@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Sistema de Check-up Médico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            color: #4a5568;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .label {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        .period-stats {
+            margin: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+        }
+        
+        .period-stats h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .period-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .period-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .period-card h4 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .period-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .period-stat .value {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .refresh-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+            margin: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #718096;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            .period-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Analytics do Sistema</h1>
+            <p>Estatísticas de uso do Sistema de Check-up Médico Inteligente</p>
+        </div>
+        
+        <div id="loading" class="loading">
+            <p>Carregando estatísticas...</p>
+        </div>
+        
+        <div id="stats-content" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total de Visitas</h3>
+                    <div class="number" id="total-visits">0</div>
+                    <div class="label">Acessos ao site</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Recomendações Geradas</h3>
+                    <div class="number" id="total-recommendations">0</div>
+                    <div class="label">Check-ups realizados</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Solicitações de Exames</h3>
+                    <div class="number" id="total-exams">0</div>
+                    <div class="label">Documentos gerados</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Receitas de Vacinas</h3>
+                    <div class="number" id="total-vaccines">0</div>
+                    <div class="label">Prescrições geradas</div>
+                </div>
+            </div>
+            
+            <div class="period-stats">
+                <h2>📈 Estatísticas por Período</h2>
+                <div class="period-grid">
+                    <div class="period-card">
+                        <h4>🗓️ Hoje</h4>
+                        <div class="period-stat">
+                            <span>Visitas:</span>
+                            <span class="value" id="today-visits">0</span>
+                        </div>
+                        <div class="period-stat">
+                            <span>Recomendações:</span>
+                            <span class="value" id="today-recommendations">0</span>
+                        </div>
+                        <div class="period-stat">
+                            <span>Exames:</span>
+                            <span class="value" id="today-exams">0</span>
+                        </div>
+                        <div class="period-stat">
+                            <span>Vacinas:</span>
+                            <span class="value" id="today-vaccines">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="period-card">
+                        <h4>📅 Este Mês</h4>
+                        <div class="period-stat">
+                            <span>Visitas:</span>
+                            <span class="value" id="month-visits">0</span>
+                        </div>
+                        <div class="period-stat">
+                            <span>Recomendações:</span>
+                            <span class="value" id="month-recommendations">0</span>
+                        </div>
+                        <div class="period-stat">
+                            <span>Exames:</span>
+                            <span class="value" id="month-exams">0</span>
+                        </div>
+                        <div class="period-stat">
+                            <span>Vacinas:</span>
+                            <span class="value" id="month-vaccines">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="refresh-btn" onclick="loadStats()">🔄 Atualizar Estatísticas</button>
+            
+            <div class="last-updated" id="last-updated"></div>
+        </div>
+    </div>
+
+    <script>
+        async function loadStats() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('stats-content').style.display = 'none';
+                
+                const response = await fetch('/analytics/stats');
+                const data = await response.json();
+                
+                // Estatísticas totais
+                document.getElementById('total-visits').textContent = data.total.visits.toLocaleString();
+                document.getElementById('total-recommendations').textContent = data.total.recommendations.toLocaleString();
+                document.getElementById('total-exams').textContent = data.total.exam_requests.toLocaleString();
+                document.getElementById('total-vaccines').textContent = data.total.vaccine_prescriptions.toLocaleString();
+                
+                // Estatísticas de hoje
+                document.getElementById('today-visits').textContent = data.today.visits.toLocaleString();
+                document.getElementById('today-recommendations').textContent = data.today.recommendations.toLocaleString();
+                document.getElementById('today-exams').textContent = data.today.exam_requests.toLocaleString();
+                document.getElementById('today-vaccines').textContent = data.today.vaccine_prescriptions.toLocaleString();
+                
+                // Estatísticas do mês
+                document.getElementById('month-visits').textContent = data.this_month.visits.toLocaleString();
+                document.getElementById('month-recommendations').textContent = data.this_month.recommendations.toLocaleString();
+                document.getElementById('month-exams').textContent = data.this_month.exam_requests.toLocaleString();
+                document.getElementById('month-vaccines').textContent = data.this_month.vaccine_prescriptions.toLocaleString();
+                
+                // Última atualização
+                if (data.last_updated) {
+                    const lastUpdated = new Date(data.last_updated).toLocaleString('pt-BR');
+                    document.getElementById('last-updated').textContent = `Última atualização: ${lastUpdated}`;
+                }
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('stats-content').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: red;">Erro ao carregar estatísticas. Tente novamente.</p>';
+            }
+        }
+        
+        // Carregar estatísticas ao abrir a página
+        loadStats();
+        
+        // Atualizar automaticamente a cada 30 segundos
+        setInterval(loadStats, 30000);
+    </script>
+</body>
+</html>
+

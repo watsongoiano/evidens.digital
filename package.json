@@ -1,0 +1,27 @@
+{
+  "name": "checkup-medico-netlify",
+  "version": "1.0.0",
+  "description": "Sistema de Check-up Médico Inteligente - Deploy para Netlify",
+  "scripts": {
+    "build": "python build.py",
+    "dev": "python run_server.py",
+    "netlify-build": "python build.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seu-usuario/checkup-medico.git"
+  },
+  "keywords": [
+    "healthcare",
+    "medical",
+    "checkup",
+    "flask",
+    "netlify"
+  ],
+  "author": "Seu Nome",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/seu-usuario/checkup-medico/issues"
+  },
+  "homepage": "https://github.com/seu-usuario/checkup-medico#readme"
+}

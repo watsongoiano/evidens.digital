@@ -1,0 +1,5 @@
+# Netlify redirects
+/*    /index.html   200
+
+# API redirects (se usar Netlify Functions)
+/api/*    /.netlify/functions/:splat   200
