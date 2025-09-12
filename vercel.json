@@ -1,25 +1,31 @@
 {
   "functions": {
-    "api/*.py": {
+    "api/checkup.py": {
+      "runtime": "python3.9"
+    },
+    "api/analytics.py": {
+      "runtime": "python3.9"
+    },
+    "api/checkup-intelligent.py": {
       "runtime": "python3.9"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/checkup",
-      "dest": "/api/checkup.py"
+      "source": "/api/checkup",
+      "destination": "/api/checkup.py"
     },
     {
-      "src": "/api/analytics/(.*)",
-      "dest": "/api/analytics.py"
+      "source": "/api/analytics/(.*)",
+      "destination": "/api/analytics.py"
     },
     {
-      "src": "/checkup-intelligent",
-      "dest": "/api/checkup-intelligent.py"
+      "source": "/checkup-intelligent",
+      "destination": "/api/checkup-intelligent.py"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
