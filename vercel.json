@@ -13,8 +13,21 @@
       "destination": "/api/checkup-intelligent.py"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/analytics",
+      "destination": "/analytics.html"
+    },
+    {
+      "source": "/analytics.html",
+      "destination": "/analytics.html"
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
