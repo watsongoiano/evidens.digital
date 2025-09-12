@@ -1,15 +1,4 @@
 {
-  "functions": {
-    "api/checkup.py": {
-      "runtime": "python3.9"
-    },
-    "api/analytics.py": {
-      "runtime": "python3.9"
-    },
-    "api/checkup-intelligent.py": {
-      "runtime": "python3.9"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/checkup",
