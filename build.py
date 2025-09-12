@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build script para preparar os arquivos estáticos para deploy no Netlify
+Build script para preparar os arquivos estáticos para deploy
 """
 
 import os
@@ -37,11 +37,8 @@ def copy_static_files(build_dir):
 
 def create_redirects(build_dir):
     """Cria arquivo _redirects para SPA routing"""
-    redirects_content = """# Netlify redirects
+    redirects_content = """# SPA redirects
 /*    /index.html   200
-
-# API redirects (se usar Netlify Functions)
-/api/*    /.netlify/functions/:splat   200
 """
     
     with open(build_dir / "_redirects", "w") as f:
@@ -89,7 +86,7 @@ def update_html_for_static(build_dir):
 
 def main():
     """Função principal do build"""
-    print("🚀 Iniciando build para Netlify...")
+    print("🚀 Iniciando build para deploy...")
     
     build_dir = create_build_directory()
     print(f"✅ Diretório de build criado: {build_dir}")
@@ -104,8 +101,8 @@ def main():
     
     print(f"\n✅ Build concluído!")
     print(f"📁 Arquivos prontos em: {build_dir.absolute()}")
-    print(f"📋 Para fazer deploy no Netlify:")
-    print(f"   1. Faça upload da pasta '{build_dir}' no Netlify")
+    print(f"📋 Para fazer deploy:")
+    print(f"   1. Faça upload da pasta '{build_dir}' no provedor de hosting")
     print(f"   2. Ou configure deploy automático do GitHub")
     
     return True
