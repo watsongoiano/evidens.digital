@@ -5,7 +5,7 @@
   "scripts": {
     "build": "python build.py",
     "dev": "python run_server.py",
-    "netlify-build": "python build.py"
+    "vercel-build": "python build.py"
   },
   "repository": {
     "type": "git",
