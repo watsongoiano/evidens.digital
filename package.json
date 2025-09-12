@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "Sistema de Check-up Médico Inteligente - Evidens Digital",
   "scripts": {
-    "build": "python build.py",
-    "dev": "python run_server.py",
-    "vercel-build": "python build.py"
+    "dev": "python run_server.py"
   },
   "repository": {
     "type": "git",
