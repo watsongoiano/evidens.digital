@@ -1911,9 +1911,9 @@
                             .then(r => r.ok ? r.json() : null)
                             .then(j => { window.PREVENT_DATA.manifest = j; })
                             .catch(() => {});
-                        fetch('./guidelines/prevent/coefficients.json')
-                            .then(r => r.ok ? r.json() : null)
-                            .then(j => { window.PREVENT_DATA.coefficients = j; })
+                                    fetch('./guidelines/prevent/coefficients.json')
+                                        .then(r => r.ok ? r.json() : null)
+                                        .then(j => { window.PREVENT_DATA.coefficients = j ? j.coefficients : null; })
                             .catch(() => {});
                 })();
         
