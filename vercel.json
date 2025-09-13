@@ -1,0 +1,33 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/checkup",
+      "destination": "/api/checkup.py"
+    },
+    {
+      "source": "/api/analytics/(.*)",
+      "destination": "/api/analytics.py"
+    },
+    {
+      "source": "/checkup-intelligent",
+      "destination": "/api/checkup-intelligent.py"
+    },
+    {
+      "source": "/analytics",
+      "destination": "/analytics.html"
+    },
+    {
+      "source": "/analytics.html",
+      "destination": "/analytics.html"
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "evidens-digital",
+  "version": "1.0.0",
+  "description": "Sistema de Check-up Médico Inteligente - Evidens Digital",
+  "scripts": {
+    "dev": "python run_server.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juniorpagedown/evidens.digital.git"
+  },
+  "keywords": [
+    "healthcare",
+    "medical",
+    "checkup",
+    "flask",
+    "vercel",
+    "evidens"
+  ],
+  "author": "Junior Pagedown",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/juniorpagedown/evidens.digital/issues"
+  },
+  "homepage": "https://github.com/juniorpagedown/evidens.digital#readme"
+}
