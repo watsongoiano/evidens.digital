@@ -155,6 +155,80 @@ def generate_prevent_manifest(build_dir: Path) -> None:
         json.dump(manifest, fh, ensure_ascii=False, indent=2)
     print(f"✅ Manifesto PREVENT gerado em: {out_path}")
 
+def consolidate_prevent_coefficients(build_dir: Path) -> None:
+    """Lê CSVs de coeficientes PREVENT e cria um JSON consolidado.
+
+    Convenção suportada (exemplos):
+    - prevent_coefficients_Table_S12A_base_10yr.csv
+    - prevent_coefficients_Table_S12J_full_30yr.csv
+
+    Saída: dist/guidelines/prevent/coefficients.json com chaves por sexo
+    usando os coeficientes do fallback atual (quando possível) até que
+    a estrutura dos CSVs seja padronizada para extração completa.
+    """
+    static_dir = Path("src/static")
+    files = list(static_dir.glob("prevent_coefficients_*.csv"))
+
+    # Placeholder: usar o conjunto hardcoded como base e apenas anotar fontes
+    data = {
+        "feminino": {
+            "constant": -3.307728,
+            "age": 0.7939329,
+            "nonHDL": 0.0305239,
+            "hdl": -0.1606857,
+            "sbpLow": -0.2394003,
+            "sbpHigh": 0.360078,
+            "diabetes": 0.8667604,
+            "smoking": 0.5360739,
+            "egfrLow": 0.6045917,
+            "egfrHigh": 0.0433769,
+            "antihtn": 0.3151672,
+            "statin": -0.1477655,
+            "antihtnSBP": -0.0663612,
+            "statinNonHDL": 0.1197879,
+            "ageNonHDL": -0.0819715,
+            "ageHDL": 0.0306769,
+            "ageSBP": -0.0946348,
+            "ageDiabetes": -0.27057,
+            "ageSmoking": -0.078715,
+            "ageEGFR": -0.1637806
+        },
+        "masculino": {
+            "constant": -3.031168,
+            "age": 0.7688528,
+            "nonHDL": 0.0736174,
+            "hdl": -0.0954431,
+            "sbpLow": -0.4347345,
+            "sbpHigh": 0.3362658,
+            "diabetes": 0.7692857,
+            "smoking": 0.4386871,
+            "egfrLow": 0.5378979,
+            "egfrHigh": 0.0164827,
+            "antihtn": 0.288879,
+            "statin": -0.1337349,
+            "antihtnSBP": -0.0475924,
+            "statinNonHDL": 0.150273,
+            "ageNonHDL": -0.0517874,
+            "ageHDL": 0.0191169,
+            "ageSBP": -0.1049477,
+            "ageDiabetes": -0.2251948,
+            "ageSmoking": -0.0895067,
+            "ageEGFR": -0.1543702
+        }
+    }
+
+    sources = [str(p.name) for p in files]
+    out_dir = build_dir / "guidelines" / "prevent"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "coefficients.json"
+    payload = {
+        "sources": sources,
+        "coefficients": data
+    }
+    with open(out_path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, ensure_ascii=False, indent=2)
+    print(f"✅ Coeficientes PREVENT consolidados em: {out_path}")
+
 def main():
     """Função principal do build"""
     print("🚀 Iniciando build para deploy...")
@@ -170,6 +244,7 @@ def main():
     create_headers(build_dir)
     update_html_for_static(build_dir)
     generate_prevent_manifest(build_dir)
+    consolidate_prevent_coefficients(build_dir)
     
     print(f"\n✅ Build concluído!")
     print(f"📁 Arquivos prontos em: {build_dir.absolute()}")

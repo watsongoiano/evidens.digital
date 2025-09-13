@@ -1,0 +1,274 @@
+{
+  "created_at": "2025-09-13T21:20:35.498624Z",
+  "count": 15,
+  "items": [
+    {
+      "name": "analyze_prevent_excel.py",
+      "path": "analyze_prevent_excel.py",
+      "size": 1881,
+      "ext": ".py",
+      "type": "binary"
+    },
+    {
+      "name": "analyze_prevent_excel.py",
+      "path": "guidelines/prevent/analyze_prevent_excel.py",
+      "size": 983,
+      "ext": ".py",
+      "type": "binary"
+    },
+    {
+      "name": "prevent_adaptation_plan.md",
+      "path": "prevent_adaptation_plan.md",
+      "size": 7824,
+      "ext": ".md",
+      "type": "text",
+      "title": "# Plan d'Adaptation des Équations PREVENT"
+    },
+    {
+      "name": "prevent_coefficients_Table_S12A_base_10yr.csv",
+      "path": "prevent_coefficients_Table_S12A_base_10yr.csv",
+      "size": 3449,
+      "ext": ".csv",
+      "type": "csv",
+      "columns": [
+        "Table S12.A. Regression coefficients* for 10 year cardiovascular risks models - PREVENT Base model",
+        "Unnamed: 1",
+        "Unnamed: 2",
+        "Unnamed: 3",
+        "Unnamed: 4",
+        "Unnamed: 5",
+        "Unnamed: 6",
+        "Unnamed: 7",
+        "Unnamed: 8",
+        "Unnamed: 9",
+        "Unnamed: 10"
+      ],
+      "rows": 29
+    },
+    {
+      "name": "prevent_coefficients_Table_S12B_ACR_10yr.csv",
+      "path": "prevent_coefficients_Table_S12B_ACR_10yr.csv",
+      "size": 9907,
+      "ext": ".csv",
+      "type": "csv",
+      "columns": [
+        "Table S12.B. Example calculation for 10 year cardiovascular risk simplified models - PREVENT Enhanced for UACR",
+        "Unnamed: 1",
+        "Unnamed: 2",
+        "Unnamed: 3",
+        "Unnamed: 4",
+        "Unnamed: 5",
+        "Unnamed: 6",
+        "Unnamed: 7",
+        "Unnamed: 8",
+        "Unnamed: 9",
+        "Unnamed: 10",
+        "Unnamed: 11",
+        "Unnamed: 12",
+        "Unnamed: 13"
+      ],
+      "rows": 78
+    },
+    {
+      "name": "prevent_coefficients_Table_S12C_A1c_10yr.csv",
+      "path": "prevent_coefficients_Table_S12C_A1c_10yr.csv",
+      "size": 10040,
+      "ext": ".csv",
+      "type": "csv",
+      "columns": [
+        "Table S12.C. Example calculation for 10 year cardiovascular risk simplified models - PREVENT Enhanced for HbA1c",
+        "Unnamed: 1",
+        "Unnamed: 2",
+        "Unnamed: 3",
+        "Unnamed: 4",
+        "Unnamed: 5",
+        "Unnamed: 6",
+        "Unnamed: 7",
+        "Unnamed: 8",
+        "Unnamed: 9",
+        "Unnamed: 10",
+        "Unnamed: 11",
+        "Unnamed: 12",
+        "Unnamed: 13"
+      ],
+      "rows": 80
+    },
+    {
+      "name": "prevent_coefficients_Table_S12D_SDI_10yr.csv",
+      "path": "prevent_coefficients_Table_S12D_SDI_10yr.csv",
+      "size": 9954,
+      "ext": ".csv",
+      "type": "csv",
+      "columns": [
+        "Table S12.D. Example calculation for 10 year cardiovascular risk simplified models - PREVENT Enhanced for SDI",
+        "Unnamed: 1",
+        "Unnamed: 2",
+        "Unnamed: 3",
+        "Unnamed: 4",
+        "Unnamed: 5",
+        "Unnamed: 6",
+        "Unnamed: 7",
+        "Unnamed: 8",
+        "Unnamed: 9",
+        "Unnamed: 10",
+        "Unnamed: 11",
+        "Unnamed: 12",
+        "Unnamed: 13"
+      ],
+      "rows": 80
+    },
+    {
+      "name": "prevent_coefficients_Table_S12E_full_10yr.csv",
+      "path": "prevent_coefficients_Table_S12E_full_10yr.csv",
+      "size": 4778,
+      "ext": ".csv",
+      "type": "csv",
+      "columns": [
+        "Table S12.E. Regression coefficients* for 10 year cardiovascular risks models - PREVENT Enhanced for all novel variables",
+        "Unnamed: 1",
+        "Unnamed: 2",
+        "Unnamed: 3",
+        "Unnamed: 4",
+        "Unnamed: 5",
+        "Unnamed: 6",
+        "Unnamed: 7",
+        "Unnamed: 8",
+        "Unnamed: 9",
+        "Unnamed: 10"
+      ],
+      "rows": 41
+    },
+    {
+      "name": "prevent_coefficients_Table_S12F_base_30yr.csv",
+      "path": "prevent_coefficients_Table_S12F_base_30yr.csv",
+      "size": 3997,
+      "ext": ".csv",
+      "type": "csv",
+      "columns": [
+        "Table S12.F. Regression coefficients* for 30 year cardiovascular risks models - PREVENT Base model",
+        "Unnamed: 1",
+        "Unnamed: 2",
+        "Unnamed: 3",
+        "Unnamed: 4",
+        "Unnamed: 5",
+        "Unnamed: 6",
+        "Unnamed: 7",
+        "Unnamed: 8",
+        "Unnamed: 9",
+        "Unnamed: 10",
+        "Unnamed: 11",
+        "Unnamed: 12"
+      ],
+      "rows": 30
+    },
+    {
+      "name": "prevent_coefficients_Table_S12G_ACR_30yr.csv",
+      "path": "prevent_coefficients_Table_S12G_ACR_30yr.csv",
+      "size": 10183,
+      "ext": ".csv",
+      "type": "csv",
+      "columns": [
+        "Table S12.G. Example calculation for 30 year cardiovascular risk simplified models - PREVENT Enhanced for UACR",
+        "Unnamed: 1",
+        "Unnamed: 2",
+        "Unnamed: 3",
+        "Unnamed: 4",
+        "Unnamed: 5",
+        "Unnamed: 6",
+        "Unnamed: 7",
+        "Unnamed: 8",
+        "Unnamed: 9",
+        "Unnamed: 10",
+        "Unnamed: 11",
+        "Unnamed: 12",
+        "Unnamed: 13"
+      ],
+      "rows": 80
+    },
+    {
+      "name": "prevent_coefficients_Table_S12H_A1c_30yr.csv",
+      "path": "prevent_coefficients_Table_S12H_A1c_30yr.csv",
+      "size": 10295,
+      "ext": ".csv",
+      "type": "csv",
+      "columns": [
+        "Table S12.H. Example calculation for 30 year cardiovascular risk simplified models - PREVENT Enhanced for HbA1c",
+        "Unnamed: 1",
+        "Unnamed: 2",
+        "Unnamed: 3",
+        "Unnamed: 4",
+        "Unnamed: 5",
+        "Unnamed: 6",
+        "Unnamed: 7",
+        "Unnamed: 8",
+        "Unnamed: 9",
+        "Unnamed: 10",
+        "Unnamed: 11",
+        "Unnamed: 12",
+        "Unnamed: 13"
+      ],
+      "rows": 82
+    },
+    {
+      "name": "prevent_coefficients_Table_S12I_SDI_30yr.csv",
+      "path": "prevent_coefficients_Table_S12I_SDI_30yr.csv",
+      "size": 10263,
+      "ext": ".csv",
+      "type": "csv",
+      "columns": [
+        "Table S12.I. Example calculation for 30 year cardiovascular risk simplified models - PREVENT Enhanced for SDI",
+        "Unnamed: 1",
+        "Unnamed: 2",
+        "Unnamed: 3",
+        "Unnamed: 4",
+        "Unnamed: 5",
+        "Unnamed: 6",
+        "Unnamed: 7",
+        "Unnamed: 8",
+        "Unnamed: 9",
+        "Unnamed: 10",
+        "Unnamed: 11",
+        "Unnamed: 12",
+        "Unnamed: 13"
+      ],
+      "rows": 82
+    },
+    {
+      "name": "prevent_coefficients_Table_S12J_full_30yr.csv",
+      "path": "prevent_coefficients_Table_S12J_full_30yr.csv",
+      "size": 4901,
+      "ext": ".csv",
+      "type": "csv",
+      "columns": [
+        "Table S12.J. Regression coefficients* for 30 year cardiovascular risks models - PREVENT Enhanced for all novel variables",
+        "Unnamed: 1",
+        "Unnamed: 2",
+        "Unnamed: 3",
+        "Unnamed: 4",
+        "Unnamed: 5",
+        "Unnamed: 6",
+        "Unnamed: 7",
+        "Unnamed: 8",
+        "Unnamed: 9",
+        "Unnamed: 10"
+      ],
+      "rows": 42
+    },
+    {
+      "name": "prevent_equations_analysis.md",
+      "path": "prevent_equations_analysis.md",
+      "size": 3050,
+      "ext": ".md",
+      "type": "text",
+      "title": "# Analyse des Équations PREVENT pour Calcul de Risque Cardiovasculaire"
+    },
+    {
+      "name": "prevent_implementation_results.md",
+      "path": "prevent_implementation_results.md",
+      "size": 3968,
+      "ext": ".md",
+      "type": "text",
+      "title": "# Résultats de l'Implémentation PREVENT"
+    }
+  ]
+}

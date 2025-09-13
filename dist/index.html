@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Check-up Médico Inteligente</title>
     <style>
@@ -669,12 +669,9 @@
 <body>
     <div class="container">
         <div class="header">
-                        <img src="/new_logo.png" alt="Evidens Check logo" style="height:80px; margin-bottom: 10px;">
-
+                    <img src="/new_logo.png" alt="Evidens Check logo" style="height:80px; margin-bottom: 10px;">
             <h1>Sistema de Check-up Médico Inteligente</h1>
-            
-                    
-<p>Recomendações personalizadas com controle de exames anteriores</p>
+            <p>Recomendações personalizadas com controle de exames anteriores</p>
         </div>
 
         <div class="main-content">
@@ -1906,7 +1903,19 @@
             return `<span class="exam-status ${cls}">${status}</span>`;
         }
 
-        // ===== FUNÇÕES PREVENT PARA CÁLCULO DE RISCO CARDIOVASCULAR =====
+                // ===== FUNÇÕES PREVENT PARA CÁLCULO DE RISCO CARDIOVASCULAR =====
+                // Carrega dados PREVENT (manifesto e coeficientes) se disponíveis no build
+                window.PREVENT_DATA = { manifest: null, coefficients: null };
+                (function loadPreventData(){
+                        fetch('./guidelines/prevent/prevent_index.json')
+                            .then(r => r.ok ? r.json() : null)
+                            .then(j => { window.PREVENT_DATA.manifest = j; })
+                            .catch(() => {});
+                        fetch('./guidelines/prevent/coefficients.json')
+                            .then(r => r.ok ? r.json() : null)
+                            .then(j => { window.PREVENT_DATA.coefficients = j; })
+                            .catch(() => {});
+                })();
         
         function calculateEGFR(creatinine, age, sex) {
             // Equação CKD-EPI 2021 sem raça
@@ -1925,7 +1934,11 @@
         }
 
         function getPREVENTCoefficients(sex, outcome = 'total_cvd') {
-            // Coefficients pour Total CVD 10 ans
+            // Usar coeficientes carregados, se existir um dataset consolidado
+            if (window.PREVENT_DATA && window.PREVENT_DATA.coefficients && window.PREVENT_DATA.coefficients[sex]) {
+                return window.PREVENT_DATA.coefficients[sex];
+            }
+            // Fallback local para Total CVD 10 anos
             const coefficients = {
                 feminino: {
                     constant: -3.307728,

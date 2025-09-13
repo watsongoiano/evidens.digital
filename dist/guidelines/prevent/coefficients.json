@@ -1,0 +1,60 @@
+{
+  "sources": [
+    "prevent_coefficients_Table_S12A_base_10yr.csv",
+    "prevent_coefficients_Table_S12B_ACR_10yr.csv",
+    "prevent_coefficients_Table_S12C_A1c_10yr.csv",
+    "prevent_coefficients_Table_S12D_SDI_10yr.csv",
+    "prevent_coefficients_Table_S12E_full_10yr.csv",
+    "prevent_coefficients_Table_S12F_base_30yr.csv",
+    "prevent_coefficients_Table_S12G_ACR_30yr.csv",
+    "prevent_coefficients_Table_S12H_A1c_30yr.csv",
+    "prevent_coefficients_Table_S12I_SDI_30yr.csv",
+    "prevent_coefficients_Table_S12J_full_30yr.csv"
+  ],
+  "coefficients": {
+    "feminino": {
+      "constant": -3.307728,
+      "age": 0.7939329,
+      "nonHDL": 0.0305239,
+      "hdl": -0.1606857,
+      "sbpLow": -0.2394003,
+      "sbpHigh": 0.360078,
+      "diabetes": 0.8667604,
+      "smoking": 0.5360739,
+      "egfrLow": 0.6045917,
+      "egfrHigh": 0.0433769,
+      "antihtn": 0.3151672,
+      "statin": -0.1477655,
+      "antihtnSBP": -0.0663612,
+      "statinNonHDL": 0.1197879,
+      "ageNonHDL": -0.0819715,
+      "ageHDL": 0.0306769,
+      "ageSBP": -0.0946348,
+      "ageDiabetes": -0.27057,
+      "ageSmoking": -0.078715,
+      "ageEGFR": -0.1637806
+    },
+    "masculino": {
+      "constant": -3.031168,
+      "age": 0.7688528,
+      "nonHDL": 0.0736174,
+      "hdl": -0.0954431,
+      "sbpLow": -0.4347345,
+      "sbpHigh": 0.3362658,
+      "diabetes": 0.7692857,
+      "smoking": 0.4386871,
+      "egfrLow": 0.5378979,
+      "egfrHigh": 0.0164827,
+      "antihtn": 0.288879,
+      "statin": -0.1337349,
+      "antihtnSBP": -0.0475924,
+      "statinNonHDL": 0.150273,
+      "ageNonHDL": -0.0517874,
+      "ageHDL": 0.0191169,
+      "ageSBP": -0.1049477,
+      "ageDiabetes": -0.2251948,
+      "ageSmoking": -0.0895067,
+      "ageEGFR": -0.1543702
+    }
+  }
+}
