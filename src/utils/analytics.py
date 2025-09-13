@@ -6,7 +6,9 @@ from flask import request, g
 
 class Analytics:
     def __init__(self, data_file='analytics_data.json'):
-        self.data_file = os.path.join('/tmp', data_file)
+        base_tmp = os.environ.get('TMPDIR') or os.environ.get('TMP') or os.environ.get('TEMP') or '/tmp'
+        os.makedirs(base_tmp, exist_ok=True)
+        self.data_file = os.path.join(base_tmp, data_file)
         self.data = self.load_data()
     
     def load_data(self):

@@ -24,7 +24,7 @@ def _parse_smoking_status(tabagismo):
         status = 'ex_fumante'
     return status, macos
 
-@checkup_bp.route('/api/checkup', methods=['POST'])
+@checkup_bp.route('/checkup', methods=['POST'])
 def gerar_recomendacoes():
     """
     Gera recomendações de check-up baseadas nos dados do paciente
