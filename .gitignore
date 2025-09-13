@@ -92,3 +92,11 @@ node_modules/
 # Temporary files
 *.tmp
 *.temp
+
+# PREVENT data archives
+src/static/*.zip
+src/static/**/*.zip
+src/static/*.7z
+src/static/**/*.7z
+src/static/*.rar
+src/static/**/*.rar
