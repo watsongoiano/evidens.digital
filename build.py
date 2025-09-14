@@ -8,9 +8,12 @@ import shutil
 import json
 from pathlib import Path
 
+# Resolve all paths relative to the script directory (repo root)
+SCRIPT_DIR = Path(__file__).parent.resolve()
+
 def create_build_directory():
     """Cria o diretório de build"""
-    build_dir = Path("dist")
+    build_dir = SCRIPT_DIR / "dist"
     if build_dir.exists():
         shutil.rmtree(build_dir)
     build_dir.mkdir()
@@ -18,7 +21,7 @@ def create_build_directory():
 
 def copy_static_files(build_dir):
     """Copia arquivos estáticos para o diretório de build"""
-    static_dir = Path("src/static")
+    static_dir = SCRIPT_DIR / "src/static"
     
     if not static_dir.exists():
         print("❌ Diretório src/static não encontrado")
