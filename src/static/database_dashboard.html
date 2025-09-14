@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard do Banco de Dados - Sistema de Check-up Médico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            padding: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 5px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.users { border-left-color: #4299e1; }
+        .stat-card.patients { border-left-color: #48bb78; }
+        .stat-card.checkups { border-left-color: #ed8936; }
+        .stat-card.recommendations { border-left-color: #9f7aea; }
+        .stat-card.exams { border-left-color: #38b2ac; }
+        .stat-card.analytics { border-left-color: #f56565; }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            font-size: 1.8em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .table-container {
+            background: #f7fafc;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #4a5568;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #edf2f7;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #4a5568;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+        }
+
+        .chart-container {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .risk-distribution {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .risk-item {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .risk-baixo { border-left: 5px solid #48bb78; }
+        .risk-intermediario { border-left: 5px solid #ed8936; }
+        .risk-alto { border-left: 5px solid #f56565; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Dashboard do Banco de Dados</h1>
+            <p>Sistema de Check-up Médico Inteligente</p>
+        </div>
+
+        <div class="dashboard">
+            <button class="refresh-btn" onclick="loadDashboard()">🔄 Atualizar Dados</button>
+
+            <div id="loading" class="loading">
+                <p>📊 Carregando dados do banco de dados...</p>
+            </div>
+
+            <div id="error" class="error" style="display: none;"></div>
+
+            <div id="content" style="display: none;">
+                <!-- Estatísticas Gerais -->
+                <div class="section">
+                    <h2>📈 Estatísticas Gerais</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card users">
+                            <div class="stat-number" id="stat-usuarios">0</div>
+                            <div class="stat-label">👥 Usuários</div>
+                        </div>
+                        <div class="stat-card patients">
+                            <div class="stat-number" id="stat-pacientes">0</div>
+                            <div class="stat-label">🏥 Pacientes</div>
+                        </div>
+                        <div class="stat-card checkups">
+                            <div class="stat-number" id="stat-checkups">0</div>
+                            <div class="stat-label">📋 Check-ups</div>
+                        </div>
+                        <div class="stat-card recommendations">
+                            <div class="stat-number" id="stat-recomendacoes">0</div>
+                            <div class="stat-label">💊 Recomendações</div>
+                        </div>
+                        <div class="stat-card exams">
+                            <div class="stat-number" id="stat-exames">0</div>
+                            <div class="stat-label">🧪 Exames</div>
+                        </div>
+                        <div class="stat-card analytics">
+                            <div class="stat-number" id="stat-analytics">0</div>
+                            <div class="stat-label">📊 Eventos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribuição de Risco -->
+                <div class="section">
+                    <h2>⚡ Distribuição de Risco Cardiovascular</h2>
+                    <div class="chart-container">
+                        <div class="risk-distribution" id="risk-distribution">
+                            <!-- Será preenchido via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recomendações por Categoria -->
+                <div class="section">
+                    <h2>💊 Recomendações por Categoria</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Categoria</th>
+                                    <th>Quantidade</th>
+                                    <th>Percentual</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recommendations-table">
+                                <!-- Será preenchido via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pacientes Recentes -->
+                <div class="section">
+                    <h2>🏥 Pacientes Cadastrados</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Idade</th>
+                                    <th>Sexo</th>
+                                    <th>Data Cadastro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patients-table">
+                                <!-- Será preenchido via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const content = document.getElementById('content');
+
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            content.style.display = 'none';
+
+            try {
+                // Carregar estatísticas gerais
+                const statsResponse = await fetch('/api/database/stats');
+                const statsData = await statsResponse.json();
+
+                if (statsData.success) {
+                    updateStats(statsData.data);
+                    updateRiskDistribution(statsData.data.distribuicao_risco);
+                    updateRecommendationsTable(statsData.data.recomendacoes_por_categoria);
+                }
+
+                // Carregar pacientes
+                const patientsResponse = await fetch('/api/patients');
+                const patientsData = await patientsResponse.json();
+
+                if (patientsData.success) {
+                    updatePatientsTable(patientsData.data);
+                }
+
+                loading.style.display = 'none';
+                content.style.display = 'block';
+
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = `Erro ao carregar dados: ${err.message}`;
+            }
+        }
+
+        function updateStats(data) {
+            document.getElementById('stat-usuarios').textContent = data.totais.usuarios;
+            document.getElementById('stat-pacientes').textContent = data.totais.pacientes;
+            document.getElementById('stat-checkups').textContent = data.totais.checkups;
+            document.getElementById('stat-recomendacoes').textContent = data.totais.recomendacoes;
+            document.getElementById('stat-exames').textContent = data.totais.exames_realizados;
+            document.getElementById('stat-analytics').textContent = data.totais.eventos_analytics;
+        }
+
+        function updateRiskDistribution(riskData) {
+            const container = document.getElementById('risk-distribution');
+            container.innerHTML = '';
+
+            const riskLabels = {
+                'baixo': '🟢 Baixo Risco',
+                'intermediario': '🟡 Risco Intermediário',
+                'alto': '🔴 Alto Risco'
+            };
+
+            riskData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `risk-item risk-${item.risco}`;
+                div.innerHTML = `
+                    <div class="stat-number">${item.count}</div>
+                    <div class="stat-label">${riskLabels[item.risco] || item.risco}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateRecommendationsTable(data) {
+            const tbody = document.getElementById('recommendations-table');
+            tbody.innerHTML = '';
+
+            const total = data.reduce((sum, item) => sum + item.count, 0);
+
+            const categoryLabels = {
+                'laboratorio': '🧪 Laboratório',
+                'imagem': '📷 Imagem',
+                'vacina': '💉 Vacina',
+                'outras': '📋 Outras'
+            };
+
+            data.forEach(item => {
+                const percentage = total > 0 ? ((item.count / total) * 100).toFixed(1) : 0;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${categoryLabels[item.categoria] || item.categoria}</td>
+                    <td>${item.count}</td>
+                    <td>${percentage}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updatePatientsTable(patients) {
+            const tbody = document.getElementById('patients-table');
+            tbody.innerHTML = '';
+
+            patients.forEach(patient => {
+                const row = document.createElement('tr');
+                const createdAt = new Date(patient.created_at).toLocaleDateString('pt-BR');
+                row.innerHTML = `
+                    <td>${patient.id}</td>
+                    <td>${patient.nome}</td>
+                    <td>${patient.idade} anos</td>
+                    <td>${patient.sexo === 'masculino' ? '👨 Masculino' : '👩 Feminino'}</td>
+                    <td>${createdAt}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Carregar dashboard ao carregar a página
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

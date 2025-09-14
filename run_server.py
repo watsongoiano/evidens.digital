@@ -8,6 +8,7 @@ from src.models.user import db
 from src.routes.user import user_bp
 from src.routes.checkup import checkup_bp
 from src.routes.checkup_intelligent import checkup_intelligent_bp
+from src.routes.database_api import database_api_bp
 from src.utils.analytics import analytics, track_visit
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'src', 'static'))
@@ -16,6 +17,7 @@ CORS(app)
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(checkup_bp, url_prefix='/api')
 app.register_blueprint(checkup_intelligent_bp)
+app.register_blueprint(database_api_bp)
 
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'src', 'database', 'app.db')}"
@@ -51,5 +53,5 @@ def serve(path):
             return 'index.html not found', 404
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
