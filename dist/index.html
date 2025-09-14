@@ -757,36 +757,112 @@
             const container = document.getElementById('recommendations');
             container.innerHTML = '';
 
-            const categories = {
-                'laboratorio': '🧪 Exames Laboratoriais',
-                'imagem': '📷 Exames de Imagem',
-                'vacina': '💉 Vacinas',
-                'outras': '📋 Outras Recomendações'
-            };
+            // Check if recommendations exist
+            if (!recommendations || recommendations.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #4a5568;">
+                        <p>Nenhuma recomendação específica para este perfil.</p>
+                    </div>
+                `;
+                return;
+            }
 
-            Object.keys(categories).forEach(category => {
-                const categoryRecs = recommendations.filter(rec => rec.categoria === category);
-                if (categoryRecs.length > 0) {
-                    const categoryDiv = document.createElement('div');
-                    categoryDiv.innerHTML = `<h3 style="color: #2d3748; margin: 20px 0 15px 0;">${categories[category]}</h3>`;
+            // Verify if it's an object with alerts and recommendations
+            const alerts = recommendations.alerts || [];
+            const recs = recommendations.recommendations || recommendations;
+            
+            // Organize recommendations by category
+            const categories = {
+                'Exames Laboratoriais': [],
+                'Exames de Imagem': [],
+                'Rastreamento de Câncer': [],
+                'Vacinas': [],
+                'Outras Recomendações': []
+            };
+            
+            recs.forEach(item => {
+                const title = (item && item.titulo ? item.titulo.toLowerCase() : '');
+                let category = 'Outras Recomendações';
+
+                if (item && item.categoria && item.categoria.includes('vacina')) {
+                    category = 'Vacinas';
+                } else if (title.includes('mamografia') ||
+                           title.includes('colonoscopia') ||
+                           title.includes('citologia') ||
+                           title.includes('psa') ||
+                           title.includes('tomografia')) {
+                    category = 'Rastreamento de Câncer';
+                } else if (title.includes('ultrassom') ||
+                           title.includes('densitometria') ||
+                           title.includes('ecocardiograma') ||
+                           title.includes('eletrocardiograma') ||
+                           title.includes('fundoscopia')) {
+                    category = 'Exames de Imagem';
+                } else if ((item && item.categoria === 'laboratorial') ||
+                           title.includes('hba1c') ||
+                           title.includes('creatinina') ||
+                           title.includes('perfil') ||
+                           title.includes('hemograma') ||
+                           title.includes('microalbuminúria') ||
+                           title.includes('hiv') ||
+                           title.includes('sífilis') ||
+                           title.includes('hepatite') ||
+                           title.includes('diabetes') ||
+                           title.includes('glicemia') ||
+                           title.includes('gonorreia') ||
+                           title.includes('clamídia') ||
+                           title.includes('tuberculose') ||
+                           title.includes('anti-hcv') ||
+                           title.includes('totg') ||
+                           title.includes('colesterol') ||
+                           title.includes('sódio') ||
+                           title.includes('potássio') ||
+                           title.includes('eletrólitos') ||
+                           title.includes('ureia') ||
+                           title.includes('egfr') ||
+                           title.includes('albumina') ||
+                           title.includes('vdrl') ||
+                           title.includes('hbsag')) {
+                    category = 'Exames Laboratoriais';
+                }
+
+                categories[category].push(item);
+            });
+            
+            let html = '';
+
+            // Show alerts
+            if (alerts.length > 0) {
+                html += '<div class="alert alert-warning"><strong>⚠️ Alertas:</strong><ul>';
+                alerts.forEach(alert => {
+                    html += `<li>${alert}</li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            Object.keys(categories).forEach(categoryName => {
+                if (categories[categoryName].length > 0) {
+                    html += `<div class="recommendation-category">
+                        <h3 style="color: #2d3748; margin: 20px 0 15px 0;">${categoryName}</h3>`;
                     
-                    categoryRecs.forEach(rec => {
-                        const recDiv = document.createElement('div');
-                        recDiv.className = `recommendation-item ${rec.prioridade}`;
-                        recDiv.innerHTML = `
-                            <div class="recommendation-title">
-                                ${rec.titulo}
-                                <span class="priority-badge ${rec.prioridade}">${rec.prioridade}</span>
+                    categories[categoryName].forEach((rec, index) => {
+                        html += `
+                            <div class="recommendation-item ${rec.prioridade}">
+                                <div class="recommendation-title">
+                                    ${rec.titulo}
+                                    <span class="priority-badge ${rec.prioridade}">${rec.prioridade}</span>
+                                </div>
+                                <div class="recommendation-description">${rec.descricao}</div>
+                                <div class="recommendation-reference">${rec.referencia}</div>
                             </div>
-                            <div class="recommendation-description">${rec.descricao}</div>
-                            <div class="recommendation-reference">${rec.referencia}</div>
                         `;
-                        categoryDiv.appendChild(recDiv);
                     });
                     
-                    container.appendChild(categoryDiv);
+                    html += '</div>';
                 }
             });
+            
+            container.innerHTML = html;
         }
 
         function generateExamRequest() {

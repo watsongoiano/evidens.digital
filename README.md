@@ -191,6 +191,19 @@ SECRET_KEY=sua_chave_secreta
 ENVIRONMENT=production
 ```
 
+## 📁 Arquitetura de Arquivos HTML
+
+### Arquivo Canônico
+- **`index.html`** (raiz do repositório) - Este é o arquivo HTML canônico servido na aplicação em produção
+- Contém a lógica de categorização robusta e mais recente
+- É a fonte única da verdade para a interface do usuário
+
+### Arquivos Arquivados
+- **`docs/archive/index.html.new`** - Variante histórica arquivada
+- **`docs/archive/index.html.original`** - Versão original arquivada
+
+Estes arquivos foram movidos para o diretório de arquivo para evitar divergência e confusão no desenvolvimento. Todos os novos desenvolvimentos e modificações devem ser feitos no arquivo canônico `index.html` na raiz do repositório.
+
 ## 🤝 Contribuição
 
 1. Fork o projeto
