@@ -18,8 +18,37 @@ def generate_intelligent_recommendations():
         pais = data.get('pais', 'BR')  # Padrão Brasil
         comorbidades = data.get('comorbidades', [])
         historia_familiar = data.get('historia_familiar', [])
-        tabagismo = data.get('tabagismo', 'nunca_fumou')
-        macos_ano = int(data.get('macos_ano', 0)) if data.get('macos_ano') else 0
+        
+        # Normalize smoking data - handle both dict and flattened fields
+        tabagismo_raw = data.get('tabagismo', None)  # Don't default to string here
+        tabagismo_status = data.get('tabagismo_status', '')
+        tabagismo_macos_ano = data.get('tabagismo_macos_ano', 0)
+        
+        # Parse smoking status robustly
+        if isinstance(tabagismo_raw, dict):
+            # Dict format: {"status": "fumante", "macos_ano": 25}
+            tabagismo = tabagismo_raw.get('status', 'nunca_fumou')
+            macos_ano = int(tabagismo_raw.get('macos_ano', 0) or 0)
+        else:
+            # String format or fallback to flattened fields
+            # Prioritize tabagismo_raw if it's a meaningful string, otherwise use flattened fields
+            if tabagismo_raw and tabagismo_raw != 'nunca_fumou':
+                tabagismo = tabagismo_raw
+            else:
+                tabagismo = tabagismo_status if tabagismo_status else 'nunca_fumou'
+            macos_ano = int(tabagismo_macos_ano or data.get('macos_ano', 0) or 0)
+        
+        # Normalize smoking status values
+        tabagismo = str(tabagismo).replace('-', '_').lower()
+        if tabagismo == 'fumante':
+            tabagismo = 'fumante_atual'
+        elif tabagismo == 'ex-fumante':
+            tabagismo = 'ex_fumante'
+        elif not tabagismo or tabagismo == 'none':
+            tabagismo = 'nunca_fumou'
+            
+        print(f"DEBUG: tabagismo normalizado = {tabagismo}, macos_ano = {macos_ano}")
+        
         outras_comorbidades = data.get('outras_comorbidades', '').lower()
         outras_condicoes_familiares = data.get('outras_condicoes_familiares', '').lower()
         medicacoes_uso_continuo = data.get('medicacoes_uso_continuo', '').lower()
@@ -27,6 +56,25 @@ def generate_intelligent_recommendations():
         
         recommendations = []
         alerts = []
+        
+        def parse_date_ymd(date_str):
+            """Parse date from multiple formats: YYYY-MM-DD, DD/MM/YYYY, YYYY/MM/DD"""
+            if not date_str:
+                return None
+            try:
+                # Try YYYY-MM-DD format first
+                return datetime.strptime(date_str, '%Y-%m-%d')
+            except ValueError:
+                try:
+                    # Try DD/MM/YYYY format
+                    return datetime.strptime(date_str, '%d/%m/%Y')
+                except ValueError:
+                    try:
+                        # Try YYYY/MM/DD format
+                        return datetime.strptime(date_str, '%Y/%m/%d')
+                    except ValueError:
+                        print(f"DEBUG: Failed to parse date: {date_str}")
+                        return None
         
 
         def should_have_received_single_dose(keyword, previous_exams):
@@ -51,8 +99,15 @@ def generate_intelligent_recommendations():
         # Função para verificar se deve recomendar exame
         def should_recommend_exam(exam_name, previous_exams, interval_days):
             for exam in previous_exams:
+                if not exam.get('name') or not exam.get('date'):
+                    continue  # Skip invalid exam entries
+                    
                 if exam_name.lower() in exam['name'].lower():
-                    exam_date = datetime.strptime(exam['date'], '%Y-%m-%d')
+                    exam_date = parse_date_ymd(exam['date'])
+                    if exam_date is None:
+                        print(f"DEBUG: Skipping exam {exam_name} - invalid date: {exam['date']}")
+                        continue  # Skip if date cannot be parsed
+                        
                     days_since = (datetime.now() - exam_date).days
                     
                     if days_since < interval_days:
@@ -65,11 +120,10 @@ def generate_intelligent_recommendations():
             return True, None
         
         def calculate_days_since_exam(exam_date_str):
-            try:
-                exam_date = datetime.strptime(exam_date_str, '%Y-%m-%d')
+            exam_date = parse_date_ymd(exam_date_str)
+            if exam_date:
                 return (datetime.now() - exam_date).days
-            except:
-                return None
+            return None
         
         # Mapeamento de condições para exames específicos
         condition_mapping = {
@@ -1179,6 +1233,9 @@ def generate_intelligent_recommendations():
         
         # Gerar alertas para exames em atraso
         for exam in exames_anteriores:
+            if not exam.get('name') or not exam.get('date'):
+                continue  # Skip invalid exam entries
+                
             days_since = calculate_days_since_exam(exam['date'])
             if days_since:
                 if 'hba1c' in exam['name'].lower() and days_since > 180:

@@ -3,28 +3,41 @@ from flask import Blueprint, request, jsonify
 checkup_bp = Blueprint('checkup', __name__)
 
 
-def _parse_smoking_status(tabagismo):
-    """Normaliza tabagismo vindo como string ou dict para (status, macos_ano)."""
+def _parse_smoking_status(tabagismo, data=None):
+    """Normaliza tabagismo vindo como string, dict, ou campos achatados para (status, macos_ano)."""
     status = 'nunca_fumou'
     macos = 0
+    
     try:
+        # First try to parse from tabagismo parameter
         if isinstance(tabagismo, dict):
             status = tabagismo.get('status') or tabagismo.get('estado') or 'nunca_fumou'
             macos = int(tabagismo.get('macos_ano') or tabagismo.get('pack_years') or 0)
         elif isinstance(tabagismo, str):
             status = tabagismo
-        else:
-            status = 'nunca_fumou'
+        
+        # If data is provided, try to get flattened fields as fallback/override
+        if data:
+            # Handle flattened fields from frontend payload
+            if 'tabagismo_status' in data and data['tabagismo_status']:
+                status = data['tabagismo_status']
+            if 'tabagismo_macos_ano' in data and data['tabagismo_macos_ano']:
+                macos = int(data['tabagismo_macos_ano'])
+                
     except Exception:
+        # Use safe defaults if anything fails
         pass
+    
+    # Normalize status values
     status = status.replace('-', '_').lower()
     if status == 'fumante':
         status = 'fumante_atual'
     if status == 'ex-fumante':
         status = 'ex_fumante'
+    
     return status, macos
 
-@checkup_bp.route('/api/checkup', methods=['POST'])
+@checkup_bp.route('/checkup', methods=['POST'])
 def gerar_recomendacoes():
     """
     Gera recomendações de check-up baseadas nos dados do paciente
@@ -68,7 +81,8 @@ def gerar_recomendacoes():
             recomendacoes.extend(process_other_conditions_simple(outras_hf, 'historia_familiar'))
         
         # Rastreamento baseado em tabagismo
-        recomendacoes.extend(get_smoking_recommendations(tabagismo, idade))
+        # Pass data parameter so the helper can handle flattened fields
+        recomendacoes.extend(get_smoking_recommendations(tabagismo, idade, data))
         
         # Rastreamentos específicos por população
         recomendacoes.extend(get_population_specific_recommendations(idade, sexo, comorbidades))
@@ -440,16 +454,21 @@ def get_family_history_recommendations(historia_familiar, idade, sexo):
     
     return recomendacoes
 
-def get_smoking_recommendations(tabagismo, idade):
+def get_smoking_recommendations(tabagismo, idade, data=None):
     """Recomendações baseadas em tabagismo"""
     recomendacoes = []
     
-    status = tabagismo.get('status', 'nunca_fumou')
-    macos_ano = tabagismo.get('macos_ano', 0)
+    # Use the robust helper function to normalize smoking data
+    try:
+        status, macos_ano = _parse_smoking_status(tabagismo, data)
+        print(f"DEBUG: tabagismo normalizado = {status}, macos_ano = {macos_ano}")
+    except Exception as e:
+        print(f"DEBUG: Erro ao normalizar tabagismo: {e}")
+        status, macos_ano = 'nunca_fumou', 0
     
     # Rastreamento de câncer de pulmão
     if 50 <= idade <= 80 and macos_ano >= 20:
-        if status in ['fumante', 'ex-fumante']:
+        if status in ['fumante_atual', 'ex_fumante']:
             recomendacoes.append({
                 'titulo': 'Tomografia de Tórax',
                 'descricao': f'TC de baixa dose anual ({macos_ano} maços-ano)',
@@ -459,7 +478,7 @@ def get_smoking_recommendations(tabagismo, idade):
             })
     
     # Cessação do tabagismo
-    if status == 'fumante':
+    if status == 'fumante_atual':
         recomendacoes.append({
             'titulo': 'Cessação do Tabagismo',
             'descricao': 'Aconselhamento e suporte farmacológico',
