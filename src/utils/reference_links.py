@@ -44,7 +44,7 @@ def _uspstf_url_by_title(title_lc: str) -> str:
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening'
     if _contains_any(title_lc, ['aorta']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/abdominal-aortic-aneurysm-screening'
-    if _contains_any(title_lc, ['pulm', 'tomografia', 'tc tórax', 'tc torax']):
+    if _contains_any(title_lc, ['pulm', 'tomografia', 'tc tórax', 'tc torax', 'ldct', 'baixa dose', 'baixa-dose', 'low dose']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening'
     if _contains_any(title_lc, ['carótida', 'carotida']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/carotid-artery-stenosis-screening'
@@ -54,13 +54,19 @@ def _uspstf_url_by_title(title_lc: str) -> str:
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/depression-in-adults-screening'
     if _contains_any(title_lc, ['ovário', 'ovario']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/ovarian-cancer-screening'
+    # Novos mapeamentos
+    if _contains_any(title_lc, ['diabetes', 'pré-diabetes', 'pre diabetes', 'pre-diabetes', 'prediabetes', 'glicemia', 'totg', 'hba1c']):
+        return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes'
+    if _contains_any(title_lc, ['osteoporose', 'osteoporosis', 'dexa', 'densitometria']):
+        return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening'
     return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics'
 
 def _resolve_url_by_org(token_lc: str, title_lc: str) -> str:
     if token_lc.startswith('uspstf'):
         return _uspstf_url_by_title(title_lc)
     if token_lc.startswith('ada'):
-        return 'https://diabetesjournals.org/care/issue/47/Supplement_1'
+        # Página estável dos Standards of Care
+        return 'https://diabetesjournals.org/care/pages/standards-of-care'
     if 'aha/acc' in token_lc:
         if _contains_any(title_lc, ['hscrp', 'lpa', 'apo', 'cálcio coron', 'calcio coron', 'perfil lip', 'dislip']):
             return 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000678'

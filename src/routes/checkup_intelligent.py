@@ -99,6 +99,10 @@ def _parse_smoking_status_intelligent(tabagismo, data=None):
 def generate_intelligent_recommendations():
     try:
         data = request.json
+
+        # Defesa: garantir payload JSON válido
+        if not isinstance(data, dict):
+            return jsonify({'error': 'JSON inválido'}), 400
         
         # Extrair dados do formulário com defaults seguros
         idade = int(data.get('idade', 0)) if data.get('idade') else 0
@@ -1300,16 +1304,24 @@ def generate_intelligent_recommendations():
                     rec['status'] = status
                 recommendations.append(rec)
         
-        # Gerar alertas para exames em atraso
-        for exam in exames_anteriores:
-            days_since = calculate_days_since_exam(exam['date'])
-            if days_since:
-                if 'hba1c' in exam['name'].lower() and days_since > 180:
-                    alerts.append(f"HbA1c em atraso - último exame há {days_since} dias")
-                elif 'mamografia' in exam['name'].lower() and days_since > 760:
-                    alerts.append(f"Mamografia em atraso - último exame há {days_since} dias")
-                elif 'colonoscopia' in exam['name'].lower() and days_since > 3680:
-                    alerts.append(f"Colonoscopia em atraso - último exame há {days_since} dias")
+        # Gerar alertas para exames em atraso (correção de robustez)
+        for exam in exames_anteriores or []:
+            if not exam or not isinstance(exam, dict):
+                continue
+            name = (exam.get('name') or '').lower()
+            date_str = exam.get('date')
+            days_since = calculate_days_since_exam(date_str)
+
+            # Ignorar itens sem nome ou sem data válida
+            if not name or days_since is None:
+                continue
+
+            if 'hba1c' in name and days_since > 180:
+                alerts.append(f"HbA1c em atraso - último exame há {days_since} dias")
+            elif 'mamografia' in name and days_since > 760:
+                alerts.append(f"Mamografia em atraso - último exame há {days_since} dias")
+            elif 'colonoscopia' in name and days_since > 3680:
+                alerts.append(f"Colonoscopia em atraso - último exame há {days_since} dias")
         
         # === MONITORAMENTO DE MEDICAÇÕES ===
         
