@@ -9,6 +9,7 @@ from src.models.user import db
 from src.routes.user import user_bp
 from src.routes.checkup import checkup_bp
 from src.routes.checkup_intelligent import checkup_intelligent_bp
+from src.routes.database_api import database_api_bp
 from src.utils.analytics import analytics, track_visit
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
@@ -20,6 +21,7 @@ CORS(app)
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(checkup_bp, url_prefix='/api')
 app.register_blueprint(checkup_intelligent_bp)
+app.register_blueprint(database_api_bp)
 
 # uncomment if you need to use database
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
@@ -42,6 +44,10 @@ def get_full_analytics():
 @app.route('/<path:path>')
 @track_visit()
 def serve(path):
+    # Não interceptar rotas da API
+    if path.startswith('api/'):
+        return "API route not found", 404
+    
     static_folder_path = app.static_folder
     if static_folder_path is None:
             return "Static folder not configured", 404
