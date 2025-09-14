@@ -7,23 +7,127 @@ from src.utils.analytics import analytics
 
 checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
 
+def parse_date_ymd(date_str):
+    """
+    Parse date string in multiple formats: YYYY-MM-DD, DD/MM/YYYY, YYYY/MM/DD
+    Returns datetime object or None if invalid
+    """
+    if not date_str or date_str is None:
+        return None
+        
+    try:
+        # Remove any extra whitespace
+        date_str = str(date_str).strip()
+        if not date_str or date_str.lower() in ['null', 'none', '']:
+            return None
+            
+        # Try YYYY-MM-DD format first
+        try:
+            return datetime.strptime(date_str, '%Y-%m-%d')
+        except ValueError:
+            pass
+            
+        # Try DD/MM/YYYY format
+        try:
+            return datetime.strptime(date_str, '%d/%m/%Y')
+        except ValueError:
+            pass
+            
+        # Try YYYY/MM/DD format
+        try:
+            return datetime.strptime(date_str, '%Y/%m/%d')
+        except ValueError:
+            pass
+            
+    except (ValueError, TypeError, AttributeError):
+        pass
+        
+    return None
+
+def _parse_smoking_status_intelligent(tabagismo, data=None):
+    """
+    Normaliza tabagismo vindo como string, dict ou campos achatados para (status, macos_ano).
+    Similar ao helper de checkup.py mas adaptado para checkup_intelligent.
+    """
+    status = 'nunca_fumou'
+    macos = 0
+    
+    try:
+        # Priorizar dict tabagismo se disponível
+        if isinstance(tabagismo, dict):
+            status = tabagismo.get('status') or tabagismo.get('estado') or 'nunca_fumou'
+            macos_value = tabagismo.get('macos_ano') or tabagismo.get('pack_years') or 0
+            try:
+                macos = int(macos_value) if macos_value else 0
+            except (ValueError, TypeError):
+                macos = 0
+        elif isinstance(tabagismo, str):
+            status = tabagismo
+        
+        # Verificar campos achatados no payload principal se data fornecido
+        if data:
+            flat_status = data.get('tabagismo_status')
+            flat_macos = data.get('tabagismo_macos_ano')
+            
+            if flat_status:
+                status = flat_status
+            if flat_macos:
+                try:
+                    macos = int(flat_macos) if flat_macos else 0
+                except (ValueError, TypeError):
+                    macos = 0
+                    
+    except Exception:
+        # Em caso de qualquer erro, usar valores padrão seguros
+        status = 'nunca_fumou'
+        macos = 0
+    
+    # Normalizar status
+    if isinstance(status, str):
+        status = status.replace('-', '_').lower().strip()
+        if status == 'fumante':
+            status = 'fumante_atual'
+        elif status == 'ex_fumante' or status == 'ex-fumante':
+            status = 'ex_fumante'
+        elif status not in ['fumante_atual', 'ex_fumante', 'nunca_fumou']:
+            status = 'nunca_fumou'
+    else:
+        status = 'nunca_fumou'
+        
+    return status, macos
+
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
 def generate_intelligent_recommendations():
     try:
         data = request.json
         
-        # Extrair dados do formulário
-        idade = int(data.get('idade', 0))
+        # Extrair dados do formulário com defaults seguros
+        idade = int(data.get('idade', 0)) if data.get('idade') else 0
         sexo = data.get('sexo', '')
         pais = data.get('pais', 'BR')  # Padrão Brasil
-        comorbidades = data.get('comorbidades', [])
-        historia_familiar = data.get('historia_familiar', [])
-        tabagismo = data.get('tabagismo', 'nunca_fumou')
-        macos_ano = int(data.get('macos_ano', 0)) if data.get('macos_ano') else 0
-        outras_comorbidades = data.get('outras_comorbidades', '').lower()
-        outras_condicoes_familiares = data.get('outras_condicoes_familiares', '').lower()
-        medicacoes_uso_continuo = data.get('medicacoes_uso_continuo', '').lower()
-        exames_anteriores = data.get('exames_anteriores', [])
+        comorbidades = data.get('comorbidades', []) if data.get('comorbidades') else []
+        historia_familiar = data.get('historia_familiar', []) if data.get('historia_familiar') else []
+        
+        # Processar tabagismo de forma robusta
+        tabagismo_raw = data.get('tabagismo', 'nunca_fumou')
+        macos_ano_raw = data.get('macos_ano', 0)
+        
+        # Normalizar tabagismo usando helper resiliente
+        tabagismo, macos_ano = _parse_smoking_status_intelligent(tabagismo_raw, data)
+        
+        # Se macos_ano não foi extraído do tabagismo, usar o campo direto
+        if macos_ano == 0 and macos_ano_raw:
+            try:
+                macos_ano = int(macos_ano_raw) if macos_ano_raw else 0
+            except (ValueError, TypeError):
+                macos_ano = 0
+        
+        print(f"DEBUG: tabagismo normalizado = {tabagismo}, macos_ano = {macos_ano}")
+        
+        outras_comorbidades = data.get('outras_comorbidades', '').lower() if data.get('outras_comorbidades') else ''
+        outras_condicoes_familiares = data.get('outras_condicoes_familiares', '').lower() if data.get('outras_condicoes_familiares') else ''
+        medicacoes_uso_continuo = data.get('medicacoes_uso_continuo', '').lower() if data.get('medicacoes_uso_continuo') else ''
+        exames_anteriores = data.get('exames_anteriores', []) if data.get('exames_anteriores') else []
         
         recommendations = []
         alerts = []
@@ -31,8 +135,14 @@ def generate_intelligent_recommendations():
 
         def should_have_received_single_dose(keyword, previous_exams):
             """Return False (do NOT recommend) if a prior dose/exam with keyword exists."""
+            if not previous_exams:
+                return True, None
+                
             for exam in previous_exams or []:
-                if keyword.lower() in exam.get('name','').lower():
+                if not exam or not isinstance(exam, dict):
+                    continue
+                exam_name = exam.get('name', '')
+                if exam_name and keyword.lower() in exam_name.lower():
                     return False, f"Já realizado anteriormente"
             return True, None
         
@@ -51,25 +161,38 @@ def generate_intelligent_recommendations():
         # Função para verificar se deve recomendar exame
         def should_recommend_exam(exam_name, previous_exams, interval_days):
             for exam in previous_exams:
-                if exam_name.lower() in exam['name'].lower():
-                    exam_date = datetime.strptime(exam['date'], '%Y-%m-%d')
-                    days_since = (datetime.now() - exam_date).days
+                if not exam or not isinstance(exam, dict):
+                    continue
                     
-                    if days_since < interval_days:
-                        return False, f"Último exame há {days_since} dias"
-                    elif days_since > interval_days + 30:  # 30 dias de tolerância
-                        return True, f"Em atraso - último exame há {days_since} dias"
-                    else:
-                        return True, f"Devido - último exame há {days_since} dias"
+                exam_name_field = exam.get('name', '')
+                exam_date_field = exam.get('date')
+                
+                if not exam_name_field or exam_name.lower() not in exam_name_field.lower():
+                    continue
+                    
+                # Usar função robusta de parsing de data
+                exam_date = parse_date_ymd(exam_date_field)
+                
+                if exam_date is None:
+                    # Se não há data válida, recomendar exame
+                    return True, "Sem data anterior válida"
+                
+                days_since = (datetime.now() - exam_date).days
+                
+                if days_since < interval_days:
+                    return False, f"Último exame há {days_since} dias"
+                elif days_since > interval_days + 30:  # 30 dias de tolerância
+                    return True, f"Em atraso - último exame há {days_since} dias"
+                else:
+                    return True, f"Devido - último exame há {days_since} dias"
             
             return True, None
         
         def calculate_days_since_exam(exam_date_str):
-            try:
-                exam_date = datetime.strptime(exam_date_str, '%Y-%m-%d')
+            exam_date = parse_date_ymd(exam_date_str)
+            if exam_date:
                 return (datetime.now() - exam_date).days
-            except:
-                return None
+            return None
         
         # Mapeamento de condições para exames específicos
         condition_mapping = {
