@@ -7,23 +7,103 @@ from src.utils.analytics import analytics
 
 checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
 
+def parse_date_ymd(date_str):
+    """
+    Utilitário que aceita %Y-%m-%d, %d/%m/%Y, %Y/%m/%d e retorna None quando inválido.
+    """
+    if not date_str or not isinstance(date_str, str):
+        return None
+    
+    date_str = date_str.strip()
+    if not date_str:
+        return None
+    
+    # Formatos suportados
+    formats = ['%Y-%m-%d', '%d/%m/%Y', '%Y/%m/%d']
+    
+    for fmt in formats:
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            continue
+    
+    return None
+
+def _normalize_tabagismo_data(data):
+    """
+    Normaliza dados de tabagismo aceitando dict ou campos achatados.
+    Retorna (status_normalizado, macos_ano_int).
+    """
+    # Defaults seguros
+    status = 'nunca_fumou'
+    macos_ano = 0
+    
+    try:
+        # Obter tabagismo como objeto ou string
+        tabagismo = data.get('tabagismo', 'nunca_fumou')
+        
+        # Se tabagismo é um dict (formato objeto)
+        if isinstance(tabagismo, dict):
+            status = tabagismo.get('status') or tabagismo.get('estado') or 'nunca_fumou'
+            macos_ano = int(tabagismo.get('macos_ano') or tabagismo.get('pack_years') or 0)
+        elif isinstance(tabagismo, str):
+            status = tabagismo
+        
+        # Verificar campos achatados e priorizar se existirem
+        flattened_status = data.get('tabagismo_status')
+        flattened_macos = data.get('tabagismo_macos_ano')
+        
+        if flattened_status:
+            status = flattened_status
+        if flattened_macos is not None:
+            macos_ano = int(flattened_macos)
+        
+        # Se macos_ano ainda não foi definido, tentar campo root
+        if macos_ano == 0:
+            root_macos = data.get('macos_ano')
+            if root_macos is not None:
+                macos_ano = int(root_macos)
+        
+    except (ValueError, TypeError, AttributeError):
+        # Em caso de erro, manter defaults seguros
+        status = 'nunca_fumou'
+        macos_ano = 0
+    
+    # Normalizar status
+    if isinstance(status, str):
+        status = status.replace('-', '_').lower()
+        # Mapear variações para valores padronizados
+        if status in ['fumante', 'fumante_atual']:
+            status = 'fumante_atual'
+        elif status in ['ex-fumante', 'ex_fumante']:
+            status = 'ex_fumante'
+        elif status not in ['nunca_fumou', 'fumante_atual', 'ex_fumante']:
+            status = 'nunca_fumou'  # Default seguro
+    else:
+        status = 'nunca_fumou'
+    
+    return status, macos_ano
+
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
 def generate_intelligent_recommendations():
     try:
         data = request.json
         
-        # Extrair dados do formulário
-        idade = int(data.get('idade', 0))
+        # Extrair dados do formulário com defaults seguros
+        idade = int(data.get('idade', 0)) if data.get('idade') else 0
         sexo = data.get('sexo', '')
         pais = data.get('pais', 'BR')  # Padrão Brasil
-        comorbidades = data.get('comorbidades', [])
-        historia_familiar = data.get('historia_familiar', [])
-        tabagismo = data.get('tabagismo', 'nunca_fumou')
-        macos_ano = int(data.get('macos_ano', 0)) if data.get('macos_ano') else 0
+        comorbidades = data.get('comorbidades', []) if data.get('comorbidades') else []
+        historia_familiar = data.get('historia_familiar', []) if data.get('historia_familiar') else []
+        
+        # Normalizar tabagismo robustamente
+        tabagismo, macos_ano = _normalize_tabagismo_data(data)
+        print(f"DEBUG: tabagismo normalizado='{tabagismo}', macos_ano={macos_ano}")
+        
         outras_comorbidades = data.get('outras_comorbidades', '').lower()
         outras_condicoes_familiares = data.get('outras_condicoes_familiares', '').lower()
         medicacoes_uso_continuo = data.get('medicacoes_uso_continuo', '').lower()
-        exames_anteriores = data.get('exames_anteriores', [])
+        exames_anteriores = data.get('exames_anteriores', []) if data.get('exames_anteriores') else []
         
         recommendations = []
         alerts = []
@@ -50,9 +130,27 @@ def generate_intelligent_recommendations():
         
         # Função para verificar se deve recomendar exame
         def should_recommend_exam(exam_name, previous_exams, interval_days):
+            if not previous_exams:
+                return True, None
+            
             for exam in previous_exams:
-                if exam_name.lower() in exam['name'].lower():
-                    exam_date = datetime.strptime(exam['date'], '%Y-%m-%d')
+                # Verificar se exam é um dict e tem as chaves necessárias
+                if not isinstance(exam, dict):
+                    continue
+                    
+                exam_name_field = exam.get('name', '')
+                exam_date_field = exam.get('date', '')
+                
+                if not exam_name_field or not exam_date_field:
+                    continue
+                
+                if exam_name.lower() in exam_name_field.lower():
+                    exam_date = parse_date_ymd(exam_date_field)
+                    
+                    if exam_date is None:
+                        # Data inválida, mas exame existe - ser conservador
+                        return True, "Sem data anterior válida"
+                    
                     days_since = (datetime.now() - exam_date).days
                     
                     if days_since < interval_days:
@@ -65,11 +163,10 @@ def generate_intelligent_recommendations():
             return True, None
         
         def calculate_days_since_exam(exam_date_str):
-            try:
-                exam_date = datetime.strptime(exam_date_str, '%Y-%m-%d')
-                return (datetime.now() - exam_date).days
-            except:
+            exam_date = parse_date_ymd(exam_date_str)
+            if exam_date is None:
                 return None
+            return (datetime.now() - exam_date).days
         
         # Mapeamento de condições para exames específicos
         condition_mapping = {
@@ -1179,6 +1276,9 @@ def generate_intelligent_recommendations():
         
         # Gerar alertas para exames em atraso
         for exam in exames_anteriores:
+            if not isinstance(exam, dict) or 'date' not in exam or 'name' not in exam:
+                continue
+                
             days_since = calculate_days_since_exam(exam['date'])
             if days_since:
                 if 'hba1c' in exam['name'].lower() and days_since > 180:

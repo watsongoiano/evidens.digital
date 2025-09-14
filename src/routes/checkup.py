@@ -3,25 +3,53 @@ from flask import Blueprint, request, jsonify
 checkup_bp = Blueprint('checkup', __name__)
 
 
-def _parse_smoking_status(tabagismo):
-    """Normaliza tabagismo vindo como string ou dict para (status, macos_ano)."""
+def _parse_smoking_status(tabagismo, data=None):
+    """
+    Normaliza tabagismo aceitando dict, string e campos achatados do payload.
+    Sempre retorna (status_normalizado, macos_ano_int).
+    """
+    # Inicializar com defaults seguros
     status = 'nunca_fumou'
     macos = 0
+    
     try:
+        # Se tabagismo é um dict (formato objeto)
         if isinstance(tabagismo, dict):
             status = tabagismo.get('status') or tabagismo.get('estado') or 'nunca_fumou'
             macos = int(tabagismo.get('macos_ano') or tabagismo.get('pack_years') or 0)
+        # Se tabagismo é uma string
         elif isinstance(tabagismo, str):
             status = tabagismo
-        else:
-            status = 'nunca_fumou'
-    except Exception:
-        pass
-    status = status.replace('-', '_').lower()
-    if status == 'fumante':
-        status = 'fumante_atual'
-    if status == 'ex-fumante':
-        status = 'ex_fumante'
+        
+        # Verificar campos achatados no payload principal se data foi fornecido
+        if data:
+            # Priorizar campos achatados se existirem
+            flattened_status = data.get('tabagismo_status')
+            flattened_macos = data.get('tabagismo_macos_ano')
+            
+            if flattened_status:
+                status = flattened_status
+            if flattened_macos is not None:
+                macos = int(flattened_macos)
+        
+    except (ValueError, TypeError, AttributeError):
+        # Em caso de erro, manter defaults seguros
+        status = 'nunca_fumou'
+        macos = 0
+    
+    # Normalizar status se for string
+    if isinstance(status, str):
+        status = status.replace('-', '_').lower()
+        # Mapear variações para valores padronizados
+        if status in ['fumante', 'fumante_atual']:
+            status = 'fumante_atual'
+        elif status in ['ex-fumante', 'ex_fumante']:
+            status = 'ex_fumante'
+        elif status not in ['nunca_fumou', 'fumante_atual', 'ex_fumante']:
+            status = 'nunca_fumou'  # Default seguro para valores desconhecidos
+    else:
+        status = 'nunca_fumou'  # Default se não for string
+    
     return status, macos
 
 @checkup_bp.route('/api/checkup', methods=['POST'])
@@ -45,13 +73,20 @@ def gerar_recomendacoes():
         outras_comorbidades = data.get('outras_comorbidades', '')
         historia_familiar = data.get('historia_familiar', [])
         outras_hf = data.get('outras_hf', '')
-        tabagismo = data.get('tabagismo', {})
+        tabagismo_raw = data.get('tabagismo', {})
+        
+        # Normalizar dados de tabagismo logo no início para evitar inconsistências
+        tabagismo_status, tabagismo_macos_ano = _parse_smoking_status(tabagismo_raw, data)
+        tabagismo_normalizado = {
+            'status': tabagismo_status,
+            'macos_ano': tabagismo_macos_ano
+        }
         
         # Gerar recomendações
         recomendacoes = []
         
         # Rastreamento por idade e sexo
-        recomendacoes.extend(get_age_sex_recommendations(idade, sexo, tabagismo))
+        recomendacoes.extend(get_age_sex_recommendations(idade, sexo, tabagismo_normalizado))
         
         # Rastreamento baseado em comorbidades
         recomendacoes.extend(get_comorbidity_recommendations(comorbidades))
@@ -68,7 +103,7 @@ def gerar_recomendacoes():
             recomendacoes.extend(process_other_conditions_simple(outras_hf, 'historia_familiar'))
         
         # Rastreamento baseado em tabagismo
-        recomendacoes.extend(get_smoking_recommendations(tabagismo, idade))
+        recomendacoes.extend(get_smoking_recommendations(tabagismo_normalizado, idade))
         
         # Rastreamentos específicos por população
         recomendacoes.extend(get_population_specific_recommendations(idade, sexo, comorbidades))
@@ -206,8 +241,8 @@ def get_age_sex_recommendations(idade, sexo, tabagismo):
     
     # Aneurisma de aorta abdominal (homens 65-75 anos; somente se já fumou)
     if sexo == 'masculino' and 65 <= idade <= 75:
-        _status, _macos = _parse_smoking_status(tabagismo)
-        if _status in ('fumante_atual', 'ex_fumante'):
+        status = tabagismo.get('status', 'nunca_fumou')
+        if status in ('fumante_atual', 'ex_fumante'):
             recomendacoes.append({
                 'titulo': 'Ultrassom de Aorta Abdominal',
                 'descricao': 'Ultrassom uma vez na vida em homens 65–75 anos que fumaram (ever smokers)',
@@ -449,7 +484,7 @@ def get_smoking_recommendations(tabagismo, idade):
     
     # Rastreamento de câncer de pulmão
     if 50 <= idade <= 80 and macos_ano >= 20:
-        if status in ['fumante', 'ex-fumante']:
+        if status in ['fumante_atual', 'ex_fumante']:
             recomendacoes.append({
                 'titulo': 'Tomografia de Tórax',
                 'descricao': f'TC de baixa dose anual ({macos_ano} maços-ano)',
@@ -459,7 +494,7 @@ def get_smoking_recommendations(tabagismo, idade):
             })
     
     # Cessação do tabagismo
-    if status == 'fumante':
+    if status == 'fumante_atual':
         recomendacoes.append({
             'titulo': 'Cessação do Tabagismo',
             'descricao': 'Aconselhamento e suporte farmacológico',
