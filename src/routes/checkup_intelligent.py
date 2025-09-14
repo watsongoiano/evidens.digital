@@ -1,9 +1,8 @@
 from flask import Blueprint, request, jsonify
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
-import re
-import math
 from src.utils.analytics import analytics
+from src.utils.reference_links import build_reference_links, build_reference_html
 
 checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
 
@@ -666,20 +665,36 @@ def generate_intelligent_recommendations():
                     rec['status'] = status
                 recommendations.append(rec)
         
-        # Citologia Cervical
+        # Citologia Cervical - Recommendations by age
         if sexo == 'feminino' and 21 <= idade <= 65:
-            should_rec, status = should_recommend_exam('Citologia Cervical', exames_anteriores, intervals['Citologia Cervical'])
-            if should_rec:
-                rec = {
-                    'titulo': 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular',
-                    'descricao': 'Papanicolaou a cada 3 anos (21-65 anos)',
-                    'prioridade': 'alta',
-                    'referencia': 'USPSTF Grau A',
-                    'categoria': 'rastreamento'
-                }
-                if status:
-                    rec['status'] = status
-                recommendations.append(rec)
+            if 21 <= idade <= 29:
+                # 21-29: Pap (citologia) every 3 years
+                should_rec, status = should_recommend_exam('Citologia Cervical', exames_anteriores, intervals['Citologia Cervical'])
+                if should_rec:
+                    rec = {
+                        'titulo': 'Citologia oncótica (Papanicolaou)',
+                        'descricao': 'Papanicolaou a cada 3 anos (21-29 anos)',
+                        'prioridade': 'alta',
+                        'referencia': 'USPSTF Grau A',
+                        'categoria': 'rastreamento'
+                    }
+                    if status:
+                        rec['status'] = status
+                    recommendations.append(rec)
+            elif 30 <= idade <= 65:
+                # 30-65: HPV primary test every 5 years (use 1825 days = 5 years)
+                should_rec, status = should_recommend_exam('Teste de HPV', exames_anteriores, 1825)
+                if should_rec:
+                    rec = {
+                        'titulo': 'Teste de HPV (primário)',
+                        'descricao': 'Teste de HPV primário a cada 5 anos (30-65 anos)',
+                        'prioridade': 'alta',
+                        'referencia': 'USPSTF Grau A',
+                        'categoria': 'rastreamento'
+                    }
+                    if status:
+                        rec['status'] = status
+                    recommendations.append(rec)
         
         # PSA
         if sexo == 'masculino' and 50 <= idade <= 70:
@@ -739,21 +754,6 @@ def generate_intelligent_recommendations():
                 'categoria': 'outras'
             }
             recommendations.append(rec_vitamina_d)
-            
-            rec_pressao = {
-                'titulo': 'Medida da Pressão Arterial',
-                'categoria': 'outras'
-            }
-            recommendations.append(rec_pressao)
-            
-            rec_phq9 = {
-                'titulo': 'PHQ-9',
-                'descricao': 'Rastreamento de depressão',
-                'prioridade': 'media',
-                'referencia': 'USPSTF Grau B',
-                'categoria': 'outras'
-            }
-            recommendations.append(rec_phq9)
 
         # Biomarqueurs avancés baseados no risco ASCVD e guidelines
         print(f"DEBUG: Verificando biomarqueurs - idade = {idade}")
@@ -901,7 +901,7 @@ def generate_intelligent_recommendations():
             if idade >= 65:
                 rec = {
                     'titulo': 'HD4V (Vacina p/Influenza de Alta dose - Efluelda®)',
-                    'descricao': 'Dose anual\nAplicar em dose única, INTRAMUSCULAR, anualmente. Obs: Pode ser coadmnistrada com VPC13 ou VPC15®, Arexvy® e Shingrix®; de preferência, aguardar 15 dias de intervalo para vacinação com a QDenga®',
+                    'descricao': 'Dose anual\nAplicar em dose única, INTRAMUSCULAR, anualmente. Obs: Pode ser coadministrada com VPC13 ou VPC15®, Arexvy® e Shingrix®; de preferência, aguardar 15 dias de intervalo para vacinação com a QDenga®',
                     'prioridade': 'alta',
                     'referencia': 'SBIm/ANVISA 2024',
                     'categoria': 'vacina'
@@ -909,7 +909,7 @@ def generate_intelligent_recommendations():
             else:
                 rec = {
                     'titulo': 'Vacina Influenza Tetravalente',
-                    'descricao': 'Dose anual\nAplicar em dose única, INTRAMUSCULAR, anualmente. Obs: Pode ser coadmnistrada com VPC13 ou VPC15®, Arexvy® e Shingrix®; de preferência, aguardar 15 dias de intervalo para vacinação com a QDenga®',
+                    'descricao': 'Dose anual\nAplicar em dose única, INTRAMUSCULAR, anualmente. Obs: Pode ser coadministrada com VPC13 ou VPC15®, Arexvy® e Shingrix®; de preferência, aguardar 15 dias de intervalo para vacinação com a QDenga®',
                     'prioridade': 'alta',
                     'referencia': 'SBIm/ANVISA 2024',
                     'categoria': 'vacina'
@@ -918,12 +918,12 @@ def generate_intelligent_recommendations():
                 rec['status'] = status
             recommendations.append(rec)
         
-        # Hexavalente - Tétano, difteria, coqueluche
+        # dTpa - Tétano, difteria, coqueluche (adultos)
         should_rec, status = should_recommend_exam('Vacina Tdap', exames_anteriores, 3650)  # 10 anos
         if should_rec:
             rec = {
-                'titulo': 'Hexavalente (HEXAXIM® ou Infanrix®)',
-                'descricao': '1 dose\nAplicar dose única e reforço após 5 anos.\n* Não tem na rede pública',
+                'titulo': 'dTpa (Boostrix®/Adacel®)',
+                'descricao': '1 dose de reforço a cada 10 anos',
                 'prioridade': 'alta',
                 'referencia': 'SBIm/ANVISA 2024',
                 'categoria': 'vacina'
@@ -952,7 +952,7 @@ def generate_intelligent_recommendations():
             if should_rec:
                 rec = {
                     'titulo': 'Shingrix® (Vacina p/Herpes Zoster recombinada)',
-                    'descricao': '2 doses\nAplicar uma dose de 0,5ml, INTRAMUSCULAR e repetir segunda dose após 2 meses. Obs: Pode ser coadmnistrada com VPC13 ou VPC15®, Efluelda® e Arexvy®',
+                    'descricao': '2 doses\nAplicar uma dose de 0,5ml, INTRAMUSCULAR e repetir segunda dose após 2 meses. Obs: Pode ser coadministrada com VPC13 ou VPC15®, Efluelda® e Arexvy®',
                     'prioridade': 'alta',
                     'referencia': 'SBIm/ANVISA 2024',
                     'categoria': 'vacina'
@@ -982,8 +982,8 @@ def generate_intelligent_recommendations():
             if should_rec:
                 # Adicionar VPC15 primeiro
                 rec1 = {
-                    'titulo': 'VPC15 (Vaxneuvance®) ou VPP13, 0,5ml',
-                    'descricao': '1 dose\nSolicito aplicação, INTRAMUSCULAR, em região deltoideana, em dose única. Obs: Pode ser coadmnistrada com Shingrix®, Efluelda® e Arexvy®',
+                    'titulo': 'VPC15 (Vaxneuvance®) ou VPC13, 0,5ml',
+                    'descricao': '1 dose\nSolicito aplicação, INTRAMUSCULAR, em região deltoideana, em dose única. Obs: Pode ser coadministrada com Shingrix®, Efluelda® e Arexvy®',
                     'prioridade': 'alta',
                     'referencia': 'SBIm/ANVISA 2024',
                     'categoria': 'vacina'
@@ -995,7 +995,7 @@ def generate_intelligent_recommendations():
                 # Adicionar VPP23 depois
                 rec2 = {
                     'titulo': 'VPP23, 0,5ml',
-                    'descricao': '1 dose\nSolicito aplicação, INTRAMUSCULAR, em região deltoideana, seis meses após aplicação de VPC13, com dose de reforço cinco anos após primeira dose de VPC13. Obs: Pode ser coadmnistrada com Shingrix®, Efluelda® e Arexvy®',
+                    'descricao': '1 dose\nSolicito aplicação, INTRAMUSCULAR, em região deltoideana, seis meses após aplicação de VPC15/VPC13. Obs: Pode ser coadministrada com Shingrix®, Efluelda® e Arexvy®',
                     'prioridade': 'alta',
                     'referencia': 'SBIm/ANVISA 2024',
                     'categoria': 'vacina'
@@ -1200,7 +1200,7 @@ def generate_intelligent_recommendations():
             'cardiopatia' in comorbidades or 
             'dislipidemia' in comorbidades or
             idade >= 40 or
-            'cancer_colorretal' in historia_familiar  # História familiar de doença cardiovascular
+            'cardiopatia' in historia_familiar  # História familiar de doença cardiovascular
         )
         
         if needs_ecg:
@@ -1434,6 +1434,15 @@ def generate_intelligent_recommendations():
                 'alta'
             )
         
+        # Enriquecer recomendações com links clicáveis das referências
+        for rec in recommendations:
+            ref_str = rec.get('referencia', '')
+            titulo = rec.get('titulo', '')
+            links = build_reference_links(titulo, ref_str)
+            if links:
+                rec['referencias'] = links
+                rec['referencia_html'] = build_reference_html(links)
+        
         # Rastrear geração de recomendações
         analytics.track_recommendation()
         
@@ -1607,7 +1616,10 @@ def gerar_solicitacao_exames():
         """
         
         for exam in exames:
-            html_content += f"                        <li>• {exam['titulo']}</li>\n"
+            html_content += f"                        <li>• {exam['titulo']}"
+            if exam.get('referencia_html'):
+                html_content += f"<br><small>Ref.: {exam['referencia_html']}</small>"
+            html_content += "</li>\n"
         
         html_content += f"""
                     </ul>
@@ -1783,9 +1795,10 @@ def gerar_receita_vacinas():
             html_content += f"""
                     <div class="vaccine-item">
                         <p><strong>{i} {vacina['titulo'].upper()}</strong> ---------------------------------------------------- 1 dose</p>
-                        <p>{vacina.get('descricao', 'Aplicar conforme orientação médica.')}</p>
-                    </div>
-            """
+                        <p>{vacina.get('descricao', 'Aplicar conforme orientação médica.')}</p>"""
+            if vacina.get('referencia_html'):
+                html_content += f"""<p><small>Ref.: {vacina['referencia_html']}</small></p>"""
+            html_content += "</div>"
         
         html_content += f"""
                 </div>
