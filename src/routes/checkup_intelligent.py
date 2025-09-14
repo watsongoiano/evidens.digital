@@ -358,7 +358,7 @@ def generate_intelligent_recommendations():
             db.session.rollback()
         
         # Registrar analytics
-        analytics.track_checkup_generated()
+        analytics.track_recommendation()
         
         # Preparar resposta
         response = {
