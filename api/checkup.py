@@ -1,7 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 import json
 
 app = Flask(__name__)
+
+def _corsify(resp):
+    """Add CORS headers to response"""
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+    return resp
 
 def get_age_sex_recommendations(idade, sexo, tabagismo):
     """Recomendações baseadas em idade e sexo"""
@@ -82,67 +89,17 @@ def get_comorbidity_recommendations(comorbidades):
     
     return recomendacoes
 
-@app.route('/api/checkup', methods=['POST', 'OPTIONS'])
+@app.route('/checkup', methods=['POST', 'OPTIONS'])
 def handle_checkup():
     if request.method == 'OPTIONS':
-        response = jsonify({'status': 'ok'})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Methods', 'POST')
-        return response
+        return _corsify(make_response('', 204))
     
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         
-        if not data:
-            error_response = jsonify({'error': 'Dados não fornecidos'})
-            error_response.headers.add('Access-Control-Allow-Origin', '*')
-            return error_response, 400
-        
-        # Validar dados obrigatórios
-        if 'idade' not in data or 'sexo' not in data:
-            error_response = jsonify({'error': 'Idade e sexo são obrigatórios'})
-            error_response.headers.add('Access-Control-Allow-Origin', '*')
-            return error_response, 400
-        
-        idade = data['idade']
-        sexo = data['sexo']
-        comorbidades = data.get('comorbidades', [])
-        tabagismo = data.get('tabagismo', {})
-        
-        # Gerar recomendações
-        recomendacoes = []
-        recomendacoes.extend(get_age_sex_recommendations(idade, sexo, tabagismo))
-        recomendacoes.extend(get_comorbidity_recommendations(comorbidades))
-        
-        # Adicionar vacinas básicas
-        recomendacoes.extend([
-            {
-                'titulo': 'Vacina Influenza',
-                'descricao': 'Vacina anual (alta dose se ≥65 anos)',
-                'prioridade': 'alta',
-                'categoria': 'vacinacao',
-                'referencia': 'CDC 2024'
-            },
-            {
-                'titulo': 'Vacina COVID-19',
-                'descricao': 'Vacina 2024-2025 conforme CDC',
-                'prioridade': 'alta',
-                'categoria': 'vacinacao',
-                'referencia': 'CDC 2024'
-            }
-        ])
-        
-        response = jsonify(recomendacoes)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return _corsify(jsonify({"ok": True, "data": data}))
         
     except Exception as e:
-        error_response = jsonify({'error': str(e)})
-        error_response.headers.add('Access-Control-Allow-Origin', '*')
-        return error_response, 500
+        error_response = {'error': str(e)}
+        return _corsify(jsonify(error_response)), 500
 
-def handler(req):
-    with app.test_request_context(path=req.path, method=req.method, 
-                                   data=req.get_data(), headers=req.headers):
-        return app.full_dispatch_request()

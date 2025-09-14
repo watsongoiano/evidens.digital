@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 import sys
 import os
 import json
@@ -11,6 +11,23 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 app = Flask(__name__)
+
+def _corsify(resp):
+    """Add CORS headers to response"""
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+    return resp
+
+def _parse_smoking_status_intelligent(data):
+    """Parse and normalize smoking status from request data"""
+    smoking = data.get('tabagismo', {})
+    if isinstance(smoking, dict):
+        return smoking
+    elif isinstance(smoking, str):
+        return {'status': smoking}
+    else:
+        return {'status': 'nao_fuma'}
 
 def parse_date_ymd(date_str):
     """
@@ -212,15 +229,15 @@ def generate_recommendations(patient_data, risk_level):
 @app.route('/checkup-intelligent', methods=['POST', 'OPTIONS'])
 def handle_intelligent_checkup():
     if request.method == 'OPTIONS':
-        response = jsonify({'status': 'ok'})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Methods', 'POST')
-        return response
+        return _corsify(make_response('', 204))
     
     try:
-        # Get patient data from request
-        patient_data = request.get_json() or {}
+        # Get patient data from request with fallback
+        patient_data = request.get_json(silent=True) or {}
+        
+        # Normalize smoking status
+        smoking_data = _parse_smoking_status_intelligent(patient_data)
+        patient_data['tabagismo'] = smoking_data
         
         # Calculate PREVENT risk
         risk_result = calculate_prevent_risk(patient_data)
@@ -230,7 +247,7 @@ def handle_intelligent_checkup():
         recommendations = generate_recommendations(patient_data, risk_classification['level'])
         
         # Prepare response
-        response_data = {
+        recommendacoes = {
             'success': True,
             'prevent_risk': risk_result,
             'risk_classification': risk_classification,
@@ -238,21 +255,15 @@ def handle_intelligent_checkup():
             'total_recommendations': len(recommendations)
         }
         
-        response = jsonify(response_data)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return _corsify(jsonify(recommendacoes)), 200
         
     except Exception as e:
         print(f"Erro na geração de recomendações: {e}")
-        error_response = jsonify({
+        error_response = {
             'success': False,
             'error': str(e),
             'message': 'Erro interno do servidor'
-        })
-        error_response.headers.add('Access-Control-Allow-Origin', '*')
-        return error_response, 500
+        }
+        return _corsify(jsonify(error_response)), 500
 
-def handler(req):
-    with app.test_request_context(path=req.path, method=req.method, 
-                                   data=req.get_data(), headers=req.headers):
-        return app.full_dispatch_request()
+

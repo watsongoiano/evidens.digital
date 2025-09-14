@@ -1,5 +1,18 @@
 {
+  "functions": {
+    "api/*.py": {
+      "runtime": "python3.11"
+    }
+  },
   "rewrites": [
+    {
+      "source": "/checkup-intelligent",
+      "destination": "/api/checkup-intelligent"
+    },
+    {
+      "source": "/checkup",
+      "destination": "/api/checkup"
+    },
     {
       "source": "/api/checkup",
       "destination": "/api/checkup.py"
@@ -7,10 +20,6 @@
     {
       "source": "/api/analytics/(.*)",
       "destination": "/api/analytics.py"
-    },
-    {
-      "source": "/checkup-intelligent",
-      "destination": "/api/checkup-intelligent.py"
     },
     {
       "source": "/analytics",
@@ -23,6 +32,17 @@
     {
       "source": "/(.*)",
       "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(checkup|checkup-intelligent)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
     }
   ]
 }
