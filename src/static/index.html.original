@@ -526,50 +526,51 @@
             };
             
             recs.forEach(item => {
+                const title = (item && item.titulo ? item.titulo.toLowerCase() : '');
                 let category = 'Outras Recomendações';
-                
-                if (item.categoria && item.categoria.includes('vacina')) {
+
+                if (item && item.categoria && item.categoria.includes('vacina')) {
                     category = 'Vacinas';
-                } else if (item.titulo.toLowerCase().includes('mamografia') || 
-                          item.titulo.toLowerCase().includes('colonoscopia') ||
-                          item.titulo.toLowerCase().includes('citologia') ||
-                          item.titulo.toLowerCase().includes('psa') ||
-                          item.titulo.toLowerCase().includes('tomografia')) {
+                } else if (title.includes('mamografia') ||
+                           title.includes('colonoscopia') ||
+                           title.includes('citologia') ||
+                           title.includes('psa') ||
+                           title.includes('tomografia')) {
                     category = 'Rastreamento de Câncer';
-                } else if (item.titulo.toLowerCase().includes('ultrassom') ||
-                          item.titulo.toLowerCase().includes('densitometria') ||
-                          item.titulo.toLowerCase().includes('ecocardiograma') ||
-                          item.titulo.toLowerCase().includes('eletrocardiograma') ||
-                          item.titulo.toLowerCase().includes('fundoscopia')) {
+                } else if (title.includes('ultrassom') ||
+                           title.includes('densitometria') ||
+                           title.includes('ecocardiograma') ||
+                           title.includes('eletrocardiograma') ||
+                           title.includes('fundoscopia')) {
                     category = 'Exames de Imagem';
-                } else if (item.categoria === 'laboratorial' ||
-                          item.titulo.toLowerCase().includes('hba1c') ||
-                          item.titulo.toLowerCase().includes('creatinina') ||
-                          item.titulo.toLowerCase().includes('perfil') ||
-                          item.titulo.toLowerCase().includes('hemograma') ||
-                          item.titulo.toLowerCase().includes('microalbuminúria') ||
-                          item.titulo.toLowerCase().includes('hiv') ||
-                          item.titulo.toLowerCase().includes('sífilis') ||
-                          item.titulo.toLowerCase().includes('hepatite') ||
-                          item.titulo.toLowerCase().includes('diabetes') ||
-                          item.titulo.toLowerCase().includes('glicemia') ||
-                          item.titulo.toLowerCase().includes('gonorreia') ||
-                          item.titulo.toLowerCase().includes('clamídia') ||
-                          item.titulo.toLowerCase().includes('tuberculose') ||
-                          item.titulo.toLowerCase().includes('anti-hcv') ||
-                          item.titulo.toLowerCase().includes('totg') ||
-                          item.titulo.toLowerCase().includes('colesterol') ||
-                          item.titulo.toLowerCase().includes('sódio') ||
-                          item.titulo.toLowerCase().includes('potássio') ||
-                          item.titulo.toLowerCase().includes('eletrólitos') ||
-                          item.titulo.toLowerCase().includes('ureia') ||
-                          item.titulo.toLowerCase().includes('egfr') ||
-                          item.titulo.toLowerCase().includes('albumina') ||
-                          item.titulo.toLowerCase().includes('vdrl') ||
-                          item.titulo.toLowerCase().includes('hbsag')) {
+                } else if ((item && item.categoria === 'laboratorial') ||
+                           title.includes('hba1c') ||
+                           title.includes('creatinina') ||
+                           title.includes('perfil') ||
+                           title.includes('hemograma') ||
+                           title.includes('microalbuminúria') ||
+                           title.includes('hiv') ||
+                           title.includes('sífilis') ||
+                           title.includes('hepatite') ||
+                           title.includes('diabetes') ||
+                           title.includes('glicemia') ||
+                           title.includes('gonorreia') ||
+                           title.includes('clamídia') ||
+                           title.includes('tuberculose') ||
+                           title.includes('anti-hcv') ||
+                           title.includes('totg') ||
+                           title.includes('colesterol') ||
+                           title.includes('sódio') ||
+                           title.includes('potássio') ||
+                           title.includes('eletrólitos') ||
+                           title.includes('ureia') ||
+                           title.includes('egfr') ||
+                           title.includes('albumina') ||
+                           title.includes('vdrl') ||
+                           title.includes('hbsag')) {
                     category = 'Exames Laboratoriais';
                 }
-                
+
                 categories[category].push(item);
             });
             
