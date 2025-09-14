@@ -3,25 +3,53 @@ from flask import Blueprint, request, jsonify
 checkup_bp = Blueprint('checkup', __name__)
 
 
-def _parse_smoking_status(tabagismo):
-    """Normaliza tabagismo vindo como string ou dict para (status, macos_ano)."""
+def _parse_smoking_status(tabagismo, data=None):
+    """Normaliza tabagismo vindo como string, dict ou campos achatados para (status, macos_ano)."""
     status = 'nunca_fumou'
     macos = 0
+    
     try:
+        # Priorizar dict tabagismo se disponível
         if isinstance(tabagismo, dict):
             status = tabagismo.get('status') or tabagismo.get('estado') or 'nunca_fumou'
-            macos = int(tabagismo.get('macos_ano') or tabagismo.get('pack_years') or 0)
+            macos_value = tabagismo.get('macos_ano') or tabagismo.get('pack_years') or 0
+            try:
+                macos = int(macos_value) if macos_value else 0
+            except (ValueError, TypeError):
+                macos = 0
         elif isinstance(tabagismo, str):
             status = tabagismo
-        else:
-            status = 'nunca_fumou'
+        
+        # Verificar campos achatados no payload principal se data fornecido
+        if data:
+            flat_status = data.get('tabagismo_status')
+            flat_macos = data.get('tabagismo_macos_ano')
+            
+            if flat_status:
+                status = flat_status
+            if flat_macos:
+                try:
+                    macos = int(flat_macos) if flat_macos else 0
+                except (ValueError, TypeError):
+                    macos = 0
+                    
     except Exception:
-        pass
-    status = status.replace('-', '_').lower()
-    if status == 'fumante':
-        status = 'fumante_atual'
-    if status == 'ex-fumante':
-        status = 'ex_fumante'
+        # Em caso de qualquer erro, usar valores padrão seguros
+        status = 'nunca_fumou'
+        macos = 0
+    
+    # Normalizar status
+    if isinstance(status, str):
+        status = status.replace('-', '_').lower().strip()
+        if status == 'fumante':
+            status = 'fumante_atual'
+        elif status == 'ex_fumante' or status == 'ex-fumante':
+            status = 'ex_fumante'
+        elif status not in ['fumante_atual', 'ex_fumante', 'nunca_fumou']:
+            status = 'nunca_fumou'
+    else:
+        status = 'nunca_fumou'
+        
     return status, macos
 
 @checkup_bp.route('/api/checkup', methods=['POST'])
@@ -46,6 +74,13 @@ def gerar_recomendacoes():
         historia_familiar = data.get('historia_familiar', [])
         outras_hf = data.get('outras_hf', '')
         tabagismo = data.get('tabagismo', {})
+        
+        # Normalizar tabagismo usando helper resiliente
+        tabagismo_normalizado, macos_ano = _parse_smoking_status(tabagismo, data)
+        print(f"DEBUG: tabagismo(normalizado)={tabagismo_normalizado}, macos_ano={macos_ano}")
+        
+        # Reconstruir dict tabagismo normalizado para compatibilidade
+        tabagismo = {'status': tabagismo_normalizado, 'macos_ano': macos_ano}
         
         # Gerar recomendações
         recomendacoes = []
@@ -444,12 +479,12 @@ def get_smoking_recommendations(tabagismo, idade):
     """Recomendações baseadas em tabagismo"""
     recomendacoes = []
     
-    status = tabagismo.get('status', 'nunca_fumou')
-    macos_ano = tabagismo.get('macos_ano', 0)
+    # Usar helper para garantir normalização consistente
+    status, macos_ano = _parse_smoking_status(tabagismo)
     
     # Rastreamento de câncer de pulmão
     if 50 <= idade <= 80 and macos_ano >= 20:
-        if status in ['fumante', 'ex-fumante']:
+        if status in ['fumante_atual', 'ex_fumante']:
             recomendacoes.append({
                 'titulo': 'Tomografia de Tórax',
                 'descricao': f'TC de baixa dose anual ({macos_ano} maços-ano)',
@@ -459,7 +494,7 @@ def get_smoking_recommendations(tabagismo, idade):
             })
     
     # Cessação do tabagismo
-    if status == 'fumante':
+    if status == 'fumante_atual':
         recomendacoes.append({
             'titulo': 'Cessação do Tabagismo',
             'descricao': 'Aconselhamento e suporte farmacológico',
