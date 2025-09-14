@@ -100,12 +100,31 @@ def generate_intelligent_recommendations():
     try:
         data = request.json
         
-        # Extrair dados do formulário com defaults seguros
-        idade = int(data.get('idade', 0)) if data.get('idade') else 0
+        # Extrair e validar dados do formulário
+        # Validar idade
+        try:
+            idade = int(data.get('idade', 0)) if data.get('idade') else 0
+            if idade < 0 or idade > 150:
+                return jsonify({'error': 'Idade deve estar entre 0 e 150 anos'}), 400
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Idade deve ser um número válido'}), 400
+            
         sexo = data.get('sexo', '')
+        if sexo and sexo not in ['masculino', 'feminino']:
+            return jsonify({'error': 'Sexo deve ser "masculino" ou "feminino"'}), 400
+            
         pais = data.get('pais', 'BR')  # Padrão Brasil
-        comorbidades = data.get('comorbidades', []) if data.get('comorbidades') else []
-        historia_familiar = data.get('historia_familiar', []) if data.get('historia_familiar') else []
+        
+        # Validar e normalizar listas
+        comorbidades = data.get('comorbidades', [])
+        if comorbidades and not isinstance(comorbidades, list):
+            return jsonify({'error': 'Comorbidades deve ser uma lista'}), 400
+        comorbidades = comorbidades if comorbidades else []
+        
+        historia_familiar = data.get('historia_familiar', [])
+        if historia_familiar and not isinstance(historia_familiar, list):
+            return jsonify({'error': 'História familiar deve ser uma lista'}), 400
+        historia_familiar = historia_familiar if historia_familiar else []
         
         # Processar tabagismo de forma robusta
         tabagismo_raw = data.get('tabagismo', 'nunca_fumou')
@@ -123,10 +142,26 @@ def generate_intelligent_recommendations():
         
         print(f"DEBUG: tabagismo normalizado = {tabagismo}, macos_ano = {macos_ano}")
         
-        outras_comorbidades = data.get('outras_comorbidades', '').lower() if data.get('outras_comorbidades') else ''
-        outras_condicoes_familiares = data.get('outras_condicoes_familiares', '').lower() if data.get('outras_condicoes_familiares') else ''
-        medicacoes_uso_continuo = data.get('medicacoes_uso_continuo', '').lower() if data.get('medicacoes_uso_continuo') else ''
-        exames_anteriores = data.get('exames_anteriores', []) if data.get('exames_anteriores') else []
+        # Validar e normalizar campos de texto
+        outras_comorbidades = data.get('outras_comorbidades', '')
+        if outras_comorbidades and not isinstance(outras_comorbidades, str):
+            outras_comorbidades = str(outras_comorbidades)
+        outras_comorbidades = outras_comorbidades.lower() if outras_comorbidades else ''
+        
+        outras_condicoes_familiares = data.get('outras_condicoes_familiares', '')
+        if outras_condicoes_familiares and not isinstance(outras_condicoes_familiares, str):
+            outras_condicoes_familiares = str(outras_condicoes_familiares)
+        outras_condicoes_familiares = outras_condicoes_familiares.lower() if outras_condicoes_familiares else ''
+        
+        medicacoes_uso_continuo = data.get('medicacoes_uso_continuo', '')
+        if medicacoes_uso_continuo and not isinstance(medicacoes_uso_continuo, str):
+            medicacoes_uso_continuo = str(medicacoes_uso_continuo)
+        medicacoes_uso_continuo = medicacoes_uso_continuo.lower() if medicacoes_uso_continuo else ''
+        
+        exames_anteriores = data.get('exames_anteriores', [])
+        if exames_anteriores and not isinstance(exames_anteriores, list):
+            return jsonify({'error': 'Exames anteriores deve ser uma lista'}), 400
+        exames_anteriores = exames_anteriores if exames_anteriores else []
         
         recommendations = []
         alerts = []

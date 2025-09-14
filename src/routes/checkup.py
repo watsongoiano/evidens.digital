@@ -52,7 +52,7 @@ def _parse_smoking_status(tabagismo, data=None):
         
     return status, macos
 
-@checkup_bp.route('/api/checkup', methods=['POST'])
+@checkup_bp.route('/checkup', methods=['POST'])
 def gerar_recomendacoes():
     """
     Gera recomendações de check-up baseadas nos dados do paciente
@@ -67,12 +67,37 @@ def gerar_recomendacoes():
         if 'idade' not in data or 'sexo' not in data:
             return jsonify({'error': 'Idade e sexo são obrigatórios'}), 400
         
-        idade = data['idade']
+        # Validar tipos de dados
+        try:
+            idade = int(data['idade'])
+            if idade < 0 or idade > 150:
+                return jsonify({'error': 'Idade deve estar entre 0 e 150 anos'}), 400
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Idade deve ser um número válido'}), 400
+            
         sexo = data['sexo']
+        if sexo not in ['masculino', 'feminino']:
+            return jsonify({'error': 'Sexo deve ser "masculino" ou "feminino"'}), 400
+            
+        # Validar e normalizar dados opcionais
         comorbidades = data.get('comorbidades', [])
+        if not isinstance(comorbidades, list):
+            return jsonify({'error': 'Comorbidades deve ser uma lista'}), 400
+            
         outras_comorbidades = data.get('outras_comorbidades', '')
+        if outras_comorbidades is not None and not isinstance(outras_comorbidades, str):
+            return jsonify({'error': 'Outras comorbidades deve ser uma string'}), 400
+        outras_comorbidades = str(outras_comorbidades) if outras_comorbidades is not None else ''
+        
         historia_familiar = data.get('historia_familiar', [])
+        if not isinstance(historia_familiar, list):
+            return jsonify({'error': 'História familiar deve ser uma lista'}), 400
+            
         outras_hf = data.get('outras_hf', '')
+        if outras_hf is not None and not isinstance(outras_hf, str):
+            return jsonify({'error': 'Outras condições familiares deve ser uma string'}), 400
+        outras_hf = str(outras_hf) if outras_hf is not None else ''
+        
         tabagismo = data.get('tabagismo', {})
         
         # Normalizar tabagismo usando helper resiliente
