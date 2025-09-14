@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template_string
 import json
 import math
+import traceback
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from src.utils.analytics import analytics
@@ -259,18 +260,72 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     
     return recommendations
 
+def _parse_smoking_status_intelligent(tabagismo, data=None):
+    """Normaliza tabagismo vindo como string, dict ou campos achatados para (status, macos_ano)."""
+    status = 'nunca_fumou'
+    macos = 0
+    
+    try:
+        # Priorizar dict tabagismo se disponível
+        if isinstance(tabagismo, dict):
+            status = tabagismo.get('status') or tabagismo.get('estado') or 'nunca_fumou'
+            macos_value = tabagismo.get('macos_ano') or tabagismo.get('pack_years') or 0
+            try:
+                macos = int(macos_value) if macos_value else 0
+            except (ValueError, TypeError):
+                macos = 0
+        elif isinstance(tabagismo, str):
+            status = tabagismo
+        
+        # Verificar campos achatados no payload principal se data fornecido
+        if data:
+            flat_status = data.get('tabagismo_status')
+            flat_macos = data.get('tabagismo_macos_ano') or data.get('macos_ano')
+            
+            if flat_status:
+                status = flat_status
+            if flat_macos:
+                try:
+                    macos = int(flat_macos) if flat_macos else 0
+                except (ValueError, TypeError):
+                    macos = 0
+                    
+    except Exception:
+        # Em caso de qualquer erro, usar valores padrão seguros
+        status = 'nunca_fumou'
+        macos = 0
+    
+    # Normalizar status
+    if isinstance(status, str):
+        status = status.replace('-', '_').lower().strip()
+        if status == 'fumante':
+            status = 'fumante_atual'
+        elif status == 'ex_fumante' or status == 'ex-fumante':
+            status = 'ex_fumante'
+        elif status not in ['fumante_atual', 'ex_fumante', 'nunca_fumou']:
+            status = 'nunca_fumou'
+    else:
+        status = 'nunca_fumou'
+        
+    return status, macos
+
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
 def generate_intelligent_recommendations():
     try:
-        data = request.get_json()
+        # Use robust JSON parsing
+        data = request.get_json(silent=True)
         if not data:
-            return jsonify({'error': 'Dados não fornecidos'}), 400
+            return jsonify({'error': 'Dados não fornecidos ou JSON inválido'}), 400
         
         # Extrair dados do paciente
         age = int(data.get('idade', 0))
         sex = data.get('sexo', 'masculino')
         weight = float(data.get('peso', 0)) if data.get('peso') else None
         height = float(data.get('altura', 0)) if data.get('altura') else None
+        
+        # Parse smoking status robustly
+        tabagismo_raw = data.get('tabagismo', {})
+        smoking_status, macos_ano = _parse_smoking_status_intelligent(tabagismo_raw, data)
         
         # Dados clínicos para PREVENT
         patient_data = {
@@ -280,7 +335,7 @@ def generate_intelligent_recommendations():
             'hdlCholesterol': float(data.get('hdl_colesterol', 0)) if data.get('hdl_colesterol') else 0,
             'systolicBP': float(data.get('pressao_sistolica', 0)) if data.get('pressao_sistolica') else 0,
             'diabetes': 'diabetes_tipo_2' in data.get('comorbidades', []),
-            'smoking': data.get('tabagismo') == 'fumante_atual',
+            'smoking': smoking_status == 'fumante_atual',
             'weight': weight,
             'height': height,
             'creatinine': float(data.get('creatinina', 1.0)) if data.get('creatinina') else 1.0
@@ -295,6 +350,7 @@ def generate_intelligent_recommendations():
         
         # Gerar recomendações
         recommendations = []
+        alerts = []  # Initialize alerts array
         
         # Recomendações baseadas em idade e sexo
         age_sex_recs = generate_age_sex_recommendations(age, sex)
@@ -332,7 +388,7 @@ def generate_intelligent_recommendations():
                 classificacao_risco=risk_level,
                 comorbidades=json.dumps(data.get('comorbidades', [])),
                 historia_familiar=json.dumps(data.get('historia_familiar', [])),
-                tabagismo=data.get('tabagismo', 'nunca_fumou'),
+                tabagismo=smoking_status,
                 medicacoes=data.get('medicacoes', ''),
                 pais_guideline=data.get('pais_guideline', 'BR')
             )
@@ -360,20 +416,17 @@ def generate_intelligent_recommendations():
         # Registrar analytics
         analytics.track_recommendation()
         
-        # Preparar resposta
-        response = {
-            'success': True,
-            'prevent_risk': risk_result,
-            'risk_classification': risk_level,
+        # Preparar resposta padronizada
+        return jsonify({
             'recommendations': recommendations,
-            'total_recommendations': len(recommendations)
-        }
-        
-        return jsonify(response)
+            'alerts': alerts
+        })
         
     except Exception as e:
+        # Log traceback for debugging
         print(f"Erro na geração de recomendações: {e}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+        traceback.print_exc()
+        return jsonify({'error': f'Falha ao gerar recomendações: {str(e)}'}), 500
 
 @checkup_intelligent_bp.route('/generate-pdf', methods=['POST'])
 def generate_pdf_report():

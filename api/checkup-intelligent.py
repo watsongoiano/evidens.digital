@@ -3,6 +3,7 @@ import sys
 import os
 import json
 import math
+import traceback
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -215,12 +216,16 @@ def handle_intelligent_checkup():
         response = jsonify({'status': 'ok'})
         response.headers.add('Access-Control-Allow-Origin', '*')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.add('Access-Control-Allow-Methods', 'POST')
+        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
         return response
     
     try:
-        # Get patient data from request
-        patient_data = request.get_json() or {}
+        # Get patient data from request with robust JSON parsing
+        patient_data = request.get_json(silent=True)
+        if not patient_data:
+            error_response = jsonify({'error': 'Dados não fornecidos ou JSON inválido'})
+            error_response.headers.add('Access-Control-Allow-Origin', '*')
+            return error_response, 400
         
         # Calculate PREVENT risk
         risk_result = calculate_prevent_risk(patient_data)
@@ -229,13 +234,10 @@ def handle_intelligent_checkup():
         # Generate recommendations
         recommendations = generate_recommendations(patient_data, risk_classification['level'])
         
-        # Prepare response
+        # Prepare standardized response
         response_data = {
-            'success': True,
-            'prevent_risk': risk_result,
-            'risk_classification': risk_classification,
             'recommendations': recommendations,
-            'total_recommendations': len(recommendations)
+            'alerts': []  # Initialize alerts as empty array
         }
         
         response = jsonify(response_data)
@@ -243,11 +245,12 @@ def handle_intelligent_checkup():
         return response
         
     except Exception as e:
+        # Log traceback for debugging
         print(f"Erro na geração de recomendações: {e}")
+        traceback.print_exc()
+        
         error_response = jsonify({
-            'success': False,
-            'error': str(e),
-            'message': 'Erro interno do servidor'
+            'error': f'Falha ao gerar recomendações: {str(e)}'
         })
         error_response.headers.add('Access-Control-Allow-Origin', '*')
         return error_response, 500
