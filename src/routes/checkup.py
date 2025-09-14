@@ -2,42 +2,56 @@ from flask import Blueprint, request, jsonify
 
 checkup_bp = Blueprint('checkup', __name__)
 
-
 def _parse_smoking_status(tabagismo, data=None):
-    """Normaliza tabagismo vindo como string, dict, ou campos achatados para (status, macos_ano)."""
+    """Normaliza tabagismo vindo como string, dict ou campos achatados para (status, macos_ano)."""
     status = 'nunca_fumou'
     macos = 0
     
     try:
-        # First try to parse from tabagismo parameter
+        # Priorizar dict tabagismo se disponível
         if isinstance(tabagismo, dict):
             status = tabagismo.get('status') or tabagismo.get('estado') or 'nunca_fumou'
-            macos = int(tabagismo.get('macos_ano') or tabagismo.get('pack_years') or 0)
+            macos_value = tabagismo.get('macos_ano') or tabagismo.get('pack_years') or 0
+            try:
+                macos = int(macos_value) if macos_value else 0
+            except (ValueError, TypeError):
+                macos = 0
         elif isinstance(tabagismo, str):
             status = tabagismo
         
-        # If data is provided, try to get flattened fields as fallback/override
+        # Verificar campos achatados no payload principal se data fornecido
         if data:
-            # Handle flattened fields from frontend payload
-            if 'tabagismo_status' in data and data['tabagismo_status']:
-                status = data['tabagismo_status']
-            if 'tabagismo_macos_ano' in data and data['tabagismo_macos_ano']:
-                macos = int(data['tabagismo_macos_ano'])
-                
+            flat_status = data.get('tabagismo_status')
+            flat_macos = data.get('tabagismo_macos_ano')
+            
+            if flat_status:
+                status = flat_status
+            if flat_macos:
+                try:
+                    macos = int(flat_macos) if flat_macos else 0
+                except (ValueError, TypeError):
+                    macos = 0
+                    
     except Exception:
-        # Use safe defaults if anything fails
-        pass
+        # Em caso de qualquer erro, usar valores padrão seguros
+        status = 'nunca_fumou'
+        macos = 0
     
-    # Normalize status values
-    status = status.replace('-', '_').lower()
-    if status == 'fumante':
-        status = 'fumante_atual'
-    if status == 'ex-fumante':
-        status = 'ex_fumante'
-    
+    # Normalizar status
+    if isinstance(status, str):
+        status = status.replace('-', '_').lower().strip()
+        if status == 'fumante':
+            status = 'fumante_atual'
+        elif status == 'ex_fumante' or status == 'ex-fumante':
+            status = 'ex_fumante'
+        elif status not in ['fumante_atual', 'ex_fumante', 'nunca_fumou']:
+            status = 'nunca_fumou'
+    else:
+        status = 'nunca_fumou'
+        
     return status, macos
 
-@checkup_bp.route('/checkup', methods=['POST'])
+@checkup_bp.route('/api/checkup', methods=['POST'])
 def gerar_recomendacoes():
     """
     Gera recomendações de check-up baseadas nos dados do paciente
@@ -60,6 +74,13 @@ def gerar_recomendacoes():
         outras_hf = data.get('outras_hf', '')
         tabagismo = data.get('tabagismo', {})
         
+        # Normalizar tabagismo usando helper resiliente
+        tabagismo_normalizado, macos_ano = _parse_smoking_status(tabagismo, data)
+        print(f"DEBUG: tabagismo(normalizado)={tabagismo_normalizado}, macos_ano={macos_ano}")
+        
+        # Reconstruir dict tabagismo normalizado para compatibilidade
+        tabagismo = {'status': tabagismo_normalizado, 'macos_ano': macos_ano}
+        
         # Gerar recomendações
         recomendacoes = []
         
@@ -81,8 +102,7 @@ def gerar_recomendacoes():
             recomendacoes.extend(process_other_conditions_simple(outras_hf, 'historia_familiar'))
         
         # Rastreamento baseado em tabagismo
-        # Pass data parameter so the helper can handle flattened fields
-        recomendacoes.extend(get_smoking_recommendations(tabagismo, idade, data))
+        recomendacoes.extend(get_smoking_recommendations(tabagismo, idade))
         
         # Rastreamentos específicos por população
         recomendacoes.extend(get_population_specific_recommendations(idade, sexo, comorbidades))
@@ -454,17 +474,12 @@ def get_family_history_recommendations(historia_familiar, idade, sexo):
     
     return recomendacoes
 
-def get_smoking_recommendations(tabagismo, idade, data=None):
+def get_smoking_recommendations(tabagismo, idade):
     """Recomendações baseadas em tabagismo"""
     recomendacoes = []
     
-    # Use the robust helper function to normalize smoking data
-    try:
-        status, macos_ano = _parse_smoking_status(tabagismo, data)
-        print(f"DEBUG: tabagismo normalizado = {status}, macos_ano = {macos_ano}")
-    except Exception as e:
-        print(f"DEBUG: Erro ao normalizar tabagismo: {e}")
-        status, macos_ano = 'nunca_fumou', 0
+    # Usar helper para garantir normalização consistente
+    status, macos_ano = _parse_smoking_status(tabagismo)
     
     # Rastreamento de câncer de pulmão
     if 50 <= idade <= 80 and macos_ano >= 20:
@@ -575,4 +590,3 @@ def remove_duplicates_and_sort(recomendacoes):
     priority_order = {'alta': 1, 'media': 2, 'baixa': 3}
     unique_recomendacoes.sort(key=lambda x: priority_order.get(x.get('prioridade'), 4))
     return unique_recomendacoes
-
