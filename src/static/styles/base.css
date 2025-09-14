@@ -1,0 +1,42 @@
+/* Reset e fundamentos */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { padding: 0; margin: 0; }
+html { color-scheme: light; }
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Links */
+a { color: var(--action); text-decoration: none; }
+a:hover { color: var(--action-hover); text-decoration: underline; }
+a:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* Contêiner e layout básico */
+.container { max-width: 1120px; margin: 0 auto; padding: 0 var(--sp-6); }
+
+.page-header { border-bottom: 1px solid var(--border-color); padding: var(--sp-7) 0 var(--sp-6); }
+.page-header h1 { font-size: clamp(var(--fs-2xl), 4vw, var(--fs-3xl)); line-height: var(--lh-tight); font-weight: 600; margin: 0 0 var(--sp-3); color: var(--gray-700); }
+.page-header p { font-size: var(--fs-md); color: var(--gray-500); margin: 0; }
+
+/* Grades */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-6); }
+@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* Seções */
+.section { padding: var(--sp-7) 0; }
+
+/* Tipografia utilitária */
+.h1 { font-size: var(--fs-3xl); line-height: var(--lh-tight); font-weight: 600; }
+.h2 { font-size: var(--fs-2xl); line-height: var(--lh-tight); font-weight: 600; color: var(--gray-700); }
+.h3 { font-size: var(--fs-xl); font-weight: 600; color: var(--gray-700); }
+.lead { font-size: var(--fs-lg); color: var(--gray-600); }
+
+/* Tabela */
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border-color); text-align: left; font-size: var(--fs-sm); }
+.table th { color: var(--gray-600); font-weight: 500; }
