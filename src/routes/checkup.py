@@ -67,12 +67,29 @@ def gerar_recomendacoes():
         if 'idade' not in data or 'sexo' not in data:
             return jsonify({'error': 'Idade e sexo são obrigatórios'}), 400
         
-        idade = data['idade']
-        sexo = data['sexo']
-        comorbidades = data.get('comorbidades', [])
-        outras_comorbidades = data.get('outras_comorbidades', '')
-        historia_familiar = data.get('historia_familiar', [])
-        outras_hf = data.get('outras_hf', '')
+        # Validar e converter tipos com defaults seguros
+        try:
+            idade = int(data['idade']) if data['idade'] is not None else 0
+        except (ValueError, TypeError):
+            idade = 0
+            
+        sexo = data['sexo'] if data['sexo'] is not None else ''
+        comorbidades = data.get('comorbidades') or []
+        if not isinstance(comorbidades, list):
+            comorbidades = []
+            
+        outras_comorbidades = data.get('outras_comorbidades') or ''
+        if not isinstance(outras_comorbidades, str):
+            outras_comorbidades = ''
+            
+        historia_familiar = data.get('historia_familiar') or []
+        if not isinstance(historia_familiar, list):
+            historia_familiar = []
+            
+        outras_hf = data.get('outras_hf') or ''
+        if not isinstance(outras_hf, str):
+            outras_hf = ''
+            
         tabagismo_raw = data.get('tabagismo', {})
         
         # Normalizar dados de tabagismo logo no início para evitar inconsistências
