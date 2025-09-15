@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "routes": [
     { "src": "/checkup-intelligent", "dest": "/api/checkup-intelligent" },
     { "src": "/gerar-solicitacao-exames", "dest": "/api/gerar-solicitacao-exames" },

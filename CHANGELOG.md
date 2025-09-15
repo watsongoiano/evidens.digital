@@ -19,3 +19,12 @@
   - Adicionadas recomendações **não recomendadas** (carótidas, ovário, Vitamina D) para educação e redução de overuse.
   - AAA incluído no fluxo inteligente (homens 65–75 ever smokers).
   - Deduplicação e ordenação por prioridade.
+
+## 2025-09-15
+- vercel.json
+  - Adicionado `version: 2` e removido `builds` legado para evitar erro "Function Runtimes must have a valid version".
+  - Mantidos `routes` para mapear `/checkup-intelligent`, `/gerar-solicitacao-exames`, `/gerar-receita-vacinas`.
+  - Declarado `functions.runtime` para Python 3.11 em `api/**/*.py`.
+- API serverless
+  - Endpoints de saúde `/health` para cada função.
+  - Normalização dos campos e `referencia_html` nas recomendações.
