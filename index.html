@@ -515,7 +515,14 @@
             // Verificar se há alertas
             const alerts = recommendations.alerts || [];
             const recs = recommendations.recommendations || recommendations;
-            
+            // Aceita as variações "laboratorio" (sem "al") e "laboratorial" como categorias laboratoriais equivalentes
+            const LAB_CATEGORY_VALUES = ['laboratorial', 'laboratorio'];
+            const isLaboratoryCategory = categoria => {
+                if (!categoria) return false;
+                const normalizedCategory = String(categoria).trim().toLowerCase();
+                return LAB_CATEGORY_VALUES.includes(normalizedCategory);
+            };
+
             // Salvar recomendações para uso posterior
             lastRecommendations = recs;
             
@@ -530,10 +537,10 @@
             
             recs.forEach(item => {
                 let category = 'Outras Recomendações';
-                
+
                 if (item.categoria && item.categoria.includes('vacina')) {
                     category = 'Vacinas';
-                } else if (item.titulo.toLowerCase().includes('mamografia') || 
+                } else if (item.titulo.toLowerCase().includes('mamografia') ||
                           item.titulo.toLowerCase().includes('colonoscopia') ||
                           item.titulo.toLowerCase().includes('citologia') ||
                           item.titulo.toLowerCase().includes('psa') ||
@@ -545,7 +552,7 @@
                           item.titulo.toLowerCase().includes('eletrocardiograma') ||
                           item.titulo.toLowerCase().includes('fundoscopia')) {
                     category = 'Exames de Imagem';
-                } else if (item.categoria === 'laboratorial' ||
+                } else if (isLaboratoryCategory(item.categoria) ||
                           item.titulo.toLowerCase().includes('hba1c') ||
                           item.titulo.toLowerCase().includes('creatinina') ||
                           item.titulo.toLowerCase().includes('perfil') ||
