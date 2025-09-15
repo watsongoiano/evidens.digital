@@ -293,13 +293,38 @@ def handle_intelligent_checkup():
         # Generate recommendations
         recommendations = generate_recommendations(patient_data, risk_classification['level'])
 
+        # Normalize recommendations to include 'titulo' and 'categoria'.
+        normalized = []
+        for r in recommendations:
+            # Determine title; fallback to name if titulo missing
+            titulo = r.get('titulo') or r.get('name') or ''
+            # Raw category may be under 'categoria' or 'category'
+            cat_raw = (r.get('categoria') or r.get('category') or '').lower()
+            # Heuristic mapping: categorize by keywords
+            if 'vacina' in cat_raw:
+                categoria = 'vacina'
+            elif 'imagem' in cat_raw:
+                categoria = 'imagem'
+            elif 'rastreamento' in cat_raw or any(
+                k in titulo.lower() for k in ['mamografia', 'colonoscopia', 'citologia', 'psa', 'tomografia']
+            ):
+                categoria = 'rastreamento'
+            elif 'laborator' in cat_raw or any(
+                k in titulo.lower() for k in ['hba1c', 'glicemia', 'colesterol', 'hdl', 'ldl']
+            ):
+                categoria = 'laboratorial'
+            else:
+                categoria = 'outras'
+            # Append normalized entry
+            normalized.append({**r, 'titulo': titulo, 'categoria': categoria})
+
         # Build response
         response_data = {
             'success': True,
             'prevent_risk': risk_result,
             'risk_classification': risk_classification,
-            'recommendations': recommendations,
-            'total_recommendations': len(recommendations),
+            'recommendations': normalized,
+            'total_recommendations': len(normalized),
         }
 
         resp = jsonify(response_data)
