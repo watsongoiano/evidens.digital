@@ -183,12 +183,17 @@
         .feature-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border-color: #3498db;
         }
 
-        .feature-card.active {
-            border-color: #3498db;
+        .feature-card:hover:not(.disabled) {
             background: linear-gradient(135deg, #a8b8e6 0%, #c3d0f0 100%);
             color: #2c3e50;
+        }
+
+        .feature-card.disabled:hover {
+            transform: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
         .dev-indicator {
@@ -386,7 +391,7 @@
             <p>Access up-to-date, peer-reviewed clinical content</p>
         </div>
         
-        <a href="/intelligent-tools" class="feature-card active">
+        <a href="/intelligent-tools" class="feature-card">
             <div class="feature-icon">💻</div>
             <h3>Intelligent Tools</h3>
             <p>Use advanced tools to support clinical decision-making</p>
