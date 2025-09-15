@@ -1,4 +1,5 @@
 from flask import Flask, request, make_response
+from src.utils.cors import sanitize_private_network_header
 import json
 
 app = Flask(__name__)
@@ -11,7 +12,7 @@ def _corsify(resp):
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-    return resp
+    return sanitize_private_network_header(resp)
 
 
 @app.route('/', methods=['POST', 'OPTIONS'])

@@ -1,5 +1,9 @@
 
 # Patches applied (2025-08-26T12:12:23)
+
+## 2025-09-16
+- Segurança: Remoção explícita do cabeçalho `Access-Control-Allow-Private-Network` em todas as respostas Flask para mitigar o comportamento inseguro introduzido no Flask-CORS 4.0.1.
+- Testes de fumaça verificam a ausência do cabeçalho de rede privada nas rotas principais.
 - index.html
   - Valores normalizados de tabagismo (`fumante_atual` / `ex_fumante`).
   - Seletor de País (BR/EUA) que envia `pais` no payload.

@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 import datetime
+from src.utils.cors import sanitize_private_network_header
 
 app = Flask(__name__)
 
@@ -29,11 +30,11 @@ def get_analytics_stats():
         
         response = jsonify(stats)
         response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return sanitize_private_network_header(response)
     except Exception as e:
         error_response = jsonify({'error': str(e)})
         error_response.headers.add('Access-Control-Allow-Origin', '*')
-        return error_response, 500
+        return sanitize_private_network_header(error_response), 500
 
 @app.route('/api/analytics/full', methods=['GET', 'OPTIONS'])
 def get_full_analytics():
@@ -55,11 +56,11 @@ def get_full_analytics():
         
         response = jsonify(full_stats)
         response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return sanitize_private_network_header(response)
     except Exception as e:
         error_response = jsonify({'error': str(e)})
         error_response.headers.add('Access-Control-Allow-Origin', '*')
-        return error_response, 500
+        return sanitize_private_network_header(error_response), 500
 
 def handler(req):
     with app.test_request_context(path=req.path, method=req.method, 
