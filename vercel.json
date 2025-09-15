@@ -6,6 +6,10 @@
       "use": "@vercel/static"
     },
     {
+      "src": "intelligent-tools.html",
+      "use": "@vercel/static"
+    },
+    {
       "src": "api/checkup-intelligent.py",
       "use": "@vercel/python"
     },
@@ -30,6 +34,10 @@
     {
       "src": "/api/gerar-receita-vacinas",
       "dest": "/api/gerar-receita-vacinas.py"
+    },
+    {
+      "src": "/intelligent-tools",
+      "dest": "/intelligent-tools.html"
     },
     {
       "src": "/(.*)",
