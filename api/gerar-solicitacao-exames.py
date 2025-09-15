@@ -2,6 +2,9 @@ from flask import Flask, request, make_response
 import json
 
 app = Flask(__name__)
+@app.route('/health', methods=['GET'])
+def health():
+    return make_response('ok', 200)
 
 
 def _corsify(resp):

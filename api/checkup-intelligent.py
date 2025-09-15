@@ -11,6 +11,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 app = Flask(__name__)
+@app.route('/health', methods=['GET'])
+def health():
+    return make_response('ok', 200)
 
 
 def _corsify(resp):
@@ -157,85 +160,145 @@ def get_risk_classification(risk_10yr):
 def generate_recommendations(patient_data, risk_level):
     """
     Generate medical recommendations based on patient data and risk level.
-    Assumes ``patient_data['age']`` has been sanitized to an integer.
+    Produces items with keys: titulo, descricao, categoria, prioridade, referencia
     """
     recommendations = []
-    # Use sanitized age value; default to 0 if missing
+    # Normalize fields
     age_val = patient_data.get('age', 0)
     try:
         age = int(age_val) if age_val not in (None, '') else 0
     except (ValueError, TypeError):
         age = 0
-    sex = patient_data.get('sex', '').lower()
+    sex = (patient_data.get('sex') or '').lower()
 
-    # Basic lab tests
-    recommendations.extend([
-        {
-            'category': 'Exames Laboratoriais',
-            'name': 'Glicemia de jejum',
-            'priority': 'ALTA',
-            'reference': 'ADA 2024',
-        },
-        {
-            'category': 'Exames Laboratoriais',
-            'name': 'Colesterol total e frações',
-            'priority': 'ALTA',
-            'reference': 'AHA/ACC 2019',
-        },
-    ])
+    def add_unique(rec):
+        t = (rec.get('titulo') or '').strip().lower()
+        if not t:
+            return
+        if any((r.get('titulo') or '').strip().lower() == t for r in recommendations):
+            return
+        recommendations.append(rec)
 
-    # Age-specific recommendations
-    if age >= 50:
-        recommendations.append({
-            'category': 'Rastreamento de Câncer',
-            'name': 'Colonoscopia de Rastreio',
-            'priority': 'ALTA',
-            'reference': 'USPSTF 2021',
+    # Básicos laboratoriais
+    add_unique({
+        'titulo': 'Glicemia de jejum',
+        'descricao': 'ADA 2024: Rastreamento universal ≥35 anos',
+        'categoria': 'laboratorio',
+        'prioridade': 'alta',
+        'referencia': 'ADA 2024',
+    })
+    add_unique({
+        'titulo': 'Colesterol total e frações, soro',
+        'descricao': 'Colesterol total, HDL, LDL e triglicerídeos',
+        'categoria': 'laboratorio',
+        'prioridade': 'alta',
+        'referencia': 'AHA/ACC 2025',
+    })
+
+    # ECG
+    add_unique({
+        'titulo': 'Eletrocardiograma de repouso',
+        'descricao': 'ECG de 12 derivações - ≥40 anos ou com comorbidades',
+        'categoria': 'imagem',
+        'prioridade': 'alta',
+        'referencia': 'SBC 2019 / AHA/ACC 2019',
+    })
+
+    # Sexo/Idade
+    if sex in ['feminino', 'female'] and 40 <= age <= 74:
+        add_unique({
+            'titulo': 'Mamografia Digital - Bilateral',
+            'descricao': 'Mamografia bienal (40-74 anos)',
+            'categoria': 'imagem',
+            'prioridade': 'alta',
+            'referencia': 'USPSTF 2024 Grau B',
         })
-
-    # Sex-specific recommendations
-    if sex in ['feminino', 'female'] and age >= 40:
-        recommendations.append({
-            'category': 'Rastreamento de Câncer',
-            'name': 'Mamografia Digital Bilateral',
-            'priority': 'ALTA',
-            'reference': 'USPSTF 2016',
+    if sex in ['feminino', 'female'] and 21 <= age <= 65:
+        add_unique({
+            'titulo': 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular',
+            'descricao': 'Papanicolaou/HPV a cada 3 anos (21-65 anos)',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'USPSTF Grau A',
         })
-
     if sex in ['masculino', 'male'] and age >= 50:
-        recommendations.append({
-            'category': 'Rastreamento de Câncer',
-            'name': 'PSA total, soro',
-            'priority': 'MÉDIA',
-            'reference': 'USPSTF 2018',
+        add_unique({
+            'titulo': 'PSA total, soro',
+            'descricao': 'Rastreamento de câncer de próstata (≥50 anos)',
+            'categoria': 'laboratorio',
+            'prioridade': 'media',
+            'referencia': 'USPSTF 2018 Grau C',
         })
 
-    # Risk-based recommendations
-    if risk_level in ['Risco Intermediário', 'Alto Risco']:
-        recommendations.extend([
-            {
-                'category': 'Exames Laboratoriais',
-                'name': 'Anti-HIV 1 e 2, soro',
-                'priority': 'ALTA',
-                'reference': 'CDC 2021',
-            },
-            {
-                'category': 'Exames Laboratoriais',
-                'name': 'HbA1c, soro',
-                'priority': 'ALTA',
-                'reference': 'ADA 2024',
-            },
-        ])
+    # Colonoscopia (45-75)
+    if 45 <= age <= 75:
+        add_unique({
+            'titulo': 'Colonoscopia de Rastreio com ou sem biópsia',
+            'descricao': 'Colonoscopia a cada 10 anos (45-75 anos)',
+            'categoria': 'imagem',
+            'prioridade': 'alta',
+            'referencia': 'USPSTF 2021 Grau B',
+        })
 
-    # Vaccines
-    recommendations.extend([
-        {
-            'category': 'Vacinas',
-            'name': 'Vacina Influenza Tetravalente',
-            'priority': 'ALTA',
-            'reference': 'SBIm/ANVISA 2024',
-        },
-    ])
+    # Vacinas
+    add_unique({
+        'titulo': 'Vacina Influenza Tetravalente',
+        'descricao': 'Dose anual. Aplicar dose única IM anualmente.',
+        'categoria': 'vacina',
+        'prioridade': 'alta',
+        'referencia': 'SBIm/ANVISA 2024',
+    })
+
+    if age <= 45:
+        prioridade_hpv = 'alta' if age <= 26 else 'media'
+        add_unique({
+            'titulo': 'Gardasil 9® (Vacina Papilomavírus Humano 9-Valente)',
+            'descricao': '3 doses. Aplicar 0, 2 e 6 meses.',
+            'categoria': 'vacina',
+            'prioridade': prioridade_hpv,
+            'referencia': 'SBIm/ANVISA 2024',
+        })
+
+    add_unique({
+        'titulo': 'Hepatite B (VHB)',
+        'descricao': 'Esquema de 3 doses (0, 1, 6 meses) em não vacinados.',
+        'categoria': 'vacina',
+        'prioridade': 'alta',
+        'referencia': 'SBIm/ANVISA 2024',
+    })
+
+    if age >= 50:
+        add_unique({
+            'titulo': 'VPC15 (Vaxneuvance®) ou VPC13, 0,5ml',
+            'descricao': '1 dose. Pode ser coadministrada com Shingrix®, Efluelda® e Arexvy®',
+            'categoria': 'vacina',
+            'prioridade': 'alta',
+            'referencia': 'SBIm/ANVISA 2024',
+        })
+        add_unique({
+            'titulo': 'VPP23, 0,5ml',
+            'descricao': '1 dose 6 meses após VPC15/VPC13; reforço após 5 anos',
+            'categoria': 'vacina',
+            'prioridade': 'alta',
+            'referencia': 'SBIm/ANVISA 2024',
+        })
+
+    # Risco intermediário/alto: biomarcadores adicionais
+    if risk_level in ['Risco Intermediário', 'Alto Risco']:
+        add_unique({
+            'titulo': 'Anti-HIV 1 e 2, soro',
+            'descricao': 'Teste para detecção de HIV',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'MS 2024 / USPSTF',
+        })
+        add_unique({
+            'titulo': 'HbA1c, soro',
+            'descricao': 'Hemoglobina glicada',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'ADA 2024',
+        })
 
     return recommendations
 
@@ -290,33 +353,59 @@ def handle_intelligent_checkup():
         risk_result = calculate_prevent_risk(patient_data)
         risk_classification = get_risk_classification(risk_result['risk_10_year'])
 
-        # Generate recommendations
-        recommendations = generate_recommendations(patient_data, risk_classification['level'])
+        # Generate and normalize recommendations
+        raw_recs = generate_recommendations(patient_data, risk_classification['level'])
 
-        # Normalize recommendations to include 'titulo' and 'categoria'.
+        # Build reference links using shared util if available
+        try:
+            sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+            from src.utils.reference_links import build_reference_links, build_reference_html  # type: ignore
+        except Exception:
+            build_reference_links = None
+            build_reference_html = None
+
         normalized = []
-        for r in recommendations:
-            # Determine title; fallback to name if titulo missing
-            titulo = r.get('titulo') or r.get('name') or ''
-            # Raw category may be under 'categoria' or 'category'
+        for r in raw_recs:
+            # Map keys
+            titulo = (r.get('titulo') or r.get('name') or '').strip()
+            # Categoria
             cat_raw = (r.get('categoria') or r.get('category') or '').lower()
-            # Heuristic mapping: categorize by keywords
             if 'vacina' in cat_raw:
                 categoria = 'vacina'
             elif 'imagem' in cat_raw:
                 categoria = 'imagem'
-            elif 'rastreamento' in cat_raw or any(
-                k in titulo.lower() for k in ['mamografia', 'colonoscopia', 'citologia', 'psa', 'tomografia']
-            ):
+            elif 'rastreamento' in cat_raw or any(k in titulo.lower() for k in ['mamografia','colonoscopia','citologia','psa','tomografia']):
                 categoria = 'rastreamento'
-            elif 'laborator' in cat_raw or any(
-                k in titulo.lower() for k in ['hba1c', 'glicemia', 'colesterol', 'hdl', 'ldl']
-            ):
+            elif 'laborator' in cat_raw or any(k in titulo.lower() for k in ['hba1c','glicemia','colesterol','hdl','ldl']):
                 categoria = 'laboratorial'
             else:
-                categoria = 'outras'
-            # Append normalized entry
-            normalized.append({**r, 'titulo': titulo, 'categoria': categoria})
+                # Fallback heuristic by keywords
+                categoria = 'laboratorio' if any(k in titulo.lower() for k in ['glicemia','colesterol','hiv','hbv','hcv','hba1c','psa']) else 'outras'
+
+            prioridade = (r.get('prioridade') or r.get('priority') or 'media').strip().lower()
+            # Normalize to alta|media|baixa
+            if prioridade not in ['alta','media','baixa']:
+                prioridade = 'media'
+            descricao = r.get('descricao') or r.get('description') or ''
+            referencia = r.get('referencia') or r.get('reference') or 'USPSTF/ADA/KDIGO/CDC'
+
+            rec = {
+                'titulo': titulo,
+                'descricao': descricao,
+                'categoria': categoria,
+                'prioridade': prioridade,
+                'referencia': referencia,
+            }
+            # Enrich references
+            try:
+                if build_reference_links and build_reference_html:
+                    links = build_reference_links(titulo, referencia)
+                    if links:
+                        rec['referencias'] = links
+                        rec['referencia_html'] = build_reference_html(links)
+            except Exception:
+                pass
+            normalized.append(rec)
 
         # Build response
         response_data = {
