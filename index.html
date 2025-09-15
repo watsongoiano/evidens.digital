@@ -176,6 +176,10 @@
             position: relative;
         }
 
+        .feature-card.disabled {
+            cursor: not-allowed;
+        }
+
         .feature-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
@@ -375,8 +379,8 @@
 
     <!-- Features Section -->
     <section class="features">
-        <div class="feature-card">
-            <div class="dev-indicator">🚧 Em Desenvolvimento</div>
+        <div class="feature-card disabled">
+            <div class="dev-indicator">Em Desenvolvimento</div>
             <div class="feature-icon">🛡️</div>
             <h3>Trusted Information</h3>
             <p>Access up-to-date, peer-reviewed clinical content</p>
@@ -388,8 +392,8 @@
             <p>Use advanced tools to support clinical decision-making</p>
         </a>
         
-        <div class="feature-card">
-            <div class="dev-indicator">🚧 Em Desenvolvimento</div>
+        <div class="feature-card disabled">
+            <div class="dev-indicator">Em Desenvolvimento</div>
             <div class="feature-icon">💚</div>
             <h3>Improved Outcomes</h3>
             <p>Apply the latest evidence to improve patient care</p>
