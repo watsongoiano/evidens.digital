@@ -341,5 +341,13 @@ def handle_intelligent_checkup():
         return _corsify(error_response), 500
 
 
+@app.route('/', methods=['POST', 'OPTIONS'])
+def root_checkup():
+    """
+    Allow posting to the function root ("/api/checkup-intelligent") on Vercel.
+    This mirrors the same behavior as posting to "/checkup-intelligent".
+    """
+    return handle_intelligent_checkup()
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=3000)
