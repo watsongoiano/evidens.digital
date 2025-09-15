@@ -221,10 +221,23 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         # Evita duplicados pelo título (case-insensitive) dentro desta função
         title = (rec.get('titulo') or '').strip().lower()
         if not title:
+            print(f"Recomendação ignorada: título vazio - {rec}")
             return
-        if any((r.get('titulo') or '').strip().lower() == title for r in recommendations):
+        
+        # Verificar se já existe uma recomendação com título similar
+        existing_titles = [(r.get('titulo') or '').strip().lower() for r in recommendations]
+        if title in existing_titles:
+            print(f"Recomendação duplicada ignorada: {title}")
             return
+            
+        # Garantir que campos obrigatórios estão presentes
+        if 'subtitulo' not in rec or rec['subtitulo'] is None:
+            rec['subtitulo'] = ''
+        if 'grau_evidencia' not in rec or rec['grau_evidencia'] is None:
+            rec['grau_evidencia'] = ''
+            
         recommendations.append(rec)
+        print(f"Recomendação adicionada: {title}")
     
     # Exames laboratoriais básicos
     _add_rec({
@@ -506,10 +519,10 @@ def generate_intelligent_recommendations():
         # Garantir chaves opcionais presentes em todas as recomendações
         try:
             for rec in response.get('recommendations', []) or []:
-                if 'subtitulo' not in rec:
-                    rec['subtitulo'] = None
-                if 'grau_evidencia' not in rec:
-                    rec['grau_evidencia'] = None
+                if 'subtitulo' not in rec or rec['subtitulo'] is None:
+                    rec['subtitulo'] = ''
+                if 'grau_evidencia' not in rec or rec['grau_evidencia'] is None:
+                    rec['grau_evidencia'] = ''
         except Exception:
             pass
 
@@ -681,11 +694,28 @@ def gerar_solicitacao_exames():
         for rec in recommendations:
             try:
                 categoria = (rec.get('categoria') or '').lower()
-                if categoria == 'laboratorial' or categoria == 'laboratorio':
+                titulo = (rec.get('titulo') or '').lower()
+                
+                # Categorizar exames laboratoriais
+                if (categoria in ['laboratorial', 'laboratorio'] or
+                    'soro' in titulo or 'sangue' in titulo or 'urina' in titulo or
+                    'jejum' in titulo or 'glicemia' in titulo or 'colesterol' in titulo or
+                    'hba1c' in titulo or 'creatinina' in titulo or 'hiv' in titulo or
+                    'hepatite' in titulo or 'totg' in titulo):
                     exames_laboratoriais.append(rec)
-                elif categoria in ['rastreamento', 'imagem']:
+                    print(f"Exame laboratorial adicionado: {rec.get('titulo')}")
+                    
+                # Categorizar exames de imagem e rastreamento
+                elif (categoria in ['rastreamento', 'imagem'] or
+                      'mamografia' in titulo or 'colonoscopia' in titulo or 
+                      'eletrocardiograma' in titulo or 'ultrassom' in titulo or
+                      'tomografia' in titulo or 'densitometria' in titulo):
                     exames_imagem.append(rec)
-            except Exception:
+                    print(f"Exame de imagem/rastreamento adicionado: {rec.get('titulo')}")
+                else:
+                    print(f"Exame não categorizado: {rec.get('titulo')} - categoria: {categoria}")
+            except Exception as e:
+                print(f"Erro ao processar recomendação: {e}")
                 continue
 
         exames = exames_laboratoriais + exames_imagem

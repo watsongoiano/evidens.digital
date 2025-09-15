@@ -547,7 +547,7 @@
                           title.includes('eletrocardiograma') ||
                           title.includes('fundoscopia')) {
                     category = 'Exames de Imagem';
-                } else if (cat === 'laboratorio' ||
+                } else if (cat === 'laboratorio' || cat === 'laboratorial' ||
                           title.includes('hba1c') ||
                           title.includes('creatinina') ||
                           title.includes('perfil') ||
@@ -571,7 +571,11 @@
                           title.includes('egfr') ||
                           title.includes('albumina') ||
                           title.includes('vdrl') ||
-                          title.includes('hbsag')) {
+                          title.includes('hbsag') ||
+                          title.includes('soro') ||
+                          title.includes('sangue') ||
+                          title.includes('urina') ||
+                          title.includes('jejum')) {
                     category = 'Exames Laboratoriais';
                 }
                 
@@ -597,8 +601,8 @@
                     categories[categoryName].forEach((rec, index) => {
                         const statusClass = rec.status ? `status-${rec.status}` : '';
                         const cardClass = rec.status === 'overdue' ? 'overdue' : rec.status === 'recent' ? 'recent' : '';
-                        const subtitulo = rec && rec.subtitulo ? rec.subtitulo : '';
-                        const grau = rec && rec.grau_evidencia ? rec.grau_evidencia : '';
+                        const subtitulo = rec && rec.subtitulo && rec.subtitulo !== 'undefined' && rec.subtitulo !== 'null' ? rec.subtitulo : '';
+                        const grau = rec && rec.grau_evidencia && rec.grau_evidencia !== 'undefined' && rec.grau_evidencia !== 'null' ? rec.grau_evidencia : '';
                         
                         html += `
                             <div class="recommendation-card ${cardClass}" data-rec-id="${rec.titulo}">
