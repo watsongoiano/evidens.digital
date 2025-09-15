@@ -757,6 +757,12 @@
             const container = document.getElementById('recommendations');
             container.innerHTML = '';
 
+            // Normaliza categorias para aceitar "laboratorio" (sem "al") como sinônimo de "laboratorial"
+            const normalizedRecommendations = recommendations.map(rec => ({
+                ...rec,
+                categoria: rec.categoria === 'laboratorial' ? 'laboratorio' : rec.categoria
+            }));
+
             const categories = {
                 'laboratorio': '🧪 Exames Laboratoriais',
                 'imagem': '📷 Exames de Imagem',
@@ -765,13 +771,7 @@
             };
 
             Object.keys(categories).forEach(category => {
-                const categoryRecs = recommendations.filter(rec => {
-                    if (category === 'laboratorio') {
-                        // Aceita explicitamente tanto 'laboratorial' quanto 'laboratorio'
-                        return rec.categoria === 'laboratorial' || rec.categoria === 'laboratorio';
-                    }
-                    return rec.categoria === category;
-                });
+                const categoryRecs = normalizedRecommendations.filter(rec => rec.categoria === category);
                 if (categoryRecs.length > 0) {
                     const categoryDiv = document.createElement('div');
                     categoryDiv.innerHTML = `<h3 style="color: #2d3748; margin: 20px 0 15px 0;">${categories[category]}</h3>`;

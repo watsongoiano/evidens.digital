@@ -1167,9 +1167,14 @@
             // Verificar se há alertas
             const alerts = recommendations.alerts || [];
             const recs = recommendations.recommendations || recommendations;
-            
+            // Normaliza categorias para aceitar "laboratorio" (sem "al") como sinônimo de "laboratorial"
+            const normalizedRecs = recs.map(item => ({
+                ...item,
+                categoria: item.categoria === 'laboratorio' ? 'laboratorial' : item.categoria
+            }));
+
             // Salvar recomendações para uso posterior
-            lastRecommendations = recs;
+            lastRecommendations = normalizedRecs;
             
             // Organizar recomendações por categoria
             const categories = {
@@ -1180,7 +1185,7 @@
                 'Outras Recomendações': []
             };
             
-            recs.forEach(item => {
+            normalizedRecs.forEach(item => {
                 let category = 'Outras Recomendações';
 
                 if (item.categoria && item.categoria.includes('vacina')) {
@@ -1197,8 +1202,7 @@
                           item.titulo.toLowerCase().includes('eletrocardiograma') ||
                           item.titulo.toLowerCase().includes('fundoscopia')) {
                     category = 'Exames de Imagem';
-                // Aceita explicitamente o valor "laboratorio" (sem "al") além de "laboratorial"
-                } else if ((item.categoria === 'laboratorial' || item.categoria === 'laboratorio') ||
+                } else if (item.categoria === 'laboratorial' ||
                           item.titulo.toLowerCase().includes('hba1c') ||
                           item.titulo.toLowerCase().includes('creatinina') ||
                           item.titulo.toLowerCase().includes('perfil') ||
