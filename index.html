@@ -41,6 +41,9 @@
             font-weight: 300;
             color: #2c3e50;
             text-decoration: none;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .nav-links {
@@ -83,46 +86,7 @@
             margin-right: auto;
         }
 
-        .search-container {
-            max-width: 600px;
-            margin: 0 auto 4rem;
-            position: relative;
-        }
 
-        .search-input {
-            width: 100%;
-            padding: 1rem 1.5rem;
-            font-size: 1.1rem;
-            border: 2px solid #e0e6ed;
-            border-radius: 50px;
-            outline: none;
-            transition: all 0.3s;
-            background: white;
-        }
-
-        .search-input:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-        }
-
-        .search-btn {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #2c3e50;
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .search-btn:hover {
-            background: #34495e;
-        }
 
         .features {
             display: grid;
@@ -388,9 +352,11 @@
     <!-- Header Navigation -->
     <header class="header">
         <nav class="nav">
-            <a href="#" class="logo">evidēns</a>
             <div class="nav-links">
                 <a href="#about">About</a>
+            </div>
+            <a href="#" class="logo">evidēns</a>
+            <div class="nav-links">
                 <a href="#contact">Contact</a>
             </div>
         </nav>
@@ -400,11 +366,6 @@
     <section class="hero">
         <h1>Clinical decision support</h1>
         <p>Evidence-based resources for healthcare professionals</p>
-        
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="Search clinical guidelines, topics, etc.">
-            <button class="search-btn">Search</button>
-        </div>
     </section>
 
     <!-- Features Section -->
