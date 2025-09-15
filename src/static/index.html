@@ -817,7 +817,7 @@
 
                 const resp = await fetch('/api/gerar-solicitacao-exames', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'text/html' },
                     body: JSON.stringify({
                         recommendations: active,
                         patient_data: patientData,
@@ -842,8 +842,48 @@
             }
         }
 
-        function generateVaccineReceipt() {
-            alert('Funcionalidade de receita de vacinas em desenvolvimento. Endpoints atualizados para /api/gerar-receita-vacinas');
+        async function generateVaccineReceipt() {
+            try {
+                const active = Array.isArray(lastRecommendations) ? lastRecommendations : [];
+                if (!active || active.length === 0) {
+                    alert('Gere as recomendações primeiro.');
+                    return;
+                }
+
+                const nome = prompt('Nome do paciente:') || 'Paciente';
+                const idadeEl = document.getElementById('idade');
+                const sexoEl = document.getElementById('sexo');
+                const patientData = {
+                    nome,
+                    idade: idadeEl && idadeEl.value ? parseInt(idadeEl.value) : undefined,
+                    sexo: sexoEl ? sexoEl.value : undefined,
+                };
+
+                const resp = await fetch('/api/gerar-receita-vacinas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'text/html' },
+                    body: JSON.stringify({
+                        recommendations: active,
+                        patient_data: patientData,
+                    })
+                });
+
+                if (!resp.ok) {
+                    throw new Error(`Erro ao gerar receita de vacinas: ${resp.status}`);
+                }
+
+                const html = await resp.text();
+                const newWindow = window.open('', '_blank');
+                if (newWindow) {
+                    newWindow.document.write(html);
+                    newWindow.document.close();
+                } else {
+                    alert('Não foi possível abrir nova janela. Verifique se pop-ups estão bloqueados.');
+                }
+            } catch (error) {
+                console.error('Erro ao gerar receita de vacinas:', error);
+                alert('Erro ao gerar receita de vacinas: ' + (error && error.message ? error.message : error));
+            }
         }
 
         function generateFullReport() {

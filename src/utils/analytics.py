@@ -1,12 +1,20 @@
 import json
 import os
+import tempfile
 from datetime import datetime
 from functools import wraps
 from flask import request, g
 
 class Analytics:
     def __init__(self, data_file='analytics_data.json'):
-        self.data_file = os.path.join('/tmp', data_file)
+        # Store analytics in the system temp directory (cross-platform)
+        temp_dir = tempfile.gettempdir()
+        try:
+            os.makedirs(temp_dir, exist_ok=True)
+        except Exception:
+            # Fallback to current working directory if temp isn't writable
+            temp_dir = os.getcwd()
+        self.data_file = os.path.join(temp_dir, data_file)
         self.data = self.load_data()
     
     def load_data(self):
@@ -35,6 +43,10 @@ class Analytics:
         """Salva dados de analytics no arquivo JSON"""
         self.data['last_updated'] = datetime.now().isoformat()
         try:
+            # Ensure directory exists
+            dirpath = os.path.dirname(self.data_file)
+            if dirpath:
+                os.makedirs(dirpath, exist_ok=True)
             with open(self.data_file, 'w', encoding='utf-8') as f:
                 json.dump(self.data, f, indent=2, ensure_ascii=False)
         except Exception as e:

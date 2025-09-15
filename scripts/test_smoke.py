@@ -53,7 +53,8 @@ def main():
         'sexo': 'masculino',
         'pais_guideline': 'BR'
     }
-    r1 = post_json(client, '/checkup-intelligent', payload_25m)
+    API = '/api'
+    r1 = post_json(client, f'{API}/checkup-intelligent', payload_25m)
     assert_true(r1.status_code == 200, f"/checkup-intelligent 25M HTTP {r1.status_code}")
     assert_no_private_network_header(r1, '/checkup-intelligent (25M)')
     data1 = r1.get_json() or {}
@@ -73,7 +74,7 @@ def main():
         'sexo': 'masculino',
         'pais_guideline': 'BR'
     }
-    r2 = post_json(client, '/checkup-intelligent', payload_55m)
+    r2 = post_json(client, f'{API}/checkup-intelligent', payload_55m)
     assert_true(r2.status_code == 200, f"/checkup-intelligent 55M HTTP {r2.status_code}")
     assert_no_private_network_header(r2, '/checkup-intelligent (55M)')
     data2 = r2.get_json() or {}
@@ -89,7 +90,7 @@ def main():
     doc_payload = {'recommendations': recs2, 'patient_data': patient_doc}
 
     # 3) Exams request: JSON
-    r3_json = post_json(client, '/gerar-solicitacao-exames', doc_payload,
+    r3_json = post_json(client, f'{API}/gerar-solicitacao-exames', doc_payload,
                         headers={'Accept': 'application/json'})
     assert_true(r3_json.status_code == 200, f"/gerar-solicitacao-exames JSON HTTP {r3_json.status_code}")
     assert_true((r3_json.content_type or '').startswith('application/json'),
@@ -100,7 +101,7 @@ def main():
                 "JSON response missing 'html' for /gerar-solicitacao-exames")
 
     # 4) Exams request: HTML
-    r3_html = post_json(client, '/gerar-solicitacao-exames', doc_payload,
+    r3_html = post_json(client, f'{API}/gerar-solicitacao-exames', doc_payload,
                         headers={'Accept': 'text/html'})
     assert_true(r3_html.status_code == 200, f"/gerar-solicitacao-exames HTML HTTP {r3_html.status_code}")
     assert_true((r3_html.content_type or '').startswith('text/html'),
@@ -110,7 +111,7 @@ def main():
     assert_no_private_network_header(r3_html, '/gerar-solicitacao-exames (HTML)')
 
     # 5) Vaccine prescription: JSON
-    r4_json = post_json(client, '/gerar-receita-vacinas', doc_payload,
+    r4_json = post_json(client, f'{API}/gerar-receita-vacinas', doc_payload,
                         headers={'Accept': 'application/json'})
     assert_true(r4_json.status_code == 200, f"/gerar-receita-vacinas JSON HTTP {r4_json.status_code}")
     assert_true((r4_json.content_type or '').startswith('application/json'),
@@ -121,7 +122,7 @@ def main():
                 "JSON response missing 'html' for /gerar-receita-vacinas")
 
     # 6) Vaccine prescription: HTML
-    r4_html = post_json(client, '/gerar-receita-vacinas', doc_payload,
+    r4_html = post_json(client, f'{API}/gerar-receita-vacinas', doc_payload,
                         headers={'Accept': 'text/html'})
     assert_true(r4_html.status_code == 200, f"/gerar-receita-vacinas HTML HTTP {r4_html.status_code}")
     assert_true((r4_html.content_type or '').startswith('text/html'),

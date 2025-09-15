@@ -18,7 +18,7 @@ CORS(app)
 register_private_network_sanitizer(app)
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(checkup_bp, url_prefix='/api')
-app.register_blueprint(checkup_intelligent_bp)
+app.register_blueprint(checkup_intelligent_bp, url_prefix='/api')
 app.register_blueprint(database_api_bp)
 
 # Database configuration
