@@ -14,6 +14,7 @@ app = Flask(__name__)
 
 
 def _corsify(resp):
+    """Add basic CORS headers to a Flask response object."""
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
@@ -22,8 +23,8 @@ def _corsify(resp):
 
 def parse_date_ymd(date_str):
     """
-    Parse date string in multiple formats: YYYY-MM-DD, DD/MM/YYYY, YYYY/MM/DD
-    Returns datetime object or None if invalid
+    Parse date string in multiple formats: YYYY-MM-DD, DD/MM/YYYY, YYYY/MM/DD.
+    Returns a datetime object or None if invalid.
     """
     if not date_str or date_str is None:
         return None
@@ -60,24 +61,38 @@ def parse_date_ymd(date_str):
 
 def calculate_prevent_risk(patient_data):
     """
-    Calculate PREVENT 2024 cardiovascular risk
+    Calculate PREVENT 2024 cardiovascular risk.
+
+    Attempts to cast the age to float; if conversion fails, defaults to 0.0.
     """
     try:
         # Extract patient data
-        age = float(patient_data.get('age', 0))
+        age_raw = patient_data.get('age', 0)
+        try:
+            age = float(age_raw) if age_raw not in (None, '') else 0.0
+        except (ValueError, TypeError):
+            age = 0.0
         sex = patient_data.get('sex', '').lower()
 
-        # Clinical parameters
-        sbp = float(patient_data.get('systolic_bp', 120))
-        total_chol = float(patient_data.get('total_cholesterol', 200))
-        hdl_chol = float(patient_data.get('hdl_cholesterol', 50))
+        # Clinical parameters with safe conversion
+        try:
+            sbp = float(patient_data.get('systolic_bp', 120))
+        except (ValueError, TypeError):
+            sbp = 120.0
+        try:
+            total_chol = float(patient_data.get('total_cholesterol', 200))
+        except (ValueError, TypeError):
+            total_chol = 200.0
+        try:
+            hdl_chol = float(patient_data.get('hdl_cholesterol', 50))
+        except (ValueError, TypeError):
+            hdl_chol = 50.0
 
         # Calculate non-HDL cholesterol
         non_hdl_chol = total_chol - hdl_chol
 
         # PREVENT 2024 coefficients (simplified version)
-        if sex == 'masculino' or sex == 'male':
-            # Male coefficients
+        if sex in ['masculino', 'male']:
             coef_age = 0.0654
             coef_sbp = 0.0089
             coef_non_hdl = 0.0039
@@ -92,11 +107,7 @@ def calculate_prevent_risk(patient_data):
             baseline_survival_30yr = 0.8353
 
         # Calculate linear predictor
-        linear_pred = (
-            coef_age * age
-            + coef_sbp * sbp
-            + coef_non_hdl * non_hdl_chol
-        )
+        linear_pred = (coef_age * age) + (coef_sbp * sbp) + (coef_non_hdl * non_hdl_chol)
 
         # Calculate 10-year risk
         risk_10yr = 1 - (baseline_survival_10yr ** math.exp(linear_pred))
@@ -112,7 +123,7 @@ def calculate_prevent_risk(patient_data):
         }
 
     except Exception as e:
-        print(f"Erro no c\u00e1lculo PREVENT: {e}")
+        print(f"Erro no cálculo PREVENT: {e}")
         return {
             'risk_10_year': 0.0,
             'risk_30_year': 0.0,
@@ -121,34 +132,40 @@ def calculate_prevent_risk(patient_data):
 
 def get_risk_classification(risk_10yr):
     """
-    Classify cardiovascular risk based on 10-year risk
+    Classify cardiovascular risk based on 10-year risk.
     """
     if risk_10yr < 5:
         return {
             'level': 'Baixo Risco',
             'color': '#28a745',
-            'interpretation': 'Baixo Risco. Manter estilo de vida saud\u00e1vel e acompanhamento de rotina.',
+            'interpretation': 'Baixo Risco. Manter estilo de vida saudável e acompanhamento de rotina.',
         }
     elif risk_10yr < 20:
         return {
-            'level': 'Risco Intermedi\u00e1rio',
+            'level': 'Risco Intermediário',
             'color': '#ffc107',
-            'interpretation': 'Risco Intermedi\u00e1rio. Biomarcadores recomendados e interven\u00e7\u00e3o terap\u00e9utica.',
+            'interpretation': 'Risco Intermediário. Biomarcadores recomendados e intervenção terapêutica.',
         }
     else:
         return {
             'level': 'Alto Risco',
             'color': '#dc3545',
-            'interpretation': 'Alto Risco. Interven\u00e7\u00e3o terap\u00e9tica imediata e acompanhamento rigoroso.',
+            'interpretation': 'Alto Risco. Intervenção terapêutica imediata e acompanhamento rigoroso.',
         }
 
 
 def generate_recommendations(patient_data, risk_level):
     """
-    Generate medical recommendations based on patient data and risk level
+    Generate medical recommendations based on patient data and risk level.
+    Assumes ``patient_data['age']`` has been sanitized to an integer.
     """
     recommendations = []
-    age = int(patient_data.get('age', 0))
+    # Use sanitized age value; default to 0 if missing
+    age_val = patient_data.get('age', 0)
+    try:
+        age = int(age_val) if age_val not in (None, '') else 0
+    except (ValueError, TypeError):
+        age = 0
     sex = patient_data.get('sex', '').lower()
 
     # Basic lab tests
@@ -161,7 +178,7 @@ def generate_recommendations(patient_data, risk_level):
         },
         {
             'category': 'Exames Laboratoriais',
-            'name': 'Colesterol total e fra\u00e7\u00f5es',
+            'name': 'Colesterol total e frações',
             'priority': 'ALTA',
             'reference': 'AHA/ACC 2019',
         },
@@ -169,38 +186,32 @@ def generate_recommendations(patient_data, risk_level):
 
     # Age-specific recommendations
     if age >= 50:
-        recommendations.append(
-            {
-                'category': 'Rastreamento de C\u00e2ncer',
-                'name': 'Colonoscopia de Rastreio',
-                'priority': 'ALTA',
-                'reference': 'USPSTF 2021',
-            }
-        )
+        recommendations.append({
+            'category': 'Rastreamento de Câncer',
+            'name': 'Colonoscopia de Rastreio',
+            'priority': 'ALTA',
+            'reference': 'USPSTF 2021',
+        })
 
     # Sex-specific recommendations
     if sex in ['feminino', 'female'] and age >= 40:
-        recommendations.append(
-            {
-                'category': 'Rastreamento de C\u00e2ncer',
-                'name': 'Mamografia Digital Bilateral',
-                'priority': 'ALTA',
-                'reference': 'USPSTF 2016',
-            }
-        )
+        recommendations.append({
+            'category': 'Rastreamento de Câncer',
+            'name': 'Mamografia Digital Bilateral',
+            'priority': 'ALTA',
+            'reference': 'USPSTF 2016',
+        })
 
     if sex in ['masculino', 'male'] and age >= 50:
-        recommendations.append(
-            {
-                'category': 'Rastreamento de C\u00e2ncer',
-                'name': 'PSA total, soro',
-                'priority': 'M\u00c9DIA',
-                'reference': 'USPSTF 2018',
-            }
-        )
+        recommendations.append({
+            'category': 'Rastreamento de Câncer',
+            'name': 'PSA total, soro',
+            'priority': 'MÉDIA',
+            'reference': 'USPSTF 2018',
+        })
 
     # Risk-based recommendations
-    if risk_level in ['Risco Intermedi\u00e1rio', 'Alto Risco']:
+    if risk_level in ['Risco Intermediário', 'Alto Risco']:
         recommendations.extend([
             {
                 'category': 'Exames Laboratoriais',
@@ -231,33 +242,58 @@ def generate_recommendations(patient_data, risk_level):
 
 @app.route('/checkup-intelligent', methods=['POST', 'OPTIONS'])
 def handle_intelligent_checkup():
+    """
+    Handle POST/OPTIONS requests for intelligent checkup.
+    Implements CORS, safe JSON parsing, safe age normalization and error handling.
+    """
     if request.method == 'OPTIONS':
         return _corsify(make_response('', 204))
 
     try:
-        # Get patient data from request (tolerante a JSON inv\u00e1lido/ausente)
+        # Get patient data from request (tolerant to missing/invalid JSON)
         patient_data = request.get_json(silent=True) or {}
 
-        # Normalizar tabagismo se helper existir neste contexto
+        # Normalize age: treat empty string as 0; return HTTP 400 for invalid age
+        idade_raw = patient_data.get('idade') or patient_data.get('age')
+        # Remove whitespace and handle None
+        if isinstance(idade_raw, str):
+            idade_str = idade_raw.strip()
+        else:
+            idade_str = idade_raw
+        if not idade_str:
+            age = 0
+        else:
+            try:
+                age = int(idade_str)
+            except (ValueError, TypeError):
+                error_response = jsonify({
+                    'success': False,
+                    'error': 'Idade inválida',
+                    'message': 'O campo idade deve ser um número inteiro',
+                })
+                return _corsify(error_response), 400
+        # Store sanitized age under unified key
+        patient_data['age'] = age
+
+        # Normalize smoking status if helper exists in this context
         try:
             tabagismo_status, macos_ano = _parse_smoking_status_intelligent(
                 patient_data.get('tabagismo'), patient_data
             )
-            # Opcionalmente incorporar no patient_data normalizado
             patient_data['tabagismo_status'] = tabagismo_status
             patient_data['tabagismo_macos_ano'] = macos_ano
         except NameError:
-            # Helper ausente; seguir sem quebrar
+            # Helper absent; continue without raising
             pass
 
-        # Calcular risco PREVENT
+        # Calculate PREVENT risk
         risk_result = calculate_prevent_risk(patient_data)
         risk_classification = get_risk_classification(risk_result['risk_10_year'])
 
-        # Gerar recomenda\u00e7\u00f5es
+        # Generate recommendations
         recommendations = generate_recommendations(patient_data, risk_classification['level'])
 
-        # Montar resposta
+        # Build response
         response_data = {
             'success': True,
             'prevent_risk': risk_result,
@@ -270,12 +306,15 @@ def handle_intelligent_checkup():
         return _corsify(resp), 200
 
     except Exception as e:
-        print(f"Erro na gera\u00e7\u00e3o de recomenda\u00e7\u00f5es: {e}")
-        error_response = jsonify(
-            {
-                'success': False,
-                'error': str(e),
-                'message': 'Erro interno do servidor',
-            }
-        )
+        # Log error and return a generic server error
+        print(f"Erro na geração de recomendações: {e}")
+        error_response = jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Erro interno do servidor',
+        })
         return _corsify(error_response), 500
+
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=3000)
