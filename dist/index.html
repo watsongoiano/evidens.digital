@@ -291,6 +291,16 @@
         let uploadedFiles = [];
         let lastRecommendations = [];
 
+        // Lista de valores aceitos para categoria de laboratório (com e sem "al")
+        const LAB_CATEGORY_VALUES = new Set(['laboratorio', 'laboratorial']);
+
+        function isLaboratoryCategory(category) {
+            if (!category) {
+                return false;
+            }
+            return LAB_CATEGORY_VALUES.has(category.toLowerCase());
+        }
+
         // Toggle da seção de exames
         document.getElementById('toggleExamHistory').addEventListener('click', function() {
             const examHistory = document.getElementById('examHistory');
@@ -527,10 +537,11 @@
             
             recs.forEach(item => {
                 let category = 'Outras Recomendações';
-                
-                if (item.categoria && item.categoria.includes('vacina')) {
+                const categoria = (item.categoria || '').toLowerCase();
+
+                if (categoria.includes('vacina')) {
                     category = 'Vacinas';
-                } else if (item.titulo.toLowerCase().includes('mamografia') || 
+                } else if (item.titulo.toLowerCase().includes('mamografia') ||
                           item.titulo.toLowerCase().includes('colonoscopia') ||
                           item.titulo.toLowerCase().includes('citologia') ||
                           item.titulo.toLowerCase().includes('psa') ||
@@ -542,8 +553,8 @@
                           item.titulo.toLowerCase().includes('eletrocardiograma') ||
                           item.titulo.toLowerCase().includes('fundoscopia')) {
                     category = 'Exames de Imagem';
-                // Aceita tanto 'laboratorial' quanto 'laboratorio' para compatibilidade
-                } else if ((item.categoria === 'laboratorial' || item.categoria === 'laboratorio') ||
+                // Aceita 'laboratorio' (sem "al") e 'laboratorial' via helper
+                } else if (isLaboratoryCategory(categoria) ||
                           item.titulo.toLowerCase().includes('hba1c') ||
                           item.titulo.toLowerCase().includes('creatinina') ||
                           item.titulo.toLowerCase().includes('perfil') ||

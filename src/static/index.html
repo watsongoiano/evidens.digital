@@ -582,6 +582,16 @@
     </div>
 
     <script>
+        // Valores aceitos para categoria de laboratório (aceita tanto 'laboratorial' quanto 'laboratorio')
+        const LAB_CATEGORY_VALUES = new Set(['laboratorio', 'laboratorial']);
+
+        function isLaboratoryCategory(category) {
+            if (!category) {
+                return false;
+            }
+            return LAB_CATEGORY_VALUES.has(category.toLowerCase());
+        }
+
         // Função para calcular risco PREVENT 2024
         function calculatePREVENTRisk(patientData) {
             const { age, sex, totalCholesterol, hdlCholesterol, systolicBP, diabetes, smoking, weight, height, creatinine } = patientData;
@@ -766,9 +776,9 @@
 
             Object.keys(categories).forEach(category => {
                 const categoryRecs = recommendations.filter(rec => {
-                    // Aceita tanto 'laboratorial' quanto 'laboratorio' para compatibilidade de dados
+                    // Usa helper para aceitar tanto 'laboratorio' quanto 'laboratorial'
                     if (category === 'laboratorio') {
-                        return rec.categoria === 'laboratorio' || rec.categoria === 'laboratorial';
+                        return isLaboratoryCategory(rec.categoria);
                     }
                     return rec.categoria === category;
                 });
