@@ -757,6 +757,9 @@
             const container = document.getElementById('recommendations');
             container.innerHTML = '';
 
+            // Aceita "laboratorio" (sem "al") e "laboratorial" como categorias laboratoriais equivalentes
+            const isLaboratoryCategory = categoria => categoria === 'laboratorio' || categoria === 'laboratorial';
+
             const categories = {
                 'laboratorio': '🧪 Exames Laboratoriais',
                 'imagem': '📷 Exames de Imagem',
@@ -765,11 +768,17 @@
             };
 
             Object.keys(categories).forEach(category => {
-                const categoryRecs = recommendations.filter(rec => rec.categoria === category);
+                const categoryRecs = recommendations.filter(rec => {
+                    if (category === 'laboratorio') {
+                        return isLaboratoryCategory(rec.categoria);
+                    }
+
+                    return rec.categoria === category;
+                });
                 if (categoryRecs.length > 0) {
                     const categoryDiv = document.createElement('div');
                     categoryDiv.innerHTML = `<h3 style="color: #2d3748; margin: 20px 0 15px 0;">${categories[category]}</h3>`;
-                    
+
                     categoryRecs.forEach(rec => {
                         const recDiv = document.createElement('div');
                         recDiv.className = `recommendation-item ${rec.prioridade}`;
