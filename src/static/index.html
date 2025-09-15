@@ -728,7 +728,7 @@
                     }
                 }
 
-                const response = await fetch('/checkup-intelligent', {
+                const response = await fetch('/api/checkup-intelligent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -793,11 +793,11 @@
         }
 
         function generateExamRequest() {
-            alert('Funcionalidade de solicitação de exames em desenvolvimento');
+            alert('Funcionalidade de solicitação de exames em desenvolvimento. Endpoints atualizados para /api/gerar-solicitacao-exames');
         }
 
         function generateVaccineReceipt() {
-            alert('Funcionalidade de receita de vacinas em desenvolvimento');
+            alert('Funcionalidade de receita de vacinas em desenvolvimento. Endpoints atualizados para /api/gerar-receita-vacinas');
         }
 
         function generateFullReport() {

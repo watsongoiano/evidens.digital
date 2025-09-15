@@ -472,7 +472,7 @@
             };
             
             try {
-                const response = await fetch('/checkup-intelligent', {
+                const response = await fetch('/api/checkup-intelligent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1025,7 +1025,7 @@
             console.log('Dados do paciente:', patientData);
             console.log('Recomendações ativas:', activeRecommendations.length);
 
-            fetch('/gerar-solicitacao-exames', {
+            fetch('/api/gerar-solicitacao-exames', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1078,7 +1078,7 @@
             console.log('Dados do paciente:', patientData);
             console.log('Recomendações ativas:', activeRecommendations.length);
 
-            fetch('/gerar-receita-vacinas', {
+            fetch('/api/gerar-receita-vacinas', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
