@@ -765,7 +765,13 @@
             };
 
             Object.keys(categories).forEach(category => {
-                const categoryRecs = recommendations.filter(rec => rec.categoria === category);
+                const categoryRecs = recommendations.filter(rec => {
+                    // Aceita tanto 'laboratorial' quanto 'laboratorio' para compatibilidade de dados
+                    if (category === 'laboratorio') {
+                        return rec.categoria === 'laboratorio' || rec.categoria === 'laboratorial';
+                    }
+                    return rec.categoria === category;
+                });
                 if (categoryRecs.length > 0) {
                     const categoryDiv = document.createElement('div');
                     categoryDiv.innerHTML = `<h3 style="color: #2d3748; margin: 20px 0 15px 0;">${categories[category]}</h3>`;

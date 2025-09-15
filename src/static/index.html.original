@@ -542,7 +542,8 @@
                           item.titulo.toLowerCase().includes('eletrocardiograma') ||
                           item.titulo.toLowerCase().includes('fundoscopia')) {
                     category = 'Exames de Imagem';
-                } else if (item.categoria === 'laboratorial' ||
+                // Aceita tanto 'laboratorial' quanto 'laboratorio' para compatibilidade
+                } else if ((item.categoria === 'laboratorial' || item.categoria === 'laboratorio') ||
                           item.titulo.toLowerCase().includes('hba1c') ||
                           item.titulo.toLowerCase().includes('creatinina') ||
                           item.titulo.toLowerCase().includes('perfil') ||
