@@ -5,6 +5,7 @@ import json
 import math
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from src.utils.cors import sanitize_private_network_header
 
 # Add paths
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -21,7 +22,7 @@ def _corsify(resp):
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-    return resp
+    return sanitize_private_network_header(resp)
 
 
 def parse_date_ymd(date_str):
