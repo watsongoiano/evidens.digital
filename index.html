@@ -162,7 +162,7 @@
         }
 
         .feature-card {
-            background: white;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             padding: 3rem 2rem;
             border-radius: 20px;
             text-align: center;
@@ -173,6 +173,7 @@
             text-decoration: none;
             color: inherit;
             display: block;
+            position: relative;
         }
 
         .feature-card:hover {
@@ -184,6 +185,20 @@
             border-color: #3498db;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+        }
+
+        .dev-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+            animation: pulse 2s infinite;
         }
 
         .feature-icon {
@@ -248,12 +263,84 @@
         }
 
         @media (max-width: 768px) {
+            .hero {
+                padding: 6rem 1rem 3rem;
+            }
+            
             .hero h1 {
                 font-size: 2.5rem;
             }
             
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
             .features {
                 grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 0 1rem 3rem;
+            }
+            
+            .feature-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .nav {
+                padding: 0 1rem;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .nav-links a {
+                font-size: 0.9rem;
+            }
+            
+            .search-input {
+                font-size: 1rem;
+                padding: 0.8rem 1rem;
+            }
+            
+            .search-btn {
+                padding: 0.6rem 1.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .dev-badge {
+                right: 100px;
+                font-size: 0.7rem;
+                padding: 0.2rem 0.6rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .feature-card {
+                padding: 1.5rem 1rem;
+            }
+            
+            .feature-icon {
+                font-size: 2.5rem;
+            }
+            
+            .feature-card h3 {
+                font-size: 1.3rem;
+            }
+            
+            .logo {
+                font-size: 1.3rem;
             }
         }
     </style>
@@ -288,7 +375,8 @@
 
     <!-- Features Section -->
     <section class="features">
-        <div class="feature-card" onclick="showTool('trusted')">
+        <div class="feature-card">
+            <div class="dev-indicator">🚧 Em Desenvolvimento</div>
             <div class="feature-icon">🛡️</div>
             <h3>Trusted Information</h3>
             <p>Access up-to-date, peer-reviewed clinical content</p>
@@ -300,71 +388,14 @@
             <p>Use advanced tools to support clinical decision-making</p>
         </a>
         
-        <div class="feature-card" onclick="showTool('outcomes')">
+        <div class="feature-card">
+            <div class="dev-indicator">🚧 Em Desenvolvimento</div>
             <div class="feature-icon">💚</div>
             <h3>Improved Outcomes</h3>
             <p>Apply the latest evidence to improve patient care</p>
         </div>
     </section>
 
-    <!-- Intelligent Tools Content -->
-    <div class="tool-content active" id="intelligent-tool">
-        <div class="form-section">
-            <h2 class="section-title">Intelligent Tools</h2>
-            <p style="color: #7f8c8d; margin-bottom: 2rem; text-align: center;">Acesse nossas ferramentas avançadas para suporte à decisão clínica baseada em evidência</p>
-            
-            <div style="text-align: center; margin: 3rem 0;">
-                <a href="/intelligent-tools" class="btn-primary" style="padding: 1.5rem 3rem; font-size: 1.2rem;">
-                    💻 Acessar Intelligent Tools
-                </a>
-            </div>
-        </div>
-    </div>
 
-    <!-- Hidden sections for other tools -->
-    <div class="tool-content" id="trusted-info">
-        <div class="form-section">
-            <h2 class="section-title">Trusted Information</h2>
-            <p style="color: #7f8c8d; margin-bottom: 2rem; text-align: center;">Acesse informações clínicas atualizadas e revisadas por pares</p>
-            
-            <div style="text-align: center; margin: 3rem 0;">
-                <p style="color: #7f8c8d; font-style: italic;">🚧 Em desenvolvimento</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="tool-content" id="outcomes">
-        <div class="form-section">
-            <h2 class="section-title">Improved Outcomes</h2>
-            <p style="color: #7f8c8d; margin-bottom: 2rem; text-align: center;">Aplique as evidências mais recentes para melhorar o cuidado ao paciente</p>
-            
-            <div style="text-align: center; margin: 3rem 0;">
-                <p style="color: #7f8c8d; font-style: italic;">🚧 Em desenvolvimento</p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function showTool(toolType) {
-            // Update feature cards
-            document.querySelectorAll('.feature-card').forEach(card => {
-                card.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-
-            // Show/hide tool content
-            document.querySelectorAll('.tool-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            if (toolType === 'trusted') {
-                document.getElementById('trusted-info').classList.add('active');
-            } else if (toolType === 'outcomes') {
-                document.getElementById('outcomes').classList.add('active');
-            } else {
-                document.getElementById('intelligent-tool').classList.add('active');
-            }
-        }
-    </script>
 </body>
 </html>
