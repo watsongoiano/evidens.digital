@@ -1,8 +1,4 @@
 {
-  "builds": [
-    { "src": "api/**/*.py", "use": "@vercel/python" },
-    { "src": "src/static/**", "use": "@vercel/static" }
-  ],
   "routes": [
     { "src": "/checkup-intelligent", "dest": "/api/checkup-intelligent" },
     { "src": "/gerar-solicitacao-exames", "dest": "/api/gerar-solicitacao-exames" },
