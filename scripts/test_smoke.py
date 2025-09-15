@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Lightweight smoke tests for key endpoints and behaviors:
-- /checkup-intelligent returns recommendations with expected vaccines and reference links
-- /gerar-solicitacao-exames and /gerar-receita-vacinas support HTML/JSON content negotiation
+- /api/checkup-intelligent returns recommendations with expected vaccines and reference links
+- /api/gerar-solicitacao-exames and /api/gerar-receita-vacinas support HTML/JSON content negotiation
 
 Run:
   python scripts/test_smoke.py
@@ -38,8 +38,8 @@ def main():
         'sexo': 'masculino',
         'pais_guideline': 'BR'
     }
-    r1 = post_json(client, '/checkup-intelligent', payload_25m)
-    assert_true(r1.status_code == 200, f"/checkup-intelligent 25M HTTP {r1.status_code}")
+    r1 = post_json(client, '/api/checkup-intelligent', payload_25m)
+    assert_true(r1.status_code == 200, f"/api/checkup-intelligent 25M HTTP {r1.status_code}")
     data1 = r1.get_json() or {}
     recs1 = data1.get('recommendations') or []
     titles1 = [ (rec.get('titulo') or '').lower() for rec in recs1 ]
@@ -56,8 +56,8 @@ def main():
         'sexo': 'masculino',
         'pais_guideline': 'BR'
     }
-    r2 = post_json(client, '/checkup-intelligent', payload_55m)
-    assert_true(r2.status_code == 200, f"/checkup-intelligent 55M HTTP {r2.status_code}")
+    r2 = post_json(client, '/api/checkup-intelligent', payload_55m)
+    assert_true(r2.status_code == 200, f"/api/checkup-intelligent 55M HTTP {r2.status_code}")
     data2 = r2.get_json() or {}
     recs2 = data2.get('recommendations') or []
     titles2 = [ (rec.get('titulo') or '').lower() for rec in recs2 ]
@@ -69,30 +69,30 @@ def main():
     doc_payload = {'recommendations': recs2, 'patient_data': patient_doc}
 
     # 3) Exams request: JSON
-    r3_json = post_json(client, '/gerar-solicitacao-exames', doc_payload, headers={'Accept': 'application/json'})
-    assert_true(r3_json.status_code == 200, f"/gerar-solicitacao-exames JSON HTTP {r3_json.status_code}")
+    r3_json = post_json(client, '/api/gerar-solicitacao-exames', doc_payload, headers={'Accept': 'application/json'})
+    assert_true(r3_json.status_code == 200, f"/api/gerar-solicitacao-exames JSON HTTP {r3_json.status_code}")
     assert_true((r3_json.content_type or '').startswith('application/json'), f"Expected JSON content-type, got {r3_json.content_type}")
     data3 = r3_json.get_json() or {}
-    assert_true(bool(data3.get('html')), "JSON response missing 'html' for /gerar-solicitacao-exames")
+    assert_true(bool(data3.get('html')), "JSON response missing 'html' for /api/gerar-solicitacao-exames")
 
     # 4) Exams request: HTML
-    r3_html = post_json(client, '/gerar-solicitacao-exames', doc_payload, headers={'Accept': 'text/html'})
-    assert_true(r3_html.status_code == 200, f"/gerar-solicitacao-exames HTML HTTP {r3_html.status_code}")
+    r3_html = post_json(client, '/api/gerar-solicitacao-exames', doc_payload, headers={'Accept': 'text/html'})
+    assert_true(r3_html.status_code == 200, f"/api/gerar-solicitacao-exames HTML HTTP {r3_html.status_code}")
     assert_true((r3_html.content_type or '').startswith('text/html'), f"Expected HTML content-type, got {r3_html.content_type}")
-    assert_true((r3_html.get_data(as_text=True) or '').lstrip().startswith('<!DOCTYPE html>'), "HTML response does not look like HTML for /gerar-solicitacao-exames")
+    assert_true((r3_html.get_data(as_text=True) or '').lstrip().startswith('<!DOCTYPE html>'), "HTML response does not look like HTML for /api/gerar-solicitacao-exames")
 
     # 5) Vaccine prescription: JSON
-    r4_json = post_json(client, '/gerar-receita-vacinas', doc_payload, headers={'Accept': 'application/json'})
-    assert_true(r4_json.status_code == 200, f"/gerar-receita-vacinas JSON HTTP {r4_json.status_code}")
+    r4_json = post_json(client, '/api/gerar-receita-vacinas', doc_payload, headers={'Accept': 'application/json'})
+    assert_true(r4_json.status_code == 200, f"/api/gerar-receita-vacinas JSON HTTP {r4_json.status_code}")
     assert_true((r4_json.content_type or '').startswith('application/json'), f"Expected JSON content-type, got {r4_json.content_type}")
     data4 = r4_json.get_json() or {}
-    assert_true(bool(data4.get('html')), "JSON response missing 'html' for /gerar-receita-vacinas")
+    assert_true(bool(data4.get('html')), "JSON response missing 'html' for /api/gerar-receita-vacinas")
 
     # 6) Vaccine prescription: HTML
-    r4_html = post_json(client, '/gerar-receita-vacinas', doc_payload, headers={'Accept': 'text/html'})
-    assert_true(r4_html.status_code == 200, f"/gerar-receita-vacinas HTML HTTP {r4_html.status_code}")
+    r4_html = post_json(client, '/api/gerar-receita-vacinas', doc_payload, headers={'Accept': 'text/html'})
+    assert_true(r4_html.status_code == 200, f"/api/gerar-receita-vacinas HTML HTTP {r4_html.status_code}")
     assert_true((r4_html.content_type or '').startswith('text/html'), f"Expected HTML content-type, got {r4_html.content_type}")
-    assert_true((r4_html.get_data(as_text=True) or '').lstrip().startswith('<!DOCTYPE html>'), "HTML response does not look like HTML for /gerar-receita-vacinas")
+    assert_true((r4_html.get_data(as_text=True) or '').lstrip().startswith('<!DOCTYPE html>'), "HTML response does not look like HTML for /api/gerar-receita-vacinas")
 
     print("[OK] Smoke tests passed.")
 
