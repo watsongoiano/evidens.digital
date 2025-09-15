@@ -113,6 +113,13 @@ def gerar_recomendacoes():
         
         # Remover duplicatas e ordenar por prioridade
         recomendacoes = remove_duplicates_and_sort(recomendacoes)
+
+        # Normalizar chaves opcionais para evitar 'undefined' no frontend
+        for rec in recomendacoes:
+            if 'subtitulo' not in rec:
+                rec['subtitulo'] = None
+            if 'grau_evidencia' not in rec:
+                rec['grau_evidencia'] = None
         
         return jsonify(recomendacoes)
         

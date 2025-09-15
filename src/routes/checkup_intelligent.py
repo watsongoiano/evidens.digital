@@ -503,6 +503,16 @@ def generate_intelligent_recommendations():
         except Exception:
             pass
 
+        # Garantir chaves opcionais presentes em todas as recomendações
+        try:
+            for rec in response.get('recommendations', []) or []:
+                if 'subtitulo' not in rec:
+                    rec['subtitulo'] = None
+                if 'grau_evidencia' not in rec:
+                    rec['grau_evidencia'] = None
+        except Exception:
+            pass
+
         return jsonify(response)
         
     except Exception as e:
