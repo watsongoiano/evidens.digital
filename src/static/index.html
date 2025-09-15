@@ -582,6 +582,7 @@
     </div>
 
     <script>
+        let lastRecommendations = [];
         // Função para calcular risco PREVENT 2024
         function calculatePREVENTRisk(patientData) {
             const { age, sex, totalCholesterol, hdlCholesterol, systolicBP, diabetes, smoking, weight, height, creatinine } = patientData;
@@ -739,6 +740,11 @@
                 const result = await response.json();
 
                 if (result.success) {
+                    try {
+                        lastRecommendations = Array.isArray(result.recommendations) ? result.recommendations : [];
+                    } catch (e) {
+                        lastRecommendations = [];
+                    }
                     displayRecommendations(result.recommendations);
                     results.style.display = 'block';
                 } else {
@@ -792,8 +798,48 @@
             });
         }
 
-        function generateExamRequest() {
-            alert('Funcionalidade de solicitação de exames em desenvolvimento. Endpoints atualizados para /api/gerar-solicitacao-exames');
+        async function generateExamRequest() {
+            try {
+                const active = Array.isArray(lastRecommendations) ? lastRecommendations : [];
+                if (!active || active.length === 0) {
+                    alert('Gere as recomendações primeiro.');
+                    return;
+                }
+
+                const nome = prompt('Nome do paciente:') || 'Paciente';
+                const idadeEl = document.getElementById('idade');
+                const sexoEl = document.getElementById('sexo');
+                const patientData = {
+                    nome,
+                    idade: idadeEl && idadeEl.value ? parseInt(idadeEl.value) : undefined,
+                    sexo: sexoEl ? sexoEl.value : undefined,
+                };
+
+                const resp = await fetch('/api/gerar-solicitacao-exames', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        recommendations: active,
+                        patient_data: patientData,
+                    })
+                });
+
+                if (!resp.ok) {
+                    throw new Error(`Erro ao gerar solicitação de exames: ${resp.status}`);
+                }
+
+                const html = await resp.text();
+                const newWindow = window.open('', '_blank');
+                if (newWindow) {
+                    newWindow.document.write(html);
+                    newWindow.document.close();
+                } else {
+                    alert('Não foi possível abrir nova janela. Verifique se pop-ups estão bloqueados.');
+                }
+            } catch (error) {
+                console.error('Erro ao gerar solicitação de exames:', error);
+                alert('Erro ao gerar solicitação de exames: ' + (error && error.message ? error.message : error));
+            }
         }
 
         function generateVaccineReceipt() {
