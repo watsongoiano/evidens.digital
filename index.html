@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intelligent Tools - Evidens</title>
     <style>
@@ -13,17 +12,20 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
-            color: #2c3e50;
         }
 
         .header {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
             top: 0;
             z-index: 100;
         }
@@ -64,17 +66,17 @@
 
         .hero {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 8rem 2rem 4rem;
             max-width: 1200px;
-            margin: 0 auto;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: #2c3e50;
+            font-size: 4rem;
+            font-weight: 300;
             margin-bottom: 1rem;
-            line-height: 1.2;
+            color: #2c3e50;
         }
 
         .hero p {
@@ -85,8 +87,6 @@
             margin-left: auto;
             margin-right: auto;
         }
-
-
 
         .search-container {
             max-width: 600px;
@@ -146,14 +146,6 @@
             animation: pulse 2s infinite;
         }
 
-        .dev-note {
-            text-align: center;
-            color: #6c757d;
-            font-size: 0.9rem;
-            font-style: italic;
-            margin: 0;
-        }
-
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -175,8 +167,12 @@
             border-radius: 20px;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s;
+            border: 3px solid transparent;
             cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
 
         .feature-card:hover {
@@ -185,51 +181,31 @@
         }
 
         .feature-card.active {
-            background: #2c3e50;
+            border-color: #3498db;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
         .feature-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 2rem;
-            background: #f8f9fa;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            transition: all 0.3s;
-        }
-
-        .feature-card.active .feature-icon {
-            background: rgba(255,255,255,0.2);
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
         }
 
         .feature-card h3 {
             font-size: 1.5rem;
-            font-weight: 700;
             margin-bottom: 1rem;
-            color: inherit;
+            font-weight: 600;
         }
 
         .feature-card p {
-            color: #7f8c8d;
-            line-height: 1.6;
-        }
-
-        .feature-card.active p {
-            color: rgba(255,255,255,0.8);
+            color: inherit;
+            opacity: 0.8;
         }
 
         .tool-content {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            margin-bottom: 4rem;
             display: none;
         }
 
@@ -238,70 +214,22 @@
         }
 
         .form-section {
-            margin-bottom: 2rem;
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
         .section-title {
-            font-size: 1.8rem;
-            font-weight: 700;
+            font-size: 2.5rem;
+            font-weight: 300;
             color: #2c3e50;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 3px solid #3498db;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 0.8rem;
-            border: 2px solid #e0e6ed;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s;
-            background: white;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: auto;
-            margin: 0;
+            margin-bottom: 1rem;
+            text-align: center;
         }
 
         .btn-primary {
-            background: #2c3e50;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
             color: white;
             border: none;
             padding: 1rem 2rem;
@@ -310,108 +238,18 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            margin: 1rem 0.5rem 1rem 0;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-primary:hover {
-            background: #34495e;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .btn-secondary {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 25px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 0.5rem;
-        }
-
-        .btn-secondary:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-        }
-
-        .recommendations-section {
-            margin-top: 3rem;
-            padding: 2rem;
-            background: #f8f9fa;
-            border-radius: 15px;
-        }
-
-        .recommendation-item {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            border-left: 4px solid #3498db;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .recommendation-title {
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-        }
-
-        .recommendation-subtitle {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .evidence-grade {
-            display: inline-block;
-            background: #27ae60;
-            color: white;
-            padding: 0.2rem 0.5rem;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .actions-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: #f8f9fa;
-            border-radius: 15px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #7f8c8d;
-        }
-
-        .error {
-            color: #e74c3c;
-            background: #fdf2f2;
-            padding: 1rem;
-            border-radius: 8px;
-            border-left: 4px solid #e74c3c;
-            margin: 1rem 0;
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
         }
 
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 2.5rem;
-            }
-            
-            .nav {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
             }
             
             .features {
@@ -445,7 +283,6 @@
                 <button class="search-btn" disabled>Search</button>
                 <div class="dev-badge">🚧 Em Desenvolvimento</div>
             </div>
-            <p class="dev-note">Esta funcionalidade está sendo desenvolvida e estará disponível em breve.</p>
         </div>
     </section>
 
@@ -457,11 +294,11 @@
             <p>Access up-to-date, peer-reviewed clinical content</p>
         </div>
         
-        <div class="feature-card active" onclick="showTool('intelligent')">
+        <a href="/intelligent-tools" class="feature-card active">
             <div class="feature-icon">💻</div>
             <h3>Intelligent Tools</h3>
             <p>Use advanced tools to support clinical decision-making</p>
-        </div>
+        </a>
         
         <div class="feature-card" onclick="showTool('outcomes')">
             <div class="feature-icon">💚</div>
@@ -473,209 +310,41 @@
     <!-- Intelligent Tools Content -->
     <div class="tool-content active" id="intelligent-tool">
         <div class="form-section">
-            <h2 class="section-title">Check-up Médico Inteligente</h2>
-            <p style="color: #7f8c8d; margin-bottom: 2rem;">Analise e receba recomendações essenciais baseadas em evidência científica</p>
+            <h2 class="section-title">Intelligent Tools</h2>
+            <p style="color: #7f8c8d; margin-bottom: 2rem; text-align: center;">Acesse nossas ferramentas avançadas para suporte à decisão clínica baseada em evidência</p>
             
-            <form id="checkupForm">
-                <input type="hidden" id="prevent_risk_10yr" name="prevent_risk_10yr" value="">
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="idade">Idade</label>
-                        <input type="number" id="idade" name="idade" min="18" max="120" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="sexo">Sexo</label>
-                        <select id="sexo" name="sexo" required>
-                            <option value="">Selecione...</option>
-                            <option value="masculino">Masculino</option>
-                            <option value="feminino">Feminino</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="pais">País/Guideline base</label>
-                        <select id="pais" name="pais" required>
-                            <option value="BR">Brasil (SBIm/SBC/SBD)</option>
-                            <option value="EUA">EUA (CDC/USPSTF/ADA)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <h4 style="color: #2c3e50; margin: 2rem 0 1rem; font-size: 1.2rem;">📊 Dados Clínicos (para cálculo de risco cardiovascular)</h4>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="peso">Peso (kg)</label>
-                        <input type="number" id="peso" name="peso" min="30" max="300" step="0.1" placeholder="Ex: 70.5">
-                    </div>
-                    <div class="form-group">
-                        <label for="altura">Altura (cm)</label>
-                        <input type="number" id="altura" name="altura" min="100" max="250" step="1" placeholder="Ex: 170">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="pressao_sistolica">Pressão Arterial Sistólica (mmHg)</label>
-                        <input type="number" id="pressao_sistolica" name="pressao_sistolica" min="90" max="200" placeholder="Ex: 140">
-                    </div>
-                    <div class="form-group">
-                        <label for="pressao_diastolica">Pressão Arterial Diastólica (mmHg)</label>
-                        <input type="number" id="pressao_diastolica" name="pressao_diastolica" min="50" max="120" placeholder="Ex: 90">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="colesterol_total">Colesterol Total (mg/dL)</label>
-                        <input type="number" id="colesterol_total" name="colesterol_total" min="130" max="320" placeholder="Ex: 200">
-                    </div>
-                    <div class="form-group">
-                        <label for="hdl_colesterol">HDL Colesterol (mg/dL)</label>
-                        <input type="number" id="hdl_colesterol" name="hdl_colesterol" min="20" max="100" placeholder="Ex: 45">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="creatinina">Creatinina Sérica (mg/dL)</label>
-                        <input type="number" id="creatinina" name="creatinina" min="0.5" max="10" step="0.01" placeholder="Ex: 1.0">
-                    </div>
-                    <div class="form-group">
-                        <label for="hba1c">HbA1c (%)</label>
-                        <input type="number" id="hba1c" name="hba1c" min="4" max="15" step="0.1" placeholder="Ex: 7.0">
-                    </div>
-                </div>
-
-                <h4 style="color: #2c3e50; margin: 2rem 0 1rem; font-size: 1.2rem;">💊 Medicações Específicas</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="medicamentos_anti_hipertensivos" name="medicamentos_anti_hipertensivos">
-                            <label for="medicamentos_anti_hipertensivos">Medicamentos Anti-hipertensivos</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="estatinas" name="estatinas">
-                            <label for="estatinas">Estatinas</label>
-                        </div>
-                    </div>
-                </div>
-
-                <h4 style="color: #2c3e50; margin: 2rem 0 1rem; font-size: 1.2rem;">🏥 Comorbidades</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="diabetes_tipo2" name="diabetes_tipo2">
-                            <label for="diabetes_tipo2">Diabetes Tipo 2</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="hipertensao" name="hipertensao">
-                            <label for="hipertensao">Hipertensão</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="has_resistente" name="has_resistente">
-                            <label for="has_resistente">HAS Resistente</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="dislipidemia" name="dislipidemia">
-                            <label for="dislipidemia">Dislipidemia</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="doenca_renal_cronica" name="doenca_renal_cronica">
-                            <label for="doenca_renal_cronica">Doença Renal Crônica</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="cardiopatia" name="cardiopatia">
-                            <label for="cardiopatia">Cardiopatia</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="obesidade" name="obesidade">
-                            <label for="obesidade">Obesidade</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="outras_comorbidades">Outras comorbidades (descreva):</label>
-                    <textarea id="outras_comorbidades" name="outras_comorbidades" rows="3" placeholder="Ex: DPOC, artrite reumatoide, lúpus..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="medicacoes_uso_continuo">Medicações de Uso Contínuo</label>
-                    <textarea id="medicacoes_uso_continuo" name="medicacoes_uso_continuo" rows="3" placeholder="Liste todas as medicações em uso contínuo com doses e frequência"></textarea>
-                </div>
-
-                <h4 style="color: #2c3e50; margin: 2rem 0 1rem; font-size: 1.2rem;">👨‍👩‍👧‍👦 História Familiar</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="cancer_mama" name="cancer_mama">
-                            <label for="cancer_mama">Câncer de Mama</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="cancer_colorretal" name="cancer_colorretal">
-                            <label for="cancer_colorretal">Câncer Colorretal</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="cancer_ovario" name="cancer_ovario">
-                            <label for="cancer_ovario">Câncer de Ovário</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="diabetes" name="diabetes">
-                            <label for="diabetes">Diabetes</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="cardiopatia_familiar" name="cardiopatia_familiar">
-                            <label for="cardiopatia_familiar">Cardiopatia</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="outras_condicoes_familiares">Outras condições familiares (descreva):</label>
-                    <textarea id="outras_condicoes_familiares" name="outras_condicoes_familiares" rows="3" placeholder="Ex: câncer de próstata, AVC, demência..."></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="tabagismo">Tabagismo</label>
-                        <select id="tabagismo" name="tabagismo">
-                            <option value="nunca_fumou">Nunca fumou</option>
-                            <option value="fumante_atual">Fumante atual</option>
-                            <option value="ex_fumante">Ex-fumante</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="macos_ano">Maços-ano (se fumante/ex-fumante)</label>
-                        <input type="number" id="macos_ano" name="macos_ano" min="0" max="200" step="0.1">
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-primary">Gerar Recomendações Inteligentes</button>
-                <button type="button" class="btn-secondary" onclick="anexarPDFs()">📄 Anexar PDFs de Exames</button>
-            </form>
+            <div style="text-align: center; margin: 3rem 0;">
+                <a href="/intelligent-tools" class="btn-primary" style="padding: 1.5rem 3rem; font-size: 1.2rem;">
+                    💻 Acessar Intelligent Tools
+                </a>
+            </div>
         </div>
+    </div>
 
-        <!-- Recommendations Section -->
-        <div class="recommendations-section" id="recommendationsSection" style="display: none;">
-            <h2 class="section-title">Recomendações Inteligentes</h2>
-            <div id="recommendationsContent"></div>
+    <!-- Hidden sections for other tools -->
+    <div class="tool-content" id="trusted-info">
+        <div class="form-section">
+            <h2 class="section-title">Trusted Information</h2>
+            <p style="color: #7f8c8d; margin-bottom: 2rem; text-align: center;">Acesse informações clínicas atualizadas e revisadas por pares</p>
             
-            <div class="actions-bar" id="actionsBar" style="display: none;">
-                <button class="btn-secondary" onclick="gerarSolicitacaoExames()">📋 Solicitação de Exames</button>
-                <button class="btn-secondary" onclick="gerarReceitaVacinas()">💉 Receita de Vacinas</button>
-                <button class="btn-secondary" onclick="gerarRelatorioCompleto()">📄 Relatório Completo</button>
-                <button class="btn-secondary" onclick="agendarLembretes()">🔔 Agendar Lembretes</button>
+            <div style="text-align: center; margin: 3rem 0;">
+                <p style="color: #7f8c8d; font-style: italic;">🚧 Em desenvolvimento</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tool-content" id="outcomes">
+        <div class="form-section">
+            <h2 class="section-title">Improved Outcomes</h2>
+            <p style="color: #7f8c8d; margin-bottom: 2rem; text-align: center;">Aplique as evidências mais recentes para melhorar o cuidado ao paciente</p>
+            
+            <div style="text-align: center; margin: 3rem 0;">
+                <p style="color: #7f8c8d; font-style: italic;">🚧 Em desenvolvimento</p>
             </div>
         </div>
     </div>
 
     <script>
-        let currentRecommendations = [];
-
         function showTool(toolType) {
             // Update feature cards
             document.querySelectorAll('.feature-card').forEach(card => {
@@ -688,181 +357,13 @@
                 content.classList.remove('active');
             });
             
-            if (toolType === 'intelligent') {
+            if (toolType === 'trusted') {
+                document.getElementById('trusted-info').classList.add('active');
+            } else if (toolType === 'outcomes') {
+                document.getElementById('outcomes').classList.add('active');
+            } else {
                 document.getElementById('intelligent-tool').classList.add('active');
             }
-        }
-
-        document.getElementById('checkupForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const data = {
-                idade: parseInt(formData.get('idade')) || 0,
-                sexo: formData.get('sexo') || '',
-                pais: formData.get('pais') || 'BR',
-                peso: parseFloat(formData.get('peso')) || 0,
-                altura: parseInt(formData.get('altura')) || 0,
-                pressao_sistolica: parseInt(formData.get('pressao_sistolica')) || 0,
-                pressao_diastolica: parseInt(formData.get('pressao_diastolica')) || 0,
-                colesterol_total: parseInt(formData.get('colesterol_total')) || 0,
-                hdl_colesterol: parseInt(formData.get('hdl_colesterol')) || 0,
-                creatinina: parseFloat(formData.get('creatinina')) || 0,
-                hba1c: parseFloat(formData.get('hba1c')) || 0,
-                medicamentos_anti_hipertensivos: formData.get('medicamentos_anti_hipertensivos') === 'on',
-                estatinas: formData.get('estatinas') === 'on',
-                diabetes_tipo2: formData.get('diabetes_tipo2') === 'on',
-                hipertensao: formData.get('hipertensao') === 'on',
-                has_resistente: formData.get('has_resistente') === 'on',
-                dislipidemia: formData.get('dislipidemia') === 'on',
-                doenca_renal_cronica: formData.get('doenca_renal_cronica') === 'on',
-                cardiopatia: formData.get('cardiopatia') === 'on',
-                obesidade: formData.get('obesidade') === 'on',
-                outras_comorbidades: formData.get('outras_comorbidades') || '',
-                medicacoes_uso_continuo: formData.get('medicacoes_uso_continuo') || '',
-                cancer_mama: formData.get('cancer_mama') === 'on',
-                cancer_colorretal: formData.get('cancer_colorretal') === 'on',
-                cancer_ovario: formData.get('cancer_ovario') === 'on',
-                diabetes: formData.get('diabetes') === 'on',
-                cardiopatia_familiar: formData.get('cardiopatia_familiar') === 'on',
-                outras_condicoes_familiares: formData.get('outras_condicoes_familiares') || '',
-                tabagismo_status: formData.get('tabagismo') || 'nunca_fumou',
-                tabagismo_macos_ano: parseInt(formData.get('macos_ano')) || 0,
-            };
-            
-            try {
-                showLoading();
-                
-                const response = await fetch('/api/checkup-intelligent', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-                
-                const recommendations = await response.json();
-                currentRecommendations = recommendations;
-                displayRecommendations(recommendations);
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                showError(`Erro ao gerar recomendações: ${error.message}`);
-            }
-        });
-
-        function showLoading() {
-            const section = document.getElementById('recommendationsSection');
-            const content = document.getElementById('recommendationsContent');
-            content.innerHTML = '<div class="loading">🔄 Gerando recomendações baseadas em evidência...</div>';
-            section.style.display = 'block';
-        }
-
-        function showError(message) {
-            const content = document.getElementById('recommendationsContent');
-            content.innerHTML = `<div class="error">${message}</div>`;
-        }
-
-        function displayRecommendations(data) {
-            const content = document.getElementById('recommendationsContent');
-            const actionsBar = document.getElementById('actionsBar');
-            
-            if (!data.recommendations || data.recommendations.length === 0) {
-                content.innerHTML = '<div class="error">Nenhuma recomendação foi gerada. Verifique os dados inseridos.</div>';
-                return;
-            }
-
-            // Group recommendations by category
-            const categories = {
-                'exame': { title: 'Exames Laboratoriais', items: [] },
-                'vacina': { title: 'Vacinas', items: [] },
-                'rastreamento': { title: 'Rastreamentos', items: [] },
-                'outros': { title: 'Outras Recomendações', items: [] }
-            };
-
-            data.recommendations.forEach(rec => {
-                const category = rec.categoria?.toLowerCase() || 'outros';
-                const targetCategory = categories[category] || categories['outros'];
-                targetCategory.items.push(rec);
-            });
-
-            let html = '';
-            Object.values(categories).forEach(category => {
-                if (category.items.length > 0) {
-                    html += `<h3 style="color: #2c3e50; margin: 2rem 0 1rem; font-size: 1.3rem;">${category.title}</h3>`;
-                    category.items.forEach(rec => {
-                        const grauEvidencia = rec.grau_evidencia || 'N/A';
-                        const subtitulo = rec.subtitulo || '';
-                        const referencia = rec.referencia_html || '';
-                        
-                        html += `
-                            <div class="recommendation-item">
-                                <div class="recommendation-title">${rec.titulo}</div>
-                                ${subtitulo ? `<div class="recommendation-subtitle">${subtitulo}</div>` : ''}
-                                ${referencia ? `<div class="recommendation-subtitle">${referencia}</div>` : ''}
-                                <span class="evidence-grade">Grau de evidência: ${grauEvidencia}</span>
-                            </div>
-                        `;
-                    });
-                }
-            });
-
-            content.innerHTML = html;
-            actionsBar.style.display = 'flex';
-        }
-
-        async function gerarSolicitacaoExames() {
-            try {
-                const response = await fetch('/api/gerar-solicitacao-exames', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ recommendations: currentRecommendations.recommendations })
-                });
-                
-                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-                
-                const html = await response.text();
-                const newWindow = window.open('', '_blank');
-                newWindow.document.write(html);
-                newWindow.document.close();
-            } catch (error) {
-                alert(`Erro ao gerar solicitação de exames: ${error.message}`);
-            }
-        }
-
-        async function gerarReceitaVacinas() {
-            try {
-                const response = await fetch('/api/gerar-receita-vacinas', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ recommendations: currentRecommendations.recommendations })
-                });
-                
-                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-                
-                const html = await response.text();
-                const newWindow = window.open('', '_blank');
-                newWindow.document.write(html);
-                newWindow.document.close();
-            } catch (error) {
-                alert(`Erro ao gerar receita de vacinas: ${error.message}`);
-            }
-        }
-
-        function gerarRelatorioCompleto() {
-            alert('Funcionalidade em desenvolvimento');
-        }
-
-        function agendarLembretes() {
-            alert('Funcionalidade em desenvolvimento');
-        }
-
-        function anexarPDFs() {
-            alert('Funcionalidade em desenvolvimento');
         }
     </script>
 </body>
