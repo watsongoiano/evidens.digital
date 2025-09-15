@@ -1,14 +1,12 @@
 {
-
-  "rewrites": [
-    { "source": "/checkup-intelligent", "destination": "/api/checkup-intelligent" },
-    { "source": "/gerar-solicitacao-exames", "destination": "/api/gerar-solicitacao-exames" },
-    { "source": "/gerar-receita-vacinas", "destination": "/api/gerar-receita-vacinas" },
-    { "source": "/checkup", "destination": "/api/checkup" },
-    { "source": "/api/analytics/(.*)", "destination": "/api/analytics.py" },
-    { "source": "/analytics", "destination": "/analytics.html" },
-    { "source": "/analytics.html", "destination": "/analytics.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    { "src": "/checkup-intelligent", "dest": "/api/checkup-intelligent" },
+    { "src": "/gerar-solicitacao-exames", "dest": "/api/gerar-solicitacao-exames" },
+    { "src": "/gerar-receita-vacinas", "dest": "/api/gerar-receita-vacinas" },
+    { "src": "/api/analytics/(.*)", "dest": "/api/analytics.py" },
+    { "src": "/analytics", "dest": "/analytics.html" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ],
   "headers": [
     {
