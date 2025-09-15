@@ -1,19 +1,13 @@
 from flask import Flask, request, make_response
-from src.utils.cors import sanitize_private_network_header
 import json
 
 app = Flask(__name__)
-@app.route('/health', methods=['GET'])
-def health():
-    return make_response('ok', 200)
-
 
 def _corsify(resp):
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-    return sanitize_private_network_header(resp)
-
+    return resp
 
 @app.route('/', methods=['POST', 'OPTIONS'])
 def generate_vaccine_prescription():
@@ -23,23 +17,24 @@ def generate_vaccine_prescription():
     try:
         data = request.get_json(silent=True) or {}
         html = data.get('html')
+        
         if not html:
             recs = data.get('recommendations') or []
             lines = []
             for rec in recs:
-                if (rec.get('categoria') or '').lower() != 'vacina':
-                    continue
-                titulo = rec.get('titulo') or 'Vacina'
-                ref_html = rec.get('referencia_html') or ''
-                if ref_html:
-                    lines.append(f"<div><strong>{titulo}</strong><br><small>Ref.: {ref_html}</small></div>")
-                else:
-                    lines.append(f"<div><strong>{titulo}</strong></div>")
-            html = """
+                if (rec.get('categoria') or '').lower() == 'vacina':
+                    titulo = rec.get('titulo') or 'Vacina'
+                    ref_html = rec.get('referencia_html') or ''
+                    if ref_html:
+                        lines.append(f"<div><strong>{titulo}</strong><br><small>Ref.: {ref_html}</small></div>")
+                    else:
+                        lines.append(f"<div><strong>{titulo}</strong></div>")
+            
+            html = f"""
             <!DOCTYPE html>
-            <html><head><meta charset=\"UTF-8\"><title>Receita de Vacinas</title></head>
-            <body>{items}</body></html>
-            """.format(items='\n'.join(lines))
+            <html><head><meta charset="UTF-8"><title>Receita de Vacinas</title></head>
+            <body><h2>Receita de Vacinas</h2>{''.join(lines)}</body></html>
+            """
 
         resp = make_response(html, 200)
         resp.mimetype = 'text/html'
@@ -49,6 +44,6 @@ def generate_vaccine_prescription():
         err.mimetype = 'text/html'
         return _corsify(err)
 
-# Vercel handler
+# For Vercel
 def handler(request):
     return app(request.environ, lambda status, headers: None)

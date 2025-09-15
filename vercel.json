@@ -1,19 +1,28 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/*.py",
-      "use": "@vercel/python"
+  "functions": {
+    "api/checkup-intelligent.py": {
+      "runtime": "python3.9"
     },
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
+    "api/gerar-solicitacao-exames.py": {
+      "runtime": "python3.9"
+    },
+    "api/gerar-receita-vacinas.py": {
+      "runtime": "python3.9"
     }
-  ],
+  },
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api/checkup-intelligent",
+      "dest": "/api/checkup-intelligent.py"
+    },
+    {
+      "src": "/api/gerar-solicitacao-exames",
+      "dest": "/api/gerar-solicitacao-exames.py"
+    },
+    {
+      "src": "/api/gerar-receita-vacinas",
+      "dest": "/api/gerar-receita-vacinas.py"
     },
     {
       "src": "/(.*)",
