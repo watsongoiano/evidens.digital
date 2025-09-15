@@ -1,7 +1,5 @@
 {
-  "functions": {
-    "api/*.py": { "runtime": "python3.11" }
-  },
+
   "rewrites": [
     { "source": "/checkup-intelligent", "destination": "/api/checkup-intelligent" },
     { "source": "/checkup", "destination": "/api/checkup" },
