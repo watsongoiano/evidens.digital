@@ -135,7 +135,50 @@ Os arquivos buildados estarão em `dist/`
 - Sugestões baseadas em dados
 - Relatórios personalizados
 
-## 🔧 Tecnologias Utilizadas
+## � API principal e documentos gerados
+
+### POST /checkup-intelligent
+Gera recomendações personalizadas.
+
+- Corpo (JSON): dados do paciente (idade, sexo, medidas, histórico)
+- Resposta (JSON):
+	- `prevent_risk`: objeto com riscos calculados (10 e 30 anos)
+	- `risk_classification`: baixo | borderline | intermediario | alto
+	- `recommendations`: lista de recomendações
+		- Cada item inclui: `titulo`, `descricao`, `categoria`, `prioridade`, `referencia`
+		- Novos campos: `referencias` (lista com `{label,url}`) e `referencia_html` (HTML com links clicáveis)
+
+Observação: Os campos de referência são construídos automaticamente a partir de `referencia` via heurísticas internas, incluindo mapeamentos para USPSTF, ADA, AHA/ACC, KDIGO, SBIm/ANVISA, entre outros.
+
+### POST /gerar-solicitacao-exames e /gerar-receita-vacinas
+Geram documentos HTML imprimíveis a partir da lista de recomendações retornadas pelo endpoint acima.
+
+- Corpo (JSON): `{ recommendations: [...], patient_data: { nome, sexo, ... } }`
+- Negociação de conteúdo:
+	- Por padrão, retorna HTML se o cabeçalho `Accept` contiver `text/html`.
+	- Retorna JSON se o `Accept` for `application/json` ou se `?format=json`.
+	- Parâmetro `?format=html|json` (ou `response_type`) tem precedência sobre o cabeçalho.
+- Em caso de erro, a resposta acompanha o mesmo formato (HTML com página amigável ou JSON com `{error: ...}`).
+
+### Novas recomendações base por idade/sexo (exemplos)
+- HPV (Gardasil 9) até 45 anos, maior prioridade até 26 anos.
+- Hepatite B (esquema 0-1-6) em não vacinados.
+- Pneumocócicas a partir de 50 anos (VPC15/VPC13 e VPP23).
+
+## 🧪 Testes rápidos (smoke)
+
+Um script simples em `scripts/test_smoke.py` valida:
+- Inclusão de HPV, Hepatite B e Pneumococo nas recomendações quando aplicável
+- Presença de `referencia_html` em pelo menos uma recomendação
+- Negociação de conteúdo dos endpoints de documentos (HTML vs JSON)
+
+Como executar localmente:
+
+```bash
+python scripts/test_smoke.py
+```
+
+## �🔧 Tecnologias Utilizadas
 
 ### Backend
 - **Flask** - Framework web Python

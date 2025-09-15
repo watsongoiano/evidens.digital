@@ -602,7 +602,7 @@
                                 </button>
                                 <div class="recommendation-title">${rec.titulo}</div>
                                 <div class="recommendation-description">${rec.descricao}</div>
-                                <div class="recommendation-reference">${rec.referencia || 'USPSTF/ADA/KDIGO/CDC'}</div>
+                                <div class="recommendation-reference">${rec.referencia_html ? rec.referencia_html : (rec.referencia || 'USPSTF/ADA/KDIGO/CDC')}</div>
                             </div>
                         `;
                     });
