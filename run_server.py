@@ -10,10 +10,12 @@ from src.routes.checkup import checkup_bp
 from src.routes.checkup_intelligent import checkup_intelligent_bp
 from src.routes.database_api import database_api_bp
 from src.utils.analytics import analytics, track_visit
+from src.utils.cors import register_private_network_sanitizer
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'src', 'static'))
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
 CORS(app)
+register_private_network_sanitizer(app)
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(checkup_bp, url_prefix='/api')
 app.register_blueprint(checkup_intelligent_bp)
