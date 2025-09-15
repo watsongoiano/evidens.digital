@@ -102,9 +102,11 @@ class Recomendacao(db.Model):
     
     titulo = db.Column(db.String(200), nullable=False)
     descricao = db.Column(db.Text)
+    subtitulo = db.Column(db.String(200))
     categoria = db.Column(db.String(50))  # 'laboratorio', 'imagem', 'vacina', 'outras'
     prioridade = db.Column(db.String(20))  # 'alta', 'media', 'baixa'
     referencia = db.Column(db.String(100))
+    grau_evidencia = db.Column(db.String(20))
     
     # Status da recomendação
     status = db.Column(db.String(20), default='pendente')  # 'pendente', 'realizada', 'cancelada'
@@ -122,9 +124,11 @@ class Recomendacao(db.Model):
             'checkup_id': self.checkup_id,
             'titulo': self.titulo,
             'descricao': self.descricao,
+            'subtitulo': self.subtitulo,
             'categoria': self.categoria,
             'prioridade': self.prioridade,
             'referencia': self.referencia,
+            'grau_evidencia': self.grau_evidencia,
             'status': self.status,
             'data_realizacao': self.data_realizacao.isoformat() if self.data_realizacao else None,
             'observacoes': self.observacoes,

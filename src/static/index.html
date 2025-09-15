@@ -771,6 +771,8 @@
                     categoryDiv.innerHTML = `<h3 style="color: #2d3748; margin: 20px 0 15px 0;">${categories[category]}</h3>`;
                     
                     categoryRecs.forEach(rec => {
+                        const subtitulo = (rec && rec.subtitulo) ? rec.subtitulo : '';
+                        const grau = (rec && rec.grau_evidencia) ? rec.grau_evidencia : '';
                         const recDiv = document.createElement('div');
                         recDiv.className = `recommendation-item ${rec.prioridade}`;
                         recDiv.innerHTML = `
@@ -778,8 +780,9 @@
                                 ${rec.titulo}
                                 <span class="priority-badge ${rec.prioridade}">${rec.prioridade}</span>
                             </div>
+                            ${subtitulo ? `<div class="recommendation-description" style="font-weight:600; color:#2d3748;">${subtitulo}</div>` : ''}
                             <div class="recommendation-description">${rec.descricao}</div>
-                            <div class="recommendation-reference">${rec.referencia}</div>
+                            <div class="recommendation-reference">${rec.referencia}${grau ? ` • Grau de evidência: <strong>${grau}</strong>` : ''}</div>
                         `;
                         categoryDiv.appendChild(recDiv);
                     });

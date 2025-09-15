@@ -176,30 +176,38 @@ def generate_biomarker_recommendations(risk_level, age, sex):
             {
                 'titulo': 'Anti-HIV 1 e 2, soro',
                 'descricao': 'Teste para detecção de HIV',
+                'subtitulo': 'Rastreamento de HIV',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS 2024'
+                'referencia': 'MS 2024',
+                'grau_evidencia': 'A'
             },
             {
                 'titulo': 'Anti-HCV IgG, soro',
                 'descricao': 'Teste para detecção de Hepatite C',
+                'subtitulo': 'Rastreamento de Hepatite C',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS 2024'
+                'referencia': 'MS 2024',
+                'grau_evidencia': 'A'
             },
             {
                 'titulo': 'TOTG-75g, soro',
                 'descricao': 'Teste oral de tolerância à glicose',
+                'subtitulo': 'Avaliação de intolerância à glicose',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'ADA 2024'
+                'referencia': 'ADA 2024',
+                'grau_evidencia': 'A'
             },
             {
                 'titulo': 'HbA1c, soro',
                 'descricao': 'Hemoglobina glicada',
+                'subtitulo': 'Rastreamento de diabetes',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'ADA 2024'
+                'referencia': 'ADA 2024',
+                'grau_evidencia': 'A'
             }
         ])
     
@@ -222,26 +230,32 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'Glicemia de jejum',
         'descricao': 'ADA 2024: Rastreamento universal ≥35 anos',
+        'subtitulo': 'Rastreamento de diabetes',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
-        'referencia': 'ADA 2024'
+        'referencia': 'ADA 2024',
+        'grau_evidencia': 'A'
     })
     
     _add_rec({
         'titulo': 'Colesterol total e frações, soro',
         'descricao': 'Colesterol total, HDL, LDL e triglicerídeos',
+        'subtitulo': 'Perfil lipídico',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
-        'referencia': 'AHA/ACC 2025'
+        'referencia': 'AHA/ACC 2025',
+        'grau_evidencia': 'B'
     })
     
     # Exames de imagem
     _add_rec({
         'titulo': 'Eletrocardiograma de repouso',
         'descricao': 'ECG de 12 derivações - Rastreamento cardiovascular para hipertensão, diabetes ou ≥40 anos',
+        'subtitulo': 'ECG de 12 derivações',
         'categoria': 'imagem',
         'prioridade': 'alta',
-        'referencia': 'SBC 2019 / AHA/ACC 2019'
+        'referencia': 'SBC 2019 / AHA/ACC 2019',
+        'grau_evidencia': 'C'
     })
     
     # Rastreamento de câncer por idade e sexo
@@ -250,27 +264,33 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
             _add_rec({
                 'titulo': 'Mamografia Digital - Bilateral',
                 'descricao': 'Mamografia bienal (40-74 anos)',
+                'subtitulo': 'Rastreamento de câncer de mama',
                 'categoria': 'imagem',
                 'prioridade': 'alta',
-                'referencia': 'USPSTF 2024 Grau B'
+                'referencia': 'USPSTF 2024',
+                'grau_evidencia': 'B'
             })
         
         if 21 <= age <= 65:
             _add_rec({
                 'titulo': 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular',
                 'descricao': 'Papanicolaou a cada 3 anos (21-65 anos)',
+                'subtitulo': 'Rastreamento de câncer do colo do útero',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'USPSTF Grau A'
+                'referencia': 'USPSTF',
+                'grau_evidencia': 'A'
             })
     
     if sex == 'masculino' and age >= 50:
         _add_rec({
             'titulo': 'PSA total, soro',
             'descricao': 'Rastreamento de câncer de próstata (≥50 anos)',
+            'subtitulo': 'Antígeno Prostático Específico',
             'categoria': 'laboratorio',
             'prioridade': 'media',
-            'referencia': 'USPSTF 2018 Grau C'
+            'referencia': 'USPSTF 2018',
+            'grau_evidencia': 'C'
         })
     
     # Colonoscopia
@@ -278,18 +298,22 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'Colonoscopia de Rastreio com ou sem biópsia',
             'descricao': 'Colonoscopia a cada 10 anos (45-75 anos)',
+            'subtitulo': 'Rastreamento de câncer colorretal',
             'categoria': 'imagem',
             'prioridade': 'alta',
-            'referencia': 'USPSTF 2021 Grau B'
+            'referencia': 'USPSTF 2021',
+            'grau_evidencia': 'B'
         })
     
     # Vacinas
     _add_rec({
         'titulo': 'Vacina Influenza Tetravalente',
         'descricao': 'Dose anual. Aplicar em dose única, INTRAMUSCULAR, anualmente.',
+        'subtitulo': 'Imunização sazonal contra influenza',
         'categoria': 'vacina',
         'prioridade': 'alta',
-        'referencia': 'SBIm/ANVISA 2024'
+        'referencia': 'SBIm/ANVISA 2024',
+        'grau_evidencia': 'A'
     })
 
     # HPV (masculino e feminino) até 45 anos
@@ -298,18 +322,22 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'Gardasil 9® (Vacina Papilomavírus Humano 9-Valente)',
             'descricao': '3 doses. Aplicar 0, 2 e 6 meses.',
+            'subtitulo': 'Prevenção de HPV e neoplasias relacionadas',
             'categoria': 'vacina',
             'prioridade': prioridade_hpv,
-            'referencia': 'SBIm/ANVISA 2024'
+            'referencia': 'SBIm/ANVISA 2024',
+            'grau_evidencia': 'A'
         })
 
     # Hepatite B (adultos não vacinados)
     _add_rec({
         'titulo': 'Hepatite B (VHB)',
         'descricao': 'Esquema de 3 doses (0, 1, 6 meses) em não vacinados.',
+        'subtitulo': 'Imunização contra hepatite B',
         'categoria': 'vacina',
         'prioridade': 'alta',
-        'referencia': 'SBIm/ANVISA 2024'
+        'referencia': 'SBIm/ANVISA 2024',
+        'grau_evidencia': 'A'
     })
 
     # Pneumocócicas a partir de 50 anos
@@ -317,16 +345,20 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'VPC15 (Vaxneuvance®) ou VPC13, 0,5ml',
             'descricao': '1 dose. Pode ser coadministrada com Shingrix®, Efluelda® e Arexvy®',
+            'subtitulo': 'Vacina pneumocócica conjugada',
             'categoria': 'vacina',
             'prioridade': 'alta',
-            'referencia': 'SBIm/ANVISA 2024'
+            'referencia': 'SBIm/ANVISA 2024',
+            'grau_evidencia': 'A'
         })
         _add_rec({
             'titulo': 'VPP23, 0,5ml',
             'descricao': '1 dose 6 meses após VPC15/VPC13; reforço 5 anos após a primeira dose de VPC',
+            'subtitulo': 'Vacina pneumocócica polissacarídica',
             'categoria': 'vacina',
             'prioridade': 'alta',
-            'referencia': 'SBIm/ANVISA 2024'
+            'referencia': 'SBIm/ANVISA 2024',
+            'grau_evidencia': 'A'
         })
     
     return recommendations
@@ -417,9 +449,11 @@ def generate_intelligent_recommendations():
                     checkup_id=checkup.id,
                     titulo=rec['titulo'],
                     descricao=rec['descricao'],
+                    subtitulo=rec.get('subtitulo'),
                     categoria=rec['categoria'],
                     prioridade=rec['prioridade'],
-                    referencia=rec['referencia']
+                    referencia=rec['referencia'],
+                    grau_evidencia=rec.get('grau_evidencia')
                 )
                 db.session.add(recomendacao)
             

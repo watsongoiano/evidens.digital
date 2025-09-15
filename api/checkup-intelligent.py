@@ -183,25 +183,31 @@ def generate_recommendations(patient_data, risk_level):
     add_unique({
         'titulo': 'Glicemia de jejum',
         'descricao': 'ADA 2024: Rastreamento universal ≥35 anos',
+        'subtitulo': 'Rastreamento de diabetes',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
         'referencia': 'ADA 2024',
+        'grau_evidencia': 'A',
     })
     add_unique({
         'titulo': 'Colesterol total e frações, soro',
         'descricao': 'Colesterol total, HDL, LDL e triglicerídeos',
+        'subtitulo': 'Perfil lipídico',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
         'referencia': 'AHA/ACC 2025',
+        'grau_evidencia': 'B',
     })
 
     # ECG
     add_unique({
         'titulo': 'Eletrocardiograma de repouso',
         'descricao': 'ECG de 12 derivações - ≥40 anos ou com comorbidades',
+        'subtitulo': 'ECG de 12 derivações',
         'categoria': 'imagem',
         'prioridade': 'alta',
         'referencia': 'SBC 2019 / AHA/ACC 2019',
+        'grau_evidencia': 'C',
     })
 
     # Sexo/Idade
@@ -209,25 +215,31 @@ def generate_recommendations(patient_data, risk_level):
         add_unique({
             'titulo': 'Mamografia Digital - Bilateral',
             'descricao': 'Mamografia bienal (40-74 anos)',
+            'subtitulo': 'Rastreamento de câncer de mama',
             'categoria': 'imagem',
             'prioridade': 'alta',
-            'referencia': 'USPSTF 2024 Grau B',
+            'referencia': 'USPSTF 2024',
+            'grau_evidencia': 'B',
         })
     if sex in ['feminino', 'female'] and 21 <= age <= 65:
         add_unique({
             'titulo': 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular',
             'descricao': 'Papanicolaou/HPV a cada 3 anos (21-65 anos)',
+            'subtitulo': 'Rastreamento de câncer do colo do útero',
             'categoria': 'laboratorio',
             'prioridade': 'alta',
-            'referencia': 'USPSTF Grau A',
+            'referencia': 'USPSTF',
+            'grau_evidencia': 'A',
         })
     if sex in ['masculino', 'male'] and age >= 50:
         add_unique({
             'titulo': 'PSA total, soro',
             'descricao': 'Rastreamento de câncer de próstata (≥50 anos)',
+            'subtitulo': 'Antígeno Prostático Específico',
             'categoria': 'laboratorio',
             'prioridade': 'media',
-            'referencia': 'USPSTF 2018 Grau C',
+            'referencia': 'USPSTF 2018',
+            'grau_evidencia': 'C',
         })
 
     # Colonoscopia (45-75)
@@ -235,18 +247,22 @@ def generate_recommendations(patient_data, risk_level):
         add_unique({
             'titulo': 'Colonoscopia de Rastreio com ou sem biópsia',
             'descricao': 'Colonoscopia a cada 10 anos (45-75 anos)',
+            'subtitulo': 'Rastreamento de câncer colorretal',
             'categoria': 'imagem',
             'prioridade': 'alta',
-            'referencia': 'USPSTF 2021 Grau B',
+            'referencia': 'USPSTF 2021',
+            'grau_evidencia': 'B',
         })
 
     # Vacinas
     add_unique({
         'titulo': 'Vacina Influenza Tetravalente',
         'descricao': 'Dose anual. Aplicar dose única IM anualmente.',
+        'subtitulo': 'Imunização sazonal contra influenza',
         'categoria': 'vacina',
         'prioridade': 'alta',
         'referencia': 'SBIm/ANVISA 2024',
+        'grau_evidencia': 'A',
     })
 
     if age <= 45:
@@ -254,33 +270,41 @@ def generate_recommendations(patient_data, risk_level):
         add_unique({
             'titulo': 'Gardasil 9® (Vacina Papilomavírus Humano 9-Valente)',
             'descricao': '3 doses. Aplicar 0, 2 e 6 meses.',
+            'subtitulo': 'Prevenção de HPV e neoplasias relacionadas',
             'categoria': 'vacina',
             'prioridade': prioridade_hpv,
             'referencia': 'SBIm/ANVISA 2024',
+            'grau_evidencia': 'A',
         })
 
     add_unique({
         'titulo': 'Hepatite B (VHB)',
         'descricao': 'Esquema de 3 doses (0, 1, 6 meses) em não vacinados.',
+        'subtitulo': 'Imunização contra hepatite B',
         'categoria': 'vacina',
         'prioridade': 'alta',
         'referencia': 'SBIm/ANVISA 2024',
+        'grau_evidencia': 'A',
     })
 
     if age >= 50:
         add_unique({
             'titulo': 'VPC15 (Vaxneuvance®) ou VPC13, 0,5ml',
             'descricao': '1 dose. Pode ser coadministrada com Shingrix®, Efluelda® e Arexvy®',
+            'subtitulo': 'Vacina pneumocócica conjugada',
             'categoria': 'vacina',
             'prioridade': 'alta',
             'referencia': 'SBIm/ANVISA 2024',
+            'grau_evidencia': 'A',
         })
         add_unique({
             'titulo': 'VPP23, 0,5ml',
             'descricao': '1 dose 6 meses após VPC15/VPC13; reforço após 5 anos',
+            'subtitulo': 'Vacina pneumocócica polissacarídica',
             'categoria': 'vacina',
             'prioridade': 'alta',
             'referencia': 'SBIm/ANVISA 2024',
+            'grau_evidencia': 'A',
         })
 
     # Risco intermediário/alto: biomarcadores adicionais
@@ -288,16 +312,20 @@ def generate_recommendations(patient_data, risk_level):
         add_unique({
             'titulo': 'Anti-HIV 1 e 2, soro',
             'descricao': 'Teste para detecção de HIV',
+            'subtitulo': 'Rastreamento de HIV',
             'categoria': 'laboratorio',
             'prioridade': 'alta',
             'referencia': 'MS 2024 / USPSTF',
+            'grau_evidencia': 'A',
         })
         add_unique({
             'titulo': 'HbA1c, soro',
             'descricao': 'Hemoglobina glicada',
+            'subtitulo': 'Rastreamento de diabetes',
             'categoria': 'laboratorio',
             'prioridade': 'alta',
             'referencia': 'ADA 2024',
+            'grau_evidencia': 'A',
         })
 
     return recommendations
@@ -356,7 +384,7 @@ def handle_intelligent_checkup():
         # Generate and normalize recommendations
         raw_recs = generate_recommendations(patient_data, risk_classification['level'])
 
-        # Build reference links using shared util if available
+    # Build reference links using shared util if available
         try:
             sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
             from src.utils.reference_links import build_reference_links, build_reference_html  # type: ignore
@@ -368,33 +396,35 @@ def handle_intelligent_checkup():
         for r in raw_recs:
             # Map keys
             titulo = (r.get('titulo') or r.get('name') or '').strip()
-            # Categoria
+            # Categoria (align with frontend buckets)
             cat_raw = (r.get('categoria') or r.get('category') or '').lower()
+            title_l = titulo.lower()
             if 'vacina' in cat_raw:
                 categoria = 'vacina'
-            elif 'imagem' in cat_raw:
+            elif 'imagem' in cat_raw or any(k in title_l for k in ['mamografia','colonoscopia','tomografia','ressonância','ressonancia','ecg','eletrocardiograma']):
                 categoria = 'imagem'
-            elif 'rastreamento' in cat_raw or any(k in titulo.lower() for k in ['mamografia','colonoscopia','citologia','psa','tomografia']):
-                categoria = 'rastreamento'
-            elif 'laborator' in cat_raw or any(k in titulo.lower() for k in ['hba1c','glicemia','colesterol','hdl','ldl']):
-                categoria = 'laboratorial'
+            elif 'laborator' in cat_raw or any(k in title_l for k in ['hba1c','glicemia','colesterol','hdl','ldl','psa','creatinina','totg']):
+                categoria = 'laboratorio'
             else:
-                # Fallback heuristic by keywords
-                categoria = 'laboratorio' if any(k in titulo.lower() for k in ['glicemia','colesterol','hiv','hbv','hcv','hba1c','psa']) else 'outras'
+                categoria = 'outras'
 
             prioridade = (r.get('prioridade') or r.get('priority') or 'media').strip().lower()
             # Normalize to alta|media|baixa
             if prioridade not in ['alta','media','baixa']:
                 prioridade = 'media'
             descricao = r.get('descricao') or r.get('description') or ''
+            subtitulo = r.get('subtitulo') or r.get('subtitle') or ''
             referencia = r.get('referencia') or r.get('reference') or 'USPSTF/ADA/KDIGO/CDC'
+            grau_evidencia = r.get('grau_evidencia') or r.get('evidence_grade') or ''
 
             rec = {
                 'titulo': titulo,
                 'descricao': descricao,
+                'subtitulo': subtitulo or None,
                 'categoria': categoria,
                 'prioridade': prioridade,
                 'referencia': referencia,
+                'grau_evidencia': grau_evidencia or None,
             }
             # Enrich references
             try:

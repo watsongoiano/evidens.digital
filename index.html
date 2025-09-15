@@ -597,6 +597,8 @@
                     categories[categoryName].forEach((rec, index) => {
                         const statusClass = rec.status ? `status-${rec.status}` : '';
                         const cardClass = rec.status === 'overdue' ? 'overdue' : rec.status === 'recent' ? 'recent' : '';
+                        const subtitulo = rec && rec.subtitulo ? rec.subtitulo : '';
+                        const grau = rec && rec.grau_evidencia ? rec.grau_evidencia : '';
                         
                         html += `
                             <div class="recommendation-card ${cardClass}" data-rec-id="${rec.titulo}">
@@ -606,8 +608,9 @@
                                     ✕
                                 </button>
                                 <div class="recommendation-title">${rec.titulo}</div>
+                                ${subtitulo ? `<div class="recommendation-description" style="font-weight:600; color:#2d3748;">${subtitulo}</div>` : ''}
                                 <div class="recommendation-description">${rec.descricao}</div>
-                                <div class="recommendation-reference">${rec.referencia || 'USPSTF/ADA/KDIGO/CDC'}</div>
+                                <div class="recommendation-reference">${rec.referencia || 'USPSTF/ADA/KDIGO/CDC'}${grau ? ` • Grau de evidência: <strong>${grau}</strong>` : ''}</div>
                             </div>
                         `;
                     });
