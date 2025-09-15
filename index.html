@@ -88,6 +88,78 @@
 
 
 
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 4rem;
+            position: relative;
+        }
+
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            border: 2px solid #e0e6ed;
+            border-radius: 50px;
+            outline: none;
+            transition: all 0.3s;
+            background: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .search-input:disabled {
+            opacity: 0.7;
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: not-allowed;
+            transition: background 0.3s;
+            opacity: 0.7;
+        }
+
+        .dev-badge {
+            position: absolute;
+            top: -12px;
+            right: 120px;
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .dev-note {
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-style: italic;
+            margin: 0;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -366,6 +438,15 @@
     <section class="hero">
         <h1>Clinical decision support</h1>
         <p>Evidence-based resources for healthcare professionals</p>
+        
+        <div class="search-container">
+            <div class="search-wrapper">
+                <input type="text" class="search-input" placeholder="Search clinical guidelines, topics, etc." disabled>
+                <button class="search-btn" disabled>Search</button>
+                <div class="dev-badge">🚧 Em Desenvolvimento</div>
+            </div>
+            <p class="dev-note">Esta funcionalidade está sendo desenvolvida e estará disponível em breve.</p>
+        </div>
     </section>
 
     <!-- Features Section -->
