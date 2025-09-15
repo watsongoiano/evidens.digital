@@ -49,3 +49,7 @@ def generate_exams_document():
         err = make_response(f"<html><body>Erro: {str(e)}</body></html>", 500)
         err.mimetype = 'text/html'
         return _corsify(err)
+
+# Vercel handler
+def handler(request):
+    return app(request.environ, lambda status, headers: None)

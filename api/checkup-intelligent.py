@@ -469,5 +469,9 @@ def root_checkup():
     """
     return handle_intelligent_checkup()
 
+# Vercel handler
+def handler(request):
+    return app(request.environ, lambda status, headers: None)
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=3000)
