@@ -7,6 +7,7 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="apple-touch-icon" href="/favicon.png">
+    <link rel="stylesheet" href="override-styles.css">
     <style>
         * {
             margin: 0;
@@ -22,8 +23,9 @@
         }
 
         .header {
-            background: #e9ecef;
+            background: #ffffff;
             padding: 1rem 2rem;
+            border-bottom: 1px solid #e9ecef;
         }
 
         .nav {
@@ -40,23 +42,14 @@
             transform: translateX(-50%);
             text-decoration: none;
             display: flex;
-            flex-direction: column;
             align-items: center;
             line-height: 1;
         }
 
         .logo-main {
             font-size: 1.8rem;
-            font-weight: 300;
+            font-weight: 400;
             color: #2c3e50;
-            margin-bottom: -5px;
-        }
-
-        .logo-sub {
-            font-size: 1.2rem;
-            font-weight: 300;
-            font-style: italic;
-            color: #27ae60;
         }
 
         .nav-links {
@@ -85,7 +78,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -144,7 +137,7 @@
         .form-group select,
         .form-group textarea {
             padding: 12px 15px;
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
             background: white;
@@ -155,7 +148,7 @@
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #007bff;
+            border-color: #999;
         }
 
         .form-group textarea {
@@ -424,7 +417,6 @@
             </div>
             <a href="/" class="logo">
                 <span class="logo-main">evidēns</span>
-                <span class="logo-sub">check</span>
             </a>
             <div class="nav-links">
                 <a href="#contact">Contact</a>
@@ -623,6 +615,44 @@
     </div>
 
     <script src="prevent_calculator.js"></script>
+    <script>
+        // Função para remover cores dos campos
+        function removeFieldColors() {
+            const allInputs = document.querySelectorAll('input, select, textarea');
+            allInputs.forEach(input => {
+                input.style.border = '1px solid #ccc !important';
+                input.style.backgroundColor = 'white !important';
+                input.style.color = '#333 !important';
+                input.style.outline = 'none !important';
+                input.style.boxShadow = 'none !important';
+                
+                // Remover classes que possam estar aplicando cores
+                input.className = input.className.replace(/\b(border-\w+|bg-\w+|text-\w+)\b/g, '');
+                
+                // Event listeners para manter o estilo
+                input.addEventListener('focus', function() {
+                    this.style.border = '1px solid #999 !important';
+                    this.style.backgroundColor = 'white !important';
+                    this.style.color = '#333 !important';
+                    this.style.outline = 'none !important';
+                    this.style.boxShadow = 'none !important';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.style.border = '1px solid #ccc !important';
+                    this.style.backgroundColor = 'white !important';
+                    this.style.color = '#333 !important';
+                });
+            });
+        }
+
+        // Executar quando a página carregar
+        document.addEventListener('DOMContentLoaded', removeFieldColors);
+        
+        // Executar novamente após um pequeno delay para garantir
+        setTimeout(removeFieldColors, 100);
+        setTimeout(removeFieldColors, 500);
+    </script>
     <script>
         function showLoading() {
             const placeholder = document.getElementById('placeholder');
