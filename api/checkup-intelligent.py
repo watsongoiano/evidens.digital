@@ -77,6 +77,31 @@ class handler(BaseHTTPRequestHandler):
                     'categoria': 'laboratorial'
                 })
             
+            # 3. RASTREAMENTO DE HIV - USPSTF 2019 (Grau A)
+            # Critérios: Adolescentes e adultos de 15 a 65 anos
+            if 15 <= idade <= 65:
+                add_recommendation({
+                    'titulo': 'Rastreamento da Infecção pelo HIV (Adolescentes e Adultos)',
+                    'descricao': 'Rastrear adolescentes e adultos de 15 a 65 anos com imunoensaio de antígeno/anticorpo para HIV. Pessoas mais jovens ou mais velhas com risco aumentado de infecção também devem ser rastreadas.',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2019',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2019.6587',
+                    'categoria': 'laboratorial'
+                })
+            
+            # 4. RASTREAMENTO DE HIV EM GESTANTES - USPSTF 2019 (Grau A)
+            # Critérios: Todas as gestantes
+            gestante = data.get('gestante') == 'on'
+            if gestante:
+                add_recommendation({
+                    'titulo': 'Rastreamento da Infecção pelo HIV (Gestantes)',
+                    'descricao': 'Rastrear todas as gestantes para infecção pelo HIV, incluindo aquelas que se apresentam em trabalho de parto com estado sorológico desconhecido. Nesses casos, utilizar um teste rápido de HIV.',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2019',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2019.6587',
+                    'categoria': 'laboratorial'
+                })
+            
             response_data = {
                 'recommendations': recommendations,
                 'patient_data': data,
