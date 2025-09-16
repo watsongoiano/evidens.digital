@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intelligent Tools - Evidens</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
     <style>
         * {
             margin: 0;
@@ -744,15 +746,38 @@
                     html += `<div class="recommendation-category">
                         <h4>${categoria}</h4>`;
                     
-                    categorias[categoria].forEach(rec => {
+                    categorias[categoria].forEach((rec, index) => {
                         const titulo = rec.titulo || 'Recomendação';
                         const subtitulo = rec.subtitulo || '';
                         const grauEvidencia = rec.grau_evidencia || '';
+                        const indicacao = rec.indicacao || subtitulo;
+                        const referencia = rec.referencia || '';
                         
-                        html += `<div class="recommendation-item">
-                            <h5>${titulo}</h5>
-                            ${subtitulo ? `<p>${subtitulo}</p>` : ''}
-                            ${grauEvidencia ? `<span class="evidence-grade">Grau de evidência: ${grauEvidencia}</span>` : ''}
+                        // Determinar cor do grau de evidência
+                        let grauColor = '#28a745'; // Verde para A
+                        if (grauEvidencia.includes('B')) grauColor = '#ffc107'; // Amarelo para B
+                        if (grauEvidencia.includes('C')) grauColor = '#fd7e14'; // Laranja para C
+                        
+                        html += `<div class="recommendation-card" style="background: white; border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #3498db; position: relative;">
+                            <button onclick="removeRecommendation(this)" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.2rem; color: #95a5a6; cursor: pointer; padding: 5px;">×</button>
+                            
+                            <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                                <span style="background: ${grauColor}; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-right: 1rem;">
+                                    ${grauEvidencia || 'ALTA'}
+                                </span>
+                            </div>
+                            
+                            <h5 style="color: #2c3e50; margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 600;">
+                                ${titulo}
+                            </h5>
+                            
+                            ${indicacao ? `<p style="color: #7f8c8d; margin: 0 0 1rem 0; font-size: 0.9rem; line-height: 1.4;">
+                                ${indicacao}
+                            </p>` : ''}
+                            
+                            ${referencia ? `<p style="color: #95a5a6; margin: 0; font-size: 0.8rem; font-style: italic;">
+                                ${referencia}
+                            </p>` : ''}
                         </div>`;
                     });
                     
@@ -828,6 +853,18 @@
 
         function anexarPDFs() {
             alert('Funcionalidade em desenvolvimento');
+        }
+
+        function removeRecommendation(button) {
+            const card = button.closest('.recommendation-card');
+            if (card) {
+                card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(20px)';
+                setTimeout(() => {
+                    card.remove();
+                }, 300);
+            }
         }
     </script>
 </body>
