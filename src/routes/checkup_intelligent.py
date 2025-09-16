@@ -684,9 +684,6 @@ def gerar_solicitacao_exames():
         nome_paciente = patient_data.get('nome', 'Paciente')
         sexo = (patient_data.get('sexo') or '').strip()
 
-        # Data atual
-        data_atual = datetime.now().strftime("%d/%m/%Y")
-
         # Filtrar exames (laboratoriais, rastreamento e imagem) e organizar por tipo
         exames_laboratoriais = []
         exames_imagem = []
@@ -695,7 +692,7 @@ def gerar_solicitacao_exames():
             try:
                 categoria = (rec.get('categoria') or '').lower()
                 titulo = (rec.get('titulo') or '').lower()
-                
+
                 # Categorizar exames laboratoriais
                 if (categoria in ['laboratorial', 'laboratorio'] or
                     'soro' in titulo or 'sangue' in titulo or 'urina' in titulo or
@@ -704,10 +701,10 @@ def gerar_solicitacao_exames():
                     'hepatite' in titulo or 'totg' in titulo):
                     exames_laboratoriais.append(rec)
                     print(f"Exame laboratorial adicionado: {rec.get('titulo')}")
-                    
+
                 # Categorizar exames de imagem e rastreamento
                 elif (categoria in ['rastreamento', 'imagem'] or
-                      'mamografia' in titulo or 'colonoscopia' in titulo or 
+                      'mamografia' in titulo or 'colonoscopia' in titulo or
                       'eletrocardiograma' in titulo or 'ultrassom' in titulo or
                       'tomografia' in titulo or 'densitometria' in titulo):
                     exames_imagem.append(rec)
@@ -718,27 +715,26 @@ def gerar_solicitacao_exames():
                 print(f"Erro ao processar recomendação: {e}")
                 continue
 
-        exames = exames_laboratoriais + exames_imagem
-
-        if not exames:
+        if not exames_laboratoriais and not exames_imagem:
             msg = 'Nenhum exame encontrado para gerar solicitação'
             if _wants_html(request):
                 return Response(_html_error_page('Não foi possível gerar', msg), status=400, mimetype='text/html')
             return jsonify({'error': msg}), 400
 
-        # Rastrear geração de solicitação de exames
-        try:
-            analytics.track_exam_request()
-        except Exception:
-            pass
+        emissao_dt = datetime.now()
+        data_atual = emissao_dt.strftime("%d/%m/%Y")
+        hora_atual = emissao_dt.strftime('%H:%M')
+        timestamp_code = emissao_dt.strftime('%Y%m%d%H%M%S')
+        timestamp_filename = emissao_dt.strftime('%Y%m%d-%H%M%S')
+        sexo_exibicao = sexo.capitalize() if sexo else 'Não informado'
 
-        # Gerar HTML para impressão
-        html_content = f"""
+        def montar_documento(exames, titulo_documento, codigo_documento, titulo_pagina):
+            html_doc = [f"""
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset=\"UTF-8\">
-            <title>Solicitação de Exames - {nome_paciente}</title>
+            <title>{titulo_pagina}</title>
             <style>
                 body {{
                     font-family: Arial, sans-serif;
@@ -832,10 +828,10 @@ def gerar_solicitacao_exames():
                 <button class=\"print-btn\" onclick=\"window.print()\">🖨️ Imprimir / Salvar PDF</button>
                 <button class=\"print-btn close-btn\" onclick=\"window.close()\">✖️ Fechar</button>
             </div>
-            
+
             <div class=\"document-container\">
                 <div class=\"header\">
-                    <h1>SOLICITAÇÃO DE EXAME</h1>
+                    <h1>{titulo_documento}</h1>
                     <div class=\"clinic-info\">
                         <p><strong>Órion Business and Health</strong> &nbsp;&nbsp;&nbsp;&nbsp; Data de emissão: {data_atual}</p>
                         <p>Endereço: Avenida Portugal, 1148, Setor Marista, Goiânia - GO</p>
@@ -849,45 +845,165 @@ def gerar_solicitacao_exames():
                 </div>
 
                 <div class=\"patient-info\">
-                    <p><strong>Paciente:</strong> {nome_paciente} &nbsp;&nbsp;&nbsp;&nbsp; <strong>Sexo:</strong> {sexo.capitalize()}</p>
+                    <p><strong>Paciente:</strong> {nome_paciente} &nbsp;&nbsp;&nbsp;&nbsp; <strong>Sexo:</strong> {sexo_exibicao}</p>
                 </div>
 
                 <div class=\"exam-list\">
                     <p><strong>Solicito:</strong></p>
                     <ul>
-        """
+        """]
 
-        for exam in exames:
-            titulo = exam.get('titulo', 'Exame')
-            ref_html = exam.get('referencia_html')
-            html_content += f"                        <li>• {titulo}"
-            if ref_html:
-                html_content += f"<br><small>Ref.: {ref_html}</small>"
-            html_content += "</li>\n"
+            for exam in exames:
+                titulo = exam.get('titulo', 'Exame')
+                ref_html = exam.get('referencia_html')
+                referencia = f"<br><small>Ref.: {ref_html}</small>" if ref_html else ''
+                html_doc.append(f"                        <li>• {titulo}{referencia}</li>\n")
 
-        html_content += f"""
+            html_doc.append(f"""
                     </ul>
                 </div>
 
                 <div class=\"signature\">
-                    <p>Solicitação de exame assinado digitalmente por <strong>RODOLFO CAMBRAIA FROTA</strong> em</p>
-                    <p>{data_atual} {datetime.now().strftime('%H:%M')}, conforme MP nº 2.200-2/2001, Resolução Nº CFM 2.299/2021 e</p>
+                    <p>Solicitação de exame assinada digitalmente por <strong>RODOLFO CAMBRAIA FROTA</strong> em</p>
+                    <p>{data_atual} {hora_atual}, conforme MP nº 2.200-2/2001, Resolução Nº CFM 2.299/2021 e</p>
                     <p>Resolução CFM Nº 2.381/2024.</p>
                     <br>
                     <p>O documento médico poderá ser validado em https://validar.iti.gov.br.</p>
                     <br>
                     <p>Acesse o documento em:</p>
                     <p>https://prescricao.cfm.org.br/api/documento?_format=application/pdf</p>
-                    <p><strong>CFMP-SE-{datetime.now().strftime('%Y%m%d%H%M')}</strong></p>
+                    <p><strong>{codigo_documento}</strong></p>
                 </div>
             </div>
         </body>
         </html>
-        """
+        """)
+
+            return ''.join(html_doc)
+
+        documentos = {}
+
+        if exames_laboratoriais:
+            titulo_lab = f"SOLICITAÇÃO DE EXAMES LABORATORIAIS"
+            codigo_lab = f"CFMP-SE-LAB-{timestamp_code}"
+            titulo_html_lab = f"{titulo_lab} - {nome_paciente} - {timestamp_code}"
+            documentos['laboratorial'] = {
+                'html': montar_documento(exames_laboratoriais, titulo_lab, codigo_lab, titulo_html_lab),
+                'title': titulo_html_lab,
+                'document_code': codigo_lab,
+                'filename': f"solicitacao-exames-laboratoriais-{timestamp_filename}.html",
+                'pdf_hint': f"solicitacao-exames-laboratoriais-{timestamp_filename}.pdf",
+                'window_name': f"solicitacao-exames-laboratoriais-{timestamp_code}",
+                'generated_at': emissao_dt.isoformat(),
+                'tipo': 'laboratorial',
+                'exams_count': len(exames_laboratoriais),
+            }
+
+        if exames_imagem:
+            titulo_img = f"SOLICITAÇÃO DE EXAMES DE IMAGEM"
+            codigo_img = f"CFMP-SE-IMG-{timestamp_code}"
+            titulo_html_img = f"{titulo_img} - {nome_paciente} - {timestamp_code}"
+            documentos['imagem'] = {
+                'html': montar_documento(exames_imagem, titulo_img, codigo_img, titulo_html_img),
+                'title': titulo_html_img,
+                'document_code': codigo_img,
+                'filename': f"solicitacao-exames-imagem-{timestamp_filename}.html",
+                'pdf_hint': f"solicitacao-exames-imagem-{timestamp_filename}.pdf",
+                'window_name': f"solicitacao-exames-imagem-{timestamp_code}",
+                'generated_at': emissao_dt.isoformat(),
+                'tipo': 'imagem',
+                'exams_count': len(exames_imagem),
+            }
+
+        # Rastrear geração de solicitação de exames
+        try:
+            analytics.track_exam_request()
+        except Exception:
+            pass
 
         if _wants_html(request):
-            return Response(html_content, mimetype='text/html')
-        return jsonify({'success': True, 'html': html_content})
+            doc_key = (request.args.get('documento') or request.args.get('tipo') or request.args.get('document_type') or '').lower()
+            if doc_key:
+                doc_info = documentos.get(doc_key)
+                if not doc_info:
+                    return Response(_html_error_page('Documento indisponível', 'Nenhum documento gerado para o tipo solicitado.'),
+                                    status=404, mimetype='text/html')
+                return Response(doc_info['html'], mimetype='text/html')
+
+            if len(documentos) == 1:
+                return Response(next(iter(documentos.values()))['html'], mimetype='text/html')
+
+            links = []
+            for key, doc in documentos.items():
+                links.append(
+                    f"<li><a href='{request.path}?documento={key}' rel='noopener' target='_blank'>{doc['title']}</a>"
+                    f"<br><small>Identificador: {doc['document_code']}</small></li>"
+                )
+            links_html = '\n'.join(links)
+            selection_html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset=\"UTF-8\">
+                <title>Solicitações de exames disponíveis</title>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        margin: 40px;
+                        color: #111;
+                        background: #f7fafc;
+                    }}
+                    .card {{
+                        max-width: 720px;
+                        margin: 0 auto;
+                        background: #fff;
+                        border-radius: 12px;
+                        padding: 30px;
+                        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+                    }}
+                    h1 {{
+                        font-size: 20px;
+                        margin-bottom: 16px;
+                        color: #1a202c;
+                    }}
+                    p {{
+                        margin-bottom: 16px;
+                        line-height: 1.5;
+                    }}
+                    ul {{
+                        list-style: disc;
+                        padding-left: 24px;
+                    }}
+                    li {{
+                        margin-bottom: 12px;
+                    }}
+                    a {{
+                        color: #2b6cb0;
+                        text-decoration: none;
+                        font-weight: 600;
+                    }}
+                    a:hover {{
+                        text-decoration: underline;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class=\"card\">
+                    <h1>Solicitações de exames disponíveis</h1>
+                    <p>Foram gerados {len(documentos)} documentos distintos, separados por tipo de exame. Escolha abaixo qual documento deseja abrir.</p>
+                    <ul>
+                        {links_html}
+                    </ul>
+                    <p style=\"font-size:12px; color:#4a5568;\">Dica: abra cada documento em uma nova aba e utilize <strong>Imprimir/Salvar em PDF</strong> para manter nomes distintos.</p>
+                </div>
+            </body>
+            </html>
+            """
+            return Response(selection_html, mimetype='text/html')
+
+        resposta = {'success': True, 'available_documents': list(documentos.keys())}
+        resposta.update(documentos)
+        return jsonify(resposta)
 
     except Exception as e:
         err = str(e)
