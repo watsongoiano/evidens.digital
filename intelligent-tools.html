@@ -801,9 +801,6 @@
             const categorias = {
                 '🧪 Exames Laboratoriais': [],
                 '🏥 Exames de Imagem': [],
-                '💉 Vacinas': [],
-                '📊 Estratificação Cardiovascular': [],
-                '🩺 Avaliação Clínica': [],
                 '📋 Outras Recomendações': []
             };
             
@@ -812,11 +809,17 @@
                 const titulo = rec.titulo || '';
                 
                 // Categorização inteligente baseada no conteúdo
-                if (categoria.includes('Estratificação Cardiovascular') || categoria.includes('estratificação') ||
-                    titulo.includes('Lipoproteína(a)') || titulo.includes('Lp(a)') || titulo.includes('hsCRP') ||
-                    titulo.includes('Proteína C Reativa') || titulo.includes('Score de Cálcio') || titulo.includes('Tornozelo-Braquial') ||
-                    titulo.includes('ITB') || titulo.includes('Strain')) {
-                    categorias['📊 Estratificação Cardiovascular'].push(rec);
+                if (titulo.includes('Lipoproteína(a)') || titulo.includes('Lp(a)') || titulo.includes('hsCRP') ||
+                    titulo.includes('Proteína C Reativa') || titulo.includes('Microalbuminúria')) {
+                    // Exames laboratoriais específicos
+                    categorias['🧪 Exames Laboratoriais'].push(rec);
+                } else if (titulo.includes('Score de Cálcio') || titulo.includes('Tomografia de Coronárias') ||
+                    titulo.includes('Strain') || titulo.includes('Ecocardiograma')) {
+                    // Exames de imagem específicos
+                    categorias['🏥 Exames de Imagem'].push(rec);
+                } else if (titulo.includes('Tornozelo-Braquial') || titulo.includes('ITB')) {
+                    // Outras recomendações específicas
+                    categorias['📋 Outras Recomendações'].push(rec);
                 } else if (categoria.includes('Laboratorial') || categoria.includes('laboratorial') || 
                     titulo.includes('Hemograma') || titulo.includes('Glicemia') || titulo.includes('Colesterol') ||
                     titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
