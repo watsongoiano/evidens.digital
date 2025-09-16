@@ -148,6 +148,22 @@ class handler(BaseHTTPRequestHandler):
                     'categoria': 'imagem'
                 })
             
+            # 8. RASTREAMENTO DE SÍFILIS - USPSTF 2022 (Grau A)
+            # Critérios: Adolescentes e adultos não gestantes com risco aumentado
+            risco_sifilis = data.get('risco_sifilis') == 'on'
+            if (idade >= 15 and 
+                not gestante and 
+                risco_sifilis):
+                
+                add_recommendation({
+                    'titulo': 'Rastreamento de Infecção por Sífilis (Não gestantes)',
+                    'descricao': 'Rastrear adolescentes e adultos não gestantes com risco aumentado de infecção, como homens que fazem sexo com homens, pessoas com HIV, histórico de encarceramento ou trabalho sexual. Pelo menos anual para homens que fazem sexo com homens e pessoas com HIV.',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2022',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2022.15322',
+                    'categoria': 'laboratorial'
+                })
+            
             response_data = {
                 'recommendations': recommendations,
                 'patient_data': data,
