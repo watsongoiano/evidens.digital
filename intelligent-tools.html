@@ -91,6 +91,7 @@
 
         .back-btn:hover {
             background: #95a5a6;
+            color: white;
         }
 
         .container {
@@ -651,7 +652,7 @@
                 }
                 
                 const result = await response.json();
-                displayRecommendations(result.recomendacoes);
+                displayRecommendations(result.recommendations, cardiovascularRisk);
                 
             } catch (error) {
                 console.error('Erro:', error);
