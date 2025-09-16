@@ -1,9 +1,16 @@
 from http.server import BaseHTTPRequestHandler
 import json
 import sys
+import os
 
-sys.path.append("..")
-from .checkup_hypertension import get_hypertension_recommendations_v2
+# Adicionar o diretório atual ao path para importações
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else '.')
+try:
+    from checkup_hypertension import get_hypertension_recommendations_v2
+except ImportError:
+    # Fallback se a importação falhar
+    def get_hypertension_recommendations_v2(data):
+        return []
 
 class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):

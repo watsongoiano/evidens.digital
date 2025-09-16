@@ -44,6 +44,10 @@
   ],
   "routes": [
     {
+      "src": "/api/checkup-intelligent.py",
+      "dest": "/api/checkup-intelligent.py"
+    },
+    {
       "src": "/api/checkup-intelligent",
       "dest": "/api/checkup-intelligent.py"
     },
