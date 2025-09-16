@@ -10,10 +10,14 @@ def get_hypertension_recommendations_v2(data):
         if not any(rec["titulo"] == rec_data["titulo"] for rec in recommendations):
             recommendations.append(rec_data)
 
-    hipertenso = data.get("hipertensao") == "on"
+    # Verificar hipertensão tanto como campo direto quanto no array de comorbidades
+    comorbidades = data.get("comorbidades", [])
+    if isinstance(comorbidades, str):
+        comorbidades = [comorbidades]
+    hipertenso = data.get("hipertensao") == "on" or "hipertensao" in comorbidades
     alteracao_ecg = data.get("alteracao_ecg") == "on"
     suspeita_ic = data.get("suspeita_ic") == "on"
-    diabetes = data.get("diabetes") == "on"
+    diabetes = data.get("diabetes") == "on" or "diabetes" in comorbidades
     sindrome_metabolica = data.get("sindrome_metabolica") == "on"
     multiplos_fatores_risco = data.get("multiplos_fatores_risco") == "on"
     has_resistente = data.get("has_resistente") == "on"

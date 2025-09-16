@@ -29,7 +29,11 @@ class handler(BaseHTTPRequestHandler):
 
             idade = int(data.get("idade", 0))
             sexo = data.get("sexo", "")
-            hipertensao = data.get("hipertensao") == "on"
+            # Verificar hipertensão tanto como campo direto quanto no array de comorbidades
+            comorbidades = data.get("comorbidades", [])
+            if isinstance(comorbidades, str):
+                comorbidades = [comorbidades]
+            hipertensao = data.get("hipertensao") == "on" or "hipertensao" in comorbidades
             gestante = data.get("gestante") == "on"
 
             recommendations = []
