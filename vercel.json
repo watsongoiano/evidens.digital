@@ -36,11 +36,23 @@
       "dest": "/api/gerar-receita-vacinas.py"
     },
     {
+      "src": "/prevent_calculator.js",
+      "dest": "/prevent_calculator.js"
+    },
+    {
+      "src": "/evidenscheck.svg",
+      "dest": "/evidenscheck.svg"
+    },
+    {
+      "src": "/evidenscheck.png",
+      "dest": "/evidenscheck.png"
+    },
+    {
       "src": "/intelligent-tools",
       "dest": "/intelligent-tools.html"
     },
     {
-      "src": "/(.*)",
+      "src": "/(?!.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|pdf|txt|xml|json)).*",
       "dest": "/index.html"
     }
   ]
