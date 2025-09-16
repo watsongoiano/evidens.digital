@@ -118,6 +118,36 @@ class handler(BaseHTTPRequestHandler):
                     'categoria': 'imagem'
                 })
             
+            # 6. RASTREAMENTO DE OSTEOPOROSE - MULHERES ≥65 ANOS - USPSTF 2025 (Grau B)
+            # Critérios: Mulheres com 65 anos ou mais
+            if sexo == 'feminino' and idade >= 65:
+                add_recommendation({
+                    'titulo': 'Rastreamento de Osteoporose (Mulheres ≥ 65 anos)',
+                    'descricao': 'Rastrear mulheres com 65 anos ou mais para osteoporose, a fim de prevenir fraturas osteoporóticas. O rastreamento é feito com densitometria óssea (DXA) da coluna ou quadril.',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2025',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2024.27154',
+                    'categoria': 'imagem'
+                })
+            
+            # 7. RASTREAMENTO DE OSTEOPOROSE - MULHERES PÓS-MENOPAUSA <65 ANOS - USPSTF 2025 (Grau B)
+            # Critérios: Mulheres pós-menopausa <65 anos com risco aumentado
+            pos_menopausa = data.get('pos_menopausa') == 'on'
+            risco_osteoporose = data.get('risco_osteoporose') == 'on'
+            if (sexo == 'feminino' and 
+                idade < 65 and 
+                pos_menopausa and 
+                risco_osteoporose):
+                
+                add_recommendation({
+                    'titulo': 'Rastreamento de Osteoporose (Mulheres Pós-Menopausa < 65 anos)',
+                    'descricao': 'Rastrear mulheres na pós-menopausa com menos de 65 anos que tenham risco aumentado de fratura osteoporótica. O risco deve ser estimado por uma ferramenta de avaliação de risco clínico antes do exame.',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2025',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2024.27154',
+                    'categoria': 'imagem'
+                })
+            
             response_data = {
                 'recommendations': recommendations,
                 'patient_data': data,
