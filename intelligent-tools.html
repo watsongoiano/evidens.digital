@@ -325,6 +325,129 @@
             transform: translateY(-2px);
         }
 
+        .cardiovascular-risk-section {
+            margin-bottom: 2rem;
+        }
+
+        .prevent-risk-heading {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .prevent-risk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .prevent-risk-card {
+            position: relative;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            --risk-color: #3498db;
+            --risk-soft-color: rgba(52, 152, 219, 0.12);
+        }
+
+        .prevent-risk-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, var(--risk-soft-color), transparent 75%);
+        }
+
+        .prevent-risk-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--risk-color);
+        }
+
+        .prevent-risk-card-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .prevent-risk-title {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08rem;
+        }
+
+        .prevent-risk-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--risk-color);
+            margin-bottom: 0.75rem;
+            line-height: 1;
+        }
+
+        .prevent-risk-value span {
+            font-size: 1.4rem;
+        }
+
+        .prevent-risk-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.45rem 1.2rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            background: var(--risk-soft-color);
+            color: var(--risk-color);
+            letter-spacing: 0.06rem;
+        }
+
+        .prevent-risk-badge--muted {
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 500;
+        }
+
+        .prevent-risk-summary {
+            background: linear-gradient(135deg, #f8f9fa 0%, #edf1f7 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .prevent-risk-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+
+        .prevent-risk-metrics span {
+            flex: 1 1 30%;
+            min-width: 160px;
+        }
+
+        .prevent-risk-footnote {
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            text-align: center;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -370,9 +493,13 @@
                 padding: 0.8rem 1.5rem;
                 font-size: 0.9rem;
             }
-            
-            .risk-card {
-                grid-template-columns: 1fr !important;
+
+            .prevent-risk-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .prevent-risk-value {
+                font-size: 2.6rem;
             }
         }
 
@@ -596,9 +723,85 @@
 
     <script src="prevent_calculator.js"></script>
     <script>
-        // Inicializar calculadora PREVENT
-        const preventCalc = new PreventCalculator();
+        // Inicializar calculadora PREVENT com tolerância a falhas
+        let preventCalc = null;
+        try {
+            if (typeof PreventCalculator === 'function') {
+                preventCalc = new PreventCalculator();
+            } else {
+                console.warn('PreventCalculator não disponível. O cálculo PREVENT será ignorado.');
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar a calculadora PREVENT:', error);
+            preventCalc = null;
+        }
         
+        function hexToRgba(hex, alpha = 0.18) {
+            if (!hex) {
+                return `rgba(149, 165, 166, ${alpha})`;
+            }
+
+            const normalized = hex.toString().replace('#', '').trim();
+            const expanded = normalized.length === 3
+                ? normalized.split('').map((ch) => ch + ch).join('')
+                : normalized;
+
+            if (expanded.length !== 6) {
+                return `rgba(149, 165, 166, ${alpha})`;
+            }
+
+            const r = parseInt(expanded.slice(0, 2), 16);
+            const g = parseInt(expanded.slice(2, 4), 16);
+            const b = parseInt(expanded.slice(4, 6), 16);
+
+            if ([r, g, b].some((component) => Number.isNaN(component))) {
+                return `rgba(149, 165, 166, ${alpha})`;
+            }
+
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function parseNumeric(value) {
+            if (value === undefined || value === null) {
+                return null;
+            }
+
+            if (typeof value === 'number' && Number.isFinite(value)) {
+                return value;
+            }
+
+            const normalized = value.toString().replace(',', '.').trim();
+            if (!normalized) {
+                return null;
+            }
+
+            const parsed = Number(normalized);
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+
+        function ensureArray(value) {
+            if (Array.isArray(value)) {
+                return value;
+            }
+
+            if (value === undefined || value === null) {
+                return [];
+            }
+
+            const text = value.toString().trim();
+            return text ? [text] : [];
+        }
+
+        function formatPercent(value) {
+            const parsed = parseNumeric(value);
+            return parsed === null ? 'N/A' : parsed.toFixed(1);
+        }
+
+        function formatMetric(value, decimals = 0) {
+            const parsed = parseNumeric(value);
+            return parsed === null ? 'N/A' : parsed.toFixed(decimals);
+        }
+
         // Função para criar links clicáveis nas referências
         function createReferenceLink(referencia) {
             const referenceLinks = {
@@ -654,21 +857,55 @@
             
             // Calcular risco cardiovascular PREVENT se dados suficientes
             let cardiovascularRisk = null;
-            if (data.idade && data.sexo && data.colesterol && data.hdl && data.pas && data.creatinina) {
+            const idadeValue = parseNumeric(data.idade);
+            const sexoValue = (data.sexo || '').toString().trim();
+            const colesterolTotalValue = parseNumeric(data.colesterol_total ?? data.colesterol);
+            const hdlValue = parseNumeric(data.hdl_colesterol ?? data.hdl);
+            const pasValue = parseNumeric(data.pressao_sistolica ?? data.pas);
+            const creatininaValue = parseNumeric(data.creatinina);
+
+            const hasRequiredRiskInputs = (
+                preventCalc &&
+                typeof preventCalc.calculateRisks === 'function' &&
+                sexoValue &&
+                idadeValue !== null &&
+                colesterolTotalValue !== null &&
+                hdlValue !== null &&
+                pasValue !== null &&
+                creatininaValue !== null
+            );
+
+            if (hasRequiredRiskInputs) {
                 try {
+                    const comorbidadesList = ensureArray(data.comorbidades).map((item) => item.toString().toLowerCase());
+                    const medicacoesList = ensureArray(data.medicacoes).map((item) => item.toString().toLowerCase());
+
+                    const diabetesActive = comorbidadesList.includes('diabetes') ||
+                        ['on', 'true', '1', 'sim', 'yes'].includes((data.diabetes_tipo2 || '').toString().toLowerCase()) ||
+                        ['on', 'true', '1', 'sim', 'yes'].includes((data.diabetes || '').toString().toLowerCase());
+
                     const riskParams = {
-                        idade: parseInt(data.idade),
-                        sexo: data.sexo,
-                        colesterol_total: parseInt(data.colesterol) || 200,
-                        hdl_colesterol: parseInt(data.hdl) || 45,
-                        pressao_sistolica: parseInt(data.pas) || 120,
-                        diabetes: data.diabetes_tipo2 === 'on',
+                        idade: idadeValue,
+                        sexo: sexoValue,
+                        colesterol_total: colesterolTotalValue,
+                        hdl_colesterol: hdlValue,
+                        pressao_sistolica: pasValue,
+                        diabetes: diabetesActive,
                         tabagismo: data.tabagismo || 'nunca',
-                        creatinina: parseFloat(data.creatinina) || 1.0,
-                        medicamentos_anti_hipertensivos: data.anti_hipertensivos === 'on',
-                        estatinas: data.estatinas === 'on'
+                        creatinina: creatininaValue,
+                        medicamentos_anti_hipertensivos: medicacoesList.includes('anti_hipertensivos'),
+                        estatinas: medicacoesList.includes('estatinas')
                     };
-                    
+
+                    const pesoValue = parseNumeric(data.peso);
+                    const alturaValue = parseNumeric(data.altura);
+                    if (pesoValue !== null) {
+                        riskParams.peso = pesoValue;
+                    }
+                    if (alturaValue !== null) {
+                        riskParams.altura = alturaValue;
+                    }
+
                     cardiovascularRisk = preventCalc.calculateRisks(riskParams);
                 } catch (error) {
                     console.error('Erro no cálculo de risco:', error);
@@ -739,50 +976,57 @@
                 const prevent = preventData.prevent_score;
                 const classification = prevent.classification || {};
                 const clinical = prevent.clinical_data || {};
-                
-                // Determinar cor baseada na categoria de risco
+
                 const riskColors = {
                     'Baixo': '#27ae60',
-                    'Borderline': '#f39c12', 
+                    'Borderline': '#f1c40f',
                     'Intermediário': '#e67e22',
                     'Alto': '#e74c3c'
                 };
-                
+
                 const riskColor = riskColors[classification.category] || '#95a5a6';
-                
+                const primarySoftColor = hexToRgba(riskColor, 0.2);
+                const secondarySoftColor = hexToRgba(riskColor, 0.1);
+
+                const risk10Display = formatPercent(prevent.risk_10yr);
+                const risk30Display = formatPercent(prevent.risk_30yr);
+                const egfrDisplay = formatMetric(clinical.egfr, 0);
+                const bmiDisplay = formatMetric(clinical.bmi, 1);
+                const nonHdlDisplay = formatMetric(clinical.non_hdl, 0);
+                const category = classification.category || 'N/A';
+                const description = classification.description || 'N/A';
+
                 riskHtml = `
-                    <div class="cardiovascular-risk-section" style="margin-bottom: 2rem;">
-                        <h3 style="color: #2c3e50; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="cardiovascular-risk-section">
+                        <h3 class="prevent-risk-heading">
                             <span style="font-size: 1.5rem;">📊</span>
                             Risco Cardiovascular (PREVENT 2024)
                         </h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                            <div class="risk-card" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; border: 3px solid ${riskColor}; position: relative; overflow: hidden;">
-                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: ${riskColor};"></div>
-                                <h4 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.1rem; font-weight: 600;">Estimated<br><strong>10-year</strong><br>risk of Heart<br>Disease</h4>
-                                <div style="font-size: 3.5rem; font-weight: 900; color: ${riskColor}; margin: 1rem 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">${prevent.risk_10yr}<span style="font-size: 2rem;">%</span></div>
-                                <div style="background: ${riskColor}20; color: ${riskColor}; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; margin-top: 1rem;">
-                                    ${classification.category || 'N/A'}
+                        <div class="prevent-risk-grid">
+                            <div class="prevent-risk-card" style="--risk-color: ${riskColor}; --risk-soft-color: ${primarySoftColor};">
+                                <div class="prevent-risk-card-content">
+                                    <p class="prevent-risk-title">Estimated 10-year risk of CVD</p>
+                                    <p class="prevent-risk-value">${risk10Display}<span>%</span></p>
+                                    <p class="prevent-risk-badge">${category}</p>
                                 </div>
                             </div>
-                            <div class="risk-card" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; border: 3px solid #8e44ad; position: relative; overflow: hidden;">
-                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: #8e44ad;"></div>
-                                <h4 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.1rem; font-weight: 600;">Estimated<br><strong>30-year</strong><br>risk of Heart<br>Disease</h4>
-                                <div style="font-size: 3.5rem; font-weight: 900; color: #8e44ad; margin: 1rem 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">${prevent.risk_30yr}<span style="font-size: 2rem;">%</span></div>
-                                <div style="background: #8e44ad20; color: #8e44ad; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; margin-top: 1rem;">
-                                    Risco Longo Prazo
+                            <div class="prevent-risk-card" style="--risk-color: ${riskColor}; --risk-soft-color: ${secondarySoftColor};">
+                                <div class="prevent-risk-card-content">
+                                    <p class="prevent-risk-title">Estimated 30-year risk of CVD</p>
+                                    <p class="prevent-risk-value">${risk30Display}<span>%</span></p>
+                                    <p class="prevent-risk-badge prevent-risk-badge--muted">Risco de longo prazo</p>
                                 </div>
                             </div>
                         </div>
-                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 1.5rem; border-radius: 15px; border-left: 5px solid #3498db; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; font-size: 0.9rem; color: #2c3e50;">
-                                <div><strong>eGFR:</strong> ${clinical.egfr || 'N/A'} mL/min/1.73m²</div>
-                                <div><strong>IMC:</strong> ${clinical.bmi ? clinical.bmi.toFixed(1) : 'N/A'} kg/m²</div>
-                                <div><strong>Não-HDL:</strong> ${clinical.non_hdl ? clinical.non_hdl.toFixed(0) : 'N/A'} mg/dL</div>
+                        <div class="prevent-risk-summary">
+                            <div class="prevent-risk-metrics">
+                                <span><strong>eGFR:</strong> ${egfrDisplay !== 'N/A' ? egfrDisplay + ' mL/min/1.73m²' : 'N/A'}</span>
+                                <span><strong>IMC:</strong> ${bmiDisplay !== 'N/A' ? bmiDisplay + ' kg/m²' : 'N/A'}</span>
+                                <span><strong>Não-HDL:</strong> ${nonHdlDisplay !== 'N/A' ? nonHdlDisplay + ' mg/dL' : 'N/A'}</span>
                             </div>
-                            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #7f8c8d; text-align: center;">
-                                <strong>Baseado em:</strong> Equações PREVENT 2024 (AHA/ACC) • <strong>Classificação:</strong> ${classification.description || 'N/A'}
-                            </div>
+                            <p class="prevent-risk-footnote">
+                                <strong>Baseado em:</strong> Equações PREVENT 2024 (AHA/ACC) • <strong>Classificação:</strong> ${description}
+                            </p>
                         </div>
                     </div>
                 `;
@@ -835,7 +1079,7 @@
                 }
             });
             
-            let html = riskHtml;
+            let html = '';
             
             Object.keys(categorias).forEach(categoria => {
                 if (categorias[categoria].length > 0) {
@@ -881,9 +1125,7 @@
             });
             
             // Montar HTML final com seção PREVENT no topo
-            const finalHtml = riskHtml + html;
-            
-            container.innerHTML = finalHtml;
+            container.innerHTML = riskHtml + html;
             recommendationsDiv.style.display = 'block';
         }
 
