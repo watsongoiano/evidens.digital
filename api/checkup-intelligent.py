@@ -65,6 +65,18 @@ class handler(BaseHTTPRequestHandler):
                     'categoria': 'imagem'
                 })
             
+            # 2. RASTREAMENTO DE HEPATITE C - USPSTF 2020 (Grau B)
+            # Critérios: Adultos de 18 a 79 anos - rastreamento universal
+            if 18 <= idade <= 79:
+                add_recommendation({
+                    'titulo': 'Rastreamento da Infecção pelo Vírus da Hepatite C (HCV)',
+                    'descricao': 'Rastrear adultos de 18 a 79 anos com teste de anticorpos anti-HCV. A maioria dos adultos necessita de um único rastreamento, com testes periódicos para pessoas com risco contínuo de infecção',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2020',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2020.1123',
+                    'categoria': 'laboratorial'
+                })
+            
             response_data = {
                 'recommendations': recommendations,
                 'patient_data': data,
