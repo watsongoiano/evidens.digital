@@ -712,27 +712,17 @@
             };
             
             recomendacoes.forEach(rec => {
-                const titulo = rec.titulo || '';
-                const subtitulo = rec.subtitulo || '';
-                const grauEvidencia = rec.grau_evidencia || '';
+                const categoria = rec.categoria || '';
+                const prioridade = rec.prioridade || 'alta';
                 
-                if (titulo.toLowerCase().includes('hemograma') || 
-                    titulo.toLowerCase().includes('glicemia') || 
-                    titulo.toLowerCase().includes('colesterol') ||
-                    titulo.toLowerCase().includes('lipídico') ||
-                    titulo.toLowerCase().includes('creatinina') ||
-                    titulo.toLowerCase().includes('hba1c')) {
+                // Usar a categoria definida no backend
+                if (categoria === 'laboratorial') {
                     categorias['Exames Laboratoriais'].push(rec);
-                } else if (titulo.toLowerCase().includes('mamografia') || 
-                          titulo.toLowerCase().includes('colonoscopia') ||
-                          titulo.toLowerCase().includes('ultrassom') ||
-                          titulo.toLowerCase().includes('tomografia')) {
+                } else if (categoria === 'imagem') {
                     categorias['Exames de Imagem'].push(rec);
-                } else if (titulo.toLowerCase().includes('vacina') || 
-                          titulo.toLowerCase().includes('imunização')) {
+                } else if (categoria === 'vacina') {
                     categorias['Vacinas'].push(rec);
-                } else if (titulo.toLowerCase().includes('rastreamento') || 
-                          titulo.toLowerCase().includes('screening')) {
+                } else if (categoria === 'rastreamento') {
                     categorias['Rastreamento'].push(rec);
                 } else {
                     categorias['Outras'].push(rec);
@@ -748,22 +738,21 @@
                     
                     categorias[categoria].forEach((rec, index) => {
                         const titulo = rec.titulo || 'Recomendação';
-                        const subtitulo = rec.subtitulo || '';
-                        const grauEvidencia = rec.grau_evidencia || '';
-                        const indicacao = rec.indicacao || subtitulo;
+                        const descricao = rec.descricao || '';
+                        const prioridade = rec.prioridade || 'alta';
                         const referencia = rec.referencia || '';
                         
-                        // Determinar cor do grau de evidência
-                        let grauColor = '#28a745'; // Verde para A
-                        if (grauEvidencia.includes('B')) grauColor = '#ffc107'; // Amarelo para B
-                        if (grauEvidencia.includes('C')) grauColor = '#fd7e14'; // Laranja para C
+                        // Determinar cor da prioridade
+                        let prioridadeColor = '#28a745'; // Verde para alta
+                        if (prioridade === 'media') prioridadeColor = '#ffc107'; // Amarelo para média
+                        if (prioridade === 'baixa') prioridadeColor = '#fd7e14'; // Laranja para baixa
                         
                         html += `<div class="recommendation-card" style="background: white; border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #3498db; position: relative;">
                             <button onclick="removeRecommendation(this)" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.2rem; color: #95a5a6; cursor: pointer; padding: 5px;">×</button>
                             
                             <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                                <span style="background: ${grauColor}; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-right: 1rem;">
-                                    ${grauEvidencia || 'ALTA'}
+                                <span style="background: ${prioridadeColor}; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-right: 1rem;">
+                                    ${prioridade.toUpperCase()}
                                 </span>
                             </div>
                             
@@ -771,8 +760,8 @@
                                 ${titulo}
                             </h5>
                             
-                            ${indicacao ? `<p style="color: #7f8c8d; margin: 0 0 1rem 0; font-size: 0.9rem; line-height: 1.4;">
-                                ${indicacao}
+                            ${descricao ? `<p style="color: #7f8c8d; margin: 0 0 1rem 0; font-size: 0.9rem; line-height: 1.4;">
+                                ${descricao}
                             </p>` : ''}
                             
                             ${referencia ? `<p style="color: #95a5a6; margin: 0; font-size: 0.8rem; font-style: italic;">
