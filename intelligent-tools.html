@@ -649,7 +649,7 @@
             console.log('Campo has_resistente:', data.has_resistente);
             
             try {
-                const response = await fetch('/api/checkup-intelligent.py', {
+                const response = await fetch('/api/checkup-intelligent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
