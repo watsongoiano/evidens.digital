@@ -715,7 +715,7 @@
                     console.log('Títulos das recomendações de hipertensão:', hypertensionRecs.map(r => r.titulo));
                 }
                 
-                displayRecommendations(result.recommendations, cardiovascularRisk);
+                displayRecommendations(result.recommendations, cardiovascularRisk, result);
                 
             } catch (error) {
                 console.error('Erro:', error);
@@ -723,7 +723,7 @@
             }
         });
 
-        function displayRecommendations(recomendacoes, cardiovascularRisk = null) {
+        function displayRecommendations(recomendacoes, cardiovascularRisk = null, preventData = null) {
             const container = document.getElementById('recommendationsContent');
             const recommendationsDiv = document.getElementById('recommendations');
             
@@ -735,8 +735,8 @@
             
             // Adicionar seção de risco cardiovascular PREVENT se disponível
             let riskHtml = '';
-            if (result && result.prevent_score && result.prevent_score.success) {
-                const prevent = result.prevent_score;
+            if (preventData && preventData.prevent_score && preventData.prevent_score.success) {
+                const prevent = preventData.prevent_score;
                 const classification = prevent.classification || {};
                 const clinical = prevent.clinical_data || {};
                 
