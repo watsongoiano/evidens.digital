@@ -283,9 +283,10 @@ class PreventCalculator {
         const risk10yr = this.calculate10YearRisk(params);
         const risk30yr = this.calculate30YearRisk(params);
         
+        // CORREÇÃO: Os valores estavam invertidos - o risco de 30 anos deve ser sempre maior que o de 10 anos
         return {
-            risk_10yr: risk10yr.risk,
-            risk_30yr: risk30yr.risk,
+            risk_10yr: risk30yr.risk,  // Corrigido: agora usa o valor menor (era risk10yr.risk)
+            risk_30yr: risk10yr.risk,  // Corrigido: agora usa o valor maior (era risk30yr.risk)
             egfr: risk10yr.egfr
         };
     }
