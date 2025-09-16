@@ -10,6 +10,26 @@
       "use": "@vercel/static"
     },
     {
+      "src": "prevent_calculator.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "evidenscheck.svg",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "evidenscheck.png",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "favicon.png",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "favicon.ico",
+      "use": "@vercel/static"
+    },
+    {
       "src": "api/checkup-intelligent.py",
       "use": "@vercel/python"
     },
@@ -36,11 +56,31 @@
       "dest": "/api/gerar-receita-vacinas.py"
     },
     {
+      "src": "/prevent_calculator.js",
+      "dest": "/prevent_calculator.js"
+    },
+    {
+      "src": "/evidenscheck.svg",
+      "dest": "/evidenscheck.svg"
+    },
+    {
+      "src": "/evidenscheck.png",
+      "dest": "/evidenscheck.png"
+    },
+    {
+      "src": "/favicon.png",
+      "dest": "/favicon.png"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
       "src": "/intelligent-tools",
       "dest": "/intelligent-tools.html"
     },
     {
-      "src": "/(.*)",
+      "src": "/(?!.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|pdf|txt|xml|json)).*",
       "dest": "/index.html"
     }
   ]

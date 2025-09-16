@@ -37,25 +37,28 @@ class handler(BaseHTTPRequestHandler):
                 recommendations.append({
                     'titulo': 'Hemograma Completo',
                     'categoria': 'exame',
-                    'subtitulo': 'Avaliação hematológica geral',
+                    'subtitulo': 'Hemograma completo, soro',
+                    'indicacao': 'Avaliação hematológica geral - Recomendado anualmente para adultos',
                     'grau_evidencia': 'A',
-                    'referencia_html': 'Recomendado anualmente para adultos'
+                    'referencia': 'SBC/SBD 2024'
                 })
                 
                 recommendations.append({
                     'titulo': 'Glicemia de Jejum',
                     'categoria': 'exame',
-                    'subtitulo': 'Rastreamento de diabetes',
+                    'subtitulo': 'Glicose, soro',
+                    'indicacao': 'Rastreamento de diabetes - Recomendado a cada 3 anos para adultos',
                     'grau_evidencia': 'A',
-                    'referencia_html': 'Recomendado a cada 3 anos para adultos'
+                    'referencia': 'ADA/SBD 2024'
                 })
                 
                 recommendations.append({
                     'titulo': 'Perfil Lipídico',
                     'categoria': 'exame',
-                    'subtitulo': 'Avaliação do risco cardiovascular',
+                    'subtitulo': 'Colesterol total, HDL, LDL, triglicérides, soro',
+                    'indicacao': 'Avaliação do risco cardiovascular - Recomendado a cada 5 anos para adultos',
                     'grau_evidencia': 'A',
-                    'referencia_html': 'Recomendado a cada 5 anos para adultos'
+                    'referencia': 'SBC/ACC 2024'
                 })
             
             # Recomendações específicas por sexo
