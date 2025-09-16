@@ -21,50 +21,6 @@ except ImportError:
             "risk_10yr": 0,
             "risk_30yr": 0
         }
-            
-        # Pressão arterial
-        if pas >= 160 or pad >= 100:
-            risk_score += 3
-        elif pas >= 140 or pad >= 90:
-            risk_score += 2
-        elif pas >= 130 or pad >= 80:
-            risk_score += 1
-            
-        # Colesterol
-        if colesterol_total >= 240:
-            risk_score += 2
-        elif colesterol_total >= 200:
-            risk_score += 1
-            
-        if hdl < 40:
-            risk_score += 1
-            
-        # Diabetes
-        if diabetes:
-            risk_score += 2
-            
-        # Tabagismo
-        if tabagismo:
-            risk_score += 2
-            
-        # eGFR
-        if egfr < 60:
-            risk_score += 2
-        elif egfr < 90:
-            risk_score += 1
-            
-        # Converter score em porcentagem de risco estimado
-        risk_10yr = min(risk_score * 2.5, 40)  # Máximo 40%
-        risk_30yr = min(risk_score * 4, 60)    # Máximo 60%
-        
-        return {
-            "risk_10yr": round(risk_10yr, 1),
-            "risk_30yr": round(risk_30yr, 1),
-            "egfr": round(egfr, 1),
-            "risk_category": "alto" if risk_10yr >= 20 else "intermediario" if risk_10yr >= 7.5 else "borderline" if risk_10yr >= 5 else "baixo"
-        }
-    except:
-        return None
 
 def get_cardiovascular_stratification_exams(risk_category):
     """
