@@ -2,97 +2,33 @@
   "version": 2,
   "builds": [
     {
-      "src": "index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "intelligent-tools.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "prevent_calculator.js",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "evidenscheck.svg",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "evidenscheck.png",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "favicon.png",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "favicon.ico",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "api/checkup-intelligent.py",
-      "use": "@vercel/python"
-    },
-    {
       "src": "api/checkup_intelligent_v3.py",
       "use": "@vercel/python"
     },
     {
-      "src": "api/gerar-solicitacao-exames.py",
-      "use": "@vercel/python"
+      "src": "api/checkup_hypertension.py",
+      "use": "@vercel/static"
     },
     {
-      "src": "api/gerar-receita-vacinas.py",
-      "use": "@vercel/python"
+      "src": "api/prevent_calculator.py",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
-    {
-      "src": "/api/checkup-intelligent.py",
-      "dest": "/api/checkup-intelligent.py"
-    },
-    {
-      "src": "/api/checkup-intelligent",
-      "dest": "/api/checkup-intelligent.py"
-    },
     {
       "src": "/api/checkup_intelligent_v3",
       "dest": "/api/checkup_intelligent_v3.py"
     },
     {
-      "src": "/api/gerar-solicitacao-exames",
-      "dest": "/api/gerar-solicitacao-exames.py"
-    },
-    {
-      "src": "/api/gerar-receita-vacinas",
-      "dest": "/api/gerar-receita-vacinas.py"
-    },
-    {
-      "src": "/prevent_calculator.js",
-      "dest": "/prevent_calculator.js"
-    },
-    {
-      "src": "/evidenscheck.svg",
-      "dest": "/evidenscheck.svg"
-    },
-    {
-      "src": "/evidenscheck.png",
-      "dest": "/evidenscheck.png"
-    },
-    {
-      "src": "/favicon.png",
-      "dest": "/favicon.png"
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
+      "src": "/api/checkup-intelligent",
+      "dest": "/api/checkup_intelligent_v3.py"
     },
     {
       "src": "/intelligent-tools",
       "dest": "/intelligent-tools.html"
     },
     {
-      "src": "/(?!.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|pdf|txt|xml|json)).*",
+      "src": "/",
       "dest": "/index.html"
     }
   ]
