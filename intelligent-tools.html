@@ -16,14 +16,21 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
             line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
 
         .header {
-            background: #e9ecef;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
         }
 
         .nav {
@@ -68,6 +75,11 @@
             color: #2c3e50;
             text-decoration: none;
             font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:not(.back-btn):hover {
+            color: #3498db;
         }
 
         .back-btn {
@@ -77,6 +89,7 @@
             border-radius: 20px;
             text-decoration: none;
             font-weight: 500;
+            transition: background 0.3s;
         }
 
         .back-btn:hover {
@@ -85,47 +98,55 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 8rem 2rem 4rem;
         }
 
-        .form-section {
+        .page-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .page-title p {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+
+        .tool-section {
             background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
         }
 
-        .form-section h1 {
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 24px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .form-section .subtitle {
-            color: #6c757d;
-            font-size: 16px;
+        .tool-section h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 2rem;
             font-weight: 400;
-            text-align: center;
-            margin-bottom: 30px;
         }
 
-        .form-section h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 18px;
-            font-weight: 600;
+        .tool-section p {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
         }
 
+        /* Todos os estilos do formulário do index.html */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .form-group {
@@ -133,285 +154,245 @@
             flex-direction: column;
         }
 
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
         .form-group label {
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #333;
-            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            background: white;
-            color: #333;
+            padding: 0.8rem;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #007bff;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
+            border-color: #3498db;
         }
 
         .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 2rem 0 1rem;
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            margin: 30px 0 20px 0;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e9ecef;
+            gap: 0.5rem;
         }
 
         .checkbox-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .checkbox-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px;
+            gap: 0.5rem;
         }
 
         .checkbox-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-        }
-
-        .checkbox-item label {
-            font-size: 14px;
-            cursor: pointer;
+            width: auto;
             margin: 0;
-            color: #333;
         }
 
-        .generate-btn {
-            background: #007bff;
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 4px;
-            font-size: 16px;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
+            transition: all 0.3s;
+            margin: 1rem 0.5rem 1rem 0;
         }
 
-        .generate-btn:hover {
-            background: #0056b3;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
         }
 
-        .attach-btn {
-            background: #dc3545;
+        .btn-secondary {
+            background: #e74c3c;
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 4px;
-            font-size: 14px;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 15px;
+            transition: all 0.3s;
+            margin: 1rem 0.5rem 1rem 0;
         }
 
-        .attach-btn:hover {
-            background: #c82333;
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
         }
 
-        .recommendations-section {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .recommendations-section h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .recommendations-placeholder {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6c757d;
-        }
-
-        .recommendations-placeholder .icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .recommendations-placeholder p {
-            font-size: 16px;
-        }
-
-        .recommendations-content {
+        .recommendations {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 15px;
             display: none;
         }
 
-        .category-section {
-            margin-bottom: 30px;
+        .recommendations h3 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
         }
 
-        .category-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #007bff;
+        .recommendation-category {
+            margin-bottom: 2rem;
         }
 
-        .recommendation-card {
+        .recommendation-category h4 {
+            color: #34495e;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .recommendation-item {
             background: white;
-            border: 1px solid #e9ecef;
-            border-left: 4px solid #007bff;
-            border-radius: 4px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        .recommendation-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
+        .recommendation-item h5 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
         }
 
-        .recommendation-title {
-            font-size: 16px;
+        .recommendation-item p {
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .evidence-grade {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
             font-weight: 600;
-            color: #333;
-            margin: 0;
-        }
-
-        .priority-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .priority-alta {
-            background-color: #28a745;
             color: white;
-        }
-
-        .priority-media {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        .priority-baixa {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .recommendation-description {
-            color: #6c757d;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 10px;
-        }
-
-        .recommendation-reference {
-            font-size: 12px;
-        }
-
-        .recommendation-reference a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .recommendation-reference a:hover {
-            text-decoration: underline;
+            background: #27ae60;
         }
 
         .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e9ecef;
-            display: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
         }
 
         .action-btn {
-            background: #007bff;
+            background: #3498db;
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
-            font-size: 14px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
             font-weight: 600;
             cursor: pointer;
-            text-align: center;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .action-btn:hover {
-            background: #0056b3;
+            background: #2980b9;
+            transform: translateY(-2px);
         }
 
         @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
             .form-grid {
                 grid-template-columns: 1fr;
             }
-
-            .checkbox-grid {
-                grid-template-columns: 1fr;
+            
+            .nav {
+                padding: 0 1rem;
             }
-
-            .action-buttons {
-                grid-template-columns: 1fr;
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .nav-links a {
+                font-size: 0.9rem;
+            }
+            
+            .hero {
+                padding: 4rem 1rem 2rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .form-section {
+                padding: 1.5rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .btn-primary {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .risk-card {
+                grid-template-columns: 1fr !important;
             }
         }
 
-        /* Loading state */
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-        }
-
-        .loading::after {
-            content: '';
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-section {
+                padding: 1rem;
+            }
+            
+            .btn-primary {
+                width: 100%;
+                padding: 1rem;
+            }
+            
+            .logo {
+                font-size: 1.3rem;
+            }
         }
     </style>
 </head>
@@ -433,16 +414,17 @@
     </header>
 
     <div class="container">
-        <div class="form-section">
-            <h1>Check-up Médico Inteligente</h1>
-            <p class="subtitle">Analise e receba recomendações essenciais baseadas em evidência científica</p>
 
-            <h2>Dados do Paciente</h2>
+
+        <div class="tool-section">
+            <h2>Check-up Médico Inteligente</h2>
+            <p>Analise e receba recomendações essenciais baseadas em evidência científica</p>
+
             <form id="checkupForm">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="idade">Idade</label>
-                        <input type="number" id="idade" name="idade" placeholder="Ex: 45" required>
+                        <input type="number" id="idade" name="idade" required>
                     </div>
                     <div class="form-group">
                         <label for="sexo">Sexo</label>
@@ -452,14 +434,13 @@
                             <option value="feminino">Feminino</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="pais">País/Guideline base</label>
-                    <select id="pais" name="pais">
-                        <option value="brasil">Brasil (SBIm/SBC/SBD)</option>
-                        <option value="eua">EUA (CDC/USPSTF/ADA)</option>
-                    </select>
+                    <div class="form-group">
+                        <label for="pais">País/Guideline base</label>
+                        <select id="pais" name="pais">
+                            <option value="brasil">Brasil (SBIm/SBC/SBD)</option>
+                            <option value="eua">EUA (CDC/USPSTF/ADA)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="section-title">📊 Dados Clínicos (para cálculo de risco cardiovascular)</div>
@@ -542,14 +523,14 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group full-width">
                     <label for="outras_comorbidades">Outras comorbidades (descreva):</label>
-                    <textarea id="outras_comorbidades" name="outras_comorbidades" placeholder="Ex: DPOC, artrite reumatoide, lúpus..."></textarea>
+                    <textarea id="outras_comorbidades" name="outras_comorbidades" rows="3" placeholder="Ex: DPOC, artrite reumatoide, lúpus..."></textarea>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group full-width">
                     <label for="medicacoes_continuo">Medicações de Uso Contínuo</label>
-                    <textarea id="medicacoes_continuo" name="medicacoes_continuo" placeholder="Liste todas as medicações em uso contínuo com doses e frequência"></textarea>
+                    <textarea id="medicacoes_continuo" name="medicacoes_continuo" rows="3" placeholder="Liste todas as medicações em uso contínuo com doses e frequência"></textarea>
                 </div>
 
                 <div class="section-title">👨‍👩‍👧‍👦 História Familiar</div>
@@ -576,9 +557,9 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group full-width">
                     <label for="outras_condicoes_familiares">Outras condições familiares (descreva):</label>
-                    <textarea id="outras_condicoes_familiares" name="outras_condicoes_familiares" placeholder="Ex: câncer de próstata, AVC, demência..."></textarea>
+                    <textarea id="outras_condicoes_familiares" name="outras_condicoes_familiares" rows="3" placeholder="Ex: câncer de próstata, AVC, demência..."></textarea>
                 </div>
 
                 <div class="form-grid">
@@ -586,8 +567,8 @@
                         <label for="tabagismo">Tabagismo</label>
                         <select id="tabagismo" name="tabagismo">
                             <option value="nunca">Nunca fumou</option>
-                            <option value="atual">Fumante atual</option>
-                            <option value="ex">Ex-fumante</option>
+                            <option value="fumante">Fumante atual</option>
+                            <option value="ex-fumante">Ex-fumante</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -596,166 +577,402 @@
                     </div>
                 </div>
 
-                <button type="button" class="generate-btn" onclick="generateRecommendations()">Gerar Recomendações Inteligentes</button>
-                <button type="button" class="attach-btn" onclick="attachPDFs()">📄 Anexar PDFs de Exames</button>
+                <button type="submit" class="btn-primary">Gerar Recomendações Inteligentes</button>
+                <button type="button" class="btn-secondary" onclick="anexarPDFs()">📄 Anexar PDFs de Exames</button>
             </form>
-        </div>
 
-        <div class="recommendations-section">
-            <h2>Recomendações Inteligentes</h2>
-            
-            <div class="recommendations-placeholder" id="placeholder">
-                <div class="icon">📋</div>
-                <p>Preencha os dados do paciente para gerar recomendações personalizadas de check-up.</p>
-            </div>
-
-            <div class="recommendations-content" id="recommendations">
-                <!-- Conteúdo será inserido dinamicamente -->
-            </div>
-
-            <div class="action-buttons" id="actionButtons">
-                <button class="action-btn">📋 Solicitação de Exames</button>
-                <button class="action-btn">💉 Receita de Vacinas</button>
-                <button class="action-btn">📄 Relatório Completo</button>
-                <button class="action-btn">🔔 Agendar Lembretes</button>
+            <div id="recommendations" class="recommendations">
+                <h3>Recomendações Inteligentes</h3>
+                <div id="recommendationsContent"></div>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="gerarSolicitacaoExames()">📋 Solicitação de Exames</button>
+                    <button class="action-btn" onclick="gerarReceitaVacinas()">💉 Receita de Vacinas</button>
+                    <button class="action-btn" onclick="gerarRelatorioCompleto()">📄 Relatório Completo</button>
+                    <button class="action-btn" onclick="agendarLembretes()">🔔 Agendar Lembretes</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="prevent_calculator.js"></script>
     <script>
-        function showLoading() {
-            const placeholder = document.getElementById('placeholder');
-            const recommendations = document.getElementById('recommendations');
-            const actionButtons = document.getElementById('actionButtons');
-            
-            placeholder.innerHTML = '<div class="loading"></div>';
-            recommendations.style.display = 'none';
-            actionButtons.style.display = 'none';
+        // Inicializar calculadora PREVENT com tolerância a falhas
+        let preventCalc = null;
+        try {
+            if (typeof PreventCalculator === 'function') {
+                preventCalc = new PreventCalculator();
+            } else {
+                console.warn('PreventCalculator não disponível. O cálculo PREVENT será ignorado.');
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar a calculadora PREVENT:', error);
+            preventCalc = null;
         }
-
-        function showRecommendations() {
-            const placeholder = document.getElementById('placeholder');
-            const recommendations = document.getElementById('recommendations');
-            const actionButtons = document.getElementById('actionButtons');
+        
+        // Função para criar links clicáveis nas referências
+        function createReferenceLink(referencia) {
+            const referenceLinks = {
+                'USPSTF 2024': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening',
+                'USPSTF 2021': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening',
+                'USPSTF 2020': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening',
+                'USPSTF 2019': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening',
+                'USPSTF 2018': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening',
+                'USPSTF 2017': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening',
+                'USPSTF 2016': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening',
+                'USPSTF Osteoporose': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening',
+                'USPSTF Colorretal': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening',
+                'ADA 2025': 'https://diabetes.org/newsroom/press-releases/american-diabetes-association-releases-standards-care-diabetes-2025',
+                'AHA/ACC 2025': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356',
+                'AHA/ACC 2022': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001071',
+                'AHA/ACC 2019': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000678',
+                'AHA/ACC 2017': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000485',
+                'AHA/ACC 2016': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000471',
+                'SBC 2020': 'https://abccardiol.org/article/diretrizes-brasileiras-de-hipertensao-arterial-2020/',
+                'SBC/SBH/SBN 2020': 'https://abccardiol.org/article/diretrizes-brasileiras-de-hipertensao-arterial-2020/',
+                'ASE 2016': 'https://www.onlinejase.com/article/S0894-7317(16)30146-4/fulltext'
+            };
             
-            placeholder.style.display = 'none';
-            recommendations.style.display = 'block';
-            actionButtons.style.display = 'grid';
+            // Procurar por correspondências exatas ou parciais
+            for (const [key, url] of Object.entries(referenceLinks)) {
+                if (referencia.includes(key)) {
+                    return `<a href="${url}" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">${referencia}</a>`;
+                }
+            }
+            
+            // Se não encontrar link específico, retornar texto normal
+            return referencia;
         }
-
-        function generateRecommendations() {
-            showLoading();
+        
+        document.getElementById('checkupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            // Simular processamento
-            setTimeout(() => {
-                const formData = new FormData(document.getElementById('checkupForm'));
-                const data = Object.fromEntries(formData.entries());
+            const formData = new FormData(this);
+            const data = {};
+            
+            // Converter FormData para objeto
+            for (let [key, value] of formData.entries()) {
+                if (data[key]) {
+                    if (Array.isArray(data[key])) {
+                        data[key].push(value);
+                    } else {
+                        data[key] = [data[key], value];
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            // Calcular risco cardiovascular PREVENT se dados suficientes
+            let cardiovascularRisk = null;
+            if (preventCalc && typeof preventCalc.calculateRisks === 'function' &&
+                data.idade && data.sexo && data.colesterol && data.hdl && data.pas && data.creatinina) {
+                try {
+                    const riskParams = {
+                        idade: parseInt(data.idade),
+                        sexo: data.sexo,
+                        colesterol_total: parseInt(data.colesterol) || 200,
+                        hdl_colesterol: parseInt(data.hdl) || 45,
+                        pressao_sistolica: parseInt(data.pas) || 120,
+                        diabetes: data.diabetes_tipo2 === 'on',
+                        tabagismo: data.tabagismo || 'nunca',
+                        creatinina: parseFloat(data.creatinina) || 1.0,
+                        medicamentos_anti_hipertensivos: data.anti_hipertensivos === 'on',
+                        estatinas: data.estatinas === 'on'
+                    };
+                    
+                    cardiovascularRisk = preventCalc.calculateRisks(riskParams);
+                } catch (error) {
+                    console.error('Erro no cálculo de risco:', error);
+                }
+            }
+            
+            // Debug: Log dos dados enviados
+            console.log('=== DADOS ENVIADOS PARA API ===');
+            console.log('Dados completos:', JSON.stringify(data, null, 2));
+            console.log('Campo hipertensao:', data.hipertensao);
+            console.log('Campo comorbidades:', data.comorbidades);
+            console.log('Campo has_resistente:', data.has_resistente);
+            
+            try {
+                const response = await fetch('/api/checkup_intelligent_v3', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
                 
-                // Processar dados e gerar recomendações
-                processRecommendations(data);
-                showRecommendations();
-            }, 2000);
-        }
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // Debug: Log da resposta da API
+                console.log('=== RESPOSTA DA API ===');
+                console.log('Total de recomendações:', result.recommendations?.length || 0);
+                
+                // Verificar recomendações de hipertensão
+                const hypertensionRecs = result.recommendations?.filter(rec => 
+                    rec.titulo?.toLowerCase().includes('potássio') ||
+                    rec.titulo?.toLowerCase().includes('creatinina') ||
+                    rec.titulo?.toLowerCase().includes('lipídico') ||
+                    rec.titulo?.toLowerCase().includes('ecg') ||
+                    rec.titulo?.toLowerCase().includes('microalbuminúria')
+                ) || [];
+                
+                console.log('Recomendações de hipertensão encontradas:', hypertensionRecs.length);
+                if (hypertensionRecs.length > 0) {
+                    console.log('Títulos das recomendações de hipertensão:', hypertensionRecs.map(r => r.titulo));
+                }
+                
+                displayRecommendations(result.recommendations, cardiovascularRisk, result);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao gerar recomendações: ' + error.message);
+            }
+        });
 
-        function processRecommendations(data) {
-            const recommendations = document.getElementById('recommendations');
+        function displayRecommendations(recomendacoes, cardiovascularRisk = null, preventData = null) {
+            const container = document.getElementById('recommendationsContent');
+            const recommendationsDiv = document.getElementById('recommendations');
             
-            // Exemplo de recomendações baseadas nas imagens de referência
-            recommendations.innerHTML = `
-                <div class="category-section">
-                    <div class="category-title">🧪 Exames Laboratoriais</div>
+            if (!recomendacoes || recomendacoes.length === 0) {
+                container.innerHTML = '<p>Nenhuma recomendação específica para este perfil.</p>';
+                recommendationsDiv.style.display = 'block';
+                return;
+            }
+            
+            // Adicionar seção de risco cardiovascular PREVENT se disponível
+            let riskHtml = '';
+            if (preventData && preventData.prevent_score && preventData.prevent_score.success) {
+                const prevent = preventData.prevent_score;
+                const classification = prevent.classification || {};
+                const clinical = prevent.clinical_data || {};
+                
+                // Determinar cor baseada na categoria de risco
+                const riskColors = {
+                    'Baixo': '#27ae60',
+                    'Borderline': '#f39c12', 
+                    'Intermediário': '#e67e22',
+                    'Alto': '#e74c3c'
+                };
+                
+                const riskColor = riskColors[classification.category] || '#95a5a6';
+                
+                riskHtml = `
+                    <div class="cardiovascular-risk-section" style="margin-bottom: 2rem;">
+                        <h3 style="color: #2c3e50; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.5rem;">📊</span>
+                            Risco Cardiovascular (PREVENT 2024)
+                        </h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
+                            <div class="risk-card" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; border-left: 4px solid ${riskColor}; position: relative; overflow: hidden; transition: all 0.3s ease;">
+                                <h4 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.1rem; font-weight: 500; line-height: 1.3;">Estimated 30-year<br>risk of CVD</h4>
+                                <div style="font-size: 3rem; font-weight: bold; color: ${riskColor}; margin: 1rem 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${prevent.risk_10yr}%</div>
+                                <div style="background: #f8f9fa; color: #6c757d; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; font-size: 0.9rem; margin-top: 1rem;">
+                                    ${classification.category || 'N/A'}
+                                </div>
+                            </div>
+                            <div class="risk-card" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; border-left: 4px solid ${riskColor}; position: relative; overflow: hidden; transition: all 0.3s ease;">
+                                <h4 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.1rem; font-weight: 500; line-height: 1.3;">Estimated 10-year<br>risk of CVD</h4>
+                                <div style="font-size: 3rem; font-weight: bold; color: ${riskColor}; margin: 1rem 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${prevent.risk_30yr}%</div>
+                                <div style="background: #f8f9fa; color: #6c757d; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; font-size: 0.9rem; margin-top: 1rem;">
+                                    Risco Longo Prazo
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 1.5rem; border-radius: 15px; border-left: 5px solid #3498db; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; font-size: 0.9rem; color: #2c3e50;">
+                                <div><strong>eGFR:</strong> ${clinical.egfr || 'N/A'} mL/min/1.73m²</div>
+                                <div><strong>IMC:</strong> ${clinical.bmi ? clinical.bmi.toFixed(1) : 'N/A'} kg/m²</div>
+                                <div><strong>Não-HDL:</strong> ${clinical.non_hdl ? clinical.non_hdl.toFixed(0) : 'N/A'} mg/dL</div>
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #7f8c8d; text-align: center;">
+                                <strong>Baseado em:</strong> Equações PREVENT 2024 (AHA/ACC) • <strong>Classificação:</strong> ${classification.description || 'N/A'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Categorizar recomendações com ícones
+            const categorias = {
+                '🧪 Exames Laboratoriais': [],
+                '🏥 Exames de Imagem': [],
+                '📋 Outras Recomendações': []
+            };
+            
+            recomendacoes.forEach(rec => {
+                const categoria = rec.categoria || '';
+                const titulo = rec.titulo || '';
+                
+                // Categorização inteligente baseada no conteúdo
+                if (titulo.includes('Lipoproteína(a)') || titulo.includes('Lp(a)') || titulo.includes('hsCRP') ||
+                    titulo.includes('Proteína C Reativa') || titulo.includes('Microalbuminúria')) {
+                    // Exames laboratoriais específicos
+                    categorias['🧪 Exames Laboratoriais'].push(rec);
+                } else if (titulo.includes('Score de Cálcio') || titulo.includes('Tomografia de Coronárias') ||
+                    titulo.includes('Strain') || titulo.includes('Ecocardiograma')) {
+                    // Exames de imagem específicos
+                    categorias['🏥 Exames de Imagem'].push(rec);
+                } else if (titulo.includes('Tornozelo-Braquial') || titulo.includes('ITB')) {
+                    // Outras recomendações específicas
+                    categorias['📋 Outras Recomendações'].push(rec);
+                } else if (categoria.includes('Laboratorial') || categoria.includes('laboratorial') || 
+                    titulo.includes('Hemograma') || titulo.includes('Glicemia') || titulo.includes('Colesterol') ||
+                    titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
+                    titulo.includes('Sódio') || titulo.includes('Magnésio') || titulo.includes('Ácido úrico') ||
+                    titulo.includes('Microalbuminúria') || titulo.includes('Urinocultura') || titulo.includes('HbA1c') ||
+                    titulo.includes('TSH') || titulo.includes('Cortisol') || titulo.includes('Aldosterona') ||
+                    titulo.includes('Hepatite C') || titulo.includes('HIV') || titulo.includes('Papanicolau') ||
+                    titulo.includes('Citologia') || titulo.includes('Metanefrinas') || titulo.includes('Catecolaminas')) {
+                    categorias['🧪 Exames Laboratoriais'].push(rec);
+                } else if (categoria.includes('Imagem') || categoria.includes('imagem') ||
+                    titulo.includes('Tomografia') || titulo.includes('Ressonância') || titulo.includes('Ultrassom') ||
+                    titulo.includes('Ecocardiograma') || titulo.includes('Radiografia') || titulo.includes('Mamografia') ||
+                    titulo.includes('TCBD') || titulo.includes('Colonoscopia') || titulo.includes('Densitometria') ||
+                    titulo.includes('MAPA') || titulo.includes('MRPA') || titulo.includes('Screening') ||
+                    titulo.includes('Rastreamento') || titulo.includes('Câncer') || titulo.includes('Sífilis') ||
+                    titulo.includes('Tuberculose') || titulo.includes('Bacteriúria') || titulo.includes('Osteoporose')) {
+                    categorias['🏥 Exames de Imagem'].push(rec);
+                } else if (categoria.includes('Vacina') || categoria.includes('vacina') ||
+                    titulo.includes('Vacina') || titulo.includes('Imunização')) {
+                    categorias['💉 Vacinas'].push(rec);
+                } else if (titulo.includes('Consulta') || titulo.includes('Avaliação') || titulo.includes('Acompanhamento')) {
+                    categorias['🩺 Avaliação Clínica'].push(rec);
+                } else {
+                    categorias['📋 Outras Recomendações'].push(rec);
+                }
+            });
+            
+            let html = '';
+            
+            Object.keys(categorias).forEach(categoria => {
+                if (categorias[categoria].length > 0) {
+                    html += `<div class="recommendation-category" style="margin-bottom: 2rem;">
+                        <h4 style="color: #2c3e50; margin-bottom: 1rem; padding: 0.75rem 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border-left: 4px solid #3498db; font-size: 1.1rem; font-weight: 600;">${categoria}</h4>`;
                     
-                    <div class="recommendation-card">
-                        <div class="recommendation-header">
-                            <h3 class="recommendation-title">Rastreamento de Hepatite C</h3>
-                            <span class="priority-badge priority-alta">ALTA</span>
-                        </div>
-                        <p class="recommendation-description">Teste único de anticorpos anti-HCV para todos os adultos de 18-79 anos, independente de fatores de risco.</p>
-                        <div class="recommendation-reference">
-                            <a href="https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening" target="_blank">USPSTF 2020</a>
-                        </div>
-                    </div>
-
-                    <div class="recommendation-card">
-                        <div class="recommendation-header">
-                            <h3 class="recommendation-title">Rastreamento de HIV</h3>
-                            <span class="priority-badge priority-alta">ALTA</span>
-                        </div>
-                        <p class="recommendation-description">Teste de HIV pelo menos uma vez para todos os adolescentes e adultos de 15-65 anos.</p>
-                        <div class="recommendation-reference">
-                            <a href="https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening" target="_blank">USPSTF 2019</a>
-                        </div>
-                    </div>
-
-                    <div class="recommendation-card">
-                        <div class="recommendation-header">
-                            <h3 class="recommendation-title">Glicemia de Jejum (FPG)</h3>
-                            <span class="priority-badge priority-alta">ALTA</span>
-                        </div>
-                        <p class="recommendation-description">Dosagem da glicose plasmática após jejum de 8-12 horas para rastreamento de diabetes. Repetir a cada 3 anos se normal.</p>
-                        <div class="recommendation-reference">
-                            <a href="https://www.diabetes.org/a1c/diagnosis" target="_blank">ADA 2025</a>
-                        </div>
-                    </div>
-
-                    <div class="recommendation-card">
-                        <div class="recommendation-header">
-                            <h3 class="recommendation-title">Hemoglobina Glicada (HbA1c)</h3>
-                            <span class="priority-badge priority-alta">ALTA</span>
-                        </div>
-                        <p class="recommendation-description">Dosagem de HbA1c para rastreamento de diabetes e pré-diabetes. Repetir a cada 3 anos se normal, anual se pré-diabetes.</p>
-                        <div class="recommendation-reference">
-                            <a href="https://www.diabetes.org/a1c/diagnosis" target="_blank">ADA 2025</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="category-section">
-                    <div class="category-title">🏥 Exames de Imagem</div>
+                    categorias[categoria].forEach((rec, index) => {
+                        const titulo = rec.titulo || 'Recomendação';
+                        const descricao = rec.descricao || '';
+                        const prioridade = rec.prioridade || 'alta';
+                        const referencia = rec.referencia || '';
+                        
+                        // Determinar cor da prioridade
+                        let prioridadeColor = '#28a745'; // Verde para alta
+                        if (prioridade === 'media') prioridadeColor = '#ffc107'; // Amarelo para média
+                        if (prioridade === 'baixa') prioridadeColor = '#fd7e14'; // Laranja para baixa
+                        
+                        html += `<div class="recommendation-card" style="background: white; border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #3498db; position: relative;">
+                            <button onclick="removeRecommendation(this)" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.2rem; color: #95a5a6; cursor: pointer; padding: 5px;">×</button>
+                            
+                            <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                                <span style="background: ${prioridadeColor}; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-right: 1rem;">
+                                    ${prioridade.toUpperCase()}
+                                </span>
+                            </div>
+                            
+                            <h5 style="color: #2c3e50; margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 600;">
+                                ${titulo}
+                            </h5>
+                            
+                            ${descricao ? `<p style="color: #7f8c8d; margin: 0 0 1rem 0; font-size: 0.9rem; line-height: 1.4;">
+                                ${descricao}
+                            </p>` : ''}
+                            
+                            ${referencia ? `<p style="color: #95a5a6; margin: 0; font-size: 0.8rem; font-style: italic;">
+                                ${createReferenceLink(referencia)}
+                            </p>` : ''}
+                        </div>`;
+                    });
                     
-                    <div class="recommendation-card">
-                        <div class="recommendation-header">
-                            <h3 class="recommendation-title">Rastreamento de Câncer Colorretal</h3>
-                            <span class="priority-badge priority-alta">ALTA</span>
-                        </div>
-                        <p class="recommendation-description">Colonoscopia a cada 10 anos, sigmoidoscopia a cada 5 anos, ou teste de sangue oculto nas fezes anual.</p>
-                        <div class="recommendation-reference">
-                            <a href="https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening" target="_blank">USPSTF 2021</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="category-section">
-                    <div class="category-title">📋 Outras Recomendações</div>
-                    
-                    <div class="recommendation-card">
-                        <div class="recommendation-header">
-                            <h3 class="recommendation-title">MAPA de 24h ou MRPA</h3>
-                            <span class="priority-badge priority-media">MÉDIA</span>
-                        </div>
-                        <p class="recommendation-description">Monitorização ambulatorial recomendada para diagnóstico preciso de hipertensão e identificação de fenótipos pressóricos.</p>
-                        <div class="recommendation-reference">
-                            <a href="https://www.ahajournals.org/doi/10.1161/HYP.0000000000000087" target="_blank">AHA/ACC 2025 e SBC 2020</a>
-                        </div>
-                    </div>
-
-                    <div class="recommendation-card">
-                        <div class="recommendation-header">
-                            <h3 class="recommendation-title">Teste Oral de Tolerância à Glicose (TOTG 75g)</h3>
-                            <span class="priority-badge priority-media">MÉDIA</span>
-                        </div>
-                        <p class="recommendation-description">TOTG com 75g de glicose quando glicemia de jejum e HbA1c são inconclusivos para diagnóstico de diabetes.</p>
-                        <div class="recommendation-reference">
-                            <a href="https://www.diabetes.org/a1c/diagnosis" target="_blank">ADA 2025</a>
-                        </div>
-                    </div>
-                </div>
-            `;
+                    html += '</div>';
+                }
+            });
+            
+            // Montar HTML final com seção PREVENT no topo
+            container.innerHTML = riskHtml + html;
+            recommendationsDiv.style.display = 'block';
         }
 
-        function attachPDFs() {
-            alert('Funcionalidade de anexar PDFs será implementada em breve.');
+        async function gerarSolicitacaoExames() {
+            try {
+                const response = await fetch('/api/gerar-solicitacao-exames', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
+                const result = await response.text();
+                
+                // Abrir em nova janela
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(result);
+                newWindow.document.close();
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao gerar solicitação de exames: ' + error.message);
+            }
+        }
+
+        async function gerarReceitaVacinas() {
+            try {
+                const response = await fetch('/api/gerar-receita-vacinas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
+                const result = await response.text();
+                
+                // Abrir em nova janela
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(result);
+                newWindow.document.close();
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao gerar receita de vacinas: ' + error.message);
+            }
+        }
+
+        function gerarRelatorioCompleto() {
+            alert('Funcionalidade em desenvolvimento');
+        }
+
+        function agendarLembretes() {
+            alert('Funcionalidade em desenvolvimento');
+        }
+
+        function anexarPDFs() {
+            alert('Funcionalidade em desenvolvimento');
+        }
+
+        function removeRecommendation(button) {
+            const card = button.closest('.recommendation-card');
+            if (card) {
+                card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(20px)';
+                setTimeout(() => {
+                    card.remove();
+                }, 300);
+            }
         }
     </script>
 </body>
