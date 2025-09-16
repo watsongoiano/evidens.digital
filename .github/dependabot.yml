@@ -1,0 +1,41 @@
+# Dependabot configuration file
+# Documentation: https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Example for npm (JavaScript/TypeScript)
+  - package-ecosystem: "npm"
+    directory: "/" # Root of the repo
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  # Example for pip (Python)
+  - package-ecosystem: "pip"
+    directory: "/" # Root of the repo, adjust if requirements.txt is elsewhere
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  # Example for Maven (Java)
+  - package-ecosystem: "maven"
+    directory: "/" # Root, or "./backend" etc.
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  # Example for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/" # Always root
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
