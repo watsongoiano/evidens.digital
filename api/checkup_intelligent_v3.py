@@ -2,6 +2,7 @@
 import json
 import sys
 import os
+import unicodedata
 from http.server import BaseHTTPRequestHandler
 
 # Adicionar o diretório atual ao path para importações
@@ -49,6 +50,90 @@ def calculate_prevent_risk(data):
 
     classification.setdefault("category", "")
     return result
+
+
+TABAGISMO_NORMALIZATION = {
+    "nunca": "nunca",
+    "nunca-fumou": "nunca",
+    "nunca-fumei": "nunca",
+    "nunca-fumador": "nunca",
+    "nunca-fumadora": "nunca",
+    "never": "nunca",
+    "never-smoked": "nunca",
+    "never-smoker": "nunca",
+    "never-smoke": "nunca",
+    "nao": "nunca",
+    "na": "nunca",
+    "n-a": "nunca",
+    "none": "nunca",
+    "sem": "nunca",
+    "no": "nunca",
+    "": "nunca",
+    "0": "nunca",
+    "false": "nunca",
+    "fumante": "fumante",
+    "fumante-atual": "fumante",
+    "fumanteatual": "fumante",
+    "atual": "fumante",
+    "current": "fumante",
+    "current-smoker": "fumante",
+    "smoker": "fumante",
+    "smoking": "fumante",
+    "ex": "ex-fumante",
+    "ex-fumante": "ex-fumante",
+    "exfumante": "ex-fumante",
+    "ex-smoker": "ex-fumante",
+    "former": "ex-fumante",
+    "former-smoker": "ex-fumante",
+    "previous-smoker": "ex-fumante",
+    "former-smoke": "ex-fumante",
+}
+
+
+def _strip_accents(value):
+    normalized = unicodedata.normalize("NFKD", value)
+    return "".join(ch for ch in normalized if not unicodedata.combining(ch))
+
+
+def normalize_tabagismo_status(value):
+    """Normaliza diferentes representações de tabagismo para o padrão interno."""
+
+    if isinstance(value, dict):
+        for key in ("status", "estado", "value"):
+            if value.get(key):
+                return normalize_tabagismo_status(value[key])
+        return "nunca"
+
+    if isinstance(value, (list, tuple)):
+        for item in value:
+            normalized = normalize_tabagismo_status(item)
+            if normalized:
+                return normalized
+        return "nunca"
+
+    if value is None:
+        return "nunca"
+
+    text = str(value).strip().lower()
+    if not text:
+        return "nunca"
+
+    text = _strip_accents(text)
+    text = text.replace("_", "-").replace(" ", "-")
+    text = text.replace("--", "-")
+
+    normalized = TABAGISMO_NORMALIZATION.get(text)
+    if normalized:
+        return normalized
+
+    if "ex" in text and "fum" in text:
+        return "ex-fumante"
+
+    if any(keyword in text for keyword in ("fumante", "smoker", "atual", "current")):
+        return "fumante"
+
+    return "nunca"
+
 
 def get_cardiovascular_stratification_exams(risk_category):
     """
@@ -154,6 +239,27 @@ class handler(BaseHTTPRequestHandler):
             elif not isinstance(comorbidades, list):
                 comorbidades = []
 
+            tabagismo_raw = data.get("tabagismo")
+            macos_ano_raw = data.get("macos_ano")
+
+            if (
+                tabagismo_raw is None
+                or (isinstance(tabagismo_raw, str) and not tabagismo_raw.strip())
+            ) and data.get("tabagismo_status") is not None:
+                tabagismo_raw = data.get("tabagismo_status")
+
+            if isinstance(tabagismo_raw, dict):
+                macos_ano_raw = macos_ano_raw or tabagismo_raw.get("macos_ano") or tabagismo_raw.get("pack_years")
+
+            if (
+                macos_ano_raw is None
+                or (isinstance(macos_ano_raw, str) and not macos_ano_raw.strip())
+            ):
+                macos_ano_raw = data.get("tabagismo_macos_ano")
+
+            tabagismo = normalize_tabagismo_status(tabagismo_raw)
+            data["tabagismo"] = tabagismo
+
             # Detectar condições
             hipertenso = (data.get("hipertensao") == "on" or "hipertensao" in comorbidades)
             has_resistente = (data.get("has_resistente") == "on" or "has_resistente" in comorbidades)
@@ -174,8 +280,18 @@ class handler(BaseHTTPRequestHandler):
             # === RASTREAMENTOS GERAIS (SEM DUPLICAÇÃO) ===
             
             # Rastreamento de Câncer de Pulmão
-            tabagismo = data.get("tabagismo", "nunca")
-            macos_ano = int(data.get("macos_ano", 0)) if data.get("macos_ano") else 0
+            macos_ano = 0
+            if macos_ano_raw is not None:
+                if isinstance(macos_ano_raw, (int, float)):
+                    macos_ano = float(macos_ano_raw)
+                elif isinstance(macos_ano_raw, str):
+                    macos_ano_str = macos_ano_raw.strip().replace(",", ".")
+                    if macos_ano_str:
+                        try:
+                            macos_ano = float(macos_ano_str)
+                        except ValueError:
+                            macos_ano = 0
+            tabagismo = tabagismo or "nunca"
             if 50 <= idade <= 80 and tabagismo in ["fumante", "ex-fumante"] and macos_ano >= 20:
                 add_recommendation({
                     "titulo": "Tomografia Computadorizada de Baixa Dose (TCBD) de Tórax",
