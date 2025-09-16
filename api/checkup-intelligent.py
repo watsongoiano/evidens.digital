@@ -27,6 +27,13 @@ class handler(BaseHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode("utf-8")) if post_data else {}
 
+            # Debug: Log dos dados recebidos
+            print(f"=== DADOS RECEBIDOS NO BACKEND ===")
+            print(f"Dados completos: {data}")
+            print(f"Campo hipertensao: {data.get('hipertensao')}")
+            print(f"Campo comorbidades: {data.get('comorbidades')}")
+            print(f"Campo has_resistente: {data.get('has_resistente')}")
+
             idade = int(data.get("idade", 0))
             sexo = data.get("sexo", "")
             # Verificar hipertensão tanto como campo direto quanto no array de comorbidades
@@ -35,6 +42,10 @@ class handler(BaseHTTPRequestHandler):
                 comorbidades = [comorbidades]
             hipertensao = data.get("hipertensao") == "on" or "hipertensao" in comorbidades
             gestante = data.get("gestante") == "on"
+            
+            # Debug: Log da detecção de hipertensão
+            print(f"Hipertensão detectada: {hipertensao}")
+            print(f"Comorbidades processadas: {comorbidades}")
 
             recommendations = []
 
@@ -43,9 +54,14 @@ class handler(BaseHTTPRequestHandler):
                     recommendations.append(rec_data)
 
             if hipertensao:
+                print(f"Chamando módulo de hipertensão...")
                 hypertension_recs = get_hypertension_recommendations_v2(data)
+                print(f"Módulo de hipertensão retornou {len(hypertension_recs)} recomendações")
                 for rec in hypertension_recs:
                     add_recommendation(rec)
+                print(f"Total de recomendações após hipertensão: {len(recommendations)}")
+            else:
+                print(f"Hipertensão não detectada, módulo não será chamado")
 
             # Lógica de rastreamento geral com descrição e referência
             tabagismo_atual = data.get("tabagismo_atual") == "on"

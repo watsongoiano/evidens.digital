@@ -641,8 +641,15 @@
                 }
             }
             
+            // Debug: Log dos dados enviados
+            console.log('=== DADOS ENVIADOS PARA API ===');
+            console.log('Dados completos:', JSON.stringify(data, null, 2));
+            console.log('Campo hipertensao:', data.hipertensao);
+            console.log('Campo comorbidades:', data.comorbidades);
+            console.log('Campo has_resistente:', data.has_resistente);
+            
             try {
-                const response = await fetch('/api/checkup-intelligent', {
+                const response = await fetch('/api/checkup-intelligent.py', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -655,6 +662,25 @@
                 }
                 
                 const result = await response.json();
+                
+                // Debug: Log da resposta da API
+                console.log('=== RESPOSTA DA API ===');
+                console.log('Total de recomendações:', result.recommendations?.length || 0);
+                
+                // Verificar recomendações de hipertensão
+                const hypertensionRecs = result.recommendations?.filter(rec => 
+                    rec.titulo?.toLowerCase().includes('potássio') ||
+                    rec.titulo?.toLowerCase().includes('creatinina') ||
+                    rec.titulo?.toLowerCase().includes('lipídico') ||
+                    rec.titulo?.toLowerCase().includes('ecg') ||
+                    rec.titulo?.toLowerCase().includes('microalbuminúria')
+                ) || [];
+                
+                console.log('Recomendações de hipertensão encontradas:', hypertensionRecs.length);
+                if (hypertensionRecs.length > 0) {
+                    console.log('Títulos das recomendações de hipertensão:', hypertensionRecs.map(r => r.titulo));
+                }
+                
                 displayRecommendations(result.recommendations, cardiovascularRisk);
                 
             } catch (error) {
