@@ -728,30 +728,45 @@
                 `;
             }
             
-            // Categorizar recomendações
+            // Categorizar recomendações com ícones
             const categorias = {
-                'Exames Laboratoriais': [],
-                'Exames de Imagem': [],
-                'Vacinas': [],
-                'Rastreamento': [],
-                'Outras': []
+                '🧪 Exames Laboratoriais': [],
+                '🏥 Exames de Imagem': [],
+                '💉 Vacinas': [],
+                '🔍 Rastreamento / Screening': [],
+                '🩺 Avaliação Clínica': [],
+                '📋 Outras Recomendações': []
             };
             
             recomendacoes.forEach(rec => {
                 const categoria = rec.categoria || '';
-                const prioridade = rec.prioridade || 'alta';
+                const titulo = rec.titulo || '';
                 
-                // Usar a categoria definida no backend
-                if (categoria === 'laboratorial') {
-                    categorias['Exames Laboratoriais'].push(rec);
-                } else if (categoria === 'imagem') {
-                    categorias['Exames de Imagem'].push(rec);
-                } else if (categoria === 'vacina') {
-                    categorias['Vacinas'].push(rec);
-                } else if (categoria === 'rastreamento') {
-                    categorias['Rastreamento'].push(rec);
+                // Categorização inteligente baseada no conteúdo
+                if (categoria.includes('Laboratorial') || categoria.includes('laboratorial') || 
+                    titulo.includes('Hemograma') || titulo.includes('Glicemia') || titulo.includes('Colesterol') ||
+                    titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
+                    titulo.includes('Sódio') || titulo.includes('Magnésio') || titulo.includes('Ácido úrico') ||
+                    titulo.includes('Microalbuminúria') || titulo.includes('Urinocultura') || titulo.includes('HbA1c') ||
+                    titulo.includes('TSH') || titulo.includes('Cortisol') || titulo.includes('Aldosterona')) {
+                    categorias['🧪 Exames Laboratoriais'].push(rec);
+                } else if (categoria.includes('Imagem') || categoria.includes('imagem') ||
+                    titulo.includes('Tomografia') || titulo.includes('Ressonância') || titulo.includes('Ultrassom') ||
+                    titulo.includes('Ecocardiograma') || titulo.includes('Radiografia') || titulo.includes('Mamografia') ||
+                    titulo.includes('TCBD') || titulo.includes('Colonoscopia') || titulo.includes('Densitometria')) {
+                    categorias['🏥 Exames de Imagem'].push(rec);
+                } else if (categoria.includes('Vacina') || categoria.includes('vacina') ||
+                    titulo.includes('Vacina') || titulo.includes('Imunização')) {
+                    categorias['💉 Vacinas'].push(rec);
+                } else if (categoria.includes('Rastreamento') || categoria.includes('rastreamento') ||
+                    titulo.includes('Rastreamento') || titulo.includes('Screening') || titulo.includes('Papanicolau') ||
+                    titulo.includes('Câncer') || titulo.includes('HIV') || titulo.includes('Hepatite') ||
+                    titulo.includes('Sífilis') || titulo.includes('Tuberculose') || titulo.includes('Bacteriúria')) {
+                    categorias['🔍 Rastreamento / Screening'].push(rec);
+                } else if (titulo.includes('Consulta') || titulo.includes('Avaliação') || titulo.includes('Acompanhamento')) {
+                    categorias['🩺 Avaliação Clínica'].push(rec);
                 } else {
-                    categorias['Outras'].push(rec);
+                    categorias['📋 Outras Recomendações'].push(rec);
                 }
             });
             
@@ -759,8 +774,8 @@
             
             Object.keys(categorias).forEach(categoria => {
                 if (categorias[categoria].length > 0) {
-                    html += `<div class="recommendation-category">
-                        <h4>${categoria}</h4>`;
+                    html += `<div class="recommendation-category" style="margin-bottom: 2rem;">
+                        <h4 style="color: #2c3e50; margin-bottom: 1rem; padding: 0.75rem 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border-left: 4px solid #3498db; font-size: 1.1rem; font-weight: 600;">${categoria}</h4>`;
                     
                     categorias[categoria].forEach((rec, index) => {
                         const titulo = rec.titulo || 'Recomendação';
