@@ -8,45 +8,19 @@ from http.server import BaseHTTPRequestHandler
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else '.')
 try:
     from checkup_hypertension import get_hypertension_recommendations_v2
+    from prevent_calculator import calculate_prevent_risk
 except ImportError:
     # Fallback se a importação falhar
     def get_hypertension_recommendations_v2(data):
         return []
-
-def calculate_prevent_risk(data):
-    """
-    Calcula o risco cardiovascular usando as equações PREVENT 2024
-    """
-    try:
-        idade = int(data.get("idade", 0))
-        sexo = data.get("sexo", "")
-        pas = float(data.get("pressao_sistolica", 0))
-        pad = float(data.get("pressao_diastolica", 0))
-        colesterol_total = float(data.get("colesterol_total", 0))
-        hdl = float(data.get("hdl_colesterol", 0))
-        creatinina = float(data.get("creatinina", 0))
-        hba1c = float(data.get("hba1c", 0))
-        
-        # Cálculo simplificado do eGFR (CKD-EPI)
-        if sexo == "feminino":
-            egfr = 142 * min(creatinina/0.7, 1)**(-0.329) * max(creatinina/0.7, 1)**(-1.209) * 0.9938**idade
-        else:
-            egfr = 142 * min(creatinina/0.9, 1)**(-0.411) * max(creatinina/0.9, 1)**(-1.209) * 0.9938**idade
-        
-        # Fatores de risco para cálculo PREVENT
-        diabetes = "diabetes" in data.get("comorbidades", [])
-        tabagismo = data.get("tabagismo", "nunca") in ["fumante", "ex-fumante"]
-        
-        # Cálculo simplificado do risco (baseado em PREVENT)
-        risk_score = 0
-        
-        # Idade
-        if idade >= 65:
-            risk_score += 3
-        elif idade >= 55:
-            risk_score += 2
-        elif idade >= 45:
-            risk_score += 1
+    
+    def calculate_prevent_risk(data):
+        return {
+            "success": False,
+            "error": "Módulo PREVENT não disponível",
+            "risk_10yr": 0,
+            "risk_30yr": 0
+        }
             
         # Pressão arterial
         if pas >= 160 or pad >= 100:
@@ -92,18 +66,23 @@ def calculate_prevent_risk(data):
     except:
         return None
 
-def get_cardiovascular_stratification_exams(risk_data):
+def get_cardiovascular_stratification_exams(risk_category):
     """
-    Retorna exames de estratificação cardiovascular baseados no risco PREVENT
+    Retorna exames de estratificação cardiovascular baseados na categoria de risco PREVENT
+    
+    Args:
+        risk_category: Categoria de risco ('Baixo', 'Borderline', 'Intermediário', 'Alto')
+    
+    Returns:
+        Lista de exames recomendados
     """
-    if not risk_data:
+    if not risk_category:
         return []
         
     exams = []
-    risk_category = risk_data["risk_category"]
     
-    # Exames para risco borderline (5-7.5%)
-    if risk_category in ["borderline", "intermediario", "alto"]:
+    # Exames para risco borderline
+    if risk_category in ["Borderline", "Intermediário", "Alto"]:
         exams.extend([
             {
                 "titulo": "Lipoproteína(a) - Lp(a), soro",
@@ -118,18 +97,6 @@ def get_cardiovascular_stratification_exams(risk_data):
                 "prioridade": "alta",
                 "referencia": "AHA/ACC 2019",
                 "categoria": "Estratificação Cardiovascular"
-            }
-        ])
-    
-    # Exames para risco intermediário (7.5-20%)
-    if risk_category in ["intermediario", "alto"]:
-        exams.extend([
-            {
-                "titulo": "Tomografia de Coronárias para Score de Cálcio",
-                "descricao": "Exame de imagem para quantificação do cálcio coronariano, útil para reclassificação de risco em pacientes com risco intermediário.",
-                "prioridade": "alta",
-                "referencia": "AHA/ACC 2019",
-                "categoria": "Estratificação Cardiovascular"
             },
             {
                 "titulo": "Índice Tornozelo-Braquial (ITB)",
@@ -140,18 +107,30 @@ def get_cardiovascular_stratification_exams(risk_data):
             }
         ])
     
-    # Exames para alto risco (≥20%)
-    if risk_category == "alto":
+    # Exames para risco intermediário
+    if risk_category in ["Intermediário", "Alto"]:
         exams.extend([
             {
-                "titulo": "Microalbuminúria, urina",
+                "titulo": "Tomografia de Coronárias para Score de Cálcio Coronariano",
+                "descricao": "Exame de imagem para quantificação do cálcio coronariano, útil para reclassificação de risco em pacientes com risco intermediário.",
+                "prioridade": "alta",
+                "referencia": "AHA/ACC 2019",
+                "categoria": "Estratificação Cardiovascular"
+            }
+        ])
+    
+    # Exames para alto risco
+    if risk_category == "Alto":
+        exams.extend([
+            {
+                "titulo": "Microalbuminúria, urina 24h",
                 "descricao": "Marcador de lesão vascular e risco cardiovascular aumentado, especialmente em pacientes de alto risco.",
                 "prioridade": "alta",
                 "referencia": "AHA/ACC 2017",
                 "categoria": "Estratificação Cardiovascular"
             },
             {
-                "titulo": "Ecocardiograma com Strain",
+                "titulo": "Ecocardiograma com Strain Longitudinal Global",
                 "descricao": "Avaliação avançada da função cardíaca para detecção precoce de disfunção em pacientes de alto risco.",
                 "prioridade": "média",
                 "referencia": "ASE 2016",
@@ -387,16 +366,20 @@ class handler(BaseHTTPRequestHandler):
                 for rec in hypertension_recs:
                     add_recommendation(rec)
 
-            # === ESTRATIFICAÇÃO CARDIOVASCULAR BASEADA NO PREVENT ===
+            # === CÁLCULO PREVENT E ESTRATIFICAÇÃO CARDIOVASCULAR ===
             
-            if cardiovascular_risk:
-                stratification_exams = get_cardiovascular_stratification_exams(cardiovascular_risk)
+            prevent_result = calculate_prevent_risk(data)
+            
+            if prevent_result.get("success", False):
+                # Adicionar exames baseados na estratificação de risco
+                risk_category = prevent_result.get("classification", {}).get("category", "Baixo")
+                stratification_exams = get_cardiovascular_stratification_exams(risk_category)
                 for exam in stratification_exams:
                     add_recommendation(exam)
 
             response_data = {
                 "recommendations": recommendations,
-                "cardiovascular_risk": cardiovascular_risk,
+                "prevent_score": prevent_result,
                 "patient_data": data,
                 "total_recommendations": len(recommendations),
             }

@@ -733,30 +733,56 @@
                 return;
             }
             
-            // Adicionar seção de risco cardiovascular se disponível
+            // Adicionar seção de risco cardiovascular PREVENT se disponível
             let riskHtml = '';
-            if (cardiovascularRisk) {
-                const risk10yr = preventCalc.interpretRisk(cardiovascularRisk.risk_10yr);
+            if (result && result.prevent_score && result.prevent_score.success) {
+                const prevent = result.prevent_score;
+                const classification = prevent.classification || {};
+                const clinical = prevent.clinical_data || {};
+                
+                // Determinar cor baseada na categoria de risco
+                const riskColors = {
+                    'Baixo': '#27ae60',
+                    'Borderline': '#f39c12', 
+                    'Intermediário': '#e67e22',
+                    'Alto': '#e74c3c'
+                };
+                
+                const riskColor = riskColors[classification.category] || '#95a5a6';
+                
                 riskHtml = `
                     <div class="cardiovascular-risk-section" style="margin-bottom: 2rem;">
-                        <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Risco Cardiovascular (PREVENT 2024)</h3>
+                        <h3 style="color: #2c3e50; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.5rem;">📊</span>
+                            Risco Cardiovascular (PREVENT 2024)
+                        </h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                            <div class="risk-card" style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border-left: 5px solid ${risk10yr.color};">
-                                <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Estimated 10-year<br>risk of CVD</h4>
-                                <div style="font-size: 2.5rem; font-weight: bold; color: ${risk10yr.color}; margin: 0.5rem 0;">${cardiovascularRisk.risk_10yr}%</div>
-                                <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">${risk10yr.description}</p>
+                            <div class="risk-card" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; border: 3px solid ${riskColor}; position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: ${riskColor};"></div>
+                                <h4 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.1rem; font-weight: 600;">Estimated<br><strong>10-year</strong><br>risk of Heart<br>Disease</h4>
+                                <div style="font-size: 3.5rem; font-weight: 900; color: ${riskColor}; margin: 1rem 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">${prevent.risk_10yr}<span style="font-size: 2rem;">%</span></div>
+                                <div style="background: ${riskColor}20; color: ${riskColor}; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; margin-top: 1rem;">
+                                    ${classification.category || 'N/A'}
+                                </div>
                             </div>
-                            <div class="risk-card" style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border-left: 5px solid #e67e22;">
-                                <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Estimated 30-year<br>risk of CVD</h4>
-                                <div style="font-size: 2.5rem; font-weight: bold; color: #e67e22; margin: 0.5rem 0;">${cardiovascularRisk.risk_30yr}%</div>
-                                <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">Risco a longo prazo</p>
+                            <div class="risk-card" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; border: 3px solid #8e44ad; position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: #8e44ad;"></div>
+                                <h4 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.1rem; font-weight: 600;">Estimated<br><strong>30-year</strong><br>risk of Heart<br>Disease</h4>
+                                <div style="font-size: 3.5rem; font-weight: 900; color: #8e44ad; margin: 1rem 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">${prevent.risk_30yr}<span style="font-size: 2rem;">%</span></div>
+                                <div style="background: #8e44ad20; color: #8e44ad; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; margin-top: 1rem;">
+                                    Risco Longo Prazo
+                                </div>
                             </div>
                         </div>
-                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; border-left: 4px solid #3498db;">
-                            <p style="margin: 0; font-size: 0.9rem; color: #2c3e50;">
-                                <strong>eGFR calculado:</strong> ${cardiovascularRisk.egfr} mL/min/1.73m² | 
-                                <strong>Baseado em:</strong> Equações PREVENT 2024 (AHA/ACC)
-                            </p>
+                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 1.5rem; border-radius: 15px; border-left: 5px solid #3498db; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; font-size: 0.9rem; color: #2c3e50;">
+                                <div><strong>eGFR:</strong> ${clinical.egfr || 'N/A'} mL/min/1.73m²</div>
+                                <div><strong>IMC:</strong> ${clinical.bmi ? clinical.bmi.toFixed(1) : 'N/A'} kg/m²</div>
+                                <div><strong>Não-HDL:</strong> ${clinical.non_hdl ? clinical.non_hdl.toFixed(0) : 'N/A'} mg/dL</div>
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #7f8c8d; text-align: center;">
+                                <strong>Baseado em:</strong> Equações PREVENT 2024 (AHA/ACC) • <strong>Classificação:</strong> ${classification.description || 'N/A'}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -854,7 +880,10 @@
                 }
             });
             
-            container.innerHTML = html;
+            // Montar HTML final com seção PREVENT no topo
+            const finalHtml = riskHtml + html;
+            
+            container.innerHTML = finalHtml;
             recommendationsDiv.style.display = 'block';
         }
 
