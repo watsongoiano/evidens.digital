@@ -598,6 +598,49 @@
     <script>
         // Inicializar calculadora PREVENT
         const preventCalc = new PreventCalculator();
+
+        const intelligentRecommendationEndpoints = [
+            '/api/checkup-intelligent',
+            '/api/checkup-intelligent.py',
+            '/checkup-intelligent'
+        ];
+
+        async function requestIntelligentRecommendations(payload) {
+            const body = JSON.stringify(payload);
+            let lastError = null;
+
+            for (const endpoint of intelligentRecommendationEndpoints) {
+                try {
+                    console.log(`Tentando endpoint: ${endpoint}`);
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body
+                    });
+
+                    if (response.ok) {
+                        return response;
+                    }
+
+                    if ([404, 405].includes(response.status)) {
+                        console.warn(`Endpoint ${endpoint} retornou ${response.status}. Testando próximo endpoint...`);
+                        lastError = new Error(`Erro HTTP: ${response.status}`);
+                        continue;
+                    }
+
+                    const errorText = await response.text().catch(() => '');
+                    throw new Error(`Erro HTTP: ${response.status}${errorText ? ` - ${errorText}` : ''}`);
+                } catch (error) {
+                    console.error(`Falha ao chamar ${endpoint}:`, error);
+                    lastError = error;
+                }
+            }
+
+            throw lastError || new Error('Não foi possível contatar o servidor de recomendações.');
+        }
         
         document.getElementById('checkupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -649,18 +692,7 @@
             console.log('Campo has_resistente:', data.has_resistente);
             
             try {
-                const response = await fetch('/api/checkup-intelligent.py', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-                
+                const response = await requestIntelligentRecommendations(data);
                 const result = await response.json();
                 
                 // Debug: Log da resposta da API
