@@ -22,6 +22,14 @@
       "use": "@vercel/static"
     },
     {
+      "src": "favicon.png",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "favicon.ico",
+      "use": "@vercel/static"
+    },
+    {
       "src": "api/checkup-intelligent.py",
       "use": "@vercel/python"
     },
@@ -58,6 +66,14 @@
     {
       "src": "/evidenscheck.png",
       "dest": "/evidenscheck.png"
+    },
+    {
+      "src": "/favicon.png",
+      "dest": "/favicon.png"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
     },
     {
       "src": "/intelligent-tools",
