@@ -179,6 +179,24 @@ class handler(BaseHTTPRequestHandler):
                     'categoria': 'laboratorial'
                 })
             
+            # 10. RASTREAMENTO DE CLAMÍDIA E GONORREIA - USPSTF 2021 (Grau B)
+            # Critérios: Mulheres sexualmente ativas ≤24 anos OU ≥25 anos com risco aumentado
+            sexualmente_ativa = data.get('sexualmente_ativa') == 'on'
+            risco_ist = data.get('risco_ist') == 'on'
+            
+            if (sexo == 'feminino' and 
+                sexualmente_ativa and 
+                (idade <= 24 or (idade >= 25 and risco_ist))):
+                
+                add_recommendation({
+                    'titulo': 'Rastreamento de Clamídia e Gonorreia (Mulheres)',
+                    'descricao': 'Rastrear todas as mulheres (incluindo gestantes) sexualmente ativas com 24 anos ou menos, e mulheres com 25 anos ou mais que apresentem risco aumentado de infecção. Teste de Amplificação de Ácidos Nucleicos (NAAT) para Gonorreia e Clamídia.',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2021',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2021.14081',
+                    'categoria': 'laboratorial'
+                })
+            
             response_data = {
                 'recommendations': recommendations,
                 'patient_data': data,
