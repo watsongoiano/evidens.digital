@@ -10,6 +10,75 @@ from src.models.medical import Patient, Checkup, Recomendacao
 
 checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
 
+
+def _first_non_empty(data, *keys):
+    """Return the first value present in *keys that is not empty."""
+    for key in keys:
+        if key in data:
+            value = data.get(key)
+            if isinstance(value, str):
+                value = value.strip()
+            if value not in (None, ''):
+                return value
+    return None
+
+
+def _safe_float(value, default=None):
+    """Convert value to float without raising exceptions."""
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return float(value)
+    try:
+        value = str(value).strip().replace(',', '.')
+        if not value:
+            return default
+        return float(value)
+    except (ValueError, TypeError):
+        return default
+
+
+def _safe_int(value, default=None):
+    """Convert value to int using _safe_float to avoid ValueError."""
+    float_val = _safe_float(value, None)
+    if float_val is None:
+        return default
+    try:
+        return int(float_val)
+    except (ValueError, TypeError):
+        return default
+
+
+def _ensure_list(value):
+    """Normalize incoming values (str/list/None) to a list."""
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple, set)):
+        return [item for item in value if item not in (None, '')]
+    if isinstance(value, str):
+        cleaned = value.strip()
+        return [cleaned] if cleaned else []
+    return [value]
+
+
+def _normalize_smoking(value: str) -> str:
+    mapping = {
+        'nunca': 'nunca_fumou',
+        'nunca fumou': 'nunca_fumou',
+        'nunca_fumou': 'nunca_fumou',
+        'nao': 'nunca_fumou',
+        'não': 'nunca_fumou',
+        'atual': 'fumante_atual',
+        'fumante atual': 'fumante_atual',
+        'fumante_atual': 'fumante_atual',
+        'fumante': 'fumante_atual',
+        'ex': 'ex_fumante',
+        'ex-fumante': 'ex_fumante',
+        'ex_fumante': 'ex_fumante',
+    }
+    key = (value or '').strip().lower()
+    return mapping.get(key, 'nunca_fumou')
+
 def _wants_html(req: request) -> bool:
     """Detect if the client expects HTML output.
     Priority: explicit query param (format/response_type) > Accept header.
@@ -379,28 +448,84 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
 def generate_intelligent_recommendations():
     try:
-        data = request.get_json()
+        data = request.get_json() or {}
         if not data:
             return jsonify({'error': 'Dados não fornecidos'}), 400
-        
-        # Extrair dados do paciente
-        age = int(data.get('idade', 0))
-        sex = data.get('sexo', 'masculino')
-        weight = float(data.get('peso', 0)) if data.get('peso') else None
-        height = float(data.get('altura', 0)) if data.get('altura') else None
-        
+
+        # Extrair dados do paciente com validação resiliente
+        age = _safe_int(_first_non_empty(data, 'idade', 'age'))
+        if not age or age <= 0:
+            return jsonify({'error': 'Idade inválida ou não informada'}), 400
+
+        sex = (_first_non_empty(data, 'sexo', 'sex') or 'masculino').lower()
+        if sex not in ['masculino', 'feminino']:
+            sex = 'masculino'
+
+        weight = _safe_float(_first_non_empty(data, 'peso', 'weight'))
+        height = _safe_float(_first_non_empty(data, 'altura', 'height'))
+
+        total_cholesterol = _safe_float(_first_non_empty(
+            data,
+            'colesterol_total',
+            'colesterol',
+            'totalCholesterol',
+            'total_cholesterol'
+        ), 0) or 0
+        hdl_cholesterol = _safe_float(_first_non_empty(
+            data,
+            'hdl_colesterol',
+            'hdl',
+            'hdlCholesterol'
+        ), 0) or 0
+        systolic_bp = _safe_float(_first_non_empty(
+            data,
+            'pressao_sistolica',
+            'pas',
+            'systolicBP'
+        ), 0) or 0
+        diastolic_bp = _safe_float(_first_non_empty(
+            data,
+            'pressao_diastolica',
+            'pad',
+            'diastolicBP'
+        ))
+        creatinine = _safe_float(_first_non_empty(data, 'creatinina', 'creatinine'), 1.0)
+        if not creatinine or creatinine <= 0:
+            creatinine = 1.0
+        hba1c_value = _safe_float(_first_non_empty(data, 'hba1c', 'hemoglobina_glicada'))
+        macos_ano = _safe_int(_first_non_empty(data, 'macos_ano', 'macosAno', 'pack_years'))
+
+        comorbidities = _ensure_list(data.get('comorbidades'))
+        family_history = _ensure_list(data.get('historia_familiar'))
+        medicacoes_checkbox = _ensure_list(data.get('medicacoes'))
+        medicacoes_extra = (_first_non_empty(data, 'medicacoes_continuo') or '').strip()
+
+        medicacoes_payload = {}
+        if medicacoes_checkbox:
+            medicacoes_payload['selecionadas'] = medicacoes_checkbox
+        if medicacoes_extra:
+            medicacoes_payload['descricao'] = medicacoes_extra
+        medicacoes_serialized = json.dumps(medicacoes_payload, ensure_ascii=False) if medicacoes_payload else ''
+
+        comorb_lower = {str(item).strip().lower() for item in comorbidities}
+        diabetes_terms = {'diabetes', 'diabetes_tipo_2', 'diabetes_tipo2', 'dm2', 'diabetes mellitus tipo 2'}
+        has_diabetes = any(term in comorb_lower for term in diabetes_terms)
+
+        smoking_value = _normalize_smoking(_first_non_empty(data, 'tabagismo', 'smoking_status'))
+        smoking_flag = smoking_value == 'fumante_atual'
+
         # Dados clínicos para PREVENT
         patient_data = {
             'age': age,
             'sex': sex,
-            'totalCholesterol': float(data.get('colesterol_total', 0)) if data.get('colesterol_total') else 0,
-            'hdlCholesterol': float(data.get('hdl_colesterol', 0)) if data.get('hdl_colesterol') else 0,
-            'systolicBP': float(data.get('pressao_sistolica', 0)) if data.get('pressao_sistolica') else 0,
-            'diabetes': 'diabetes_tipo_2' in data.get('comorbidades', []),
-            'smoking': data.get('tabagismo') == 'fumante_atual',
+            'totalCholesterol': total_cholesterol,
+            'hdlCholesterol': hdl_cholesterol,
+            'systolicBP': systolic_bp,
+            'diabetes': has_diabetes,
+            'smoking': smoking_flag,
             'weight': weight,
             'height': height,
-            'creatinine': float(data.get('creatinina', 1.0)) if data.get('creatinina') else 1.0
+            'creatinine': creatinine
         }
         
         # Calcular risco PREVENT
@@ -434,24 +559,25 @@ def generate_intelligent_recommendations():
             )
             db.session.add(patient)
             db.session.flush()  # Para obter o ID
-            
+
             # Criar checkup
             checkup = Checkup(
                 patient_id=patient.id,
-                pressao_sistolica=patient_data['systolicBP'],
-                pressao_diastolica=float(data.get('pressao_diastolica', 0)) if data.get('pressao_diastolica') else None,
-                colesterol_total=patient_data['totalCholesterol'],
-                hdl_colesterol=patient_data['hdlCholesterol'],
-                creatinina=patient_data['creatinine'],
-                hba1c=float(data.get('hba1c', 0)) if data.get('hba1c') else None,
+                pressao_sistolica=systolic_bp,
+                pressao_diastolica=diastolic_bp,
+                colesterol_total=total_cholesterol,
+                hdl_colesterol=hdl_cholesterol,
+                creatinina=creatinine,
+                hba1c=hba1c_value,
                 risco_10_anos=risk_result['risk10Year'] if risk_result else None,
                 risco_30_anos=risk_result['risk30Year'] if risk_result else None,
                 classificacao_risco=risk_level,
-                comorbidades=json.dumps(data.get('comorbidades', [])),
-                historia_familiar=json.dumps(data.get('historia_familiar', [])),
-                tabagismo=data.get('tabagismo', 'nunca_fumou'),
-                medicacoes=data.get('medicacoes', ''),
-                pais_guideline=data.get('pais_guideline', 'BR')
+                comorbidades=json.dumps(comorbidities, ensure_ascii=False),
+                historia_familiar=json.dumps(family_history, ensure_ascii=False),
+                tabagismo=smoking_value,
+                macos_ano=macos_ano,
+                medicacoes=medicacoes_serialized,
+                pais_guideline=_first_non_empty(data, 'pais_guideline', 'pais') or 'BR'
             )
             db.session.add(checkup)
             db.session.flush()

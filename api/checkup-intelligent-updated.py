@@ -1,7 +1,31 @@
 from http.server import BaseHTTPRequestHandler
 import json
 
+
 class handler(BaseHTTPRequestHandler):
+    def _send_json(self, payload, status=200):
+        body = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    @staticmethod
+    def _safe_int(value):
+        if value is None:
+            return None
+        if isinstance(value, int):
+            return value
+        try:
+            value_str = str(value).strip()
+            if not value_str:
+                return None
+            return int(float(value_str))
+        except (ValueError, TypeError):
+            return None
+
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -11,12 +35,7 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         # Resposta para GET requests (para testes)
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        response = {'message': 'API funcionando. Use POST para enviar dados.', 'status': 'ok'}
-        self.wfile.write(json.dumps(response).encode('utf-8'))
+        self._send_json({'message': 'API funcionando. Use POST para enviar dados.', 'status': 'ok'})
 
     def do_POST(self):
         try:
@@ -24,9 +43,12 @@ class handler(BaseHTTPRequestHandler):
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode('utf-8')) if post_data else {}
-            
+
             # Dados básicos do paciente
-            idade = int(data.get('idade', 0))
+            idade = self._safe_int(data.get('idade'))
+            if not idade or idade <= 0:
+                self._send_json({'error': 'Idade inválida ou não informada'}, status=400)
+                return
             sexo = data.get('sexo', '')
             
             # Condições médicas
@@ -222,19 +244,9 @@ class handler(BaseHTTPRequestHandler):
                 'patient_data': data,
                 'total_recommendations': len(recommendations)
             }
-            
-            # Enviar resposta
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(json.dumps(response_data).encode('utf-8'))
-            
+
+            self._send_json(response_data)
+
         except Exception as e:
             # Enviar erro
-            self.send_response(500)
-            self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            error_response = {'error': f'Erro interno: {str(e)}'}
-            self.wfile.write(json.dumps(error_response).encode('utf-8'))
+            self._send_json({'error': f'Erro interno: {str(e)}'}, status=500)
