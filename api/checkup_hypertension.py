@@ -14,18 +14,33 @@ def get_hypertension_recommendations_v2(data):
     comorbidades = data.get("comorbidades", [])
     if isinstance(comorbidades, str):
         comorbidades = [comorbidades]
-    hipertenso = data.get("hipertensao") == "on" or "hipertensao" in comorbidades
+    elif not isinstance(comorbidades, list):
+        comorbidades = []
+    
+    # Usar detecção do algoritmo principal se disponível
+    hipertenso = (data.get("hipertensao_detectada", False) or 
+                  data.get("hipertensao") == "on" or 
+                  "hipertensao" in comorbidades or
+                  any(c == "hipertensao" for c in comorbidades if isinstance(c, str)))
+    
+    has_resistente = (data.get("has_resistente_detectada", False) or
+                     data.get("has_resistente") == "on" or 
+                     "has_resistente" in comorbidades or
+                     any(c == "has_resistente" for c in comorbidades if isinstance(c, str)))
+    
     alteracao_ecg = data.get("alteracao_ecg") == "on"
     suspeita_ic = data.get("suspeita_ic") == "on"
     diabetes = data.get("diabetes") == "on" or "diabetes" in comorbidades
     sindrome_metabolica = data.get("sindrome_metabolica") == "on"
     multiplos_fatores_risco = data.get("multiplos_fatores_risco") == "on"
-    has_resistente = data.get("has_resistente") == "on"
     suspeita_hiperaldosteronismo = data.get("suspeita_hiperaldosteronismo") == "on"
     suspeita_apneia_sono = data.get("suspeita_apneia_sono") == "on"
     suspeita_estenose_arteria_renal = data.get("suspeita_estenose_arteria_renal") == "on"
 
-    if not hipertenso:
+    print(f"[MÓDULO HIPERTENSÃO] Hipertenso: {hipertenso}, HAS Resistente: {has_resistente}")
+
+    if not (hipertenso or has_resistente):
+        print(f"[MÓDULO HIPERTENSÃO] Nem hipertensão nem HAS resistente detectadas, retornando lista vazia")
         return []
 
     # 1. Avaliação de Rotina (Ambas as Sociedades)

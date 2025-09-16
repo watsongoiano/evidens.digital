@@ -40,11 +40,23 @@ class handler(BaseHTTPRequestHandler):
             comorbidades = data.get("comorbidades", [])
             if isinstance(comorbidades, str):
                 comorbidades = [comorbidades]
-            hipertensao = data.get("hipertensao") == "on" or "hipertensao" in comorbidades
+            elif not isinstance(comorbidades, list):
+                comorbidades = []
+            
+            # Hipertensão pode vir como campo direto ou no array de comorbidades
+            hipertensao = (data.get("hipertensao") == "on" or 
+                          "hipertensao" in comorbidades or
+                          any(c == "hipertensao" for c in comorbidades if isinstance(c, str)))
+            
+            # HAS Resistente
+            has_resistente = (data.get("has_resistente") == "on" or 
+                             "has_resistente" in comorbidades or
+                             any(c == "has_resistente" for c in comorbidades if isinstance(c, str)))
             gestante = data.get("gestante") == "on"
             
             # Debug: Log da detecção de hipertensão
             print(f"Hipertensão detectada: {hipertensao}")
+            print(f"HAS Resistente detectada: {has_resistente}")
             print(f"Comorbidades processadas: {comorbidades}")
 
             recommendations = []
@@ -53,15 +65,20 @@ class handler(BaseHTTPRequestHandler):
                 if not any(rec["titulo"] == rec_data["titulo"] for rec in recommendations):
                     recommendations.append(rec_data)
 
-            if hipertensao:
-                print(f"Chamando módulo de hipertensão...")
-                hypertension_recs = get_hypertension_recommendations_v2(data)
+            if hipertensao or has_resistente:
+                print(f"Chamando módulo de hipertensão (hipertensão: {hipertensao}, HAS resistente: {has_resistente})...")
+                # Atualizar dados para incluir detecção de HAS resistente
+                data_updated = data.copy()
+                data_updated['hipertensao_detectada'] = hipertensao
+                data_updated['has_resistente_detectada'] = has_resistente
+                
+                hypertension_recs = get_hypertension_recommendations_v2(data_updated)
                 print(f"Módulo de hipertensão retornou {len(hypertension_recs)} recomendações")
                 for rec in hypertension_recs:
                     add_recommendation(rec)
                 print(f"Total de recomendações após hipertensão: {len(recommendations)}")
             else:
-                print(f"Hipertensão não detectada, módulo não será chamado")
+                print(f"Hipertensão e HAS resistente não detectadas, módulo não será chamado")
 
             # Lógica de rastreamento geral com descrição e referência
             tabagismo_atual = data.get("tabagismo_atual") == "on"
