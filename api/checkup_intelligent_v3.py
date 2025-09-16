@@ -158,14 +158,14 @@ def get_cardiovascular_stratification_exams(risk_category):
                 "descricao": "Marcador de risco cardiovascular independente, especialmente útil para reclassificação de risco em pacientes borderline/intermediário.",
                 "prioridade": "alta",
                 "referencia": "AHA/ACC 2022",
-                "categoria": "Estratificação Cardiovascular"
+                "categoria": "Exames Laboratoriais"
             },
             {
                 "titulo": "Proteína C Reativa ultrassensível (hsCRP), soro",
                 "descricao": "Marcador inflamatório para estratificação de risco cardiovascular, especialmente em pacientes com risco intermediário.",
                 "prioridade": "alta",
                 "referencia": "AHA/ACC 2019",
-                "categoria": "Estratificação Cardiovascular"
+                "categoria": "Exames Laboratoriais"
             },
             {
                 "titulo": "Índice Tornozelo-Braquial (ITB)",
@@ -184,7 +184,7 @@ def get_cardiovascular_stratification_exams(risk_category):
                 "descricao": "Exame de imagem para quantificação do cálcio coronariano, útil para reclassificação de risco em pacientes com risco intermediário.",
                 "prioridade": "alta",
                 "referencia": "AHA/ACC 2019",
-                "categoria": "Estratificação Cardiovascular"
+                "categoria": "Exames de Imagem"
             }
         ])
     
@@ -196,14 +196,14 @@ def get_cardiovascular_stratification_exams(risk_category):
                 "descricao": "Marcador de lesão vascular e risco cardiovascular aumentado, especialmente em pacientes de alto risco.",
                 "prioridade": "alta",
                 "referencia": "AHA/ACC 2017",
-                "categoria": "Estratificação Cardiovascular"
+                "categoria": "Exames Laboratoriais"
             },
             {
                 "titulo": "Ecocardiograma com Strain Longitudinal Global",
                 "descricao": "Avaliação avançada da função cardíaca para detecção precoce de disfunção em pacientes de alto risco.",
                 "prioridade": "média",
                 "referencia": "ASE 2016",
-                "categoria": "Estratificação Cardiovascular"
+                "categoria": "Exames de Imagem"
             }
         ])
     

@@ -38,6 +38,8 @@ def _uspstf_url_by_title(title_lc: str) -> str:
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/brca-related-cancer-risk-assessment-genetic-counseling-and-genetic-testing'
     if _contains_any(title_lc, ['colonoscopia', 'colorretal']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening'
+    if _contains_any(title_lc, ['densitometria', 'dexa', 'osteoporose']):
+        return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening'
     if _contains_any(title_lc, ['cervical', 'papanicolaou', 'pap', 'hpv']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening'
     if _contains_any(title_lc, ['psa', 'próstata', 'prostata']):
