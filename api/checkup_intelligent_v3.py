@@ -300,9 +300,9 @@ class handler(BaseHTTPRequestHandler):
                     "categoria": "Rastreamento"
                 })
 
-            # === RASTREAMENTOS DE DIABETES (CONSOLIDADO) ===
+            # === RASTREAMENTOS DE DIABETES (DESAGRUPADO EM EXAMES INDIVIDUAIS) ===
             
-            # Rastreamento consolidado de diabetes (evitando duplicação)
+            # Rastreamento de diabetes - exames individuais (ADA 2025)
             sobrepeso_obesidade = data.get("sobrepeso_obesidade") == "on"
             fatores_risco_diabetes = any([
                 data.get("historia_familiar_diabetes") == "on",
@@ -313,12 +313,31 @@ class handler(BaseHTTPRequestHandler):
             ])
             
             if idade >= 35 or (sobrepeso_obesidade and fatores_risco_diabetes):
+                # Glicemia de Jejum
                 add_recommendation({
-                    "titulo": "Rastreamento de Diabetes Tipo 2",
-                    "descricao": "Glicemia de jejum, TOTG 75g ou HbA1c para rastreamento. Repetir a cada 3 anos se normal, anual se prediabetes.",
+                    "titulo": "Glicemia de Jejum (FPG)",
+                    "descricao": "Dosagem da glicose plasmática após jejum de 8-12 horas para rastreamento de diabetes. Repetir a cada 3 anos se normal.",
                     "prioridade": "alta",
                     "referencia": "ADA 2025",
-                    "categoria": "Rastreamento"
+                    "categoria": "Laboratorial"
+                })
+                
+                # Hemoglobina Glicada
+                add_recommendation({
+                    "titulo": "Hemoglobina Glicada (HbA1c)",
+                    "descricao": "Dosagem de HbA1c para rastreamento de diabetes e prediabetes. Repetir a cada 3 anos se normal, anual se prediabetes.",
+                    "prioridade": "alta",
+                    "referencia": "ADA 2025",
+                    "categoria": "Laboratorial"
+                })
+                
+                # TOTG apenas se outros exames inconclusivos
+                add_recommendation({
+                    "titulo": "Teste Oral de Tolerância à Glicose (TOTG 75g)",
+                    "descricao": "TOTG com 75g de glicose quando glicemia de jejum e HbA1c são inconclusivos para diagnóstico de diabetes.",
+                    "prioridade": "media",
+                    "referencia": "ADA 2025",
+                    "categoria": "Laboratorial"
                 })
 
             # Rastreamentos específicos para gestantes
