@@ -10,6 +10,18 @@
       "use": "@vercel/static"
     },
     {
+      "src": "prevent_calculator.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "evidenscheck.svg",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "evidenscheck.png",
+      "use": "@vercel/static"
+    },
+    {
       "src": "api/checkup-intelligent.py",
       "use": "@vercel/python"
     },
