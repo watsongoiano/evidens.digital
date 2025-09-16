@@ -164,6 +164,21 @@ class handler(BaseHTTPRequestHandler):
                     'categoria': 'laboratorial'
                 })
             
+            # 9. RASTREAMENTO DE TUBERCULOSE LATENTE - USPSTF 2023 (Grau B)
+            # Critérios: Adultos assintomáticos ≥18 anos com risco aumentado
+            risco_tuberculose = data.get('risco_tuberculose') == 'on'
+            if (idade >= 18 and 
+                risco_tuberculose):
+                
+                add_recommendation({
+                    'titulo': 'Rastreamento de Tuberculose Latente (Adultos de Risco)',
+                    'descricao': 'Rastrear adultos assintomáticos com risco aumentado de infecção, como pessoas que nasceram ou viveram em países de alta prevalência ou em ambientes de alto risco (ex: abrigos, presídios). Teste cutâneo de tuberculina (PPD/TST) ou Ensaio de liberação de interferon-gama (IGRA).',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2023',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2023.4899',
+                    'categoria': 'laboratorial'
+                })
+            
             response_data = {
                 'recommendations': recommendations,
                 'patient_data': data,
