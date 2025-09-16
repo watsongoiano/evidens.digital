@@ -197,6 +197,30 @@ class handler(BaseHTTPRequestHandler):
                     'categoria': 'laboratorial'
                 })
             
+            # 11. RASTREAMENTO DE CÂNCER COLORRETAL (45-75 anos) - USPSTF 2021 (Grau A/B)
+            # Critérios: Adultos 45-75 anos com risco médio
+            if 45 <= idade <= 75:
+                add_recommendation({
+                    'titulo': 'Rastreamento de Câncer Colorretal (45 a 75 anos)',
+                    'descricao': 'Rastrear todos os adultos com risco médio para câncer colorretal. Testes de fezes (FIT, gFOBT de alta sensibilidade, sDNA-FIT) ou Colonoscopia ou Colonografia por TC ou Sigmoidoscopia flexível (isolada ou com FIT). A escolha do teste deve considerar as preferências do paciente e a disponibilidade do método.',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2021',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2021.6238',
+                    'categoria': 'rastreamento'
+                })
+            
+            # 12. RASTREAMENTO SELETIVO DE CÂNCER COLORRETAL (76-85 anos) - USPSTF 2021 (Grau C)
+            # Critérios: Adultos 76-85 anos com decisão individualizada
+            if 76 <= idade <= 85:
+                add_recommendation({
+                    'titulo': 'Rastreamento Seletivo de Câncer Colorretal (76 a 85 anos)',
+                    'descricao': 'Oferecer seletivamente o rastreamento, com decisão individualizada baseada na saúde geral, histórico de rastreamento prévio e preferências do paciente. Testes de fezes (FIT, gFOBT de alta sensibilidade, sDNA-FIT) ou Colonoscopia ou Colonografia por TC ou Sigmoidoscopia flexível (isolada ou com FIT).',
+                    'prioridade': 'media',
+                    'referencia': 'USPSTF 2021',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2021.6238',
+                    'categoria': 'rastreamento'
+                })
+            
             response_data = {
                 'recommendations': recommendations,
                 'patient_data': data,
