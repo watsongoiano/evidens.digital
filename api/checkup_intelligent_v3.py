@@ -172,7 +172,7 @@ def get_cardiovascular_stratification_exams(risk_category):
                 "descricao": "Avaliação não invasiva de doença arterial periférica como marcador de risco cardiovascular.",
                 "prioridade": "média",
                 "referencia": "AHA/ACC 2016",
-                "categoria": "Estratificação Cardiovascular"
+                "categoria": "Outras recomendações"
             }
         ])
     
@@ -298,7 +298,7 @@ class handler(BaseHTTPRequestHandler):
                     "descricao": "Rastreamento anual para câncer de pulmão em adultos de 50-80 anos com história de tabagismo ≥20 maços-ano.",
                     "prioridade": "alta",
                     "referencia": "USPSTF 2021",
-                    "categoria": "Rastreamento"
+                    "categoria": "Outras recomendações"
                 })
 
             # Rastreamento de Hepatite C (universal)
@@ -308,7 +308,7 @@ class handler(BaseHTTPRequestHandler):
                     "descricao": "Teste único de anticorpos anti-HCV para todos os adultos de 18-79 anos, independente de fatores de risco.",
                     "prioridade": "alta",
                     "referencia": "USPSTF 2020",
-                    "categoria": "Rastreamento"
+                    "categoria": "Outras recomendações"
                 })
 
             # Rastreamento de HIV
@@ -318,7 +318,7 @@ class handler(BaseHTTPRequestHandler):
                     "descricao": "Teste de HIV pelo menos uma vez para todos os adolescentes e adultos de 15-65 anos.",
                     "prioridade": "alta",
                     "referencia": "USPSTF 2019",
-                    "categoria": "Rastreamento"
+                    "categoria": "Outras recomendações"
                 })
 
             # Rastreamento de Aneurisma de Aorta Abdominal
@@ -328,7 +328,7 @@ class handler(BaseHTTPRequestHandler):
                     "descricao": "Rastreamento único para aneurisma de aorta abdominal em homens de 65-75 anos com história de tabagismo.",
                     "prioridade": "alta",
                     "referencia": "USPSTF 2019",
-                    "categoria": "Rastreamento"
+                    "categoria": "Outras recomendações"
                 })
 
             # Rastreamento de Osteoporose
@@ -338,7 +338,7 @@ class handler(BaseHTTPRequestHandler):
                     "descricao": "Rastreamento de osteoporose para todas as mulheres ≥65 anos.",
                     "prioridade": "alta",
                     "referencia": "USPSTF 2018",
-                    "categoria": "Rastreamento"
+                    "categoria": "Outras recomendações"
                 })
 
             # Rastreamento de Câncer Colorretal
@@ -348,7 +348,7 @@ class handler(BaseHTTPRequestHandler):
                     "descricao": "Colonoscopia a cada 10 anos, sigmoidoscopia a cada 5 anos, ou teste de sangue oculto nas fezes anual.",
                     "prioridade": "alta",
                     "referencia": "USPSTF 2021",
-                    "categoria": "Rastreamento"
+                    "categoria": "Outras recomendações"
                 })
 
             # Rastreamento de Câncer de Colo de Útero
@@ -359,7 +359,7 @@ class handler(BaseHTTPRequestHandler):
                         "descricao": "Rastreamento de câncer de colo de útero a cada 3 anos para mulheres de 21-29 anos.",
                         "prioridade": "alta",
                         "referencia": "USPSTF 2018",
-                        "categoria": "Rastreamento"
+                        "categoria": "Outras recomendações"
                     })
                 elif 30 <= idade <= 65:
                     add_recommendation({
@@ -367,7 +367,7 @@ class handler(BaseHTTPRequestHandler):
                         "descricao": "Co-teste (citologia + HPV) a cada 5 anos ou citologia isolada a cada 3 anos para mulheres de 30-65 anos.",
                         "prioridade": "alta",
                         "referencia": "USPSTF 2018",
-                        "categoria": "Rastreamento"
+                        "categoria": "Outras recomendações"
                     })
 
             # Rastreamento de Câncer de Mama
@@ -377,7 +377,7 @@ class handler(BaseHTTPRequestHandler):
                     "descricao": "Rastreamento de câncer de mama a cada 2 anos para mulheres de 40-74 anos.",
                     "prioridade": "alta",
                     "referencia": "USPSTF 2024",
-                    "categoria": "Rastreamento"
+                    "categoria": "Outras recomendações"
                 })
 
             # === RASTREAMENTOS DE DIABETES (DESAGRUPADO EM EXAMES INDIVIDUAIS) ===
@@ -399,7 +399,7 @@ class handler(BaseHTTPRequestHandler):
                     "descricao": "Dosagem da glicose plasmática após jejum de 8-12 horas para rastreamento de diabetes. Repetir a cada 3 anos se normal.",
                     "prioridade": "alta",
                     "referencia": "ADA 2025",
-                    "categoria": "Laboratorial"
+                    "categoria": "Exames Laboratoriais"
                 })
                 
                 # Hemoglobina Glicada
@@ -408,7 +408,7 @@ class handler(BaseHTTPRequestHandler):
                     "descricao": "Dosagem de HbA1c para rastreamento de diabetes e prediabetes. Repetir a cada 3 anos se normal, anual se prediabetes.",
                     "prioridade": "alta",
                     "referencia": "ADA 2025",
-                    "categoria": "Laboratorial"
+                    "categoria": "Exames Laboratoriais"
                 })
                 
                 # TOTG apenas se outros exames inconclusivos
@@ -417,7 +417,7 @@ class handler(BaseHTTPRequestHandler):
                     "descricao": "TOTG com 75g de glicose quando glicemia de jejum e HbA1c são inconclusivos para diagnóstico de diabetes.",
                     "prioridade": "media",
                     "referencia": "ADA 2025",
-                    "categoria": "Laboratorial"
+                    "categoria": "Exames Laboratoriais"
                 })
 
             # Rastreamentos específicos para gestantes
@@ -427,14 +427,14 @@ class handler(BaseHTTPRequestHandler):
                     "descricao": "TOTG 75g entre 24-28 semanas de gestação para todas as gestantes.",
                     "prioridade": "alta",
                     "referencia": "ADA 2025",
-                    "categoria": "Rastreamento Pré-natal"
+                    "categoria": "Outras recomendações"
                 })
                 add_recommendation({
                     "titulo": "Rastreamento de Bacteriúria Assintomática",
                     "descricao": "Urinocultura na primeira consulta pré-natal ou entre 12-16 semanas de gestação.",
                     "prioridade": "alta",
                     "referencia": "USPSTF 2019",
-                    "categoria": "Rastreamento Pré-natal"
+                    "categoria": "Outras recomendações"
                 })
 
             # === MONITORAMENTO PRESSÓRICO BASEADO NO PREVENT ===
@@ -447,7 +447,7 @@ class handler(BaseHTTPRequestHandler):
                         "descricao": "Monitorização ambulatorial prioritária para pacientes com risco cardiovascular intermediário/alto para diagnóstico preciso de hipertensão e fenótipos pressóricos.",
                         "prioridade": "alta",
                         "referencia": "AHA/ACC 2025 e SBC 2020",
-                        "categoria": "Monitoramento Pressórico"
+                        "categoria": "Outras recomendações"
                     })
                 else:
                     add_recommendation({
@@ -455,7 +455,7 @@ class handler(BaseHTTPRequestHandler):
                         "descricao": "Monitorização ambulatorial recomendada para diagnóstico preciso de hipertensão e identificação de fenótipos pressóricos.",
                         "prioridade": "média",
                         "referencia": "AHA/ACC 2025 e SBC 2020",
-                        "categoria": "Monitoramento Pressórico"
+                        "categoria": "Outras recomendações"
                     })
 
             # === MÓDULO DE HIPERTENSÃO (SEM DUPLICAÇÃO) ===
