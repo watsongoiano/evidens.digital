@@ -1,0 +1,46 @@
+/* Override styles to remove unwanted colors from form fields */
+
+/* Remove all colored borders and backgrounds from inputs */
+input, select, textarea {
+    border: 1px solid #ccc !important;
+    background-color: white !important;
+    color: #333 !important;
+}
+
+/* Focus state with simple gray border */
+input:focus, select:focus, textarea:focus {
+    border-color: #999 !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove any browser default styling */
+input[type="text"], 
+input[type="number"], 
+input[type="email"], 
+input[type="tel"], 
+select, 
+textarea {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    border: 1px solid #ccc !important;
+    background: white !important;
+}
+
+/* Ensure consistent styling across all form elements */
+.form-group input,
+.form-group select,
+.form-group textarea {
+    border: 1px solid #ccc !important;
+    background: white !important;
+    color: #333 !important;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #999 !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
