@@ -454,20 +454,20 @@
                         <input type="number" id="altura" name="altura" placeholder="Ex: 170">
                     </div>
                     <div class="form-group">
-                        <label for="pas">Pressão Arterial Sistólica (mmHg)</label>
-                        <input type="number" id="pas" name="pas" placeholder="Ex: 140">
+                        <label for="pressao_sistolica">Pressão Arterial Sistólica (mmHg)</label>
+                        <input type="number" id="pressao_sistolica" name="pressao_sistolica" placeholder="Ex: 140">
                     </div>
                     <div class="form-group">
-                        <label for="pad">Pressão Arterial Diastólica (mmHg)</label>
-                        <input type="number" id="pad" name="pad" placeholder="Ex: 90">
+                        <label for="pressao_diastolica">Pressão Arterial Diastólica (mmHg)</label>
+                        <input type="number" id="pressao_diastolica" name="pressao_diastolica" placeholder="Ex: 90">
                     </div>
                     <div class="form-group">
-                        <label for="colesterol">Colesterol Total (mg/dL)</label>
-                        <input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200">
+                        <label for="colesterol_total">Colesterol Total (mg/dL)</label>
+                        <input type="number" id="colesterol_total" name="colesterol_total" placeholder="Ex: 200">
                     </div>
                     <div class="form-group">
-                        <label for="hdl">HDL Colesterol (mg/dL)</label>
-                        <input type="number" id="hdl" name="hdl" placeholder="Ex: 45">
+                        <label for="hdl_colesterol">HDL Colesterol (mg/dL)</label>
+                        <input type="number" id="hdl_colesterol" name="hdl_colesterol" placeholder="Ex: 45">
                     </div>
                     <div class="form-group">
                         <label for="creatinina">Creatinina Sérica (mg/dL)</label>
@@ -649,7 +649,7 @@
             console.log('Campo has_resistente:', data.has_resistente);
             
             try {
-                const response = await fetch('/api/checkup-intelligent', {
+                const response = await fetch('/api/checkup_intelligent_v3', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -733,6 +733,7 @@
                 '🧪 Exames Laboratoriais': [],
                 '🏥 Exames de Imagem': [],
                 '💉 Vacinas': [],
+                '📊 Estratificação Cardiovascular': [],
                 '🩺 Avaliação Clínica': [],
                 '📋 Outras Recomendações': []
             };
@@ -742,7 +743,12 @@
                 const titulo = rec.titulo || '';
                 
                 // Categorização inteligente baseada no conteúdo
-                if (categoria.includes('Laboratorial') || categoria.includes('laboratorial') || 
+                if (categoria.includes('Estratificação Cardiovascular') || categoria.includes('estratificação') ||
+                    titulo.includes('Lipoproteína(a)') || titulo.includes('Lp(a)') || titulo.includes('hsCRP') ||
+                    titulo.includes('Proteína C Reativa') || titulo.includes('Score de Cálcio') || titulo.includes('Tornozelo-Braquial') ||
+                    titulo.includes('ITB') || titulo.includes('Strain')) {
+                    categorias['📊 Estratificação Cardiovascular'].push(rec);
+                } else if (categoria.includes('Laboratorial') || categoria.includes('laboratorial') || 
                     titulo.includes('Hemograma') || titulo.includes('Glicemia') || titulo.includes('Colesterol') ||
                     titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
                     titulo.includes('Sódio') || titulo.includes('Magnésio') || titulo.includes('Ácido úrico') ||
