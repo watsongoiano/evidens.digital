@@ -596,8 +596,18 @@
 
     <script src="prevent_calculator.js"></script>
     <script>
-        // Inicializar calculadora PREVENT
-        const preventCalc = new PreventCalculator();
+        // Inicializar calculadora PREVENT com tolerância a falhas
+        let preventCalc = null;
+        try {
+            if (typeof PreventCalculator === 'function') {
+                preventCalc = new PreventCalculator();
+            } else {
+                console.warn('PreventCalculator não disponível. O cálculo PREVENT será ignorado.');
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar a calculadora PREVENT:', error);
+            preventCalc = null;
+        }
         
         // Função para criar links clicáveis nas referências
         function createReferenceLink(referencia) {
@@ -654,7 +664,8 @@
             
             // Calcular risco cardiovascular PREVENT se dados suficientes
             let cardiovascularRisk = null;
-            if (data.idade && data.sexo && data.colesterol && data.hdl && data.pas && data.creatinina) {
+            if (preventCalc && typeof preventCalc.calculateRisks === 'function' &&
+                data.idade && data.sexo && data.colesterol && data.hdl && data.pas && data.creatinina) {
                 try {
                     const riskParams = {
                         idade: parseInt(data.idade),
@@ -835,7 +846,7 @@
                 }
             });
             
-            let html = riskHtml;
+            let html = '';
             
             Object.keys(categorias).forEach(categoria => {
                 if (categorias[categoria].length > 0) {
@@ -881,9 +892,7 @@
             });
             
             // Montar HTML final com seção PREVENT no topo
-            const finalHtml = riskHtml + html;
-            
-            container.innerHTML = finalHtml;
+            container.innerHTML = riskHtml + html;
             recommendationsDiv.style.display = 'block';
         }
 
