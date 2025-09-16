@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Tools - Evidens</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .logo-main {
+            font-size: 1.8rem;
+            font-weight: 300;
+            color: #2c3e50;
+            margin-bottom: -5px;
+        }
+
+        .logo-sub {
+            font-size: 1.2rem;
+            font-weight: 300;
+            font-style: italic;
+            color: #27ae60;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #3498db;
+        }
+
+        .back-btn {
+            background: #bdc3c7;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 8rem 2rem 4rem;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .page-title p {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+
+        .tool-section {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .tool-section h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+            font-weight: 400;
+        }
+
+        .tool-section p {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* Todos os estilos do formulário do index.html */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.8rem;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 2rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 1rem 0.5rem 1rem 0;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 1rem 0.5rem 1rem 0;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+        }
+
+        .recommendations {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .recommendations h3 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .recommendation-category {
+            margin-bottom: 2rem;
+        }
+
+        .recommendation-category h4 {
+            color: #34495e;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .recommendation-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .recommendation-item h5 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .recommendation-item p {
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .evidence-grade {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            background: #27ae60;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .action-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .action-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav {
+                padding: 0 1rem;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .nav-links a {
+                font-size: 0.9rem;
+            }
+            
+            .hero {
+                padding: 4rem 1rem 2rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .form-section {
+                padding: 1.5rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .btn-primary {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .risk-card {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-section {
+                padding: 1rem;
+            }
+            
+            .btn-primary {
+                width: 100%;
+                padding: 1rem;
+            }
+            
+            .logo {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-links">
+                <a href="/" class="back-btn">← Voltar</a>
+            </div>
+            <a href="/" class="logo">
+                <span class="logo-main">evidēns</span>
+                <span class="logo-sub">check</span>
+            </a>
+            <div class="nav-links">
+                <a href="#contact">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+
+
+        <div class="tool-section">
+            <h2>Check-up Médico Inteligente</h2>
+            <p>Analise e receba recomendações essenciais baseadas em evidência científica</p>
+
+            <form id="checkupForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="idade">Idade</label>
+                        <input type="number" id="idade" name="idade" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sexo">Sexo</label>
+                        <select id="sexo" name="sexo" required>
+                            <option value="">Selecione...</option>
+                            <option value="masculino">Masculino</option>
+                            <option value="feminino">Feminino</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pais">País/Guideline base</label>
+                        <select id="pais" name="pais">
+                            <option value="brasil">Brasil (SBIm/SBC/SBD)</option>
+                            <option value="eua">EUA (CDC/USPSTF/ADA)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-title">📊 Dados Clínicos (para cálculo de risco cardiovascular)</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="peso">Peso (kg)</label>
+                        <input type="number" id="peso" name="peso" step="0.1" placeholder="Ex: 70.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="altura">Altura (cm)</label>
+                        <input type="number" id="altura" name="altura" placeholder="Ex: 170">
+                    </div>
+                    <div class="form-group">
+                        <label for="pas">Pressão Arterial Sistólica (mmHg)</label>
+                        <input type="number" id="pas" name="pas" placeholder="Ex: 140">
+                    </div>
+                    <div class="form-group">
+                        <label for="pad">Pressão Arterial Diastólica (mmHg)</label>
+                        <input type="number" id="pad" name="pad" placeholder="Ex: 90">
+                    </div>
+                    <div class="form-group">
+                        <label for="colesterol">Colesterol Total (mg/dL)</label>
+                        <input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200">
+                    </div>
+                    <div class="form-group">
+                        <label for="hdl">HDL Colesterol (mg/dL)</label>
+                        <input type="number" id="hdl" name="hdl" placeholder="Ex: 45">
+                    </div>
+                    <div class="form-group">
+                        <label for="creatinina">Creatinina Sérica (mg/dL)</label>
+                        <input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="hba1c">HbA1c (%)</label>
+                        <input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0">
+                    </div>
+                </div>
+
+                <div class="section-title">💊 Medicações Específicas</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="anti_hipertensivos" name="medicacoes" value="anti_hipertensivos">
+                        <label for="anti_hipertensivos">Medicamentos Anti-hipertensivos</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="estatinas" name="medicacoes" value="estatinas">
+                        <label for="estatinas">Estatinas</label>
+                    </div>
+                </div>
+
+                <div class="section-title">🏥 Comorbidades</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="diabetes" name="comorbidades" value="diabetes">
+                        <label for="diabetes">Diabetes Tipo 2</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="hipertensao" name="comorbidades" value="hipertensao">
+                        <label for="hipertensao">Hipertensão</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="has_resistente" name="comorbidades" value="has_resistente">
+                        <label for="has_resistente">HAS Resistente</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="dislipidemia" name="comorbidades" value="dislipidemia">
+                        <label for="dislipidemia">Dislipidemia</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="doenca_renal" name="comorbidades" value="doenca_renal">
+                        <label for="doenca_renal">Doença Renal Crônica</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cardiopatia" name="comorbidades" value="cardiopatia">
+                        <label for="cardiopatia">Cardiopatia</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="obesidade" name="comorbidades" value="obesidade">
+                        <label for="obesidade">Obesidade</label>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="outras_comorbidades">Outras comorbidades (descreva):</label>
+                    <textarea id="outras_comorbidades" name="outras_comorbidades" rows="3" placeholder="Ex: DPOC, artrite reumatoide, lúpus..."></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="medicacoes_continuo">Medicações de Uso Contínuo</label>
+                    <textarea id="medicacoes_continuo" name="medicacoes_continuo" rows="3" placeholder="Liste todas as medicações em uso contínuo com doses e frequência"></textarea>
+                </div>
+
+                <div class="section-title">👨‍👩‍👧‍👦 História Familiar</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cancer_mama" name="historia_familiar" value="cancer_mama">
+                        <label for="cancer_mama">Câncer de Mama</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cancer_colorretal" name="historia_familiar" value="cancer_colorretal">
+                        <label for="cancer_colorretal">Câncer Colorretal</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cancer_ovario" name="historia_familiar" value="cancer_ovario">
+                        <label for="cancer_ovario">Câncer de Ovário</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="diabetes_familiar" name="historia_familiar" value="diabetes">
+                        <label for="diabetes_familiar">Diabetes</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="cardiopatia_familiar" name="historia_familiar" value="cardiopatia">
+                        <label for="cardiopatia_familiar">Cardiopatia</label>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="outras_condicoes_familiares">Outras condições familiares (descreva):</label>
+                    <textarea id="outras_condicoes_familiares" name="outras_condicoes_familiares" rows="3" placeholder="Ex: câncer de próstata, AVC, demência..."></textarea>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="tabagismo">Tabagismo</label>
+                        <select id="tabagismo" name="tabagismo">
+                            <option value="nunca">Nunca fumou</option>
+                            <option value="atual">Fumante atual</option>
+                            <option value="ex">Ex-fumante</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="macos_ano">Maços-ano (se fumante/ex-fumante)</label>
+                        <input type="number" id="macos_ano" name="macos_ano" step="0.1">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Gerar Recomendações Inteligentes</button>
+                <button type="button" class="btn-secondary" onclick="anexarPDFs()">📄 Anexar PDFs de Exames</button>
+            </form>
+
+            <div id="recommendations" class="recommendations">
+                <h3>Recomendações Inteligentes</h3>
+                <div id="recommendationsContent"></div>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="gerarSolicitacaoExames()">📋 Solicitação de Exames</button>
+                    <button class="action-btn" onclick="gerarReceitaVacinas()">💉 Receita de Vacinas</button>
+                    <button class="action-btn" onclick="gerarRelatorioCompleto()">📄 Relatório Completo</button>
+                    <button class="action-btn" onclick="agendarLembretes()">🔔 Agendar Lembretes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="prevent_calculator.js"></script>
+    <script>
+        // Inicializar calculadora PREVENT
+        const preventCalc = new PreventCalculator();
+        
+        document.getElementById('checkupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {};
+            
+            // Converter FormData para objeto
+            for (let [key, value] of formData.entries()) {
+                if (data[key]) {
+                    if (Array.isArray(data[key])) {
+                        data[key].push(value);
+                    } else {
+                        data[key] = [data[key], value];
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            // Calcular risco cardiovascular PREVENT se dados suficientes
+            let cardiovascularRisk = null;
+            if (data.idade && data.sexo && data.colesterol && data.hdl && data.pas && data.creatinina) {
+                try {
+                    const riskParams = {
+                        idade: parseInt(data.idade),
+                        sexo: data.sexo,
+                        colesterol_total: parseInt(data.colesterol) || 200,
+                        hdl_colesterol: parseInt(data.hdl) || 45,
+                        pressao_sistolica: parseInt(data.pas) || 120,
+                        diabetes: data.diabetes_tipo2 === 'on',
+                        tabagismo: data.tabagismo || 'nunca',
+                        creatinina: parseFloat(data.creatinina) || 1.0,
+                        medicamentos_anti_hipertensivos: data.anti_hipertensivos === 'on',
+                        estatinas: data.estatinas === 'on'
+                    };
+                    
+                    cardiovascularRisk = preventCalc.calculateRisks(riskParams);
+                } catch (error) {
+                    console.error('Erro no cálculo de risco:', error);
+                }
+            }
+            
+            try {
+                const response = await fetch('/api/checkup-intelligent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                displayRecommendations(result.recommendations, cardiovascularRisk);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao gerar recomendações: ' + error.message);
+            }
+        });
+
+        function displayRecommendations(recomendacoes, cardiovascularRisk = null) {
+            const container = document.getElementById('recommendationsContent');
+            const recommendationsDiv = document.getElementById('recommendations');
+            
+            if (!recomendacoes || recomendacoes.length === 0) {
+                container.innerHTML = '<p>Nenhuma recomendação específica para este perfil.</p>';
+                recommendationsDiv.style.display = 'block';
+                return;
+            }
+            
+            // Adicionar seção de risco cardiovascular se disponível
+            let riskHtml = '';
+            if (cardiovascularRisk) {
+                const risk10yr = preventCalc.interpretRisk(cardiovascularRisk.risk_10yr);
+                riskHtml = `
+                    <div class="cardiovascular-risk-section" style="margin-bottom: 2rem;">
+                        <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Risco Cardiovascular (PREVENT 2024)</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="risk-card" style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border-left: 5px solid ${risk10yr.color};">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Estimated 10-year<br>risk of CVD</h4>
+                                <div style="font-size: 2.5rem; font-weight: bold; color: ${risk10yr.color}; margin: 0.5rem 0;">${cardiovascularRisk.risk_10yr}%</div>
+                                <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">${risk10yr.description}</p>
+                            </div>
+                            <div class="risk-card" style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border-left: 5px solid #e67e22;">
+                                <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Estimated 30-year<br>risk of CVD</h4>
+                                <div style="font-size: 2.5rem; font-weight: bold; color: #e67e22; margin: 0.5rem 0;">${cardiovascularRisk.risk_30yr}%</div>
+                                <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">Risco a longo prazo</p>
+                            </div>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; border-left: 4px solid #3498db;">
+                            <p style="margin: 0; font-size: 0.9rem; color: #2c3e50;">
+                                <strong>eGFR calculado:</strong> ${cardiovascularRisk.egfr} mL/min/1.73m² | 
+                                <strong>Baseado em:</strong> Equações PREVENT 2024 (AHA/ACC)
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Categorizar recomendações
+            const categorias = {
+                'Exames Laboratoriais': [],
+                'Exames de Imagem': [],
+                'Vacinas': [],
+                'Rastreamento': [],
+                'Outras': []
+            };
+            
+            recomendacoes.forEach(rec => {
+                const titulo = rec.titulo || '';
+                const subtitulo = rec.subtitulo || '';
+                const grauEvidencia = rec.grau_evidencia || '';
+                
+                if (titulo.toLowerCase().includes('hemograma') || 
+                    titulo.toLowerCase().includes('glicemia') || 
+                    titulo.toLowerCase().includes('colesterol') ||
+                    titulo.toLowerCase().includes('lipídico') ||
+                    titulo.toLowerCase().includes('creatinina') ||
+                    titulo.toLowerCase().includes('hba1c')) {
+                    categorias['Exames Laboratoriais'].push(rec);
+                } else if (titulo.toLowerCase().includes('mamografia') || 
+                          titulo.toLowerCase().includes('colonoscopia') ||
+                          titulo.toLowerCase().includes('ultrassom') ||
+                          titulo.toLowerCase().includes('tomografia')) {
+                    categorias['Exames de Imagem'].push(rec);
+                } else if (titulo.toLowerCase().includes('vacina') || 
+                          titulo.toLowerCase().includes('imunização')) {
+                    categorias['Vacinas'].push(rec);
+                } else if (titulo.toLowerCase().includes('rastreamento') || 
+                          titulo.toLowerCase().includes('screening')) {
+                    categorias['Rastreamento'].push(rec);
+                } else {
+                    categorias['Outras'].push(rec);
+                }
+            });
+            
+            let html = riskHtml;
+            
+            Object.keys(categorias).forEach(categoria => {
+                if (categorias[categoria].length > 0) {
+                    html += `<div class="recommendation-category">
+                        <h4>${categoria}</h4>`;
+                    
+                    categorias[categoria].forEach(rec => {
+                        const titulo = rec.titulo || 'Recomendação';
+                        const subtitulo = rec.subtitulo || '';
+                        const grauEvidencia = rec.grau_evidencia || '';
+                        
+                        html += `<div class="recommendation-item">
+                            <h5>${titulo}</h5>
+                            ${subtitulo ? `<p>${subtitulo}</p>` : ''}
+                            ${grauEvidencia ? `<span class="evidence-grade">Grau de evidência: ${grauEvidencia}</span>` : ''}
+                        </div>`;
+                    });
+                    
+                    html += '</div>';
+                }
+            });
+            
+            container.innerHTML = html;
+            recommendationsDiv.style.display = 'block';
+        }
+
+        async function gerarSolicitacaoExames() {
+            try {
+                const response = await fetch('/api/gerar-solicitacao-exames', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
+                const result = await response.text();
+                
+                // Abrir em nova janela
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(result);
+                newWindow.document.close();
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao gerar solicitação de exames: ' + error.message);
+            }
+        }
+
+        async function gerarReceitaVacinas() {
+            try {
+                const response = await fetch('/api/gerar-receita-vacinas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
+                const result = await response.text();
+                
+                // Abrir em nova janela
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(result);
+                newWindow.document.close();
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao gerar receita de vacinas: ' + error.message);
+            }
+        }
+
+        function gerarRelatorioCompleto() {
+            alert('Funcionalidade em desenvolvimento');
+        }
+
+        function agendarLembretes() {
+            alert('Funcionalidade em desenvolvimento');
+        }
+
+        function anexarPDFs() {
+            alert('Funcionalidade em desenvolvimento');
+        }
+    </script>
+</body>
+</html>

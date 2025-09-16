@@ -1,25 +1,47 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "/checkup-intelligent", "dest": "/api/checkup-intelligent" },
-    { "src": "/gerar-solicitacao-exames", "dest": "/api/gerar-solicitacao-exames" },
-    { "src": "/gerar-receita-vacinas", "dest": "/api/gerar-receita-vacinas" },
-    { "src": "/api/analytics/(.*)", "dest": "/api/analytics.py" },
-    { "src": "/analytics", "dest": "/analytics.html" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ],
-  "headers": [
+  "builds": [
     {
-      "source": "/(checkup|checkup-intelligent)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "intelligent-tools.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "api/checkup-intelligent.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/gerar-solicitacao-exames.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/gerar-receita-vacinas.py",
+      "use": "@vercel/python"
     }
   ],
-  "functions": {
-    "api/**/*.py": {
-      "runtime": "python3.11"
+  "routes": [
+    {
+      "src": "/api/checkup-intelligent",
+      "dest": "/api/checkup-intelligent.py"
+    },
+    {
+      "src": "/api/gerar-solicitacao-exames",
+      "dest": "/api/gerar-solicitacao-exames.py"
+    },
+    {
+      "src": "/api/gerar-receita-vacinas",
+      "dest": "/api/gerar-receita-vacinas.py"
+    },
+    {
+      "src": "/intelligent-tools",
+      "dest": "/intelligent-tools.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
-  }
+  ]
 }

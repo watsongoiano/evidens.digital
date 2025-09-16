@@ -1,50 +1,53 @@
-from flask import Flask, request, make_response
-from src.utils.cors import sanitize_private_network_header
+from http.server import BaseHTTPRequestHandler
 import json
 
-app = Flask(__name__)
-@app.route('/health', methods=['GET'])
-def health():
-    return make_response('ok', 200)
+class handler(BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
 
+    def do_POST(self):
+        try:
+            # Ler dados do request
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8')) if post_data else {}
+            
+            html = data.get('html')
+            
+            if not html:
+                recs = data.get('recommendations') or []
+                lines = []
+                for rec in recs:
+                    if (rec.get('categoria') or '').lower() == 'vacina':
+                        titulo = rec.get('titulo') or 'Vacina'
+                        ref_html = rec.get('referencia_html') or ''
+                        if ref_html:
+                            lines.append(f"<div><strong>{titulo}</strong><br><small>Ref.: {ref_html}</small></div>")
+                        else:
+                            lines.append(f"<div><strong>{titulo}</strong></div>")
+                
+                html = f"""
+                <!DOCTYPE html>
+                <html><head><meta charset="UTF-8"><title>Receita de Vacinas</title></head>
+                <body><h2>Receita de Vacinas</h2>{''.join(lines)}</body></html>
+                """
 
-def _corsify(resp):
-    resp.headers['Access-Control-Allow-Origin'] = '*'
-    resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    resp.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-    return sanitize_private_network_header(resp)
-
-
-@app.route('/', methods=['POST', 'OPTIONS'])
-def generate_vaccine_prescription():
-    if request.method == 'OPTIONS':
-        return _corsify(make_response('', 204))
-
-    try:
-        data = request.get_json(silent=True) or {}
-        html = data.get('html')
-        if not html:
-            recs = data.get('recommendations') or []
-            lines = []
-            for rec in recs:
-                if (rec.get('categoria') or '').lower() != 'vacina':
-                    continue
-                titulo = rec.get('titulo') or 'Vacina'
-                ref_html = rec.get('referencia_html') or ''
-                if ref_html:
-                    lines.append(f"<div><strong>{titulo}</strong><br><small>Ref.: {ref_html}</small></div>")
-                else:
-                    lines.append(f"<div><strong>{titulo}</strong></div>")
-            html = """
-            <!DOCTYPE html>
-            <html><head><meta charset=\"UTF-8\"><title>Receita de Vacinas</title></head>
-            <body>{items}</body></html>
-            """.format(items='\n'.join(lines))
-
-        resp = make_response(html, 200)
-        resp.mimetype = 'text/html'
-        return _corsify(resp)
-    except Exception as e:
-        err = make_response(f"<html><body>Erro: {str(e)}</body></html>", 500)
-        err.mimetype = 'text/html'
-        return _corsify(err)
+            # Enviar resposta
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(html.encode('utf-8'))
+            
+        except Exception as e:
+            # Enviar erro
+            self.send_response(500)
+            self.send_header('Content-Type', 'text/html')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            error_html = f"<html><body>Erro: {str(e)}</body></html>"
+            self.wfile.write(error_html.encode('utf-8'))
