@@ -649,14 +649,24 @@
                     },
                     body: JSON.stringify(data)
                 });
-                
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
+
+                let result = null;
+                try {
+                    result = await response.json();
+                } catch (parseError) {
+                    if (!response.ok) {
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
+                    throw parseError;
                 }
-                
-                const result = await response.json();
-                displayRecommendations(result.recommendations, cardiovascularRisk);
-                
+
+                if (!response.ok) {
+                    const errorMessage = (result && (result.error || result.message)) || `Erro HTTP: ${response.status}`;
+                    throw new Error(errorMessage);
+                }
+
+                displayRecommendations(result?.recommendations || [], result?.prevent_risk || cardiovascularRisk);
+
             } catch (error) {
                 console.error('Erro:', error);
                 alert('Erro ao gerar recomendações: ' + error.message);
