@@ -8,19 +8,47 @@ from http.server import BaseHTTPRequestHandler
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else '.')
 try:
     from checkup_hypertension import get_hypertension_recommendations_v2
-    from prevent_calculator import calculate_prevent_risk
 except ImportError:
     # Fallback se a importação falhar
     def get_hypertension_recommendations_v2(data):
         return []
-    
-    def calculate_prevent_risk(data):
+
+try:
+    from prevent_calculator import calculate_prevent_risk as _calculate_prevent_risk
+except ImportError:
+    # Fallback se a importação falhar
+    def _calculate_prevent_risk(data):
         return {
             "success": False,
             "error": "Módulo PREVENT não disponível",
             "risk_10yr": 0,
-            "risk_30yr": 0
+            "risk_30yr": 0,
+            "classification": {"category": ""},
         }
+
+
+def calculate_prevent_risk(data):
+    try:
+        result = _calculate_prevent_risk(data)
+    except Exception as exc:  # pragma: no cover - segurança adicional
+        result = {
+            "success": False,
+            "error": str(exc),
+            "risk_10yr": 0,
+            "risk_30yr": 0,
+            "classification": {"category": ""},
+        }
+
+    if not isinstance(result, dict):
+        result = {}
+
+    classification = result.get("classification")
+    if not isinstance(classification, dict):
+        classification = {}
+        result["classification"] = classification
+
+    classification.setdefault("category", "")
+    return result
 
 def get_cardiovascular_stratification_exams(risk_category):
     """
@@ -134,6 +162,7 @@ class handler(BaseHTTPRequestHandler):
             
             # Calcular risco cardiovascular PREVENT
             cardiovascular_risk = calculate_prevent_risk(data)
+            risk = cardiovascular_risk.get("classification", {}).get("category", "").lower()
             
             recommendations = []
             
@@ -296,7 +325,7 @@ class handler(BaseHTTPRequestHandler):
             
             # MAPA/MRPA estratificado por risco
             if idade >= 18:
-                if cardiovascular_risk and cardiovascular_risk["risk_category"] in ["intermediario", "alto"]:
+                if risk in ["intermediario", "alto"]:
                     add_recommendation({
                         "titulo": "MAPA de 24h ou MRPA",
                         "descricao": "Monitorização ambulatorial prioritária para pacientes com risco cardiovascular intermediário/alto para diagnóstico preciso de hipertensão e fenótipos pressóricos.",
