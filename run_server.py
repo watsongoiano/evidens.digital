@@ -1,6 +1,8 @@
 import os
 import sys
-sys.path.insert(0, os.path.dirname(__file__))
+
+BASE_DIR = os.path.dirname(__file__)
+sys.path.insert(0, BASE_DIR)
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
@@ -12,7 +14,7 @@ from src.routes.database_api import database_api_bp
 from src.utils.analytics import analytics, track_visit
 from src.utils.cors import register_private_network_sanitizer
 
-app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'src', 'static'))
+app = Flask(__name__, static_folder=os.path.join(BASE_DIR, 'src', 'static'))
 app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
 CORS(app)
 register_private_network_sanitizer(app)
@@ -22,11 +24,20 @@ app.register_blueprint(checkup_intelligent_bp, url_prefix='/api')
 app.register_blueprint(database_api_bp)
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'src', 'database', 'app.db')}"
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(BASE_DIR, 'src', 'database', 'app.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 with app.app_context():
     db.create_all()
+
+@app.route('/favicon.png')
+def serve_favicon_png():
+    """Serve the PNG favicon stored at the project root."""
+    favicon_path = os.path.join(BASE_DIR, 'favicon.png')
+    if os.path.exists(favicon_path):
+        return send_from_directory(BASE_DIR, 'favicon.png')
+    return ("", 404)
+
 
 @app.route('/analytics/stats')
 def get_analytics_stats():

@@ -38,6 +38,18 @@ def copy_static_files(build_dir):
     
     return True
 
+
+def copy_root_favicon(build_dir):
+    """Garante que o favicon.png presente na raiz seja incluído no build."""
+    root_favicon = SCRIPT_DIR / "favicon.png"
+    if not root_favicon.exists():
+        print("⚠️ favicon.png não encontrado na raiz do projeto")
+        return
+
+    destination = build_dir / "favicon.png"
+    shutil.copy2(root_favicon, destination)
+    print("✅ Copiado: favicon.png (raiz)")
+
 def create_redirects(build_dir):
     """Cria arquivo _redirects para SPA routing"""
     redirects_content = """# SPA redirects
@@ -81,6 +93,7 @@ def update_html_for_static(build_dir):
     # Atualiza referências para funcionar como site estático
     # Se houver chamadas para /api/, você precisará configurar um backend alternativo
     content = content.replace('href="/favicon.ico"', 'href="./favicon.ico"')
+    content = content.replace('href="/favicon.png"', 'href="./favicon.png"')
     
     with open(index_path, "w", encoding="utf-8") as f:
         f.write(content)
@@ -97,7 +110,9 @@ def main():
     if not copy_static_files(build_dir):
         print("❌ Falha ao copiar arquivos estáticos")
         return False
-    
+
+    copy_root_favicon(build_dir)
+
     create_redirects(build_dir)
     create_headers(build_dir)
     update_html_for_static(build_dir)
