@@ -42,11 +42,25 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
         }
 
-        .logo img {
-            height: 50px;
-            width: auto;
+        .logo-main {
+            font-size: 1.8rem;
+            font-weight: 300;
+            color: #2c3e50;
+            margin-bottom: -5px;
+        }
+
+        .logo-sub {
+            font-size: 1.2rem;
+            font-weight: 300;
+            font-style: italic;
+            color: #27ae60;
         }
 
         .nav-links {
@@ -385,7 +399,10 @@
             <div class="nav-links">
                 <a href="/" class="back-btn">← Voltar</a>
             </div>
-            <a href="/" class="logo"><img src="evidenscheck.svg" alt="Evidens Check"></a>
+            <a href="/" class="logo">
+                <span class="logo-main">evidēns</span>
+                <span class="logo-sub">check</span>
+            </a>
             <div class="nav-links">
                 <a href="#contact">Contact</a>
             </div>
