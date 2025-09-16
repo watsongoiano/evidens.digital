@@ -221,6 +221,30 @@ class handler(BaseHTTPRequestHandler):
                     'categoria': 'rastreamento'
                 })
             
+            # 13. RASTREAMENTO DE CÂNCER DE COLO DE ÚTERO (21-29 anos) - USPSTF 2018 (Grau A)
+            # Critérios: Mulheres 21-29 anos
+            if sexo == 'feminino' and 21 <= idade <= 29:
+                add_recommendation({
+                    'titulo': 'Rastreamento de Câncer de Colo de Útero (21 a 29 anos)',
+                    'descricao': 'Rastrear mulheres nesta faixa etária apenas com citologia cervical (Papanicolau) a cada 3 anos. O rastreamento com teste de HPV (isolado ou em coteste) não é recomendado para este grupo.',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2018',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2018.10897',
+                    'categoria': 'laboratorial'
+                })
+            
+            # 14. RASTREAMENTO DE CÂNCER DE COLO DE ÚTERO (30-65 anos) - USPSTF 2018 (Grau A)
+            # Critérios: Mulheres 30-65 anos
+            if sexo == 'feminino' and 30 <= idade <= 65:
+                add_recommendation({
+                    'titulo': 'Rastreamento de Câncer de Colo de Útero (30 a 65 anos)',
+                    'descricao': 'Rastrear mulheres utilizando uma das três estratégias recomendadas: Citologia cervical (Papanicolau) a cada 3 anos, Teste de HPV de alto risco (hrHPV) isolado a cada 5 anos, ou Citologia com teste de HPV (coteste) a cada 5 anos. A escolha da estratégia pode ser discutida entre a paciente e o profissional de saúde.',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2018',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2018.10897',
+                    'categoria': 'laboratorial'
+                })
+            
             response_data = {
                 'recommendations': recommendations,
                 'patient_data': data,
