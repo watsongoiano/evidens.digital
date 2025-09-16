@@ -846,7 +846,7 @@
                 }
             });
             
-            let html = riskHtml;
+            let html = '';
             
             Object.keys(categorias).forEach(categoria => {
                 if (categorias[categoria].length > 0) {
@@ -892,9 +892,7 @@
             });
             
             // Montar HTML final com seção PREVENT no topo
-            const finalHtml = riskHtml + html;
-            
-            container.innerHTML = finalHtml;
+            container.innerHTML = riskHtml + html;
             recommendationsDiv.style.display = 'block';
         }
 
