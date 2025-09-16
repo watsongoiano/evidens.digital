@@ -599,6 +599,36 @@
         // Inicializar calculadora PREVENT
         const preventCalc = new PreventCalculator();
         
+        // Função para criar links clicáveis nas referências
+        function createReferenceLink(referencia) {
+            const referenceLinks = {
+                'USPSTF 2024': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening',
+                'USPSTF 2021': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening',
+                'USPSTF 2020': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening',
+                'USPSTF 2019': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening',
+                'USPSTF 2018': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening',
+                'ADA 2025': 'https://doi.org/10.2337/dc25-5002',
+                'AHA/ACC 2025': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001209',
+                'AHA/ACC 2022': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001071',
+                'AHA/ACC 2019': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000678',
+                'AHA/ACC 2017': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000485',
+                'AHA/ACC 2016': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000471',
+                'SBC 2020': 'https://www.scielo.br/j/abc/a/4WdTKx7XZJQZbYQVqYyQGJz/',
+                'SBC/SBH/SBN 2020': 'https://www.scielo.br/j/abc/a/4WdTKx7XZJQZbYQVqYyQGJz/',
+                'ASE 2016': 'https://www.onlinejase.com/article/S0894-7317(16)30146-4/fulltext'
+            };
+            
+            // Procurar por correspondências exatas ou parciais
+            for (const [key, url] of Object.entries(referenceLinks)) {
+                if (referencia.includes(key)) {
+                    return `<a href="${url}" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">${referencia}</a>`;
+                }
+            }
+            
+            // Se não encontrar link específico, retornar texto normal
+            return referencia;
+        }
+        
         document.getElementById('checkupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -811,7 +841,7 @@
                             </p>` : ''}
                             
                             ${referencia ? `<p style="color: #95a5a6; margin: 0; font-size: 0.8rem; font-style: italic;">
-                                ${referencia}
+                                ${createReferenceLink(referencia)}
                             </p>` : ''}
                         </div>`;
                     });
