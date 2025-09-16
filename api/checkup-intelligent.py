@@ -102,6 +102,22 @@ class handler(BaseHTTPRequestHandler):
                     'categoria': 'laboratorial'
                 })
             
+            # 5. RASTREAMENTO DE ANEURISMA DE AORTA ABDOMINAL (AAA) - USPSTF 2019 (Grau B)
+            # Critérios: Homens de 65-75 anos que já fumaram alguma vez (≥100 cigarros)
+            historico_tabagismo = data.get('historico_tabagismo') == 'on'
+            if (sexo == 'masculino' and 
+                65 <= idade <= 75 and 
+                historico_tabagismo):
+                
+                add_recommendation({
+                    'titulo': 'Doppler Arterial de Aorta Abdominal',
+                    'descricao': 'Realizar rastreamento único com ultrassonografia para aneurisma de aorta abdominal em homens de 65 a 75 anos que já fumaram alguma vez na vida (100 ou mais cigarros).',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2019',
+                    'site_referencia': 'https://doi.org/10.1001/jama.2019.18928',
+                    'categoria': 'imagem'
+                })
+            
             response_data = {
                 'recommendations': recommendations,
                 'patient_data': data,
