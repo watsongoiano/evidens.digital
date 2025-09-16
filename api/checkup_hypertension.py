@@ -194,5 +194,47 @@ def get_hypertension_recommendations_v2(data):
             "referencia": "AHA/ACC 2025 e SBC 2020",
             "categoria": "Imagem - Hipertensão Secundária"
         })
+    
+    # Exames adicionais para HAR/HAS resistente
+    if has_resistente:
+        add_recommendation({
+            "titulo": "Metanefrinas, urina 24h ou plasma",
+            "descricao": "Exame para investigação de feocromocitoma/paraganglioma, uma causa rara mas importante de hipertensão secundária.",
+            "prioridade": "alta",
+            "referencia": "AHA/ACC 2025 e SBC 2020",
+            "categoria": "Laboratorial - Hipertensão Secundária"
+        })
+        
+        add_recommendation({
+            "titulo": "Cortisol livre, urina 24h",
+            "descricao": "Rastreio para síndrome de Cushing, causa endócrina de hipertensão secundária.",
+            "prioridade": "alta",
+            "referencia": "AHA/ACC 2025 e SBC 2020",
+            "categoria": "Laboratorial - Hipertensão Secundária"
+        })
+        
+        add_recommendation({
+            "titulo": "Teste de supressão com dexametasona",
+            "descricao": "Teste complementar para investigação de síndrome de Cushing em pacientes com HAR.",
+            "prioridade": "média",
+            "referencia": "AHA/ACC 2025 e SBC 2020",
+            "categoria": "Laboratorial - Hipertensão Secundária"
+        })
+        
+        add_recommendation({
+            "titulo": "Catecolaminas, urina 24h",
+            "descricao": "Exame complementar às metanefrinas para investigação de feocromocitoma/paraganglioma.",
+            "prioridade": "média",
+            "referencia": "AHA/ACC 2025 e SBC 2020",
+            "categoria": "Laboratorial - Hipertensão Secundária"
+        })
+        
+        add_recommendation({
+            "titulo": "Tomografia de Adrenais",
+            "descricao": "Exame de imagem para investigação de massas adrenais em casos de HAR com suspeita de causa endócrina.",
+            "prioridade": "média",
+            "referencia": "AHA/ACC 2025 e SBC 2020",
+            "categoria": "Imagem - Hipertensão Secundária"
+        })
 
     return recommendations

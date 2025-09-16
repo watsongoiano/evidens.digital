@@ -733,7 +733,6 @@
                 '🧪 Exames Laboratoriais': [],
                 '🏥 Exames de Imagem': [],
                 '💉 Vacinas': [],
-                '🔍 Rastreamento / Screening': [],
                 '🩺 Avaliação Clínica': [],
                 '📋 Outras Recomendações': []
             };
@@ -748,21 +747,21 @@
                     titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
                     titulo.includes('Sódio') || titulo.includes('Magnésio') || titulo.includes('Ácido úrico') ||
                     titulo.includes('Microalbuminúria') || titulo.includes('Urinocultura') || titulo.includes('HbA1c') ||
-                    titulo.includes('TSH') || titulo.includes('Cortisol') || titulo.includes('Aldosterona')) {
+                    titulo.includes('TSH') || titulo.includes('Cortisol') || titulo.includes('Aldosterona') ||
+                    titulo.includes('Hepatite C') || titulo.includes('HIV') || titulo.includes('Papanicolau') ||
+                    titulo.includes('Citologia') || titulo.includes('Metanefrinas') || titulo.includes('Catecolaminas')) {
                     categorias['🧪 Exames Laboratoriais'].push(rec);
                 } else if (categoria.includes('Imagem') || categoria.includes('imagem') ||
                     titulo.includes('Tomografia') || titulo.includes('Ressonância') || titulo.includes('Ultrassom') ||
                     titulo.includes('Ecocardiograma') || titulo.includes('Radiografia') || titulo.includes('Mamografia') ||
-                    titulo.includes('TCBD') || titulo.includes('Colonoscopia') || titulo.includes('Densitometria')) {
+                    titulo.includes('TCBD') || titulo.includes('Colonoscopia') || titulo.includes('Densitometria') ||
+                    titulo.includes('MAPA') || titulo.includes('MRPA') || titulo.includes('Screening') ||
+                    titulo.includes('Rastreamento') || titulo.includes('Câncer') || titulo.includes('Sífilis') ||
+                    titulo.includes('Tuberculose') || titulo.includes('Bacteriúria') || titulo.includes('Osteoporose')) {
                     categorias['🏥 Exames de Imagem'].push(rec);
                 } else if (categoria.includes('Vacina') || categoria.includes('vacina') ||
                     titulo.includes('Vacina') || titulo.includes('Imunização')) {
                     categorias['💉 Vacinas'].push(rec);
-                } else if (categoria.includes('Rastreamento') || categoria.includes('rastreamento') ||
-                    titulo.includes('Rastreamento') || titulo.includes('Screening') || titulo.includes('Papanicolau') ||
-                    titulo.includes('Câncer') || titulo.includes('HIV') || titulo.includes('Hepatite') ||
-                    titulo.includes('Sífilis') || titulo.includes('Tuberculose') || titulo.includes('Bacteriúria')) {
-                    categorias['🔍 Rastreamento / Screening'].push(rec);
                 } else if (titulo.includes('Consulta') || titulo.includes('Avaliação') || titulo.includes('Acompanhamento')) {
                     categorias['🩺 Avaliação Clínica'].push(rec);
                 } else {

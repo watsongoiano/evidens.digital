@@ -273,6 +273,16 @@ class handler(BaseHTTPRequestHandler):
                     "categoria": "Rastreamento Pré-natal"
                 })
 
+            # MAPA/MRPA para todos acima de 18 anos
+            if idade >= 18:
+                add_recommendation({
+                    "titulo": "MAPA de 24h ou MRPA",
+                    "descricao": "Monitorização ambulatorial da pressão arterial recomendada para todos os adultos para diagnóstico preciso de hipertensão e identificação de fenótipos como hipertensão do avental branco e mascarada.",
+                    "prioridade": "alta",
+                    "referencia": "AHA/ACC 2025 e SBC 2020",
+                    "categoria": "Monitoramento Pressórico"
+                })
+
             response_data = {
                 "recommendations": recommendations,
                 "patient_data": data,
