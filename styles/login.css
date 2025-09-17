@@ -410,7 +410,8 @@ input[type="password"]:focus {
     justify-content: flex-end;
 }
 
-.illustration svg {
+.illustration svg,
+.illustration img {
     max-width: 200px;
     width: 100%;
     height: auto;

@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
-<body>
+<body data-redirect="/dashboard">
     <main class="main">
         <div class="auth-card" role="presentation">
             <header class="card-header">
@@ -127,25 +127,7 @@
 
                 <section class="info-panel" aria-label="Platform highlights">
                     <div class="illustration" aria-hidden="true">
-                        <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="stethoscope-gradient" x1="56" y1="20" x2="166" y2="180" gradientUnits="userSpaceOnUse">
-                                    <stop stop-color="#E2E8F0"/>
-                                    <stop offset="1" stop-color="#94A3B8"/>
-                                </linearGradient>
-                                <linearGradient id="stethoscope-accent" x1="84" y1="112" x2="148" y2="176" gradientUnits="userSpaceOnUse">
-                                    <stop stop-color="#CBD5F5"/>
-                                    <stop offset="1" stop-color="#A5B4FC"/>
-                                </linearGradient>
-                            </defs>
-                            <path d="M66 32C66 26.4772 70.4772 22 76 22H94C99.5228 22 104 26.4772 104 32V78C104 94.5685 90.5685 108 74 108C57.4315 108 44 94.5685 44 78V58" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M44 94C44 123.823 68.1771 148 98 148C107.817 148 117.007 145.595 124.925 140.417" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round"/>
-                            <path d="M98 148C98 160.702 108.298 171 121 171H141" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-                            <circle cx="164" cy="171" r="23" stroke="url(#stethoscope-gradient)" stroke-width="6"/>
-                            <circle cx="164" cy="171" r="9" fill="#94A3B8"/>
-                            <path d="M66 32V24" stroke="url(#stethoscope-accent)" stroke-width="6" stroke-linecap="round"/>
-                            <path d="M94 32V24" stroke="url(#stethoscope-accent)" stroke-width="6" stroke-linecap="round"/>
-                        </svg>
+                        <img src="assets/stethoscope.svg" alt="" width="200" height="200">
                     </div>
 
                     <div class="info-content">
@@ -186,6 +168,6 @@
         </div>
     </main>
 
-    <script src="js/auth-card.js" data-redirect="/dashboard"></script>
+    <script src="js/auth-card.js"></script>
 </body>
 </html>

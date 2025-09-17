@@ -1,0 +1,18 @@
+<svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="stetho-body" x1="52" y1="24" x2="174" y2="196" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#E2E8F0" />
+            <stop offset="1" stop-color="#94A3B8" />
+        </linearGradient>
+        <linearGradient id="stetho-accent" x1="92" y1="150" x2="180" y2="206" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#CBD5F5" />
+            <stop offset="1" stop-color="#A5B4FC" />
+        </linearGradient>
+    </defs>
+    <path d="M68 36C68 27.1634 75.1634 20 84 20H118C126.837 20 134 27.1634 134 36V100C134 123.853 114.853 143 91 143C67.1472 143 48 123.853 48 100V74" stroke="url(#stetho-body)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M91 143C91 170.957 113.043 193 141 193H166" stroke="url(#stetho-body)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="186" cy="193" r="26" stroke="url(#stetho-body)" stroke-width="6" />
+    <circle cx="186" cy="193" r="10" fill="#94A3B8" />
+    <path d="M68 36V26" stroke="url(#stetho-accent)" stroke-width="6" stroke-linecap="round" />
+    <path d="M134 36V26" stroke="url(#stetho-accent)" stroke-width="6" stroke-linecap="round" />
+</svg>
