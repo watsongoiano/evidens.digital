@@ -875,7 +875,7 @@
 
                 const resp = await fetch('/api/gerar-solicitacao-exames', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'text/html' },
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({
                         recommendations: active,
                         patient_data: patientData,
@@ -886,13 +886,66 @@
                     throw new Error(`Erro ao gerar solicitação de exames: ${resp.status}`);
                 }
 
-                const html = await resp.text();
-                const newWindow = window.open('', '_blank');
-                if (newWindow) {
-                    newWindow.document.write(html);
-                    newWindow.document.close();
-                } else {
-                    alert('Não foi possível abrir nova janela. Verifique se pop-ups estão bloqueados.');
+                const data = await resp.json();
+                if (data && data.error) {
+                    throw new Error(data.error);
+                }
+
+                const documentos = [];
+                const baseTimestamp = Date.now();
+                const appendDocumento = (tipo, label) => {
+                    const info = data && data[tipo];
+                    if (info && info.html) {
+                        documentos.push({
+                            tipo,
+                            html: info.html,
+                            title: info.title || `Solicitação de Exames ${label}`,
+                            filename: info.filename || `solicitacao-exames-${tipo}-${baseTimestamp}.html`,
+                            windowName: info.window_name || `solicitacao-${tipo}-${baseTimestamp}`,
+                        });
+                    }
+                };
+
+                appendDocumento('laboratorial', 'Laboratoriais');
+                appendDocumento('imagem', 'de Imagem');
+
+                if (documentos.length === 0) {
+                    alert('Não foi possível gerar a solicitação de exames.');
+                    return;
+                }
+
+                const bloqueados = [];
+                documentos.forEach(doc => {
+                    const alvo = doc.windowName || `_blank`;
+                    const novaJanela = window.open('', alvo);
+                    if (novaJanela) {
+                        novaJanela.document.write(doc.html);
+                        novaJanela.document.close();
+                        if (doc.title) {
+                            try {
+                                novaJanela.document.title = doc.title;
+                            } catch (setTitleError) {
+                                console.warn('Não foi possível definir o título do documento de exames.', setTitleError);
+                            }
+                        }
+                    } else {
+                        bloqueados.push(doc);
+                    }
+                });
+
+                if (bloqueados.length > 0) {
+                    bloqueados.forEach(doc => {
+                        const blob = new Blob([doc.html], { type: 'text/html' });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = doc.filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        setTimeout(() => URL.revokeObjectURL(url), 4000);
+                    });
+                    alert('O navegador bloqueou a abertura automática. Os documentos foram baixados individualmente.');
                 }
             } catch (error) {
                 console.error('Erro ao gerar solicitação de exames:', error);

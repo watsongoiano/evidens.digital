@@ -87,7 +87,22 @@ def main():
 
     # Generate documents inputs
     patient_doc = {'nome': 'Paciente Teste', 'sexo': 'masculino'}
-    doc_payload = {'recommendations': recs2, 'patient_data': patient_doc}
+    sample_lab = {
+        'titulo': 'Hemoglobina glicada (HbA1c), soro',
+        'descricao': 'Avaliação do controle glicêmico',
+        'categoria': 'laboratorio',
+        'referencia_html': 'Diretriz MS 2024'
+    }
+    sample_imagem = {
+        'titulo': 'Mamografia bilateral digital',
+        'descricao': 'Rastreamento de neoplasia de mama',
+        'categoria': 'imagem',
+        'referencia_html': 'Diretriz MS 2024'
+    }
+    doc_payload = {
+        'recommendations': recs2 + [sample_lab, sample_imagem],
+        'patient_data': patient_doc
+    }
 
     # 3) Exams request: JSON
     r3_json = post_json(client, f'{API}/gerar-solicitacao-exames', doc_payload,
@@ -97,20 +112,62 @@ def main():
                 f"Expected JSON content-type, got {r3_json.content_type}")
     assert_no_private_network_header(r3_json, '/gerar-solicitacao-exames (JSON)')
     data3 = r3_json.get_json() or {}
-    assert_true(bool(data3.get('html')),
-                "JSON response missing 'html' for /gerar-solicitacao-exames")
+    available_docs = data3.get('available_documents') or []
+    lab_doc = data3.get('laboratorial') or {}
+    img_doc = data3.get('imagem') or {}
+    assert_true('laboratorial' in available_docs,
+                "Laboratory document not advertised in JSON response")
+    assert_true('imagem' in available_docs,
+                "Imaging document not advertised in JSON response")
+    assert_true(bool(lab_doc.get('html')),
+                "JSON response missing laboratory document HTML for /gerar-solicitacao-exames")
+    assert_true(bool(img_doc.get('html')),
+                "JSON response missing imaging document HTML for /gerar-solicitacao-exames")
+    assert_true(lab_doc.get('document_code', '').startswith('CFMP-SE-LAB-'),
+                "Laboratory document code missing or incorrect")
+    assert_true(img_doc.get('document_code', '').startswith('CFMP-SE-IMG-'),
+                "Imaging document code missing or incorrect")
+    assert_true(lab_doc.get('filename') and img_doc.get('filename') and lab_doc.get('filename') != img_doc.get('filename'),
+                "Document filenames should be distinct between lab and imaging")
 
-    # 4) Exams request: HTML
-    r3_html = post_json(client, f'{API}/gerar-solicitacao-exames', doc_payload,
-                        headers={'Accept': 'text/html'})
-    assert_true(r3_html.status_code == 200, f"/gerar-solicitacao-exames HTML HTTP {r3_html.status_code}")
-    assert_true((r3_html.content_type or '').startswith('text/html'),
-                f"Expected HTML content-type, got {r3_html.content_type}")
-    assert_true((r3_html.get_data(as_text=True) or '').lstrip().startswith('<!DOCTYPE html>'),
-                "HTML response does not look like HTML for /gerar-solicitacao-exames")
-    assert_no_private_network_header(r3_html, '/gerar-solicitacao-exames (HTML)')
+    # 4) Exams request: HTML (laboratory)
+    r3_lab_html = post_json(client, f'{API}/gerar-solicitacao-exames?documento=laboratorial', doc_payload,
+                            headers={'Accept': 'text/html'})
+    assert_true(r3_lab_html.status_code == 200, f"/gerar-solicitacao-exames HTML lab HTTP {r3_lab_html.status_code}")
+    assert_true((r3_lab_html.content_type or '').startswith('text/html'),
+                f"Expected HTML content-type, got {r3_lab_html.content_type}")
+    lab_html_text = (r3_lab_html.get_data(as_text=True) or '').lstrip()
+    assert_true(lab_html_text.startswith('<!DOCTYPE html>'),
+                "Laboratory HTML response does not look like HTML")
+    assert_true('CFMP-SE-LAB-' in lab_html_text,
+                "Laboratory HTML missing unique identifier")
+    assert_no_private_network_header(r3_lab_html, '/gerar-solicitacao-exames (HTML-LAB)')
 
-    # 5) Vaccine prescription: JSON
+    # 5) Exams request: HTML (imaging)
+    r3_img_html = post_json(client, f'{API}/gerar-solicitacao-exames?documento=imagem', doc_payload,
+                            headers={'Accept': 'text/html'})
+    assert_true(r3_img_html.status_code == 200, f"/gerar-solicitacao-exames HTML imagem HTTP {r3_img_html.status_code}")
+    assert_true((r3_img_html.content_type or '').startswith('text/html'),
+                f"Expected HTML content-type, got {r3_img_html.content_type}")
+    img_html_text = (r3_img_html.get_data(as_text=True) or '').lstrip()
+    assert_true(img_html_text.startswith('<!DOCTYPE html>'),
+                "Imaging HTML response does not look like HTML")
+    assert_true('CFMP-SE-IMG-' in img_html_text,
+                "Imaging HTML missing unique identifier")
+    assert_no_private_network_header(r3_img_html, '/gerar-solicitacao-exames (HTML-IMG)')
+
+    # 6) Exams request: HTML selection page when no tipo specified
+    r3_select = post_json(client, f'{API}/gerar-solicitacao-exames', doc_payload,
+                          headers={'Accept': 'text/html'})
+    assert_true(r3_select.status_code == 200, f"/gerar-solicitacao-exames HTML selection HTTP {r3_select.status_code}")
+    assert_true((r3_select.content_type or '').startswith('text/html'),
+                f"Expected HTML content-type, got {r3_select.content_type}")
+    selection_html = r3_select.get_data(as_text=True) or ''
+    assert_true('documento=laboratorial' in selection_html and 'documento=imagem' in selection_html,
+                "Selection HTML does not list both document links")
+    assert_no_private_network_header(r3_select, '/gerar-solicitacao-exames (HTML-selection)')
+
+    # 7) Vaccine prescription: JSON
     r4_json = post_json(client, f'{API}/gerar-receita-vacinas', doc_payload,
                         headers={'Accept': 'application/json'})
     assert_true(r4_json.status_code == 200, f"/gerar-receita-vacinas JSON HTTP {r4_json.status_code}")
@@ -121,7 +178,7 @@ def main():
     assert_true(bool(data4.get('html')),
                 "JSON response missing 'html' for /gerar-receita-vacinas")
 
-    # 6) Vaccine prescription: HTML
+    # 8) Vaccine prescription: HTML
     r4_html = post_json(client, f'{API}/gerar-receita-vacinas', doc_payload,
                         headers={'Accept': 'text/html'})
     assert_true(r4_html.status_code == 200, f"/gerar-receita-vacinas HTML HTTP {r4_html.status_code}")
