@@ -1,315 +1,400 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - evidēns</title>
+    <title>Sign in - evidēns</title>
     <link rel="stylesheet" href="styles/login.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <h1>evidēns</h1>
-            </div>
-            <nav class="nav">
-                <a href="#" class="nav-link">Contact</a>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Main Content -->
     <main class="main">
-        <div class="login-container">
-            <!-- Left Side - Login Form -->
-            <div class="login-card">
-                <div class="login-header">
-                    <h2>Welcome Back</h2>
-                    <p>Log in to your account</p>
-                </div>
-
-                <!-- Role Tabs -->
-                <div class="role-tabs">
-                    <button class="tab-button active" data-role="medico">
-                        Profissional de saúde
-                    </button>
-                    <button class="tab-button" data-role="admin">
-                        Administrador
-                    </button>
-                </div>
-
-                <!-- Login Form -->
-                <form id="login-form" class="login-form">
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                <polyline points="22,6 12,13 2,6"></polyline>
-                            </svg>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                placeholder="Email Address" 
-                                required 
-                                aria-label="Email Address"
-                                autocomplete="email"
-                            >
-                        </div>
+        <div class="auth-card" role="presentation">
+            <header class="card-header">
+                <a href="#" class="header-link">About</a>
+                <div class="header-logo" aria-label="evidēns">evidēns</div>
+                <a href="#" class="header-link header-link-right">Contact</a>
+            </header>
+            <div class="card-body">
+                <section class="auth-panel" aria-labelledby="welcome-title">
+                    <div class="welcome">
+                        <h1 id="welcome-title" class="welcome-title">Welcome Back</h1>
+                        <p class="welcome-subtitle">Log in to your account</p>
                     </div>
 
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                <circle cx="12" cy="16" r="1"></circle>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                            </svg>
-                            <input 
-                                type="password" 
-                                id="password" 
-                                name="password" 
-                                placeholder="Password" 
-                                required 
-                                aria-label="Password"
-                                autocomplete="current-password"
-                            >
-                        </div>
+                    <div class="role-tabs" role="tablist" aria-label="Select account type">
+                        <button type="button" class="tab-button active" data-role="medico" aria-pressed="true">
+                            Healthcare Professional
+                        </button>
+                        <button type="button" class="tab-button" data-role="admin" aria-pressed="false">
+                            Administrator
+                        </button>
                     </div>
 
-                    <div class="form-options">
-                        <label class="checkbox-wrapper">
-                            <input type="checkbox" id="remember" name="remember">
-                            <span class="checkmark"></span>
-                            <span class="checkbox-label">Lembrar de mim</span>
-                        </label>
-                        <a href="#" class="forgot-link" id="forgot-password">Esqueci minha senha</a>
-                    </div>
-
-                    <button type="submit" class="login-button" id="login-btn">
-                        <span class="button-text">Entrar</span>
-                        <div class="loading-spinner" style="display: none;">
-                            <div class="spinner"></div>
+                    <form id="login-form" class="login-form" novalidate>
+                        <div class="form-group">
+                            <label class="sr-only" for="email">Email Address</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                </span>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="Email address"
+                                    required
+                                    autocomplete="email"
+                                    inputmode="email"
+                                >
+                            </div>
                         </div>
-                    </button>
 
-                    <div class="error-message" id="error-message" style="display: none;" role="alert" aria-live="polite"></div>
-                </form>
+                        <div class="form-group">
+                            <label class="sr-only" for="password">Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                        <circle cx="12" cy="16" r="1"></circle>
+                                    </svg>
+                                </span>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Password"
+                                    required
+                                    autocomplete="current-password"
+                                >
+                            </div>
+                        </div>
 
-                <!-- Divider -->
-                <div class="divider">
-                    <span>ou</span>
-                </div>
+                        <div class="form-options">
+                            <label class="checkbox-wrapper" for="remember">
+                                <input type="checkbox" id="remember" name="remember">
+                                <span class="custom-checkbox" aria-hidden="true"></span>
+                                <span class="checkbox-label">Remember me</span>
+                            </label>
+                            <a href="#" class="forgot-link" id="forgot-password">Forgot password?</a>
+                        </div>
 
-                <!-- OAuth Buttons -->
-                <div class="oauth-buttons">
-                    <button class="oauth-button google-button" id="google-login">
-                        <svg class="oauth-icon" width="20" height="20" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        <button type="submit" class="login-button" id="login-btn">
+                            <span class="button-text">Sign in</span>
+                            <span class="loading-spinner" aria-hidden="true"></span>
+                        </button>
+
+                        <div class="feedback-message" id="feedback-message" role="alert" aria-live="polite"></div>
+
+                        <div class="divider" role="separator">
+                            <span>or</span>
+                        </div>
+
+                        <div class="oauth-buttons">
+                            <button type="button" class="oauth-button google-button" id="google-login">
+                                <span class="oauth-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24">
+                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                    </svg>
+                                </span>
+                                <span>Continue with Google</span>
+                            </button>
+
+                            <button type="button" class="oauth-button microsoft-button" id="microsoft-login">
+                                <span class="oauth-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24">
+                                        <path fill="#F25022" d="M1 1h10v10H1z"/>
+                                        <path fill="#00A4EF" d="M13 1h10v10H13z"/>
+                                        <path fill="#7FBA00" d="M1 13h10v10H1z"/>
+                                        <path fill="#FFB900" d="M13 13h10v10H13z"/>
+                                    </svg>
+                                </span>
+                                <span>Microsoft account</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="info-panel" aria-label="Platform highlights">
+                    <div class="illustration" aria-hidden="true">
+                        <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="stethoscope-gradient" x1="40" y1="30" x2="160" y2="170" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#CBD5F5"/>
+                                    <stop offset="1" stop-color="#94A3B8"/>
+                                </linearGradient>
+                            </defs>
+                            <path d="M64 36C64 31.0294 68.0294 27 73 27H97C101.971 27 106 31.0294 106 36V64C106 68.9706 101.971 73 97 73H73C68.0294 73 64 68.9706 64 64V36Z" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M85 72V132" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round"/>
+                            <path d="M85 132C85 148.016 72.0163 161 56 161C39.9837 161 27 148.016 27 132C27 115.984 39.9837 103 56 103" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M85 132C85 148.016 97.9837 161 114 161C130.016 161 143 148.016 143 132C143 115.984 130.016 103 114 103" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="158" cy="132" r="20" stroke="url(#stethoscope-gradient)" stroke-width="6"/>
+                            <circle cx="158" cy="132" r="6" fill="#94A3B8"/>
+                            <path d="M143 132H136" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round"/>
                         </svg>
-                        <span>Continuar com Google</span>
-                    </button>
-
-                    <button class="oauth-button microsoft-button" id="microsoft-login">
-                        <svg class="oauth-icon" width="20" height="20" viewBox="0 0 24 24">
-                            <path fill="#F25022" d="M1 1h10v10H1z"/>
-                            <path fill="#00A4EF" d="M13 1h10v10H13z"/>
-                            <path fill="#7FBA00" d="M1 13h10v10H1z"/>
-                            <path fill="#FFB900" d="M13 13h10v10H13z"/>
-                        </svg>
-                        <span>Com Microsoft</span>
-                    </button>
-                </div>
-
-                <!-- Footer Links -->
-                <div class="form-footer">
-                    <a href="#" class="footer-link" id="create-account">Criar conta</a>
-                    <div class="language-links">
-                        <a href="#" class="lang-link active">PT</a>
-                        <span class="lang-separator">|</span>
-                        <a href="#" class="lang-link">EN</a>
-                    </div>
-                    <a href="#" class="footer-link">Privacidade</a>
-                </div>
-            </div>
-
-            <!-- Right Side - Features -->
-            <div class="features-card">
-                <div class="stethoscope-icon">
-                    <svg width="120" height="120" viewBox="0 0 200 200" fill="none">
-                        <!-- Stethoscope SVG -->
-                        <path d="M60 40C60 35.5817 63.5817 32 68 32H92C96.4183 32 100 35.5817 100 40V60C100 64.4183 96.4183 68 92 68H68C63.5817 68 60 64.4183 60 60V40Z" stroke="#8B9DC3" stroke-width="4" fill="none"/>
-                        <path d="M80 68V120" stroke="#8B9DC3" stroke-width="4"/>
-                        <path d="M80 120C80 133.255 69.255 144 56 144C42.745 144 32 133.255 32 120C32 106.745 42.745 96 56 96" stroke="#8B9DC3" stroke-width="4" fill="none"/>
-                        <path d="M80 120C80 133.255 90.745 144 104 144C117.255 144 128 133.255 128 120C128 106.745 117.255 96 104 96" stroke="#8B9DC3" stroke-width="4" fill="none"/>
-                        <circle cx="140" cy="120" r="16" stroke="#8B9DC3" stroke-width="4" fill="none"/>
-                        <circle cx="140" cy="120" r="4" fill="#8B9DC3"/>
-                        <path d="M128 120H124" stroke="#8B9DC3" stroke-width="4"/>
-                    </svg>
-                </div>
-
-                <div class="features-list">
-                    <div class="feature-item">
-                        <div class="check-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <circle cx="12" cy="12" r="10" fill="#4CAF50"/>
-                                <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
-                            </svg>
-                        </div>
-                        <span>Conteúdo revisado por pares</span>
                     </div>
 
-                    <div class="feature-item">
-                        <div class="check-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <circle cx="12" cy="12" r="10" fill="#4CAF50"/>
-                                <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
-                            </svg>
-                        </div>
-                        <span>Ferramentas inteligentes para decisão clínica</span>
+                    <div class="info-content">
+                        <h2>Clinical intelligence at your fingertips</h2>
+                        <p>Evidence-based content and intuitive workflows designed to support every consultation.</p>
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <span class="feature-icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="8" cy="8" r="8" fill="#16A34A" fill-opacity="0.15"/>
+                                        <path d="M6.2 8.6l1.3 1.3 2.8-2.8" stroke="#16A34A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span>Peer-reviewed content</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="8" cy="8" r="8" fill="#16A34A" fill-opacity="0.15"/>
+                                        <path d="M6.2 8.6l1.3 1.3 2.8-2.8" stroke="#16A34A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span>Intelligent tools for clinical decision-making</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="8" cy="8" r="8" fill="#16A34A" fill-opacity="0.15"/>
+                                        <path d="M6.2 8.6l1.3 1.3 2.8-2.8" stroke="#16A34A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span>Improved outcomes</span>
+                            </li>
+                        </ul>
                     </div>
-
-                    <div class="feature-item">
-                        <div class="check-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <circle cx="12" cy="12" r="10" fill="#4CAF50"/>
-                                <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
-                            </svg>
-                        </div>
-                        <span>Melhore desfechos</span>
-                    </div>
-                </div>
-
-                <div class="features-box">
-                    <div class="feature-item-box">
-                        <div class="check-icon-small">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 12l2 2 4-4" stroke="#4CAF50" stroke-width="2" fill="none"/>
-                            </svg>
-                        </div>
-                        <span>Conteúdo revisado por pares</span>
-                    </div>
-
-                    <div class="feature-item-box">
-                        <div class="check-icon-small">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 12l2 2 4-4" stroke="#4CAF50" stroke-width="2" fill="none"/>
-                            </svg>
-                        </div>
-                        <span>Ferramentas anteligentes</span>
-                    </div>
-
-                    <div class="feature-item-box">
-                        <div class="check-icon-small">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 12l2 2 4-4" stroke="#4CAF50" stroke-width="2" fill="none"/>
-                            </svg>
-                        </div>
-                        <span>Melhore desfechos</span>
-                    </div>
-                </div>
+                </section>
             </div>
         </div>
     </main>
 
-    <!-- Scripts -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Inline auth script loaded');
-            
-            let currentRole = 'medico';
-            
-            // Role tab switching
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Remove active class from all buttons
-                    document.querySelectorAll('.tab-button').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    
-                    // Add active class to clicked button
-                    this.classList.add('active');
-                    
-                    // Update current role
-                    currentRole = this.dataset.role;
-                    console.log('Role switched to:', currentRole);
-                });
-            });
-            
-            // Login button click
-            const loginBtn = document.querySelector('button[type="submit"]');
-            if (loginBtn) {
-                loginBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    handleLogin();
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const loginForm = document.getElementById('login-form');
+            const loginButton = document.getElementById('login-btn');
+            const loginButtonText = loginButton?.querySelector('.button-text');
+            const loginSpinner = loginButton?.querySelector('.loading-spinner');
+            const feedbackMessage = document.getElementById('feedback-message');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const forgotPasswordLink = document.getElementById('forgot-password');
+            const googleLoginButton = document.getElementById('google-login');
+            const microsoftLoginButton = document.getElementById('microsoft-login');
+
+            const activeTab = document.querySelector('.tab-button.active');
+            let currentRole = activeTab?.dataset.role || 'medico';
+
+            const errorMessages = {
+                INVALID_CREDENTIALS: 'We could not find an account with those credentials.',
+                INVALID_EMAIL_FORMAT: 'Please enter a valid email address.',
+                EMAIL_PASSWORD_REQUIRED: 'Email and password are required.',
+                ACCOUNT_LOCKED: 'Too many failed attempts. Please try again in a few minutes.',
+                JSON_REQUIRED: 'Something went wrong with the request. Please try again.',
+                INVALID_ROLE: 'The selected role is not available for this account.'
+            };
+
+            function setRole(role, button) {
+                currentRole = role || 'medico';
+                tabButtons.forEach((btn) => {
+                    btn.classList.toggle('active', btn === button);
+                    btn.setAttribute('aria-pressed', btn === button ? 'true' : 'false');
                 });
             }
-            
-            function handleLogin() {
-                console.log('Login attempt started');
-                
-                const email = document.querySelector('input[placeholder="Email Address"]').value;
-                const password = document.querySelector('input[placeholder="Password"]').value;
-                
-                console.log('Email:', email, 'Role:', currentRole);
-                
-                if (!email || !password) {
-                    alert('Por favor, preencha todos os campos.');
+
+            function setFeedback(message, type = 'error') {
+                if (!feedbackMessage) {
                     return;
                 }
-                
-                // Show loading state
-                const originalText = loginBtn.textContent;
-                loginBtn.textContent = 'Entrando...';
-                loginBtn.disabled = true;
-                
-                // Make API call
-                fetch(`/api/login/${currentRole}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password
-                    })
-                })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Response data:', data);
-                    
-                    if (data.ok) {
-                        console.log('Login successful, redirecting to:', data.redirect);
-                        window.location.href = data.redirect;
-                    } else {
-                        alert('Erro ao fazer login: ' + (data.message || 'Verifique suas credenciais.'));
+
+                feedbackMessage.textContent = message;
+
+                if (!message) {
+                    feedbackMessage.style.display = 'none';
+                    feedbackMessage.classList.remove('feedback-error', 'feedback-success');
+                    return;
+                }
+
+                feedbackMessage.style.display = 'block';
+                feedbackMessage.classList.toggle('feedback-success', type === 'success');
+                feedbackMessage.classList.toggle('feedback-error', type !== 'success');
+            }
+
+            function setLoading(isLoading) {
+                if (!loginButton) {
+                    return;
+                }
+
+                loginButton.disabled = isLoading;
+                loginButton.setAttribute('aria-busy', String(isLoading));
+
+                if (loginButtonText) {
+                    loginButtonText.textContent = isLoading ? 'Signing in…' : 'Sign in';
+                }
+
+                if (loginSpinner) {
+                    loginSpinner.style.display = isLoading ? 'inline-flex' : 'none';
+                }
+
+                loginButton.classList.toggle('is-loading', isLoading);
+            }
+
+            function normalizeResponse(data) {
+                if (Array.isArray(data)) {
+                    return data[0];
+                }
+                return data;
+            }
+
+            function resolveErrorMessage(payload, statusCode) {
+                if (!payload || typeof payload !== 'object') {
+                    return 'Unable to sign in at the moment. Please try again.';
+                }
+
+                if (payload.error === 'ACCOUNT_LOCKED' && payload.retry_after_sec) {
+                    const minutes = Math.max(1, Math.ceil(payload.retry_after_sec / 60));
+                    return `Too many attempts. Try again in approximately ${minutes} minute${minutes > 1 ? 's' : ''}.`;
+                }
+
+                if (payload.error && errorMessages[payload.error]) {
+                    return errorMessages[payload.error];
+                }
+
+                if (statusCode >= 500) {
+                    return 'Our servers are unavailable right now. Please try again later.';
+                }
+
+                return payload.message || 'Unable to sign in. Please check your credentials and try again.';
+            }
+
+            async function handleLogin(event) {
+                event?.preventDefault();
+                if (!emailInput || !passwordInput) {
+                    return;
+                }
+
+                const email = emailInput.value.trim();
+                const password = passwordInput.value.trim();
+
+                if (!email || !password) {
+                    setFeedback('Please enter your email and password to continue.');
+                    return;
+                }
+
+                setFeedback('');
+                setLoading(true);
+
+                try {
+                    const response = await fetch(`/api/login/${currentRole}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email,
+                            password
+                        })
+                    });
+
+                    const rawData = await response.json().catch(() => null);
+                    const payload = normalizeResponse(rawData);
+
+                    if (!response.ok || !payload?.ok) {
+                        const message = resolveErrorMessage(payload, response.status);
+                        setFeedback(message);
+                        return;
                     }
-                })
-                .catch(error => {
+
+                    setFeedback('Authenticated successfully. Redirecting…', 'success');
+                    const redirectUrl = payload.redirect || '/dashboard';
+                    window.location.href = redirectUrl;
+                } catch (error) {
                     console.error('Login error:', error);
-                    alert('Erro ao fazer login. Tente novamente.');
-                })
-                .finally(() => {
-                    // Reset button state
-                    loginBtn.textContent = originalText;
-                    loginBtn.disabled = false;
+                    setFeedback('We could not sign you in. Please try again in a moment.');
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            tabButtons.forEach((button) => {
+                button.addEventListener('click', () => setRole(button.dataset.role || 'medico', button));
+            });
+
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+
+            if (forgotPasswordLink) {
+                forgotPasswordLink.addEventListener('click', async (event) => {
+                    event.preventDefault();
+
+                    if (!emailInput) {
+                        return;
+                    }
+
+                    const email = emailInput.value.trim();
+
+                    if (!email) {
+                        setFeedback('Enter your email address so we can send the reset instructions.');
+                        return;
+                    }
+
+                    setFeedback('');
+                    forgotPasswordLink.classList.add('loading');
+                    forgotPasswordLink.setAttribute('aria-busy', 'true');
+
+                    try {
+                        const response = await fetch('/api/forgot-password', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ email })
+                        });
+
+                        if (response.ok) {
+                            setFeedback('If your email is registered, you will receive reset instructions shortly.', 'success');
+                        } else {
+                            setFeedback('We could not start the reset process right now. Please try again later.');
+                        }
+                    } catch (error) {
+                        console.error('Forgot password error:', error);
+                        setFeedback('We were unable to send reset instructions. Please try again later.');
+                    } finally {
+                        forgotPasswordLink.classList.remove('loading');
+                        forgotPasswordLink.removeAttribute('aria-busy');
+                    }
                 });
             }
-            
-            console.log('Inline auth script initialized');
+
+            if (googleLoginButton) {
+                googleLoginButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    setFeedback('Google single sign-on is coming soon. Please use email and password for now.');
+                });
+            }
+
+            if (microsoftLoginButton) {
+                microsoftLoginButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    setFeedback('Microsoft single sign-on is coming soon. Please use email and password for now.');
+                });
+            }
         });
-    </script></body>
+    </script>
+</body>
 </html>
