@@ -645,11 +645,27 @@
                     return `<a href="${url}" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">${referencia}</a>`;
                 }
             }
-            
+
             // Se não encontrar link específico, retornar texto normal
             return referencia;
         }
-        
+
+        function normalizeText(value) {
+            if (!value || typeof value !== 'string') {
+                return '';
+            }
+            return value
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .trim();
+        }
+
+        const QUESTIONNAIRE_LINKS = {
+            [normalizeText('Questionário GAD-7 (Triagem de Ansiedade)')]: 'https://www.mdcalc.com/calc/1727/gad7-general-anxiety-disorder7',
+            [normalizeText('Questionário PHQ-9 (Triagem de Depressão)')]: 'https://www.mdcalc.com/calc/1725/phq9-patient-health-questionnaire9'
+        };
+
         document.getElementById('checkupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -819,7 +835,13 @@
             recomendacoes.forEach(rec => {
                 const categoria = rec.categoria || '';
                 const titulo = rec.titulo || '';
-                
+                const normalizedTitle = normalizeText(titulo);
+
+                if (normalizedTitle.includes('profilaxia pre-exposicao ao hiv')) {
+                    categorias['📋 Outras Recomendações'].push(rec);
+                    return;
+                }
+
                 // Categorização inteligente baseada no conteúdo
                 if (titulo.includes('Lipoproteína(a)') || titulo.includes('Lp(a)') || titulo.includes('hsCRP') ||
                     titulo.includes('Proteína C Reativa') || titulo.includes('Microalbuminúria')) {
@@ -872,7 +894,12 @@
                         const descricao = rec.descricao || '';
                         const prioridade = rec.prioridade || 'alta';
                         const referencia = rec.referencia || '';
-                        
+                        const normalizedTitle = normalizeText(titulo);
+                        const linkHref = QUESTIONNAIRE_LINKS[normalizedTitle];
+                        const displayTitle = linkHref
+                            ? `<a href="${linkHref}" target="_blank" rel="noopener noreferrer" style="color: #2980b9; text-decoration: underline;">${titulo}</a>`
+                            : titulo;
+
                         // Determinar cor da prioridade
                         let prioridadeColor = '#28a745'; // Verde para alta
                         if (prioridade === 'media') prioridadeColor = '#ffc107'; // Amarelo para média
@@ -888,7 +915,7 @@
                             </div>
                             
                             <h5 style="color: #2c3e50; margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 600;">
-                                ${titulo}
+                                ${displayTitle}
                             </h5>
                             
                             ${descricao ? `<p style="color: #7f8c8d; margin: 0 0 1rem 0; font-size: 0.9rem; line-height: 1.4;">
@@ -926,9 +953,14 @@
                 const labRecommendations = allRecommendations.filter(rec => {
                     const titulo = rec.titulo || '';
                     const categoria = rec.categoria || '';
-                    
+                    const normalizedTitle = normalizeText(titulo);
+
+                    if (normalizedTitle.includes('profilaxia pre-exposicao ao hiv')) {
+                        return false;
+                    }
+
                     // Filtrar exames laboratoriais
-                    return categoria.includes('Laboratorial') || categoria.includes('laboratorial') || 
+                    return categoria.includes('Laboratorial') || categoria.includes('laboratorial') ||
                            titulo.includes('Hemograma') || titulo.includes('Glicemia') || titulo.includes('Colesterol') ||
                            titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
                            titulo.includes('Sódio') || titulo.includes('Magnésio') || titulo.includes('Ácido úrico') ||
