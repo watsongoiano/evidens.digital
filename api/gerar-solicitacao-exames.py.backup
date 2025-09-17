@@ -1,7 +1,7 @@
 from http.server import BaseHTTPRequestHandler
 import json
+import io
 import base64
-import unicodedata
 from datetime import datetime
 from fpdf import FPDF
 
@@ -34,123 +34,6 @@ def _sanitize_name_for_filename(value: object) -> str:
     base_name = _normalize_text(value).strip() or "Paciente"
     return base_name.replace(" ", "_")
 
-
-def _normalize_for_matching(value: object) -> str:
-    """Return a normalized representation for keyword matching."""
-
-    text = _normalize_text(value)
-    if not text:
-        return ""
-
-    decomposed = unicodedata.normalize('NFD', text)
-    stripped = ''.join(ch for ch in decomposed if unicodedata.category(ch) != 'Mn')
-    return stripped.casefold()
-
-
-LAB_CATEGORY_KEYWORDS = (
-    'laboratorio',
-    'laboratorial',
-    'laboratoriais',
-    'lab',
-)
-
-IMAGING_CATEGORY_KEYWORDS = (
-    'imagem',
-    'radiologia',
-)
-
-LAB_TITLE_KEYWORDS = (
-    'soro',
-    'sangue',
-    'serum',
-    'plasma',
-    'urina',
-    'fezes',
-    'hemograma',
-    'hemoglob',
-    'glic',
-    'colesterol',
-    'lipoproteina',
-    'lp(a',
-    'lpa',
-    'apolipoprote',
-    'hscrp',
-    'proteina c reativa',
-    'proteina c',
-    'pcr',
-    'reativa',
-    'ultrassensivel',
-    'psa',
-    'totg',
-    'tsh',
-    'creatinina',
-    'ureia',
-    'microalbumin',
-    'ferritina',
-    'transferrina',
-    'vitamina d',
-    'homocisteina',
-    'd-dimero',
-    'dimero',
-    'hiv',
-    'hepatite',
-)
-
-IMAGING_TITLE_KEYWORDS = (
-    'tomograf',
-    'resson',
-    'ultrassom',
-    'ultrasonograf',
-    'ecografia',
-    'ecocardio',
-    'eletrocardiograma',
-    'mamograf',
-    'colonoscop',
-    'densitometr',
-    'raio x',
-    'raiox',
-    'radiograf',
-    'mapa',
-    'mrpa',
-    'holter',
-    'strain',
-    'score de calcio',
-    'calcio coron',
-    'tcbd',
-    'doppler',
-    'angiotom',
-    'angiograf',
-    'cintilograf',
-    'pet',
-    'dexa',
-)
-
-
-def _classify_exam_type(rec: dict) -> str:
-    """Return ``imagem`` or ``laboratorial`` based on exam metadata."""
-
-    categoria = _normalize_for_matching(rec.get('categoria'))
-    titulo = _normalize_for_matching(rec.get('titulo'))
-    subtitulo = _normalize_for_matching(rec.get('subtitulo'))
-    descricao = _normalize_for_matching(rec.get('descricao'))
-
-    if not titulo:
-        return ''
-
-    if any(keyword in categoria for keyword in IMAGING_CATEGORY_KEYWORDS):
-        return 'imagem'
-    if any(keyword in categoria for keyword in LAB_CATEGORY_KEYWORDS):
-        return 'laboratorial'
-
-    combined = ' '.join(filter(None, (titulo, subtitulo, descricao)))
-
-    if any(keyword in combined for keyword in IMAGING_TITLE_KEYWORDS):
-        return 'imagem'
-    if any(keyword in combined for keyword in LAB_TITLE_KEYWORDS):
-        return 'laboratorial'
-
-    return 'laboratorial'
-
 class SolicitacaoExamePDF(FPDF):
     def __init__(self):
         super().__init__()
@@ -182,35 +65,28 @@ class SolicitacaoExamePDF(FPDF):
         self.cell(0, 6, '(11 )', 0, 1, 'L')
         self.ln(5)
         
-    def add_doctor_info(self, nome, crm):
-        # Dr(a).
+    def add_doctor_info(self, medico_nome="", medico_crm=""):
+        # Dados do médico
         self.set_font('Arial', '', 10)
         self.cell(30, 6, 'Dr(a).', 0, 0, 'L')
+        self.cell(100, 6, medico_nome, 0, 0, 'L')
+        self.cell(20, 6, 'CRM:', 0, 0, 'L')
+        self.cell(0, 6, medico_crm, 0, 1, 'L')
+        self.ln(5)
         
-        # CRM (lado direito)
-        self.set_xy(150, self.get_y())
-        self.cell(0, 6, f'CRM: {crm}', 0, 1, 'L')
-        self.ln(10)
-        
-    def add_patient_info(self, nome, cpf, sexo, idade):
         # Linha separadora
         self.line(10, self.get_y(), 200, self.get_y())
         self.ln(5)
         
-        # Informações do paciente em uma linha
+    def add_patient_info(self, paciente_nome="", paciente_cpf="", paciente_sexo="", paciente_idade=""):
+        # Dados do paciente
         self.set_font('Arial', '', 10)
-        
-        # Paciente
         self.cell(20, 6, 'Paciente:', 0, 0, 'L')
-        self.cell(60, 6, nome, 0, 0, 'L')
-        
-        # Sexo
+        self.cell(80, 6, paciente_nome, 0, 0, 'L')
         self.cell(15, 6, 'Sexo:', 0, 0, 'L')
-        self.cell(30, 6, sexo.capitalize() if sexo else '', 0, 0, 'L')
-        
-        # Idade
+        self.cell(30, 6, paciente_sexo, 0, 0, 'L')
         self.cell(15, 6, 'Idade:', 0, 0, 'L')
-        self.cell(0, 6, str(idade), 0, 1, 'L')
+        self.cell(0, 6, str(paciente_idade), 0, 1, 'L')
         self.ln(5)
         
         # Linha separadora
@@ -235,31 +111,30 @@ class SolicitacaoExamePDF(FPDF):
             self.ln(1)
 
 def categorizar_exames(recommendations):
-    """Categoriza exames em laboratoriais e de imagem de forma resiliente."""
+    """Categoriza exames em Laboratoriais e de Imagem"""
 
     exames_laboratoriais = []
     exames_imagem = []
-    vistos_laboratoriais = set()
-    vistos_imagem = set()
 
     for rec in _ensure_list(recommendations):
         if not isinstance(rec, dict):
             continue
 
-        titulo = _normalize_text(rec.get('titulo')).strip()
+        categoria = _normalize_text(rec.get('categoria')).lower()
+        titulo = _normalize_text(rec.get('titulo'))
+
         if not titulo:
             continue
 
-        tipo = _classify_exam_type(rec)
-
-        if tipo == 'imagem':
-            if titulo not in vistos_imagem:
-                exames_imagem.append(titulo)
-                vistos_imagem.add(titulo)
+        if 'laboratorial' in categoria or 'exames laboratoriais' in categoria:
+            exames_laboratoriais.append(titulo)
+        elif 'imagem' in categoria or 'exames de imagem' in categoria:
+            exames_imagem.append(titulo)
+        elif any(keyword in titulo.lower() for keyword in ['tomografia', 'ressonância', 'ultrassom', 'raio-x', 'mamografia', 'densitometria']):
+            exames_imagem.append(titulo)
         else:
-            if titulo not in vistos_laboratoriais:
-                exames_laboratoriais.append(titulo)
-                vistos_laboratoriais.add(titulo)
+            # Por padrão, considera como laboratorial
+            exames_laboratoriais.append(titulo)
 
     return exames_laboratoriais, exames_imagem
 
@@ -327,25 +202,21 @@ class handler(BaseHTTPRequestHandler):
                 'idade': patient_data.get('idade')
             }
             
-            todos_os_exames = [
-                titulo
-                for rec in recommendations
-                if isinstance(rec, dict)
-                for titulo in [_normalize_text(rec.get('titulo')).strip()]
-                if titulo
-            ]
-
-            categorizados_laboratoriais, categorizados_imagem = categorizar_exames(recommendations)
-
             pdfs_gerados = []
             exames_laboratoriais = []
             exames_imagem = []
 
             # Processar baseado no tipo solicitado
             if tipo_exame == 'laboratorial':
-                exames = categorizados_laboratoriais or todos_os_exames
+                # Gerar apenas PDF de exames laboratoriais
+                exames = [
+                    titulo
+                    for rec in recommendations
+                    if isinstance(rec, dict)
+                    for titulo in [_normalize_text(rec.get('titulo')).strip()]
+                    if titulo
+                ]
                 exames_laboratoriais = exames
-                exames_imagem = categorizados_imagem
                 if exames:
                     pdf_lab = gerar_pdf_solicitacao(
                         exames,
@@ -361,9 +232,15 @@ class handler(BaseHTTPRequestHandler):
                     })
 
             elif tipo_exame == 'imagem':
-                exames = categorizados_imagem or todos_os_exames
+                # Gerar apenas PDF de exames de imagem
+                exames = [
+                    titulo
+                    for rec in recommendations
+                    if isinstance(rec, dict)
+                    for titulo in [_normalize_text(rec.get('titulo')).strip()]
+                    if titulo
+                ]
                 exames_imagem = exames
-                exames_laboratoriais = categorizados_laboratoriais
                 if exames:
                     pdf_img = gerar_pdf_solicitacao(
                         exames,
@@ -380,8 +257,7 @@ class handler(BaseHTTPRequestHandler):
 
             else:
                 # Comportamento original - categorizar e gerar ambos
-                exames_laboratoriais = categorizados_laboratoriais
-                exames_imagem = categorizados_imagem
+                exames_laboratoriais, exames_imagem = categorizar_exames(recommendations)
 
                 # Gerar PDF para exames laboratoriais
                 if exames_laboratoriais:
@@ -414,48 +290,52 @@ class handler(BaseHTTPRequestHandler):
                     })
             
             # Se não há exames categorizados, gerar um PDF geral
-            if not pdfs_gerados and todos_os_exames:
-                pdf_geral = gerar_pdf_solicitacao(
-                    todos_os_exames, 
-                    'Geral', 
-                    dados_medico, 
-                    dados_paciente
-                )
-                pdfs_gerados.append({
-                    'tipo': 'Geral',
-                    'filename': f'Solicitacao_Exames_{_sanitize_name_for_filename(dados_paciente.get("nome"))}_{datetime.now().strftime("%Y%m%d")}.pdf',
-                    'content': base64.b64encode(pdf_geral).decode('utf-8'),
-                    'exames_count': len(todos_os_exames)
-                })
-
-            # Resposta de sucesso
-            response_data = {
+            if not pdfs_gerados:
+                todos_exames = [
+                    titulo
+                    for rec in recommendations
+                    if isinstance(rec, dict)
+                    for titulo in [_normalize_text(rec.get('titulo')).strip()]
+                    if titulo
+                ]
+                if todos_exames:
+                    pdf_geral = gerar_pdf_solicitacao(
+                        todos_exames, 
+                        'Geral', 
+                        dados_medico, 
+                        dados_paciente
+                    )
+                    pdfs_gerados.append({
+                        'tipo': 'Geral',
+                        'filename': f'Solicitacao_Exames_{_sanitize_name_for_filename(dados_paciente.get("nome"))}_{datetime.now().strftime("%Y%m%d")}.pdf',
+                        'content': base64.b64encode(pdf_geral).decode('utf-8'),
+                        'exames_count': len(todos_exames)
+                    })
+            
+            # Resposta JSON com os PDFs gerados
+            response = {
                 'success': True,
-                'message': f'{len(pdfs_gerados)} PDF(s) gerado(s) com sucesso',
                 'pdfs': pdfs_gerados,
-                'categorization': {
-                    'laboratoriais': exames_laboratoriais,
-                    'imagem': exames_imagem,
-                    'total_exames': len(todos_os_exames)
-                }
+                'total_pdfs': len(pdfs_gerados),
+                'exames_laboratoriais': len(exames_laboratoriais),
+                'exames_imagem': len(exames_imagem)
             }
-
+            
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(json.dumps(response_data).encode('utf-8'))
-
-        except Exception as e:
-            # Resposta de erro
-            error_response = {
-                'success': False,
-                'error': str(e),
-                'message': 'Erro interno do servidor ao gerar solicitação de exames'
-            }
+            self.wfile.write(json.dumps(response).encode('utf-8'))
             
+        except Exception as e:
+            # Enviar erro
             self.send_response(500)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
+            error_response = {
+                'success': False,
+                'error': str(e),
+                'details': repr(e)
+            }
             self.wfile.write(json.dumps(error_response).encode('utf-8'))

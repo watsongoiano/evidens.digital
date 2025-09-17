@@ -585,7 +585,8 @@
                 <h3>Recomendações Inteligentes</h3>
                 <div id="recommendationsContent"></div>
                 <div class="action-buttons">
-                    <button class="action-btn" onclick="gerarSolicitacaoExames()">📋 Solicitação de Exames</button>
+                    <button class="action-btn" onclick="gerarSolicitacaoExamesLaboratoriais()">🧪 Solicitação de Exames Laboratoriais</button>
+                    <button class="action-btn" onclick="gerarSolicitacaoExamesImagem()">🏥 Solicitação de Exames de Imagem</button>
                     <button class="action-btn" onclick="gerarReceitaVacinas()">💉 Receita de Vacinas</button>
                 </div>
             </div>
@@ -909,7 +910,7 @@
             recommendationsDiv.style.display = 'block';
         }
 
-        async function gerarSolicitacaoExames() {
+        async function gerarSolicitacaoExamesLaboratoriais() {
             try {
                 // Coletar dados do formulário
                 const formData = new FormData(document.getElementById('checkupForm'));
@@ -920,12 +921,33 @@
                     cpf: formData.get('cpf') || ''
                 };
 
-                // Coletar recomendações atuais
-                const recommendations = window.currentRecommendations || [];
+                // Coletar recomendações atuais e filtrar apenas exames laboratoriais
+                const allRecommendations = window.currentRecommendations || [];
+                const labRecommendations = allRecommendations.filter(rec => {
+                    const titulo = rec.titulo || '';
+                    const categoria = rec.categoria || '';
+                    
+                    // Filtrar exames laboratoriais
+                    return categoria.includes('Laboratorial') || categoria.includes('laboratorial') || 
+                           titulo.includes('Hemograma') || titulo.includes('Glicemia') || titulo.includes('Colesterol') ||
+                           titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
+                           titulo.includes('Sódio') || titulo.includes('Magnésio') || titulo.includes('Ácido úrico') ||
+                           titulo.includes('Microalbuminúria') || titulo.includes('Urinocultura') || titulo.includes('HbA1c') ||
+                           titulo.includes('TSH') || titulo.includes('Cortisol') || titulo.includes('Aldosterona') ||
+                           titulo.includes('Hepatite C') || titulo.includes('HIV') || titulo.includes('Papanicolau') ||
+                           titulo.includes('Citologia') || titulo.includes('Metanefrinas') || titulo.includes('Catecolaminas') ||
+                           titulo.includes('TOTG') || titulo.includes('Tolerância à Glicose');
+                });
+                
+                if (labRecommendations.length === 0) {
+                    alert('Nenhum exame laboratorial encontrado nas recomendações.');
+                    return;
+                }
                 
                 const requestData = {
-                    recommendations: recommendations,
+                    recommendations: labRecommendations,
                     patient_data: patientData,
+                    tipo_exame: 'laboratorial',
                     medico: {
                         nome: '',
                         crm: ''
@@ -958,14 +980,92 @@
                         document.body.removeChild(link);
                     });
                     
-                    alert(`${result.pdfs.length} PDF(s) de solicitação gerado(s) com sucesso!`);
+                    alert(`PDF de solicitação de exames laboratoriais gerado com sucesso!`);
                 } else {
                     throw new Error('Nenhum PDF foi gerado');
                 }
                 
             } catch (error) {
                 console.error('Erro:', error);
-                alert('Erro ao gerar solicitação de exames: ' + error.message);
+                alert('Erro ao gerar solicitação de exames laboratoriais: ' + error.message);
+            }
+        }
+
+        async function gerarSolicitacaoExamesImagem() {
+            try {
+                // Coletar dados do formulário
+                const formData = new FormData(document.getElementById('checkupForm'));
+                const patientData = {
+                    nome: formData.get('nome') || 'Paciente',
+                    idade: formData.get('idade') || '',
+                    sexo: formData.get('sexo') || '',
+                    cpf: formData.get('cpf') || ''
+                };
+
+                // Coletar recomendações atuais e filtrar apenas exames de imagem
+                const allRecommendations = window.currentRecommendations || [];
+                const imageRecommendations = allRecommendations.filter(rec => {
+                    const titulo = rec.titulo || '';
+                    const categoria = rec.categoria || '';
+                    
+                    // Filtrar exames de imagem
+                    return categoria.includes('Imagem') || categoria.includes('imagem') ||
+                           titulo.includes('Tomografia') || titulo.includes('Ressonância') || titulo.includes('Ultrassom') ||
+                           titulo.includes('Ecocardiograma') || titulo.includes('Radiografia') || titulo.includes('Mamografia') ||
+                           titulo.includes('TCBD') || titulo.includes('Colonoscopia') || titulo.includes('Densitometria') ||
+                           titulo.includes('MAPA') || titulo.includes('MRPA') || titulo.includes('Score de Cálcio') ||
+                           titulo.includes('Strain') || titulo.includes('DEXA');
+                });
+                
+                if (imageRecommendations.length === 0) {
+                    alert('Nenhum exame de imagem encontrado nas recomendações.');
+                    return;
+                }
+                
+                const requestData = {
+                    recommendations: imageRecommendations,
+                    patient_data: patientData,
+                    tipo_exame: 'imagem',
+                    medico: {
+                        nome: '',
+                        crm: ''
+                    }
+                };
+
+                const response = await fetch('/api/gerar-solicitacao-exames', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.pdfs && result.pdfs.length > 0) {
+                    // Baixar cada PDF gerado
+                    result.pdfs.forEach((pdf, index) => {
+                        const link = document.createElement('a');
+                        link.href = 'data:application/pdf;base64,' + pdf.content;
+                        link.download = pdf.filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
+                    
+                    alert(`PDF de solicitação de exames de imagem gerado com sucesso!`);
+                } else {
+                    throw new Error('Nenhum PDF foi gerado');
+                }
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao gerar solicitação de exames de imagem: ' + error.message);
             }
         }
 
