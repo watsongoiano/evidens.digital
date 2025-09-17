@@ -826,11 +826,21 @@
                 if (categoryRecs.length > 0) {
                     const categoryDiv = document.createElement('div');
                     categoryDiv.innerHTML = `<h3 style="color: #2d3748; margin: 20px 0 15px 0;">${categories[category]}</h3>`;
-                    
+
                     categoryRecs.forEach(rec => {
                         const subtitulo = (rec && rec.subtitulo) ? rec.subtitulo : '';
                         const grau = (rec && rec.grau_evidencia) ? rec.grau_evidencia : '';
                         const referenceContent = buildReferenceContent(rec);
+                        const normalizedTitle = normalizeText(rec.titulo || '');
+                        const linkMap = {
+                            'questionario gad-7 (triagem de ansiedade)': 'https://www.mdcalc.com/calc/1727/gad7-general-anxiety-disorder7',
+                            'questionario phq-9 (triagem de depressao)': 'https://www.mdcalc.com/calc/1725/phq9-patient-health-questionnaire9'
+                        };
+                        const linkHref = linkMap[normalizedTitle];
+                        const titleText = rec.titulo || '';
+                        const titleHtml = linkHref
+                            ? `<a href="${linkHref}" target="_blank" rel="noopener noreferrer">${titleText}</a>`
+                            : titleText;
                         const evidenceClasses = ['evidence-grade'];
                         const extraEvidenceClass = getEvidenceClass(grau);
                         if (extraEvidenceClass) {
@@ -840,7 +850,7 @@
                         recDiv.className = `recommendation-item ${rec.prioridade}`;
                         recDiv.innerHTML = `
                             <div class="recommendation-title">
-                                ${rec.titulo}
+                                ${titleHtml}
                                 <span class="priority-badge ${rec.prioridade}">${rec.prioridade}</span>
                             </div>
                             ${subtitulo ? `<div class="recommendation-description" style="font-weight:600; color:#2d3748;">${subtitulo}</div>` : ''}
@@ -867,8 +877,13 @@
                 const labRecommendations = active.filter(rec => {
                     const titulo = rec.titulo || '';
                     const categoria = rec.categoria || '';
-                    
-                    return categoria.includes('Laboratorial') || categoria.includes('laboratorial') || 
+                    const normalizedTitle = normalizeText(titulo);
+
+                    if (normalizedTitle.includes('profilaxia pre-exposicao ao hiv')) {
+                        return false;
+                    }
+
+                    return categoria.includes('Laboratorial') || categoria.includes('laboratorial') ||
                            titulo.includes('Hemograma') || titulo.includes('Glicemia') || titulo.includes('Colesterol') ||
                            titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
                            titulo.includes('Sódio') || titulo.includes('Magnésio') || titulo.includes('Ácido úrico') ||
