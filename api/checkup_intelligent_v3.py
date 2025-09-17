@@ -195,7 +195,7 @@ def get_cardiovascular_stratification_exams(risk_category):
                 "titulo": "Microalbuminúria, urina 24h",
                 "descricao": "Marcador de lesão vascular e risco cardiovascular aumentado, especialmente em pacientes de alto risco.",
                 "prioridade": "alta",
-                "referencia": "AHA/ACC 2017",
+                "referencia": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356",
                 "categoria": "Exames Laboratoriais"
             },
             {
@@ -337,7 +337,7 @@ class handler(BaseHTTPRequestHandler):
                     "titulo": "Densitometria Óssea (DEXA)",
                     "descricao": "Rastreamento de osteoporose para todas as mulheres ≥65 anos.",
                     "prioridade": "alta",
-                    "referencia": "USPSTF 2018",
+                    "referencia": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening",
                     "categoria": "Outras recomendações"
                 })
 
