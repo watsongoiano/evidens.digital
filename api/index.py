@@ -1,20 +1,114 @@
-"""
-Simplified Flask API for Vercel deployment
-"""
-from flask import Flask, request, jsonify, session
+"""Simplified Flask API and static asset server for Vercel deployment."""
+from __future__ import annotations
+
 import os
-import sys
 import sqlite3
-from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError
-import secrets
 from datetime import datetime
+from pathlib import Path
+
+from flask import Flask, abort, jsonify, request, send_from_directory, session
+
+try:
+    from argon2 import PasswordHasher as _PasswordHasher
+    from argon2.exceptions import VerifyMismatchError as _VerifyMismatchError
+except ModuleNotFoundError:  # pragma: no cover - optional dependency fallback
+    from werkzeug.security import check_password_hash, generate_password_hash
+
+    class _VerifyMismatchError(Exception):
+        """Fallback error raised when password verification fails."""
+
+    class _PasswordHasher:
+        """Minimal password hasher compatible with the Argon2 interface."""
+
+        def __init__(self, **_kwargs):
+            # Accept arbitrary keyword arguments for API compatibility.
+            pass
+
+        def hash(self, password: str) -> str:
+            return generate_password_hash(password)
+
+        def verify(self, hashed_password: str, password: str) -> bool:
+            if not check_password_hash(hashed_password, password):
+                raise _VerifyMismatchError("Password mismatch")
+            return True
+
+PasswordHasher = _PasswordHasher
+VerifyMismatchError = _VerifyMismatchError
+
+# Resolve project paths relative to the repository root so the function works on Vercel
+BASE_DIR = Path(__file__).resolve().parent.parent
+STATIC_SRC_DIR = BASE_DIR / "src" / "static"
+
+# Additional directories that contain public assets (login/dashboard, JS, CSS, etc.)
+ADDITIONAL_STATIC_DIRS = [
+    BASE_DIR,
+    BASE_DIR / "styles",
+    BASE_DIR / "js",
+    BASE_DIR / "assets",
+]
+
+# Allow-list of file extensions that can be served as static assets
+ALLOWED_STATIC_EXTENSIONS = {
+    ".css",
+    ".html",
+    ".ico",
+    ".jpg",
+    ".jpeg",
+    ".js",
+    ".json",
+    ".pdf",
+    ".png",
+    ".svg",
+    ".txt",
+    ".webmanifest",
+    ".woff",
+    ".woff2",
+}
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
 
 # Password hasher
 ph = PasswordHasher()
+
+
+def _find_static_asset(path: str) -> tuple[Path, str] | None:
+    """Locate a static asset that can be safely served."""
+
+    if not path:
+        path = "index.html"
+
+    candidate = Path(path)
+
+    # Prevent path traversal attempts like "../../etc/passwd"
+    if any(part == ".." for part in candidate.parts):
+        return None
+
+    candidates = [candidate]
+    if candidate.suffix:
+        if candidate.suffix.lower() not in ALLOWED_STATIC_EXTENSIONS:
+            return None
+    else:
+        candidates.append(candidate.with_suffix(".html"))
+
+    search_dirs = [STATIC_SRC_DIR, *ADDITIONAL_STATIC_DIRS]
+
+    for base_dir in search_dirs:
+        if not base_dir.exists():
+            continue
+
+        resolved_base = base_dir.resolve()
+        for option in candidates:
+            absolute = (resolved_base / option).resolve()
+            try:
+                relative = absolute.relative_to(resolved_base)
+            except ValueError:
+                continue
+
+            if absolute.is_file() and absolute.suffix.lower() in ALLOWED_STATIC_EXTENSIONS:
+                return resolved_base, relative.as_posix()
+
+    return None
 
 def get_db_connection():
     """Get database connection"""
@@ -148,6 +242,27 @@ def get_user():
             'name': session['user_name']
         }
     })
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_static(path: str):
+    """Serve static assets and fall back to the SPA entry point."""
+
+    if path.startswith('api/'):
+        abort(404)
+
+    asset_info = _find_static_asset(path)
+    if asset_info:
+        base_dir, relative_path = asset_info
+        return send_from_directory(base_dir, relative_path)
+
+    fallback = _find_static_asset('index.html')
+    if fallback:
+        base_dir, relative_path = fallback
+        return send_from_directory(base_dir, relative_path)
+
+    abort(404)
+
 
 # Default handler for Vercel
 def handler(request):

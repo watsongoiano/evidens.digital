@@ -1,11 +1,36 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from datetime import datetime, timedelta
-from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError
 import os
 
 db = SQLAlchemy()
+try:
+    from argon2 import PasswordHasher as _PasswordHasher
+    from argon2.exceptions import VerifyMismatchError as _VerifyMismatchError
+except ModuleNotFoundError:  # pragma: no cover - optional dependency fallback
+    from werkzeug.security import check_password_hash, generate_password_hash
+
+    class _VerifyMismatchError(Exception):
+        """Raised when password verification fails using the fallback hasher."""
+
+    class _PasswordHasher:
+        """Drop-in replacement for the Argon2 password hasher."""
+
+        def __init__(self, **_kwargs):
+            # Ignore keyword arguments so the interface matches Argon2's hasher.
+            pass
+
+        def hash(self, password: str) -> str:
+            return generate_password_hash(password)
+
+        def verify(self, hashed_password: str, password: str) -> bool:
+            if not check_password_hash(hashed_password, password):
+                raise _VerifyMismatchError("Password mismatch")
+            return True
+
+PasswordHasher = _PasswordHasher
+VerifyMismatchError = _VerifyMismatchError
+
 ph = PasswordHasher(
     time_cost=int(os.getenv('ARGON2_TIME_COST', 2)),
     memory_cost=int(os.getenv('ARGON2_MEMORY_COST', 65536)),
