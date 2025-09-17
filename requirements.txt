@@ -36,3 +36,15 @@ yarl==1.20.1
 gunicorn>=21.2
 
 fpdf2>=2.7.0
+
+# Authentication dependencies
+flask-login==0.6.3
+flask-migrate==4.0.5
+flask-limiter==3.5.0
+bcrypt==4.0.1
+pyjwt==2.8.0
+authlib==1.2.1
+python-dotenv==1.0.0
+email-validator==2.0.0
+redis==5.0.0
+celery==5.3.4
