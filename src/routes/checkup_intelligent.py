@@ -417,7 +417,40 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
             'referencia': 'SBIm/ANVISA 2024',
             'grau_evidencia': 'A'
         })
-    
+
+    # Outras recomendações preventivas (triagens e profilaxia)
+    if 18 <= age <= 64:
+        _add_rec({
+            'titulo': 'Questionário GAD-7 (Triagem de Ansiedade)',
+            'descricao': 'Rastreamento de ansiedade para adultos até 64 anos, incluindo gestantes e puérperas.',
+            'subtitulo': 'Detecção precoce de transtornos de ansiedade',
+            'categoria': 'outras',
+            'prioridade': 'media',
+            'referencia': 'USPSTF 2023 Grau B',
+            'grau_evidencia': 'B'
+        })
+
+    if age >= 18:
+        _add_rec({
+            'titulo': 'Questionário PHQ-9 (Triagem de Depressão)',
+            'descricao': 'Rastreamento de depressão em adultos, incluindo gestantes, puérperas e idosos.',
+            'subtitulo': 'Avaliação sistemática de sintomas depressivos',
+            'categoria': 'outras',
+            'prioridade': 'media',
+            'referencia': 'USPSTF 2023 Grau B',
+            'grau_evidencia': 'B'
+        })
+
+        _add_rec({
+            'titulo': 'Profilaxia Pré-Exposição ao HIV (PrEP)',
+            'descricao': 'Oferecer PrEP para adultos e adolescentes ≥35 kg com risco aumentado de infecção pelo HIV.',
+            'subtitulo': 'Prevenção combinada do HIV',
+            'categoria': 'outras',
+            'prioridade': 'alta',
+            'referencia': 'USPSTF 2023 Grau A',
+            'grau_evidencia': 'A'
+        })
+
     return recommendations
 
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
