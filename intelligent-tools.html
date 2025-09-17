@@ -585,7 +585,8 @@
                 <h3>Recomendações Inteligentes</h3>
                 <div id="recommendationsContent"></div>
                 <div class="action-buttons">
-                    <button class="action-btn" onclick="gerarSolicitacaoExames()">📋 Solicitação de Exames</button>
+                    <button class="action-btn" onclick="gerarSolicitacaoExames('laboratorial')">🧪 Solicitação de Exames Laboratoriais</button>
+                    <button class="action-btn" onclick="gerarSolicitacaoExames('imagem')">🖼️ Solicitação de Exames de Imagem</button>
                     <button class="action-btn" onclick="gerarReceitaVacinas()">💉 Receita de Vacinas</button>
                 </div>
             </div>
@@ -899,7 +900,7 @@
             recommendationsDiv.style.display = 'block';
         }
 
-        async function gerarSolicitacaoExames() {
+        async function gerarSolicitacaoExames(tipo) {
             try {
                 // Coletar dados do formulário
                 const formData = new FormData(document.getElementById('checkupForm'));
@@ -913,7 +914,7 @@
                 // Coletar recomendações atuais
                 const recommendations = window.currentRecommendations || [];
                 
-                const requestData = {
+                const payload = {
                     recommendations: recommendations,
                     patient_data: patientData,
                     medico: {
@@ -922,24 +923,40 @@
                     }
                 };
 
+                const tipoParam = typeof tipo === 'string' ? tipo.trim().toLowerCase() : '';
+                if (tipoParam) {
+                    payload.tipo = tipoParam;
+                }
+
+                const tipoFiltro = tipoParam.startsWith('laborator')
+                    ? 'laboratorial'
+                    : tipoParam.startsWith('imagem')
+                        ? 'imagem'
+                        : '';
+
                 const response = await fetch('/api/gerar-solicitacao-exames', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(requestData)
+                    body: JSON.stringify(payload)
                 });
-                
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
                 }
-                
+
                 const result = await response.json();
-                
-                if (result.success && result.pdfs && result.pdfs.length > 0) {
+
+                const pdfs = Array.isArray(result.pdfs) ? result.pdfs : [];
+                const pdfsFiltrados = tipoFiltro
+                    ? pdfs.filter(pdf => (pdf.tipo || '').toLowerCase() === tipoFiltro)
+                    : pdfs;
+
+                if (result.success && pdfsFiltrados.length > 0) {
                     // Baixar cada PDF gerado
-                    result.pdfs.forEach((pdf, index) => {
+                    pdfsFiltrados.forEach((pdf) => {
                         const link = document.createElement('a');
                         link.href = 'data:application/pdf;base64,' + pdf.content;
                         link.download = pdf.filename;
@@ -947,12 +964,30 @@
                         link.click();
                         document.body.removeChild(link);
                     });
-                    
-                    alert(`${result.pdfs.length} PDF(s) de solicitação gerado(s) com sucesso!`);
+
+                    const descricaoTipo = tipoFiltro === 'imagem'
+                        ? 'de imagem'
+                        : tipoFiltro === 'laboratorial'
+                            ? 'laboratoriais'
+                            : '';
+                    const mensagemSucesso = descricaoTipo
+                        ? `Solicitação de exames ${descricaoTipo} gerada com sucesso!`
+                        : 'Solicitação de exames gerada com sucesso!';
+
+                    alert(mensagemSucesso);
                 } else {
-                    throw new Error('Nenhum PDF foi gerado');
+                    const descricaoTipo = tipoFiltro === 'imagem'
+                        ? 'de imagem'
+                        : tipoFiltro === 'laboratorial'
+                            ? 'laboratoriais'
+                            : '';
+                    const mensagemPadrao = descricaoTipo
+                        ? `Nenhum exame ${descricaoTipo} disponível para gerar o PDF.`
+                        : 'Nenhum exame disponível para gerar o PDF.';
+                    const mensagem = result && result.message ? result.message : mensagemPadrao;
+                    alert(mensagem);
                 }
-                
+
             } catch (error) {
                 console.error('Erro:', error);
                 alert('Erro ao gerar solicitação de exames: ' + error.message);
