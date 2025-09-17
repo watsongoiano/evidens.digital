@@ -3,7 +3,7 @@
   "name": "evidens-digital-auth",
   "builds": [
     {
-      "src": "app_with_auth.py",
+      "src": "api/index.py",
       "use": "@vercel/python"
     },
     {
@@ -34,11 +34,11 @@
     },
     {
       "src": "/api/(.*)",
-      "dest": "/app_with_auth.py"
+      "dest": "/api/index.py"
     },
     {
       "src": "/logout",
-      "dest": "/app_with_auth.py"
+      "dest": "/api/index.py"
     },
     {
       "src": "/styles/(.*)",
@@ -50,7 +50,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/app_with_auth.py"
+      "dest": "/api/index.py"
     }
   ],
   "env": {
@@ -63,7 +63,7 @@
     "APPLE_CLIENT_SECRET": "@apple_client_secret"
   },
   "functions": {
-    "app_with_auth.py": {
+    "api/index.py": {
       "runtime": "python3.9"
     }
   }
