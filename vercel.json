@@ -1,26 +1,9 @@
 {
   "version": 2,
-  "name": "evidens-digital-auth",
   "builds": [
     {
       "src": "api/index.py",
       "use": "@vercel/python"
-    },
-    {
-      "src": "login.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "dashboard.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "styles/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "js/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -29,15 +12,11 @@
       "dest": "/login.html"
     },
     {
-      "src": "/dashboard",
+      "src": "/dashboard", 
       "dest": "/dashboard.html"
     },
     {
       "src": "/api/(.*)",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/logout",
       "dest": "/api/index.py"
     },
     {
@@ -49,22 +28,12 @@
       "dest": "/js/$1"
     },
     {
-      "src": "/(.*)",
-      "dest": "/api/index.py"
+      "src": "/intelligent-tools",
+      "dest": "/intelligent-tools.html"
+    },
+    {
+      "src": "/",
+      "dest": "/src/static/index.html"
     }
-  ],
-  "env": {
-    "FLASK_ENV": "production",
-    "SECRET_KEY": "@secret_key",
-    "DATABASE_URL": "@database_url",
-    "GOOGLE_CLIENT_ID": "@google_client_id",
-    "GOOGLE_CLIENT_SECRET": "@google_client_secret",
-    "APPLE_CLIENT_ID": "@apple_client_id",
-    "APPLE_CLIENT_SECRET": "@apple_client_secret"
-  },
-  "functions": {
-    "api/index.py": {
-      "runtime": "python3.9"
-    }
-  }
+  ]
 }
