@@ -1,71 +1,70 @@
 {
   "version": 2,
+  "name": "evidens-digital-auth",
   "builds": [
     {
-      "src": "*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.js",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.ico",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.png",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.svg",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "assets/**/*",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "api/checkup_intelligent_v3.py",
+      "src": "app_with_auth.py",
       "use": "@vercel/python"
     },
     {
-      "src": "api/gerar-solicitacao-exames.py",
-      "use": "@vercel/python"
+      "src": "login.html",
+      "use": "@vercel/static"
     },
     {
-      "src": "api/gerar-receita-vacinas.py",
-      "use": "@vercel/python"
+      "src": "dashboard.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "styles/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "js/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
-      "src": "/api/checkup_intelligent_v3",
-      "dest": "/api/checkup_intelligent_v3.py"
+      "src": "/login",
+      "dest": "/login.html"
     },
     {
-      "src": "/api/checkup-intelligent",
-      "dest": "/api/checkup_intelligent_v3.py"
+      "src": "/dashboard",
+      "dest": "/dashboard.html"
     },
     {
-      "src": "/api/gerar-solicitacao-exames",
-      "dest": "/api/gerar-solicitacao-exames.py"
+      "src": "/api/(.*)",
+      "dest": "/app_with_auth.py"
     },
     {
-      "src": "/api/gerar-receita-vacinas",
-      "dest": "/api/gerar-receita-vacinas.py"
+      "src": "/logout",
+      "dest": "/app_with_auth.py"
     },
     {
-      "src": "/intelligent-tools",
-      "dest": "/intelligent-tools.html"
+      "src": "/styles/(.*)",
+      "dest": "/styles/$1"
     },
     {
-      "src": "/analytics",
-      "dest": "/analytics.html"
+      "src": "/js/(.*)",
+      "dest": "/js/$1"
     },
     {
-      "src": "/",
-      "dest": "/index.html"
+      "src": "/(.*)",
+      "dest": "/app_with_auth.py"
     }
-  ]
+  ],
+  "env": {
+    "FLASK_ENV": "production",
+    "SECRET_KEY": "@secret_key",
+    "DATABASE_URL": "@database_url",
+    "GOOGLE_CLIENT_ID": "@google_client_id",
+    "GOOGLE_CLIENT_SECRET": "@google_client_secret",
+    "APPLE_CLIENT_ID": "@apple_client_id",
+    "APPLE_CLIENT_SECRET": "@apple_client_secret"
+  },
+  "functions": {
+    "app_with_auth.py": {
+      "runtime": "python3.9"
+    }
+  }
 }
