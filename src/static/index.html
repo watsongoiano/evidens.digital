@@ -800,7 +800,8 @@
             const titleNormalized = normalizeText(rec.titulo || '');
 
             if (titleNormalized.includes('microalbuminuria') && titleNormalized.includes('urina')) {
-                return '<a href="https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356" target="_blank" rel="noopener noreferrer">AHA/ACC 2025</a>';
+                const url = 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356';
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
             }
 
             if (titleNormalized.includes('densitometria') && titleNormalized.includes('dexa')) {
