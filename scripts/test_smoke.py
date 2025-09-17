@@ -62,6 +62,9 @@ def main():
     titles1 = [(rec.get('titulo') or '').lower() for rec in recs1]
     assert_true(any('gardasil 9' in t for t in titles1), "HPV (Gardasil 9) not found for 25M")
     assert_true(any('hepatite b' in t for t in titles1), "Hepatite B not found for 25M")
+    assert_true(any('questionário gad-7' in t for t in titles1), "GAD-7 screening not found for 25M")
+    assert_true(any('questionário phq-9' in t for t in titles1), "PHQ-9 screening not found for 25M")
+    assert_true(any('prep' in t for t in titles1), "HIV PrEP guidance not found for 25M")
 
     # Reference HTML presence (at least one rec with referencia_html)
     assert_true(any((rec.get('referencia_html') or '') for rec in recs1),
