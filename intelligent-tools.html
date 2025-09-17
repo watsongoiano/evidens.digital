@@ -587,8 +587,6 @@
                 <div class="action-buttons">
                     <button class="action-btn" onclick="gerarSolicitacaoExames()">📋 Solicitação de Exames</button>
                     <button class="action-btn" onclick="gerarReceitaVacinas()">💉 Receita de Vacinas</button>
-                    <button class="action-btn" onclick="gerarRelatorioCompleto()">📄 Relatório Completo</button>
-                    <button class="action-btn" onclick="agendarLembretes()">🔔 Agendar Lembretes</button>
                 </div>
             </div>
         </div>
@@ -737,6 +735,9 @@
         function displayRecommendations(recomendacoes, cardiovascularRisk = null, preventData = null) {
             const container = document.getElementById('recommendationsContent');
             const recommendationsDiv = document.getElementById('recommendations');
+            
+            // Armazenar recomendações globalmente para uso em outras funções
+            window.currentRecommendations = recomendacoes || [];
             
             if (!recomendacoes || recomendacoes.length === 0) {
                 container.innerHTML = '<p>Nenhuma recomendação específica para este perfil.</p>';
@@ -899,24 +900,57 @@
 
         async function gerarSolicitacaoExames() {
             try {
+                // Coletar dados do formulário
+                const formData = new FormData(document.getElementById('checkupForm'));
+                const patientData = {
+                    nome: formData.get('nome') || 'Paciente',
+                    idade: formData.get('idade') || '',
+                    sexo: formData.get('sexo') || '',
+                    cpf: formData.get('cpf') || ''
+                };
+
+                // Coletar recomendações atuais
+                const recommendations = window.currentRecommendations || [];
+                
+                const requestData = {
+                    recommendations: recommendations,
+                    patient_data: patientData,
+                    medico: {
+                        nome: '',
+                        crm: ''
+                    }
+                };
+
                 const response = await fetch('/api/gerar-solicitacao-exames', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({})
+                    body: JSON.stringify(requestData)
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
                 }
                 
-                const result = await response.text();
+                const result = await response.json();
                 
-                // Abrir em nova janela
-                const newWindow = window.open('', '_blank');
-                newWindow.document.write(result);
-                newWindow.document.close();
+                if (result.success && result.pdfs && result.pdfs.length > 0) {
+                    // Baixar cada PDF gerado
+                    result.pdfs.forEach((pdf, index) => {
+                        const link = document.createElement('a');
+                        link.href = 'data:application/pdf;base64,' + pdf.content;
+                        link.download = pdf.filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
+                    
+                    alert(`${result.pdfs.length} PDF(s) de solicitação gerado(s) com sucesso!`);
+                } else {
+                    throw new Error('Nenhum PDF foi gerado');
+                }
                 
             } catch (error) {
                 console.error('Erro:', error);
@@ -951,13 +985,7 @@
             }
         }
 
-        function gerarRelatorioCompleto() {
-            alert('Funcionalidade em desenvolvimento');
-        }
 
-        function agendarLembretes() {
-            alert('Funcionalidade em desenvolvimento');
-        }
 
         function anexarPDFs() {
             alert('Funcionalidade em desenvolvimento');
