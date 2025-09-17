@@ -185,7 +185,8 @@ class handler(BaseHTTPRequestHandler):
             recommendations = _ensure_list(data.get('recommendations'))
             patient_data = _ensure_dict(data.get('patient_data'))
             medico_data = _ensure_dict(data.get('medico'))
-            tipo_exame = data.get('tipo_exame', 'todos')  # 'laboratorial', 'imagem', ou 'todos'
+            raw_tipo_exame = data.get('tipo_exame', 'todos')
+            tipo_exame = _normalize_text(raw_tipo_exame, default='todos').lower() or 'todos'
 
             # Dados do médico (podem vir dos dados do paciente ou serem padrão)
             dados_medico = {
@@ -202,7 +203,9 @@ class handler(BaseHTTPRequestHandler):
             }
             
             pdfs_gerados = []
-            
+            exames_laboratoriais = []
+            exames_imagem = []
+
             # Processar baseado no tipo solicitado
             if tipo_exame == 'laboratorial':
                 # Gerar apenas PDF de exames laboratoriais
@@ -213,11 +216,12 @@ class handler(BaseHTTPRequestHandler):
                     for titulo in [_normalize_text(rec.get('titulo')).strip()]
                     if titulo
                 ]
+                exames_laboratoriais = exames
                 if exames:
                     pdf_lab = gerar_pdf_solicitacao(
-                        exames, 
-                        'Laboratorial', 
-                        dados_medico, 
+                        exames,
+                        'Laboratorial',
+                        dados_medico,
                         dados_paciente
                     )
                     pdfs_gerados.append({
@@ -226,7 +230,7 @@ class handler(BaseHTTPRequestHandler):
                         'content': base64.b64encode(pdf_lab).decode('utf-8'),
                         'exames_count': len(exames)
                     })
-                    
+
             elif tipo_exame == 'imagem':
                 # Gerar apenas PDF de exames de imagem
                 exames = [
@@ -236,11 +240,12 @@ class handler(BaseHTTPRequestHandler):
                     for titulo in [_normalize_text(rec.get('titulo')).strip()]
                     if titulo
                 ]
+                exames_imagem = exames
                 if exames:
                     pdf_img = gerar_pdf_solicitacao(
-                        exames, 
-                        'Imagem', 
-                        dados_medico, 
+                        exames,
+                        'Imagem',
+                        dados_medico,
                         dados_paciente
                     )
                     pdfs_gerados.append({
@@ -249,17 +254,17 @@ class handler(BaseHTTPRequestHandler):
                         'content': base64.b64encode(pdf_img).decode('utf-8'),
                         'exames_count': len(exames)
                     })
-                    
+
             else:
                 # Comportamento original - categorizar e gerar ambos
                 exames_laboratoriais, exames_imagem = categorizar_exames(recommendations)
-                
+
                 # Gerar PDF para exames laboratoriais
                 if exames_laboratoriais:
                     pdf_lab = gerar_pdf_solicitacao(
-                        exames_laboratoriais, 
-                        'Laboratorial', 
-                        dados_medico, 
+                        exames_laboratoriais,
+                        'Laboratorial',
+                        dados_medico,
                         dados_paciente
                     )
                     pdfs_gerados.append({
@@ -268,13 +273,13 @@ class handler(BaseHTTPRequestHandler):
                         'content': base64.b64encode(pdf_lab).decode('utf-8'),
                         'exames_count': len(exames_laboratoriais)
                     })
-                
+
                 # Gerar PDF para exames de imagem
                 if exames_imagem:
                     pdf_img = gerar_pdf_solicitacao(
-                        exames_imagem, 
-                        'Imagem', 
-                        dados_medico, 
+                        exames_imagem,
+                        'Imagem',
+                        dados_medico,
                         dados_paciente
                     )
                     pdfs_gerados.append({
