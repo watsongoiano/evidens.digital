@@ -24,6 +24,13 @@ def _contains_any(haystack: str, needles: List[str]) -> bool:
     return any(n in haystack for n in needles)
 
 def _uspstf_url_by_title(title_lc: str) -> str:
+    if _contains_any(title_lc, [
+        'prep', 'pre-exposicao', 'pre exposicao', 'preexposicao',
+        'profilaxia pre-exposicao', 'profilaxia pre exposicao', 'profilaxia preexposicao'
+    ]):
+        return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prevention-of-human-immunodeficiency-virus-hiv-infection-pre-exposure-prophylaxis'
+    if _contains_any(title_lc, ['ansiedade', 'gad-7', 'gad7', 'anxiety']):
+        return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/anxiety-adults-screening'
     if _contains_any(title_lc, ['hiv']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening'
     if _contains_any(title_lc, ['hepatite c', 'hcv']):
