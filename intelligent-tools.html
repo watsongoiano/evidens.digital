@@ -1,1161 +1,187 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intelligent Tools - Evidens</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" href="/favicon.png">
-    <link rel="apple-touch-icon" href="/favicon.png">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #2c3e50;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .logo {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            line-height: 1;
-        }
-
-        .logo-main {
-            font-size: 1.8rem;
-            font-weight: 300;
-            color: #2c3e50;
-            margin-bottom: -5px;
-        }
-
-        .logo-sub {
-            font-size: 1.2rem;
-            font-weight: 300;
-            font-style: italic;
-            color: #27ae60;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            color: #2c3e50;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:not(.back-btn):hover {
-            color: #3498db;
-        }
-
-        .back-btn {
-            background: #bdc3c7;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.3s;
-        }
-
-        .back-btn:hover {
-            background: #95a5a6;
-            color: #374151;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 8rem 2rem 4rem;
-        }
-
-        .page-title {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .page-title h1 {
-            font-size: 3rem;
-            font-weight: 300;
-            margin-bottom: 1rem;
-            color: #2c3e50;
-        }
-
-        .page-title p {
-            font-size: 1.2rem;
-            color: #7f8c8d;
-        }
-
-        .tool-section {
-            background: white;
-            border-radius: 20px;
-            padding: 3rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-
-        .tool-section h2 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            font-size: 2rem;
-            font-weight: 400;
-        }
-
-        .tool-section p {
-            color: #7f8c8d;
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
-
-        /* Todos os estilos do formulário do index.html */
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #2c3e50;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 0.8rem;
-            border: 2px solid #e0e6ed;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #2c3e50;
-            margin: 2rem 0 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .checkbox-item input[type="checkbox"] {
-            width: auto;
-            margin: 0;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3498db, #2c3e50);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 1rem 0.5rem 1rem 0;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
-        }
-
-        .btn-secondary {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 1rem 0.5rem 1rem 0;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
-        }
-
-        .recommendations {
-            margin-top: 3rem;
-            padding: 2rem;
-            background: #f8f9fa;
-            border-radius: 15px;
-            display: none;
-        }
-
-        .recommendations h3 {
-            color: #2c3e50;
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
-        }
-
-        .recommendation-category {
-            margin-bottom: 2rem;
-        }
-
-        .recommendation-category h4 {
-            color: #34495e;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-
-        .recommendation-item {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            border-left: 4px solid #3498db;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .recommendation-item h5 {
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .recommendation-item p {
-            color: #7f8c8d;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-        }
-
-        .evidence-grade {
-            display: inline-block;
-            padding: 0.2rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: white;
-            background: #27ae60;
-        }
-
-        .action-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .action-btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 25px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .action-btn:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav {
-                padding: 0 1rem;
-            }
-            
-            .logo {
-                font-size: 1.5rem;
-            }
-            
-            .nav-links a {
-                font-size: 0.9rem;
-            }
-            
-            .hero {
-                padding: 4rem 1rem 2rem;
-            }
-            
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .hero p {
-                font-size: 1rem;
-            }
-            
-            .form-section {
-                padding: 1.5rem;
-            }
-            
-            .section-title {
-                font-size: 1.5rem;
-            }
-            
-            .btn-primary {
-                padding: 0.8rem 1.5rem;
-                font-size: 0.9rem;
-            }
-            
-            .risk-card {
-                grid-template-columns: 1fr !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-            
-            .form-section {
-                padding: 1rem;
-            }
-            
-            .btn-primary {
-                width: 100%;
-                padding: 1rem;
-            }
-            
-            .logo {
-                font-size: 1.3rem;
-            }
-        }
-    </style>
+    <title>Sign in - evidēns</title>
+    <link rel="stylesheet" href="styles/login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <!-- Header Navigation -->
-    <header class="header">
-        <nav class="nav">
-            <div class="nav-links">
-                <a href="/" class="back-btn">← Voltar</a>
-            </div>
-            <a href="/" class="logo">
-                <span class="logo-main">evidēns</span>
-                <span class="logo-sub">check</span>
-            </a>
-            <div class="nav-links">
-                <a href="#contact">Contact</a>
-            </div>
-        </nav>
-    </header>
+    <main class="main">
+        <div class="auth-card" role="presentation">
+            <header class="card-header">
+                <a href="#" class="header-link">About</a>
+                <div class="header-logo" aria-label="evidēns">evidēns</div>
+                <a href="#" class="header-link header-link-right">Contact</a>
+            </header>
+            <div class="card-body">
+                <section class="auth-panel" aria-labelledby="welcome-title">
+                    <div class="welcome">
+                        <h1 id="welcome-title" class="welcome-title">Welcome Back</h1>
+                        <p class="welcome-subtitle">Log in to your account</p>
+                    </div>
 
-    <div class="container">
+                    <div class="role-tabs" role="tablist" aria-label="Select account type">
+                        <button type="button" class="tab-button active" data-role="medico" aria-pressed="true">
+                            Healthcare Professional
+                        </button>
+                        <button type="button" class="tab-button" data-role="admin" aria-pressed="false">
+                            Administrator
+                        </button>
+                    </div>
 
+                    <form id="login-form" class="login-form" novalidate>
+                        <div class="form-group">
+                            <label class="sr-only" for="email">Email Address</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                </span>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="Email address"
+                                    required
+                                    autocomplete="email"
+                                    inputmode="email"
+                                >
+                            </div>
+                        </div>
 
-        <div class="tool-section">
-            <h2>Check-up Médico Inteligente</h2>
-            <p>Analise e receba recomendações essenciais baseadas em evidência científica</p>
+                        <div class="form-group">
+                            <label class="sr-only" for="password">Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                        <circle cx="12" cy="16" r="1"></circle>
+                                    </svg>
+                                </span>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Password"
+                                    required
+                                    autocomplete="current-password"
+                                >
+                            </div>
+                        </div>
 
-            <form id="checkupForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="idade">Idade</label>
-                        <input type="number" id="idade" name="idade" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="sexo">Sexo</label>
-                        <select id="sexo" name="sexo" required>
-                            <option value="">Selecione...</option>
-                            <option value="masculino">Masculino</option>
-                            <option value="feminino">Feminino</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="pais">País/Guideline base</label>
-                        <select id="pais" name="pais">
-                            <option value="brasil">Brasil (SBIm/SBC/SBD)</option>
-                            <option value="eua">EUA (CDC/USPSTF/ADA)</option>
-                        </select>
-                    </div>
-                </div>
+                        <div class="form-options">
+                            <label class="checkbox-wrapper" for="remember">
+                                <input type="checkbox" id="remember" name="remember">
+                                <span class="custom-checkbox" aria-hidden="true"></span>
+                                <span class="checkbox-label">Remember me</span>
+                            </label>
+                            <a href="#" class="forgot-link" id="forgot-password">Forgot password?</a>
+                        </div>
 
-                <div class="section-title">📊 Dados Clínicos (para cálculo de risco cardiovascular)</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="peso">Peso (kg)</label>
-                        <input type="number" id="peso" name="peso" step="0.1" placeholder="Ex: 70.5">
-                    </div>
-                    <div class="form-group">
-                        <label for="altura">Altura (cm)</label>
-                        <input type="number" id="altura" name="altura" placeholder="Ex: 170">
-                    </div>
-                    <div class="form-group">
-                        <label for="pressao_sistolica">Pressão Arterial Sistólica (mmHg)</label>
-                        <input type="number" id="pressao_sistolica" name="pressao_sistolica" placeholder="Ex: 140">
-                    </div>
-                    <div class="form-group">
-                        <label for="pressao_diastolica">Pressão Arterial Diastólica (mmHg)</label>
-                        <input type="number" id="pressao_diastolica" name="pressao_diastolica" placeholder="Ex: 90">
-                    </div>
-                    <div class="form-group">
-                        <label for="colesterol_total">Colesterol Total (mg/dL)</label>
-                        <input type="number" id="colesterol_total" name="colesterol_total" placeholder="Ex: 200">
-                    </div>
-                    <div class="form-group">
-                        <label for="hdl_colesterol">HDL Colesterol (mg/dL)</label>
-                        <input type="number" id="hdl_colesterol" name="hdl_colesterol" placeholder="Ex: 45">
-                    </div>
-                    <div class="form-group">
-                        <label for="creatinina">Creatinina Sérica (mg/dL)</label>
-                        <input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0">
-                    </div>
-                    <div class="form-group">
-                        <label for="hba1c">HbA1c (%)</label>
-                        <input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0">
-                    </div>
-                </div>
+                        <button type="submit" class="login-button" id="login-btn">
+                            <span class="button-text">Sign in</span>
+                            <span class="loading-spinner" aria-hidden="true"></span>
+                        </button>
 
-                <div class="section-title">💊 Medicações Específicas</div>
-                <div class="checkbox-grid">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="anti_hipertensivos" name="medicacoes" value="anti_hipertensivos">
-                        <label for="anti_hipertensivos">Medicamentos Anti-hipertensivos</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="estatinas" name="medicacoes" value="estatinas">
-                        <label for="estatinas">Estatinas</label>
-                    </div>
-                </div>
+                        <div class="feedback-message" id="feedback-message" role="alert" aria-live="polite"></div>
 
-                <div class="section-title">🏥 Comorbidades</div>
-                <div class="checkbox-grid">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="diabetes" name="comorbidades" value="diabetes">
-                        <label for="diabetes">Diabetes Tipo 2</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="hipertensao" name="comorbidades" value="hipertensao">
-                        <label for="hipertensao">Hipertensão</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="has_resistente" name="comorbidades" value="has_resistente">
-                        <label for="has_resistente">HAS Resistente</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="dislipidemia" name="comorbidades" value="dislipidemia">
-                        <label for="dislipidemia">Dislipidemia</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="doenca_renal" name="comorbidades" value="doenca_renal">
-                        <label for="doenca_renal">Doença Renal Crônica</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="cardiopatia" name="comorbidades" value="cardiopatia">
-                        <label for="cardiopatia">Cardiopatia</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="obesidade" name="comorbidades" value="obesidade">
-                        <label for="obesidade">Obesidade</label>
-                    </div>
-                </div>
+                        <div class="divider" role="separator">
+                            <span>or</span>
+                        </div>
 
-                <div class="form-group full-width">
-                    <label for="outras_comorbidades">Outras comorbidades (descreva):</label>
-                    <textarea id="outras_comorbidades" name="outras_comorbidades" rows="3" placeholder="Ex: DPOC, artrite reumatoide, lúpus..."></textarea>
-                </div>
+                        <div class="oauth-buttons">
+                            <button type="button" class="oauth-button google-button" id="google-login">
+                                <span class="oauth-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24">
+                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                    </svg>
+                                </span>
+                                <span>Continue with Google</span>
+                            </button>
 
-                <div class="form-group full-width">
-                    <label for="medicacoes_continuo">Medicações de Uso Contínuo</label>
-                    <textarea id="medicacoes_continuo" name="medicacoes_continuo" rows="3" placeholder="Liste todas as medicações em uso contínuo com doses e frequência"></textarea>
-                </div>
+                            <button type="button" class="oauth-button microsoft-button" id="microsoft-login">
+                                <span class="oauth-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24">
+                                        <path fill="#F25022" d="M1 1h10v10H1z"/>
+                                        <path fill="#00A4EF" d="M13 1h10v10H13z"/>
+                                        <path fill="#7FBA00" d="M1 13h10v10H1z"/>
+                                        <path fill="#FFB900" d="M13 13h10v10H13z"/>
+                                    </svg>
+                                </span>
+                                <span>Microsoft account</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
 
-                <div class="section-title">👨‍👩‍👧‍👦 História Familiar</div>
-                <div class="checkbox-grid">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="cancer_mama" name="historia_familiar" value="cancer_mama">
-                        <label for="cancer_mama">Câncer de Mama</label>
+                <section class="info-panel" aria-label="Platform highlights">
+                    <div class="illustration" aria-hidden="true">
+                        <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="stethoscope-gradient" x1="40" y1="30" x2="160" y2="170" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#CBD5F5"/>
+                                    <stop offset="1" stop-color="#94A3B8"/>
+                                </linearGradient>
+                            </defs>
+                            <path d="M64 36C64 31.0294 68.0294 27 73 27H97C101.971 27 106 31.0294 106 36V64C106 68.9706 101.971 73 97 73H73C68.0294 73 64 68.9706 64 64V36Z" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M85 72V132" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round"/>
+                            <path d="M85 132C85 148.016 72.0163 161 56 161C39.9837 161 27 148.016 27 132C27 115.984 39.9837 103 56 103" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M85 132C85 148.016 97.9837 161 114 161C130.016 161 143 148.016 143 132C143 115.984 130.016 103 114 103" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="158" cy="132" r="20" stroke="url(#stethoscope-gradient)" stroke-width="6"/>
+                            <circle cx="158" cy="132" r="6" fill="#94A3B8"/>
+                            <path d="M143 132H136" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round"/>
+                        </svg>
                     </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="cancer_colorretal" name="historia_familiar" value="cancer_colorretal">
-                        <label for="cancer_colorretal">Câncer Colorretal</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="cancer_ovario" name="historia_familiar" value="cancer_ovario">
-                        <label for="cancer_ovario">Câncer de Ovário</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="diabetes_familiar" name="historia_familiar" value="diabetes">
-                        <label for="diabetes_familiar">Diabetes</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="cardiopatia_familiar" name="historia_familiar" value="cardiopatia">
-                        <label for="cardiopatia_familiar">Cardiopatia</label>
-                    </div>
-                </div>
 
-                <div class="form-group full-width">
-                    <label for="outras_condicoes_familiares">Outras condições familiares (descreva):</label>
-                    <textarea id="outras_condicoes_familiares" name="outras_condicoes_familiares" rows="3" placeholder="Ex: câncer de próstata, AVC, demência..."></textarea>
-                </div>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="tabagismo">Tabagismo</label>
-                        <select id="tabagismo" name="tabagismo">
-                            <option value="nunca">Nunca fumou</option>
-                            <option value="fumante">Fumante atual</option>
-                            <option value="ex-fumante">Ex-fumante</option>
-                        </select>
+                    <div class="info-content">
+                        <h2>Clinical intelligence at your fingertips</h2>
+                        <p>Evidence-based content and intuitive workflows designed to support every consultation.</p>
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <span class="feature-icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="8" cy="8" r="8" fill="#16A34A" fill-opacity="0.15"/>
+                                        <path d="M6.2 8.6l1.3 1.3 2.8-2.8" stroke="#16A34A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span>Peer-reviewed content</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="8" cy="8" r="8" fill="#16A34A" fill-opacity="0.15"/>
+                                        <path d="M6.2 8.6l1.3 1.3 2.8-2.8" stroke="#16A34A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span>Intelligent tools for clinical decision-making</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="8" cy="8" r="8" fill="#16A34A" fill-opacity="0.15"/>
+                                        <path d="M6.2 8.6l1.3 1.3 2.8-2.8" stroke="#16A34A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span>Improved outcomes</span>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="form-group">
-                        <label for="macos_ano">Maços-ano (se fumante/ex-fumante)</label>
-                        <input type="number" id="macos_ano" name="macos_ano" step="0.1">
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-primary">Gerar Recomendações Inteligentes</button>
-                <button type="button" class="btn-secondary" onclick="anexarPDFs()">📄 Anexar PDFs de Exames</button>
-            </form>
-
-            <div id="recommendations" class="recommendations">
-                <h3>Recomendações Inteligentes</h3>
-                <div id="recommendationsContent"></div>
-                <div class="action-buttons">
-                    <button class="action-btn" onclick="gerarSolicitacaoExamesLaboratoriais()">🧪 Solicitação de Exames Laboratoriais</button>
-                    <button class="action-btn" onclick="gerarSolicitacaoExamesImagem()">🏥 Solicitação de Exames de Imagem</button>
-                    <button class="action-btn" onclick="gerarReceitaVacinas()">💉 Receita de Vacinas</button>
-                </div>
+                </section>
             </div>
         </div>
-    </div>
+    </main>
 
-    <script src="prevent_calculator.js"></script>
-    <script>
-        // Inicializar calculadora PREVENT com tolerância a falhas
-        let preventCalc = null;
-        try {
-            if (typeof PreventCalculator === 'function') {
-                preventCalc = new PreventCalculator();
-            } else {
-                console.warn('PreventCalculator não disponível. O cálculo PREVENT será ignorado.');
-            }
-        } catch (error) {
-            console.error('Erro ao inicializar a calculadora PREVENT:', error);
-            preventCalc = null;
-        }
-        
-        // Função para criar links clicáveis nas referências
-        function createReferenceLink(referencia) {
-            const trimmed = (referencia || '').trim();
-
-            if (!trimmed) {
-                return '';
-            }
-
-            if (/^https?:\/\//i.test(trimmed)) {
-                const safeUrl = trimmed.replace(/"/g, '&quot;');
-                return `<a href="${safeUrl}" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">${safeUrl}</a>`;
-            }
-
-            const referenceLinks = {
-                'USPSTF 2024': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening',
-                'USPSTF 2023 - Triagem de Ansiedade': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/anxiety-adults-screening',
-                'USPSTF 2023 - Triagem de Depressão': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-depression-suicide-risk-adults',
-                'USPSTF 2023 - PrEP (Grau A)': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prevention-of-human-immunodeficiency-virus-hiv-infection-pre-exposure-prophylaxis',
-                'USPSTF 2021': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening',
-                'USPSTF 2020': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening',
-                'USPSTF 2019': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening',
-                'USPSTF 2018': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening',
-                'USPSTF 2017': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening',
-                'USPSTF 2016': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening',
-                'USPSTF Osteoporose': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening',
-                'USPSTF Colorretal': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening',
-                'ADA 2025': 'https://diabetes.org/newsroom/press-releases/american-diabetes-association-releases-standards-care-diabetes-2025',
-                'AHA/ACC 2025': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356',
-                'AHA/ACC 2022': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001071',
-                'AHA/ACC 2019': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000678',
-                'AHA/ACC 2017': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000485',
-                'AHA/ACC 2016': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000471',
-                'SBC 2020': 'https://abccardiol.org/article/diretrizes-brasileiras-de-hipertensao-arterial-2020/',
-                'SBC/SBH/SBN 2020': 'https://abccardiol.org/article/diretrizes-brasileiras-de-hipertensao-arterial-2020/',
-                'ASE 2016': 'https://www.onlinejase.com/article/S0894-7317(16)30146-4/fulltext'
-            };
-
-            // Tratamento especial para "AHA/ACC 2025 e SBC 2020"
-            if (trimmed === "AHA/ACC 2025 e SBC 2020") {
-                return `<a href="https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">AHA/ACC 2025</a> e <a href="https://abccardiol.org/article/diretrizes-brasileiras-de-hipertensao-arterial-2020/" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">SBC 2020</a>`;
-            }
-
-            // Procurar por correspondências exatas ou parciais
-            for (const [key, url] of Object.entries(referenceLinks)) {
-                if (trimmed.includes(key)) {
-                    return `<a href="${url}" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">${trimmed}</a>`;
-                }
-            }
-
-            // Se não encontrar link específico, retornar texto normal
-            return trimmed;
-        }
-
-        function normalizeText(value) {
-            if (!value || typeof value !== 'string') {
-                return '';
-            }
-            return value
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .toLowerCase()
-                .trim();
-        }
-
-        const QUESTIONNAIRE_LINKS = {
-            [normalizeText('Questionário GAD-7 (Triagem de Ansiedade)')]: 'https://www.mdcalc.com/calc/1727/gad7-general-anxiety-disorder7',
-            [normalizeText('Questionário PHQ-9 (Triagem de Depressão)')]: 'https://www.mdcalc.com/calc/1725/phq9-patient-health-questionnaire9'
-        };
-
-        document.getElementById('checkupForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const data = {};
-            
-            // Converter FormData para objeto
-            for (let [key, value] of formData.entries()) {
-                if (data[key]) {
-                    if (Array.isArray(data[key])) {
-                        data[key].push(value);
-                    } else {
-                        data[key] = [data[key], value];
-                    }
-                } else {
-                    data[key] = value;
-                }
-            }
-            
-            // Calcular risco cardiovascular PREVENT se dados suficientes
-            let cardiovascularRisk = null;
-            if (preventCalc && typeof preventCalc.calculateRisks === 'function' &&
-                data.idade && data.sexo && data.colesterol && data.hdl && data.pas && data.creatinina) {
-                try {
-                    const riskParams = {
-                        idade: parseInt(data.idade),
-                        sexo: data.sexo,
-                        colesterol_total: parseInt(data.colesterol) || 200,
-                        hdl_colesterol: parseInt(data.hdl) || 45,
-                        pressao_sistolica: parseInt(data.pas) || 120,
-                        diabetes: data.diabetes_tipo2 === 'on',
-                        tabagismo: data.tabagismo || 'nunca',
-                        creatinina: parseFloat(data.creatinina) || 1.0,
-                        medicamentos_anti_hipertensivos: data.anti_hipertensivos === 'on',
-                        estatinas: data.estatinas === 'on'
-                    };
-                    
-                    cardiovascularRisk = preventCalc.calculateRisks(riskParams);
-                } catch (error) {
-                    console.error('Erro no cálculo de risco:', error);
-                }
-            }
-            
-            // Debug: Log dos dados enviados
-            console.log('=== DADOS ENVIADOS PARA API ===');
-            console.log('Dados completos:', JSON.stringify(data, null, 2));
-            console.log('Campo hipertensao:', data.hipertensao);
-            console.log('Campo comorbidades:', data.comorbidades);
-            console.log('Campo has_resistente:', data.has_resistente);
-            
-            try {
-                const response = await fetch('/api/checkup_intelligent_v3', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                
-                // Debug: Log da resposta da API
-                console.log('=== RESPOSTA DA API ===');
-                console.log('Total de recomendações:', result.recommendations?.length || 0);
-                
-                // Verificar recomendações de hipertensão
-                const hypertensionRecs = result.recommendations?.filter(rec => 
-                    rec.titulo?.toLowerCase().includes('potássio') ||
-                    rec.titulo?.toLowerCase().includes('creatinina') ||
-                    rec.titulo?.toLowerCase().includes('lipídico') ||
-                    rec.titulo?.toLowerCase().includes('ecg') ||
-                    rec.titulo?.toLowerCase().includes('microalbuminúria')
-                ) || [];
-                
-                console.log('Recomendações de hipertensão encontradas:', hypertensionRecs.length);
-                if (hypertensionRecs.length > 0) {
-                    console.log('Títulos das recomendações de hipertensão:', hypertensionRecs.map(r => r.titulo));
-                }
-                
-                displayRecommendations(result.recommendations, cardiovascularRisk, result);
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao gerar recomendações: ' + error.message);
-            }
-        });
-
-        function displayRecommendations(recomendacoes, cardiovascularRisk = null, preventData = null) {
-            const container = document.getElementById('recommendationsContent');
-            const recommendationsDiv = document.getElementById('recommendations');
-            
-            // Armazenar recomendações globalmente para uso em outras funções
-            window.currentRecommendations = recomendacoes || [];
-            
-            if (!recomendacoes || recomendacoes.length === 0) {
-                container.innerHTML = '<p>Nenhuma recomendação específica para este perfil.</p>';
-                recommendationsDiv.style.display = 'block';
-                return;
-            }
-            
-            // Adicionar seção de risco cardiovascular PREVENT se disponível
-            let riskHtml = '';
-            if (preventData && preventData.prevent_score && preventData.prevent_score.success) {
-                const prevent = preventData.prevent_score;
-                const classification = prevent.classification || {};
-                const clinical = prevent.clinical_data || {};
-                
-                // Determinar cor baseada na categoria de risco
-                const riskColors = {
-                    'Baixo': '#27ae60',
-                    'Borderline': '#f39c12', 
-                    'Intermediário': '#e67e22',
-                    'Alto': '#e74c3c'
-                };
-                
-                const riskColor = riskColors[classification.category] || '#95a5a6';
-                
-                riskHtml = `
-                    <div class="cardiovascular-risk-section" style="margin-bottom: 2rem;">
-                        <h3 style="color: #2c3e50; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="font-size: 1.5rem;">📊</span>
-                            Risco Cardiovascular (PREVENT 2024)
-                        </h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
-                            <div class="risk-card" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; border-left: 4px solid ${riskColor}; position: relative; overflow: hidden; transition: all 0.3s ease;">
-                                <h4 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.1rem; font-weight: 500; line-height: 1.3;">Estimated 30-year<br>risk of CVD</h4>
-                                <div style="font-size: 3rem; font-weight: bold; color: ${riskColor}; margin: 1rem 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${prevent.risk_10yr}%</div>
-                                <div style="background: #f8f9fa; color: #6c757d; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; font-size: 0.9rem; margin-top: 1rem;">
-                                    ${classification.category || 'N/A'}
-                                </div>
-                            </div>
-                            <div class="risk-card" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; border-left: 4px solid ${riskColor}; position: relative; overflow: hidden; transition: all 0.3s ease;">
-                                <h4 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.1rem; font-weight: 500; line-height: 1.3;">Estimated 10-year<br>risk of CVD</h4>
-                                <div style="font-size: 3rem; font-weight: bold; color: ${riskColor}; margin: 1rem 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${prevent.risk_30yr}%</div>
-                                <div style="background: #f8f9fa; color: #6c757d; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; font-size: 0.9rem; margin-top: 1rem;">
-                                    Risco Longo Prazo
-                                </div>
-                            </div>
-                        </div>
-                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 1.5rem; border-radius: 15px; border-left: 5px solid #3498db; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; font-size: 0.9rem; color: #2c3e50;">
-                                <div><strong>eGFR:</strong> ${clinical.egfr || 'N/A'} mL/min/1.73m²</div>
-                                <div><strong>IMC:</strong> ${clinical.bmi ? clinical.bmi.toFixed(1) : 'N/A'} kg/m²</div>
-                                <div><strong>Não-HDL:</strong> ${clinical.non_hdl ? clinical.non_hdl.toFixed(0) : 'N/A'} mg/dL</div>
-                            </div>
-                            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #7f8c8d; text-align: center;">
-                                <strong>Baseado em:</strong> Equações PREVENT 2024 (AHA/ACC) • <strong>Classificação:</strong> ${classification.description || 'N/A'}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Categorizar recomendações com ícones
-            const categorias = {
-                '🧪 Exames Laboratoriais': [],
-                '🏥 Exames de Imagem': [],
-                '💉 Vacinas': [],
-                '🩺 Avaliação Clínica': [],
-                '📋 Outras Recomendações': []
-            };
-            
-            recomendacoes.forEach(rec => {
-                const categoria = rec.categoria || '';
-                const titulo = rec.titulo || '';
-                const normalizedTitle = normalizeText(titulo);
-
-                if (normalizedTitle.includes('profilaxia pre-exposicao ao hiv')) {
-                    categorias['📋 Outras Recomendações'].push(rec);
-                    return;
-                }
-
-                // Categorização inteligente baseada no conteúdo
-                if (titulo.includes('Lipoproteína(a)') || titulo.includes('Lp(a)') || titulo.includes('hsCRP') ||
-                    titulo.includes('Proteína C Reativa') || titulo.includes('Microalbuminúria')) {
-                    // Exames laboratoriais específicos
-                    categorias['🧪 Exames Laboratoriais'].push(rec);
-                } else if (titulo.includes('Score de Cálcio') || titulo.includes('Tomografia de Coronárias') ||
-                    titulo.includes('Strain') || titulo.includes('Ecocardiograma')) {
-                    // Exames de imagem específicos
-                    categorias['🏥 Exames de Imagem'].push(rec);
-                } else if (titulo.includes('Tornozelo-Braquial') || titulo.includes('ITB')) {
-                    // Outras recomendações específicas
-                    categorias['📋 Outras Recomendações'].push(rec);
-                } else if (categoria.includes('Laboratorial') || categoria.includes('laboratorial') || 
-                    titulo.includes('Hemograma') || titulo.includes('Glicemia') || titulo.includes('Colesterol') ||
-                    titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
-                    titulo.includes('Sódio') || titulo.includes('Magnésio') || titulo.includes('Ácido úrico') ||
-                    titulo.includes('Microalbuminúria') || titulo.includes('Urinocultura') || titulo.includes('HbA1c') ||
-                    titulo.includes('TSH') || titulo.includes('Cortisol') || titulo.includes('Aldosterona') ||
-                    titulo.includes('Hepatite C') || titulo.includes('HIV') || titulo.includes('Papanicolau') ||
-                    titulo.includes('Citologia') || titulo.includes('Metanefrinas') || titulo.includes('Catecolaminas') ||
-                    titulo.includes('TOTG') || titulo.includes('Tolerância à Glicose')) {
-                    categorias['🧪 Exames Laboratoriais'].push(rec);
-                } else if (categoria.includes('Imagem') || categoria.includes('imagem') ||
-                    titulo.includes('Tomografia') || titulo.includes('Ressonância') || titulo.includes('Ultrassom') ||
-                    titulo.includes('Ecocardiograma') || titulo.includes('Radiografia') || titulo.includes('Mamografia') ||
-                    titulo.includes('TCBD') || titulo.includes('Colonoscopia') || titulo.includes('Densitometria') ||
-                    titulo.includes('MAPA') || titulo.includes('MRPA') || titulo.includes('Screening') ||
-                    titulo.includes('Rastreamento') || titulo.includes('Câncer') || titulo.includes('Sífilis') ||
-                    titulo.includes('Tuberculose') || titulo.includes('Bacteriúria') || titulo.includes('Osteoporose')) {
-                    categorias['🏥 Exames de Imagem'].push(rec);
-                } else if (categoria.includes('Vacina') || categoria.includes('vacina') ||
-                    titulo.includes('Vacina') || titulo.includes('Imunização')) {
-                    categorias['💉 Vacinas'].push(rec);
-                } else if (titulo.includes('Consulta') || titulo.includes('Avaliação') || titulo.includes('Acompanhamento')) {
-                    categorias['🩺 Avaliação Clínica'].push(rec);
-                } else {
-                    categorias['📋 Outras Recomendações'].push(rec);
-                }
-            });
-            
-            let html = '';
-            
-            Object.keys(categorias).forEach(categoria => {
-                if (categorias[categoria].length > 0) {
-                    html += `<div class="recommendation-category" style="margin-bottom: 2rem;">
-                        <h4 style="color: #2c3e50; margin-bottom: 1rem; padding: 0.75rem 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border-left: 4px solid #3498db; font-size: 1.1rem; font-weight: 600;">${categoria}</h4>`;
-                    
-                    categorias[categoria].forEach((rec, index) => {
-                        const titulo = rec.titulo || 'Recomendação';
-                        const descricao = rec.descricao || '';
-                        const prioridade = rec.prioridade || 'alta';
-                        const referencia = rec.referencia || '';
-                        const normalizedTitle = normalizeText(titulo);
-                        const linkHref = QUESTIONNAIRE_LINKS[normalizedTitle];
-                        const displayTitle = linkHref
-                            ? `<a href="${linkHref}" target="_blank" rel="noopener noreferrer" style="color: #2980b9; text-decoration: underline;">${titulo}</a>`
-                            : titulo;
-
-                        // Determinar cor da prioridade
-                        let prioridadeColor = '#28a745'; // Verde para alta
-                        if (prioridade === 'media') prioridadeColor = '#ffc107'; // Amarelo para média
-                        if (prioridade === 'baixa') prioridadeColor = '#fd7e14'; // Laranja para baixa
-                        
-                        html += `<div class="recommendation-card" style="background: white; border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #3498db; position: relative;">
-                            <button onclick="removeRecommendation(this)" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.2rem; color: #95a5a6; cursor: pointer; padding: 5px;">×</button>
-                            
-                            <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                                <span style="background: ${prioridadeColor}; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-right: 1rem;">
-                                    ${prioridade.toUpperCase()}
-                                </span>
-                            </div>
-                            
-                            <h5 style="color: #2c3e50; margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 600;">
-                                ${displayTitle}
-                            </h5>
-                            
-                            ${descricao ? `<p style="color: #7f8c8d; margin: 0 0 1rem 0; font-size: 0.9rem; line-height: 1.4;">
-                                ${descricao}
-                            </p>` : ''}
-                            
-                            ${referencia ? `<p style="color: #95a5a6; margin: 0; font-size: 0.8rem; font-style: italic;">
-                                ${createReferenceLink(referencia)}
-                            </p>` : ''}
-                        </div>`;
-                    });
-                    
-                    html += '</div>';
-                }
-            });
-            
-            // Montar HTML final com seção PREVENT no topo
-            container.innerHTML = riskHtml + html;
-            recommendationsDiv.style.display = 'block';
-        }
-
-        async function gerarSolicitacaoExamesLaboratoriais() {
-            try {
-                // Coletar dados do formulário
-                const formData = new FormData(document.getElementById('checkupForm'));
-                const patientData = {
-                    nome: formData.get('nome') || 'Paciente',
-                    idade: formData.get('idade') || '',
-                    sexo: formData.get('sexo') || '',
-                    cpf: formData.get('cpf') || ''
-                };
-
-                // Coletar recomendações atuais e filtrar apenas exames laboratoriais
-                const allRecommendations = window.currentRecommendations || [];
-                const labRecommendations = allRecommendations.filter(rec => {
-                    const titulo = rec.titulo || '';
-                    const categoria = rec.categoria || '';
-                    const normalizedTitle = normalizeText(titulo);
-
-                    if (normalizedTitle.includes('profilaxia pre-exposicao ao hiv')) {
-                        return false;
-                    }
-
-                    // Filtrar exames laboratoriais
-                    return categoria.includes('Laboratorial') || categoria.includes('laboratorial') ||
-                           titulo.includes('Hemograma') || titulo.includes('Glicemia') || titulo.includes('Colesterol') ||
-                           titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
-                           titulo.includes('Sódio') || titulo.includes('Magnésio') || titulo.includes('Ácido úrico') ||
-                           titulo.includes('Microalbuminúria') || titulo.includes('Urinocultura') || titulo.includes('HbA1c') ||
-                           titulo.includes('TSH') || titulo.includes('Cortisol') || titulo.includes('Aldosterona') ||
-                           titulo.includes('Hepatite C') || titulo.includes('HIV') || titulo.includes('Papanicolau') ||
-                           titulo.includes('Citologia') || titulo.includes('Metanefrinas') || titulo.includes('Catecolaminas') ||
-                           titulo.includes('TOTG') || titulo.includes('Tolerância à Glicose');
-                });
-                
-                if (labRecommendations.length === 0) {
-                    alert('Nenhum exame laboratorial encontrado nas recomendações.');
-                    return;
-                }
-                
-                const requestData = {
-                    recommendations: labRecommendations,
-                    patient_data: patientData,
-                    tipo_exame: 'laboratorial',
-                    medico: {
-                        nome: '',
-                        crm: ''
-                    }
-                };
-
-                const response = await fetch('/api/gerar-solicitacao-exames', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestData)
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
-                }
-                
-                const result = await response.json();
-                
-                if (result.success && result.pdfs && result.pdfs.length > 0) {
-                    // Baixar cada PDF gerado
-                    result.pdfs.forEach((pdf, index) => {
-                        const link = document.createElement('a');
-                        link.href = 'data:application/pdf;base64,' + pdf.content;
-                        link.download = pdf.filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    });
-                    
-                    alert(`PDF de solicitação de exames laboratoriais gerado com sucesso!`);
-                } else {
-                    throw new Error('Nenhum PDF foi gerado');
-                }
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao gerar solicitação de exames laboratoriais: ' + error.message);
-            }
-        }
-
-        async function gerarSolicitacaoExamesImagem() {
-            try {
-                // Coletar dados do formulário
-                const formData = new FormData(document.getElementById('checkupForm'));
-                const patientData = {
-                    nome: formData.get('nome') || 'Paciente',
-                    idade: formData.get('idade') || '',
-                    sexo: formData.get('sexo') || '',
-                    cpf: formData.get('cpf') || ''
-                };
-
-                // Coletar recomendações atuais e filtrar apenas exames de imagem
-                const allRecommendations = window.currentRecommendations || [];
-                const imageRecommendations = allRecommendations.filter(rec => {
-                    const titulo = rec.titulo || '';
-                    const categoria = rec.categoria || '';
-                    
-                    // Filtrar exames de imagem
-                    return categoria.includes('Imagem') || categoria.includes('imagem') ||
-                           titulo.includes('Tomografia') || titulo.includes('Ressonância') || titulo.includes('Ultrassom') ||
-                           titulo.includes('Ecocardiograma') || titulo.includes('Radiografia') || titulo.includes('Mamografia') ||
-                           titulo.includes('TCBD') || titulo.includes('Colonoscopia') || titulo.includes('Densitometria') ||
-                           titulo.includes('MAPA') || titulo.includes('MRPA') || titulo.includes('Score de Cálcio') ||
-                           titulo.includes('Strain') || titulo.includes('DEXA');
-                });
-                
-                if (imageRecommendations.length === 0) {
-                    alert('Nenhum exame de imagem encontrado nas recomendações.');
-                    return;
-                }
-                
-                const requestData = {
-                    recommendations: imageRecommendations,
-                    patient_data: patientData,
-                    tipo_exame: 'imagem',
-                    medico: {
-                        nome: '',
-                        crm: ''
-                    }
-                };
-
-                const response = await fetch('/api/gerar-solicitacao-exames', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestData)
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
-                }
-                
-                const result = await response.json();
-                
-                if (result.success && result.pdfs && result.pdfs.length > 0) {
-                    // Baixar cada PDF gerado
-                    result.pdfs.forEach((pdf, index) => {
-                        const link = document.createElement('a');
-                        link.href = 'data:application/pdf;base64,' + pdf.content;
-                        link.download = pdf.filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    });
-                    
-                    alert(`PDF de solicitação de exames de imagem gerado com sucesso!`);
-                } else {
-                    throw new Error('Nenhum PDF foi gerado');
-                }
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao gerar solicitação de exames de imagem: ' + error.message);
-            }
-        }
-
-        async function gerarReceitaVacinas() {
-            try {
-                const response = await fetch('/api/gerar-receita-vacinas', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({})
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-                
-                const result = await response.text();
-                
-                // Abrir em nova janela
-                const newWindow = window.open('', '_blank');
-                newWindow.document.write(result);
-                newWindow.document.close();
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao gerar receita de vacinas: ' + error.message);
-            }
-        }
-
-
-
-        function anexarPDFs() {
-            alert('Funcionalidade em desenvolvimento');
-        }
-
-        function removeRecommendation(button) {
-            const card = button.closest('.recommendation-card');
-            if (card) {
-                card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                card.style.opacity = '0';
-                card.style.transform = 'translateX(20px)';
-                setTimeout(() => {
-                    card.remove();
-                }, 300);
-            }
-        }
-    </script>
+    <script src="js/auth-card.js"></script>
 </body>
 </html>

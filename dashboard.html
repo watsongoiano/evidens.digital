@@ -1,350 +1,187 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - evidēns</title>
+    <title>Sign in - evidēns</title>
+    <link rel="stylesheet" href="styles/login.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            color: #2C3E50;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 1rem 2rem;
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #2C3E50;
-        }
-
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .user-email {
-            font-size: 0.875rem;
-            color: #7F8C8D;
-        }
-
-        .user-role {
-            font-size: 0.75rem;
-            background: #4CAF50;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            text-transform: uppercase;
-            font-weight: 500;
-        }
-
-        .logout-btn {
-            background: #E74C3C;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-
-        .logout-btn:hover {
-            background: #C0392B;
-        }
-
-        .main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .dashboard-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 1.5rem;
-            padding: 3rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
-            max-width: 600px;
-            width: 100%;
-        }
-
-        .welcome-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2C3E50;
-            margin-bottom: 1rem;
-        }
-
-        .welcome-message {
-            font-size: 1.125rem;
-            color: #7F8C8D;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .feature-card {
-            background: #F8F9FA;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            text-align: left;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            background: #4CAF50;
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-
-        .feature-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #2C3E50;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-description {
-            font-size: 0.875rem;
-            color: #7F8C8D;
-            line-height: 1.5;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
-            background: #FF6B35;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .action-btn:hover {
-            background: #E55A2B;
-            transform: translateY(-1px);
-        }
-
-        .action-btn.secondary {
-            background: #4A90E2;
-        }
-
-        .action-btn.secondary:hover {
-            background: #357ABD;
-        }
-
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-
-            .dashboard-card {
-                padding: 2rem;
-                margin: 1rem;
-            }
-
-            .welcome-title {
-                font-size: 1.5rem;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <h1>evidēns</h1>
-            </div>
-            <div class="user-menu">
-                <div class="user-info">
-                    <span class="user-email" id="user-email">Carregando...</span>
-                    <span class="user-role" id="user-role">Carregando...</span>
-                </div>
-                <button class="logout-btn" onclick="logout()">Sair</button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
     <main class="main">
-        <div class="dashboard-card">
-            <h1 class="welcome-title">Bem-vindo ao evidēns!</h1>
-            <p class="welcome-message">
-                Sua plataforma de medicina baseada em evidências está pronta para uso. 
-                Explore nossas ferramentas inteligentes para tomada de decisão clínica.
-            </p>
+        <div class="auth-card" role="presentation">
+            <header class="card-header">
+                <a href="#" class="header-link">About</a>
+                <div class="header-logo" aria-label="evidēns">evidēns</div>
+                <a href="#" class="header-link header-link-right">Contact</a>
+            </header>
+            <div class="card-body">
+                <section class="auth-panel" aria-labelledby="welcome-title">
+                    <div class="welcome">
+                        <h1 id="welcome-title" class="welcome-title">Welcome Back</h1>
+                        <p class="welcome-subtitle">Log in to your account</p>
+                    </div>
 
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4m6-6h4a2 2 0 0 1 2 2v3c0 1.1-.9 2-2 2h-4m-6 0V9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/>
+                    <div class="role-tabs" role="tablist" aria-label="Select account type">
+                        <button type="button" class="tab-button active" data-role="medico" aria-pressed="true">
+                            Healthcare Professional
+                        </button>
+                        <button type="button" class="tab-button" data-role="admin" aria-pressed="false">
+                            Administrator
+                        </button>
+                    </div>
+
+                    <form id="login-form" class="login-form" novalidate>
+                        <div class="form-group">
+                            <label class="sr-only" for="email">Email Address</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                </span>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="Email address"
+                                    required
+                                    autocomplete="email"
+                                    inputmode="email"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="sr-only" for="password">Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                        <circle cx="12" cy="16" r="1"></circle>
+                                    </svg>
+                                </span>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Password"
+                                    required
+                                    autocomplete="current-password"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-options">
+                            <label class="checkbox-wrapper" for="remember">
+                                <input type="checkbox" id="remember" name="remember">
+                                <span class="custom-checkbox" aria-hidden="true"></span>
+                                <span class="checkbox-label">Remember me</span>
+                            </label>
+                            <a href="#" class="forgot-link" id="forgot-password">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" class="login-button" id="login-btn">
+                            <span class="button-text">Sign in</span>
+                            <span class="loading-spinner" aria-hidden="true"></span>
+                        </button>
+
+                        <div class="feedback-message" id="feedback-message" role="alert" aria-live="polite"></div>
+
+                        <div class="divider" role="separator">
+                            <span>or</span>
+                        </div>
+
+                        <div class="oauth-buttons">
+                            <button type="button" class="oauth-button google-button" id="google-login">
+                                <span class="oauth-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24">
+                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                    </svg>
+                                </span>
+                                <span>Continue with Google</span>
+                            </button>
+
+                            <button type="button" class="oauth-button microsoft-button" id="microsoft-login">
+                                <span class="oauth-icon" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24">
+                                        <path fill="#F25022" d="M1 1h10v10H1z"/>
+                                        <path fill="#00A4EF" d="M13 1h10v10H13z"/>
+                                        <path fill="#7FBA00" d="M1 13h10v10H1z"/>
+                                        <path fill="#FFB900" d="M13 13h10v10H13z"/>
+                                    </svg>
+                                </span>
+                                <span>Microsoft account</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="info-panel" aria-label="Platform highlights">
+                    <div class="illustration" aria-hidden="true">
+                        <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="stethoscope-gradient" x1="40" y1="30" x2="160" y2="170" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#CBD5F5"/>
+                                    <stop offset="1" stop-color="#94A3B8"/>
+                                </linearGradient>
+                            </defs>
+                            <path d="M64 36C64 31.0294 68.0294 27 73 27H97C101.971 27 106 31.0294 106 36V64C106 68.9706 101.971 73 97 73H73C68.0294 73 64 68.9706 64 64V36Z" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M85 72V132" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round"/>
+                            <path d="M85 132C85 148.016 72.0163 161 56 161C39.9837 161 27 148.016 27 132C27 115.984 39.9837 103 56 103" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M85 132C85 148.016 97.9837 161 114 161C130.016 161 143 148.016 143 132C143 115.984 130.016 103 114 103" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="158" cy="132" r="20" stroke="url(#stethoscope-gradient)" stroke-width="6"/>
+                            <circle cx="158" cy="132" r="6" fill="#94A3B8"/>
+                            <path d="M143 132H136" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round"/>
                         </svg>
                     </div>
-                    <h3 class="feature-title">Ferramentas Inteligentes</h3>
-                    <p class="feature-description">
-                        Acesse calculadoras médicas, algoritmos de decisão e recomendações baseadas em evidências.
-                    </p>
-                </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14,2 14,8 20,8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                            <polyline points="10,9 9,9 8,9"/>
-                        </svg>
+                    <div class="info-content">
+                        <h2>Clinical intelligence at your fingertips</h2>
+                        <p>Evidence-based content and intuitive workflows designed to support every consultation.</p>
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <span class="feature-icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="8" cy="8" r="8" fill="#16A34A" fill-opacity="0.15"/>
+                                        <path d="M6.2 8.6l1.3 1.3 2.8-2.8" stroke="#16A34A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span>Peer-reviewed content</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="8" cy="8" r="8" fill="#16A34A" fill-opacity="0.15"/>
+                                        <path d="M6.2 8.6l1.3 1.3 2.8-2.8" stroke="#16A34A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span>Intelligent tools for clinical decision-making</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="8" cy="8" r="8" fill="#16A34A" fill-opacity="0.15"/>
+                                        <path d="M6.2 8.6l1.3 1.3 2.8-2.8" stroke="#16A34A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span>Improved outcomes</span>
+                            </li>
+                        </ul>
                     </div>
-                    <h3 class="feature-title">Conteúdo Revisado</h3>
-                    <p class="feature-description">
-                        Acesse conteúdo médico revisado por pares e atualizado com as últimas evidências científicas.
-                    </p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                        </svg>
-                    </div>
-                    <h3 class="feature-title">Melhores Desfechos</h3>
-                    <p class="feature-description">
-                        Utilize ferramentas que ajudam a melhorar os desfechos clínicos dos seus pacientes.
-                    </p>
-                </div>
-            </div>
-
-            <div class="action-buttons">
-                <a href="/intelligent-tools" class="action-btn">Ferramentas Inteligentes</a>
-                <a href="/analytics" class="action-btn secondary">Analytics</a>
+                </section>
             </div>
         </div>
     </main>
 
-    <script>
-        // Load user information
-        async function loadUserInfo() {
-            try {
-                const response = await fetch('/api/me', {
-                    credentials: 'include'
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.ok && data.user) {
-                        document.getElementById('user-email').textContent = data.user.email;
-                        document.getElementById('user-role').textContent = 
-                            data.user.role === 'medico' ? 'Médico' : 'Administrador';
-                    }
-                } else {
-                    // Not logged in, redirect to login
-                    window.location.href = '/login';
-                }
-            } catch (error) {
-                console.error('Error loading user info:', error);
-                window.location.href = '/login';
-            }
-        }
-
-        // Logout function
-        async function logout() {
-            try {
-                const response = await fetch('/api/logout', {
-                    method: 'POST',
-                    credentials: 'include'
-                });
-                
-                // Always redirect to login, regardless of response
-                window.location.href = '/login';
-            } catch (error) {
-                console.error('Logout error:', error);
-                window.location.href = '/login';
-            }
-        }
-
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', () => {
-            loadUserInfo();
-        });
-    </script>
+    <script src="js/auth-card.js"></script>
 </body>
 </html>
