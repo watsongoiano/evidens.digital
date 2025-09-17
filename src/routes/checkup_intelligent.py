@@ -15,7 +15,7 @@ checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
 REFERENCE_OVERRIDE_RULES = [
     {
         'keywords': ['microalbuminuria', 'urina'],
-        'label': 'AHA/ACC 2025',
+        'label': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356',
         'url': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356'
     },
     {
