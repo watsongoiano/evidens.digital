@@ -8,32 +8,12 @@
   ],
   "routes": [
     {
-      "src": "/login",
-      "dest": "/login.html"
-    },
-    {
-      "src": "/dashboard", 
-      "dest": "/dashboard.html"
-    },
-    {
       "src": "/api/(.*)",
       "dest": "/api/index.py"
     },
     {
-      "src": "/styles/(.*)",
-      "dest": "/styles/$1"
-    },
-    {
-      "src": "/js/(.*)",
-      "dest": "/js/$1"
-    },
-    {
-      "src": "/intelligent-tools",
-      "dest": "/intelligent-tools.html"
-    },
-    {
-      "src": "/",
-      "dest": "/src/static/index.html"
+      "src": "/(.*)",
+      "dest": "/api/index.py"
     }
   ]
 }
