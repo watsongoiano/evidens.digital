@@ -380,6 +380,19 @@ class handler(BaseHTTPRequestHandler):
                     "categoria": "Outras recomendações"
                 })
 
+            # Rastreamento de Câncer de Próstata
+            if sexo == "masculino" and 55 <= idade <= 69:
+                add_recommendation({
+                    "titulo": "Rastreamento de Câncer de Próstata (55 a 69 anos)",
+                    "descricao": "A decisão de realizar o rastreamento deve ser individual, após uma conversa entre o paciente e o médico sobre os potenciais benefícios e danos. Não é um rastreio de rotina para todos.",
+                    "prioridade": "baixa",
+                    "referencia": "USPSTF 2018",
+                    "categoria": "Outras recomendações",
+                    "exame_recomendado": "Antígeno Prostático Específico (PSA), soro",
+                    "frequencia_rastreio": "A frequência é periódica e deve ser individualizada após discussão com o médico.",
+                    "site_referencia": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening"
+                })
+
             # === RASTREAMENTOS DE DIABETES (DESAGRUPADO EM EXAMES INDIVIDUAIS) ===
             
             # Rastreamento de diabetes - exames individuais (ADA 2025)
