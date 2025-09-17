@@ -630,6 +630,11 @@
                 'ASE 2016': 'https://www.onlinejase.com/article/S0894-7317(16)30146-4/fulltext'
             };
             
+            // Tratamento especial para "AHA/ACC 2025 e SBC 2020"
+            if (referencia === "AHA/ACC 2025 e SBC 2020") {
+                return `<a href="https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">AHA/ACC 2025</a> e <a href="https://abccardiol.org/article/diretrizes-brasileiras-de-hipertensao-arterial-2020/" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">SBC 2020</a>`;
+            }
+            
             // Procurar por correspondências exatas ou parciais
             for (const [key, url] of Object.entries(referenceLinks)) {
                 if (referencia.includes(key)) {
