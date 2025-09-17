@@ -126,6 +126,20 @@ IMAGING_TITLE_KEYWORDS = (
 )
 
 
+SPECIAL_EXAM_TITLE_REPLACEMENTS = {
+    _normalize_for_matching('Citologia Cervical + Teste de HPV'): [
+        {
+            'titulo': 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular, autocoleta',
+            'tipo': 'laboratorial',
+        },
+        {
+            'titulo': 'Citologia cérvico-vaginal, em base líqüida, material vaginal e colo uterino',
+            'tipo': 'laboratorial',
+        },
+    ],
+}
+
+
 def _classify_exam_type(rec: dict) -> str:
     """Return ``imagem`` or ``laboratorial`` based on exam metadata."""
 
@@ -242,6 +256,34 @@ def categorizar_exames(recommendations):
     vistos_laboratoriais = set()
     vistos_imagem = set()
 
+    def _append_exam(rec, *, force_tipo=None):
+        if not isinstance(rec, dict):
+            return
+
+        titulo_texto = _normalize_text(rec.get('titulo')).strip()
+        if not titulo_texto:
+            return
+
+        rec_normalizado = dict(rec)
+        rec_normalizado['titulo'] = titulo_texto
+
+        tipo_forcado = ''
+        if isinstance(force_tipo, str):
+            tipo_forcado = force_tipo.strip().lower()
+
+        tipo = tipo_forcado or _classify_exam_type(rec_normalizado)
+        if tipo not in ('imagem', 'laboratorial'):
+            tipo = 'laboratorial'
+
+        if tipo == 'imagem':
+            if titulo_texto not in vistos_imagem:
+                exames_imagem.append(titulo_texto)
+                vistos_imagem.add(titulo_texto)
+        else:
+            if titulo_texto not in vistos_laboratoriais:
+                exames_laboratoriais.append(titulo_texto)
+                vistos_laboratoriais.add(titulo_texto)
+
     for rec in _ensure_list(recommendations):
         if not isinstance(rec, dict):
             continue
@@ -250,16 +292,27 @@ def categorizar_exames(recommendations):
         if not titulo:
             continue
 
-        tipo = _classify_exam_type(rec)
+        titulo_normalizado = _normalize_for_matching(titulo)
+        substituicoes = SPECIAL_EXAM_TITLE_REPLACEMENTS.get(titulo_normalizado)
 
-        if tipo == 'imagem':
-            if titulo not in vistos_imagem:
-                exames_imagem.append(titulo)
-                vistos_imagem.add(titulo)
-        else:
-            if titulo not in vistos_laboratoriais:
-                exames_laboratoriais.append(titulo)
-                vistos_laboratoriais.add(titulo)
+        if substituicoes:
+            for substituicao in substituicoes:
+                novo_titulo = substituicao.get('titulo')
+                if not novo_titulo:
+                    continue
+
+                rec_substituido = dict(rec)
+                rec_substituido['titulo'] = novo_titulo
+
+                for chave, valor in substituicao.items():
+                    if chave in {'titulo', 'tipo'}:
+                        continue
+                    rec_substituido[chave] = valor
+
+                _append_exam(rec_substituido, force_tipo=substituicao.get('tipo'))
+            continue
+
+        _append_exam(rec)
 
     return exames_laboratoriais, exames_imagem
 
