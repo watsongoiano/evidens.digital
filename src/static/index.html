@@ -237,6 +237,14 @@
             font-style: italic;
         }
 
+        .evidence-grade {
+            font-weight: 700;
+        }
+
+        .evidence-grade.media {
+            color: #eab308;
+        }
+
         .priority-badge {
             display: inline-block;
             padding: 2px 8px;
@@ -759,6 +767,50 @@
             }
         }
 
+        function normalizeText(value) {
+            if (!value || typeof value !== 'string') {
+                return '';
+            }
+            return value
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .trim();
+        }
+
+        function getEvidenceClass(grau) {
+            const normalized = normalizeText(grau);
+            if (!normalized) {
+                return '';
+            }
+            if (normalized === 'media') {
+                return 'media';
+            }
+            return '';
+        }
+
+        function buildReferenceContent(rec) {
+            if (!rec || typeof rec !== 'object') {
+                return '';
+            }
+
+            if (rec.referencia_html) {
+                return rec.referencia_html;
+            }
+
+            const titleNormalized = normalizeText(rec.titulo || '');
+
+            if (titleNormalized.includes('microalbuminuria') && titleNormalized.includes('urina')) {
+                return '<a href="https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356" target="_blank" rel="noopener noreferrer">AHA/ACC 2025</a>';
+            }
+
+            if (titleNormalized.includes('densitometria') && titleNormalized.includes('dexa')) {
+                return '<a href="https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening" target="_blank" rel="noopener noreferrer">USPSTF 2025</a>';
+            }
+
+            return rec.referencia || '';
+        }
+
         function displayRecommendations(recommendations) {
             const container = document.getElementById('recommendations');
             container.innerHTML = '';
@@ -779,6 +831,12 @@
                     categoryRecs.forEach(rec => {
                         const subtitulo = (rec && rec.subtitulo) ? rec.subtitulo : '';
                         const grau = (rec && rec.grau_evidencia) ? rec.grau_evidencia : '';
+                        const referenceContent = buildReferenceContent(rec);
+                        const evidenceClasses = ['evidence-grade'];
+                        const extraEvidenceClass = getEvidenceClass(grau);
+                        if (extraEvidenceClass) {
+                            evidenceClasses.push(extraEvidenceClass);
+                        }
                         const recDiv = document.createElement('div');
                         recDiv.className = `recommendation-item ${rec.prioridade}`;
                         recDiv.innerHTML = `
@@ -788,11 +846,11 @@
                             </div>
                             ${subtitulo ? `<div class="recommendation-description" style="font-weight:600; color:#2d3748;">${subtitulo}</div>` : ''}
                             <div class="recommendation-description">${rec.descricao}</div>
-                            <div class="recommendation-reference">${rec.referencia}${grau ? ` • Grau de evidência: <strong>${grau}</strong>` : ''}</div>
+                            <div class="recommendation-reference">${referenceContent}${grau ? ` • Grau de evidência: <strong class="${evidenceClasses.join(' ')}">${grau}</strong>` : ''}</div>
                         `;
                         categoryDiv.appendChild(recDiv);
                     });
-                    
+
                     container.appendChild(categoryDiv);
                 }
             });
