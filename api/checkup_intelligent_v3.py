@@ -380,6 +380,33 @@ class handler(BaseHTTPRequestHandler):
                     "categoria": "Outras recomendações"
                 })
 
+            # Triagens de saúde mental (USPSTF 2023)
+            if 18 <= idade <= 64:
+                add_recommendation({
+                    "titulo": "Questionário GAD-7 (Triagem de Ansiedade)",
+                    "descricao": "Aplicar GAD-7 para rastrear transtornos de ansiedade em adultos até 64 anos, incluindo gestantes e puérperas.",
+                    "prioridade": "média",
+                    "referencia": "USPSTF 2023 - Triagem de Ansiedade",
+                    "categoria": "Outras recomendações"
+                })
+
+            if idade >= 18:
+                add_recommendation({
+                    "titulo": "Questionário PHQ-9 (Triagem de Depressão)",
+                    "descricao": "Aplicar PHQ-9 para rastrear depressão em adultos, incluindo gestantes, puérperas e idosos.",
+                    "prioridade": "média",
+                    "referencia": "USPSTF 2023 - Triagem de Depressão",
+                    "categoria": "Outras recomendações"
+                })
+
+                add_recommendation({
+                    "titulo": "Profilaxia Pré-Exposição ao HIV (PrEP)",
+                    "descricao": "Oferecer PrEP para adultos e adolescentes ≥35 kg com risco aumentado para infecção pelo HIV.",
+                    "prioridade": "alta",
+                    "referencia": "USPSTF 2023 - PrEP (Grau A)",
+                    "categoria": "Outras recomendações"
+                })
+
             # Rastreamento de Câncer de Próstata
             if sexo == "masculino" and 55 <= idade <= 69:
                 add_recommendation({
@@ -394,7 +421,7 @@ class handler(BaseHTTPRequestHandler):
                 })
 
             # === RASTREAMENTOS DE DIABETES (DESAGRUPADO EM EXAMES INDIVIDUAIS) ===
-            
+
             # Rastreamento de diabetes - exames individuais (ADA 2025)
             sobrepeso_obesidade = data.get("sobrepeso_obesidade") == "on"
             fatores_risco_diabetes = any([
