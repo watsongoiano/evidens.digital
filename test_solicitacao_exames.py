@@ -49,6 +49,21 @@ def test_gerar_solicitacao_exames():
                 "titulo": "Colesterol Total e Frações",
                 "categoria": "Exames Laboratoriais",
                 "descricao": "Dosagem de colesterol"
+            },
+            {
+                "titulo": "Colonoscopia com ou sem biópsia",
+                "categoria": "Rastreamento",
+                "descricao": "Colonoscopia para rastreamento colorretal"
+            },
+            {
+                "titulo": "Lipoproteína(a) - Lp(a), soro",
+                "categoria": "Estratificação Cardiovascular",
+                "descricao": "Marcador complementar para estratificação de risco"
+            },
+            {
+                "titulo": "Proteína C Reativa ultrassensível (hsCRP), soro",
+                "categoria": "Estratificação Cardiovascular",
+                "descricao": "Marcador inflamatório para estratificação de risco"
             }
         ]
     }
@@ -73,6 +88,10 @@ def test_gerar_solicitacao_exames():
         print(f"   ✅ Exames de imagem encontrados: {len(exames_img)}")
         for exame in exames_img:
             print(f"      - {exame}")
+
+        assert "Lipoproteína(a) - Lp(a), soro" in exames_lab, "Lp(a) deveria ser categorizado como exame laboratorial"
+        assert "Proteína C Reativa ultrassensível (hsCRP), soro" in exames_lab, "hsCRP deveria ser categorizado como exame laboratorial"
+        assert "Colonoscopia com ou sem biópsia" in exames_img, "Colonoscopia deveria ser categorizada como exame de imagem"
         
         # Teste 2: Geração de PDF para exames laboratoriais
         if exames_lab:

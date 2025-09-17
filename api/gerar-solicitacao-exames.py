@@ -1,7 +1,7 @@
 from http.server import BaseHTTPRequestHandler
 import json
-import io
 import base64
+import unicodedata
 from datetime import datetime
 from fpdf import FPDF
 
@@ -33,6 +33,119 @@ def _sanitize_name_for_filename(value: object) -> str:
 
     base_name = _normalize_text(value).strip() or "Paciente"
     return base_name.replace(" ", "_")
+
+
+def _normalize_for_matching(value: object) -> str:
+    """Return a normalized representation for keyword matching."""
+
+    text = _normalize_text(value)
+    if not text:
+        return ""
+
+    decomposed = unicodedata.normalize('NFD', text)
+    stripped = ''.join(ch for ch in decomposed if unicodedata.category(ch) != 'Mn')
+    return stripped.casefold()
+
+
+LAB_CATEGORY_KEYWORDS = (
+    'laboratorio',
+    'laboratorial',
+    'laboratoriais',
+    'lab',
+)
+
+IMAGING_CATEGORY_KEYWORDS = (
+    'imagem',
+    'radiologia',
+)
+
+LAB_TITLE_KEYWORDS = (
+    'soro',
+    'sangue',
+    'serum',
+    'plasma',
+    'urina',
+    'fezes',
+    'hemograma',
+    'hemoglob',
+    'glic',
+    'colesterol',
+    'lipoproteina',
+    'lp(a',
+    'lpa',
+    'apolipoprote',
+    'hscrp',
+    'proteina c reativa',
+    'psa',
+    'totg',
+    'tsh',
+    'creatinina',
+    'ureia',
+    'microalbumin',
+    'ferritina',
+    'transferrina',
+    'vitamina d',
+    'homocisteina',
+    'd-dimero',
+    'dimero',
+    'hiv',
+    'hepatite',
+)
+
+IMAGING_TITLE_KEYWORDS = (
+    'tomograf',
+    'resson',
+    'ultrass',
+    'ultrason',
+    'ecografia',
+    'ecocardio',
+    'eletrocardiograma',
+    'mamograf',
+    'colonoscop',
+    'densitometr',
+    'raio x',
+    'raiox',
+    'radiograf',
+    'mapa',
+    'mrpa',
+    'holter',
+    'strain',
+    'score de calcio',
+    'calcio coron',
+    'tcbd',
+    'doppler',
+    'angiotom',
+    'angiograf',
+    'cintilograf',
+    'pet',
+    'dexa',
+)
+
+
+def _classify_exam_type(rec: dict) -> str:
+    """Return ``imagem`` or ``laboratorial`` based on exam metadata."""
+
+    categoria = _normalize_for_matching(rec.get('categoria'))
+    titulo = _normalize_for_matching(rec.get('titulo'))
+    subtitulo = _normalize_for_matching(rec.get('subtitulo'))
+    descricao = _normalize_for_matching(rec.get('descricao'))
+
+    if not titulo:
+        return ''
+
+    if any(keyword in categoria for keyword in IMAGING_CATEGORY_KEYWORDS):
+        return 'imagem'
+    if any(keyword in categoria for keyword in LAB_CATEGORY_KEYWORDS):
+        return 'laboratorial'
+
+    combined = ' '.join(filter(None, (titulo, subtitulo, descricao)))
+
+    if any(keyword in combined for keyword in IMAGING_TITLE_KEYWORDS):
+        return 'imagem'
+    if any(keyword in combined for keyword in LAB_TITLE_KEYWORDS):
+        return 'laboratorial'
+
+    return 'laboratorial'
 
 class SolicitacaoExamePDF(FPDF):
     def __init__(self):
@@ -111,30 +224,31 @@ class SolicitacaoExamePDF(FPDF):
             self.ln(1)
 
 def categorizar_exames(recommendations):
-    """Categoriza exames em Laboratoriais e de Imagem"""
+    """Categoriza exames em laboratoriais e de imagem de forma resiliente."""
 
     exames_laboratoriais = []
     exames_imagem = []
+    vistos_laboratoriais = set()
+    vistos_imagem = set()
 
     for rec in _ensure_list(recommendations):
         if not isinstance(rec, dict):
             continue
 
-        categoria = _normalize_text(rec.get('categoria')).lower()
-        titulo = _normalize_text(rec.get('titulo'))
-
+        titulo = _normalize_text(rec.get('titulo')).strip()
         if not titulo:
             continue
 
-        if 'laboratorial' in categoria or 'exames laboratoriais' in categoria:
-            exames_laboratoriais.append(titulo)
-        elif 'imagem' in categoria or 'exames de imagem' in categoria:
-            exames_imagem.append(titulo)
-        elif any(keyword in titulo.lower() for keyword in ['tomografia', 'ressonância', 'ultrassom', 'raio-x', 'mamografia', 'densitometria']):
-            exames_imagem.append(titulo)
+        tipo = _classify_exam_type(rec)
+
+        if tipo == 'imagem':
+            if titulo not in vistos_imagem:
+                exames_imagem.append(titulo)
+                vistos_imagem.add(titulo)
         else:
-            # Por padrão, considera como laboratorial
-            exames_laboratoriais.append(titulo)
+            if titulo not in vistos_laboratoriais:
+                exames_laboratoriais.append(titulo)
+                vistos_laboratoriais.add(titulo)
 
     return exames_laboratoriais, exames_imagem
 
@@ -185,7 +299,8 @@ class handler(BaseHTTPRequestHandler):
             recommendations = _ensure_list(data.get('recommendations'))
             patient_data = _ensure_dict(data.get('patient_data'))
             medico_data = _ensure_dict(data.get('medico'))
-            tipo_exame = data.get('tipo_exame', 'todos')  # 'laboratorial', 'imagem', ou 'todos'
+            raw_tipo_exame = data.get('tipo_exame', 'todos')
+            tipo_exame = _normalize_text(raw_tipo_exame, default='todos').lower() or 'todos'
 
             # Dados do médico (podem vir dos dados do paciente ou serem padrão)
             dados_medico = {
@@ -201,23 +316,30 @@ class handler(BaseHTTPRequestHandler):
                 'idade': patient_data.get('idade')
             }
             
+            todos_os_exames = [
+                titulo
+                for rec in recommendations
+                if isinstance(rec, dict)
+                for titulo in [_normalize_text(rec.get('titulo')).strip()]
+                if titulo
+            ]
+
+            categorizados_laboratoriais, categorizados_imagem = categorizar_exames(recommendations)
+
             pdfs_gerados = []
-            
+            exames_laboratoriais = []
+            exames_imagem = []
+
             # Processar baseado no tipo solicitado
             if tipo_exame == 'laboratorial':
-                # Gerar apenas PDF de exames laboratoriais
-                exames = [
-                    titulo
-                    for rec in recommendations
-                    if isinstance(rec, dict)
-                    for titulo in [_normalize_text(rec.get('titulo')).strip()]
-                    if titulo
-                ]
+                exames = categorizados_laboratoriais or todos_os_exames
+                exames_laboratoriais = exames
+                exames_imagem = categorizados_imagem
                 if exames:
                     pdf_lab = gerar_pdf_solicitacao(
-                        exames, 
-                        'Laboratorial', 
-                        dados_medico, 
+                        exames,
+                        'Laboratorial',
+                        dados_medico,
                         dados_paciente
                     )
                     pdfs_gerados.append({
@@ -226,21 +348,16 @@ class handler(BaseHTTPRequestHandler):
                         'content': base64.b64encode(pdf_lab).decode('utf-8'),
                         'exames_count': len(exames)
                     })
-                    
+
             elif tipo_exame == 'imagem':
-                # Gerar apenas PDF de exames de imagem
-                exames = [
-                    titulo
-                    for rec in recommendations
-                    if isinstance(rec, dict)
-                    for titulo in [_normalize_text(rec.get('titulo')).strip()]
-                    if titulo
-                ]
+                exames = categorizados_imagem or todos_os_exames
+                exames_imagem = exames
+                exames_laboratoriais = categorizados_laboratoriais
                 if exames:
                     pdf_img = gerar_pdf_solicitacao(
-                        exames, 
-                        'Imagem', 
-                        dados_medico, 
+                        exames,
+                        'Imagem',
+                        dados_medico,
                         dados_paciente
                     )
                     pdfs_gerados.append({
@@ -249,17 +366,18 @@ class handler(BaseHTTPRequestHandler):
                         'content': base64.b64encode(pdf_img).decode('utf-8'),
                         'exames_count': len(exames)
                     })
-                    
+
             else:
                 # Comportamento original - categorizar e gerar ambos
-                exames_laboratoriais, exames_imagem = categorizar_exames(recommendations)
-                
+                exames_laboratoriais = categorizados_laboratoriais
+                exames_imagem = categorizados_imagem
+
                 # Gerar PDF para exames laboratoriais
                 if exames_laboratoriais:
                     pdf_lab = gerar_pdf_solicitacao(
-                        exames_laboratoriais, 
-                        'Laboratorial', 
-                        dados_medico, 
+                        exames_laboratoriais,
+                        'Laboratorial',
+                        dados_medico,
                         dados_paciente
                     )
                     pdfs_gerados.append({
@@ -268,13 +386,13 @@ class handler(BaseHTTPRequestHandler):
                         'content': base64.b64encode(pdf_lab).decode('utf-8'),
                         'exames_count': len(exames_laboratoriais)
                     })
-                
+
                 # Gerar PDF para exames de imagem
                 if exames_imagem:
                     pdf_img = gerar_pdf_solicitacao(
-                        exames_imagem, 
-                        'Imagem', 
-                        dados_medico, 
+                        exames_imagem,
+                        'Imagem',
+                        dados_medico,
                         dados_paciente
                     )
                     pdfs_gerados.append({
@@ -285,27 +403,19 @@ class handler(BaseHTTPRequestHandler):
                     })
             
             # Se não há exames categorizados, gerar um PDF geral
-            if not pdfs_gerados:
-                todos_exames = [
-                    titulo
-                    for rec in recommendations
-                    if isinstance(rec, dict)
-                    for titulo in [_normalize_text(rec.get('titulo')).strip()]
-                    if titulo
-                ]
-                if todos_exames:
-                    pdf_geral = gerar_pdf_solicitacao(
-                        todos_exames, 
-                        'Geral', 
-                        dados_medico, 
-                        dados_paciente
-                    )
-                    pdfs_gerados.append({
-                        'tipo': 'Geral',
-                        'filename': f'Solicitacao_Exames_{_sanitize_name_for_filename(dados_paciente.get("nome"))}_{datetime.now().strftime("%Y%m%d")}.pdf',
-                        'content': base64.b64encode(pdf_geral).decode('utf-8'),
-                        'exames_count': len(todos_exames)
-                    })
+            if not pdfs_gerados and todos_os_exames:
+                pdf_geral = gerar_pdf_solicitacao(
+                    todos_os_exames,
+                    'Geral',
+                    dados_medico,
+                    dados_paciente
+                )
+                pdfs_gerados.append({
+                    'tipo': 'Geral',
+                    'filename': f'Solicitacao_Exames_{_sanitize_name_for_filename(dados_paciente.get("nome"))}_{datetime.now().strftime("%Y%m%d")}.pdf',
+                    'content': base64.b64encode(pdf_geral).decode('utf-8'),
+                    'exames_count': len(todos_os_exames)
+                })
             
             # Resposta JSON com os PDFs gerados
             response = {
