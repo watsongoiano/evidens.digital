@@ -185,6 +185,7 @@ class handler(BaseHTTPRequestHandler):
             recommendations = _ensure_list(data.get('recommendations'))
             patient_data = _ensure_dict(data.get('patient_data'))
             medico_data = _ensure_dict(data.get('medico'))
+            tipo_exame = data.get('tipo_exame', 'todos')  # 'laboratorial', 'imagem', ou 'todos'
 
             # Dados do médico (podem vir dos dados do paciente ou serem padrão)
             dados_medico = {
@@ -200,40 +201,88 @@ class handler(BaseHTTPRequestHandler):
                 'idade': patient_data.get('idade')
             }
             
-            # Categorizar exames
-            exames_laboratoriais, exames_imagem = categorizar_exames(recommendations)
-            
             pdfs_gerados = []
             
-            # Gerar PDF para exames laboratoriais
-            if exames_laboratoriais:
-                pdf_lab = gerar_pdf_solicitacao(
-                    exames_laboratoriais, 
-                    'Laboratorial', 
-                    dados_medico, 
-                    dados_paciente
-                )
-                pdfs_gerados.append({
-                    'tipo': 'Laboratorial',
-                    'filename': f'Solicitacao_Laboratorial_{_sanitize_name_for_filename(dados_paciente.get("nome"))}_{datetime.now().strftime("%Y%m%d")}.pdf',
-                    'content': base64.b64encode(pdf_lab).decode('utf-8'),
-                    'exames_count': len(exames_laboratoriais)
-                })
-            
-            # Gerar PDF para exames de imagem
-            if exames_imagem:
-                pdf_img = gerar_pdf_solicitacao(
-                    exames_imagem, 
-                    'Imagem', 
-                    dados_medico, 
-                    dados_paciente
-                )
-                pdfs_gerados.append({
-                    'tipo': 'Imagem',
-                    'filename': f'Solicitacao_Imagem_{_sanitize_name_for_filename(dados_paciente.get("nome"))}_{datetime.now().strftime("%Y%m%d")}.pdf',
-                    'content': base64.b64encode(pdf_img).decode('utf-8'),
-                    'exames_count': len(exames_imagem)
-                })
+            # Processar baseado no tipo solicitado
+            if tipo_exame == 'laboratorial':
+                # Gerar apenas PDF de exames laboratoriais
+                exames = [
+                    titulo
+                    for rec in recommendations
+                    if isinstance(rec, dict)
+                    for titulo in [_normalize_text(rec.get('titulo')).strip()]
+                    if titulo
+                ]
+                if exames:
+                    pdf_lab = gerar_pdf_solicitacao(
+                        exames, 
+                        'Laboratorial', 
+                        dados_medico, 
+                        dados_paciente
+                    )
+                    pdfs_gerados.append({
+                        'tipo': 'Laboratorial',
+                        'filename': f'Solicitacao_Laboratorial_{_sanitize_name_for_filename(dados_paciente.get("nome"))}_{datetime.now().strftime("%Y%m%d")}.pdf',
+                        'content': base64.b64encode(pdf_lab).decode('utf-8'),
+                        'exames_count': len(exames)
+                    })
+                    
+            elif tipo_exame == 'imagem':
+                # Gerar apenas PDF de exames de imagem
+                exames = [
+                    titulo
+                    for rec in recommendations
+                    if isinstance(rec, dict)
+                    for titulo in [_normalize_text(rec.get('titulo')).strip()]
+                    if titulo
+                ]
+                if exames:
+                    pdf_img = gerar_pdf_solicitacao(
+                        exames, 
+                        'Imagem', 
+                        dados_medico, 
+                        dados_paciente
+                    )
+                    pdfs_gerados.append({
+                        'tipo': 'Imagem',
+                        'filename': f'Solicitacao_Imagem_{_sanitize_name_for_filename(dados_paciente.get("nome"))}_{datetime.now().strftime("%Y%m%d")}.pdf',
+                        'content': base64.b64encode(pdf_img).decode('utf-8'),
+                        'exames_count': len(exames)
+                    })
+                    
+            else:
+                # Comportamento original - categorizar e gerar ambos
+                exames_laboratoriais, exames_imagem = categorizar_exames(recommendations)
+                
+                # Gerar PDF para exames laboratoriais
+                if exames_laboratoriais:
+                    pdf_lab = gerar_pdf_solicitacao(
+                        exames_laboratoriais, 
+                        'Laboratorial', 
+                        dados_medico, 
+                        dados_paciente
+                    )
+                    pdfs_gerados.append({
+                        'tipo': 'Laboratorial',
+                        'filename': f'Solicitacao_Laboratorial_{_sanitize_name_for_filename(dados_paciente.get("nome"))}_{datetime.now().strftime("%Y%m%d")}.pdf',
+                        'content': base64.b64encode(pdf_lab).decode('utf-8'),
+                        'exames_count': len(exames_laboratoriais)
+                    })
+                
+                # Gerar PDF para exames de imagem
+                if exames_imagem:
+                    pdf_img = gerar_pdf_solicitacao(
+                        exames_imagem, 
+                        'Imagem', 
+                        dados_medico, 
+                        dados_paciente
+                    )
+                    pdfs_gerados.append({
+                        'tipo': 'Imagem',
+                        'filename': f'Solicitacao_Imagem_{_sanitize_name_for_filename(dados_paciente.get("nome"))}_{datetime.now().strftime("%Y%m%d")}.pdf',
+                        'content': base64.b64encode(pdf_img).decode('utf-8'),
+                        'exames_count': len(exames_imagem)
+                    })
             
             # Se não há exames categorizados, gerar um PDF geral
             if not pdfs_gerados:
