@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import List, Dict
+import unicodedata
 
 def _split_refs(ref: str) -> List[str]:
     if not ref:
@@ -14,7 +15,10 @@ def _split_refs(ref: str) -> List[str]:
     return [p for p in parts if p]
 
 def _norm(s: str) -> str:
-    return (s or '').strip().lower()
+    if not s:
+        return ''
+    normalized = unicodedata.normalize('NFD', s.strip().lower())
+    return ''.join(ch for ch in normalized if unicodedata.category(ch) != 'Mn')
 
 def _contains_any(haystack: str, needles: List[str]) -> bool:
     return any(n in haystack for n in needles)
@@ -64,6 +68,8 @@ def _resolve_url_by_org(token_lc: str, title_lc: str) -> str:
     if token_lc.startswith('ada'):
         return 'https://diabetesjournals.org/care/issue/47/Supplement_1'
     if 'aha/acc' in token_lc:
+        if _contains_any(title_lc, ['microalbuminuria']):
+            return 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356'
         if _contains_any(title_lc, ['hscrp', 'lpa', 'apo', 'cálcio coron', 'calcio coron', 'perfil lip', 'dislip']):
             return 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000678'
         return 'https://www.ahajournals.org/journal/circ'

@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template_string, Response
 import json
 import math
+import unicodedata
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from src.utils.analytics import analytics
@@ -9,6 +10,49 @@ from src.models.user import db
 from src.models.medical import Patient, Checkup, Recomendacao
 
 checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
+
+
+REFERENCE_OVERRIDE_RULES = [
+    {
+        'keywords': ['microalbuminuria', 'urina'],
+        'label': 'AHA/ACC 2025',
+        'url': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356'
+    },
+    {
+        'keywords': ['densitometria', 'dexa'],
+        'label': 'USPSTF 2025',
+        'url': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening'
+    }
+]
+
+
+def _normalize_text(value: str) -> str:
+    if not value:
+        return ''
+    normalized = unicodedata.normalize('NFD', str(value))
+    return ''.join(ch for ch in normalized if unicodedata.category(ch) != 'Mn').lower().strip()
+
+
+def _apply_reference_overrides(recommendations):
+    if not isinstance(recommendations, list):
+        return
+
+    for rec in recommendations:
+        if not isinstance(rec, dict):
+            continue
+
+        title_norm = _normalize_text(rec.get('titulo', ''))
+        if not title_norm:
+            continue
+
+        for rule in REFERENCE_OVERRIDE_RULES:
+            if all(keyword in title_norm for keyword in rule['keywords']):
+                label = rule['label']
+                url = rule['url']
+                rec['referencia'] = label
+                rec['referencias'] = [{'label': label, 'url': url}]
+                rec['referencia_html'] = build_reference_html(rec['referencias'])
+                break
 
 def _wants_html(req: request) -> bool:
     """Detect if the client expects HTML output.
@@ -487,6 +531,11 @@ def generate_intelligent_recommendations():
                     rec['referencia_html'] = build_reference_html(links)
         except Exception as _e:
             # Não bloquear resposta por erro de link
+            pass
+
+        try:
+            _apply_reference_overrides(recommendations)
+        except Exception:
             pass
 
         # Registrar analytics
