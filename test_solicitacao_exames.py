@@ -55,6 +55,11 @@ def test_gerar_solicitacao_exames():
                 "titulo": "Proteína C Reativa ultrassensível (hsCRP), soro",
                 "categoria": "Estratificação Cardiovascular",
                 "descricao": "Marcador inflamatório para estratificação de risco"
+            },
+            {
+                "titulo": "Citologia Cervical + Teste de HPV",
+                "categoria": "Outras recomendações",
+                "descricao": "Co-teste (citologia + HPV) a cada 5 anos para mulheres de 30-65 anos"
             }
         ]
     }
@@ -103,7 +108,7 @@ def test_gerar_solicitacao_exames():
         print(f"   Img keywords encontradas: {img_matches}")
         
         exames_lab, exames_img = categorizar_exames(test_data["recommendations"])
-        
+
         print(f"   ✅ Exames laboratoriais encontrados: {len(exames_lab)}")
         for exame in exames_lab:
             print(f"      - {exame}")
@@ -115,6 +120,9 @@ def test_gerar_solicitacao_exames():
         assert "Lipoproteína(a) - Lp(a), soro" in exames_lab, "Lp(a) deveria ser categorizado como exame laboratorial"
         assert "Proteína C Reativa ultrassensível (hsCRP), soro" in exames_lab, "hsCRP deveria ser categorizado como exame laboratorial"
         assert "Colonoscopia com ou sem biópsia" in exames_img, "Colonoscopia deveria ser categorizada como exame de imagem"
+        assert "Citologia Cervical + Teste de HPV" not in exames_lab, "O coteste deve ser substituído por exames específicos"
+        assert "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular, autocoleta" in exames_lab, "O teste de HPV por técnica molecular (autocoleta) deve ser solicitado"
+        assert "Citologia cérvico-vaginal, em base líqüida, material vaginal e colo uterino" in exames_lab, "A citologia em base líqüida deve ser solicitada junto com o coteste"
         
         # Teste 2: Geração de PDF para exames laboratoriais
         if exames_lab:
