@@ -2,6 +2,7 @@
 Main Flask application with authentication system
 """
 
+import os
 from flask import Flask, request, jsonify, redirect, send_from_directory, render_template_string, url_for
 from flask_login import LoginManager, login_required, current_user
 from flask_migrate import Migrate
@@ -126,9 +127,7 @@ def create_app():
     def javascript(filename):
         return send_from_directory('js', filename)
     
-    @app.route('/api/<path:filename>')
-    def api_files(filename):
-        return send_from_directory('api', filename)
+    # Removed conflicting /api/<path:filename> route to avoid conflicts with auth API
     
     @app.route('/src/<path:filename>')
     def src_files(filename):

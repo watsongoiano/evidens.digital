@@ -38,7 +38,7 @@
                     <button class="tab-button active" data-role="medico">
                         Profissional de saúde
                     </button>
-                    <button class="tab-button" data-role="administrador">
+                    <button class="tab-button" data-role="admin">
                         Administrador
                     </button>
                 </div>
@@ -221,6 +221,95 @@
     </main>
 
     <!-- Scripts -->
-    <script src="js/auth.js"></script>
-</body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inline auth script loaded');
+            
+            let currentRole = 'medico';
+            
+            // Role tab switching
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.tab-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Update current role
+                    currentRole = this.dataset.role;
+                    console.log('Role switched to:', currentRole);
+                });
+            });
+            
+            // Login button click
+            const loginBtn = document.querySelector('button[type="submit"]');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    handleLogin();
+                });
+            }
+            
+            function handleLogin() {
+                console.log('Login attempt started');
+                
+                const email = document.querySelector('input[placeholder="Email Address"]').value;
+                const password = document.querySelector('input[placeholder="Password"]').value;
+                
+                console.log('Email:', email, 'Role:', currentRole);
+                
+                if (!email || !password) {
+                    alert('Por favor, preencha todos os campos.');
+                    return;
+                }
+                
+                // Show loading state
+                const originalText = loginBtn.textContent;
+                loginBtn.textContent = 'Entrando...';
+                loginBtn.disabled = true;
+                
+                // Make API call
+                fetch(`/api/login/${currentRole}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    
+                    if (data.ok) {
+                        console.log('Login successful, redirecting to:', data.redirect);
+                        window.location.href = data.redirect;
+                    } else {
+                        alert('Erro ao fazer login: ' + (data.message || 'Verifique suas credenciais.'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Login error:', error);
+                    alert('Erro ao fazer login. Tente novamente.');
+                })
+                .finally(() => {
+                    // Reset button state
+                    loginBtn.textContent = originalText;
+                    loginBtn.disabled = false;
+                });
+            }
+            
+            console.log('Inline auth script initialized');
+        });
+    </script></body>
 </html>

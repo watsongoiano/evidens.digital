@@ -1,0 +1,2472 @@
+=== ARQUIVOS PRINCIPAIS DO SISTEMA DE LOGIN ===
+
+=== app_with_auth.py ===
+"""
+Main Flask application with authentication system
+"""
+
+from flask import Flask, request, jsonify, redirect, send_from_directory, render_template_string, url_for
+from flask_login import LoginManager, login_required, current_user
+from flask_migrate import Migrate
+from flask_cors import CORS
+from src.models.user import db, User
+from src.routes.auth import auth_bp
+from src.utils.oauth import oauth_provider
+from src.utils.rate_limiter import RateLimiter
+
+def create_app():
+    """Create and configure the Flask application"""
+    app = Flask(__name__)
+    
+    # Configuration
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+    # Database configuration
+    database_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src', 'database', 'app.db')
+    os.makedirs(os.path.dirname(database_path), exist_ok=True)
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'sqlite:///{database_path}')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # OAuth Configuration
+    app.config['GOOGLE_CLIENT_ID'] = os.getenv('GOOGLE_CLIENT_ID')
+    app.config['GOOGLE_CLIENT_SECRET'] = os.getenv('GOOGLE_CLIENT_SECRET')
+    app.config['APPLE_CLIENT_ID'] = os.getenv('APPLE_CLIENT_ID')
+    app.config['APPLE_CLIENT_SECRET'] = os.getenv('APPLE_CLIENT_SECRET')
+    app.config['APPLE_KEY_ID'] = os.getenv('APPLE_KEY_ID')
+    app.config['APPLE_TEAM_ID'] = os.getenv('APPLE_TEAM_ID')
+    
+    # Rate Limiting Configuration
+    app.config['REDIS_URL'] = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+    
+    # Initialize extensions
+    db.init_app(app)
+    CORS(app, supports_credentials=True)
+    
+    # Initialize Flask-Login
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'login'
+    login_manager.login_message = 'Por favor, faça login para acessar esta página.'
+    login_manager.login_message_category = 'info'
+    
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+    
+    # Initialize OAuth
+    oauth_provider.init_app(app)
+    
+    # Initialize database migration
+    migrate = Migrate(app, db)
+    
+    # Register blueprints
+    app.register_blueprint(auth_bp, url_prefix='/api')
+    
+    # Test route for debugging
+    @app.route('/api/test-login', methods=['POST'])
+    def test_login():
+        """Test login endpoint for debugging"""
+        from flask import request, jsonify
+        from src.models.user import User
+        
+        data = request.get_json()
+        email = data.get('email', '').lower().strip()
+        password = data.get('password', '')
+        
+        user = User.query.filter_by(email=email).first()
+        
+        if not user:
+            return jsonify({"error": "User not found", "email": email}), 404
+        
+        password_valid = user.check_password(password)
+        
+        return jsonify({
+            "user_found": True,
+            "email": user.email,
+            "role": user.role,
+            "password_valid": password_valid,
+            "expected_role": "medico"
+        })
+    
+    # Routes
+    @app.route('/')
+    def index():
+        """Home page"""
+        if current_user.is_authenticated:
+            return redirect('/dashboard')
+        return send_from_directory('.', 'index.html')
+    
+    @app.route('/login')
+    def login():
+        """Login page"""
+        if current_user.is_authenticated:
+            return redirect('/dashboard')
+        return send_from_directory('.', 'login.html')
+    
+    @app.route('/dashboard')
+    @login_required
+    def dashboard():
+        """Dashboard page - requires authentication"""
+        return send_from_directory('.', 'dashboard.html')
+    
+    @app.route('/intelligent-tools')
+    def intelligent_tools():
+        """Intelligent tools page"""
+        return send_from_directory('.', 'intelligent-tools.html')
+    
+    @app.route('/analytics')
+    @login_required
+    def analytics():
+        """Analytics page - requires authentication"""
+        # For now, redirect to intelligent tools
+        return redirect('/intelligent-tools')
+    
+    # Static file routes
+    @app.route('/styles/<path:filename>')
+    def styles(filename):
+        return send_from_directory('styles', filename)
+    
+    @app.route('/js/<path:filename>')
+    def javascript(filename):
+        return send_from_directory('js', filename)
+    
+    @app.route('/api/<path:filename>')
+    def api_files(filename):
+        return send_from_directory('api', filename)
+    
+    @app.route('/src/<path:filename>')
+    def src_files(filename):
+        return send_from_directory('src', filename)
+    
+    # Error handlers
+    @app.errorhandler(404)
+    def not_found(error):
+        return render_template_string('''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>404 - Página não encontrada</title>
+            <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                h1 { color: #E74C3C; }
+                a { color: #4A90E2; text-decoration: none; }
+            </style>
+        </head>
+        <body>
+            <h1>404 - Página não encontrada</h1>
+            <p>A página que você está procurando não existe.</p>
+            <a href="/">Voltar ao início</a>
+        </body>
+        </html>
+        '''), 404
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        db.session.rollback()
+        return render_template_string('''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>500 - Erro interno</title>
+            <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                h1 { color: #E74C3C; }
+                a { color: #4A90E2; text-decoration: none; }
+            </style>
+        </head>
+        <body>
+            <h1>500 - Erro interno do servidor</h1>
+            <p>Ocorreu um erro interno. Tente novamente mais tarde.</p>
+            <a href="/">Voltar ao início</a>
+        </body>
+        </html>
+        '''), 500
+    
+    # Create database tables
+    with app.app_context():
+        db.create_all()
+    
+    return app
+
+# For backwards compatibility, keep the original app.py structure
+app = create_app()
+
+if __name__ == '__main__':
+    # Development server
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    port = int(os.getenv('PORT', 5000))
+    
+    print("🚀 Starting evidēns application...")
+    print(f"   Debug mode: {debug_mode}")
+    print(f"   Port: {port}")
+    
+    app.run(
+        host='0.0.0.0',
+        port=port,
+        debug=debug_mode
+    )
+
+
+
+=== src/routes/auth.py ===
+from flask import Blueprint, request, jsonify, session, redirect, url_for
+from flask_login import login_user, logout_user, login_required, current_user
+from datetime import datetime
+from src.models.user import User, LoginAttempt, db
+from src.utils.rate_limiter import rate_limit
+from src.utils.oauth import google_oauth, apple_oauth
+import os
+import re
+
+auth_bp = Blueprint('auth', __name__, url_prefix='/api')
+
+def validate_email(email):
+    """Validate email format"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+def log_login_attempt(email, success, failure_reason=None, oauth_provider=None):
+    """Log login attempt for audit purposes"""
+    attempt = LoginAttempt(
+        email=email,
+        ip_address=request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr),
+        user_agent=request.headers.get('User-Agent'),
+        success=success,
+        failure_reason=failure_reason,
+        oauth_provider=oauth_provider
+    )
+    db.session.add(attempt)
+    db.session.commit()
+
+def perform_login(email, password, expected_role):
+    """Perform login with security checks"""
+    if not email or not password:
+        return {"ok": False, "error": "EMAIL_PASSWORD_REQUIRED"}, 400
+    
+    if not validate_email(email):
+        return {"ok": False, "error": "INVALID_EMAIL_FORMAT"}, 400
+    
+    email = email.lower().strip()
+    user = User.query.filter_by(email=email).first()
+    
+    if not user:
+        log_login_attempt(email, False, "USER_NOT_FOUND")
+        return {"ok": False, "error": "INVALID_CREDENTIALS"}, 401
+    
+    if user.is_locked():
+        log_login_attempt(email, False, "ACCOUNT_LOCKED")
+        lockout_remaining = int((user.locked_until - datetime.utcnow()).total_seconds())
+        return {
+            "ok": False, 
+            "error": "ACCOUNT_LOCKED", 
+            "retry_after_sec": max(0, lockout_remaining)
+        }, 423
+    
+    if user.role != expected_role:
+        user.increment_failed_attempts()
+        log_login_attempt(email, False, "WRONG_ROLE")
+        return {"ok": False, "error": "INVALID_CREDENTIALS"}, 401
+    
+    if not user.check_password(password):
+        user.increment_failed_attempts()
+        log_login_attempt(email, False, "WRONG_PASSWORD")
+        return {"ok": False, "error": "INVALID_CREDENTIALS"}, 401
+    
+    # Successful login
+    user.reset_failed_attempts()
+    login_user(user, remember=True)
+    log_login_attempt(email, True)
+    
+    return {
+        "ok": True, 
+        "redirect": "/dashboard", 
+        "role": user.role,
+        "user": user.to_dict()
+    }, 200
+
+@auth_bp.route('/login/medico', methods=['POST'])
+@rate_limit("login", per_minute=10)
+def login_medico():
+    """Login endpoint for medical professionals"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"ok": False, "error": "JSON_REQUIRED"}), 400
+    
+    return jsonify(*perform_login(
+        data.get('email'), 
+        data.get('password'), 
+        'medico'
+    ))
+
+@auth_bp.route('/login/admin', methods=['POST'])
+@rate_limit("login", per_minute=5)  # Stricter rate limit for admin
+def login_admin():
+    """Login endpoint for administrators"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"ok": False, "error": "JSON_REQUIRED"}), 400
+    
+    return jsonify(*perform_login(
+        data.get('email'), 
+        data.get('password'), 
+        'administrador'
+    ))
+
+@auth_bp.route('/logout', methods=['POST'])
+@login_required
+def logout():
+    """Logout current user"""
+    logout_user()
+    return jsonify({"ok": True, "message": "Logged out successfully"})
+
+@auth_bp.route('/me', methods=['GET'])
+@login_required
+def get_current_user():
+    """Get current user information"""
+    return jsonify({
+        "ok": True,
+        "user": current_user.to_dict()
+    })
+
+@auth_bp.route('/register', methods=['POST'])
+@rate_limit("register", per_minute=3)
+def register():
+    """Register new user (admin only for now)"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"ok": False, "error": "JSON_REQUIRED"}), 400
+    
+    email = data.get('email', '').lower().strip()
+    password = data.get('password', '')
+    role = data.get('role', 'medico')
+    
+    if not email or not password:
+        return jsonify({"ok": False, "error": "EMAIL_PASSWORD_REQUIRED"}), 400
+    
+    if not validate_email(email):
+        return jsonify({"ok": False, "error": "INVALID_EMAIL_FORMAT"}), 400
+    
+    if len(password) < 8:
+        return jsonify({"ok": False, "error": "PASSWORD_TOO_SHORT"}), 400
+    
+    if role not in ['medico', 'administrador']:
+        return jsonify({"ok": False, "error": "INVALID_ROLE"}), 400
+    
+    # Check if user already exists
+    if User.query.filter_by(email=email).first():
+        return jsonify({"ok": False, "error": "EMAIL_ALREADY_EXISTS"}), 409
+    
+    # Create new user
+    user = User(email=email, role=role)
+    user.set_password(password)
+    
+    db.session.add(user)
+    db.session.commit()
+    
+    return jsonify({
+        "ok": True,
+        "message": "User created successfully",
+        "user": user.to_dict()
+    }), 201
+
+@auth_bp.route('/forgot-password', methods=['POST'])
+@rate_limit("forgot_password", per_minute=3)
+def forgot_password():
+    """Request password reset"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"ok": False, "error": "JSON_REQUIRED"}), 400
+    
+    email = data.get('email', '').lower().strip()
+    
+    if not email or not validate_email(email):
+        return jsonify({"ok": False, "error": "INVALID_EMAIL"}), 400
+    
+    user = User.query.filter_by(email=email).first()
+    
+    # Always return success to prevent email enumeration
+    if user:
+        token = user.generate_reset_token()
+        # TODO: Send email with reset link
+        # send_password_reset_email(user.email, token)
+    
+    return jsonify({
+        "ok": True,
+        "message": "If the email exists, a reset link has been sent"
+    })
+
+@auth_bp.route('/reset-password', methods=['POST'])
+@rate_limit("reset_password", per_minute=5)
+def reset_password():
+    """Reset password with token"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"ok": False, "error": "JSON_REQUIRED"}), 400
+    
+    token = data.get('token')
+    new_password = data.get('password')
+    
+    if not token or not new_password:
+        return jsonify({"ok": False, "error": "TOKEN_PASSWORD_REQUIRED"}), 400
+    
+    if len(new_password) < 8:
+        return jsonify({"ok": False, "error": "PASSWORD_TOO_SHORT"}), 400
+    
+    user = User.query.filter_by(reset_token=token).first()
+    
+    if not user or not user.verify_reset_token(token):
+        return jsonify({"ok": False, "error": "INVALID_OR_EXPIRED_TOKEN"}), 400
+    
+    user.set_password(new_password)
+    user.clear_reset_token()
+    
+    return jsonify({
+        "ok": True,
+        "message": "Password reset successfully"
+    })
+
+# OAuth routes
+@auth_bp.route('/login/google')
+def google_login():
+    """Redirect to Google OAuth"""
+    try:
+        from src.utils.oauth import google_oauth
+        role = request.args.get('role', 'medico')
+        
+        if role not in ['medico', 'administrador']:
+            return jsonify({"ok": False, "error": "INVALID_ROLE"}), 400
+        
+        return google_oauth.get_authorization_url(role)
+        
+    except ValueError as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+    except Exception as e:
+        print(f"Google OAuth error: {e}")
+        return jsonify({"ok": False, "error": "OAUTH_CONFIG_ERROR"}), 500
+
+@auth_bp.route('/auth/callback/google')
+def google_callback():
+    """Handle Google OAuth callback"""
+    try:
+        from src.utils.oauth import google_oauth
+        from flask_login import login_user
+        
+        code = request.args.get('code')
+        state = request.args.get('state')
+        error = request.args.get('error')
+        
+        if error:
+            error_description = request.args.get('error_description', 'OAuth error')
+            return redirect(f'/login?error={error_description}')
+        
+        if not code or not state:
+            return redirect('/login?error=Missing OAuth parameters')
+        
+        # Handle OAuth callback
+        user, is_new = google_oauth.handle_callback(code, state)
+        
+        # Log in user
+        login_user(user, remember=True)
+        
+        # Redirect to dashboard
+        return redirect('/dashboard')
+        
+    except ValueError as e:
+        return redirect(f'/login?error={str(e)}')
+    except Exception as e:
+        print(f"Google OAuth callback error: {e}")
+        return redirect('/login?error=OAuth authentication failed')
+
+@auth_bp.route('/login/apple')
+def apple_login():
+    """Redirect to Apple OAuth"""
+    try:
+        from src.utils.oauth import apple_oauth
+        role = request.args.get('role', 'medico')
+        
+        if role not in ['medico', 'administrador']:
+            return jsonify({"ok": False, "error": "INVALID_ROLE"}), 400
+        
+        return apple_oauth.get_authorization_url(role)
+        
+    except ValueError as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+    except Exception as e:
+        print(f"Apple OAuth error: {e}")
+        return jsonify({"ok": False, "error": "OAUTH_CONFIG_ERROR"}), 500
+
+@auth_bp.route('/auth/callback/apple', methods=['POST'])
+def apple_callback():
+    """Handle Apple OAuth callback"""
+    try:
+        from src.utils.oauth import apple_oauth
+        from flask_login import login_user
+        
+        code = request.form.get('code')
+        state = request.form.get('state')
+        id_token = request.form.get('id_token')
+        error = request.form.get('error')
+        
+        if error:
+            error_description = request.form.get('error_description', 'OAuth error')
+            return redirect(f'/login?error={error_description}')
+        
+        if not code or not state:
+            return redirect('/login?error=Missing OAuth parameters')
+        
+        # Handle OAuth callback
+        user, is_new = apple_oauth.handle_callback(code, state, id_token)
+        
+        # Log in user
+        login_user(user, remember=True)
+        
+        # Redirect to dashboard
+        return redirect('/dashboard')
+        
+    except ValueError as e:
+        return redirect(f'/login?error={str(e)}')
+    except Exception as e:
+        print(f"Apple OAuth callback error: {e}")
+        return redirect('/login?error=OAuth authentication failed')
+
+
+
+=== src/models/user.py ===
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
+from datetime import datetime, timedelta
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
+import os
+
+db = SQLAlchemy()
+ph = PasswordHasher(
+    time_cost=int(os.getenv('ARGON2_TIME_COST', 2)),
+    memory_cost=int(os.getenv('ARGON2_MEMORY_COST', 65536)),
+    parallelism=int(os.getenv('ARGON2_PARALLELISM', 1))
+)
+
+class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=True)
+    role = db.Column(db.String(20), nullable=False, default='medico')  # 'medico' or 'administrador'
+    
+    # OAuth fields
+    oauth_provider = db.Column(db.String(50), nullable=True)
+    oauth_sub = db.Column(db.String(255), nullable=True)
+    
+    # Security fields
+    failed_attempts = db.Column(db.Integer, default=0)
+    locked_until = db.Column(db.DateTime, nullable=True)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_login_at = db.Column(db.DateTime, nullable=True)
+    
+    # MFA (for future use)
+    mfa_enabled = db.Column(db.Boolean, default=False)
+    
+    # Password reset
+    reset_token = db.Column(db.String(255), nullable=True)
+    reset_token_expires = db.Column(db.DateTime, nullable=True)
+    
+    def set_password(self, password):
+        """Hash and set password using Argon2"""
+        self.password_hash = ph.hash(password)
+    
+    def check_password(self, password):
+        """Verify password using Argon2"""
+        if not self.password_hash:
+            return False
+        try:
+            ph.verify(self.password_hash, password)
+            return True
+        except VerifyMismatchError:
+            return False
+    
+    def is_locked(self):
+        """Check if account is currently locked"""
+        if self.locked_until is None:
+            return False
+        return datetime.utcnow() < self.locked_until
+    
+    def lock_account(self):
+        """Lock account for specified duration"""
+        lockout_duration = int(os.getenv('LOCKOUT_DURATION', 900))  # 15 minutes default
+        self.locked_until = datetime.utcnow() + timedelta(seconds=lockout_duration)
+        db.session.commit()
+    
+    def unlock_account(self):
+        """Unlock account and reset failed attempts"""
+        self.failed_attempts = 0
+        self.locked_until = None
+        db.session.commit()
+    
+    def increment_failed_attempts(self):
+        """Increment failed login attempts and lock if necessary"""
+        self.failed_attempts += 1
+        max_attempts = int(os.getenv('MAX_LOGIN_ATTEMPTS', 5))
+        
+        if self.failed_attempts >= max_attempts:
+            self.lock_account()
+        else:
+            db.session.commit()
+    
+    def reset_failed_attempts(self):
+        """Reset failed attempts on successful login"""
+        self.failed_attempts = 0
+        self.last_login_at = datetime.utcnow()
+        db.session.commit()
+    
+    def generate_reset_token(self):
+        """Generate password reset token"""
+        import secrets
+        self.reset_token = secrets.token_urlsafe(32)
+        self.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+        db.session.commit()
+        return self.reset_token
+    
+    def verify_reset_token(self, token):
+        """Verify password reset token"""
+        if not self.reset_token or not self.reset_token_expires:
+            return False
+        if datetime.utcnow() > self.reset_token_expires:
+            return False
+        return self.reset_token == token
+    
+    def clear_reset_token(self):
+        """Clear password reset token"""
+        self.reset_token = None
+        self.reset_token_expires = None
+        db.session.commit()
+    
+    def __repr__(self):
+        return f'<User {self.email} ({self.role})>'
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'role': self.role,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'last_login_at': self.last_login_at.isoformat() if self.last_login_at else None,
+            'mfa_enabled': self.mfa_enabled
+        }
+
+class LoginAttempt(db.Model):
+    """Audit log for login attempts"""
+    __tablename__ = 'login_attempts'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), nullable=False, index=True)
+    ip_address = db.Column(db.String(45), nullable=True)
+    user_agent = db.Column(db.Text, nullable=True)
+    success = db.Column(db.Boolean, nullable=False)
+    failure_reason = db.Column(db.String(100), nullable=True)
+    oauth_provider = db.Column(db.String(50), nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    
+    def __repr__(self):
+        status = "SUCCESS" if self.success else f"FAILED ({self.failure_reason})"
+        return f'<LoginAttempt {self.email} - {status} at {self.timestamp}>'
+
+
+
+=== login.html ===
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - evidēns</title>
+    <link rel="stylesheet" href="styles/login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>evidēns</h1>
+            </div>
+            <nav class="nav">
+                <a href="#" class="nav-link">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="login-container">
+            <!-- Left Side - Login Form -->
+            <div class="login-card">
+                <div class="login-header">
+                    <h2>Welcome Back</h2>
+                    <p>Log in to your account</p>
+                </div>
+
+                <!-- Role Tabs -->
+                <div class="role-tabs">
+                    <button class="tab-button active" data-role="medico">
+                        Profissional de saúde
+                    </button>
+                    <button class="tab-button" data-role="administrador">
+                        Administrador
+                    </button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="login-form">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                placeholder="Email Address" 
+                                required 
+                                aria-label="Email Address"
+                                autocomplete="email"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <circle cx="12" cy="16" r="1"></circle>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                placeholder="Password" 
+                                required 
+                                aria-label="Password"
+                                autocomplete="current-password"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="remember" name="remember">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">Lembrar de mim</span>
+                        </label>
+                        <a href="#" class="forgot-link" id="forgot-password">Esqueci minha senha</a>
+                    </div>
+
+                    <button type="submit" class="login-button" id="login-btn">
+                        <span class="button-text">Entrar</span>
+                        <div class="loading-spinner" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+
+                    <div class="error-message" id="error-message" style="display: none;" role="alert" aria-live="polite"></div>
+                </form>
+
+                <!-- Divider -->
+                <div class="divider">
+                    <span>ou</span>
+                </div>
+
+                <!-- OAuth Buttons -->
+                <div class="oauth-buttons">
+                    <button class="oauth-button google-button" id="google-login">
+                        <svg class="oauth-icon" width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        <span>Continuar com Google</span>
+                    </button>
+
+                    <button class="oauth-button microsoft-button" id="microsoft-login">
+                        <svg class="oauth-icon" width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="#F25022" d="M1 1h10v10H1z"/>
+                            <path fill="#00A4EF" d="M13 1h10v10H13z"/>
+                            <path fill="#7FBA00" d="M1 13h10v10H1z"/>
+                            <path fill="#FFB900" d="M13 13h10v10H13z"/>
+                        </svg>
+                        <span>Com Microsoft</span>
+                    </button>
+                </div>
+
+                <!-- Footer Links -->
+                <div class="form-footer">
+                    <a href="#" class="footer-link" id="create-account">Criar conta</a>
+                    <div class="language-links">
+                        <a href="#" class="lang-link active">PT</a>
+                        <span class="lang-separator">|</span>
+                        <a href="#" class="lang-link">EN</a>
+                    </div>
+                    <a href="#" class="footer-link">Privacidade</a>
+                </div>
+            </div>
+
+            <!-- Right Side - Features -->
+            <div class="features-card">
+                <div class="stethoscope-icon">
+                    <svg width="120" height="120" viewBox="0 0 200 200" fill="none">
+                        <!-- Stethoscope SVG -->
+                        <path d="M60 40C60 35.5817 63.5817 32 68 32H92C96.4183 32 100 35.5817 100 40V60C100 64.4183 96.4183 68 92 68H68C63.5817 68 60 64.4183 60 60V40Z" stroke="#8B9DC3" stroke-width="4" fill="none"/>
+                        <path d="M80 68V120" stroke="#8B9DC3" stroke-width="4"/>
+                        <path d="M80 120C80 133.255 69.255 144 56 144C42.745 144 32 133.255 32 120C32 106.745 42.745 96 56 96" stroke="#8B9DC3" stroke-width="4" fill="none"/>
+                        <path d="M80 120C80 133.255 90.745 144 104 144C117.255 144 128 133.255 128 120C128 106.745 117.255 96 104 96" stroke="#8B9DC3" stroke-width="4" fill="none"/>
+                        <circle cx="140" cy="120" r="16" stroke="#8B9DC3" stroke-width="4" fill="none"/>
+                        <circle cx="140" cy="120" r="4" fill="#8B9DC3"/>
+                        <path d="M128 120H124" stroke="#8B9DC3" stroke-width="4"/>
+                    </svg>
+                </div>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="check-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" fill="#4CAF50"/>
+                                <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
+                            </svg>
+                        </div>
+                        <span>Conteúdo revisado por pares</span>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="check-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" fill="#4CAF50"/>
+                                <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
+                            </svg>
+                        </div>
+                        <span>Ferramentas inteligentes para decisão clínica</span>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="check-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" fill="#4CAF50"/>
+                                <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none"/>
+                            </svg>
+                        </div>
+                        <span>Melhore desfechos</span>
+                    </div>
+                </div>
+
+                <div class="features-box">
+                    <div class="feature-item-box">
+                        <div class="check-icon-small">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 12l2 2 4-4" stroke="#4CAF50" stroke-width="2" fill="none"/>
+                            </svg>
+                        </div>
+                        <span>Conteúdo revisado por pares</span>
+                    </div>
+
+                    <div class="feature-item-box">
+                        <div class="check-icon-small">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 12l2 2 4-4" stroke="#4CAF50" stroke-width="2" fill="none"/>
+                            </svg>
+                        </div>
+                        <span>Ferramentas anteligentes</span>
+                    </div>
+
+                    <div class="feature-item-box">
+                        <div class="check-icon-small">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 12l2 2 4-4" stroke="#4CAF50" stroke-width="2" fill="none"/>
+                            </svg>
+                        </div>
+                        <span>Melhore desfechos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+</body>
+</html>
+
+
+
+=== js/auth.js ===
+/**
+ * Authentication JavaScript Module
+ * Handles login form submission, OAuth, and user interactions
+ */
+
+class AuthManager {
+    constructor() {
+        this.currentRole = 'medico';
+        this.isLoading = false;
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+        this.setupAccessibility();
+    }
+
+    bindEvents() {
+        // Role tab switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', (e) => this.switchRole(e));
+        });
+
+        // Form submission
+        const form = document.getElementById('login-form');
+        if (form) {
+            form.addEventListener('submit', (e) => this.handleLogin(e));
+        }
+
+        // OAuth buttons
+        const googleBtn = document.getElementById('google-login');
+        if (googleBtn) {
+            googleBtn.addEventListener('click', (e) => this.handleGoogleLogin(e));
+        }
+
+        const microsoftBtn = document.getElementById('microsoft-login');
+        if (microsoftBtn) {
+            microsoftBtn.addEventListener('click', (e) => this.handleMicrosoftLogin(e));
+        }
+
+        // Forgot password
+        const forgotLink = document.getElementById('forgot-password');
+        if (forgotLink) {
+            forgotLink.addEventListener('click', (e) => this.handleForgotPassword(e));
+        }
+
+        // Create account
+        const createAccountLink = document.getElementById('create-account');
+        if (createAccountLink) {
+            createAccountLink.addEventListener('click', (e) => this.handleCreateAccount(e));
+        }
+
+        // Real-time form validation
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        if (emailInput) {
+            emailInput.addEventListener('blur', () => this.validateEmail());
+            emailInput.addEventListener('input', () => this.clearFieldError('email'));
+        }
+
+        if (passwordInput) {
+            passwordInput.addEventListener('input', () => this.clearFieldError('password'));
+        }
+    }
+
+    setupAccessibility() {
+        // Add ARIA labels and descriptions
+        const form = document.getElementById('login-form');
+        if (form) {
+            form.setAttribute('novalidate', '');
+        }
+
+        // Keyboard navigation for tabs
+        document.querySelectorAll('.tab-button').forEach((button, index, buttons) => {
+            button.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    const nextIndex = e.key === 'ArrowRight' 
+                        ? (index + 1) % buttons.length 
+                        : (index - 1 + buttons.length) % buttons.length;
+                    buttons[nextIndex].click();
+                    buttons[nextIndex].focus();
+                }
+            });
+        });
+    }
+
+    switchRole(event) {
+        event.preventDefault();
+        
+        const button = event.target;
+        const role = button.dataset.role;
+        
+        if (role === this.currentRole) return;
+        
+        // Update active tab
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-selected', 'false');
+        });
+        
+        button.classList.add('active');
+        button.setAttribute('aria-selected', 'true');
+        
+        this.currentRole = role;
+        this.clearErrors();
+        
+        // Announce role change to screen readers
+        this.announceToScreenReader(`Switched to ${role === 'medico' ? 'Medical Professional' : 'Administrator'} login`);
+    }
+
+    async handleLogin(event) {
+        event.preventDefault();
+        
+        if (this.isLoading) return;
+        
+        const formData = new FormData(event.target);
+        const email = formData.get('email')?.trim();
+        const password = formData.get('password');
+        const remember = formData.get('remember') === 'on';
+        
+        // Client-side validation
+        if (!this.validateForm(email, password)) {
+            return;
+        }
+        
+        this.setLoading(true);
+        this.clearErrors();
+        
+        try {
+            const response = await fetch(`/api/login/${this.currentRole}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    remember: remember
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.ok) {
+                this.handleLoginSuccess(data);
+            } else {
+                this.handleLoginError(data, response.status);
+            }
+            
+        } catch (error) {
+            console.error('Login error:', error);
+            this.showError('Erro de conexão. Verifique sua internet e tente novamente.');
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    validateForm(email, password) {
+        let isValid = true;
+        
+        // Email validation
+        if (!email) {
+            this.showFieldError('email', 'Email é obrigatório');
+            isValid = false;
+        } else if (!this.isValidEmail(email)) {
+            this.showFieldError('email', 'Email inválido');
+            isValid = false;
+        }
+        
+        // Password validation
+        if (!password) {
+            this.showFieldError('password', 'Senha é obrigatória');
+            isValid = false;
+        } else if (password.length < 6) {
+            this.showFieldError('password', 'Senha deve ter pelo menos 6 caracteres');
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+
+    validateEmail() {
+        const emailInput = document.getElementById('email');
+        const email = emailInput.value.trim();
+        
+        if (email && !this.isValidEmail(email)) {
+            this.showFieldError('email', 'Email inválido');
+            return false;
+        }
+        
+        this.clearFieldError('email');
+        return true;
+    }
+
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    showFieldError(fieldName, message) {
+        const input = document.getElementById(fieldName);
+        if (input) {
+            input.setAttribute('aria-invalid', 'true');
+            input.classList.add('error');
+            
+            // Create or update error message
+            let errorElement = document.getElementById(`${fieldName}-error`);
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.id = `${fieldName}-error`;
+                errorElement.className = 'field-error';
+                errorElement.setAttribute('role', 'alert');
+                input.parentNode.appendChild(errorElement);
+            }
+            
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+    }
+
+    clearFieldError(fieldName) {
+        const input = document.getElementById(fieldName);
+        if (input) {
+            input.setAttribute('aria-invalid', 'false');
+            input.classList.remove('error');
+            
+            const errorElement = document.getElementById(`${fieldName}-error`);
+            if (errorElement) {
+                errorElement.style.display = 'none';
+            }
+        }
+    }
+
+    handleLoginSuccess(data) {
+        this.announceToScreenReader('Login realizado com sucesso');
+        
+        // Store user info if needed
+        if (data.user) {
+            sessionStorage.setItem('user', JSON.stringify(data.user));
+        }
+        
+        // Redirect to dashboard
+        window.location.href = data.redirect || '/dashboard';
+    }
+
+    handleLoginError(data, status) {
+        let errorMessage = 'Erro desconhecido';
+        
+        switch (data.error) {
+            case 'INVALID_CREDENTIALS':
+                errorMessage = 'Email ou senha incorretos';
+                break;
+            case 'ACCOUNT_LOCKED':
+                const minutes = Math.ceil(data.retry_after_sec / 60);
+                errorMessage = `Conta bloqueada. Tente novamente em ${minutes} minutos`;
+                break;
+            case 'EMAIL_PASSWORD_REQUIRED':
+                errorMessage = 'Email e senha são obrigatórios';
+                break;
+            case 'INVALID_EMAIL_FORMAT':
+                errorMessage = 'Formato de email inválido';
+                break;
+            case 'RATE_LIMIT_EXCEEDED':
+                errorMessage = data.message || 'Muitas tentativas. Tente novamente mais tarde';
+                break;
+            case 'USER_NOT_FOUND':
+                errorMessage = 'Usuário não encontrado';
+                break;
+            case 'WRONG_ROLE':
+                errorMessage = `Esta conta não tem permissão para acessar como ${this.currentRole === 'medico' ? 'profissional de saúde' : 'administrador'}`;
+                break;
+            default:
+                errorMessage = data.message || 'Erro ao fazer login. Tente novamente';
+        }
+        
+        this.showError(errorMessage);
+    }
+
+    showError(message) {
+        const errorElement = document.getElementById('error-message');
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Focus on error for screen readers
+            errorElement.focus();
+        }
+    }
+
+    clearErrors() {
+        const errorElement = document.getElementById('error-message');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+        
+        // Clear field errors
+        ['email', 'password'].forEach(field => {
+            this.clearFieldError(field);
+        });
+    }
+
+    setLoading(loading) {
+        this.isLoading = loading;
+        
+        const button = document.getElementById('login-btn');
+        const buttonText = button.querySelector('.button-text');
+        const spinner = button.querySelector('.loading-spinner');
+        
+        if (loading) {
+            button.disabled = true;
+            buttonText.style.opacity = '0';
+            spinner.style.display = 'block';
+            button.setAttribute('aria-label', 'Fazendo login...');
+        } else {
+            button.disabled = false;
+            buttonText.style.opacity = '1';
+            spinner.style.display = 'none';
+            button.setAttribute('aria-label', 'Entrar');
+        }
+    }
+
+    async handleGoogleLogin(event) {
+        event.preventDefault();
+        
+        try {
+            // Redirect to Google OAuth
+            window.location.href = `/api/login/google?role=${this.currentRole}`;
+        } catch (error) {
+            console.error('Google login error:', error);
+            this.showError('Erro ao conectar com Google. Tente novamente.');
+        }
+    }
+
+    async handleMicrosoftLogin(event) {
+        event.preventDefault();
+        
+        try {
+            // Redirect to Microsoft OAuth
+            window.location.href = `/api/login/microsoft?role=${this.currentRole}`;
+        } catch (error) {
+            console.error('Microsoft login error:', error);
+            this.showError('Erro ao conectar com Microsoft. Tente novamente.');
+        }
+    }
+
+    handleForgotPassword(event) {
+        event.preventDefault();
+        
+        const email = document.getElementById('email').value.trim();
+        
+        if (!email) {
+            this.showError('Digite seu email primeiro para recuperar a senha');
+            document.getElementById('email').focus();
+            return;
+        }
+        
+        if (!this.isValidEmail(email)) {
+            this.showError('Digite um email válido para recuperar a senha');
+            document.getElementById('email').focus();
+            return;
+        }
+        
+        this.showForgotPasswordModal(email);
+    }
+
+    async showForgotPasswordModal(email) {
+        const confirmed = confirm(`Enviar link de recuperação para ${email}?`);
+        
+        if (!confirmed) return;
+        
+        try {
+            const response = await fetch('/api/forgot-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email })
+            });
+            
+            const data = await response.json();
+            
+            if (data.ok) {
+                alert('Se o email existir, um link de recuperação foi enviado.');
+            } else {
+                this.showError(data.message || 'Erro ao enviar email de recuperação');
+            }
+        } catch (error) {
+            console.error('Forgot password error:', error);
+            this.showError('Erro ao enviar email de recuperação');
+        }
+    }
+
+    handleCreateAccount(event) {
+        event.preventDefault();
+        
+        // For now, show a message that account creation is admin-only
+        alert('A criação de contas é restrita a administradores. Entre em contato com o administrador do sistema.');
+    }
+
+    announceToScreenReader(message) {
+        const announcement = document.createElement('div');
+        announcement.setAttribute('aria-live', 'polite');
+        announcement.setAttribute('aria-atomic', 'true');
+        announcement.className = 'sr-only';
+        announcement.textContent = message;
+        
+        document.body.appendChild(announcement);
+        
+        setTimeout(() => {
+            document.body.removeChild(announcement);
+        }, 1000);
+    }
+}
+
+// Utility function to check if user is already logged in
+async function checkAuthStatus() {
+    try {
+        const response = await fetch('/api/me', {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.ok && data.user) {
+                // User is already logged in, redirect to dashboard
+                window.location.href = '/dashboard';
+                return;
+            }
+        }
+    } catch (error) {
+        // Not logged in or error, continue with login page
+        console.log('Not logged in, showing login page');
+    }
+}
+
+// Handle OAuth callbacks
+function handleOAuthCallback() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    const success = urlParams.get('success');
+    
+    if (error) {
+        const authManager = new AuthManager();
+        authManager.showError(decodeURIComponent(error));
+    } else if (success) {
+        // OAuth success, redirect to dashboard
+        window.location.href = '/dashboard';
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if user is already authenticated
+    checkAuthStatus();
+    
+    // Handle OAuth callbacks
+    handleOAuthCallback();
+    
+    // Initialize auth manager
+    window.authManager = new AuthManager();
+});
+
+// Add CSS for field errors
+const style = document.createElement('style');
+style.textContent = `
+    .field-error {
+        color: var(--error-color, #E74C3C);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    
+    .input-wrapper input.error {
+        border-color: var(--error-color, #E74C3C);
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+    }
+    
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+`;
+document.head.appendChild(style);
+
+
+
+=== styles/login.css ===
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Colors */
+    --primary-blue: #4A90E2;
+    --primary-orange: #FF6B35;
+    --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-background: rgba(255, 255, 255, 0.95);
+    --text-primary: #2C3E50;
+    --text-secondary: #7F8C8D;
+    --text-light: #BDC3C7;
+    --border-color: #E8ECEF;
+    --success-color: #4CAF50;
+    --error-color: #E74C3C;
+    --warning-color: #F39C12;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
+    
+    /* Typography */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 2rem;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Border Radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-base: 250ms ease;
+    --transition-slow: 350ms ease;
+}
+
+body {
+    font-family: var(--font-family);
+    background: var(--background-gradient);
+    min-height: 100vh;
+    line-height: 1.6;
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Header */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-md) var(--spacing-xl);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo h1 {
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.025em;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.nav-link:hover {
+    color: var(--primary-blue);
+}
+
+/* Main Content */
+.main {
+    padding-top: 80px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px var(--spacing-md) var(--spacing-xl);
+}
+
+.login-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xxl);
+    max-width: 1000px;
+    width: 100%;
+    align-items: center;
+}
+
+/* Login Card */
+.login-card {
+    background: var(--card-background);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-xxl);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 480px;
+    width: 100%;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.login-header h2 {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.login-header p {
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+}
+
+/* Role Tabs */
+.role-tabs {
+    display: flex;
+    background: #F8F9FA;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xs);
+    margin-bottom: var(--spacing-xl);
+}
+
+.tab-button {
+    flex: 1;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-size: var(--font-size-sm);
+}
+
+.tab-button.active {
+    background: var(--text-primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.tab-button:hover:not(.active) {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+}
+
+/* Form Styles */
+.login-form {
+    margin-bottom: var(--spacing-xl);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: var(--spacing-md);
+    color: var(--text-light);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: var(--spacing-lg) var(--spacing-md) var(--spacing-lg) 3rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    background: white;
+    transition: all var(--transition-base);
+    outline: none;
+}
+
+.input-wrapper input:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.input-wrapper input:focus + .input-icon {
+    color: var(--primary-blue);
+}
+
+.input-wrapper input::placeholder {
+    color: var(--text-light);
+}
+
+.input-wrapper input[aria-invalid="true"] {
+    border-color: var(--error-color);
+}
+
+/* Form Options */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    display: none;
+}
+
+.checkmark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    margin-right: var(--spacing-sm);
+    position: relative;
+    transition: all var(--transition-base);
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked + .checkmark {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked + .checkmark::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-label {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.forgot-link {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.forgot-link:hover {
+    color: var(--primary-orange);
+}
+
+/* Login Button */
+.login-button {
+    width: 100%;
+    padding: var(--spacing-lg);
+    background: var(--primary-orange);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: var(--spacing-lg);
+}
+
+.login-button:hover {
+    background: #E55A2B;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+}
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+.login-button:disabled {
+    background: var(--text-light);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error Message */
+.error-message {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: var(--error-color);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.error-message::before {
+    content: '⚠️';
+    font-size: var(--font-size-base);
+}
+
+/* Divider */
+.divider {
+    text-align: center;
+    margin: var(--spacing-xl) 0;
+    position: relative;
+    color: var(--text-light);
+    font-size: var(--font-size-sm);
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.divider span {
+    background: var(--card-background);
+    padding: 0 var(--spacing-md);
+    position: relative;
+}
+
+/* OAuth Buttons */
+.oauth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.oauth-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: white;
+    color: var(--text-primary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-decoration: none;
+}
+
+.oauth-button:hover {
+    border-color: var(--primary-blue);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.oauth-icon {
+    flex-shrink: 0;
+}
+
+/* Form Footer */
+.form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+.footer-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    transition: color var(--transition-fast);
+}
+
+.footer-link:hover {
+    color: var(--primary-blue);
+}
+
+.language-links {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.lang-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.lang-link.active {
+    color: var(--primary-blue);
+}
+
+.lang-link:hover {
+    color: var(--primary-blue);
+}
+
+.lang-separator {
+    color: var(--text-light);
+}
+
+/* Features Card */
+.features-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: white;
+    max-width: 400px;
+}
+
+.stethoscope-icon {
+    margin-bottom: var(--spacing-xl);
+    opacity: 0.9;
+}
+
+.features-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+}
+
+.check-icon {
+    flex-shrink: 0;
+}
+
+.features-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    width: 100%;
+}
+
+.feature-item-box {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-base);
+}
+
+.check-icon-small {
+    flex-shrink: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-content {
+        padding: var(--spacing-md);
+    }
+    
+    .main {
+        padding: 80px var(--spacing-md) var(--spacing-md);
+    }
+    
+    .login-container {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+        max-width: 480px;
+    }
+    
+    .login-card {
+        padding: var(--spacing-xl);
+    }
+    
+    .features-card {
+        order: -1;
+    }
+    
+    .stethoscope-icon {
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .stethoscope-icon svg {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .features-list {
+        display: none;
+    }
+    
+    .form-footer {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-sm);
+    }
+    
+    .role-tabs {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .tab-button {
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: var(--spacing-lg);
+        margin: var(--spacing-md);
+    }
+    
+    .login-header h2 {
+        font-size: var(--font-size-2xl);
+    }
+    
+    .oauth-buttons {
+        flex-direction: column;
+    }
+    
+    .oauth-button {
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: #000;
+        --text-light: #666;
+    }
+    
+    .input-wrapper input {
+        border-width: 2px;
+    }
+    
+    .oauth-button {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .spinner {
+        animation: none;
+    }
+}
+
+/* Focus Styles for Accessibility */
+.login-button:focus,
+.oauth-button:focus,
+.tab-button:focus,
+.footer-link:focus,
+.forgot-link:focus {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+.input-wrapper input:focus {
+    outline: none; /* Custom focus style already applied */
+}
+
+/* Print Styles */
+@media print {
+    .header,
+    .features-card,
+    .oauth-buttons,
+    .form-footer {
+        display: none;
+    }
+    
+    .main {
+        padding-top: 0;
+    }
+    
+    .login-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+=== tests/test_auth.py ===
+"""
+Unit tests for authentication system
+"""
+
+import unittest
+import json
+import tempfile
+import os
+from datetime import datetime, timedelta
+from unittest.mock import patch, MagicMock
+
+# Set up test environment before importing app
+os.environ['TESTING'] = 'True'
+os.environ['SECRET_KEY'] = 'test-secret-key'
+os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
+
+from app import create_app
+from src.models.user import User, LoginAttempt, db
+from src.utils.rate_limiter import RateLimiter
+
+class AuthTestCase(unittest.TestCase):
+    """Test cases for authentication system"""
+    
+    def setUp(self):
+        """Set up test fixtures"""
+        self.app = create_app()
+        self.app.config['TESTING'] = True
+        self.app.config['WTF_CSRF_ENABLED'] = False
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        
+        self.client = self.app.test_client()
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        
+        # Create all tables
+        db.create_all()
+        
+        # Create test users
+        self.test_user_medico = User(
+            email='medico@test.com',
+            username='Dr. Test',
+            role='medico'
+        )
+        self.test_user_medico.set_password('password123')
+        
+        self.test_user_admin = User(
+            email='admin@test.com',
+            username='Admin Test',
+            role='administrador'
+        )
+        self.test_user_admin.set_password('admin123')
+        
+        db.session.add(self.test_user_medico)
+        db.session.add(self.test_user_admin)
+        db.session.commit()
+    
+    def tearDown(self):
+        """Clean up after tests"""
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+    
+    def test_user_model_creation(self):
+        """Test user model creation and password hashing"""
+        user = User(
+            email='test@example.com',
+            username='Test User',
+            role='medico'
+        )
+        user.set_password('testpassword')
+        
+        self.assertTrue(user.check_password('testpassword'))
+        self.assertFalse(user.check_password('wrongpassword'))
+        self.assertIsNotNone(user.password_hash)
+        self.assertNotEqual(user.password_hash, 'testpassword')
+    
+    def test_login_success_medico(self):
+        """Test successful login for medico"""
+        response = self.client.post('/api/login/medico', 
+            data=json.dumps({
+                'email': 'medico@test.com',
+                'password': 'password123'
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertTrue(data['ok'])
+        self.assertIn('user', data)
+        self.assertEqual(data['user']['role'], 'medico')
+    
+    def test_login_success_admin(self):
+        """Test successful login for admin"""
+        response = self.client.post('/api/login/administrador', 
+            data=json.dumps({
+                'email': 'admin@test.com',
+                'password': 'admin123'
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertTrue(data['ok'])
+        self.assertIn('user', data)
+        self.assertEqual(data['user']['role'], 'administrador')
+    
+    def test_login_wrong_credentials(self):
+        """Test login with wrong credentials"""
+        response = self.client.post('/api/login/medico', 
+            data=json.dumps({
+                'email': 'medico@test.com',
+                'password': 'wrongpassword'
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 401)
+        data = json.loads(response.data)
+        self.assertFalse(data['ok'])
+        self.assertEqual(data['error'], 'INVALID_CREDENTIALS')
+    
+    def test_login_wrong_role(self):
+        """Test login with wrong role"""
+        response = self.client.post('/api/login/administrador', 
+            data=json.dumps({
+                'email': 'medico@test.com',
+                'password': 'password123'
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.data)
+        self.assertFalse(data['ok'])
+        self.assertEqual(data['error'], 'WRONG_ROLE')
+    
+    def test_login_nonexistent_user(self):
+        """Test login with nonexistent user"""
+        response = self.client.post('/api/login/medico', 
+            data=json.dumps({
+                'email': 'nonexistent@test.com',
+                'password': 'password123'
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data)
+        self.assertFalse(data['ok'])
+        self.assertEqual(data['error'], 'USER_NOT_FOUND')
+    
+    def test_login_missing_fields(self):
+        """Test login with missing fields"""
+        response = self.client.post('/api/login/medico', 
+            data=json.dumps({
+                'email': 'medico@test.com'
+                # Missing password
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data)
+        self.assertFalse(data['ok'])
+        self.assertEqual(data['error'], 'EMAIL_PASSWORD_REQUIRED')
+    
+    def test_login_invalid_email_format(self):
+        """Test login with invalid email format"""
+        response = self.client.post('/api/login/medico', 
+            data=json.dumps({
+                'email': 'invalid-email',
+                'password': 'password123'
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data)
+        self.assertFalse(data['ok'])
+        self.assertEqual(data['error'], 'INVALID_EMAIL_FORMAT')
+    
+    def test_account_lockout(self):
+        """Test account lockout after multiple failed attempts"""
+        # Make 5 failed login attempts
+        for i in range(5):
+            response = self.client.post('/api/login/medico', 
+                data=json.dumps({
+                    'email': 'medico@test.com',
+                    'password': 'wrongpassword'
+                }),
+                content_type='application/json'
+            )
+            self.assertEqual(response.status_code, 401)
+        
+        # 6th attempt should be locked
+        response = self.client.post('/api/login/medico', 
+            data=json.dumps({
+                'email': 'medico@test.com',
+                'password': 'wrongpassword'
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 429)
+        data = json.loads(response.data)
+        self.assertFalse(data['ok'])
+        self.assertEqual(data['error'], 'ACCOUNT_LOCKED')
+        self.assertIn('retry_after_sec', data)
+    
+    def test_forgot_password(self):
+        """Test forgot password functionality"""
+        with patch('src.routes.auth.send_password_reset_email') as mock_send:
+            mock_send.return_value = True
+            
+            response = self.client.post('/api/forgot-password', 
+                data=json.dumps({
+                    'email': 'medico@test.com'
+                }),
+                content_type='application/json'
+            )
+            
+            self.assertEqual(response.status_code, 200)
+            data = json.loads(response.data)
+            self.assertTrue(data['ok'])
+            mock_send.assert_called_once()
+    
+    def test_forgot_password_nonexistent_email(self):
+        """Test forgot password with nonexistent email"""
+        response = self.client.post('/api/forgot-password', 
+            data=json.dumps({
+                'email': 'nonexistent@test.com'
+            }),
+            content_type='application/json'
+        )
+        
+        # Should return success for security reasons
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertTrue(data['ok'])
+    
+    def test_reset_password_valid_token(self):
+        """Test password reset with valid token"""
+        user = User.query.filter_by(email='medico@test.com').first()
+        token = user.generate_reset_token()
+        
+        response = self.client.post('/api/reset-password', 
+            data=json.dumps({
+                'token': token,
+                'new_password': 'newpassword123'
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertTrue(data['ok'])
+        
+        # Verify password was changed
+        user = User.query.filter_by(email='medico@test.com').first()
+        self.assertTrue(user.check_password('newpassword123'))
+    
+    def test_reset_password_invalid_token(self):
+        """Test password reset with invalid token"""
+        response = self.client.post('/api/reset-password', 
+            data=json.dumps({
+                'token': 'invalid-token',
+                'new_password': 'newpassword123'
+            }),
+            content_type='application/json'
+        )
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data)
+        self.assertFalse(data['ok'])
+        self.assertEqual(data['error'], 'INVALID_TOKEN')
+    
+    def test_me_endpoint_authenticated(self):
+        """Test /api/me endpoint when authenticated"""
+        # Login first
+        login_response = self.client.post('/api/login/medico', 
+            data=json.dumps({
+                'email': 'medico@test.com',
+                'password': 'password123'
+            }),
+            content_type='application/json'
+        )
+        self.assertEqual(login_response.status_code, 200)
+        
+        # Test /api/me
+        response = self.client.get('/api/me')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertTrue(data['ok'])
+        self.assertIn('user', data)
+        self.assertEqual(data['user']['email'], 'medico@test.com')
+    
+    def test_me_endpoint_unauthenticated(self):
+        """Test /api/me endpoint when not authenticated"""
+        response = self.client.get('/api/me')
+        self.assertEqual(response.status_code, 401)
+        data = json.loads(response.data)
+        self.assertFalse(data['ok'])
+        self.assertEqual(data['error'], 'NOT_AUTHENTICATED')
+    
+    def test_logout(self):
+        """Test logout functionality"""
+        # Login first
+        login_response = self.client.post('/api/login/medico', 
+            data=json.dumps({
+                'email': 'medico@test.com',
+                'password': 'password123'
+            }),
+            content_type='application/json'
+        )
+        self.assertEqual(login_response.status_code, 200)
+        
+        # Logout
+        response = self.client.post('/api/logout')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertTrue(data['ok'])
+        
+        # Verify user is logged out
+        me_response = self.client.get('/api/me')
+        self.assertEqual(me_response.status_code, 401)
+    
+    def test_rate_limiting(self):
+        """Test rate limiting functionality"""
+        rate_limiter = RateLimiter()
+        
+        # Test within limit
+        for i in range(5):
+            allowed, remaining, reset_time = rate_limiter.is_allowed('test-key', limit=10, window=60)
+            self.assertTrue(allowed)
+            self.assertEqual(remaining, 10 - i - 1)
+        
+        # Test exceeding limit
+        for i in range(6):
+            rate_limiter.is_allowed('test-key-2', limit=5, window=60)
+        
+        allowed, remaining, reset_time = rate_limiter.is_allowed('test-key-2', limit=5, window=60)
+        self.assertFalse(allowed)
+        self.assertEqual(remaining, 0)
+
+class OAuthTestCase(unittest.TestCase):
+    """Test cases for OAuth functionality"""
+    
+    def setUp(self):
+        """Set up test fixtures"""
+        self.app = create_app()
+        self.app.config['TESTING'] = True
+        self.client = self.app.test_client()
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        
+        db.create_all()
+    
+    def tearDown(self):
+        """Clean up after tests"""
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+    
+    @patch('src.utils.oauth.google_oauth')
+    def test_google_oauth_redirect(self, mock_google):
+        """Test Google OAuth redirect"""
+        mock_google.get_authorization_url.return_value = MagicMock()
+        
+        response = self.client.get('/api/login/google?role=medico')
+        
+        # Should redirect or return authorization URL
+        self.assertIn(response.status_code, [200, 302])
+        mock_google.get_authorization_url.assert_called_once_with('medico')
+    
+    def test_oauth_invalid_role(self):
+        """Test OAuth with invalid role"""
+        response = self.client.get('/api/login/google?role=invalid')
+        
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data)
+        self.assertFalse(data['ok'])
+        self.assertEqual(data['error'], 'INVALID_ROLE')
+
+if __name__ == '__main__':
+    unittest.main()
+
+
+
