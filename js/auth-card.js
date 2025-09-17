@@ -1,21 +1,23 @@
 (function () {
     'use strict';
 
+    const scriptElement = document.currentScript;
+
     document.addEventListener('DOMContentLoaded', () => {
         const tabButtons = document.querySelectorAll('.tab-button');
-        const loginForm = document.getElementById('login-form');
-        const loginButton = document.getElementById('login-btn');
+        const loginForm = document.querySelector('.login-form');
+        const loginButton = document.querySelector('#login-btn');
         const loginButtonText = loginButton?.querySelector('.button-text');
         const loginSpinner = loginButton?.querySelector('.loading-spinner');
-        const feedbackMessage = document.getElementById('feedback-message');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const forgotPasswordLink = document.getElementById('forgot-password');
-        const googleLoginButton = document.getElementById('google-login');
-        const microsoftLoginButton = document.getElementById('microsoft-login');
-
+        const feedbackMessage = document.querySelector('#feedback-message');
+        const emailInput = document.querySelector('#email');
+        const passwordInput = document.querySelector('#password');
+        const forgotPasswordLink = document.querySelector('#forgot-password');
+        const googleLoginButton = document.querySelector('#google-login');
+        const microsoftLoginButton = document.querySelector('#microsoft-login');
         const activeTab = document.querySelector('.tab-button.active');
-        let currentRole = activeTab?.dataset.role || 'medico';
+
+        const defaultRedirect = scriptElement?.dataset.redirect || document.body?.dataset.redirect || '/dashboard';
 
         const errorMessages = {
             INVALID_CREDENTIALS: 'We could not find an account with those credentials.',
@@ -23,14 +25,25 @@
             EMAIL_PASSWORD_REQUIRED: 'Email and password are required.',
             ACCOUNT_LOCKED: 'Too many failed attempts. Please try again in a few minutes.',
             JSON_REQUIRED: 'Something went wrong with the request. Please try again.',
-            INVALID_ROLE: 'The selected role is not available for this account.'
+            INVALID_ROLE: 'The selected role is not available for this account.',
+            INVALID_DATA: 'We need both email and password to sign you in.',
+            MISSING_FIELDS: 'Please enter your email address and password.',
         };
 
-        function setRole(role, button) {
-            currentRole = role || 'medico';
-            tabButtons.forEach((btn) => {
-                btn.classList.toggle('active', btn === button);
-                btn.setAttribute('aria-pressed', btn === button ? 'true' : 'false');
+        let currentRole = activeTab?.dataset.role || 'medico';
+
+        function updateRole(button) {
+            const nextRole = button?.dataset.role;
+            if (!nextRole) {
+                return;
+            }
+
+            currentRole = nextRole;
+
+            tabButtons.forEach((tab) => {
+                const isActive = tab === button;
+                tab.classList.toggle('active', isActive);
+                tab.setAttribute('aria-pressed', isActive ? 'true' : 'false');
             });
         }
 
@@ -39,20 +52,20 @@
                 return;
             }
 
-            feedbackMessage.textContent = message;
-
             if (!message) {
+                feedbackMessage.textContent = '';
                 feedbackMessage.style.display = 'none';
                 feedbackMessage.classList.remove('feedback-error', 'feedback-success');
                 return;
             }
 
+            feedbackMessage.textContent = message;
             feedbackMessage.style.display = 'block';
             feedbackMessage.classList.toggle('feedback-success', type === 'success');
             feedbackMessage.classList.toggle('feedback-error', type !== 'success');
         }
 
-        function setLoading(isLoading) {
+        function toggleLoading(isLoading) {
             if (!loginButton) {
                 return;
             }
@@ -71,14 +84,14 @@
             loginButton.classList.toggle('is-loading', isLoading);
         }
 
-        function normalizeResponse(data) {
+        function normalizePayload(data) {
             if (Array.isArray(data)) {
                 return data[0];
             }
             return data;
         }
 
-        function resolveErrorMessage(payload, statusCode) {
+        function resolveError(payload, statusCode) {
             if (!payload || typeof payload !== 'object') {
                 return 'Unable to sign in at the moment. Please try again.';
             }
@@ -96,60 +109,77 @@
                 return 'Our servers are unavailable right now. Please try again later.';
             }
 
-            return payload.message || 'Unable to sign in. Please check your credentials and try again.';
+            if (payload.message) {
+                return payload.message;
+            }
+
+            return 'Unable to sign in. Please check your credentials and try again.';
+        }
+
+        function toggleForgotLoading(isLoading) {
+            if (!forgotPasswordLink) {
+                return;
+            }
+
+            forgotPasswordLink.classList.toggle('loading', isLoading);
+            if (isLoading) {
+                forgotPasswordLink.setAttribute('aria-busy', 'true');
+            } else {
+                forgotPasswordLink.removeAttribute('aria-busy');
+            }
         }
 
         async function handleLogin(event) {
             event?.preventDefault();
-            if (!emailInput || !passwordInput) {
-                return;
-            }
 
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
+            const email = emailInput?.value.trim() || '';
+            const password = passwordInput?.value.trim() || '';
 
             if (!email || !password) {
                 setFeedback('Please enter your email and password to continue.');
+                emailInput?.focus();
                 return;
             }
 
             setFeedback('');
-            setLoading(true);
+            toggleLoading(true);
 
             try {
-                const response = await fetch(`/api/login/${currentRole}`, {
+                const response = await fetch(`/api/login/${encodeURIComponent(currentRole)}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        email,
-                        password
-                    })
+                    body: JSON.stringify({ email, password }),
                 });
 
-                const rawData = await response.json().catch(() => null);
-                const payload = normalizeResponse(rawData);
+                const payload = normalizePayload(await response.json().catch(() => null));
 
                 if (!response.ok || !payload?.ok) {
-                    const message = resolveErrorMessage(payload, response.status);
+                    const message = resolveError(payload, response.status);
                     setFeedback(message);
                     return;
                 }
 
                 setFeedback('Authenticated successfully. Redirecting…', 'success');
-                const redirectUrl = payload.redirect || '/dashboard';
-                window.location.href = redirectUrl;
+
+                const redirectTarget = payload.redirect || defaultRedirect;
+                window.setTimeout(() => {
+                    window.location.href = redirectTarget;
+                }, 300);
             } catch (error) {
                 console.error('Login error:', error);
                 setFeedback('We could not sign you in. Please try again in a moment.');
             } finally {
-                setLoading(false);
+                toggleLoading(false);
             }
         }
 
         tabButtons.forEach((button) => {
-            button.addEventListener('click', () => setRole(button.dataset.role || 'medico', button));
+            button.addEventListener('click', () => {
+                updateRole(button);
+                setFeedback('');
+            });
         });
 
         if (loginForm) {
@@ -160,28 +190,24 @@
             forgotPasswordLink.addEventListener('click', async (event) => {
                 event.preventDefault();
 
-                if (!emailInput) {
-                    return;
-                }
-
-                const email = emailInput.value.trim();
+                const email = emailInput?.value.trim() || '';
 
                 if (!email) {
                     setFeedback('Enter your email address so we can send the reset instructions.');
+                    emailInput?.focus();
                     return;
                 }
 
                 setFeedback('');
-                forgotPasswordLink.classList.add('loading');
-                forgotPasswordLink.setAttribute('aria-busy', 'true');
+                toggleForgotLoading(true);
 
                 try {
                     const response = await fetch('/api/forgot-password', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ email })
+                        body: JSON.stringify({ email }),
                     });
 
                     if (response.ok) {
@@ -193,38 +219,39 @@
                     console.error('Forgot password error:', error);
                     setFeedback('We were unable to send reset instructions. Please try again later.');
                 } finally {
-                    forgotPasswordLink.classList.remove('loading');
-                    forgotPasswordLink.removeAttribute('aria-busy');
+                    toggleForgotLoading(false);
                 }
             });
         }
 
-        if (googleLoginButton) {
-            googleLoginButton.addEventListener('click', (event) => {
+        function attachSocial(button, provider, providerLabel) {
+            if (!button) {
+                return;
+            }
+
+            button.addEventListener('click', (event) => {
                 event.preventDefault();
-                setFeedback('Redirecting you to Google…', 'success');
+                setFeedback(`Redirecting you to ${providerLabel}…`, 'success');
+
+                const overrideUrl = button.dataset.url;
+                let url = overrideUrl
+                    ? overrideUrl.replace('{role}', encodeURIComponent(currentRole))
+                    : `/api/login/${provider}?role=${encodeURIComponent(currentRole)}`;
+
+                if (!overrideUrl && button.dataset.appendRole === 'false') {
+                    url = `/api/login/${provider}`;
+                }
 
                 try {
-                    window.location.href = `/api/login/google?role=${currentRole}`;
+                    window.location.href = url;
                 } catch (error) {
-                    console.error('Google login error:', error);
-                    setFeedback('We could not connect to Google right now. Please try again in a moment.');
+                    console.error(`${providerLabel} login error:`, error);
+                    setFeedback(`We could not connect to ${providerLabel} right now. Please try again in a moment.`);
                 }
             });
         }
 
-        if (microsoftLoginButton) {
-            microsoftLoginButton.addEventListener('click', (event) => {
-                event.preventDefault();
-                setFeedback('Redirecting you to Microsoft…', 'success');
-
-                try {
-                    window.location.href = `/api/login/microsoft?role=${currentRole}`;
-                } catch (error) {
-                    console.error('Microsoft login error:', error);
-                    setFeedback('We could not connect to Microsoft right now. Please try again in a moment.');
-                }
-            });
-        }
+        attachSocial(googleLoginButton, 'google', 'Google');
+        attachSocial(microsoftLoginButton, 'microsoft', 'Microsoft');
     });
 })();
