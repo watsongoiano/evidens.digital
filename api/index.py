@@ -235,7 +235,33 @@ def serve_static(path: str):
 
 # Default handler for Vercel
 def handler(request):
-    return app(request.environ, lambda *args: None)
+    """Adapt incoming Vercel requests to the Flask application."""
+
+    path = getattr(request, "path", "/")
+    method = getattr(request, "method", "GET")
+    data = request.get_data() if hasattr(request, "get_data") else None
+    headers = getattr(request, "headers", None)
+    if headers is not None:
+        if hasattr(headers, "items"):
+            try:
+                headers = list(headers.items())
+            except TypeError:
+                headers = list(headers.items(multi=True))  # type: ignore[attr-defined]
+        else:
+            headers = list(headers)
+
+    query_string = getattr(request, "query_string", None)
+    if isinstance(query_string, str):
+        query_string = query_string.encode("utf-8")
+
+    with app.test_request_context(
+        path=path,
+        method=method,
+        data=data,
+        headers=headers,
+        query_string=query_string,
+    ):
+        return app.full_dispatch_request()
 
 if __name__ == '__main__':
     app.run(debug=True)
