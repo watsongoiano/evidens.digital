@@ -6,9 +6,8 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 
-from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError
 from flask import Flask, abort, jsonify, request, send_from_directory, session
+from werkzeug.security import check_password_hash, generate_password_hash
 
 # Resolve project paths relative to the repository root so the function works on Vercel
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,9 +41,6 @@ ALLOWED_STATIC_EXTENSIONS = {
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
-
-# Password hasher
-ph = PasswordHasher()
 
 
 def _find_static_asset(path: str) -> tuple[Path, str] | None:
@@ -113,14 +109,14 @@ def init_db():
     # Create default users if they don't exist
     try:
         # Create medico user
-        medico_hash = ph.hash('medico123')
+        medico_hash = generate_password_hash('medico123')
         conn.execute('''
             INSERT OR IGNORE INTO users (email, password_hash, role, name)
             VALUES (?, ?, ?, ?)
         ''', ('medico@evidens.digital', medico_hash, 'medico', 'Dr. Médico'))
         
         # Create admin user
-        admin_hash = ph.hash('admin123')
+        admin_hash = generate_password_hash('admin123')
         conn.execute('''
             INSERT OR IGNORE INTO users (email, password_hash, role, name)
             VALUES (?, ?, ?, ?)
@@ -161,9 +157,7 @@ def login(role):
             return jsonify({'ok': False, 'error': 'INVALID_CREDENTIALS'}), 401
         
         # Verify password
-        try:
-            ph.verify(user['password_hash'], password)
-        except VerifyMismatchError:
+        if not check_password_hash(user['password_hash'], password):
             conn.close()
             return jsonify({'ok': False, 'error': 'INVALID_CREDENTIALS'}), 401
         
