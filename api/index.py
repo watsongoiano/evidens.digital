@@ -261,7 +261,17 @@ def handler(request):
         headers=headers,
         query_string=query_string,
     ):
-        return app.full_dispatch_request()
+        response = app.full_dispatch_request()
+
+        # ``send_from_directory`` sets ``direct_passthrough`` so Flask can stream
+        # files efficiently.  The Vercel runtime eagerly reads the body from the
+        # returned response, which raises ``RuntimeError`` if passthrough mode is
+        # still enabled.  Disabling it keeps the response compatible without
+        # affecting normal Flask behaviour.
+        if getattr(response, "direct_passthrough", False):
+            response.direct_passthrough = False
+
+        return response
 
 if __name__ == '__main__':
     app.run(debug=True)
