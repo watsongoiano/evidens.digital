@@ -108,15 +108,15 @@ def init_db():
     
     # Create default users if they don't exist
     try:
-        # Create medico user
-        medico_hash = generate_password_hash('medico123')
+        # Create medico user using pbkdf2 for broader platform support
+        medico_hash = generate_password_hash('medico123', method='pbkdf2:sha256')
         conn.execute('''
             INSERT OR IGNORE INTO users (email, password_hash, role, name)
             VALUES (?, ?, ?, ?)
         ''', ('medico@evidens.digital', medico_hash, 'medico', 'Dr. Médico'))
         
         # Create admin user
-        admin_hash = generate_password_hash('admin123')
+        admin_hash = generate_password_hash('admin123', method='pbkdf2:sha256')
         conn.execute('''
             INSERT OR IGNORE INTO users (email, password_hash, role, name)
             VALUES (?, ?, ?, ?)
