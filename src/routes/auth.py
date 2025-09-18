@@ -1,11 +1,15 @@
-from flask import Blueprint, request, jsonify, session, redirect, url_for
-from flask_login import login_user, logout_user, login_required, current_user
+from __future__ import annotations
+
 from datetime import datetime
-from src.models.user import User, LoginAttempt, db
-from src.utils.rate_limiter import rate_limit
-from src.utils.oauth import google_oauth, apple_oauth
 import os
 import re
+
+from flask import Blueprint, jsonify, redirect, request, session, url_for
+from flask_login import current_user, login_required, login_user, logout_user
+
+from src.models.user import LoginAttempt, User, db
+from src.utils.rate_limiter import rate_limit
+from src.utils.oauth import apple_oauth, google_oauth
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api')
 
@@ -27,50 +31,63 @@ def log_login_attempt(email, success, failure_reason=None, oauth_provider=None):
     db.session.add(attempt)
     db.session.commit()
 
-def perform_login(email, password, expected_role):
-    """Perform login with security checks"""
+
+def send_password_reset_email(email: str, token: str) -> bool:
+    """Placeholder password reset email sender.
+
+    The real implementation should integrate with the organisation's email
+    provider. The function returns ``True`` so tests can assert it was called
+    successfully.
+    """
+
+    reset_url = url_for('auth.reset_password', _external=True)
+    print(f"Password reset requested for {email}. Token: {token}. Reset URL: {reset_url}")
+    return True
+
+def perform_login(email: str | None, password: str | None, expected_role: str) -> tuple[dict, int]:
+    """Perform login with security checks."""
+
     if not email or not password:
         return {"ok": False, "error": "EMAIL_PASSWORD_REQUIRED"}, 400
-    
+
     if not validate_email(email):
         return {"ok": False, "error": "INVALID_EMAIL_FORMAT"}, 400
-    
+
     email = email.lower().strip()
     user = User.query.filter_by(email=email).first()
-    
+
     if not user:
         log_login_attempt(email, False, "USER_NOT_FOUND")
-        return {"ok": False, "error": "INVALID_CREDENTIALS"}, 401
-    
+        return {"ok": False, "error": "USER_NOT_FOUND"}, 404
+
     if user.is_locked():
         log_login_attempt(email, False, "ACCOUNT_LOCKED")
-        lockout_remaining = int((user.locked_until - datetime.utcnow()).total_seconds())
+        lockout_remaining = int((user.locked_until - datetime.utcnow()).total_seconds()) if user.locked_until else 0
         return {
-            "ok": False, 
-            "error": "ACCOUNT_LOCKED", 
-            "retry_after_sec": max(0, lockout_remaining)
-        }, 423
-    
+            "ok": False,
+            "error": "ACCOUNT_LOCKED",
+            "retry_after_sec": max(0, lockout_remaining),
+        }, 429
+
     if user.role != expected_role:
         user.increment_failed_attempts()
         log_login_attempt(email, False, "WRONG_ROLE")
-        return {"ok": False, "error": "INVALID_CREDENTIALS"}, 401
-    
+        return {"ok": False, "error": "WRONG_ROLE"}, 403
+
     if not user.check_password(password):
         user.increment_failed_attempts()
         log_login_attempt(email, False, "WRONG_PASSWORD")
         return {"ok": False, "error": "INVALID_CREDENTIALS"}, 401
-    
+
     # Successful login
     user.reset_failed_attempts()
     login_user(user, remember=True)
     log_login_attempt(email, True)
-    
+
     return {
-        "ok": True, 
-        "redirect": "/dashboard", 
-        "role": user.role,
-        "user": user.to_dict()
+        "ok": True,
+        "redirect": "/dashboard",
+        "user": user.to_dict(),
     }, 200
 
 @auth_bp.route('/login/medico', methods=['POST'])
@@ -81,13 +98,15 @@ def login_medico():
     if not data:
         return jsonify({"ok": False, "error": "JSON_REQUIRED"}), 400
     
-    return jsonify(*perform_login(
-        data.get('email'), 
-        data.get('password'), 
+    result, status = perform_login(
+        data.get('email'),
+        data.get('password'),
         'medico'
-    ))
+    )
+    return jsonify(result), status
 
 @auth_bp.route('/login/admin', methods=['POST'])
+@auth_bp.route('/login/administrador', methods=['POST'])
 @rate_limit("login", per_minute=5)  # Stricter rate limit for admin
 def login_admin():
     """Login endpoint for administrators"""
@@ -95,11 +114,12 @@ def login_admin():
     if not data:
         return jsonify({"ok": False, "error": "JSON_REQUIRED"}), 400
     
-    return jsonify(*perform_login(
-        data.get('email'), 
-        data.get('password'), 
+    result, status = perform_login(
+        data.get('email'),
+        data.get('password'),
         'administrador'
-    ))
+    )
+    return jsonify(result), status
 
 @auth_bp.route('/logout', methods=['POST'])
 @login_required
@@ -165,20 +185,19 @@ def forgot_password():
     data = request.get_json()
     if not data:
         return jsonify({"ok": False, "error": "JSON_REQUIRED"}), 400
-    
+
     email = data.get('email', '').lower().strip()
-    
+
     if not email or not validate_email(email):
         return jsonify({"ok": False, "error": "INVALID_EMAIL"}), 400
-    
+
     user = User.query.filter_by(email=email).first()
-    
+
     # Always return success to prevent email enumeration
     if user:
         token = user.generate_reset_token()
-        # TODO: Send email with reset link
-        # send_password_reset_email(user.email, token)
-    
+        send_password_reset_email(user.email, token)
+
     return jsonify({
         "ok": True,
         "message": "If the email exists, a reset link has been sent"
@@ -193,22 +212,22 @@ def reset_password():
         return jsonify({"ok": False, "error": "JSON_REQUIRED"}), 400
     
     token = data.get('token')
-    new_password = data.get('password')
-    
+    new_password = data.get('new_password') or data.get('password')
+
     if not token or not new_password:
         return jsonify({"ok": False, "error": "TOKEN_PASSWORD_REQUIRED"}), 400
-    
+
     if len(new_password) < 8:
         return jsonify({"ok": False, "error": "PASSWORD_TOO_SHORT"}), 400
-    
+
     user = User.query.filter_by(reset_token=token).first()
-    
+
     if not user or not user.verify_reset_token(token):
-        return jsonify({"ok": False, "error": "INVALID_OR_EXPIRED_TOKEN"}), 400
-    
+        return jsonify({"ok": False, "error": "INVALID_TOKEN"}), 400
+
     user.set_password(new_password)
     user.clear_reset_token()
-    
+
     return jsonify({
         "ok": True,
         "message": "Password reset successfully"

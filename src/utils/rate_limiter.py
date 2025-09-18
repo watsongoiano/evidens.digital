@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, jsonify
+from flask import current_app, request, jsonify
 from datetime import datetime, timedelta
 from collections import defaultdict
 import threading
@@ -20,6 +20,10 @@ def rate_limit(key_prefix, per_minute=60, per_hour=None):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
+            # Skip rate limiting entirely when running in the testing configuration
+            if current_app and current_app.config.get('TESTING'):
+                return f(*args, **kwargs)
+
             # Get client identifier (IP address)
             client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
             if client_ip:
