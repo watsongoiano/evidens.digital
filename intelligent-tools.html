@@ -1156,6 +1156,28 @@
                 }, 300);
             }
         }
+
+        // Verificar autenticação ao carregar a página
+        async function checkAuthentication() {
+            try {
+                const response = await fetch('/api/user');
+                if (!response.ok) {
+                    // Usuário não autenticado, redirecionar para login
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // Usuário autenticado, pode continuar na página
+                console.log('Usuário autenticado');
+            } catch (error) {
+                console.error('Erro ao verificar autenticação:', error);
+                // Em caso de erro, redirecionar para login por segurança
+                window.location.href = '/login.html';
+            }
+        }
+
+        // Executar verificação quando a página carregar
+        document.addEventListener('DOMContentLoaded', checkAuthentication);
     </script>
 </body>
 </html>

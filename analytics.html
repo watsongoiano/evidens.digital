@@ -139,11 +139,31 @@
             }
         }
         
-        // Carregar estatísticas ao abrir a página
-        loadStats();
-        
-        // Atualizar automaticamente a cada 30 segundos
-        setInterval(loadStats, 30000);
+        // Verificar autenticação ao carregar a página
+        async function checkAuthentication() {
+            try {
+                const response = await fetch('/api/user');
+                if (!response.ok) {
+                    // Usuário não autenticado, redirecionar para login
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // Usuário autenticado, pode continuar e carregar estatísticas
+                console.log('Usuário autenticado');
+                loadStats();
+
+                // Atualizar automaticamente a cada 30 segundos
+                setInterval(loadStats, 30000);
+            } catch (error) {
+                console.error('Erro ao verificar autenticação:', error);
+                // Em caso de erro, redirecionar para login por segurança
+                window.location.href = '/login.html';
+            }
+        }
+
+        // Executar verificação quando a página carregar
+        document.addEventListener('DOMContentLoaded', checkAuthentication);
     </script>
 </body>
 </html>
