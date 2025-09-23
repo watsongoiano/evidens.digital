@@ -2,9 +2,9 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Check-up Médico Inteligente</title>
+    <title>Evidens Digital - Sistema Médico</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <style>
         * {
             margin: 0;
@@ -13,1081 +13,141 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            padding: 30px;
-        }
-
-        .form-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-        }
-
-        .results-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-        }
-
-        .section-title {
-            color: #2d3748;
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #4a5568;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #4299e1;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
-        }
-
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .checkbox-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
         }
 
-        .checkbox-item input[type="checkbox"] {
-            width: auto;
-            margin: 0;
-        }
-
-        .prevent-risk-section {
-            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
-            border: 2px solid #38b2ac;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
+        .loading-container {
             text-align: center;
-        }
-
-        .risk-display {
-            display: flex;
-            justify-content: space-around;
-            margin: 15px 0;
-        }
-
-        .risk-item {
-            text-align: center;
-        }
-
-        .risk-percentage {
-            font-size: 2em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .risk-percentage.low { color: #38a169; }
-        .risk-percentage.borderline { color: #d69e2e; }
-        .risk-percentage.intermediate { color: #dd6b20; }
-        .risk-percentage.high { color: #e53e3e; }
-
-        .risk-label {
-            font-size: 0.9em;
-            color: #4a5568;
-            font-weight: 600;
-        }
-
-        .risk-interpretation {
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 8px;
-            font-weight: 500;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.1em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin: 10px 0;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(66, 153, 225, 0.3);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-        }
-
-        .btn-info {
-            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-        }
-
-        .recommendations {
-            margin-top: 20px;
-        }
-
-        .recommendation-item {
+            padding: 3rem;
             background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
         }
 
-        .recommendation-item.alta { border-left-color: #e53e3e; }
-        .recommendation-item.media { border-left-color: #dd6b20; }
-        .recommendation-item.baixa { border-left-color: #38a169; }
-
-        .recommendation-title {
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 5px;
+        .logo {
+            font-size: 3rem;
+            font-weight: 300;
+            color: #2c3e50;
+            margin-bottom: 1rem;
         }
 
-        .recommendation-description {
-            color: #4a5568;
-            font-size: 0.9em;
-            margin-bottom: 5px;
+        .message {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
         }
 
-        .recommendation-reference {
-            color: #718096;
-            font-size: 0.8em;
-            font-style: italic;
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
         }
 
-        .evidence-grade {
-            font-weight: 700;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .evidence-grade.media {
-            color: #eab308;
-        }
-
-        .priority-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.7em;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-left: 10px;
-        }
-
-        .priority-badge.alta {
-            background: #fed7d7;
-            color: #c53030;
-        }
-
-        .priority-badge.media {
-            background: #feebc8;
-            color: #c05621;
-        }
-
-        .priority-badge.baixa {
-            background: #c6f6d5;
-            color: #2f855a;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #4a5568;
-        }
-
-        .error {
-            background: #fed7d7;
-            color: #c53030;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-
-        .success {
-            background: #c6f6d5;
-            color: #2f855a;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .checkbox-group {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .footer {
-            background: #2d3748;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 0.9em;
-        }
-
-        .footer a {
-            color: #4299e1;
+        .manual-link {
+            display: block;
+            color: #3498db;
             text-decoration: none;
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            border: 2px solid #3498db;
+            border-radius: 25px;
+            transition: all 0.3s;
         }
 
-        .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+        .manual-link:hover {
+            background: #3498db;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 1rem;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🩺 Sistema de Check-up Médico Inteligente</h1>
-            <p>Recomendações personalizadas com controle de exames anteriores</p>
+    <div class="loading-container">
+        <div class="logo">evidēns</div>
+        <div class="message">
+            Verificando autenticação...<br>
+            <small>Redirecionando para a área de login</small>
         </div>
-
-        <div class="main-content">
-            <div class="form-section">
-                <h2 class="section-title">Dados do Paciente</h2>
-                
-                <form id="checkupForm">
-                    <!-- Campo hidden para passar o risco PREVENT calculado -->
-                    <input type="hidden" id="prevent_risk_10yr" name="prevent_risk_10yr" value="">
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="idade">Idade</label>
-                            <input type="number" id="idade" name="idade" min="18" max="120" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="sexo">Sexo</label>
-                            <select id="sexo" name="sexo" required>
-                                <option value="">Selecione...</option>
-                                <option value="masculino">Masculino</option>
-                                <option value="feminino">Feminino</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="pais_guideline">País/Guideline base</label>
-                            <select id="pais_guideline" name="pais_guideline">
-                                <option value="BR">Brasil (SBIm/SBC/SBD)</option>
-                                <option value="EUA">EUA (CDC/USPSTF/ADA)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Seção Dados Clínicos para PREVENT -->
-                    <div class="form-group">
-                        <h4 style="color: #2c3e50; margin-bottom: 20px; font-size: 1.2rem;">📊 Dados Clínicos (para cálculo de risco cardiovascular)</h4>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="peso">Peso (kg)</label>
-                                <input type="number" id="peso" name="peso" min="30" max="300" step="0.1" placeholder="Ex: 70.5">
-                            </div>
-                            <div class="form-group">
-                                <label for="altura">Altura (cm)</label>
-                                <input type="number" id="altura" name="altura" min="100" max="250" step="1" placeholder="Ex: 170">
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="pressao_sistolica">Pressão Arterial Sistólica (mmHg)</label>
-                                <input type="number" id="pressao_sistolica" name="pressao_sistolica" min="90" max="200" placeholder="Ex: 140">
-                            </div>
-                            <div class="form-group">
-                                <label for="pressao_diastolica">Pressão Arterial Diastólica (mmHg)</label>
-                                <input type="number" id="pressao_diastolica" name="pressao_diastolica" min="50" max="120" placeholder="Ex: 90">
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="colesterol_total">Colesterol Total (mg/dL)</label>
-                                <input type="number" id="colesterol_total" name="colesterol_total" min="130" max="320" placeholder="Ex: 200">
-                            </div>
-                            <div class="form-group">
-                                <label for="hdl_colesterol">HDL Colesterol (mg/dL)</label>
-                                <input type="number" id="hdl_colesterol" name="hdl_colesterol" min="20" max="100" placeholder="Ex: 45">
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="creatinina">Creatinina Sérica (mg/dL)</label>
-                                <input type="number" id="creatinina" name="creatinina" min="0.5" max="10" step="0.01" placeholder="Ex: 1.0">
-                            </div>
-                            <div class="form-group">
-                                <label for="hba1c">HbA1c (%)</label>
-                                <input type="number" id="hba1c" name="hba1c" min="4" max="15" step="0.1" placeholder="Ex: 7.0">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Seção PREVENT Risk Display -->
-                    <div id="preventRiskSection" class="prevent-risk-section" style="display: none;">
-                        <h4>🎯 Risco Cardiovascular PREVENT 2024</h4>
-                        <div class="risk-display">
-                            <div class="risk-item">
-                                <div id="risk-10-year" class="risk-percentage">-</div>
-                                <div class="risk-label">Risco 10 anos</div>
-                            </div>
-                            <div class="risk-item">
-                                <div id="risk-30-year" class="risk-percentage">-</div>
-                                <div class="risk-label">Risco 30 anos</div>
-                            </div>
-                        </div>
-                        <div id="riskInterpretation" class="risk-interpretation">
-                            <span id="riskInterpretationText">Preencha os dados clínicos para calcular o risco</span>
-                        </div>
-                    </div>
-
-                    <!-- Medicações Específicas -->
-                    <div class="form-group">
-                        <label>Medicações Específicas</label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="medicamento_hipertensao" name="medicamentos_estruturados" value="anti_hipertensivo">
-                                <label for="medicamento_hipertensao">Medicamentos Anti-hipertensivos</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="medicamento_estatina" name="medicamentos_estruturados" value="estatina">
-                                <label for="medicamento_estatina">Estatinas</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Comorbidades -->
-                    <div class="form-group">
-                        <label>Comorbidades</label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="diabetes" name="comorbidades" value="diabetes_tipo_2">
-                                <label for="diabetes">Diabetes Tipo 2</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="hipertensao" name="comorbidades" value="hipertensao">
-                                <label for="hipertensao">Hipertensão</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="has_resistente" name="comorbidades" value="has_resistente">
-                                <label for="has_resistente">HAS Resistente</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="dislipidemia" name="comorbidades" value="dislipidemia">
-                                <label for="dislipidemia">Dislipidemia</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="doenca_renal" name="comorbidades" value="doenca_renal_cronica">
-                                <label for="doenca_renal">Doença Renal Crônica</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="cardiopatia" name="comorbidades" value="cardiopatia">
-                                <label for="cardiopatia">Cardiopatia</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="obesidade" name="comorbidades" value="obesidade">
-                                <label for="obesidade">Obesidade</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="outras_comorbidades">Outras comorbidades (descreva):</label>
-                        <textarea id="outras_comorbidades" name="outras_comorbidades" rows="3" placeholder="Ex: câncer de próstata, AVC, doença de Alzheimer, aneurisma..."></textarea>
-                    </div>
-
-                    <!-- Medicações de Uso Contínuo -->
-                    <div class="form-group">
-                        <label for="medicacoes">Medicações de Uso Contínuo</label>
-                        <textarea id="medicacoes" name="medicacoes" rows="4" placeholder="Ex: Losartana 50mg 1x/dia, Enalapril 10mg 2x/dia, Hidroclorotiazida 25mg 1x/dia, Metformina 850mg 2x/dia, Sinvastatina 20mg 1x/dia..."></textarea>
-                        <small>Liste todas as medicações em uso contínuo com doses e frequência</small>
-                    </div>
-
-                    <!-- História Familiar -->
-                    <div class="form-group">
-                        <label>História Familiar</label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="cancer_mama" name="historia_familiar" value="cancer_mama">
-                                <label for="cancer_mama">Câncer de Mama</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="cancer_colorretal" name="historia_familiar" value="cancer_colorretal">
-                                <label for="cancer_colorretal">Câncer Colorretal</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="cancer_ovario" name="historia_familiar" value="cancer_ovario">
-                                <label for="cancer_ovario">Câncer de Ovário</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="diabetes_familiar" name="historia_familiar" value="diabetes">
-                                <label for="diabetes_familiar">Diabetes</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="cardiopatia_familiar" name="historia_familiar" value="cardiopatia">
-                                <label for="cardiopatia_familiar">Cardiopatia</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="outras_condicoes_familiares">Outras condições familiares (descreva):</label>
-                        <textarea id="outras_condicoes_familiares" name="outras_condicoes_familiares" rows="3" placeholder="Ex: câncer de próstata, AVC, doença de Alzheimer, aneurisma..."></textarea>
-                    </div>
-
-                    <!-- Tabagismo -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="tabagismo">Tabagismo</label>
-                            <select id="tabagismo" name="tabagismo">
-                                <option value="nunca_fumou">Nunca fumou</option>
-                                <option value="fumante_atual">Fumante atual</option>
-                                <option value="ex_fumante">Ex-fumante</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="macos_ano">Maços-ano (se fumante/ex-fumante)</label>
-                            <input type="number" id="macos_ano" name="macos_ano" min="0" max="200">
-                        </div>
-                    </div>
-
-                    <button type="button" class="btn" onclick="generateRecommendations()">Gerar Recomendações Inteligentes</button>
-                    <button type="button" class="btn btn-success" onclick="attachPDFs()">📄 Anexar PDFs de Exames</button>
-                </form>
-            </div>
-
-            <div class="results-section">
-                <h2 class="section-title">Recomendações Inteligentes</h2>
-                
-                <div id="loading" class="loading" style="display: none;">
-                    <p>🔄 Gerando recomendações personalizadas...</p>
-                </div>
-
-                <div id="error" class="error" style="display: none;"></div>
-
-                <div id="results" style="display: none;">
-                    <div id="recommendations" class="recommendations"></div>
-                    
-                    <div class="action-buttons">
-                        <button class="btn btn-info" onclick="gerarSolicitacaoExamesLaboratoriais()">🧪 Solicitação de Exames Laboratoriais</button>
-                        <button class="btn btn-primary" onclick="gerarSolicitacaoExamesImagem()">🏥 Solicitação de Exames de Imagem</button>
-                        <button class="btn btn-warning" onclick="generateVaccineReceipt()">💉 Receita de Vacinas</button>
-                    </div>
-                </div>
-
-                <div id="initial-message" style="text-align: center; color: #718096; padding: 40px;">
-                    <div style="font-size: 3em; margin-bottom: 20px;">🩺</div>
-                    <p>Preencha os dados do paciente para gerar recomendações personalizadas de check-up.</p>
-                </div>
-            </div>
+        <div class="spinner"></div>
+        <div class="error-message" id="errorMsg">
+            Erro na verificação. Clique no link abaixo para continuar.
         </div>
-
-        <div class="footer">
-            <p>Sistema de Check-up Médico Inteligente<br>
-            Desenvolvido por <strong>Dr. Rodolfo Cambraia Frota</strong><br>
-            CRM-GO: 26.815</p>
-            <p style="margin-top: 10px; font-size: 0.8em;">
-                Baseado nos principais guidelines médicos internacionais (USPSTF, ADA, CDC, KDIGO)
-            </p>
-            <p style="margin-top: 10px;">
-                <span style="color: #4299e1;">🚀 Made with Manus</span>
-            </p>
-        </div>
+        <a href="/login.html" class="manual-link" id="manualLink" style="display: none;">
+            Ir para Login Manualmente
+        </a>
     </div>
 
     <script>
-        let lastRecommendations = [];
-        // Função para calcular risco PREVENT 2024
-        function calculatePREVENTRisk(patientData) {
-            const { age, sex, totalCholesterol, hdlCholesterol, systolicBP, diabetes, smoking, weight, height, creatinine } = patientData;
-            
-            // Validar dados mínimos
-            if (!age || !sex || !totalCholesterol || !hdlCholesterol || !systolicBP) {
-                return null;
-            }
-            
-            // Calcular eGFR (CKD-EPI)
-            let egfr = 175 * Math.pow(creatinine, -1.154) * Math.pow(age, -0.203);
-            if (sex === 'feminino') {
-                egfr *= 0.742;
-            }
-            
-            // Calcular BMI
-            let bmi = null;
-            if (weight && height) {
-                const heightM = height / 100;
-                bmi = weight / (heightM * heightM);
-            }
-            
-            // Coeficientes PREVENT 2024 (simplificados)
-            let beta_age, beta_chol, beta_hdl, beta_sbp, beta_diabetes, beta_smoking, intercept;
-            
-            if (sex === 'masculino') {
-                beta_age = 0.0695;
-                beta_chol = 0.0087;
-                beta_hdl = -0.0142;
-                beta_sbp = 0.0178;
-                beta_diabetes = 0.4312;
-                beta_smoking = 0.5473;
-                intercept = -12.8234;
-            } else {
-                beta_age = 0.0712;
-                beta_chol = 0.0098;
-                beta_hdl = -0.0156;
-                beta_sbp = 0.0189;
-                beta_diabetes = 0.4876;
-                beta_smoking = 0.6234;
-                intercept = -13.2145;
-            }
-            
-            // Calcular log odds
-            const logOdds = intercept + 
-                           beta_age * age +
-                           beta_chol * totalCholesterol +
-                           beta_hdl * hdlCholesterol +
-                           beta_sbp * systolicBP +
-                           (diabetes ? beta_diabetes : 0) +
-                           (smoking ? beta_smoking : 0);
-            
-            // Converter para probabilidade
-            const risk10Year = Math.exp(logOdds) / (1 + Math.exp(logOdds)) * 100;
-            const risk30Year = Math.min(risk10Year * 2.8, 85);
-            
-            return {
-                risk10Year: Math.round(risk10Year * 10) / 10,
-                risk30Year: Math.round(risk30Year * 10) / 10,
-                egfr: Math.round(egfr),
-                bmi: bmi ? Math.round(bmi * 10) / 10 : null
-            };
-        }
-
-        function getRiskInterpretation(risk10Year) {
-            if (risk10Year < 5) {
-                return { level: 'low', text: 'Baixo Risco. Manter estilo de vida saudável e acompanhamento de rotina.' };
-            } else if (risk10Year < 7.5) {
-                return { level: 'borderline', text: 'Risco Borderline. Considerar biomarcadores para refinamento da avaliação.' };
-            } else if (risk10Year < 20) {
-                return { level: 'intermediate', text: 'Risco Intermediário. Biomarcadores recomendados e intervenção terapêutica.' };
-            } else {
-                return { level: 'high', text: 'Alto Risco. Intervenção terapêutica urgente e acompanhamento especializado.' };
-            }
-        }
-
-        function updatePREVENTRiskDisplay() {
-            const formData = new FormData(document.getElementById('checkupForm'));
-            
-            const patientData = {
-                age: parseInt(formData.get('idade')),
-                sex: formData.get('sexo'),
-                totalCholesterol: parseFloat(formData.get('colesterol_total')),
-                hdlCholesterol: parseFloat(formData.get('hdl_colesterol')),
-                systolicBP: parseFloat(formData.get('pressao_sistolica')),
-                diabetes: formData.getAll('comorbidades').includes('diabetes_tipo_2'),
-                smoking: formData.get('tabagismo') === 'fumante_atual',
-                weight: parseFloat(formData.get('peso')),
-                height: parseFloat(formData.get('altura')),
-                creatinine: parseFloat(formData.get('creatinina'))
-            };
-            
-            const riskResult = calculatePREVENTRisk(patientData);
-            
-            const riskSection = document.getElementById('preventRiskSection');
-            const risk10Element = document.getElementById('risk-10-year');
-            const risk30Element = document.getElementById('risk-30-year');
-            const interpretationElement = document.getElementById('riskInterpretationText');
-            
-            if (riskResult) {
-                riskSection.style.display = 'block';
-                
-                risk10Element.textContent = riskResult.risk10Year + '%';
-                risk30Element.textContent = riskResult.risk30Year + '%';
-                
-                document.getElementById('prevent_risk_10yr').value = riskResult.risk10Year;
-                
-                const interpretation = getRiskInterpretation(riskResult.risk10Year);
-                risk10Element.className = `risk-percentage ${interpretation.level}`;
-                risk30Element.className = `risk-percentage ${interpretation.level}`;
-                
-                interpretationElement.textContent = interpretation.text;
-            } else {
-                riskSection.style.display = 'none';
-                document.getElementById('prevent_risk_10yr').value = '';
-            }
-        }
-
-        async function generateRecommendations() {
-            const loading = document.getElementById('loading');
-            const error = document.getElementById('error');
-            const results = document.getElementById('results');
-            const initialMessage = document.getElementById('initial-message');
-
-            loading.style.display = 'block';
-            error.style.display = 'none';
-            results.style.display = 'none';
-            initialMessage.style.display = 'none';
-
+        // Verificar autenticação imediatamente
+        async function checkAuth() {
             try {
-                const formData = new FormData(document.getElementById('checkupForm'));
-                const data = {};
-                
-                // Converter FormData para objeto
-                for (let [key, value] of formData.entries()) {
-                    if (data[key]) {
-                        if (Array.isArray(data[key])) {
-                            data[key].push(value);
-                        } else {
-                            data[key] = [data[key], value];
-                        }
-                    } else {
-                        data[key] = value;
-                    }
-                }
+                console.log('Verificando autenticação...');
 
-                const response = await fetch('/api/checkup-intelligent', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
+                // Tentar acessar a API de autenticação
+                const response = await fetch('/api/user', {
+                    method: 'GET',
+                    credentials: 'include'
                 });
 
-                const result = await response.json();
-
-                if (result.success) {
-                    try {
-                        lastRecommendations = Array.isArray(result.recommendations) ? result.recommendations : [];
-                    } catch (e) {
-                        lastRecommendations = [];
-                    }
-                    displayRecommendations(result.recommendations);
-                    results.style.display = 'block';
+                if (response.ok) {
+                    // Usuário autenticado - redirecionar para dashboard
+                    console.log('Usuário autenticado, redirecionando...');
+                    window.location.href = '/dashboard.html';
                 } else {
-                    throw new Error(result.error || 'Erro desconhecido');
-                }
-
-            } catch (err) {
-                error.textContent = `Erro: ${err.message}`;
-                error.style.display = 'block';
-            } finally {
-                loading.style.display = 'none';
-            }
-        }
-
-        function normalizeText(value) {
-            if (!value || typeof value !== 'string') {
-                return '';
-            }
-            return value
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .toLowerCase()
-                .trim();
-        }
-
-        function getEvidenceClass(grau) {
-            const normalized = normalizeText(grau);
-            if (!normalized) {
-                return '';
-            }
-            if (normalized === 'media') {
-                return 'media';
-            }
-            return '';
-        }
-
-        function buildReferenceContent(rec) {
-            if (!rec || typeof rec !== 'object') {
-                return '';
-            }
-
-            if (rec.referencia_html) {
-                return rec.referencia_html;
-            }
-
-            const titleNormalized = normalizeText(rec.titulo || '');
-
-            if (titleNormalized.includes('microalbuminuria') && titleNormalized.includes('urina')) {
-                const url = 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356';
-                return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-            }
-
-            if (titleNormalized.includes('densitometria') && titleNormalized.includes('dexa')) {
-                return '<a href="https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening" target="_blank" rel="noopener noreferrer">USPSTF 2025</a>';
-            }
-
-            return rec.referencia || '';
-        }
-
-        function displayRecommendations(recommendations) {
-            const container = document.getElementById('recommendations');
-            container.innerHTML = '';
-
-            const categories = {
-                'laboratorio': '🧪 Exames Laboratoriais',
-                'imagem': '📷 Exames de Imagem',
-                'vacina': '💉 Vacinas',
-                'outras': '📋 Outras Recomendações'
-            };
-
-            Object.keys(categories).forEach(category => {
-                const categoryRecs = recommendations.filter(rec => rec.categoria === category);
-                if (categoryRecs.length > 0) {
-                    const categoryDiv = document.createElement('div');
-                    categoryDiv.innerHTML = `<h3 style="color: #2d3748; margin: 20px 0 15px 0;">${categories[category]}</h3>`;
-
-                    categoryRecs.forEach(rec => {
-                        const subtitulo = (rec && rec.subtitulo) ? rec.subtitulo : '';
-                        const grau = (rec && rec.grau_evidencia) ? rec.grau_evidencia : '';
-                        const referenceContent = buildReferenceContent(rec);
-                        const normalizedTitle = normalizeText(rec.titulo || '');
-                        const linkMap = {
-                            'questionario gad-7 (triagem de ansiedade)': 'https://www.mdcalc.com/calc/1727/gad7-general-anxiety-disorder7',
-                            'questionario phq-9 (triagem de depressao)': 'https://www.mdcalc.com/calc/1725/phq9-patient-health-questionnaire9'
-                        };
-                        const linkHref = linkMap[normalizedTitle];
-                        const titleText = rec.titulo || '';
-                        const titleHtml = linkHref
-                            ? `<a href="${linkHref}" target="_blank" rel="noopener noreferrer">${titleText}</a>`
-                            : titleText;
-                        const evidenceClasses = ['evidence-grade'];
-                        const extraEvidenceClass = getEvidenceClass(grau);
-                        if (extraEvidenceClass) {
-                            evidenceClasses.push(extraEvidenceClass);
-                        }
-                        const recDiv = document.createElement('div');
-                        recDiv.className = `recommendation-item ${rec.prioridade}`;
-                        recDiv.innerHTML = `
-                            <div class="recommendation-title">
-                                ${titleHtml}
-                                <span class="priority-badge ${rec.prioridade}">${rec.prioridade}</span>
-                            </div>
-                            ${subtitulo ? `<div class="recommendation-description" style="font-weight:600; color:#2d3748;">${subtitulo}</div>` : ''}
-                            <div class="recommendation-description">${rec.descricao}</div>
-                            <div class="recommendation-reference">${referenceContent}${grau ? ` • Grau de evidência: <strong class="${evidenceClasses.join(' ')}">${grau}</strong>` : ''}</div>
-                        `;
-                        categoryDiv.appendChild(recDiv);
-                    });
-
-                    container.appendChild(categoryDiv);
-                }
-            });
-        }
-
-        async function gerarSolicitacaoExamesLaboratoriais() {
-            try {
-                const active = Array.isArray(lastRecommendations) ? lastRecommendations : [];
-                if (!active || active.length === 0) {
-                    alert('Gere as recomendações primeiro.');
-                    return;
-                }
-
-                // Filtrar apenas exames laboratoriais
-                const labRecommendations = active.filter(rec => {
-                    const titulo = rec.titulo || '';
-                    const categoria = rec.categoria || '';
-                    const normalizedTitle = normalizeText(titulo);
-
-                    if (normalizedTitle.includes('profilaxia pre-exposicao ao hiv')) {
-                        return false;
-                    }
-
-                    return categoria.includes('Laboratorial') || categoria.includes('laboratorial') ||
-                           titulo.includes('Hemograma') || titulo.includes('Glicemia') || titulo.includes('Colesterol') ||
-                           titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
-                           titulo.includes('Sódio') || titulo.includes('Magnésio') || titulo.includes('Ácido úrico') ||
-                           titulo.includes('Microalbuminúria') || titulo.includes('Urinocultura') || titulo.includes('HbA1c') ||
-                           titulo.includes('TSH') || titulo.includes('Cortisol') || titulo.includes('Aldosterona') ||
-                           titulo.includes('Hepatite C') || titulo.includes('HIV') || titulo.includes('Papanicolau') ||
-                           titulo.includes('Citologia') || titulo.includes('Metanefrinas') || titulo.includes('Catecolaminas') ||
-                           titulo.includes('TOTG') || titulo.includes('Tolerância à Glicose');
-                });
-                
-                if (labRecommendations.length === 0) {
-                    alert('Nenhum exame laboratorial encontrado nas recomendações.');
-                    return;
-                }
-
-                const nome = prompt('Nome do paciente:') || 'Paciente';
-                const idadeEl = document.getElementById('idade');
-                const sexoEl = document.getElementById('sexo');
-                const patientData = {
-                    nome,
-                    idade: idadeEl && idadeEl.value ? parseInt(idadeEl.value) : undefined,
-                    sexo: sexoEl ? sexoEl.value : undefined,
-                };
-
-                const resp = await fetch('/api/gerar-solicitacao-exames', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        recommendations: labRecommendations,
-                        patient_data: patientData,
-                        tipo_exame: 'laboratorial'
-                    })
-                });
-
-                if (!resp.ok) {
-                    throw new Error(`Erro ao gerar solicitação de exames laboratoriais: ${resp.status}`);
-                }
-
-                const result = await resp.json();
-                
-                if (result.success && result.pdfs && result.pdfs.length > 0) {
-                    result.pdfs.forEach((pdf, index) => {
-                        const link = document.createElement('a');
-                        link.href = 'data:application/pdf;base64,' + pdf.content;
-                        link.download = pdf.filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    });
-                    
-                    alert(`PDF de solicitação de exames laboratoriais gerado com sucesso!`);
-                } else {
-                    throw new Error('Nenhum PDF foi gerado');
+                    // Usuário não autenticado - redirecionar para login
+                    console.log('Usuário não autenticado, redirecionando para login...');
+                    setTimeout(() => {
+                        window.location.href = '/login.html';
+                    }, 1500);
                 }
             } catch (error) {
-                console.error('Erro ao gerar solicitação de exames laboratoriais:', error);
-                alert('Erro ao gerar solicitação de exames laboratoriais: ' + (error && error.message ? error.message : error));
+                console.error('Erro na verificação de autenticação:', error);
+
+                // Em caso de erro, mostrar opção manual
+                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('manualLink').style.display = 'block';
+                document.querySelector('.message').innerHTML = 'Erro na verificação automática';
+                document.querySelector('.spinner').style.display = 'none';
+
+                // Tentar redirecionamento após 3 segundos mesmo com erro
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 3000);
             }
         }
 
-        async function gerarSolicitacaoExamesImagem() {
-            try {
-                const active = Array.isArray(lastRecommendations) ? lastRecommendations : [];
-                if (!active || active.length === 0) {
-                    alert('Gere as recomendações primeiro.');
-                    return;
-                }
+        // Executar verificação quando página carregar
+        document.addEventListener('DOMContentLoaded', checkAuth);
 
-                // Filtrar apenas exames de imagem
-                const imageRecommendations = active.filter(rec => {
-                    const titulo = rec.titulo || '';
-                    const categoria = rec.categoria || '';
-                    
-                    return categoria.includes('Imagem') || categoria.includes('imagem') ||
-                           titulo.includes('Tomografia') || titulo.includes('Ressonância') || titulo.includes('Ultrassom') ||
-                           titulo.includes('Ecocardiograma') || titulo.includes('Radiografia') || titulo.includes('Mamografia') ||
-                           titulo.includes('TCBD') || titulo.includes('Colonoscopia') || titulo.includes('Densitometria') ||
-                           titulo.includes('MAPA') || titulo.includes('MRPA') || titulo.includes('Score de Cálcio') ||
-                           titulo.includes('Strain') || titulo.includes('DEXA');
-                });
-                
-                if (imageRecommendations.length === 0) {
-                    alert('Nenhum exame de imagem encontrado nas recomendações.');
-                    return;
-                }
-
-                const nome = prompt('Nome do paciente:') || 'Paciente';
-                const idadeEl = document.getElementById('idade');
-                const sexoEl = document.getElementById('sexo');
-                const patientData = {
-                    nome,
-                    idade: idadeEl && idadeEl.value ? parseInt(idadeEl.value) : undefined,
-                    sexo: sexoEl ? sexoEl.value : undefined,
-                };
-
-                const resp = await fetch('/api/gerar-solicitacao-exames', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        recommendations: imageRecommendations,
-                        patient_data: patientData,
-                        tipo_exame: 'imagem'
-                    })
-                });
-
-                if (!resp.ok) {
-                    throw new Error(`Erro ao gerar solicitação de exames de imagem: ${resp.status}`);
-                }
-
-                const result = await resp.json();
-                
-                if (result.success && result.pdfs && result.pdfs.length > 0) {
-                    result.pdfs.forEach((pdf, index) => {
-                        const link = document.createElement('a');
-                        link.href = 'data:application/pdf;base64,' + pdf.content;
-                        link.download = pdf.filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    });
-                    
-                    alert(`PDF de solicitação de exames de imagem gerado com sucesso!`);
-                } else {
-                    throw new Error('Nenhum PDF foi gerado');
-                }
-            } catch (error) {
-                console.error('Erro ao gerar solicitação de exames de imagem:', error);
-                alert('Erro ao gerar solicitação de exames de imagem: ' + (error && error.message ? error.message : error));
+        // Backup: executar após 1 segundo se ainda não executou
+        setTimeout(() => {
+            if (document.readyState === 'complete') {
+                checkAuth();
             }
-        }
-
-        async function generateVaccineReceipt() {
-            try {
-                const active = Array.isArray(lastRecommendations) ? lastRecommendations : [];
-                if (!active || active.length === 0) {
-                    alert('Gere as recomendações primeiro.');
-                    return;
-                }
-
-                const nome = prompt('Nome do paciente:') || 'Paciente';
-                const idadeEl = document.getElementById('idade');
-                const sexoEl = document.getElementById('sexo');
-                const patientData = {
-                    nome,
-                    idade: idadeEl && idadeEl.value ? parseInt(idadeEl.value) : undefined,
-                    sexo: sexoEl ? sexoEl.value : undefined,
-                };
-
-                const resp = await fetch('/api/gerar-receita-vacinas', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'text/html' },
-                    body: JSON.stringify({
-                        recommendations: active,
-                        patient_data: patientData,
-                    })
-                });
-
-                if (!resp.ok) {
-                    throw new Error(`Erro ao gerar receita de vacinas: ${resp.status}`);
-                }
-
-                const html = await resp.text();
-                const newWindow = window.open('', '_blank');
-                if (newWindow) {
-                    newWindow.document.write(html);
-                    newWindow.document.close();
-                } else {
-                    alert('Não foi possível abrir nova janela. Verifique se pop-ups estão bloqueados.');
-                }
-            } catch (error) {
-                console.error('Erro ao gerar receita de vacinas:', error);
-                alert('Erro ao gerar receita de vacinas: ' + (error && error.message ? error.message : error));
-            }
-        }
-
-
-
-        function attachPDFs() {
-            alert('Funcionalidade de anexar PDFs em desenvolvimento');
-        }
-
-        // Event listeners para recalcular risco automaticamente
-        document.addEventListener('DOMContentLoaded', function() {
-            const clinicalFields = [
-                'idade', 'sexo', 'peso', 'altura', 'pressao_sistolica', 
-                'colesterol_total', 'hdl_colesterol', 'creatinina',
-                'tabagismo'
-            ];
-            
-            clinicalFields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field) {
-                    field.addEventListener('change', updatePREVENTRiskDisplay);
-                    field.addEventListener('input', updatePREVENTRiskDisplay);
-                }
-            });
-
-            // Event listener para checkboxes de comorbidades
-            const comorbidadeCheckboxes = document.querySelectorAll('input[name="comorbidades"]');
-            comorbidadeCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', updatePREVENTRiskDisplay);
-            });
-        });
+        }, 1000);
     </script>
 </body>
 </html>
