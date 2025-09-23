@@ -288,46 +288,6 @@ def serve_static(path: str):
     abort(404)
 
 
-# Default handler for Vercel
-def handler(request):
-    """Adapt incoming Vercel requests to the Flask application."""
-
-    path = getattr(request, "path", "/")
-    method = getattr(request, "method", "GET")
-    data = request.get_data() if hasattr(request, "get_data") else None
-    headers = getattr(request, "headers", None)
-    if headers is not None:
-        if hasattr(headers, "items"):
-            try:
-                headers = list(headers.items())
-            except TypeError:
-                headers = list(headers.items(multi=True))  # type: ignore[attr-defined]
-        else:
-            headers = list(headers)
-
-    query_string = getattr(request, "query_string", None)
-    if isinstance(query_string, str):
-        query_string = query_string.encode("utf-8")
-
-    with app.test_request_context(
-        path=path,
-        method=method,
-        data=data,
-        headers=headers,
-        query_string=query_string,
-    ):
-        response = app.full_dispatch_request()
-
-        # ``send_from_directory`` sets ``direct_passthrough`` so Flask can stream
-        # files efficiently.  The Vercel runtime eagerly reads the body from the
-        # returned response, which raises ``RuntimeError`` if passthrough mode is
-        # still enabled.  Disabling it keeps the response compatible without
-        # affecting normal Flask behaviour.
-        if getattr(response, "direct_passthrough", False):
-            response.direct_passthrough = False
-
-        return response
-
 # Global flag to track database initialization
 _db_initialized = False
 
@@ -341,8 +301,8 @@ def ensure_db_initialized():
         except Exception as e:
             print(f"Warning: Could not initialize database: {e}")
 
-# Also expose the app directly for Vercel
-application = app
+# Initialize database on first import
+ensure_db_initialized()
 
 if __name__ == '__main__':
     app.run(debug=True)
