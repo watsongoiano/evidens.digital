@@ -128,23 +128,23 @@ def init_db():
     finally:
         conn.close()
 
-# Initialize database on import
-init_db()
+# Database will be initialized lazily when needed
 
 @app.route('/api/login/<role>', methods=['POST'])
 def login(role):
     """Login endpoint"""
+    ensure_db_initialized()  # Initialize database if needed
     try:
         data = request.get_json()
         if not data:
             return jsonify({'ok': False, 'error': 'INVALID_DATA'}), 400
-            
+
         email = data.get('email', '').strip().lower()
         password = data.get('password', '')
-        
+
         if not email or not password:
             return jsonify({'ok': False, 'error': 'MISSING_FIELDS'}), 400
-        
+
         # Get user from database
         conn = get_db_connection()
         user = conn.execute(
@@ -273,11 +273,18 @@ def handler(request):
 
         return response
 
-# Initialize database on app startup
-try:
-    init_db()
-except Exception as e:
-    print(f"Warning: Could not initialize database: {e}")
+# Global flag to track database initialization
+_db_initialized = False
+
+def ensure_db_initialized():
+    """Ensure database is initialized (lazy initialization)"""
+    global _db_initialized
+    if not _db_initialized:
+        try:
+            init_db()
+            _db_initialized = True
+        except Exception as e:
+            print(f"Warning: Could not initialize database: {e}")
 
 # Also expose the app directly for Vercel
 application = app
