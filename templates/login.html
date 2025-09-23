@@ -130,17 +130,27 @@
                         <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <defs>
                                 <linearGradient id="stethoscope-gradient" x1="40" y1="30" x2="160" y2="170" gradientUnits="userSpaceOnUse">
-                                    <stop stop-color="#CBD5F5"/>
+                                    <stop stop-color="#E2E8F0"/>
                                     <stop offset="1" stop-color="#94A3B8"/>
                                 </linearGradient>
                             </defs>
-                            <path d="M64 36C64 31.0294 68.0294 27 73 27H97C101.971 27 106 31.0294 106 36V64C106 68.9706 101.971 73 97 73H73C68.0294 73 64 68.9706 64 64V36Z" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M85 72V132" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round"/>
-                            <path d="M85 132C85 148.016 72.0163 161 56 161C39.9837 161 27 148.016 27 132C27 115.984 39.9837 103 56 103" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M85 132C85 148.016 97.9837 161 114 161C130.016 161 143 148.016 143 132C143 115.984 130.016 103 114 103" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-                            <circle cx="158" cy="132" r="20" stroke="url(#stethoscope-gradient)" stroke-width="6"/>
-                            <circle cx="158" cy="132" r="6" fill="#94A3B8"/>
-                            <path d="M143 132H136" stroke="url(#stethoscope-gradient)" stroke-width="6" stroke-linecap="round"/>
+                            <!-- Simplified stethoscope design matching the provided image -->
+                            <!-- Left earpiece -->
+                            <circle cx="60" cy="50" r="12" stroke="url(#stethoscope-gradient)" stroke-width="4" fill="none"/>
+                            <!-- Right earpiece -->
+                            <circle cx="140" cy="50" r="12" stroke="url(#stethoscope-gradient)" stroke-width="4" fill="none"/>
+                            <!-- Left tube from earpiece to junction -->
+                            <path d="M60 62 Q 60 80 85 95" stroke="url(#stethoscope-gradient)" stroke-width="4" stroke-linecap="round" fill="none"/>
+                            <!-- Right tube from earpiece to junction -->
+                            <path d="M140 62 Q 140 80 115 95" stroke="url(#stethoscope-gradient)" stroke-width="4" stroke-linecap="round" fill="none"/>
+                            <!-- Main tube from junction to chest piece -->
+                            <path d="M100 95 L 100 130" stroke="url(#stethoscope-gradient)" stroke-width="4" stroke-linecap="round"/>
+                            <!-- Chest piece (diaphragm) -->
+                            <circle cx="100" cy="150" r="18" stroke="url(#stethoscope-gradient)" stroke-width="4" fill="none"/>
+                            <!-- Inner circle of chest piece -->
+                            <circle cx="100" cy="150" r="8" fill="#94A3B8" opacity="0.6"/>
+                            <!-- Connection from main tube to chest piece -->
+                            <path d="M100 130 L 100 132" stroke="url(#stethoscope-gradient)" stroke-width="4" stroke-linecap="round"/>
                         </svg>
                     </div>
 
