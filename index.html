@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evidens Digital - Sistema Médico</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: 300;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .message {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .manual-link {
+            display: block;
+            color: #3498db;
+            text-decoration: none;
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            border: 2px solid #3498db;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+
+        .manual-link:hover {
+            background: #3498db;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="logo">evidēns</div>
+        <div class="message">
+            Verificando autenticação...<br>
+            <small>Redirecionando para a área de login</small>
+        </div>
+        <div class="spinner"></div>
+        <div class="error-message" id="errorMsg">
+            Erro na verificação. Clique no link abaixo para continuar.
+        </div>
+        <a href="/login.html" class="manual-link" id="manualLink" style="display: none;">
+            Ir para Login Manualmente
+        </a>
+    </div>
+
+    <script>
+        // Verificar autenticação imediatamente
+        async function checkAuth() {
+            try {
+                console.log('Verificando autenticação...');
+
+                // Tentar acessar a API de autenticação
+                const response = await fetch('/api/user', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    // Usuário autenticado - redirecionar para dashboard
+                    console.log('Usuário autenticado, redirecionando...');
+                    window.location.href = '/dashboard.html';
+                } else {
+                    // Usuário não autenticado - redirecionar para login
+                    console.log('Usuário não autenticado, redirecionando para login...');
+                    setTimeout(() => {
+                        window.location.href = '/login.html';
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('Erro na verificação de autenticação:', error);
+
+                // Em caso de erro, mostrar opção manual
+                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('manualLink').style.display = 'block';
+                document.querySelector('.message').innerHTML = 'Erro na verificação automática';
+                document.querySelector('.spinner').style.display = 'none';
+
+                // Tentar redirecionamento após 3 segundos mesmo com erro
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 3000);
+            }
+        }
+
+        // Executar verificação quando página carregar
+        document.addEventListener('DOMContentLoaded', checkAuth);
+
+        // Backup: executar após 1 segundo se ainda não executou
+        setTimeout(() => {
+            if (document.readyState === 'complete') {
+                checkAuth();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
