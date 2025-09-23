@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - evidēns</title>
+    <title>evidēns - Clinical decision support</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,286 +16,319 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #e8eeff 0%, #f0f4ff 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            color: #2C3E50;
+            color: #2d3748;
         }
 
+        /* Header */
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 1rem 2rem;
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 20px 40px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
         }
 
-        .logo h1 {
-            font-size: 1.5rem;
+        .nav-link {
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #2d3748;
+        }
+
+        .logo {
+            font-size: 24px;
             font-weight: 600;
-            color: #2C3E50;
+            color: #2d3748;
+            letter-spacing: -0.5px;
         }
 
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .user-email {
-            font-size: 0.875rem;
-            color: #7F8C8D;
-        }
-
-        .user-role {
-            font-size: 0.75rem;
-            background: #4CAF50;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            text-transform: uppercase;
-            font-weight: 500;
-        }
-
-        .logout-btn {
-            background: #E74C3C;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-
-        .logout-btn:hover {
-            background: #C0392B;
-        }
-
-        .main {
+        /* Main Content */
+        .main-content {
             flex: 1;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: 60px 40px;
+            text-align: center;
         }
 
-        .dashboard-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 1.5rem;
-            padding: 3rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
+        .hero-title {
+            font-size: 56px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            max-width: 900px;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: #718096;
+            margin-bottom: 50px;
+            font-weight: 400;
+        }
+
+        /* Search Section */
+        .search-section {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 80px;
             max-width: 600px;
+            width: 100%;
+            position: relative;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 18px 24px;
+            font-size: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px 0 0 12px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            background: white;
+            color: #2d3748;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+        }
+
+        .search-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .search-button {
+            padding: 18px 30px;
+            background: #a0aec0;
+            color: white;
+            border: none;
+            border-radius: 0 12px 12px 0;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-button:hover {
+            background: #718096;
+        }
+
+        .dev-badge {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #ffa726);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
             width: 100%;
         }
 
-        .welcome-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2C3E50;
-            margin-bottom: 1rem;
-        }
-
-        .welcome-message {
-            font-size: 1.125rem;
-            color: #7F8C8D;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
         .feature-card {
-            background: #F8F9FA;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            text-align: left;
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .feature-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+        }
+
+        .feature-card.intelligent-tools {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
         .feature-icon {
-            width: 48px;
-            height: 48px;
-            background: #4CAF50;
-            border-radius: 0.75rem;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 30px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1rem;
+            font-size: 24px;
+        }
+
+        .trusted-info .feature-icon {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+        }
+
+        .intelligent-tools .feature-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .improved-outcomes .feature-icon {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
         }
 
         .feature-title {
-            font-size: 1.125rem;
+            font-size: 24px;
             font-weight: 600;
-            color: #2C3E50;
-            margin-bottom: 0.5rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
         }
 
         .feature-description {
-            font-size: 0.875rem;
-            color: #7F8C8D;
-            line-height: 1.5;
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.8;
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 2rem;
-            flex-wrap: wrap;
+        .intelligent-tools .feature-description {
+            opacity: 0.9;
         }
 
-        .action-btn {
-            background: #FF6B35;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .action-btn:hover {
-            background: #E55A2B;
-            transform: translateY(-1px);
-        }
-
-        .action-btn.secondary {
-            background: #4A90E2;
-        }
-
-        .action-btn.secondary:hover {
-            background: #357ABD;
-        }
-
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .header-content {
+            .header {
+                padding: 15px 20px;
                 flex-direction: column;
-                gap: 1rem;
-                text-align: center;
+                gap: 15px;
             }
 
-            .dashboard-card {
-                padding: 2rem;
-                margin: 1rem;
+            .main-content {
+                padding: 40px 20px;
             }
 
-            .welcome-title {
-                font-size: 1.5rem;
+            .hero-title {
+                font-size: 36px;
+            }
+
+            .hero-subtitle {
+                font-size: 18px;
+            }
+
+            .search-section {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .search-input,
+            .search-button {
+                width: 100%;
+            }
+
+            .search-input {
+                border-radius: 12px 12px 0 0;
+            }
+
+            .search-button {
+                border-radius: 0 0 12px 12px;
             }
 
             .features-grid {
                 grid-template-columns: 1fr;
+                gap: 30px;
             }
 
-            .action-buttons {
-                flex-direction: column;
-                align-items: center;
+            .feature-card {
+                padding: 40px 30px;
             }
+        }
+
+        /* Logout button */
+        .logout-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c53030;
         }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <h1>evidēns</h1>
-            </div>
-            <div class="user-menu">
-                <div class="user-info">
-                    <span class="user-email" id="user-email">Carregando...</span>
-                    <span class="user-role" id="user-role">Carregando...</span>
-                </div>
-                <button class="logout-btn" onclick="logout()">Sair</button>
-            </div>
+        <a href="#" class="nav-link">About</a>
+        <div class="logo">evidēns</div>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <a href="#" class="nav-link">Contact</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="main">
-        <div class="dashboard-card">
-            <h1 class="welcome-title">Bem-vindo ao evidēns!</h1>
-            <p class="welcome-message">
-                Sua plataforma de medicina baseada em evidências está pronta para uso. 
-                Explore nossas ferramentas inteligentes para tomada de decisão clínica.
-            </p>
+    <main class="main-content">
+        <!-- Hero Section -->
+        <h1 class="hero-title">Clinical decision support</h1>
+        <p class="hero-subtitle">Evidence-based resources for healthcare professionals</p>
 
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <path d="M9 11H5a2 2 0 0 0-2 2v3c0 1.1.9 2 2 2h4m6-6h4a2 2 0 0 1 2 2v3c0 1.1-.9 2-2 2h-4m-6 0V9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/>
-                        </svg>
-                    </div>
-                    <h3 class="feature-title">Ferramentas Inteligentes</h3>
-                    <p class="feature-description">
-                        Acesse calculadoras médicas, algoritmos de decisão e recomendações baseadas em evidências.
-                    </p>
-                </div>
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="dev-badge">🔥 Em Desenvolvimento</div>
+            <input
+                type="text"
+                class="search-input"
+                placeholder="Search clinical guidelines, topics, etc."
+            >
+            <button class="search-button">Search</button>
+        </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14,2 14,8 20,8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                            <polyline points="10,9 9,9 8,9"/>
-                        </svg>
-                    </div>
-                    <h3 class="feature-title">Conteúdo Revisado</h3>
-                    <p class="feature-description">
-                        Acesse conteúdo médico revisado por pares e atualizado com as últimas evidências científicas.
-                    </p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                        </svg>
-                    </div>
-                    <h3 class="feature-title">Melhores Desfechos</h3>
-                    <p class="feature-description">
-                        Utilize ferramentas que ajudam a melhorar os desfechos clínicos dos seus pacientes.
-                    </p>
-                </div>
+        <!-- Features Grid -->
+        <div class="features-grid">
+            <!-- Trusted Information -->
+            <div class="feature-card trusted-info">
+                <div class="feature-icon">🛡️</div>
+                <h3 class="feature-title">Trusted Information</h3>
+                <p class="feature-description">
+                    Access up-to-date, peer-reviewed clinical content
+                </p>
             </div>
 
-            <div class="action-buttons">
-                <a href="/intelligent-tools" class="action-btn">Ferramentas Inteligentes</a>
-                <a href="/analytics" class="action-btn secondary">Analytics</a>
+            <!-- Intelligent Tools -->
+            <div class="feature-card intelligent-tools">
+                <div class="feature-icon">💻</div>
+                <h3 class="feature-title">Intelligent Tools</h3>
+                <p class="feature-description">
+                    Use advanced tools to support clinical decision-making
+                </p>
+            </div>
+
+            <!-- Improved Outcomes -->
+            <div class="feature-card improved-outcomes">
+                <div class="feature-icon">💚</div>
+                <h3 class="feature-title">Improved Outcomes</h3>
+                <p class="feature-description">
+                    Apply the latest evidence to improve patient care
+                </p>
             </div>
         </div>
     </main>
@@ -307,21 +340,19 @@
                 const response = await fetch('/api/user', {
                     credentials: 'include'
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     if (data.ok && data.user) {
-                        document.getElementById('user-email').textContent = data.user.email;
-                        document.getElementById('user-role').textContent = 
-                            data.user.role === 'medico' ? 'Médico' : 'Administrador';
+                        console.log('User logged in:', data.user.name);
                     }
                 } else {
                     // Not logged in, redirect to login
-                    window.location.href = '/login';
+                    window.location.href = '/login.html';
                 }
             } catch (error) {
                 console.error('Error loading user info:', error);
-                window.location.href = '/login';
+                window.location.href = '/login.html';
             }
         }
 
@@ -332,44 +363,19 @@
                     method: 'POST',
                     credentials: 'include'
                 });
-                
-                // Always redirect to login, regardless of response
-                window.location.href = '/login';
-            } catch (error) {
-                console.error('Logout error:', error);
-                window.location.href = '/login';
-            }
-        }
-
-        // Load dashboard statistics
-        async function loadDashboardStats() {
-            try {
-                const response = await fetch('/api/dashboard/stats', {
-                    credentials: 'include'
-                });
 
                 if (response.ok) {
-                    const data = await response.json();
-                    if (data.ok && data.stats) {
-                        // Update stats on page if elements exist
-                        const totalElement = document.querySelector('[data-stat="total"]');
-                        const pendingElement = document.querySelector('[data-stat="pending"]');
-                        const todayElement = document.querySelector('[data-stat="today"]');
-
-                        if (totalElement) totalElement.textContent = data.stats.total_checkups;
-                        if (pendingElement) pendingElement.textContent = data.stats.pending_reviews;
-                        if (todayElement) todayElement.textContent = data.stats.completed_today;
-                    }
+                    window.location.href = '/login.html';
                 }
             } catch (error) {
-                console.error('Error loading dashboard stats:', error);
+                console.error('Error during logout:', error);
+                window.location.href = '/login.html';
             }
         }
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', () => {
             loadUserInfo();
-            loadDashboardStats();
         });
     </script>
 </body>
