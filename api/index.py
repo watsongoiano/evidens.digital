@@ -6,7 +6,7 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 
-from flask import Flask, abort, jsonify, request, send_from_directory, session, redirect, url_for
+from flask import Flask, abort, jsonify, request, send_from_directory, session, redirect, url_for, render_template_string
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 
@@ -267,7 +267,18 @@ def dashboard_stats():
 
     return jsonify({'ok': True, 'stats': stats})
 
-@app.route('/', defaults={'path': ''})
+@app.route('/')
+def index():
+    """Home page with authentication check"""
+    with open(BASE_DIR / 'templates' / 'index.html', 'r', encoding='utf-8') as f:
+        return f.read()
+
+@app.route('/login.html')
+def login_page():
+    """Login page"""
+    with open(BASE_DIR / 'templates' / 'login.html', 'r', encoding='utf-8') as f:
+        return f.read()
+
 @app.route('/<path:path>')
 def serve_static(path: str):
     """Serve static assets and fall back to the SPA entry point."""
