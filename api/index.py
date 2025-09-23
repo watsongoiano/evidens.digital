@@ -6,8 +6,9 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 
-from flask import Flask, abort, jsonify, request, send_from_directory, session
+from flask import Flask, abort, jsonify, request, send_from_directory, session, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
+from functools import wraps
 
 # Resolve project paths relative to the repository root so the function works on Vercel
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -130,6 +131,34 @@ def init_db():
 
 # Database will be initialized lazily when needed
 
+# Authentication decorators
+def login_required(f):
+    """Decorator to require authentication for routes"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            # For API requests, return JSON error
+            if request.path.startswith('/api/'):
+                return jsonify({'ok': False, 'error': 'NOT_AUTHENTICATED'}), 401
+            # For regular requests, redirect to login
+            return redirect('/login.html')
+        return f(*args, **kwargs)
+    return decorated_function
+
+def require_role(required_role):
+    """Decorator to require specific role for routes"""
+    def decorator(f):
+        @wraps(f)
+        @login_required
+        def decorated_function(*args, **kwargs):
+            if session.get('user_role') != required_role:
+                if request.path.startswith('/api/'):
+                    return jsonify({'ok': False, 'error': 'INSUFFICIENT_PERMISSIONS'}), 403
+                return abort(403)
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
 @app.route('/api/login/<role>', methods=['POST'])
 def login(role):
     """Login endpoint"""
@@ -191,17 +220,17 @@ def login(role):
         return jsonify({'ok': False, 'error': 'SERVER_ERROR'}), 500
 
 @app.route('/api/logout', methods=['POST'])
+@login_required
 def logout():
     """Logout endpoint"""
+    # Clear all session data
     session.clear()
-    return jsonify({'ok': True, 'redirect': '/login'})
+    return jsonify({'ok': True, 'redirect': '/login.html'})
 
 @app.route('/api/user', methods=['GET'])
+@login_required
 def get_user():
     """Get current user info"""
-    if 'user_id' not in session:
-        return jsonify({'ok': False, 'error': 'NOT_AUTHENTICATED'}), 401
-    
     return jsonify({
         'ok': True,
         'user': {
@@ -211,6 +240,32 @@ def get_user():
             'name': session['user_name']
         }
     })
+
+@app.route('/dashboard')
+@app.route('/dashboard.html')
+@login_required
+def dashboard():
+    """Protected dashboard route"""
+    # Serve the dashboard.html file
+    return send_from_directory(BASE_DIR, 'dashboard.html')
+
+@app.route('/api/dashboard/stats', methods=['GET'])
+@login_required
+def dashboard_stats():
+    """Get dashboard statistics"""
+    user_role = session.get('user_role')
+    user_id = session.get('user_id')
+
+    # Mock statistics - replace with real data from your database
+    stats = {
+        'total_checkups': 156,
+        'pending_reviews': 12,
+        'completed_today': 8,
+        'user_role': user_role,
+        'user_name': session.get('user_name')
+    }
+
+    return jsonify({'ok': True, 'stats': stats})
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')

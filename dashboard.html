@@ -304,7 +304,7 @@
         // Load user information
         async function loadUserInfo() {
             try {
-                const response = await fetch('/api/me', {
+                const response = await fetch('/api/user', {
                     credentials: 'include'
                 });
                 
@@ -341,9 +341,35 @@
             }
         }
 
+        // Load dashboard statistics
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/dashboard/stats', {
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.ok && data.stats) {
+                        // Update stats on page if elements exist
+                        const totalElement = document.querySelector('[data-stat="total"]');
+                        const pendingElement = document.querySelector('[data-stat="pending"]');
+                        const todayElement = document.querySelector('[data-stat="today"]');
+
+                        if (totalElement) totalElement.textContent = data.stats.total_checkups;
+                        if (pendingElement) pendingElement.textContent = data.stats.pending_reviews;
+                        if (todayElement) todayElement.textContent = data.stats.completed_today;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', () => {
             loadUserInfo();
+            loadDashboardStats();
         });
     </script>
 </body>
