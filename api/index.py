@@ -273,5 +273,14 @@ def handler(request):
 
         return response
 
+# Initialize database on app startup
+try:
+    init_db()
+except Exception as e:
+    print(f"Warning: Could not initialize database: {e}")
+
+# Also expose the app directly for Vercel
+application = app
+
 if __name__ == '__main__':
     app.run(debug=True)
