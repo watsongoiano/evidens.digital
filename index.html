@@ -414,8 +414,23 @@
             try {
                 const response = await fetch('/api/user');
                 if (!response.ok) {
-                    // Usuário não autenticado, redirecionar para login
-                    window.location.href = '/login.html';
+                    // Mostrar mensagem de redirecionamento
+                    document.body.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                            <div style="text-align: center; padding: 2rem; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                                <h2 style="color: #2c3e50; margin-bottom: 1rem;">Acesso Restrito</h2>
+                                <p style="color: #7f8c8d; margin-bottom: 1.5rem;">Redirecionando para a página de login...</p>
+                                <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                            </div>
+                        </div>
+                        <style>
+                            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                        </style>
+                    `;
+                    // Redirecionar após 2 segundos
+                    setTimeout(() => {
+                        window.location.href = '/login.html';
+                    }, 2000);
                     return;
                 }
 
@@ -423,8 +438,22 @@
                 console.log('Usuário autenticado');
             } catch (error) {
                 console.error('Erro ao verificar autenticação:', error);
-                // Em caso de erro, redirecionar para login por segurança
-                window.location.href = '/login.html';
+                // Mostrar mensagem de erro e redirecionar
+                document.body.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                        <div style="text-align: center; padding: 2rem; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                            <h2 style="color: #e74c3c; margin-bottom: 1rem;">Erro de Conexão</h2>
+                            <p style="color: #7f8c8d; margin-bottom: 1.5rem;">Redirecionando para a página de login...</p>
+                            <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #e74c3c; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        </div>
+                    </div>
+                    <style>
+                        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                    </style>
+                `;
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 2000);
             }
         }
 
