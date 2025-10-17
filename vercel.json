@@ -2,35 +2,31 @@
   "version": 2,
   "builds": [
     {
-      "src": "index.html",
+      "src": "*.html",
       "use": "@vercel/static"
     },
     {
-      "src": "intelligent-tools.html",
+      "src": "*.js",
       "use": "@vercel/static"
     },
     {
-      "src": "prevent_calculator.js",
+      "src": "*.ico",
       "use": "@vercel/static"
     },
     {
-      "src": "evidenscheck.svg",
+      "src": "*.png",
       "use": "@vercel/static"
     },
     {
-      "src": "evidenscheck.png",
+      "src": "*.svg",
       "use": "@vercel/static"
     },
     {
-      "src": "favicon.png",
+      "src": "assets/**/*",
       "use": "@vercel/static"
     },
     {
-      "src": "favicon.ico",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "api/checkup-intelligent.py",
+      "src": "api/checkup_intelligent_v3.py",
       "use": "@vercel/python"
     },
     {
@@ -44,8 +40,12 @@
   ],
   "routes": [
     {
+      "src": "/api/checkup_intelligent_v3",
+      "dest": "/api/checkup_intelligent_v3.py"
+    },
+    {
       "src": "/api/checkup-intelligent",
-      "dest": "/api/checkup-intelligent.py"
+      "dest": "/api/checkup_intelligent_v3.py"
     },
     {
       "src": "/api/gerar-solicitacao-exames",
@@ -56,31 +56,15 @@
       "dest": "/api/gerar-receita-vacinas.py"
     },
     {
-      "src": "/prevent_calculator.js",
-      "dest": "/prevent_calculator.js"
-    },
-    {
-      "src": "/evidenscheck.svg",
-      "dest": "/evidenscheck.svg"
-    },
-    {
-      "src": "/evidenscheck.png",
-      "dest": "/evidenscheck.png"
-    },
-    {
-      "src": "/favicon.png",
-      "dest": "/favicon.png"
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
-    },
-    {
       "src": "/intelligent-tools",
       "dest": "/intelligent-tools.html"
     },
     {
-      "src": "/(?!.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|pdf|txt|xml|json)).*",
+      "src": "/analytics",
+      "dest": "/analytics.html"
+    },
+    {
+      "src": "/",
       "dest": "/index.html"
     }
   ]

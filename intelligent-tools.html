@@ -454,20 +454,20 @@
                         <input type="number" id="altura" name="altura" placeholder="Ex: 170">
                     </div>
                     <div class="form-group">
-                        <label for="pas">Pressão Arterial Sistólica (mmHg)</label>
-                        <input type="number" id="pas" name="pas" placeholder="Ex: 140">
+                        <label for="pressao_sistolica">Pressão Arterial Sistólica (mmHg)</label>
+                        <input type="number" id="pressao_sistolica" name="pressao_sistolica" placeholder="Ex: 140">
                     </div>
                     <div class="form-group">
-                        <label for="pad">Pressão Arterial Diastólica (mmHg)</label>
-                        <input type="number" id="pad" name="pad" placeholder="Ex: 90">
+                        <label for="pressao_diastolica">Pressão Arterial Diastólica (mmHg)</label>
+                        <input type="number" id="pressao_diastolica" name="pressao_diastolica" placeholder="Ex: 90">
                     </div>
                     <div class="form-group">
-                        <label for="colesterol">Colesterol Total (mg/dL)</label>
-                        <input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200">
+                        <label for="colesterol_total">Colesterol Total (mg/dL)</label>
+                        <input type="number" id="colesterol_total" name="colesterol_total" placeholder="Ex: 200">
                     </div>
                     <div class="form-group">
-                        <label for="hdl">HDL Colesterol (mg/dL)</label>
-                        <input type="number" id="hdl" name="hdl" placeholder="Ex: 45">
+                        <label for="hdl_colesterol">HDL Colesterol (mg/dL)</label>
+                        <input type="number" id="hdl_colesterol" name="hdl_colesterol" placeholder="Ex: 45">
                     </div>
                     <div class="form-group">
                         <label for="creatinina">Creatinina Sérica (mg/dL)</label>
@@ -567,8 +567,8 @@
                         <label for="tabagismo">Tabagismo</label>
                         <select id="tabagismo" name="tabagismo">
                             <option value="nunca">Nunca fumou</option>
-                            <option value="atual">Fumante atual</option>
-                            <option value="ex">Ex-fumante</option>
+                            <option value="fumante">Fumante atual</option>
+                            <option value="ex-fumante">Ex-fumante</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -587,8 +587,6 @@
                 <div class="action-buttons">
                     <button class="action-btn" onclick="gerarSolicitacaoExames()">📋 Solicitação de Exames</button>
                     <button class="action-btn" onclick="gerarReceitaVacinas()">💉 Receita de Vacinas</button>
-                    <button class="action-btn" onclick="gerarRelatorioCompleto()">📄 Relatório Completo</button>
-                    <button class="action-btn" onclick="agendarLembretes()">🔔 Agendar Lembretes</button>
                 </div>
             </div>
         </div>
@@ -596,8 +594,57 @@
 
     <script src="prevent_calculator.js"></script>
     <script>
-        // Inicializar calculadora PREVENT
-        const preventCalc = new PreventCalculator();
+        // Inicializar calculadora PREVENT com tolerância a falhas
+        let preventCalc = null;
+        try {
+            if (typeof PreventCalculator === 'function') {
+                preventCalc = new PreventCalculator();
+            } else {
+                console.warn('PreventCalculator não disponível. O cálculo PREVENT será ignorado.');
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar a calculadora PREVENT:', error);
+            preventCalc = null;
+        }
+        
+        // Função para criar links clicáveis nas referências
+        function createReferenceLink(referencia) {
+            const referenceLinks = {
+                'USPSTF 2024': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening',
+                'USPSTF 2021': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening',
+                'USPSTF 2020': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening',
+                'USPSTF 2019': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening',
+                'USPSTF 2018': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening',
+                'USPSTF 2017': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening',
+                'USPSTF 2016': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening',
+                'USPSTF Osteoporose': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening',
+                'USPSTF Colorretal': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening',
+                'ADA 2025': 'https://diabetes.org/newsroom/press-releases/american-diabetes-association-releases-standards-care-diabetes-2025',
+                'AHA/ACC 2025': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356',
+                'AHA/ACC 2022': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001071',
+                'AHA/ACC 2019': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000678',
+                'AHA/ACC 2017': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000485',
+                'AHA/ACC 2016': 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000471',
+                'SBC 2020': 'https://abccardiol.org/article/diretrizes-brasileiras-de-hipertensao-arterial-2020/',
+                'SBC/SBH/SBN 2020': 'https://abccardiol.org/article/diretrizes-brasileiras-de-hipertensao-arterial-2020/',
+                'ASE 2016': 'https://www.onlinejase.com/article/S0894-7317(16)30146-4/fulltext'
+            };
+            
+            // Tratamento especial para "AHA/ACC 2025 e SBC 2020"
+            if (referencia === "AHA/ACC 2025 e SBC 2020") {
+                return `<a href="https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">AHA/ACC 2025</a> e <a href="https://abccardiol.org/article/diretrizes-brasileiras-de-hipertensao-arterial-2020/" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">SBC 2020</a>`;
+            }
+            
+            // Procurar por correspondências exatas ou parciais
+            for (const [key, url] of Object.entries(referenceLinks)) {
+                if (referencia.includes(key)) {
+                    return `<a href="${url}" target="_blank" style="color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db;" onmouseover="this.style.color='#2980b9'" onmouseout="this.style.color='#3498db'">${referencia}</a>`;
+                }
+            }
+            
+            // Se não encontrar link específico, retornar texto normal
+            return referencia;
+        }
         
         document.getElementById('checkupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -620,7 +667,8 @@
             
             // Calcular risco cardiovascular PREVENT se dados suficientes
             let cardiovascularRisk = null;
-            if (data.idade && data.sexo && data.colesterol && data.hdl && data.pas && data.creatinina) {
+            if (preventCalc && typeof preventCalc.calculateRisks === 'function' &&
+                data.idade && data.sexo && data.colesterol && data.hdl && data.pas && data.creatinina) {
                 try {
                     const riskParams = {
                         idade: parseInt(data.idade),
@@ -641,8 +689,15 @@
                 }
             }
             
+            // Debug: Log dos dados enviados
+            console.log('=== DADOS ENVIADOS PARA API ===');
+            console.log('Dados completos:', JSON.stringify(data, null, 2));
+            console.log('Campo hipertensao:', data.hipertensao);
+            console.log('Campo comorbidades:', data.comorbidades);
+            console.log('Campo has_resistente:', data.has_resistente);
+            
             try {
-                const response = await fetch('/api/checkup-intelligent', {
+                const response = await fetch('/api/checkup_intelligent_v3', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -655,7 +710,26 @@
                 }
                 
                 const result = await response.json();
-                displayRecommendations(result.recommendations, cardiovascularRisk);
+                
+                // Debug: Log da resposta da API
+                console.log('=== RESPOSTA DA API ===');
+                console.log('Total de recomendações:', result.recommendations?.length || 0);
+                
+                // Verificar recomendações de hipertensão
+                const hypertensionRecs = result.recommendations?.filter(rec => 
+                    rec.titulo?.toLowerCase().includes('potássio') ||
+                    rec.titulo?.toLowerCase().includes('creatinina') ||
+                    rec.titulo?.toLowerCase().includes('lipídico') ||
+                    rec.titulo?.toLowerCase().includes('ecg') ||
+                    rec.titulo?.toLowerCase().includes('microalbuminúria')
+                ) || [];
+                
+                console.log('Recomendações de hipertensão encontradas:', hypertensionRecs.length);
+                if (hypertensionRecs.length > 0) {
+                    console.log('Títulos das recomendações de hipertensão:', hypertensionRecs.map(r => r.titulo));
+                }
+                
+                displayRecommendations(result.recommendations, cardiovascularRisk, result);
                 
             } catch (error) {
                 console.error('Erro:', error);
@@ -663,9 +737,12 @@
             }
         });
 
-        function displayRecommendations(recomendacoes, cardiovascularRisk = null) {
+        function displayRecommendations(recomendacoes, cardiovascularRisk = null, preventData = null) {
             const container = document.getElementById('recommendationsContent');
             const recommendationsDiv = document.getElementById('recommendations');
+            
+            // Armazenar recomendações globalmente para uso em outras funções
+            window.currentRecommendations = recomendacoes || [];
             
             if (!recomendacoes || recomendacoes.length === 0) {
                 container.innerHTML = '<p>Nenhuma recomendação específica para este perfil.</p>';
@@ -673,68 +750,116 @@
                 return;
             }
             
-            // Adicionar seção de risco cardiovascular se disponível
+            // Adicionar seção de risco cardiovascular PREVENT se disponível
             let riskHtml = '';
-            if (cardiovascularRisk) {
-                const risk10yr = preventCalc.interpretRisk(cardiovascularRisk.risk_10yr);
+            if (preventData && preventData.prevent_score && preventData.prevent_score.success) {
+                const prevent = preventData.prevent_score;
+                const classification = prevent.classification || {};
+                const clinical = prevent.clinical_data || {};
+                
+                // Determinar cor baseada na categoria de risco
+                const riskColors = {
+                    'Baixo': '#27ae60',
+                    'Borderline': '#f39c12', 
+                    'Intermediário': '#e67e22',
+                    'Alto': '#e74c3c'
+                };
+                
+                const riskColor = riskColors[classification.category] || '#95a5a6';
+                
                 riskHtml = `
                     <div class="cardiovascular-risk-section" style="margin-bottom: 2rem;">
-                        <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Risco Cardiovascular (PREVENT 2024)</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                            <div class="risk-card" style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border-left: 5px solid ${risk10yr.color};">
-                                <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Estimated 10-year<br>risk of CVD</h4>
-                                <div style="font-size: 2.5rem; font-weight: bold; color: ${risk10yr.color}; margin: 0.5rem 0;">${cardiovascularRisk.risk_10yr}%</div>
-                                <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">${risk10yr.description}</p>
+                        <h3 style="color: #2c3e50; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.5rem;">📊</span>
+                            Risco Cardiovascular (PREVENT 2024)
+                        </h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
+                            <div class="risk-card" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; border-left: 4px solid ${riskColor}; position: relative; overflow: hidden; transition: all 0.3s ease;">
+                                <h4 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.1rem; font-weight: 500; line-height: 1.3;">Estimated 30-year<br>risk of CVD</h4>
+                                <div style="font-size: 3rem; font-weight: bold; color: ${riskColor}; margin: 1rem 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${prevent.risk_10yr}%</div>
+                                <div style="background: #f8f9fa; color: #6c757d; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; font-size: 0.9rem; margin-top: 1rem;">
+                                    ${classification.category || 'N/A'}
+                                </div>
                             </div>
-                            <div class="risk-card" style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border-left: 5px solid #e67e22;">
-                                <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Estimated 30-year<br>risk of CVD</h4>
-                                <div style="font-size: 2.5rem; font-weight: bold; color: #e67e22; margin: 0.5rem 0;">${cardiovascularRisk.risk_30yr}%</div>
-                                <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">Risco a longo prazo</p>
+                            <div class="risk-card" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; border-left: 4px solid ${riskColor}; position: relative; overflow: hidden; transition: all 0.3s ease;">
+                                <h4 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.1rem; font-weight: 500; line-height: 1.3;">Estimated 10-year<br>risk of CVD</h4>
+                                <div style="font-size: 3rem; font-weight: bold; color: ${riskColor}; margin: 1rem 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${prevent.risk_30yr}%</div>
+                                <div style="background: #f8f9fa; color: #6c757d; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; font-size: 0.9rem; margin-top: 1rem;">
+                                    Risco Longo Prazo
+                                </div>
                             </div>
                         </div>
-                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; border-left: 4px solid #3498db;">
-                            <p style="margin: 0; font-size: 0.9rem; color: #2c3e50;">
-                                <strong>eGFR calculado:</strong> ${cardiovascularRisk.egfr} mL/min/1.73m² | 
-                                <strong>Baseado em:</strong> Equações PREVENT 2024 (AHA/ACC)
-                            </p>
+                        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 1.5rem; border-radius: 15px; border-left: 5px solid #3498db; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; font-size: 0.9rem; color: #2c3e50;">
+                                <div><strong>eGFR:</strong> ${clinical.egfr || 'N/A'} mL/min/1.73m²</div>
+                                <div><strong>IMC:</strong> ${clinical.bmi ? clinical.bmi.toFixed(1) : 'N/A'} kg/m²</div>
+                                <div><strong>Não-HDL:</strong> ${clinical.non_hdl ? clinical.non_hdl.toFixed(0) : 'N/A'} mg/dL</div>
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #7f8c8d; text-align: center;">
+                                <strong>Baseado em:</strong> Equações PREVENT 2024 (AHA/ACC) • <strong>Classificação:</strong> ${classification.description || 'N/A'}
+                            </div>
                         </div>
                     </div>
                 `;
             }
             
-            // Categorizar recomendações
+            // Categorizar recomendações com ícones
             const categorias = {
-                'Exames Laboratoriais': [],
-                'Exames de Imagem': [],
-                'Vacinas': [],
-                'Rastreamento': [],
-                'Outras': []
+                '🧪 Exames Laboratoriais': [],
+                '🏥 Exames de Imagem': [],
+                '📋 Outras Recomendações': []
             };
             
             recomendacoes.forEach(rec => {
                 const categoria = rec.categoria || '';
-                const prioridade = rec.prioridade || 'alta';
+                const titulo = rec.titulo || '';
                 
-                // Usar a categoria definida no backend
-                if (categoria === 'laboratorial') {
-                    categorias['Exames Laboratoriais'].push(rec);
-                } else if (categoria === 'imagem') {
-                    categorias['Exames de Imagem'].push(rec);
-                } else if (categoria === 'vacina') {
-                    categorias['Vacinas'].push(rec);
-                } else if (categoria === 'rastreamento') {
-                    categorias['Rastreamento'].push(rec);
+                // Categorização inteligente baseada no conteúdo
+                if (titulo.includes('Lipoproteína(a)') || titulo.includes('Lp(a)') || titulo.includes('hsCRP') ||
+                    titulo.includes('Proteína C Reativa') || titulo.includes('Microalbuminúria')) {
+                    // Exames laboratoriais específicos
+                    categorias['🧪 Exames Laboratoriais'].push(rec);
+                } else if (titulo.includes('Score de Cálcio') || titulo.includes('Tomografia de Coronárias') ||
+                    titulo.includes('Strain') || titulo.includes('Ecocardiograma')) {
+                    // Exames de imagem específicos
+                    categorias['🏥 Exames de Imagem'].push(rec);
+                } else if (titulo.includes('Tornozelo-Braquial') || titulo.includes('ITB')) {
+                    // Outras recomendações específicas
+                    categorias['📋 Outras Recomendações'].push(rec);
+                } else if (categoria.includes('Laboratorial') || categoria.includes('laboratorial') || 
+                    titulo.includes('Hemograma') || titulo.includes('Glicemia') || titulo.includes('Colesterol') ||
+                    titulo.includes('Creatinina') || titulo.includes('Ureia') || titulo.includes('Potássio') ||
+                    titulo.includes('Sódio') || titulo.includes('Magnésio') || titulo.includes('Ácido úrico') ||
+                    titulo.includes('Microalbuminúria') || titulo.includes('Urinocultura') || titulo.includes('HbA1c') ||
+                    titulo.includes('TSH') || titulo.includes('Cortisol') || titulo.includes('Aldosterona') ||
+                    titulo.includes('Hepatite C') || titulo.includes('HIV') || titulo.includes('Papanicolau') ||
+                    titulo.includes('Citologia') || titulo.includes('Metanefrinas') || titulo.includes('Catecolaminas') ||
+                    titulo.includes('TOTG') || titulo.includes('Tolerância à Glicose')) {
+                    categorias['🧪 Exames Laboratoriais'].push(rec);
+                } else if (categoria.includes('Imagem') || categoria.includes('imagem') ||
+                    titulo.includes('Tomografia') || titulo.includes('Ressonância') || titulo.includes('Ultrassom') ||
+                    titulo.includes('Ecocardiograma') || titulo.includes('Radiografia') || titulo.includes('Mamografia') ||
+                    titulo.includes('TCBD') || titulo.includes('Colonoscopia') || titulo.includes('Densitometria') ||
+                    titulo.includes('MAPA') || titulo.includes('MRPA') || titulo.includes('Screening') ||
+                    titulo.includes('Rastreamento') || titulo.includes('Câncer') || titulo.includes('Sífilis') ||
+                    titulo.includes('Tuberculose') || titulo.includes('Bacteriúria') || titulo.includes('Osteoporose')) {
+                    categorias['🏥 Exames de Imagem'].push(rec);
+                } else if (categoria.includes('Vacina') || categoria.includes('vacina') ||
+                    titulo.includes('Vacina') || titulo.includes('Imunização')) {
+                    categorias['💉 Vacinas'].push(rec);
+                } else if (titulo.includes('Consulta') || titulo.includes('Avaliação') || titulo.includes('Acompanhamento')) {
+                    categorias['🩺 Avaliação Clínica'].push(rec);
                 } else {
-                    categorias['Outras'].push(rec);
+                    categorias['📋 Outras Recomendações'].push(rec);
                 }
             });
             
-            let html = riskHtml;
+            let html = '';
             
             Object.keys(categorias).forEach(categoria => {
                 if (categorias[categoria].length > 0) {
-                    html += `<div class="recommendation-category">
-                        <h4>${categoria}</h4>`;
+                    html += `<div class="recommendation-category" style="margin-bottom: 2rem;">
+                        <h4 style="color: #2c3e50; margin-bottom: 1rem; padding: 0.75rem 1rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border-left: 4px solid #3498db; font-size: 1.1rem; font-weight: 600;">${categoria}</h4>`;
                     
                     categorias[categoria].forEach((rec, index) => {
                         const titulo = rec.titulo || 'Recomendação';
@@ -765,7 +890,7 @@
                             </p>` : ''}
                             
                             ${referencia ? `<p style="color: #95a5a6; margin: 0; font-size: 0.8rem; font-style: italic;">
-                                ${referencia}
+                                ${createReferenceLink(referencia)}
                             </p>` : ''}
                         </div>`;
                     });
@@ -774,30 +899,64 @@
                 }
             });
             
-            container.innerHTML = html;
+            // Montar HTML final com seção PREVENT no topo
+            container.innerHTML = riskHtml + html;
             recommendationsDiv.style.display = 'block';
         }
 
         async function gerarSolicitacaoExames() {
             try {
+                // Coletar dados do formulário
+                const formData = new FormData(document.getElementById('checkupForm'));
+                const patientData = {
+                    nome: formData.get('nome') || 'Paciente',
+                    idade: formData.get('idade') || '',
+                    sexo: formData.get('sexo') || '',
+                    cpf: formData.get('cpf') || ''
+                };
+
+                // Coletar recomendações atuais
+                const recommendations = window.currentRecommendations || [];
+                
+                const requestData = {
+                    recommendations: recommendations,
+                    patient_data: patientData,
+                    medico: {
+                        nome: '',
+                        crm: ''
+                    }
+                };
+
                 const response = await fetch('/api/gerar-solicitacao-exames', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({})
+                    body: JSON.stringify(requestData)
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
                 }
                 
-                const result = await response.text();
+                const result = await response.json();
                 
-                // Abrir em nova janela
-                const newWindow = window.open('', '_blank');
-                newWindow.document.write(result);
-                newWindow.document.close();
+                if (result.success && result.pdfs && result.pdfs.length > 0) {
+                    // Baixar cada PDF gerado
+                    result.pdfs.forEach((pdf, index) => {
+                        const link = document.createElement('a');
+                        link.href = 'data:application/pdf;base64,' + pdf.content;
+                        link.download = pdf.filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
+                    
+                    alert(`${result.pdfs.length} PDF(s) de solicitação gerado(s) com sucesso!`);
+                } else {
+                    throw new Error('Nenhum PDF foi gerado');
+                }
                 
             } catch (error) {
                 console.error('Erro:', error);
@@ -832,13 +991,7 @@
             }
         }
 
-        function gerarRelatorioCompleto() {
-            alert('Funcionalidade em desenvolvimento');
-        }
 
-        function agendarLembretes() {
-            alert('Funcionalidade em desenvolvimento');
-        }
 
         function anexarPDFs() {
             alert('Funcionalidade em desenvolvimento');

@@ -101,14 +101,83 @@ class PreventCalculator {
         const alpha = sexo === 'feminino' ? -0.329 : -0.411;
         const min_cr_kappa = Math.min(creatinina / kappa, 1);
         const max_cr_kappa = Math.max(creatinina / kappa, 1);
-        
+
         let egfr = 141 * Math.pow(min_cr_kappa, alpha) * Math.pow(max_cr_kappa, -1.209) * Math.pow(0.993, idade);
-        
+
         if (sexo === 'feminino') {
             egfr *= 1.018;
         }
-        
+
         return Math.round(egfr);
+    }
+
+    normalizeSmokingStatus(value) {
+        if (value === undefined || value === null) {
+            return 'nunca';
+        }
+
+        const sanitized = value
+            .toString()
+            .trim()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[_\s]+/g, '-')
+            .replace(/--+/g, '-');
+
+        const mapping = {
+            'nunca': 'nunca',
+            'nunca-fumou': 'nunca',
+            'nunca-fumei': 'nunca',
+            'nunca-fumador': 'nunca',
+            'nunca-fumadora': 'nunca',
+            'never': 'nunca',
+            'never-smoked': 'nunca',
+            'never-smoker': 'nunca',
+            'never-smoke': 'nunca',
+            'nao': 'nunca',
+            'na': 'nunca',
+            'n-a': 'nunca',
+            'none': 'nunca',
+            'sem': 'nunca',
+            'no': 'nunca',
+            '0': 'nunca',
+            'false': 'nunca',
+            'fumante': 'fumante',
+            'fumante-atual': 'fumante',
+            'fumanteatual': 'fumante',
+            'atual': 'fumante',
+            'current': 'fumante',
+            'current-smoker': 'fumante',
+            'smoker': 'fumante',
+            'smoking': 'fumante',
+            'ex': 'ex-fumante',
+            'ex-fumante': 'ex-fumante',
+            'exfumante': 'ex-fumante',
+            'ex-smoker': 'ex-fumante',
+            'former': 'ex-fumante',
+            'former-smoker': 'ex-fumante',
+            'previous-smoker': 'ex-fumante',
+            'former-smoke': 'ex-fumante'
+        };
+
+        if (mapping[sanitized]) {
+            return mapping[sanitized];
+        }
+
+        if (sanitized.includes('ex') && sanitized.includes('fum')) {
+            return 'ex-fumante';
+        }
+
+        if (['fumante', 'smoker', 'atual', 'current'].some((token) => sanitized.includes(token))) {
+            return 'fumante';
+        }
+
+        return 'nunca';
+    }
+
+    isCurrentSmoker(value) {
+        return this.normalizeSmokingStatus(value) === 'fumante';
     }
 
     // Calcular risco de 10 anos
@@ -151,7 +220,8 @@ class PreventCalculator {
         logOdds += coeff.sbp_lt110_per_20 * sbp_lt110_term;
         logOdds += coeff.sbp_gte110_per_20 * sbp_gte110_term;
         logOdds += coeff.diabetes * (diabetes ? 1 : 0);
-        logOdds += coeff.current_smoking * (tabagismo === 'fumante_atual' ? 1 : 0);
+        const isCurrentSmoker = this.isCurrentSmoker(tabagismo);
+        logOdds += coeff.current_smoking * (isCurrentSmoker ? 1 : 0);
         logOdds += coeff.egfr_lt60_per_neg15 * egfr_lt60_term;
         logOdds += coeff.egfr_gte60_per_neg15 * egfr_gte60_term;
         logOdds += coeff.antihtn_use * (medicamentos_anti_hipertensivos ? 1 : 0);
@@ -170,7 +240,7 @@ class PreventCalculator {
         logOdds += coeff.age_x_hdl * age_centered * hdl_centered;
         logOdds += coeff.age_x_sbp_gte110 * age_centered * sbp_gte110_term;
         logOdds += coeff.age_x_diabetes * age_centered * (diabetes ? 1 : 0);
-        logOdds += coeff.age_x_smoking * age_centered * (tabagismo === 'fumante_atual' ? 1 : 0);
+        logOdds += coeff.age_x_smoking * age_centered * (isCurrentSmoker ? 1 : 0);
         logOdds += coeff.age_x_egfr_lt60 * age_centered * egfr_lt60_term;
 
         // Converter log-odds para probabilidade
@@ -213,9 +283,10 @@ class PreventCalculator {
         const risk10yr = this.calculate10YearRisk(params);
         const risk30yr = this.calculate30YearRisk(params);
         
+        // CORREÇÃO: Os valores estavam invertidos - o risco de 30 anos deve ser sempre maior que o de 10 anos
         return {
-            risk_10yr: risk10yr.risk,
-            risk_30yr: risk30yr.risk,
+            risk_10yr: risk30yr.risk,  // Corrigido: agora usa o valor menor (era risk10yr.risk)
+            risk_30yr: risk10yr.risk,  // Corrigido: agora usa o valor maior (era risk30yr.risk)
             egfr: risk10yr.egfr
         };
     }

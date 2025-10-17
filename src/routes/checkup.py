@@ -328,7 +328,7 @@ def get_population_specific_recommendations(idade, sexo, comorbidades):
             'titulo': 'Rastreamento de Depressão',
             'descricao': 'PHQ-2 ou PHQ-9 anual',
             'prioridade': 'alta',
-            'categoria': 'saude_mental',
+            'categoria': 'Outras recomendações',
             'referencia': 'USPSTF Grau B'
         })
     
@@ -338,7 +338,7 @@ def get_population_specific_recommendations(idade, sexo, comorbidades):
             'titulo': 'Rastreamento de Ansiedade',
             'descricao': 'GAD-2 ou GAD-7 conforme indicação clínica',
             'prioridade': 'media',
-            'categoria': 'saude_mental',
+            'categoria': 'Outras recomendações',
             'referencia': 'USPSTF Grau B'
         })
     
