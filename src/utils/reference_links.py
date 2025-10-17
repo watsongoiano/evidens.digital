@@ -44,8 +44,12 @@ def _uspstf_url_by_title(title_lc: str) -> str:
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening'
     if _contains_any(title_lc, ['aorta']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/abdominal-aortic-aneurysm-screening'
-    if _contains_any(title_lc, ['pulm', 'tomografia', 'tc tórax', 'tc torax']):
+    if _contains_any(title_lc, ['pulm', 'tomografia', 'tc tórax', 'tc torax', 'ldct']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening'
+    if _contains_any(title_lc, ['densitometria', 'osteoporose', 'dexa']):
+        return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening'
+    if _contains_any(title_lc, ['pré-diabetes', 'prediabetes', 'diabetes tipo 2']):
+        return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes'
     if _contains_any(title_lc, ['carótida', 'carotida']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/carotid-artery-stenosis-screening'
     if _contains_any(title_lc, ['vitamina d']):

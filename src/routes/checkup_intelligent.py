@@ -295,6 +295,21 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
             'grau_evidencia': 'C'
         })
     
+    # Densitometria óssea (Osteoporose)
+    if sex == 'feminino' and age >= 65:
+        _add_rec({
+            'titulo': 'Densitometria óssea (DEXA)',
+            'descricao': 'Rastreamento de osteoporose para prevenir fraturas osteoporóticas. Mulheres ≥65 anos.',
+            'subtitulo': 'Mulheres ≥65 anos | A cada 2 anos',
+            'categoria': 'imagem',
+            'prioridade': 'alta',
+            'referencia': 'USPSTF 2024',
+            'grau_evidencia': 'B'
+        })
+    
+    # Densitometria para mulheres pós-menopausa <65 anos com fatores de risco
+    # Nota: Requer avaliação individualizada de fatores de risco
+    
     # Colonoscopia
     if 45 <= age <= 75:
         _add_rec({
@@ -513,6 +528,45 @@ def generate_intelligent_recommendations():
         if risk_level in ['borderline', 'intermediario', 'alto']:
             biomarker_recs = generate_biomarker_recommendations(risk_level, age, sex)
             recommendations.extend(biomarker_recs)
+        
+        # Rastreamento de câncer de pulmão (LDCT)
+        tabagismo = data.get('tabagismo', 'nunca_fumou')
+        macos_ano = float(data.get('macos_ano', 0)) if data.get('macos_ano') else 0
+        
+        if (50 <= age <= 80 and 
+            macos_ano >= 20 and 
+            tabagismo in ['fumante_atual', 'ex_fumante']):
+            recommendations.append({
+                'titulo': 'Tomografia computadorizada de tórax de baixa dose (LDCT)',
+                'descricao': 'Rastreamento anual de câncer de pulmão. Indicado para adultos 50-80 anos com história de tabagismo de 20 maços-ano e que atualmente fumam ou pararam nos últimos 15 anos. Descontinuar se não fumou por 15 anos ou desenvolveu problema de saúde que limita substancialmente expectativa de vida.',
+                'subtitulo': 'Adultos 50-80 anos com 20 maços-ano | Anual',
+                'categoria': 'imagem',
+                'prioridade': 'alta',
+                'referencia': 'USPSTF 2021',
+                'grau_evidencia': 'B'
+            })
+        
+        # Rastreamento de pré-diabetes e diabetes tipo 2
+        imc = None
+        if weight and height:
+            altura_m = height / 100
+            imc = weight / (altura_m ** 2)
+        
+        if (35 <= age <= 70 and 
+            imc and imc >= 25 and 
+            'diabetes_tipo_2' not in data.get('comorbidades', [])):
+            # Verifica se já não tem glicemia nas recomendações
+            tem_glicemia = any('glicemia' in rec.get('titulo', '').lower() for rec in recommendations)
+            if not tem_glicemia:
+                recommendations.append({
+                    'titulo': 'Glicemia de jejum',
+                    'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Indicado para adultos 35-70 anos com sobrepeso ou obesidade (IMC ≥25). Considerar rastreamento em idade mais precoce se história familiar, etnia de alto risco (Afro-americano, Hispânico/Latino, Asiático-americano) ou história de diabetes gestacional.',
+                    'subtitulo': 'Adultos 35-70 anos com IMC ≥25 | A cada 3 anos',
+                    'categoria': 'laboratorio',
+                    'prioridade': 'alta',
+                    'referencia': 'USPSTF 2021',
+                    'grau_evidencia': 'B'
+                })
         
     # Salvar no banco de dados se possível
         try:
