@@ -174,7 +174,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     
     # Exames laboratoriais básicos
     _add_rec({
-        'titulo': 'Rastreamento de Diabetes: Glicemia de jejum, TOTG-75g ou HbA1c',
+        'titulo': 'Rastreamento de Diabetes: Glicemia de jejum, TOTG-75g ou HbA1c, soro',
         'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Métodos: Glicemia de jejum (≥92 mg/dL pré-diabetes, ≥126 mg/dL diabetes), TOTG-75g (140-199 mg/dL pré-diabetes, ≥200 mg/dL diabetes) ou HbA1c (5,7-6,4% pré-diabetes, ≥6,5% diabetes).',
         'subtitulo': 'Adultos ≥35 anos | A cada 3 anos se normal',
         'categoria': 'laboratorio',
@@ -187,7 +187,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     if age >= 40:
         # Adultos ≥40 anos
         _add_rec({
-            'titulo': 'Painel lipídico completo',
+            'titulo': 'Colesterol total e frações, soro',
             'descricao': 'Painel lipídico completo (não jejum): Colesterol total, HDL-C, triglicerídeos, LDL-C calculado e non-HDL-C. Rastreamento a cada 4-6 anos. Considerar ApoB se triglicerídeos altos, diabetes ou obesidade.',
             'subtitulo': 'Adultos ≥40 anos | A cada 4-6 anos',
             'categoria': 'laboratorio',
@@ -198,7 +198,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     elif age >= 20:
         # Adultos 20-39 anos
         _add_rec({
-            'titulo': 'Painel lipídico completo',
+            'titulo': 'Colesterol total e frações, soro',
             'descricao': 'Colesterol total, HDL-C, triglicerídeos, LDL-C calculado e non-HDL-C. Rastreamento a cada 4-6 anos.',
             'subtitulo': 'Adultos 20-39 anos | A cada 4-6 anos',
             'categoria': 'laboratorio',
@@ -210,7 +210,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Lipoproteína(a) - recomendação única na vida adulta
     if age >= 20:
         _add_rec({
-            'titulo': 'Lipoproteína(a) - Lp(a)',
+            'titulo': 'Lipoproteína(a) - Lp(a), soro',
             'descricao': 'Medição única na vida adulta para refinamento de risco cardiovascular. Preferir ensaio independente de isoforma.',
             'subtitulo': 'Adultos ≥20 anos | Dose única na vida',
             'categoria': 'laboratorio',
@@ -261,7 +261,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Apenas adicionar se o paciente tiver hipertensão
     if has_hypertension and age >= 18:
         _add_rec({
-            'titulo': 'Potássio plasmático',
+            'titulo': 'Potássio, soro',
             'descricao': 'Avaliação de distúrbios eletrolíticos e investigação de hipertensão secundária',
             'subtitulo': 'Adultos com HAS | Anual',
             'categoria': 'laboratorio',
@@ -271,7 +271,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         })
         
         _add_rec({
-            'titulo': 'Ácido úrico plasmático',
+            'titulo': 'Ácido úrico, soro',
             'descricao': 'Avaliação de risco cardiovascular e renal em pacientes hipertensos',
             'subtitulo': 'Adultos com HAS | Anual',
             'categoria': 'laboratorio',
@@ -291,7 +291,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         })
         
         _add_rec({
-            'titulo': 'Razão albumina/creatinina urinária',
+            'titulo': 'Razão albumina/creatinina, urina',
             'descricao': 'Avaliação de albuminúria para detecção precoce de lesão renal em hipertensos',
             'subtitulo': 'Adultos com HAS | Anual',
             'categoria': 'laboratorio',
@@ -409,23 +409,35 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         })
     
     # Vacinas
-    _add_rec({
-        'titulo': 'Vacina Influenza Tetravalente',
-        'descricao': 'Dose anual. Aplicar em dose única, INTRAMUSCULAR, anualmente.',
-        'subtitulo': 'Todos ≥6 meses | Anual',
-        'categoria': 'vacina',
-        'prioridade': 'alta',
-        'referencia': 'SBIm 2024',
-        'grau_evidencia': 'A'
-    })
+    # Influenza - nome comercial varia conforme idade
+    if age >= 65:
+        _add_rec({
+            'titulo': 'Efluelda® (Influenza Tetravalente de Alta Dose)',
+            'descricao': 'Dose anual. Vacina de alta dose ou adjuvantada recomendada para idosos. Aplicar em dose única, INTRAMUSCULAR, anualmente.',
+            'subtitulo': 'Adultos ≥65 anos | Anual',
+            'categoria': 'vacina',
+            'prioridade': 'alta',
+            'referencia': 'SBIm 2025 / CDC 2025',
+            'grau_evidencia': 'A'
+        })
+    else:
+        _add_rec({
+            'titulo': 'Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)',
+            'descricao': 'Dose anual. Aplicar em dose única, INTRAMUSCULAR, anualmente.',
+            'subtitulo': 'Todos ≥6 meses | Anual',
+            'categoria': 'vacina',
+            'prioridade': 'alta',
+            'referencia': 'SBIm 2025 / CDC 2025',
+            'grau_evidencia': 'A'
+        })
 
     # HPV (masculino e feminino) até 45 anos
     if age <= 45:
         prioridade_hpv = 'alta' if age <= 26 else 'media'
         _add_rec({
-            'titulo': 'Gardasil 9® (Vacina Papilomavírus Humano 9-Valente)',
-            'descricao': '3 doses. Aplicar 0, 2 e 6 meses.',
-            'subtitulo': '9-45 anos | 2-3 doses',
+            'titulo': 'Gardasil 9® (Vacina HPV 9-Valente)',
+            'descricao': '2 doses (9-14 anos) ou 3 doses (15-45 anos). Esquema 0-2-6 meses para 3 doses ou 0-6 meses para 2 doses.',
+            'subtitulo': '9-45 anos | 2-3 doses conforme idade',
             'categoria': 'vacina',
             'prioridade': prioridade_hpv,
             'referencia': 'SBIm 2024',
@@ -434,99 +446,99 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
 
     # Hepatite B (adultos não vacinados)
     _add_rec({
-        'titulo': 'Hepatite B (VHB)',
-        'descricao': 'Esquema de 3 doses (0, 1, 6 meses) em não vacinados.',
-        'subtitulo': 'Todos não imunizados | 3 doses',
+        'titulo': 'Hepatite B (Engerix-B® ou Euvax B®)',
+        'descricao': 'Esquema de 3 doses (0, 1, 6 meses) em não vacinados. Adultos até 59 anos devem ser vacinados.',
+        'subtitulo': 'Adultos 19-59 anos não imunizados | 3 doses',
         'categoria': 'vacina',
         'prioridade': 'alta',
-        'referencia': 'SBIm 2024',
+        'referencia': 'SBIm 2025 / CDC 2025',
         'grau_evidencia': 'A'
     })
 
     # dTpa (Tétano, difteria, coqueluche)
     _add_rec({
-        'titulo': 'dTpa (Tétano, difteria, coqueluche)',
-        'descricao': '1 dose de dTpa, depois reforço com dT ou dTpa a cada 10 anos.',
-        'subtitulo': 'Adultos | Reforço a cada 10 anos',
+        'titulo': 'dTpa (Adacel® ou Boostrix®)',
+        'descricao': '1 dose de dTpa, depois reforço com dT ou dTpa a cada 10 anos. Gestantes devem receber dTpa a cada gestação.',
+        'subtitulo': 'Adultos | Reforço a cada 10 anos + cada gestação',
         'categoria': 'vacina',
         'prioridade': 'alta',
-        'referencia': 'SBIm 2024 / CDC 2025',
+        'referencia': 'SBIm 2025 / CDC 2025',
         'grau_evidencia': 'A'
     })
 
     # Tríplice viral (Sarampo, caxumba, rubéola)
     if age <= 59:  # Prioridade para adultos jovens não vacinados
         _add_rec({
-            'titulo': 'Tríplice viral (Sarampo, caxumba, rubéola)',
-            'descricao': '1 ou 2 doses para adultos não vacinados ou sem comprovação vacinal.',
-            'subtitulo': 'Adultos não imunizados | 2 doses',
+            'titulo': 'Tríplice viral - SCR (Priorix® ou M-M-R® II)',
+            'descricao': '1 ou 2 doses para adultos não vacinados ou sem comprovação vacinal. Adultos até 68 anos.',
+            'subtitulo': 'Adultos 19-68 anos não imunizados | 1-2 doses',
             'categoria': 'vacina',
             'prioridade': 'media',
-            'referencia': 'SBIm 2024 / CDC 2025',
+            'referencia': 'SBIm 2025 / CDC 2025',
             'grau_evidencia': 'A'
         })
 
     # Hepatite A
     _add_rec({
-        'titulo': 'Hepatite A',
-        'descricao': '2 doses com intervalo de 6 meses.',
-        'subtitulo': 'Grupos de risco | 2 doses',
+        'titulo': 'Hepatite A (Havrix® ou Vaqta®)',
+        'descricao': '2 doses com intervalo de 6 meses. Recomendada para grupos de risco, viajantes e áreas endêmicas.',
+        'subtitulo': 'Grupos de risco e viajantes | 2 doses',
         'categoria': 'vacina',
-        'prioridade': 'alta',
-        'referencia': 'SBIm 2024 / CDC 2025',
+        'prioridade': 'media',
+        'referencia': 'SBIm 2025 / CDC 2025',
         'grau_evidencia': 'A'
     })
 
     # Febre amarela (para áreas endêmicas)
     _add_rec({
-        'titulo': 'Febre amarela',
-        'descricao': 'Dose única ou reforço. Indicada para residentes ou viajantes para áreas endêmicas.',
-        'subtitulo': 'Áreas endêmicas | Dose única',
+        'titulo': 'Febre amarela (Stamaril®)',
+        'descricao': 'Dose única ou 2 doses com intervalo de 10 anos (SBIm recomenda 2 doses). Indicada para residentes ou viajantes para áreas endêmicas.',
+        'subtitulo': 'Áreas endêmicas | 1-2 doses',
         'categoria': 'vacina',
         'prioridade': 'media',
-        'referencia': 'SBIm 2024',
+        'referencia': 'SBIm 2025',
         'grau_evidencia': 'A'
     })
 
     # Meningocócica ACWY
     if age <= 59:
         _add_rec({
-            'titulo': 'Meningocócica ACWY',
-            'descricao': 'Dose única ou reforço a cada 5 anos para grupos de risco.',
-            'subtitulo': 'Adolescentes 11-12 anos | Reforço aos 16',
+            'titulo': 'Meningocócica ACWY (Menactra® ou Menveo®)',
+            'descricao': 'Dose única ou reforço a cada 5 anos para grupos de risco. Adolescentes: dose aos 11-12 anos e reforço aos 16 anos.',
+            'subtitulo': 'Adolescentes 11-12 anos | Reforço aos 16 anos',
             'categoria': 'vacina',
             'prioridade': 'media',
-            'referencia': 'SBIm 2024 / CDC 2025',
+            'referencia': 'SBIm 2025 / CDC 2025',
             'grau_evidencia': 'B'
         })
 
     # Meningocócica B (19-23 anos)
     if 19 <= age <= 23:
         _add_rec({
-            'titulo': 'Meningocócica B',
-            'descricao': '2 doses conforme esquema do fabricante.',
+            'titulo': 'Meningocócica B (Bexsero® ou Trumenba®)',
+            'descricao': '2 doses conforme esquema do fabricante. Bexsero®: intervalo de 1 mês. Trumenba®: intervalo de 6 meses.',
             'subtitulo': 'Adolescentes 16-23 anos | 2 doses',
             'categoria': 'vacina',
             'prioridade': 'media',
-            'referencia': 'SBIm 2024 / CDC 2025',
+            'referencia': 'SBIm 2025 / CDC 2025',
             'grau_evidencia': 'B'
         })
 
     # Dengue (Qdenga)
     _add_rec({
-        'titulo': 'Dengue (Qdenga)',
-        'descricao': '2 doses com intervalo de 3 meses. Indicada para áreas endêmicas.',
+        'titulo': 'Dengue (Qdenga®)',
+        'descricao': '2 doses com intervalo de 3 meses. Indicada para áreas endêmicas. Licenciada para 4-60 anos.',
         'subtitulo': '4-60 anos (áreas endêmicas) | 2 doses',
         'categoria': 'vacina',
         'prioridade': 'media',
-        'referencia': 'SBIm 2024',
+        'referencia': 'SBIm 2025',
         'grau_evidencia': 'B'
     })
 
     # COVID-19
     _add_rec({
-        'titulo': 'COVID-19',
-        'descricao': 'Dose de reforço anual conforme vacina disponível.',
+        'titulo': 'COVID-19 (Comirnaty®, Spikevax® ou outras)',
+        'descricao': 'Dose de reforço anual conforme vacina disponível. Idosos ≥65 anos: pelo menos 2 doses da vacina atual.',
         'subtitulo': 'Todos ≥6 meses | Anual (atualizada)',
         'categoria': 'vacina',
         'prioridade': 'alta',
@@ -549,21 +561,59 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Pneumocócicas a partir de 50 anos
     if age >= 50:
         _add_rec({
-            'titulo': 'VPC15 (Vaxneuvance®) ou VPC13, 0,5ml',
-            'descricao': '1 dose. Pode ser coadministrada com Shingrix®, Efluelda® e Arexvy®',
-            'subtitulo': 'Adultos ≥50 anos | Dose única',
+            'titulo': 'Pneumocócica Conjugada 20V (Prevenar 20®) OU 15V (Vaxneuvance®)',
+            'descricao': 'VPC20 em dose única OU esquema sequencial VPC15 seguida de VPP23 após 6-12 meses. Pode ser coadministrada com Shingrix®, Efluelda® e Arexvy®.',
+            'subtitulo': 'Adultos ≥50 anos | Dose única ou esquema sequencial',
             'categoria': 'vacina',
             'prioridade': 'alta',
-            'referencia': 'SBIm 2024 / CDC 2025',
+            'referencia': 'SBIm 2025 / CDC 2025',
             'grau_evidencia': 'A'
         })
         _add_rec({
-            'titulo': 'VPP23, 0,5ml',
-            'descricao': '1 dose 6 meses após VPC15/VPC13; reforço 5 anos após a primeira dose de VPC',
-            'subtitulo': 'Adultos ≥50 anos | Série + reforço',
+            'titulo': 'Pneumocócica Polissacarídica 23V (Pneumovax 23®)',
+            'descricao': '1 dose 6-12 meses após VPC15 (se esquema sequencial escolhido). Reforço 5 anos após a primeira dose de VPP23. Não necessária se VPC20 foi utilizada.',
+            'subtitulo': 'Adultos ≥50 anos | Esquema sequencial (se VPC15)',
             'categoria': 'vacina',
             'prioridade': 'alta',
-            'referencia': 'SBIm 2024 / CDC 2025',
+            'referencia': 'SBIm 2025 / CDC 2025',
+            'grau_evidencia': 'A'
+        })
+    
+    # Vírus Sincicial Respiratório (RSV) a partir de 50 anos
+    if age >= 50:
+        # Prioridade alta para ≥75 anos, média para 50-74 anos
+        prioridade_rsv = 'alta' if age >= 75 else 'media'
+        _add_rec({
+            'titulo': 'Vírus Sincicial Respiratório - RSV (Arexvy® ou Abrysvo®)',
+            'descricao': 'Dose única. Recomendada para adultos ≥50 anos com maior risco de evolução grave (cardiopatia, pneumopatia, diabetes, obesidade, nefropatia). Obrigatória para ≥75 anos. Pode ser coadministrada com Shingrix®, Efluelda® e vacinas pneumocócicas.',
+            'subtitulo': 'Adultos ≥50 anos (obrigatória ≥75 anos) | Dose única',
+            'categoria': 'vacina',
+            'prioridade': prioridade_rsv,
+            'referencia': 'SBIm 2025 / CDC 2025',
+            'grau_evidencia': 'A'
+        })
+    
+    # Varicela (catapora) para suscetíveis não vacinados
+    if age <= 45:  # Prioridade para adultos jovens nascidos nos EUA
+        _add_rec({
+            'titulo': 'Varicela (Varilrix® ou Varivax®)',
+            'descricao': '2 doses com intervalo de 1-2 meses para adultos suscetíveis (sem história de doença ou vacinação prévia). Contraindicada para gestantes.',
+            'subtitulo': 'Adultos suscetíveis ≤45 anos | 2 doses',
+            'categoria': 'vacina',
+            'prioridade': 'media',
+            'referencia': 'SBIm 2025 / CDC 2025',
+            'grau_evidencia': 'A'
+        })
+    
+    # Hepatites A e B combinada (Twinrix) - alternativa para quem precisa das duas
+    if age >= 18:
+        _add_rec({
+            'titulo': 'Hepatites A e B combinada (Twinrix®)',
+            'descricao': '3 doses (esquema 0-1-6 meses) ou esquema acelerado (0-7-21 dias + reforço aos 12 meses). Alternativa para adultos que precisam de ambas as vacinas.',
+            'subtitulo': 'Adultos não imunizados | 3-4 doses',
+            'categoria': 'vacina',
+            'prioridade': 'media',
+            'referencia': 'SBIm 2025',
             'grau_evidencia': 'A'
         })
     
@@ -601,7 +651,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         })
         
         _add_rec({
-            'titulo': 'Metanefrinas plasmáticas ou urinárias',
+            'titulo': 'Metanefrinas, plasma ou urina de 24h',
             'descricao': 'Rastreamento de feocromocitoma em pacientes com hipertensão resistente, especialmente se crises hipertensivas, cefaleia, palpitações ou sudorese excessiva.',
             'subtitulo': 'Adultos com HAS resistente | Conforme necessidade',
             'categoria': 'laboratorio',
@@ -750,7 +800,7 @@ def generate_intelligent_recommendations():
             tem_glicemia = any('glicemia' in rec.get('titulo', '').lower() for rec in recommendations)
             if not tem_glicemia:
                 recommendations.append({
-                    'titulo': 'Glicemia de jejum',
+                    'titulo': 'Glicemia de jejum, soro',
                     'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Indicado para adultos 35-70 anos com sobrepeso ou obesidade (IMC ≥25). Considerar rastreamento em idade mais precoce se história familiar, etnia de alto risco (Afro-americano, Hispânico/Latino, Asiático-americano) ou história de diabetes gestacional.',
                     'subtitulo': 'Adultos 35-70 anos com IMC ≥25 | A cada 3 anos',
                     'categoria': 'laboratorio',
