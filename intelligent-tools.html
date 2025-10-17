@@ -749,6 +749,7 @@
                     
                     categorias[categoria].forEach((rec, index) => {
                         const titulo = rec.titulo || 'Recomendação';
+                        const subtitulo = rec.subtitulo || '';
                         const descricao = rec.descricao || '';
                         const prioridade = rec.prioridade || 'alta';
                         const referencia = rec.referencia_html || rec.referencia || '';
@@ -767,9 +768,13 @@
                                 </span>
                             </div>
                             
-                            <h5 style="color: #2c3e50; margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 600;">
+                            <h5 style="color: #2c3e50; margin: 0 0 0.25rem 0; font-size: 1.1rem; font-weight: 600;">
                                 ${titulo}
                             </h5>
+                            
+                            ${subtitulo ? `<p style="color: #3498db; margin: 0 0 0.75rem 0; font-size: 0.85rem; font-weight: 500;">
+                                ${subtitulo}
+                            </p>` : ''}
                             
                             ${descricao ? `<p style="color: #7f8c8d; margin: 0 0 1rem 0; font-size: 0.9rem; line-height: 1.4;">
                                 ${descricao}
