@@ -249,6 +249,48 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         'grau_evidencia': 'A'
     })
     
+    # Exames para avaliação de hipertensão arterial (AHA 2025 / SBC 2025)
+    if age >= 18:
+        _add_rec({
+            'titulo': 'Potássio plasmático',
+            'descricao': 'Avaliação de distúrbios eletrolíticos e investigação de hipertensão secundária',
+            'subtitulo': 'Adultos com HAS | Anual',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'AHA 2025 / SBC 2025',
+            'grau_evidencia': 'A'
+        })
+        
+        _add_rec({
+            'titulo': 'Ácido úrico plasmático',
+            'descricao': 'Avaliação de risco cardiovascular e renal em pacientes hipertensos',
+            'subtitulo': 'Adultos com HAS | Anual',
+            'categoria': 'laboratorio',
+            'prioridade': 'media',
+            'referencia': 'AHA 2025 / SBC 2025',
+            'grau_evidencia': 'B'
+        })
+        
+        _add_rec({
+            'titulo': 'EAS - Elementos Anormais e Sedimentoscopia',
+            'descricao': 'Análise de urina para avaliação de lesão renal e investigação de hipertensão secundária',
+            'subtitulo': 'Adultos com HAS | Anual',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'AHA 2025 / SBC 2025',
+            'grau_evidencia': 'A'
+        })
+        
+        _add_rec({
+            'titulo': 'Razão albumina/creatinina urinária',
+            'descricao': 'Avaliação de albuminúria para detecção precoce de lesão renal em hipertensos',
+            'subtitulo': 'Adultos com HAS | Anual',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'AHA 2025 / SBC 2025',
+            'grau_evidencia': 'A'
+        })
+    
     # Exames de imagem
     _add_rec({
         'titulo': 'Eletrocardiograma de repouso',
@@ -259,6 +301,28 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         'referencia': 'SBC 2019 / AHA/ACC 2019',
         'grau_evidencia': 'C'
     })
+    
+    # Exames de imagem para avaliação de hipertensão (AHA 2025 / SBC 2025)
+    if age >= 18:
+        _add_rec({
+            'titulo': 'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)',
+            'descricao': 'Confirmação diagnóstica de hipertensão arterial, investigação de hipertensão do avental branco e hipertensão mascarada',
+            'subtitulo': 'Adultos com suspeita de HAS | Conforme necessidade',
+            'categoria': 'imagem',
+            'prioridade': 'alta',
+            'referencia': 'AHA 2025 / SBC 2025',
+            'grau_evidencia': 'A'
+        })
+        
+        _add_rec({
+            'titulo': 'Ecocardiograma transtorácico',
+            'descricao': 'Avaliação de hipertrofia ventricular esquerda, função diastólica e lesão de órgão-alvo em hipertensos',
+            'subtitulo': 'Adultos com HAS | Inicial e a cada 1-2 anos',
+            'categoria': 'imagem',
+            'prioridade': 'media',
+            'referencia': 'AHA 2025 / SBC 2025',
+            'grau_evidencia': 'B'
+        })
     
     # Rastreamento de câncer por idade e sexo
     if sex == 'feminino':

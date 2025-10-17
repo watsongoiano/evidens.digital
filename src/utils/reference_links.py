@@ -106,9 +106,15 @@ def _resolve_url_by_org(token_lc: str, title_lc: str) -> str:
         if '2019' in token_lc or _contains_any(title_lc, ['ecg', 'eletrocardiograma', 'cardiovascular']):
             return 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000625'
         return 'https://www.ahajournals.org/journal/circ'
+    if token_lc.startswith('aha'):
+        if '2025' in token_lc:
+            return 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356'
+        return 'https://www.ahajournals.org/journal/circ'
     if token_lc.startswith('kdigo'):
         return 'https://kdigo.org/guidelines/ckd-evaluation-and-management/'
     if token_lc.startswith('sbc'):
+        if '2025' in token_lc:
+            return 'https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf'
         if '2019' in token_lc:
             return 'http://publicacoes.cardiol.br/portal/abc/portugues/2019/v11303/pdf/11303022.pdf'
         return 'https://abccardiol.org/diretrizes/'
