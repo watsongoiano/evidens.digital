@@ -138,8 +138,16 @@ def generate_biomarker_recommendations(risk_level, age, sex):
     
     return recommendations
 
-def generate_age_sex_recommendations(age, sex, country='BR'):
-    """Gera recomendações baseadas em idade e sexo"""
+def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False):
+    """Gera recomendações baseadas em idade, sexo e condições clínicas
+    
+    Args:
+        age: Idade do paciente
+        sex: Sexo do paciente
+        country: País para guidelines
+        has_hypertension: Se o paciente tem hipertensão (detectado por PA ou checkboxes)
+        has_resistant_hypertension: Se o paciente tem hipertensão resistente
+    """
     recommendations = []
 
     def _add_rec(rec):
@@ -250,7 +258,8 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     })
     
     # Exames para avaliação de hipertensão arterial (AHA 2025 / SBC 2025)
-    if age >= 18:
+    # Apenas adicionar se o paciente tiver hipertensão
+    if has_hypertension and age >= 18:
         _add_rec({
             'titulo': 'Potássio plasmático',
             'descricao': 'Avaliação de distúrbios eletrolíticos e investigação de hipertensão secundária',
@@ -303,7 +312,8 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     })
     
     # Exames de imagem para avaliação de hipertensão (AHA 2025 / SBC 2025)
-    if age >= 18:
+    # Apenas adicionar se o paciente tiver hipertensão
+    if has_hypertension and age >= 18:
         _add_rec({
             'titulo': 'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)',
             'descricao': 'Confirmação diagnóstica de hipertensão arterial, investigação de hipertensão do avental branco e hipertensão mascarada',
@@ -557,6 +567,49 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
             'grau_evidencia': 'A'
         })
     
+    # Exames específicos para hipertensão resistente (AHA 2025 / SBC 2025)
+    # Apenas adicionar se o paciente tiver hipertensão resistente
+    if has_resistant_hypertension and age >= 18:
+        _add_rec({
+            'titulo': 'Polissonografia',
+            'descricao': 'Investigação de apneia obstrutiva do sono, causa comum de hipertensão resistente. Indicada para pacientes com ronco, sonolência diurna excessiva ou pausas respiratórias durante o sono.',
+            'subtitulo': 'Adultos com HAS resistente | Conforme necessidade',
+            'categoria': 'imagem',
+            'prioridade': 'alta',
+            'referencia': 'AHA 2025 / SBC 2025',
+            'grau_evidencia': 'A'
+        })
+        
+        _add_rec({
+            'titulo': 'Doppler de artérias renais',
+            'descricao': 'Investigação de estenose de artéria renal como causa de hipertensão secundária. Indicado em pacientes com hipertensão resistente, início abrupto de hipertensão grave, ou piora da função renal após IECA/BRA.',
+            'subtitulo': 'Adultos com HAS resistente | Conforme necessidade',
+            'categoria': 'imagem',
+            'prioridade': 'alta',
+            'referencia': 'AHA 2025 / SBC 2025',
+            'grau_evidencia': 'B'
+        })
+        
+        _add_rec({
+            'titulo': 'Relação Aldosterona/Renina (A/R)',
+            'descricao': 'Rastreamento de hiperaldosteronismo primário, causa importante de hipertensão resistente. Coletar pela manhã após 2 horas em pé. Relação >20-30 sugere hiperaldosteronismo.',
+            'subtitulo': 'Adultos com HAS resistente | Conforme necessidade',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'AHA 2025 / SBC 2025',
+            'grau_evidencia': 'A'
+        })
+        
+        _add_rec({
+            'titulo': 'Metanefrinas plasmáticas ou urinárias',
+            'descricao': 'Rastreamento de feocromocitoma em pacientes com hipertensão resistente, especialmente se crises hipertensivas, cefaleia, palpitações ou sudorese excessiva.',
+            'subtitulo': 'Adultos com HAS resistente | Conforme necessidade',
+            'categoria': 'laboratorio',
+            'prioridade': 'media',
+            'referencia': 'AHA 2025 / SBC 2025',
+            'grau_evidencia': 'B'
+        })
+    
     return recommendations
 
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
@@ -593,11 +646,68 @@ def generate_intelligent_recommendations():
         if risk_result:
             risk_level = get_risk_classification(risk_result['risk10Year'])
         
+        # Detectar hipertensão automaticamente
+        has_hypertension = False
+        has_resistant_hypertension = False
+        
+        # 1. Detecção por valores de PA (SBP >130 ou DBP >90)
+        sbp = float(data.get('pressao_sistolica', 0)) if data.get('pressao_sistolica') else 0
+        dbp = float(data.get('pressao_diastolica', 0)) if data.get('pressao_diastolica') else 0
+        if sbp > 130 or dbp > 90:
+            has_hypertension = True
+        
+        # 2. Detecção por checkboxes clínicos
+        comorbidades = data.get('comorbidades', [])
+        # Garantir que comorbidades é uma lista
+        if isinstance(comorbidades, str):
+            comorbidades = [comorbidades]
+        elif not isinstance(comorbidades, list):
+            comorbidades = []
+        
+        medicacoes_checkboxes = data.get('medicacoes', [])
+        # Garantir que medicacoes é uma lista
+        if isinstance(medicacoes_checkboxes, str):
+            medicacoes_checkboxes = [medicacoes_checkboxes]
+        elif not isinstance(medicacoes_checkboxes, list):
+            medicacoes_checkboxes = []
+        
+        # Campo de texto de medicações contínuas
+        medicacoes_continuo = (data.get('medicacoes_continuo', '') or '').lower()
+        
+        # Verificar se tem hipertensão nas comorbidades
+        if 'hipertensao' in comorbidades or 'hipertensão' in comorbidades:
+            has_hypertension = True
+        
+        # Verificar se tem hipertensão resistente
+        if 'hipertensao_resistente' in comorbidades or 'has_resistente' in comorbidades:
+            has_hypertension = True
+            has_resistant_hypertension = True
+        
+        # Verificar se tem cardiopatia (frequentemente associada a HAS)
+        if 'cardiopatia' in comorbidades:
+            has_hypertension = True
+        
+        # Verificar se marcou checkbox de anti-hipertensivos
+        if 'anti_hipertensivos' in medicacoes_checkboxes:
+            has_hypertension = True
+        
+        # Verificar se usa medicações anti-hipertensivas no campo de texto
+        anti_htn_keywords = ['losartan', 'enalapril', 'captopril', 'valsartan', 'anlodipino', 
+                             'hidroclorotiazida', 'atenolol', 'propranolol', 'carvedilol',
+                             'metoprolol', 'bisoprolol', 'espironolactona', 'furosemida',
+                             'anti-hipertensiv', 'antihipertensiv']
+        for keyword in anti_htn_keywords:
+            if keyword in medicacoes_continuo:
+                has_hypertension = True
+                break
+        
         # Gerar recomendações
         recommendations = []
         
-        # Recomendações baseadas em idade e sexo
-        age_sex_recs = generate_age_sex_recommendations(age, sex)
+        # Recomendações baseadas em idade, sexo e status de hipertensão
+        age_sex_recs = generate_age_sex_recommendations(age, sex, country='BR', 
+                                                         has_hypertension=has_hypertension,
+                                                         has_resistant_hypertension=has_resistant_hypertension)
         recommendations.extend(age_sex_recs)
         
         # Recomendações de biomarcadores se necessário
