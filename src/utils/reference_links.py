@@ -42,7 +42,7 @@ def _uspstf_url_by_title(title_lc: str) -> str:
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening'
     if _contains_any(title_lc, ['psa', 'próstata', 'prostata']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening'
-    if _contains_any(title_lc, ['aorta']):
+    if _contains_any(title_lc, ['aorta', 'aneurisma']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/abdominal-aortic-aneurysm-screening'
     if _contains_any(title_lc, ['pulm', 'tomografia', 'tc tórax', 'tc torax', 'ldct']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening'

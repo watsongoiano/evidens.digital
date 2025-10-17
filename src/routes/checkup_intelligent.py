@@ -322,6 +322,18 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
             'grau_evidencia': 'B'
         })
     
+    # Aneurisma de Aorta Abdominal (AAA)
+    if sex == 'masculino' and 65 <= age <= 75:
+        _add_rec({
+            'titulo': 'Ultrassonografia de aorta abdominal',
+            'descricao': 'Rastreamento de aneurisma de aorta abdominal. Homens 65-75 anos que já fumaram.',
+            'subtitulo': 'Homens 65-75 anos que já fumaram | Dose única',
+            'categoria': 'imagem',
+            'prioridade': 'alta',
+            'referencia': 'USPSTF 2019',
+            'grau_evidencia': 'B'
+        })
+    
     # Vacinas
     _add_rec({
         'titulo': 'Vacina Influenza Tetravalente',
