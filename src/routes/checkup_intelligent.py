@@ -185,25 +185,9 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         'grau_evidencia': 'B'
     })
     
-    _add_rec({
-        'titulo': 'Hemograma completo',
-        'descricao': 'Avaliação de células sanguíneas',
-        'subtitulo': 'Rastreamento hematológico',
-        'categoria': 'laboratorio',
-        'prioridade': 'media',
-        'referencia': 'Rotina clínica',
-        'grau_evidencia': 'C'
-    })
-    
-    _add_rec({
-        'titulo': 'TSH',
-        'descricao': 'Hormônio estimulante da tireoide',
-        'subtitulo': 'Rastreamento de disfunção tireoidiana',
-        'categoria': 'laboratorio',
-        'prioridade': 'media',
-        'referencia': 'USPSTF 2024',
-        'grau_evidencia': 'B'
-    })
+    # Hemograma e TSH removidos - não há evidência para rastreamento universal
+    # TSH: USPSTF grau I (evidência insuficiente)
+    # Hemograma: sem guideline que recomende rastreamento universal
     
     _add_rec({
         'titulo': 'Creatinina, soro',
