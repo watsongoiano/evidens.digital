@@ -298,8 +298,8 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         'subtitulo': 'Adultos ≥40 anos | Anual',
         'categoria': 'imagem',
         'prioridade': 'alta',
-        'referencia': 'SBC 2019 / AHA/ACC 2019',
-        'grau_evidencia': 'C'
+        'referencia': 'AHA 2025 / SBC 2025 / AHA 2022 / SBC 2018',
+        'grau_evidencia': 'B'
     })
     
     # Exames de imagem para avaliação de hipertensão (AHA 2025 / SBC 2025)
