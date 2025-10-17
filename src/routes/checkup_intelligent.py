@@ -1304,7 +1304,7 @@ def gerar_solicitacao_exames():
 
 
 
-@checkup_intelligent_bp.route('/api/gerar-pdf-exames-laboratoriais', methods=['POST'])
+@checkup_intelligent_bp.route('/gerar-pdf-exames-laboratoriais', methods=['POST'])
 def gerar_pdf_exames_laboratoriais_endpoint():
     """
     Endpoint para gerar PDF de solicitação de exames laboratoriais.
@@ -1350,7 +1350,7 @@ def gerar_pdf_exames_laboratoriais_endpoint():
         return jsonify({'error': str(e)}), 500
 
 
-@checkup_intelligent_bp.route('/api/gerar-pdf-exames-imagem', methods=['POST'])
+@checkup_intelligent_bp.route('/gerar-pdf-exames-imagem', methods=['POST'])
 def gerar_pdf_exames_imagem_endpoint():
     """
     Endpoint para gerar PDF de solicitação de exames de imagem.
@@ -1396,7 +1396,7 @@ def gerar_pdf_exames_imagem_endpoint():
         return jsonify({'error': str(e)}), 500
 
 
-@checkup_intelligent_bp.route('/api/gerar-pdf-vacinas', methods=['POST'])
+@checkup_intelligent_bp.route('/gerar-pdf-vacinas', methods=['POST'])
 def gerar_pdf_vacinas_endpoint():
     """
     Endpoint para gerar PDF de prescrição de vacinas.
