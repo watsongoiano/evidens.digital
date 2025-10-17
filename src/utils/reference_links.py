@@ -61,6 +61,20 @@ def _uspstf_url_by_title(title_lc: str) -> str:
     return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics'
 
 def _resolve_url_by_org(token_lc: str, title_lc: str) -> str:
+    # Tratar ACC/AHA como um caso especial
+    if 'acc' in token_lc and 'aha' in token_lc:
+        if '2019' in token_lc:
+            return 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000625'
+        if '2025' in token_lc:
+            return 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001309'
+        return 'https://www.ahajournals.org/journal/circ'
+    
+    # Tratar ESC/EAS como um caso especial
+    if 'esc' in token_lc and 'eas' in token_lc:
+        if '2019' in token_lc:
+            return 'https://academic.oup.com/eurheartj/article/41/1/111/5556353'
+        return 'https://academic.oup.com/eurheartj'
+    
     if token_lc.startswith('uspstf'):
         url = _uspstf_url_by_title(title_lc)
         # Adicionar ano específico se disponível

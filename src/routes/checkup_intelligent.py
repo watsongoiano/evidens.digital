@@ -166,9 +166,9 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     
     # Exames laboratoriais básicos
     _add_rec({
-        'titulo': 'Glicemia de jejum',
-        'descricao': 'ADA 2024: Rastreamento universal ≥35 anos',
-        'subtitulo': 'Adultos ≥35 anos | Anual',
+        'titulo': 'Rastreamento de Diabetes: Glicemia de jejum, TOTG-75g ou HbA1c',
+        'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Métodos: Glicemia de jejum (≥92 mg/dL pré-diabetes, ≥126 mg/dL diabetes), TOTG-75g (140-199 mg/dL pré-diabetes, ≥200 mg/dL diabetes) ou HbA1c (5,7-6,4% pré-diabetes, ≥6,5% diabetes).',
+        'subtitulo': 'Adultos ≥35 anos | A cada 3 anos se normal',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
         'referencia': 'ADA 2024',
