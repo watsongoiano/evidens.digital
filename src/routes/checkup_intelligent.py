@@ -168,7 +168,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'Glicemia de jejum',
         'descricao': 'ADA 2024: Rastreamento universal ≥35 anos',
-        'subtitulo': 'Rastreamento de diabetes',
+        'subtitulo': 'Adultos ≥35 anos | Anual',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
         'referencia': 'ADA 2024',
@@ -181,7 +181,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'Painel lipídico completo',
             'descricao': 'Painel lipídico completo (não jejum): Colesterol total, HDL-C, triglicerídeos, LDL-C calculado e non-HDL-C. Rastreamento a cada 4-6 anos. Considerar ApoB se triglicerídeos altos, diabetes ou obesidade.',
-            'subtitulo': 'Perfil lipídico para prevenção cardiovascular',
+            'subtitulo': 'Adultos ≥40 anos | A cada 4-6 anos',
             'categoria': 'laboratorio',
             'prioridade': 'alta',
             'referencia': 'ACC/AHA 2019 / ESC/EAS 2019',
@@ -192,7 +192,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'Painel lipídico completo',
             'descricao': 'Colesterol total, HDL-C, triglicerídeos, LDL-C calculado e non-HDL-C. Rastreamento a cada 4-6 anos.',
-            'subtitulo': 'Perfil lipídico para avaliação de risco',
+            'subtitulo': 'Adultos 20-39 anos | A cada 4-6 anos',
             'categoria': 'laboratorio',
             'prioridade': 'alta',
             'referencia': 'ACC/AHA 2019',
@@ -204,7 +204,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'Lipoproteína(a) - Lp(a)',
             'descricao': 'Medição única na vida adulta para refinamento de risco cardiovascular. Preferir ensaio independente de isoforma.',
-            'subtitulo': 'Marcador de risco cardiovascular',
+            'subtitulo': 'Adultos ≥20 anos | Dose única na vida',
             'categoria': 'laboratorio',
             'prioridade': 'media',
             'referencia': 'ESC/EAS 2019 / EAS 2022',
@@ -218,7 +218,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'Creatinina, soro',
         'descricao': 'Avaliação da função renal',
-        'subtitulo': 'Rastreamento de doença renal',
+        'subtitulo': 'Adultos ≥18 anos | Anual',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
         'referencia': 'KDIGO 2024',
@@ -232,7 +232,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'Anti-HIV 1 e 2, soro',
         'descricao': 'Teste para detecção de HIV',
-        'subtitulo': 'Rastreamento de HIV',
+        'subtitulo': 'Adultos 15-65 anos | Pelo menos 1x na vida',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
         'referencia': 'USPSTF 2024',
@@ -242,7 +242,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'Anti-HCV IgG, soro',
         'descricao': 'Teste para detecção de Hepatite C',
-        'subtitulo': 'Rastreamento de Hepatite C',
+        'subtitulo': 'Adultos ≥18 anos | Pelo menos 1x na vida',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
         'referencia': 'USPSTF 2024',
@@ -253,7 +253,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'Eletrocardiograma de repouso',
         'descricao': 'ECG de 12 derivações - Rastreamento cardiovascular para hipertensão, diabetes ou ≥40 anos',
-        'subtitulo': 'ECG de 12 derivações',
+        'subtitulo': 'Adultos ≥40 anos | Anual',
         'categoria': 'imagem',
         'prioridade': 'alta',
         'referencia': 'SBC 2019 / AHA/ACC 2019',
@@ -266,7 +266,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
             _add_rec({
                 'titulo': 'Mamografia Digital - Bilateral',
                 'descricao': 'Mamografia bienal (40-74 anos)',
-                'subtitulo': 'Rastreamento de câncer de mama',
+                'subtitulo': 'Mulheres 40-74 anos | Bienal',
                 'categoria': 'imagem',
                 'prioridade': 'alta',
                 'referencia': 'USPSTF 2024',
@@ -277,7 +277,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
             _add_rec({
                 'titulo': 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular',
                 'descricao': 'Papanicolaou a cada 3 anos (21-65 anos)',
-                'subtitulo': 'Rastreamento de câncer do colo do útero',
+                'subtitulo': 'Mulheres 21-65 anos | A cada 3 anos',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
                 'referencia': 'USPSTF',
@@ -288,7 +288,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'PSA total, soro',
             'descricao': 'Rastreamento de câncer de próstata (≥50 anos)',
-            'subtitulo': 'Antígeno Prostático Específico',
+            'subtitulo': 'Homens ≥50 anos | Anual',
             'categoria': 'laboratorio',
             'prioridade': 'media',
             'referencia': 'USPSTF 2018',
@@ -300,7 +300,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'Colonoscopia de Rastreio com ou sem biópsia',
             'descricao': 'Colonoscopia a cada 10 anos (45-75 anos)',
-            'subtitulo': 'Rastreamento de câncer colorretal',
+            'subtitulo': 'Adultos 45-75 anos | A cada 10 anos',
             'categoria': 'imagem',
             'prioridade': 'alta',
             'referencia': 'USPSTF 2021',
@@ -311,7 +311,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'Vacina Influenza Tetravalente',
         'descricao': 'Dose anual. Aplicar em dose única, INTRAMUSCULAR, anualmente.',
-        'subtitulo': 'Imunização sazonal contra influenza',
+        'subtitulo': 'Todos ≥6 meses | Anual',
         'categoria': 'vacina',
         'prioridade': 'alta',
         'referencia': 'SBIm 2024',
@@ -324,7 +324,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'Gardasil 9® (Vacina Papilomavírus Humano 9-Valente)',
             'descricao': '3 doses. Aplicar 0, 2 e 6 meses.',
-            'subtitulo': 'Prevenção de HPV e neoplasias relacionadas',
+            'subtitulo': '9-45 anos | 2-3 doses',
             'categoria': 'vacina',
             'prioridade': prioridade_hpv,
             'referencia': 'SBIm 2024',
@@ -335,7 +335,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'Hepatite B (VHB)',
         'descricao': 'Esquema de 3 doses (0, 1, 6 meses) em não vacinados.',
-        'subtitulo': 'Imunização contra hepatite B',
+        'subtitulo': 'Todos não imunizados | 3 doses',
         'categoria': 'vacina',
         'prioridade': 'alta',
         'referencia': 'SBIm 2024',
@@ -346,7 +346,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'dTpa (Tétano, difteria, coqueluche)',
         'descricao': '1 dose de dTpa, depois reforço com dT ou dTpa a cada 10 anos.',
-        'subtitulo': 'Proteção contra tétano, difteria e coqueluche',
+        'subtitulo': 'Adultos | Reforço a cada 10 anos',
         'categoria': 'vacina',
         'prioridade': 'alta',
         'referencia': 'SBIm 2024 / CDC 2025',
@@ -358,7 +358,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'Tríplice viral (Sarampo, caxumba, rubéola)',
             'descricao': '1 ou 2 doses para adultos não vacinados ou sem comprovação vacinal.',
-            'subtitulo': 'Imunização contra sarampo, caxumba e rubéola',
+            'subtitulo': 'Adultos não imunizados | 2 doses',
             'categoria': 'vacina',
             'prioridade': 'media',
             'referencia': 'SBIm 2024 / CDC 2025',
@@ -369,7 +369,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'Hepatite A',
         'descricao': '2 doses com intervalo de 6 meses.',
-        'subtitulo': 'Proteção contra hepatite A',
+        'subtitulo': 'Grupos de risco | 2 doses',
         'categoria': 'vacina',
         'prioridade': 'alta',
         'referencia': 'SBIm 2024 / CDC 2025',
@@ -380,7 +380,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'Febre amarela',
         'descricao': 'Dose única ou reforço. Indicada para residentes ou viajantes para áreas endêmicas.',
-        'subtitulo': 'Proteção contra febre amarela',
+        'subtitulo': 'Áreas endêmicas | Dose única',
         'categoria': 'vacina',
         'prioridade': 'media',
         'referencia': 'SBIm 2024',
@@ -392,7 +392,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'Meningocócica ACWY',
             'descricao': 'Dose única ou reforço a cada 5 anos para grupos de risco.',
-            'subtitulo': 'Proteção contra meningite meningocócica',
+            'subtitulo': 'Adolescentes 11-12 anos | Reforço aos 16',
             'categoria': 'vacina',
             'prioridade': 'media',
             'referencia': 'SBIm 2024 / CDC 2025',
@@ -404,7 +404,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'Meningocócica B',
             'descricao': '2 doses conforme esquema do fabricante.',
-            'subtitulo': 'Proteção contra meningite meningocócica sorogrupo B',
+            'subtitulo': 'Adolescentes 16-23 anos | 2 doses',
             'categoria': 'vacina',
             'prioridade': 'media',
             'referencia': 'SBIm 2024 / CDC 2025',
@@ -415,7 +415,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'Dengue (Qdenga)',
         'descricao': '2 doses com intervalo de 3 meses. Indicada para áreas endêmicas.',
-        'subtitulo': 'Proteção contra dengue',
+        'subtitulo': '4-60 anos (áreas endêmicas) | 2 doses',
         'categoria': 'vacina',
         'prioridade': 'media',
         'referencia': 'SBIm 2024',
@@ -426,7 +426,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
     _add_rec({
         'titulo': 'COVID-19',
         'descricao': 'Dose de reforço anual conforme vacina disponível.',
-        'subtitulo': 'Proteção contra COVID-19',
+        'subtitulo': 'Todos ≥6 meses | Anual (atualizada)',
         'categoria': 'vacina',
         'prioridade': 'alta',
         'referencia': 'CDC 2025',
@@ -438,7 +438,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'Herpes zóster (Shingrix®)',
             'descricao': '2 doses com intervalo de 2 a 6 meses.',
-            'subtitulo': 'Proteção contra herpes zóster (cobreiro)',
+            'subtitulo': 'Adultos ≥50 anos | 2 doses',
             'categoria': 'vacina',
             'prioridade': 'alta',
             'referencia': 'SBIm 2024 / CDC 2025',
@@ -450,7 +450,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'VPC15 (Vaxneuvance®) ou VPC13, 0,5ml',
             'descricao': '1 dose. Pode ser coadministrada com Shingrix®, Efluelda® e Arexvy®',
-            'subtitulo': 'Vacina pneumocócica conjugada',
+            'subtitulo': 'Adultos ≥50 anos | Dose única',
             'categoria': 'vacina',
             'prioridade': 'alta',
             'referencia': 'SBIm 2024 / CDC 2025',
@@ -459,7 +459,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         _add_rec({
             'titulo': 'VPP23, 0,5ml',
             'descricao': '1 dose 6 meses após VPC15/VPC13; reforço 5 anos após a primeira dose de VPC',
-            'subtitulo': 'Vacina pneumocócica polissacarídica',
+            'subtitulo': 'Adultos ≥50 anos | Série + reforço',
             'categoria': 'vacina',
             'prioridade': 'alta',
             'referencia': 'SBIm 2024 / CDC 2025',
