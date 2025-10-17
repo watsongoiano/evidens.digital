@@ -2,16 +2,27 @@
 from typing import List, Dict
 
 def _split_refs(ref: str) -> List[str]:
+    """Separa referências múltiplas preservando referências compostas como ACC/AHA.
+    
+    Usa ' / ' (com espaços) como separador principal para não quebrar 'ACC/AHA'.
+    Fallback para ';' e ',' se ' / ' não estiver presente.
+    """
     if not ref:
         return []
-    parts = []
-    for sep in ['/', ';', ',']:
+    
+    # Tentar separar por ' / ' primeiro (preserva ACC/AHA, ESC/EAS, etc)
+    if ' / ' in ref:
+        parts = [p.strip() for p in ref.split(' / ')]
+        return [p for p in parts if p]
+    
+    # Fallback para outros separadores
+    for sep in [';', ',']:
         if sep in ref:
             parts = [p.strip() for p in ref.split(sep)]
-            break
-    if not parts:
-        parts = [ref.strip()]
-    return [p for p in parts if p]
+            return [p for p in parts if p]
+    
+    # Sem separador, retornar como está
+    return [ref.strip()]
 
 def _norm(s: str) -> str:
     return (s or '').strip().lower()
