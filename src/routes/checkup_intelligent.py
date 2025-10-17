@@ -209,7 +209,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         'subtitulo': 'Rastreamento de HIV',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
-        'referencia': 'MS 2024',
+        'referencia': 'USPSTF 2024',
         'grau_evidencia': 'A'
     })
     
@@ -219,7 +219,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         'subtitulo': 'Rastreamento de Hepatite C',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
-        'referencia': 'MS 2024',
+        'referencia': 'USPSTF 2024',
         'grau_evidencia': 'A'
     })
     
@@ -288,7 +288,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         'subtitulo': 'Imunização sazonal contra influenza',
         'categoria': 'vacina',
         'prioridade': 'alta',
-        'referencia': 'SBIm/ANVISA 2024',
+        'referencia': 'SBIm 2024',
         'grau_evidencia': 'A'
     })
 
@@ -301,7 +301,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
             'subtitulo': 'Prevenção de HPV e neoplasias relacionadas',
             'categoria': 'vacina',
             'prioridade': prioridade_hpv,
-            'referencia': 'SBIm/ANVISA 2024',
+            'referencia': 'SBIm 2024',
             'grau_evidencia': 'A'
         })
 
@@ -312,9 +312,112 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         'subtitulo': 'Imunização contra hepatite B',
         'categoria': 'vacina',
         'prioridade': 'alta',
-        'referencia': 'SBIm/ANVISA 2024',
+        'referencia': 'SBIm 2024',
         'grau_evidencia': 'A'
     })
+
+    # dTpa (Tétano, difteria, coqueluche)
+    _add_rec({
+        'titulo': 'dTpa (Tétano, difteria, coqueluche)',
+        'descricao': '1 dose de dTpa, depois reforço com dT ou dTpa a cada 10 anos.',
+        'subtitulo': 'Proteção contra tétano, difteria e coqueluche',
+        'categoria': 'vacina',
+        'prioridade': 'alta',
+        'referencia': 'SBIm 2024 / CDC 2025',
+        'grau_evidencia': 'A'
+    })
+
+    # Tríplice viral (Sarampo, caxumba, rubéola)
+    if age <= 59:  # Prioridade para adultos jovens não vacinados
+        _add_rec({
+            'titulo': 'Tríplice viral (Sarampo, caxumba, rubéola)',
+            'descricao': '1 ou 2 doses para adultos não vacinados ou sem comprovação vacinal.',
+            'subtitulo': 'Imunização contra sarampo, caxumba e rubéola',
+            'categoria': 'vacina',
+            'prioridade': 'media',
+            'referencia': 'SBIm 2024 / CDC 2025',
+            'grau_evidencia': 'A'
+        })
+
+    # Hepatite A
+    _add_rec({
+        'titulo': 'Hepatite A',
+        'descricao': '2 doses com intervalo de 6 meses.',
+        'subtitulo': 'Proteção contra hepatite A',
+        'categoria': 'vacina',
+        'prioridade': 'alta',
+        'referencia': 'SBIm 2024 / CDC 2025',
+        'grau_evidencia': 'A'
+    })
+
+    # Febre amarela (para áreas endêmicas)
+    _add_rec({
+        'titulo': 'Febre amarela',
+        'descricao': 'Dose única ou reforço. Indicada para residentes ou viajantes para áreas endêmicas.',
+        'subtitulo': 'Proteção contra febre amarela',
+        'categoria': 'vacina',
+        'prioridade': 'media',
+        'referencia': 'SBIm 2024',
+        'grau_evidencia': 'A'
+    })
+
+    # Meningocócica ACWY
+    if age <= 59:
+        _add_rec({
+            'titulo': 'Meningocócica ACWY',
+            'descricao': 'Dose única ou reforço a cada 5 anos para grupos de risco.',
+            'subtitulo': 'Proteção contra meningite meningocócica',
+            'categoria': 'vacina',
+            'prioridade': 'media',
+            'referencia': 'SBIm 2024 / CDC 2025',
+            'grau_evidencia': 'B'
+        })
+
+    # Meningocócica B (19-23 anos)
+    if 19 <= age <= 23:
+        _add_rec({
+            'titulo': 'Meningocócica B',
+            'descricao': '2 doses conforme esquema do fabricante.',
+            'subtitulo': 'Proteção contra meningite meningocócica sorogrupo B',
+            'categoria': 'vacina',
+            'prioridade': 'media',
+            'referencia': 'SBIm 2024 / CDC 2025',
+            'grau_evidencia': 'B'
+        })
+
+    # Dengue (Qdenga)
+    _add_rec({
+        'titulo': 'Dengue (Qdenga)',
+        'descricao': '2 doses com intervalo de 3 meses. Indicada para áreas endêmicas.',
+        'subtitulo': 'Proteção contra dengue',
+        'categoria': 'vacina',
+        'prioridade': 'media',
+        'referencia': 'SBIm 2024',
+        'grau_evidencia': 'B'
+    })
+
+    # COVID-19
+    _add_rec({
+        'titulo': 'COVID-19',
+        'descricao': 'Dose de reforço anual conforme vacina disponível.',
+        'subtitulo': 'Proteção contra COVID-19',
+        'categoria': 'vacina',
+        'prioridade': 'alta',
+        'referencia': 'CDC 2025',
+        'grau_evidencia': 'A'
+    })
+
+    # Herpes zóster a partir de 50 anos
+    if age >= 50:
+        _add_rec({
+            'titulo': 'Herpes zóster (Shingrix®)',
+            'descricao': '2 doses com intervalo de 2 a 6 meses.',
+            'subtitulo': 'Proteção contra herpes zóster (cobreiro)',
+            'categoria': 'vacina',
+            'prioridade': 'alta',
+            'referencia': 'SBIm 2024 / CDC 2025',
+            'grau_evidencia': 'A'
+        })
 
     # Pneumocócicas a partir de 50 anos
     if age >= 50:
@@ -324,7 +427,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
             'subtitulo': 'Vacina pneumocócica conjugada',
             'categoria': 'vacina',
             'prioridade': 'alta',
-            'referencia': 'SBIm/ANVISA 2024',
+            'referencia': 'SBIm 2024 / CDC 2025',
             'grau_evidencia': 'A'
         })
         _add_rec({
@@ -333,7 +436,7 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
             'subtitulo': 'Vacina pneumocócica polissacarídica',
             'categoria': 'vacina',
             'prioridade': 'alta',
-            'referencia': 'SBIm/ANVISA 2024',
+            'referencia': 'SBIm 2024 / CDC 2025',
             'grau_evidencia': 'A'
         })
     

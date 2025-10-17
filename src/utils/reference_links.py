@@ -85,15 +85,18 @@ def _resolve_url_by_org(token_lc: str, title_lc: str) -> str:
         return 'https://abccardiol.org/diretrizes/'
     if token_lc.startswith('ase'):
         return 'https://www.asecho.org/clinical-guidelines/'
-    if 'sbim' in token_lc or 'anvisa' in token_lc:
-        return 'https://sbim.org.br/images/calendarios/calend-sbim-adulto.pdf'
+    if 'sbim' in token_lc and 'cdc' in token_lc:
+        # Referência combinada SBIm/CDC
+        return 'https://sbim.org.br/calendarios-de-vacinacao'
+    if 'sbim' in token_lc:
+        return 'https://sbim.org.br/calendarios-de-vacinacao'
+    if 'cdc' in token_lc:
+        if _contains_any(title_lc, ['covid']):
+            return 'https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-age.html'
+        return 'https://www.cdc.gov/vaccines/hcp/imz-schedules/index.html'
     if token_lc.startswith('cdc') and _contains_any(title_lc, ['rsv']):
         return 'https://www.cdc.gov/rsv/hcp/vaccine-clinical-guidance/adults.html'
     if token_lc.startswith('ms') and '2024' in token_lc:
-        if _contains_any(title_lc, ['hiv']):
-            return 'http://www.aids.gov.br/pt-br/legislacao/protocolo-clinico-e-diretrizes-terapeuticas-para-manejo-da-infeccao-pelo-hiv-em-adultos'
-        if _contains_any(title_lc, ['hepatite c', 'hcv']):
-            return 'http://www.aids.gov.br/pt-br/pub/2015/protocolo-clinico-e-diretrizes-terapeuticas-para-hepatite-c-e-coinfeccoes'
         return 'https://www.gov.br/saude/pt-br'
     if token_lc.startswith('gold'):
         return 'https://goldcopd.org/'
