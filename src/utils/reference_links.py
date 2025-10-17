@@ -58,23 +58,43 @@ def _uspstf_url_by_title(title_lc: str) -> str:
 
 def _resolve_url_by_org(token_lc: str, title_lc: str) -> str:
     if token_lc.startswith('uspstf'):
-        return _uspstf_url_by_title(title_lc)
+        url = _uspstf_url_by_title(title_lc)
+        # Adicionar ano específico se disponível
+        if '2024' in token_lc and _contains_any(title_lc, ['mamografia', 'mama']):
+            return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening'
+        if '2021' in token_lc and _contains_any(title_lc, ['colonoscopia', 'colorretal']):
+            return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening'
+        if '2018' in token_lc and _contains_any(title_lc, ['pulm', 'tomografia']):
+            return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening'
+        return url
     if token_lc.startswith('ada'):
+        if _contains_any(title_lc, ['glicemia', 'glicose', 'diabetes']):
+            return 'https://diabetesjournals.org/care/article/47/Supplement_1/S20/153954/2-Diagnosis-and-Classification-of-Diabetes'
         return 'https://diabetesjournals.org/care/issue/47/Supplement_1'
     if 'aha/acc' in token_lc:
-        if _contains_any(title_lc, ['hscrp', 'lpa', 'apo', 'cálcio coron', 'calcio coron', 'perfil lip', 'dislip']):
-            return 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000678'
+        if '2025' in token_lc or _contains_any(title_lc, ['colesterol', 'lipid', 'ldl', 'hdl', 'triglicerid']):
+            return 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001309'
+        if '2019' in token_lc or _contains_any(title_lc, ['ecg', 'eletrocardiograma', 'cardiovascular']):
+            return 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000000625'
         return 'https://www.ahajournals.org/journal/circ'
     if token_lc.startswith('kdigo'):
-        return 'https://kdigo.org/guidelines/ckd-2024/'
+        return 'https://kdigo.org/guidelines/ckd-evaluation-and-management/'
     if token_lc.startswith('sbc'):
+        if '2019' in token_lc:
+            return 'http://publicacoes.cardiol.br/portal/abc/portugues/2019/v11303/pdf/11303022.pdf'
         return 'https://abccardiol.org/diretrizes/'
     if token_lc.startswith('ase'):
         return 'https://www.asecho.org/clinical-guidelines/'
     if 'sbim' in token_lc or 'anvisa' in token_lc:
-        return 'https://sbim.org.br/calendarios'
+        return 'https://sbim.org.br/images/calendarios/calend-sbim-adulto.pdf'
     if token_lc.startswith('cdc') and _contains_any(title_lc, ['rsv']):
         return 'https://www.cdc.gov/rsv/hcp/vaccine-clinical-guidance/adults.html'
+    if token_lc.startswith('ms') and '2024' in token_lc:
+        if _contains_any(title_lc, ['hiv']):
+            return 'http://www.aids.gov.br/pt-br/legislacao/protocolo-clinico-e-diretrizes-terapeuticas-para-manejo-da-infeccao-pelo-hiv-em-adultos'
+        if _contains_any(title_lc, ['hepatite c', 'hcv']):
+            return 'http://www.aids.gov.br/pt-br/pub/2015/protocolo-clinico-e-diretrizes-terapeuticas-para-hepatite-c-e-coinfeccoes'
+        return 'https://www.gov.br/saude/pt-br'
     if token_lc.startswith('gold'):
         return 'https://goldcopd.org/'
     if token_lc.startswith('ata'):
