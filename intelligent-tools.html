@@ -752,7 +752,8 @@
                         const subtitulo = rec.subtitulo || '';
                         const descricao = rec.descricao || '';
                         const prioridade = rec.prioridade || 'alta';
-                        const referencia = rec.referencia_html || rec.referencia || '';
+                        const referencia = rec.referencia || '';
+                        const referencia_html = rec.referencia_html || rec.referencia || '';
                         
                         // Determinar cor da prioridade
                         let prioridadeColor = '#28a745'; // Verde para alta
@@ -776,8 +777,8 @@
                                 ${subtitulo}
                             </p>` : ''}
                             
-                            ${referencia ? `<p style="color: #95a5a6; margin: 0; font-size: 0.8rem; font-style: italic;">
-                                <span style="margin-right: 0.5rem;">📚</span>${referencia}
+                            ${referencia_html ? `<p style="color: #95a5a6; margin: 0; font-size: 0.8rem; font-style: italic;">
+                                <span style="margin-right: 0.5rem;">📚</span>${referencia_html}
                             </p>` : ''}
                         </div>`;
                     });
