@@ -587,8 +587,6 @@
                 <div class="action-buttons">
                     <button class="action-btn" onclick="gerarSolicitacaoExames()">📋 Solicitação de Exames</button>
                     <button class="action-btn" onclick="gerarReceitaVacinas()">💉 Receita de Vacinas</button>
-                    <button class="action-btn" onclick="gerarRelatorioCompleto()">📄 Relatório Completo</button>
-                    <button class="action-btn" onclick="agendarLembretes()">🔔 Agendar Lembretes</button>
                 </div>
             </div>
         </div>
@@ -598,6 +596,10 @@
     <script>
         // Inicializar calculadora PREVENT
         const preventCalc = new PreventCalculator();
+        
+        // Variáveis globais para armazenar dados
+        let currentRecommendations = [];
+        let currentPatientData = {};
         
         document.getElementById('checkupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -655,6 +657,15 @@
                 }
                 
                 const result = await response.json();
+                
+                // Armazenar dados globalmente
+                currentRecommendations = result.recommendations || [];
+                currentPatientData = {
+                    nome: data.nome || 'Paciente',
+                    idade: data.idade,
+                    sexo: data.sexo
+                };
+                
                 displayRecommendations(result.recommendations, cardiovascularRisk);
                 
             } catch (error) {
@@ -716,7 +727,7 @@
                 const prioridade = rec.prioridade || 'alta';
                 
                 // Usar a categoria definida no backend
-                if (categoria === 'laboratorial') {
+                if (categoria === 'laboratorio' || categoria === 'laboratorial') {
                     categorias['Exames Laboratoriais'].push(rec);
                 } else if (categoria === 'imagem') {
                     categorias['Exames de Imagem'].push(rec);
@@ -780,12 +791,20 @@
 
         async function gerarSolicitacaoExames() {
             try {
+                if (!currentRecommendations || currentRecommendations.length === 0) {
+                    alert('Gere as recomendações primeiro!');
+                    return;
+                }
+                
                 const response = await fetch('/api/gerar-solicitacao-exames', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({
+                        recommendations: currentRecommendations,
+                        patient_data: currentPatientData
+                    })
                 });
                 
                 if (!response.ok) {
@@ -807,12 +826,20 @@
 
         async function gerarReceitaVacinas() {
             try {
+                if (!currentRecommendations || currentRecommendations.length === 0) {
+                    alert('Gere as recomendações primeiro!');
+                    return;
+                }
+                
                 const response = await fetch('/api/gerar-receita-vacinas', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({
+                        recommendations: currentRecommendations,
+                        patient_data: currentPatientData
+                    })
                 });
                 
                 if (!response.ok) {
