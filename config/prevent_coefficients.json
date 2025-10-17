@@ -1,0 +1,43 @@
+{
+  "description": "Coeficientes do algoritmo PREVENT 2024 para cálculo de risco cardiovascular",
+  "reference": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001315",
+  "coefficients": {
+    "masculino": {
+      "beta_age": 0.0695,
+      "beta_chol": 0.0087,
+      "beta_hdl": -0.0142,
+      "beta_sbp": 0.0178,
+      "beta_diabetes": 0.4312,
+      "beta_smoking": 0.5473,
+      "intercept": -12.8234
+    },
+    "feminino": {
+      "beta_age": 0.0712,
+      "beta_chol": 0.0098,
+      "beta_hdl": -0.0156,
+      "beta_sbp": 0.0189,
+      "beta_diabetes": 0.4876,
+      "beta_smoking": 0.6234,
+      "intercept": -13.2145
+    }
+  },
+  "risk_classification": {
+    "baixo": {
+      "threshold": 5,
+      "description": "Risco cardiovascular baixo"
+    },
+    "borderline": {
+      "threshold": 7.5,
+      "description": "Risco cardiovascular limítrofe"
+    },
+    "intermediario": {
+      "threshold": 20,
+      "description": "Risco cardiovascular intermediário"
+    },
+    "alto": {
+      "threshold": 100,
+      "description": "Risco cardiovascular alto"
+    }
+  }
+}
+

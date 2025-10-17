@@ -5,8 +5,17 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from src.utils.analytics import analytics
 from src.utils.reference_links import build_reference_links, build_reference_html
-from src.models.user import db
-from src.models.medical import Patient, Checkup, Recomendacao
+from src.utils.prevent_calculator import calculate_prevent_risk, get_risk_classification
+from src.utils.reference_manager import apply_reference_overrides
+try:
+    from src.models.user import db
+    from src.models.medical import Patient, Checkup, Recomendacao
+except ImportError:
+    # Modelos não disponíveis em ambiente serverless
+    db = None
+    Patient = None
+    Checkup = None
+    Recomendacao = None
 
 checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
 
@@ -81,91 +90,7 @@ def parse_date_ymd(date_str):
         
     return None
 
-def calculate_prevent_risk(patient_data):
-    """
-    Calcula o risco cardiovascular usando o algoritmo PREVENT 2024
-    """
-    try:
-        age = patient_data.get('age', 0)
-        sex = patient_data.get('sex', 'masculino')
-        total_chol = patient_data.get('totalCholesterol', 0)
-        hdl_chol = patient_data.get('hdlCholesterol', 0)
-        systolic_bp = patient_data.get('systolicBP', 0)
-        diabetes = patient_data.get('diabetes', False)
-        smoking = patient_data.get('smoking', False)
-        weight = patient_data.get('weight', 0)
-        height = patient_data.get('height', 0)
-        creatinine = patient_data.get('creatinine', 0)
-        
-        # Validar dados mínimos
-        if not all([age, sex, total_chol, hdl_chol, systolic_bp]):
-            return None
-        
-        # Calcular eGFR
-        egfr = 175 * (creatinine ** -1.154) * (age ** -0.203)
-        if sex == 'feminino':
-            egfr *= 0.742
-        
-        # Calcular BMI
-        bmi = None
-        if weight and height:
-            height_m = height / 100
-            bmi = weight / (height_m ** 2)
-        
-        # Coeficientes PREVENT 2024 (simplificados)
-        if sex == 'masculino':
-            # Coeficientes para homens
-            beta_age = 0.0695
-            beta_chol = 0.0087
-            beta_hdl = -0.0142
-            beta_sbp = 0.0178
-            beta_diabetes = 0.4312
-            beta_smoking = 0.5473
-            intercept = -12.8234
-        else:
-            # Coeficientes para mulheres
-            beta_age = 0.0712
-            beta_chol = 0.0098
-            beta_hdl = -0.0156
-            beta_sbp = 0.0189
-            beta_diabetes = 0.4876
-            beta_smoking = 0.6234
-            intercept = -13.2145
-        
-        # Calcular log odds
-        log_odds = (intercept + 
-                   beta_age * age +
-                   beta_chol * total_chol +
-                   beta_hdl * hdl_chol +
-                   beta_sbp * systolic_bp +
-                   (beta_diabetes if diabetes else 0) +
-                   (beta_smoking if smoking else 0))
-        
-        # Converter para probabilidade
-        risk_10_year = math.exp(log_odds) / (1 + math.exp(log_odds)) * 100
-        risk_30_year = min(risk_10_year * 2.8, 85)
-        
-        return {
-            'risk10Year': round(risk_10_year, 1),
-            'risk30Year': round(risk_30_year, 1),
-            'egfr': round(egfr) if egfr else None,
-            'bmi': round(bmi, 1) if bmi else None
-        }
-        
-    except Exception as e:
-        print(f"Erro no cálculo PREVENT: {e}")
-        return None
-
-def get_risk_classification(risk_10_year):
-    """Classifica o risco cardiovascular"""
-    if risk_10_year < 5:
-        return 'baixo'
-    elif risk_10_year < 7.5:
-        return 'borderline'
-    elif risk_10_year < 20:
-        return 'intermediario'
-    else:
-        return 'alto'
+# Funções calculate_prevent_risk e get_risk_classification agora são importadas de src.utils.prevent_calculator
 
 def generate_biomarker_recommendations(risk_level, age, sex):
     """Gera recomendações de biomarcadores baseadas no nível de risco"""

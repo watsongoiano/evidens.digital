@@ -1,0 +1,63 @@
+{
+  "description": "Referências médicas e guidelines utilizados no sistema",
+  "references": {
+    "USPSTF": {
+      "name": "U.S. Preventive Services Task Force",
+      "url": "https://www.uspreventiveservicestaskforce.org",
+      "description": "Força-tarefa de serviços preventivos dos EUA"
+    },
+    "ADA": {
+      "name": "American Diabetes Association",
+      "url": "https://diabetes.org/guidelines",
+      "description": "Associação Americana de Diabetes"
+    },
+    "AHA": {
+      "name": "American Heart Association",
+      "url": "https://www.heart.org",
+      "description": "Associação Americana do Coração"
+    },
+    "ACC": {
+      "name": "American College of Cardiology",
+      "url": "https://www.acc.org",
+      "description": "Colégio Americano de Cardiologia"
+    },
+    "SBC": {
+      "name": "Sociedade Brasileira de Cardiologia",
+      "url": "https://www.portal.cardiol.br",
+      "description": "Sociedade Brasileira de Cardiologia"
+    },
+    "SBD": {
+      "name": "Sociedade Brasileira de Diabetes",
+      "url": "https://diabetes.org.br",
+      "description": "Sociedade Brasileira de Diabetes"
+    },
+    "SBIm": {
+      "name": "Sociedade Brasileira de Imunizações",
+      "url": "https://sbim.org.br",
+      "description": "Sociedade Brasileira de Imunizações"
+    },
+    "KDIGO": {
+      "name": "Kidney Disease: Improving Global Outcomes",
+      "url": "https://kdigo.org",
+      "description": "Diretrizes para doenças renais"
+    },
+    "CDC": {
+      "name": "Centers for Disease Control and Prevention",
+      "url": "https://www.cdc.gov",
+      "description": "Centros de Controle e Prevenção de Doenças dos EUA"
+    }
+  },
+  "override_rules": [
+    {
+      "keywords": ["microalbuminuria", "urina"],
+      "label": "AHA/ACC 2025",
+      "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+      "keywords": ["densitometria", "dexa"],
+      "label": "USPSTF 2025",
+      "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+    }
+  ]
+}
+
