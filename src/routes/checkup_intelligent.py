@@ -175,15 +175,44 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         'grau_evidencia': 'A'
     })
     
-    _add_rec({
-        'titulo': 'Colesterol total e frações, soro',
-        'descricao': 'Colesterol total, HDL, LDL e triglicerídeos',
-        'subtitulo': 'Perfil lipídico',
-        'categoria': 'laboratorio',
-        'prioridade': 'alta',
-        'referencia': 'AHA/ACC 2025',
-        'grau_evidencia': 'B'
-    })
+    # Painel lipídico - recomendação ajustada por idade e condições
+    if age >= 40:
+        # Adultos ≥40 anos: considerar ApoB se diabetes, obesidade ou TG alto
+        descricao_lipidico = 'Painel lipídico completo (não jejum): Colesterol total, HDL-C, triglicerídeos, LDL-C calculado e non-HDL-C. Rastreamento a cada 4-6 anos.'
+        if 'diabetes' in comorbidades_lower or 'obesidade' in comorbidades_lower:
+            descricao_lipidico += ' Considerar ApoB se triglicerídeos altos, diabetes ou obesidade.'
+        _add_rec({
+            'titulo': 'Painel lipídico completo',
+            'descricao': descricao_lipidico,
+            'subtitulo': 'Perfil lipídico para prevenção cardiovascular',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'ACC/AHA 2019 / ESC/EAS 2019',
+            'grau_evidencia': 'A'
+        })
+    elif age >= 20:
+        # Adultos 20-39 anos
+        _add_rec({
+            'titulo': 'Painel lipídico completo',
+            'descricao': 'Colesterol total, HDL-C, triglicerídeos, LDL-C calculado e non-HDL-C. Rastreamento a cada 4-6 anos.',
+            'subtitulo': 'Perfil lipídico para avaliação de risco',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'ACC/AHA 2019',
+            'grau_evidencia': 'A'
+        })
+    
+    # Lipoproteína(a) - recomendação única na vida adulta
+    if age >= 20:
+        _add_rec({
+            'titulo': 'Lipoproteína(a) - Lp(a)',
+            'descricao': 'Medição única na vida adulta para refinamento de risco cardiovascular. Preferir ensaio independente de isoforma.',
+            'subtitulo': 'Marcador de risco cardiovascular',
+            'categoria': 'laboratorio',
+            'prioridade': 'media',
+            'referencia': 'ESC/EAS 2019 / EAS 2022',
+            'grau_evidencia': 'B'
+        })
     
     # Hemograma e TSH removidos - não há evidência para rastreamento universal
     # TSH: USPSTF grau I (evidência insuficiente)

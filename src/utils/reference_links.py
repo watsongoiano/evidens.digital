@@ -98,6 +98,12 @@ def _resolve_url_by_org(token_lc: str, title_lc: str) -> str:
         return 'https://www.cdc.gov/rsv/hcp/vaccine-clinical-guidance/adults.html'
     if token_lc.startswith('ms') and '2024' in token_lc:
         return 'https://www.gov.br/saude/pt-br'
+    if 'acc' in token_lc and 'aha' in token_lc and '2019' in token_lc:
+        return 'https://pmc.ncbi.nlm.nih.gov/articles/PMC8351755/'
+    if 'esc' in token_lc and 'eas' in token_lc and '2019' in token_lc:
+        return 'https://academic.oup.com/eurheartj/article/41/1/111/5556353'
+    if 'eas' in token_lc and '2022' in token_lc:
+        return 'https://academic.oup.com/eurheartj/article/43/39/3925/6670929'
     if token_lc.startswith('gold'):
         return 'https://goldcopd.org/'
     if token_lc.startswith('ata'):
