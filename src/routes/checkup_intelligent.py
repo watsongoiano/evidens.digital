@@ -199,15 +199,8 @@ def generate_age_sex_recommendations(age, sex, country='BR'):
         'grau_evidencia': 'A'
     })
     
-    _add_rec({
-        'titulo': 'TGO/AST e TGP/ALT',
-        'descricao': 'Enzimas hepáticas',
-        'subtitulo': 'Avaliação da função hepática',
-        'categoria': 'laboratorio',
-        'prioridade': 'media',
-        'referencia': 'Rotina clínica',
-        'grau_evidencia': 'C'
-    })
+    # TGO/TGP removido: sem evidência para rastreamento universal em assintomáticos
+    # Apenas indicado para pacientes com fatores de risco específicos
     
     # Rastreamento de doenças infecciosas
     _add_rec({
