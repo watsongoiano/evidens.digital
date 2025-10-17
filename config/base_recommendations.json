@@ -1,0 +1,156 @@
+{
+  "description": "Recomendações básicas de check-up por idade e sexo",
+  "version": "1.0.0",
+  "last_updated": "2025-10-17",
+  "recommendations": {
+    "laboratorio_basico": [
+      {
+        "titulo": "Glicemia de jejum",
+        "descricao": "ADA 2024: Rastreamento universal ≥35 anos",
+        "subtitulo": "Rastreamento de diabetes",
+        "categoria": "laboratorio",
+        "prioridade": "alta",
+        "referencia": "ADA 2024",
+        "grau_evidencia": "A",
+        "idade_minima": 35
+      },
+      {
+        "titulo": "Colesterol total e frações, soro",
+        "descricao": "Colesterol total, HDL, LDL e triglicerídeos",
+        "subtitulo": "Perfil lipídico",
+        "categoria": "laboratorio",
+        "prioridade": "alta",
+        "referencia": "AHA/ACC 2019",
+        "grau_evidencia": "A",
+        "idade_minima": 20
+      },
+      {
+        "titulo": "Hemograma completo",
+        "descricao": "Avaliação de células sanguíneas",
+        "subtitulo": "Rastreamento hematológico",
+        "categoria": "laboratorio",
+        "prioridade": "media",
+        "referencia": "Rotina clínica",
+        "grau_evidencia": "C",
+        "idade_minima": 18
+      },
+      {
+        "titulo": "TSH",
+        "descricao": "Hormônio estimulante da tireoide",
+        "subtitulo": "Rastreamento de disfunção tireoidiana",
+        "categoria": "laboratorio",
+        "prioridade": "media",
+        "referencia": "USPSTF 2024",
+        "grau_evidencia": "B",
+        "idade_minima": 35
+      },
+      {
+        "titulo": "Creatinina, soro",
+        "descricao": "Avaliação da função renal",
+        "subtitulo": "Rastreamento de doença renal",
+        "categoria": "laboratorio",
+        "prioridade": "alta",
+        "referencia": "KDIGO 2024",
+        "grau_evidencia": "A",
+        "idade_minima": 18
+      },
+      {
+        "titulo": "TGO/AST e TGP/ALT",
+        "descricao": "Enzimas hepáticas",
+        "subtitulo": "Avaliação da função hepática",
+        "categoria": "laboratorio",
+        "prioridade": "media",
+        "referencia": "Rotina clínica",
+        "grau_evidencia": "C",
+        "idade_minima": 18
+      }
+    ],
+    "rastreamento_cancer_feminino": [
+      {
+        "titulo": "Mamografia bilateral",
+        "descricao": "USPSTF 2024: Rastreamento bienal 40-74 anos",
+        "subtitulo": "Rastreamento de câncer de mama",
+        "categoria": "imagem",
+        "prioridade": "alta",
+        "referencia": "USPSTF 2024",
+        "grau_evidencia": "B",
+        "sexo": "feminino",
+        "idade_minima": 40,
+        "idade_maxima": 74
+      },
+      {
+        "titulo": "Citologia cervical (Papanicolaou)",
+        "descricao": "USPSTF 2018: Rastreamento a cada 3 anos (21-65 anos)",
+        "subtitulo": "Rastreamento de câncer de colo uterino",
+        "categoria": "laboratorio",
+        "prioridade": "alta",
+        "referencia": "USPSTF 2018",
+        "grau_evidencia": "A",
+        "sexo": "feminino",
+        "idade_minima": 21,
+        "idade_maxima": 65
+      }
+    ],
+    "rastreamento_cancer_masculino": [
+      {
+        "titulo": "PSA total, soro",
+        "descricao": "USPSTF 2018: Decisão individualizada 55-69 anos",
+        "subtitulo": "Rastreamento de câncer de próstata",
+        "categoria": "laboratorio",
+        "prioridade": "media",
+        "referencia": "USPSTF 2018",
+        "grau_evidencia": "C",
+        "sexo": "masculino",
+        "idade_minima": 55,
+        "idade_maxima": 69
+      }
+    ],
+    "rastreamento_cancer_geral": [
+      {
+        "titulo": "Colonoscopia",
+        "descricao": "USPSTF 2021: Rastreamento 45-75 anos",
+        "subtitulo": "Rastreamento de câncer colorretal",
+        "categoria": "imagem",
+        "prioridade": "alta",
+        "referencia": "USPSTF 2021",
+        "grau_evidencia": "A",
+        "idade_minima": 45,
+        "idade_maxima": 75
+      }
+    ],
+    "vacinacao_adulto": [
+      {
+        "titulo": "Vacina contra Influenza",
+        "descricao": "SBIm 2024: Anual para todos os adultos",
+        "subtitulo": "Prevenção de gripe",
+        "categoria": "vacina",
+        "prioridade": "alta",
+        "referencia": "SBIm 2024",
+        "grau_evidencia": "A",
+        "idade_minima": 18
+      },
+      {
+        "titulo": "Vacina contra COVID-19",
+        "descricao": "MS 2024: Reforço anual recomendado",
+        "subtitulo": "Prevenção de COVID-19",
+        "categoria": "vacina",
+        "prioridade": "alta",
+        "referencia": "MS 2024",
+        "grau_evidencia": "A",
+        "idade_minima": 18
+      },
+      {
+        "titulo": "Vacina Hepatite B",
+        "descricao": "SBIm 2024: Esquema 0-1-6 meses se não vacinado",
+        "subtitulo": "Prevenção de hepatite B",
+        "categoria": "vacina",
+        "prioridade": "alta",
+        "referencia": "SBIm 2024",
+        "grau_evidencia": "A",
+        "idade_minima": 18,
+        "idade_maxima": 60
+      }
+    ]
+  }
+}
+
