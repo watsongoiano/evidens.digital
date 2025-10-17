@@ -596,8 +596,9 @@
                 <h3>Recomendações Inteligentes</h3>
                 <div id="recommendationsContent"></div>
                 <div class="action-buttons">
-                    <button class="action-btn" onclick="gerarSolicitacaoExames()">📋 Solicitação de Exames</button>
-                    <button class="action-btn" onclick="gerarReceitaVacinas()">💉 Receita de Vacinas</button>
+                    <button class="action-btn" onclick="gerarPDFExamesLaboratoriais()">🧪 PDF Exames Laboratoriais</button>
+                    <button class="action-btn" onclick="gerarPDFExamesImagem()">📷 PDF Exames de Imagem</button>
+                    <button class="action-btn" onclick="gerarPDFVacinas()">💉 PDF Vacinas</button>
                 </div>
             </div>
         </div>
@@ -807,73 +808,156 @@
             recommendationsDiv.style.display = 'block';
         }
 
-        async function gerarSolicitacaoExames() {
+        async function gerarPDFExamesLaboratoriais() {
             try {
                 if (!currentRecommendations || currentRecommendations.length === 0) {
                     alert('Gere as recomendações primeiro!');
                     return;
                 }
                 
-                const response = await fetch('/api/gerar-solicitacao-exames', {
+                // Preparar dados do paciente
+                const dadosPaciente = {
+                    nome: currentPatientData.nome || 'Paciente',
+                    idade: currentPatientData.idade || currentPatientData.age,
+                    sexo: currentPatientData.sexo || currentPatientData.sex,
+                    comorbidades: currentPatientData.comorbidades || [],
+                    medicacoes: currentPatientData.medicacoes || [],
+                    tabagismo: currentPatientData.tabagismo || 'nunca_fumou',
+                    historico_familiar: currentPatientData.historico_familiar || []
+                };
+                
+                const response = await fetch('/api/gerar-pdf-exames-laboratoriais', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        recommendations: currentRecommendations,
-                        patient_data: currentPatientData
+                        dados_paciente: dadosPaciente,
+                        recomendacoes: currentRecommendations
                     })
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
                 }
                 
-                const result = await response.text();
-                
-                // Abrir em nova janela
-                const newWindow = window.open('', '_blank');
-                newWindow.document.write(result);
-                newWindow.document.close();
+                // Download do PDF
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `exames_laboratoriais_${new Date().getTime()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
                 
             } catch (error) {
                 console.error('Erro:', error);
-                alert('Erro ao gerar solicitação de exames: ' + error.message);
+                alert('Erro ao gerar PDF de exames laboratoriais: ' + error.message);
             }
         }
 
-        async function gerarReceitaVacinas() {
+        async function gerarPDFExamesImagem() {
             try {
                 if (!currentRecommendations || currentRecommendations.length === 0) {
                     alert('Gere as recomendações primeiro!');
                     return;
                 }
                 
-                const response = await fetch('/api/gerar-receita-vacinas', {
+                // Preparar dados do paciente
+                const dadosPaciente = {
+                    nome: currentPatientData.nome || 'Paciente',
+                    idade: currentPatientData.idade || currentPatientData.age,
+                    sexo: currentPatientData.sexo || currentPatientData.sex,
+                    comorbidades: currentPatientData.comorbidades || [],
+                    medicacoes: currentPatientData.medicacoes || [],
+                    tabagismo: currentPatientData.tabagismo || 'nunca_fumou',
+                    historico_familiar: currentPatientData.historico_familiar || []
+                };
+                
+                const response = await fetch('/api/gerar-pdf-exames-imagem', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        recommendations: currentRecommendations,
-                        patient_data: currentPatientData
+                        dados_paciente: dadosPaciente,
+                        recomendacoes: currentRecommendations
                     })
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
                 }
                 
-                const result = await response.text();
-                
-                // Abrir em nova janela
-                const newWindow = window.open('', '_blank');
-                newWindow.document.write(result);
-                newWindow.document.close();
+                // Download do PDF
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `exames_imagem_${new Date().getTime()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
                 
             } catch (error) {
                 console.error('Erro:', error);
-                alert('Erro ao gerar receita de vacinas: ' + error.message);
+                alert('Erro ao gerar PDF de exames de imagem: ' + error.message);
+            }
+        }
+
+        async function gerarPDFVacinas() {
+            try {
+                if (!currentRecommendations || currentRecommendations.length === 0) {
+                    alert('Gere as recomendações primeiro!');
+                    return;
+                }
+                
+                // Preparar dados do paciente
+                const dadosPaciente = {
+                    nome: currentPatientData.nome || 'Paciente',
+                    idade: currentPatientData.idade || currentPatientData.age,
+                    sexo: currentPatientData.sexo || currentPatientData.sex,
+                    comorbidades: currentPatientData.comorbidades || [],
+                    medicacoes: currentPatientData.medicacoes || [],
+                    tabagismo: currentPatientData.tabagismo || 'nunca_fumou',
+                    historico_familiar: currentPatientData.historico_familiar || []
+                };
+                
+                const response = await fetch('/api/gerar-pdf-vacinas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        dados_paciente: dadosPaciente,
+                        recomendacoes: currentRecommendations
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
+                }
+                
+                // Download do PDF
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `prescricao_vacinas_${new Date().getTime()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao gerar PDF de vacinas: ' + error.message);
             }
         }
 

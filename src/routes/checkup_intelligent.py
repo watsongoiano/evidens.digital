@@ -172,13 +172,33 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         recommendations.append(rec)
         print(f"Recomendação adicionada: {title}")
     
-    # Exames laboratoriais básicos
+    # Exames laboratoriais básicos - Rastreamento de Diabetes (3 exames separados)
     _add_rec({
-        'titulo': 'Rastreamento de Diabetes: Glicemia de jejum, TOTG-75g ou HbA1c, soro',
-        'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Métodos: Glicemia de jejum (≥92 mg/dL pré-diabetes, ≥126 mg/dL diabetes), TOTG-75g (140-199 mg/dL pré-diabetes, ≥200 mg/dL diabetes) ou HbA1c (5,7-6,4% pré-diabetes, ≥6,5% diabetes).',
+        'titulo': 'Glicemia de jejum, soro',
+        'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Valores de referência: <100 mg/dL normal, 100-125 mg/dL pré-diabetes, ≥126 mg/dL diabetes.',
         'subtitulo': 'Adultos ≥35 anos | A cada 3 anos se normal',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
+        'referencia': 'ADA 2024',
+        'grau_evidencia': 'A'
+    })
+    
+    _add_rec({
+        'titulo': 'Hemoglobina glicada (HbA1c), soro',
+        'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Valores de referência: <5,7% normal, 5,7-6,4% pré-diabetes, ≥6,5% diabetes. Reflete controle glicêmico dos últimos 2-3 meses.',
+        'subtitulo': 'Adultos ≥35 anos | A cada 3 anos se normal',
+        'categoria': 'laboratorio',
+        'prioridade': 'alta',
+        'referencia': 'ADA 2024',
+        'grau_evidencia': 'A'
+    })
+    
+    _add_rec({
+        'titulo': 'TOTG-75g (Teste Oral de Tolerância à Glicose), soro',
+        'descricao': 'Teste confirmatório para diabetes gestacional e rastreamento de diabetes tipo 2 quando glicemia de jejum e HbA1c são inconclusivos. Valores 2h pós-carga: <140 mg/dL normal, 140-199 mg/dL pré-diabetes, ≥200 mg/dL diabetes.',
+        'subtitulo': 'Adultos ≥35 anos com glicemia/HbA1c limítrofes | Conforme indicação',
+        'categoria': 'laboratorio',
+        'prioridade': 'media',
         'referencia': 'ADA 2024',
         'grau_evidencia': 'A'
     })
@@ -1281,3 +1301,143 @@ def gerar_solicitacao_exames():
         if _wants_html(request):
             return Response(_html_error_page('Erro ao gerar solicitação', err), status=500, mimetype='text/html')
         return jsonify({'error': err}), 500
+
+
+
+@checkup_intelligent_bp.route('/api/gerar-pdf-exames-laboratoriais', methods=['POST'])
+def gerar_pdf_exames_laboratoriais_endpoint():
+    """
+    Endpoint para gerar PDF de solicitação de exames laboratoriais.
+    
+    Recebe JSON com:
+    - dados_paciente: {nome, idade, sexo, comorbidades, medicacoes, tabagismo, historico_familiar}
+    - recomendacoes: lista de recomendações (filtra apenas laboratoriais)
+    
+    Retorna: PDF binário
+    """
+    try:
+        from src.utils.document_generator import gerar_pdf_exames_laboratoriais
+        from flask import send_file
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Dados não fornecidos'}), 400
+        
+        dados_paciente = data.get('dados_paciente', {})
+        recomendacoes = data.get('recomendacoes', [])
+        
+        # Filtrar apenas exames laboratoriais
+        exames_lab = [
+            rec for rec in recomendacoes 
+            if rec.get('tipo') == 'exame' and rec.get('categoria') == 'laboratorio'
+        ]
+        
+        if not exames_lab:
+            return jsonify({'error': 'Nenhum exame laboratorial encontrado'}), 400
+        
+        # Gerar PDF
+        pdf_buffer = gerar_pdf_exames_laboratoriais(dados_paciente, exames_lab)
+        
+        # Retornar PDF
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f'exames_laboratoriais_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+        )
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@checkup_intelligent_bp.route('/api/gerar-pdf-exames-imagem', methods=['POST'])
+def gerar_pdf_exames_imagem_endpoint():
+    """
+    Endpoint para gerar PDF de solicitação de exames de imagem.
+    
+    Recebe JSON com:
+    - dados_paciente: {nome, idade, sexo, comorbidades, medicacoes, tabagismo, historico_familiar}
+    - recomendacoes: lista de recomendações (filtra apenas imagem)
+    
+    Retorna: PDF binário
+    """
+    try:
+        from src.utils.document_generator import gerar_pdf_exames_imagem
+        from flask import send_file
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Dados não fornecidos'}), 400
+        
+        dados_paciente = data.get('dados_paciente', {})
+        recomendacoes = data.get('recomendacoes', [])
+        
+        # Filtrar apenas exames de imagem
+        exames_imagem = [
+            rec for rec in recomendacoes 
+            if rec.get('tipo') == 'exame' and rec.get('categoria') == 'imagem'
+        ]
+        
+        if not exames_imagem:
+            return jsonify({'error': 'Nenhum exame de imagem encontrado'}), 400
+        
+        # Gerar PDF
+        pdf_buffer = gerar_pdf_exames_imagem(dados_paciente, exames_imagem)
+        
+        # Retornar PDF
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f'exames_imagem_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+        )
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@checkup_intelligent_bp.route('/api/gerar-pdf-vacinas', methods=['POST'])
+def gerar_pdf_vacinas_endpoint():
+    """
+    Endpoint para gerar PDF de prescrição de vacinas.
+    
+    Recebe JSON com:
+    - dados_paciente: {nome, idade, sexo, comorbidades, medicacoes, tabagismo, historico_familiar}
+    - recomendacoes: lista de recomendações (filtra apenas vacinas)
+    
+    Retorna: PDF binário
+    """
+    try:
+        from src.utils.document_generator import gerar_pdf_vacinas
+        from flask import send_file
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Dados não fornecidos'}), 400
+        
+        dados_paciente = data.get('dados_paciente', {})
+        recomendacoes = data.get('recomendacoes', [])
+        
+        # Filtrar apenas vacinas
+        vacinas = [
+            rec for rec in recomendacoes 
+            if rec.get('tipo') == 'vacina'
+        ]
+        
+        if not vacinas:
+            return jsonify({'error': 'Nenhuma vacina encontrada'}), 400
+        
+        # Gerar PDF
+        pdf_buffer = gerar_pdf_vacinas(dados_paciente, vacinas)
+        
+        # Retornar PDF
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f'prescricao_vacinas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+        )
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
