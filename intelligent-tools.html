@@ -755,6 +755,11 @@
                         const referencia = rec.referencia || '';
                         const referencia_html = rec.referencia_html || rec.referencia || '';
                         
+                        // Debug: log para verificar referencia_html
+                        if (titulo.includes('Painel lipídico') || titulo.includes('Lp(a)')) {
+                            console.log(`${titulo}:`, {referencia, referencia_html, referencias: rec.referencias});
+                        }
+                        
                         // Determinar cor da prioridade
                         let prioridadeColor = '#28a745'; // Verde para alta
                         if (prioridade === 'media') prioridadeColor = '#ffc107'; // Amarelo para média
