@@ -625,14 +625,18 @@ def generate_intelligent_recommendations():
         weight = float(data.get('peso', 0)) if data.get('peso') else None
         height = float(data.get('altura', 0)) if data.get('altura') else None
         
+        # Aceitar tanto 'pas' quanto 'pressao_sistolica' (compatibilidade com formulário)
+        sbp_value = data.get('pas') or data.get('pressao_sistolica') or 0
+        dbp_value = data.get('pad') or data.get('pressao_diastolica') or 0
+        
         # Dados clínicos para PREVENT
         patient_data = {
             'age': age,
             'sex': sex,
-            'totalCholesterol': float(data.get('colesterol_total', 0)) if data.get('colesterol_total') else 0,
-            'hdlCholesterol': float(data.get('hdl_colesterol', 0)) if data.get('hdl_colesterol') else 0,
-            'systolicBP': float(data.get('pressao_sistolica', 0)) if data.get('pressao_sistolica') else 0,
-            'diabetes': 'diabetes_tipo_2' in data.get('comorbidades', []),
+            'totalCholesterol': float(data.get('colesterol_total', 0) or data.get('colesterol', 0)) if (data.get('colesterol_total') or data.get('colesterol')) else 0,
+            'hdlCholesterol': float(data.get('hdl_colesterol', 0) or data.get('hdl', 0)) if (data.get('hdl_colesterol') or data.get('hdl')) else 0,
+            'systolicBP': float(sbp_value) if sbp_value else 0,
+            'diabetes': 'diabetes_tipo_2' in data.get('comorbidades', []) or 'diabetes' in data.get('comorbidades', []),
             'smoking': data.get('tabagismo') == 'fumante_atual',
             'weight': weight,
             'height': height,
@@ -651,10 +655,11 @@ def generate_intelligent_recommendations():
         has_resistant_hypertension = False
         
         # 1. Detecção por valores de PA (SBP >130 ou DBP >90)
-        sbp = float(data.get('pressao_sistolica', 0)) if data.get('pressao_sistolica') else 0
-        dbp = float(data.get('pressao_diastolica', 0)) if data.get('pressao_diastolica') else 0
+        sbp = float(sbp_value) if sbp_value else 0
+        dbp = float(dbp_value) if dbp_value else 0
         if sbp > 130 or dbp > 90:
             has_hypertension = True
+            print(f"[DEBUG] Hipertensão detectada por PA: SBP={sbp}, DBP={dbp}")
         
         # 2. Detecção por checkboxes clínicos
         comorbidades = data.get('comorbidades', [])
