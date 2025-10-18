@@ -256,16 +256,17 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # TGO/TGP removido: sem evidência para rastreamento universal em assintomáticos
     # Apenas indicado para pacientes com fatores de risco específicos
     
-    # Rastreamento de doenças infecciosas
-    _add_rec({
-        'titulo': 'Anti-HIV 1 e 2, soro',
-        'descricao': 'Teste para detecção de HIV',
-        'subtitulo': 'Adultos 15-65 anos | Pelo menos 1x na vida',
-        'categoria': 'laboratorio',
-        'prioridade': 'alta',
-        'referencia': 'USPSTF 2024',
-        'grau_evidencia': 'A'
-    })
+    # HIV: Rastreamento para adolescentes e jovens ≤30 anos (PCDT-IST 2022)
+    if idade <= 30:
+        _add_rec({
+            'titulo': 'Anti-HIV 1 e 2, soro',
+            'descricao': 'Rastreamento de HIV conforme PCDT-IST MS 2022. Adolescentes e jovens devem realizar teste anualmente.',
+            'subtitulo': 'Adolescentes e jovens ≤30 anos | Anual',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'PCDT-IST MS 2022',
+            'grau_evidencia': 'A'
+        })
     
     _add_rec({
         'titulo': 'Anti-HCV IgG, soro',
@@ -434,7 +435,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Efluelda® (Influenza Tetravalente de Alta Dose)',
             'descricao': 'Dose anual. Vacina de alta dose ou adjuvantada recomendada para idosos. Aplicar em dose única, INTRAMUSCULAR, anualmente.',
-            'subtitulo': 'Adultos ≥65 anos | Anual',
+            'subtitulo': 'Adultos ≥65 anos | Anual | Reforço: anual',
             'categoria': 'vacina',
             'prioridade': 'alta',
             'referencia': 'SBIm 2025 / CDC 2025',
@@ -444,7 +445,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)',
             'descricao': 'Dose anual. Aplicar em dose única, INTRAMUSCULAR, anualmente.',
-            'subtitulo': 'Todos ≥6 meses | Anual',
+            'subtitulo': 'Todos ≥6 meses | Anual | Reforço: anual',
             'categoria': 'vacina',
             'prioridade': 'alta',
             'referencia': 'SBIm 2025 / CDC 2025',
@@ -457,7 +458,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Gardasil 9® (Vacina HPV 9-Valente)',
             'descricao': '2 doses (9-14 anos) ou 3 doses (15-45 anos). Esquema 0-2-6 meses para 3 doses ou 0-6 meses para 2 doses.',
-            'subtitulo': '9-45 anos | 2-3 doses conforme idade',
+            'subtitulo': '9-45 anos | 2-3 doses conforme idade | Sem reforço',
             'categoria': 'vacina',
             'prioridade': prioridade_hpv,
             'referencia': 'SBIm 2024',
@@ -479,7 +480,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     _add_rec({
         'titulo': 'dTpa (Adacel® ou Boostrix®)',
         'descricao': '1 dose de dTpa, depois reforço com dT ou dTpa a cada 10 anos. Gestantes devem receber dTpa a cada gestação.',
-        'subtitulo': 'Adultos | Reforço a cada 10 anos + cada gestação',
+        'subtitulo': 'Adultos ≥18 anos | 1 dose inicial + reforços | Reforço: 10 anos (+ cada gestação)',
         'categoria': 'vacina',
         'prioridade': 'alta',
         'referencia': 'SBIm 2025 / CDC 2025',
@@ -491,7 +492,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Tríplice viral - SCR (Priorix® ou M-M-R® II)',
             'descricao': '1 ou 2 doses para adultos não vacinados ou sem comprovação vacinal. Adultos até 68 anos.',
-            'subtitulo': 'Adultos 19-68 anos não imunizados | 1-2 doses',
+            'subtitulo': 'Adultos 19-68 anos não imunizados | 1-2 doses | Sem reforço',
             'categoria': 'vacina',
             'prioridade': 'media',
             'referencia': 'SBIm 2025 / CDC 2025',
@@ -513,7 +514,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     _add_rec({
         'titulo': 'Febre amarela (Stamaril®)',
         'descricao': 'Dose única ou 2 doses com intervalo de 10 anos (SBIm recomenda 2 doses). Indicada para residentes ou viajantes para áreas endêmicas.',
-        'subtitulo': 'Áreas endêmicas | 1-2 doses',
+        'subtitulo': 'Áreas endêmicas | 1-2 doses | Reforço: 10 anos (se 2 doses)',
         'categoria': 'vacina',
         'prioridade': 'media',
         'referencia': 'SBIm 2025',
@@ -525,7 +526,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Meningocócica ACWY (Menactra® ou Menveo®)',
             'descricao': 'Dose única ou reforço a cada 5 anos para grupos de risco. Adolescentes: dose aos 11-12 anos e reforço aos 16 anos.',
-            'subtitulo': 'Adolescentes 11-12 anos | Reforço aos 16 anos',
+            'subtitulo': 'Adolescentes 11-12 anos e adultos ≤59 anos | 1 dose | Reforço: 5 anos (grupos de risco)',
             'categoria': 'vacina',
             'prioridade': 'media',
             'referencia': 'SBIm 2025 / CDC 2025',
@@ -537,7 +538,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Meningocócica B (Bexsero® ou Trumenba®)',
             'descricao': '2 doses conforme esquema do fabricante. Bexsero®: intervalo de 1 mês. Trumenba®: intervalo de 6 meses.',
-            'subtitulo': 'Adolescentes 16-23 anos | 2 doses',
+            'subtitulo': 'Adolescentes 16-23 anos | 2 doses | Sem reforço',
             'categoria': 'vacina',
             'prioridade': 'media',
             'referencia': 'SBIm 2025 / CDC 2025',
@@ -548,7 +549,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     _add_rec({
         'titulo': 'Dengue (Qdenga®)',
         'descricao': '2 doses com intervalo de 3 meses. Indicada para áreas endêmicas. Licenciada para 4-60 anos.',
-        'subtitulo': '4-60 anos (áreas endêmicas) | 2 doses',
+        'subtitulo': '4-60 anos (áreas endêmicas) | 2 doses (0-3 meses) | Sem reforço',
         'categoria': 'vacina',
         'prioridade': 'media',
         'referencia': 'SBIm 2025',
@@ -571,7 +572,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Herpes zóster (Shingrix®)',
             'descricao': '2 doses com intervalo de 2 a 6 meses.',
-            'subtitulo': 'Adultos ≥50 anos | 2 doses',
+            'subtitulo': 'Adultos ≥50 anos | 2 doses (0-2 a 6 meses) | Sem reforço',
             'categoria': 'vacina',
             'prioridade': 'alta',
             'referencia': 'SBIm 2024 / CDC 2025',
@@ -583,7 +584,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Pneumocócica Conjugada 20V (Prevenar 20®) OU 15V (Vaxneuvance®)',
             'descricao': 'VPC20 em dose única OU esquema sequencial VPC15 seguida de VPP23 após 6-12 meses. Pode ser coadministrada com Shingrix®, Efluelda® e Arexvy®.',
-            'subtitulo': 'Adultos ≥50 anos | Dose única ou esquema sequencial',
+            'subtitulo': 'Adultos ≥50 anos | Dose única ou esquema sequencial | Sem reforço',
             'categoria': 'vacina',
             'prioridade': 'alta',
             'referencia': 'SBIm 2025 / CDC 2025',
@@ -592,7 +593,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Pneumocócica Polissacarídica 23V (Pneumovax 23®)',
             'descricao': '1 dose 6-12 meses após VPC15 (se esquema sequencial escolhido). Reforço 5 anos após a primeira dose de VPP23. Não necessária se VPC20 foi utilizada.',
-            'subtitulo': 'Adultos ≥50 anos | Esquema sequencial (se VPC15)',
+            'subtitulo': 'Adultos ≥50 anos | Esquema sequencial (se VPC15) | Reforço: 5 anos',
             'categoria': 'vacina',
             'prioridade': 'alta',
             'referencia': 'SBIm 2025 / CDC 2025',
@@ -606,7 +607,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Vírus Sincicial Respiratório - RSV (Arexvy® ou Abrysvo®)',
             'descricao': 'Dose única. Recomendada para adultos ≥50 anos com maior risco de evolução grave (cardiopatia, pneumopatia, diabetes, obesidade, nefropatia). Obrigatória para ≥75 anos. Pode ser coadministrada com Shingrix®, Efluelda® e vacinas pneumocócicas.',
-            'subtitulo': 'Adultos ≥50 anos (obrigatória ≥75 anos) | Dose única',
+            'subtitulo': 'Adultos ≥50 anos (obrigatória ≥75 anos) | Dose única | Sem reforço',
             'categoria': 'vacina',
             'prioridade': prioridade_rsv,
             'referencia': 'SBIm 2025 / CDC 2025',
@@ -618,7 +619,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Varicela (Varilrix® ou Varivax®)',
             'descricao': '2 doses com intervalo de 1-2 meses para adultos suscetíveis (sem história de doença ou vacinação prévia). Contraindicada para gestantes.',
-            'subtitulo': 'Adultos suscetíveis ≤45 anos | 2 doses',
+            'subtitulo': 'Adultos suscetíveis ≤45 anos | 2 doses (0-1 a 2 meses) | Sem reforço',
             'categoria': 'vacina',
             'prioridade': 'media',
             'referencia': 'SBIm 2025 / CDC 2025',
@@ -630,7 +631,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Hepatites A e B combinada (Twinrix®)',
             'descricao': '3 doses (esquema 0-1-6 meses) ou esquema acelerado (0-7-21 dias + reforço aos 12 meses). Alternativa para adultos que precisam de ambas as vacinas.',
-            'subtitulo': 'Adultos não imunizados | 3-4 doses',
+            'subtitulo': 'Adultos não imunizados | 3-4 doses (0-1-6 meses) | Sem reforço',
             'categoria': 'vacina',
             'prioridade': 'media',
             'referencia': 'SBIm 2025',
