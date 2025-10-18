@@ -257,7 +257,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Apenas indicado para pacientes com fatores de risco específicos
     
     # HIV: Rastreamento para adolescentes e jovens ≤30 anos (PCDT-IST 2022)
-    if idade <= 30:
+    if age <= 30:
         _add_rec({
             'titulo': 'Anti-HIV 1 e 2, soro',
             'descricao': 'Rastreamento de HIV conforme PCDT-IST MS 2022. Adolescentes e jovens devem realizar teste anualmente.',
