@@ -1344,7 +1344,7 @@ def gerar_pdf_exames_laboratoriais_endpoint():
             return jsonify({'error': 'Nenhum exame laboratorial encontrado'}), 400
         
         # Gerar PDF
-        pdf_bytes = gerar_pdf_exames(dados_paciente, exames_lab, tipo_exame="LABORATORIAIS")
+        pdf_bytes = gerar_pdf_exames_laboratoriais(dados_paciente, exames_lab)
         
         # Retornar PDF
         return send_file(
@@ -1395,7 +1395,7 @@ def gerar_pdf_exames_imagem_endpoint():
             return jsonify({'error': 'Nenhum exame de imagem encontrado'}), 400
         
         # Gerar PDF
-        pdf_bytes = gerar_pdf_exames(dados_paciente, exames_imagem, tipo_exame="DE IMAGEM")
+        pdf_bytes = gerar_pdf_exames_imagem(dados_paciente, exames_imagem)
         
         # Retornar PDF
         return send_file(
