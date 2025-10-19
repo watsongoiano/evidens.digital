@@ -1337,7 +1337,7 @@ def gerar_pdf_exames_laboratoriais_endpoint():
         # Filtrar apenas exames laboratoriais
         exames_lab = [
             rec for rec in recomendacoes 
-            if rec.get('tipo') == 'exame' and rec.get('categoria') == 'laboratorio'
+            if rec.get('categoria') == 'laboratorio'
         ]
         
         if not exames_lab:
@@ -1388,7 +1388,7 @@ def gerar_pdf_exames_imagem_endpoint():
         # Filtrar apenas exames de imagem
         exames_imagem = [
             rec for rec in recomendacoes 
-            if rec.get('tipo') == 'exame' and rec.get('categoria') == 'imagem'
+            if rec.get('categoria') == 'imagem'
         ]
         
         if not exames_imagem:
@@ -1439,7 +1439,7 @@ def gerar_pdf_vacinas_endpoint():
         # Filtrar apenas vacinas
         vacinas = [
             rec for rec in recomendacoes 
-            if rec.get('tipo') == 'vacina'
+            if rec.get('categoria') == 'vacina'
         ]
         
         if not vacinas:
