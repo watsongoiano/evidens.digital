@@ -1305,20 +1305,27 @@ def gerar_solicitacao_exames():
 
 
 
+
+
+
+# ==================== ENDPOINTS DE GERAÇÃO DE PDFs ====================
+
 @checkup_intelligent_bp.route('/gerar-pdf-exames-laboratoriais', methods=['POST'])
 def gerar_pdf_exames_laboratoriais_endpoint():
     """
     Endpoint para gerar PDF de solicitação de exames laboratoriais.
     
     Recebe JSON com:
-    - dados_paciente: {nome, idade, sexo, comorbidades, medicacoes, tabagismo, historico_familiar}
+    - dados_paciente: {nome, idade, sexo, comorbidades}
     - recomendacoes: lista de recomendações (filtra apenas laboratoriais)
     
     Retorna: PDF binário
     """
     try:
-        from src.utils.document_generator import gerar_pdf_exames_laboratoriais
+        from src.utils.pdf_service import gerar_pdf_exames
         from flask import send_file
+        import io
+        from datetime import datetime
         
         data = request.get_json()
         if not data:
@@ -1337,18 +1344,21 @@ def gerar_pdf_exames_laboratoriais_endpoint():
             return jsonify({'error': 'Nenhum exame laboratorial encontrado'}), 400
         
         # Gerar PDF
-        pdf_buffer = gerar_pdf_exames_laboratoriais(dados_paciente, exames_lab)
+        pdf_bytes = gerar_pdf_exames(dados_paciente, exames_lab, tipo_exame="LABORATORIAIS")
         
         # Retornar PDF
         return send_file(
-            pdf_buffer,
+            io.BytesIO(pdf_bytes),
             mimetype='application/pdf',
             as_attachment=True,
             download_name=f'exames_laboratoriais_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
         )
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"❌ Erro ao gerar PDF laboratoriais: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Erro ao gerar PDF de exames laboratoriais: {str(e)}'}), 500
 
 
 @checkup_intelligent_bp.route('/gerar-pdf-exames-imagem', methods=['POST'])
@@ -1357,14 +1367,16 @@ def gerar_pdf_exames_imagem_endpoint():
     Endpoint para gerar PDF de solicitação de exames de imagem.
     
     Recebe JSON com:
-    - dados_paciente: {nome, idade, sexo, comorbidades, medicacoes, tabagismo, historico_familiar}
+    - dados_paciente: {nome, idade, sexo, comorbidades}
     - recomendacoes: lista de recomendações (filtra apenas imagem)
     
     Retorna: PDF binário
     """
     try:
-        from src.utils.document_generator import gerar_pdf_exames_imagem
+        from src.utils.pdf_service import gerar_pdf_exames
         from flask import send_file
+        import io
+        from datetime import datetime
         
         data = request.get_json()
         if not data:
@@ -1383,18 +1395,21 @@ def gerar_pdf_exames_imagem_endpoint():
             return jsonify({'error': 'Nenhum exame de imagem encontrado'}), 400
         
         # Gerar PDF
-        pdf_buffer = gerar_pdf_exames_imagem(dados_paciente, exames_imagem)
+        pdf_bytes = gerar_pdf_exames(dados_paciente, exames_imagem, tipo_exame="DE IMAGEM")
         
         # Retornar PDF
         return send_file(
-            pdf_buffer,
+            io.BytesIO(pdf_bytes),
             mimetype='application/pdf',
             as_attachment=True,
             download_name=f'exames_imagem_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
         )
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"❌ Erro ao gerar PDF imagem: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Erro ao gerar PDF de exames de imagem: {str(e)}'}), 500
 
 
 @checkup_intelligent_bp.route('/gerar-pdf-vacinas', methods=['POST'])
@@ -1403,14 +1418,16 @@ def gerar_pdf_vacinas_endpoint():
     Endpoint para gerar PDF de prescrição de vacinas.
     
     Recebe JSON com:
-    - dados_paciente: {nome, idade, sexo, comorbidades, medicacoes, tabagismo, historico_familiar}
+    - dados_paciente: {nome, idade, sexo}
     - recomendacoes: lista de recomendações (filtra apenas vacinas)
     
     Retorna: PDF binário
     """
     try:
-        from src.utils.document_generator import gerar_pdf_vacinas
+        from src.utils.pdf_service import gerar_pdf_vacinas
         from flask import send_file
+        import io
+        from datetime import datetime
         
         data = request.get_json()
         if not data:
@@ -1429,16 +1446,18 @@ def gerar_pdf_vacinas_endpoint():
             return jsonify({'error': 'Nenhuma vacina encontrada'}), 400
         
         # Gerar PDF
-        pdf_buffer = gerar_pdf_vacinas(dados_paciente, vacinas)
+        pdf_bytes = gerar_pdf_vacinas(dados_paciente, vacinas)
         
         # Retornar PDF
         return send_file(
-            pdf_buffer,
+            io.BytesIO(pdf_bytes),
             mimetype='application/pdf',
             as_attachment=True,
-            download_name=f'prescricao_vacinas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+            download_name=f'vacinas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
         )
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
+        print(f"❌ Erro ao gerar PDF vacinas: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Erro ao gerar PDF de vacinas: {str(e)}'}), 500

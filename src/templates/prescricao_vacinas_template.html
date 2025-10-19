@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescrição de Vacinas</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid: #28a745;
+            padding-bottom: 15px;
+        }
+        
+        .header h1 {
+            color: #28a745;
+            font-size: 18pt;
+            margin: 0 0 5px 0;
+            font-weight: bold;
+        }
+        
+        .header .subtitle {
+            font-size: 14pt;
+            color: #666;
+            margin: 5px 0;
+        }
+        
+        .patient-info {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .patient-info p {
+            margin: 5px 0;
+            font-size: 10pt;
+        }
+        
+        .patient-info strong {
+            color: #28a745;
+        }
+        
+        .vaccines-section {
+            margin: 20px 0;
+        }
+        
+        .vaccines-section h2 {
+            font-size: 14pt;
+            color: #28a745;
+            border-bottom: 1px solid #28a745;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .vaccine-item {
+            margin: 15px 0;
+            padding: 12px;
+            border-left: 3px solid #28a745;
+            background-color: #f9f9f9;
+        }
+        
+        .vaccine-item .vaccine-number {
+            font-weight: bold;
+            color: #28a745;
+            margin-right: 5px;
+        }
+        
+        .vaccine-item .vaccine-title {
+            font-weight: bold;
+            font-size: 11pt;
+        }
+        
+        .vaccine-item .vaccine-subtitle {
+            font-size: 9pt;
+            color: #666;
+            margin-top: 3px;
+        }
+        
+        .vaccine-item .vaccine-reference {
+            font-size: 8pt;
+            color: #999;
+            margin-top: 3px;
+            font-style: italic;
+        }
+        
+        .signature-section {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+        }
+        
+        .signature-box {
+            margin-top: 60px;
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #333;
+            width: 300px;
+            margin: 0 auto 5px auto;
+        }
+        
+        .signature-text {
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 1cm;
+            left: 2cm;
+            right: 2cm;
+            text-align: center;
+            font-size: 8pt;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .qr-code img {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .document-code {
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>evidēns digital</h1>
+        <div class="subtitle">PRESCRIÇÃO DE VACINAS</div>
+    </div>
+    
+    <div class="patient-info">
+        <p><strong>Paciente:</strong> {{ patient_name }}</p>
+        <p><strong>Idade:</strong> {{ patient_age }} anos | <strong>Sexo:</strong> {{ patient_sex }}</p>
+        <p><strong>Data:</strong> {{ date }}</p>
+    </div>
+    
+    <div class="vaccines-section">
+        <h2>💉 Vacinas Recomendadas</h2>
+        {% for vaccine in vaccines %}
+        <div class="vaccine-item">
+            <span class="vaccine-number">{{ loop.index }}.</span>
+            <span class="vaccine-title">{{ vaccine.titulo }}</span>
+            {% if vaccine.subtitulo %}
+            <div class="vaccine-subtitle">{{ vaccine.subtitulo }}</div>
+            {% endif %}
+            {% if vaccine.referencia %}
+            <div class="vaccine-reference">Referência: {{ vaccine.referencia }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="signature-text">Assinatura e Carimbo do Médico</div>
+        </div>
+    </div>
+    
+    {% if qr_code %}
+    <div class="qr-code">
+        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+    </div>
+    {% endif %}
+    
+    {% if document_code %}
+    <div class="document-code">
+        Código do documento: {{ document_code }}
+    </div>
+    {% endif %}
+    
+    <div class="footer">
+        Documento gerado em {{ generation_datetime }} | evidēns digital - Check-up Inteligente
+    </div>
+</body>
+</html>
+

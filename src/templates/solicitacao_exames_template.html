@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitação de Exames</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 15px;
+        }
+        
+        .header h1 {
+            color: #0066cc;
+            font-size: 18pt;
+            margin: 0 0 5px 0;
+            font-weight: bold;
+        }
+        
+        .header .subtitle {
+            font-size: 14pt;
+            color: #666;
+            margin: 5px 0;
+        }
+        
+        .patient-info {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .patient-info p {
+            margin: 5px 0;
+            font-size: 10pt;
+        }
+        
+        .patient-info strong {
+            color: #0066cc;
+        }
+        
+        .justification {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fffacd;
+            border-left: 4px solid #ffd700;
+            border-radius: 3px;
+        }
+        
+        .justification h3 {
+            margin: 0 0 10px 0;
+            font-size: 12pt;
+            color: #b8860b;
+        }
+        
+        .justification p {
+            margin: 0;
+            font-size: 10pt;
+            line-height: 1.5;
+        }
+        
+        .exams-section {
+            margin: 20px 0;
+        }
+        
+        .exams-section h2 {
+            font-size: 14pt;
+            color: #0066cc;
+            border-bottom: 1px solid #0066cc;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .exam-item {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid #0066cc;
+            background-color: #f9f9f9;
+        }
+        
+        .exam-item .exam-number {
+            font-weight: bold;
+            color: #0066cc;
+            margin-right: 5px;
+        }
+        
+        .exam-item .exam-title {
+            font-weight: bold;
+            font-size: 11pt;
+        }
+        
+        .exam-item .exam-subtitle {
+            font-size: 9pt;
+            color: #666;
+            margin-top: 3px;
+        }
+        
+        .exam-item .exam-reference {
+            font-size: 8pt;
+            color: #999;
+            margin-top: 3px;
+            font-style: italic;
+        }
+        
+        .signature-section {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+        }
+        
+        .signature-box {
+            margin-top: 60px;
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #333;
+            width: 300px;
+            margin: 0 auto 5px auto;
+        }
+        
+        .signature-text {
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 1cm;
+            left: 2cm;
+            right: 2cm;
+            text-align: center;
+            font-size: 8pt;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .qr-code img {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .document-code {
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>evidēns digital</h1>
+        <div class="subtitle">SOLICITAÇÃO DE EXAMES {{ tipo_exame }}</div>
+    </div>
+    
+    <div class="patient-info">
+        <p><strong>Paciente:</strong> {{ patient_name }}</p>
+        <p><strong>Idade:</strong> {{ patient_age }} anos | <strong>Sexo:</strong> {{ patient_sex }}</p>
+        <p><strong>Data:</strong> {{ date }}</p>
+    </div>
+    
+    {% if justification %}
+    <div class="justification">
+        <h3>📋 Justificativa Clínica</h3>
+        <p>{{ justification }}</p>
+    </div>
+    {% endif %}
+    
+    <div class="exams-section">
+        <h2>Exames Solicitados</h2>
+        {% for exam in exams %}
+        <div class="exam-item">
+            <span class="exam-number">{{ loop.index }}.</span>
+            <span class="exam-title">{{ exam.titulo }}</span>
+            {% if exam.subtitulo %}
+            <div class="exam-subtitle">{{ exam.subtitulo }}</div>
+            {% endif %}
+            {% if exam.referencia %}
+            <div class="exam-reference">Referência: {{ exam.referencia }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="signature-text">Assinatura e Carimbo do Médico</div>
+        </div>
+    </div>
+    
+    {% if qr_code %}
+    <div class="qr-code">
+        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+    </div>
+    {% endif %}
+    
+    {% if document_code %}
+    <div class="document-code">
+        Código do documento: {{ document_code }}
+    </div>
+    {% endif %}
+    
+    <div class="footer">
+        Documento gerado em {{ generation_datetime }} | evidēns digital - Check-up Inteligente
+    </div>
+</body>
+</html>
+
