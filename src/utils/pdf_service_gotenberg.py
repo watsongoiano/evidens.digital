@@ -16,6 +16,12 @@ def gerar_justificativa_clinica(dados_paciente):
     """Gera justificativa clínica automática baseada nos dados do paciente"""
     
     idade = dados_paciente.get('idade', 0)
+    # Garantir que idade seja um inteiro
+    try:
+        idade = int(idade) if idade else 0
+    except (ValueError, TypeError):
+        idade = 0
+    
     sexo = dados_paciente.get('sexo', 'Não informado')
     sexo_texto = 'Paciente feminina' if sexo == 'F' else 'Paciente masculino'
     
