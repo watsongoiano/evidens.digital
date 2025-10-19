@@ -1,168 +1,203 @@
 """
 Gerador de documentos PDF para solicitações de exames e vacinas
-Usa WeasyPrint para converter HTML em PDF
+Usa ReportLab para geração de PDFs
 """
 
 from datetime import datetime
-from weasyprint import HTML
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import cm
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib import colors
 from io import BytesIO
 
 
 def gerar_justificativa_clinica(dados_paciente):
-    """
-    Gera justificativa clínica automática baseada nos dados do paciente
-    """
+    """Gera justificativa clínica automática"""
     idade = dados_paciente.get('idade', '')
     sexo = dados_paciente.get('sexo', '').capitalize()
     
-    # Construir lista de condições
     condicoes = []
-    
-    # Comorbidades
     comorbidades = dados_paciente.get('comorbidades', [])
     if isinstance(comorbidades, list):
         condicoes.extend(comorbidades)
     
-    # Medicações
     medicacoes = dados_paciente.get('medicacoes', [])
     if isinstance(medicacoes, list):
         if 'Medicamentos Anti-hipertensivos' in medicacoes:
             if 'Hipertensão' not in condicoes and 'HAS Resistente' not in condicoes:
                 condicoes.append('em uso de anti-hipertensivos')
     
-    # Tabagismo
     tabagismo = dados_paciente.get('tabagismo', '')
     if tabagismo and tabagismo != 'Nunca fumou':
         condicoes.append(tabagismo.lower())
     
-    # Construir justificativa
     if condicoes:
         condicoes_texto = ', '.join(condicoes)
-        justificativa = f"Paciente {sexo.lower()}, {idade} anos, com {condicoes_texto}, necessitando de screening preventivo e acompanhamento conforme diretrizes clínicas."
+        return f"Paciente {sexo.lower()}, {idade} anos, com {condicoes_texto}, necessitando de screening preventivo e acompanhamento conforme diretrizes clínicas."
     else:
-        justificativa = f"Paciente {sexo.lower()}, {idade} anos, necessitando de screening preventivo conforme diretrizes clínicas."
-    
-    return justificativa
+        return f"Paciente {sexo.lower()}, {idade} anos, necessitando de screening preventivo conforme diretrizes clínicas."
 
 
 def gerar_pdf_exames_laboratoriais(dados_paciente, exames):
-    """
-    Gera PDF de solicitação de exames laboratoriais usando WeasyPrint
-    """
-    justificativa = gerar_justificativa_clinica(dados_paciente)
-    data_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
+    """Gera PDF de solicitação de exames laboratoriais"""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
+    story = []
+    styles = getSampleStyleSheet()
     
-    # Construir HTML
-    html_content = f"""<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><style>
-@page {{ size: A4; margin: 2cm; }}
-body {{ font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.4; }}
-.header {{ text-align: center; margin-bottom: 20px; }}
-.logo {{ font-size: 20pt; font-weight: bold; color: #2563eb; }}
-.titulo {{ font-size: 16pt; font-weight: bold; margin: 20px 0; text-align: center; }}
-.secao {{ margin: 15px 0; }}
-.label {{ font-weight: bold; }}
-.exame {{ margin: 8px 0 8px 20px; }}
-.assinatura {{ margin-top: 60px; text-align: center; }}
-.linha-assinatura {{ border-top: 1px solid #000; width: 300px; margin: 0 auto; padding-top: 5px; }}
-.rodape {{ margin-top: 40px; font-size: 9pt; color: #666; text-align: center; }}
-</style></head><body>
-<div class="header"><div class="logo">evidens digital</div></div>
-<div class="titulo">SOLICITAÇÃO DE EXAMES LABORATORIAIS</div>
-<div class="secao">
-<div><span class="label">Paciente:</span> {dados_paciente.get('nome', '________________________________')}</div>
-<div><span class="label">Idade:</span> {dados_paciente.get('idade', '__')} anos | <span class="label">Sexo:</span> {dados_paciente.get('sexo', '________').capitalize()}</div>
-</div>
-<div class="secao"><div class="label">Justificativa Clínica:</div><div>{justificativa}</div></div>
-<div class="secao"><div class="label">Exames Solicitados:</div>"""
+    # Estilo customizado para título
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        textColor=colors.HexColor('#2563eb'),
+        spaceAfter=20,
+        alignment=TA_CENTER
+    )
+    
+    # Cabeçalho
+    story.append(Paragraph("evidens digital", title_style))
+    story.append(Paragraph("SOLICITAÇÃO DE EXAMES LABORATORIAIS", styles['Heading2']))
+    story.append(Spacer(1, 0.5*cm))
+    
+    # Dados do paciente
+    nome = dados_paciente.get('nome', '________________________________')
+    idade = dados_paciente.get('idade', '__')
+    sexo = dados_paciente.get('sexo', '________').capitalize()
+    
+    story.append(Paragraph(f"<b>Paciente:</b> {nome}", styles['Normal']))
+    story.append(Paragraph(f"<b>Idade:</b> {idade} anos | <b>Sexo:</b> {sexo}", styles['Normal']))
+    story.append(Spacer(1, 0.5*cm))
+    
+    # Justificativa
+    justificativa = gerar_justificativa_clinica(dados_paciente)
+    story.append(Paragraph("<b>Justificativa Clínica:</b>", styles['Normal']))
+    story.append(Paragraph(justificativa, styles['Normal']))
+    story.append(Spacer(1, 0.5*cm))
+    
+    # Exames
+    story.append(Paragraph("<b>Exames Solicitados:</b>", styles['Normal']))
+    story.append(Spacer(1, 0.3*cm))
     
     for i, exame in enumerate(exames, 1):
-        html_content += f'<div class="exame">{i}. {exame.get("titulo", "")}</div>'
+        titulo = exame.get('titulo', '')
+        story.append(Paragraph(f"{i}. {titulo}", styles['Normal']))
     
-    html_content += f"""</div>
-<div class="assinatura"><div class="linha-assinatura">Assinatura e Carimbo do Médico</div></div>
-<div class="rodape">Documento gerado em {data_hora} | evidens digital</div>
-</body></html>"""
+    story.append(Spacer(1, 2*cm))
     
-    return HTML(string=html_content).write_pdf()
+    # Assinatura
+    story.append(Paragraph("_" * 50, styles['Normal']))
+    story.append(Paragraph("Assinatura e Carimbo do Médico", styles['Normal']))
+    
+    # Rodapé
+    data_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
+    story.append(Spacer(1, 1*cm))
+    story.append(Paragraph(f"Documento gerado em {data_hora} | evidens digital", styles['Normal']))
+    
+    doc.build(story)
+    return buffer.getvalue()
 
 
 def gerar_pdf_exames_imagem(dados_paciente, exames):
     """Gera PDF de solicitação de exames de imagem"""
-    justificativa = gerar_justificativa_clinica(dados_paciente)
-    data_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
+    story = []
+    styles = getSampleStyleSheet()
     
-    html_content = f"""<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><style>
-@page {{ size: A4; margin: 2cm; }}
-body {{ font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.4; }}
-.header {{ text-align: center; margin-bottom: 20px; }}
-.logo {{ font-size: 20pt; font-weight: bold; color: #2563eb; }}
-.titulo {{ font-size: 16pt; font-weight: bold; margin: 20px 0; text-align: center; }}
-.secao {{ margin: 15px 0; }}
-.label {{ font-weight: bold; }}
-.exame {{ margin: 8px 0 8px 20px; }}
-.assinatura {{ margin-top: 60px; text-align: center; }}
-.linha-assinatura {{ border-top: 1px solid #000; width: 300px; margin: 0 auto; padding-top: 5px; }}
-.rodape {{ margin-top: 40px; font-size: 9pt; color: #666; text-align: center; }}
-</style></head><body>
-<div class="header"><div class="logo">evidens digital</div></div>
-<div class="titulo">SOLICITAÇÃO DE EXAMES DE IMAGEM</div>
-<div class="secao">
-<div><span class="label">Paciente:</span> {dados_paciente.get('nome', '________________________________')}</div>
-<div><span class="label">Idade:</span> {dados_paciente.get('idade', '__')} anos | <span class="label">Sexo:</span> {dados_paciente.get('sexo', '________').capitalize()}</div>
-</div>
-<div class="secao"><div class="label">Justificativa Clínica:</div><div>{justificativa}</div></div>
-<div class="secao"><div class="label">Exames Solicitados:</div>"""
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        textColor=colors.HexColor('#2563eb'),
+        spaceAfter=20,
+        alignment=TA_CENTER
+    )
+    
+    story.append(Paragraph("evidens digital", title_style))
+    story.append(Paragraph("SOLICITAÇÃO DE EXAMES DE IMAGEM", styles['Heading2']))
+    story.append(Spacer(1, 0.5*cm))
+    
+    nome = dados_paciente.get('nome', '________________________________')
+    idade = dados_paciente.get('idade', '__')
+    sexo = dados_paciente.get('sexo', '________').capitalize()
+    
+    story.append(Paragraph(f"<b>Paciente:</b> {nome}", styles['Normal']))
+    story.append(Paragraph(f"<b>Idade:</b> {idade} anos | <b>Sexo:</b> {sexo}", styles['Normal']))
+    story.append(Spacer(1, 0.5*cm))
+    
+    justificativa = gerar_justificativa_clinica(dados_paciente)
+    story.append(Paragraph("<b>Justificativa Clínica:</b>", styles['Normal']))
+    story.append(Paragraph(justificativa, styles['Normal']))
+    story.append(Spacer(1, 0.5*cm))
+    
+    story.append(Paragraph("<b>Exames Solicitados:</b>", styles['Normal']))
+    story.append(Spacer(1, 0.3*cm))
     
     for i, exame in enumerate(exames, 1):
-        html_content += f'<div class="exame">{i}. {exame.get("titulo", "")}</div>'
+        titulo = exame.get('titulo', '')
+        story.append(Paragraph(f"{i}. {titulo}", styles['Normal']))
     
-    html_content += f"""</div>
-<div class="assinatura"><div class="linha-assinatura">Assinatura e Carimbo do Médico</div></div>
-<div class="rodape">Documento gerado em {data_hora} | evidens digital</div>
-</body></html>"""
+    story.append(Spacer(1, 2*cm))
+    story.append(Paragraph("_" * 50, styles['Normal']))
+    story.append(Paragraph("Assinatura e Carimbo do Médico", styles['Normal']))
     
-    return HTML(string=html_content).write_pdf()
+    data_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
+    story.append(Spacer(1, 1*cm))
+    story.append(Paragraph(f"Documento gerado em {data_hora} | evidens digital", styles['Normal']))
+    
+    doc.build(story)
+    return buffer.getvalue()
 
 
 def gerar_pdf_vacinas(dados_paciente, vacinas):
     """Gera PDF de prescrição de vacinas"""
-    data_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
+    story = []
+    styles = getSampleStyleSheet()
     
-    html_content = f"""<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><style>
-@page {{ size: A4; margin: 2cm; }}
-body {{ font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.4; }}
-.header {{ text-align: center; margin-bottom: 20px; }}
-.logo {{ font-size: 20pt; font-weight: bold; color: #2563eb; }}
-.titulo {{ font-size: 16pt; font-weight: bold; margin: 20px 0; text-align: center; }}
-.secao {{ margin: 15px 0; }}
-.label {{ font-weight: bold; }}
-.vacina {{ margin: 12px 0 12px 20px; border-left: 3px solid #2563eb; padding-left: 10px; }}
-.vacina-subtitulo {{ font-size: 9pt; color: #555; margin-top: 2px; }}
-.assinatura {{ margin-top: 60px; text-align: center; }}
-.linha-assinatura {{ border-top: 1px solid #000; width: 300px; margin: 0 auto; padding-top: 5px; }}
-.rodape {{ margin-top: 40px; font-size: 9pt; color: #666; text-align: center; }}
-</style></head><body>
-<div class="header"><div class="logo">evidens digital</div></div>
-<div class="titulo">PRESCRIÇÃO DE VACINAS</div>
-<div class="secao">
-<div><span class="label">Paciente:</span> {dados_paciente.get('nome', '________________________________')}</div>
-<div><span class="label">Idade:</span> {dados_paciente.get('idade', '__')} anos | <span class="label">Sexo:</span> {dados_paciente.get('sexo', '________').capitalize()}</div>
-</div>
-<div class="secao"><div class="label">Vacinas Recomendadas:</div>"""
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        textColor=colors.HexColor('#2563eb'),
+        spaceAfter=20,
+        alignment=TA_CENTER
+    )
+    
+    story.append(Paragraph("evidens digital", title_style))
+    story.append(Paragraph("PRESCRIÇÃO DE VACINAS", styles['Heading2']))
+    story.append(Spacer(1, 0.5*cm))
+    
+    nome = dados_paciente.get('nome', '________________________________')
+    idade = dados_paciente.get('idade', '__')
+    sexo = dados_paciente.get('sexo', '________').capitalize()
+    
+    story.append(Paragraph(f"<b>Paciente:</b> {nome}", styles['Normal']))
+    story.append(Paragraph(f"<b>Idade:</b> {idade} anos | <b>Sexo:</b> {sexo}", styles['Normal']))
+    story.append(Spacer(1, 0.5*cm))
+    
+    story.append(Paragraph("<b>Vacinas Recomendadas:</b>", styles['Normal']))
+    story.append(Spacer(1, 0.3*cm))
     
     for i, vacina in enumerate(vacinas, 1):
+        titulo = vacina.get('titulo', '')
         subtitulo = vacina.get('subtitulo', '')
-        html_content += f'<div class="vacina"><div>{i}. <b>{vacina.get("titulo", "")}</b></div>'
+        story.append(Paragraph(f"<b>{i}. {titulo}</b>", styles['Normal']))
         if subtitulo:
-            html_content += f'<div class="vacina-subtitulo">{subtitulo}</div>'
-        html_content += '</div>'
+            story.append(Paragraph(f"   <i>{subtitulo}</i>", styles['Normal']))
+        story.append(Spacer(1, 0.2*cm))
     
-    html_content += f"""</div>
-<div class="assinatura"><div class="linha-assinatura">Assinatura e Carimbo do Médico</div></div>
-<div class="rodape">Documento gerado em {data_hora} | evidens digital</div>
-</body></html>"""
+    story.append(Spacer(1, 2*cm))
+    story.append(Paragraph("_" * 50, styles['Normal']))
+    story.append(Paragraph("Assinatura e Carimbo do Médico", styles['Normal']))
     
-    return HTML(string=html_content).write_pdf()
+    data_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
+    story.append(Spacer(1, 1*cm))
+    story.append(Paragraph(f"Documento gerado em {data_hora} | evidens digital", styles['Normal']))
+    
+    doc.build(story)
+    return buffer.getvalue()
