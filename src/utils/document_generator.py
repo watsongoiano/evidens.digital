@@ -4,7 +4,7 @@ Evidens Digital - Sistema de Check-up Inteligente
 """
 
 from datetime import datetime
-from fpdf import FPDF
+from fpdf2 import FPDF
 from io import BytesIO
 
 
