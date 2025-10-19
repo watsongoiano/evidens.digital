@@ -1322,7 +1322,7 @@ def gerar_pdf_exames_laboratoriais_endpoint():
     Retorna: PDF binário
     """
     try:
-        from src.utils.pdf_service import gerar_pdf_exames
+        from src.utils.pdf_service_gotenberg import gerar_pdf_exames_laboratoriais, gerar_pdf_exames_imagem, gerar_pdf_vacinas
         from flask import send_file
         import io
         from datetime import datetime
@@ -1373,7 +1373,7 @@ def gerar_pdf_exames_imagem_endpoint():
     Retorna: PDF binário
     """
     try:
-        from src.utils.pdf_service import gerar_pdf_exames
+        from src.utils.pdf_service_gotenberg import gerar_pdf_exames_laboratoriais, gerar_pdf_exames_imagem, gerar_pdf_vacinas
         from flask import send_file
         import io
         from datetime import datetime
@@ -1424,7 +1424,7 @@ def gerar_pdf_vacinas_endpoint():
     Retorna: PDF binário
     """
     try:
-        from src.utils.pdf_service import gerar_pdf_vacinas
+        from src.utils.pdf_service_gotenberg import gerar_pdf_exames_laboratoriais, gerar_pdf_exames_imagem, gerar_pdf_vacinas
         from flask import send_file
         import io
         from datetime import datetime
