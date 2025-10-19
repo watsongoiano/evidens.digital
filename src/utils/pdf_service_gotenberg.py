@@ -2,8 +2,9 @@
 Serviço de geração de PDFs usando Gotenberg (Chromium)
 """
 
-import requests
 import os
+import urllib.request
+import urllib.error
 from datetime import datetime
 from jinja2 import Template
 
@@ -443,21 +444,42 @@ def gerar_pdf_via_gotenberg(html_content):
     """Gera PDF usando Gotenberg (Chromium)"""
     
     try:
+        import io
+        from urllib.parse import urlencode
+        
         # Endpoint do Gotenberg para conversão HTML -> PDF
         url = f"{GOTENBERG_URL}/forms/chromium/convert/html"
         
-        # Enviar HTML como arquivo
-        files = {
-            'index.html': ('index.html', html_content.encode('utf-8'), 'text/html')
-        }
+        # Criar boundary para multipart/form-data
+        boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW'
+        
+        # Construir corpo da requisição multipart/form-data
+        body = io.BytesIO()
+        body.write(f'--{boundary}\r\n'.encode())
+        body.write(b'Content-Disposition: form-data; name="files"; filename="index.html"\r\n')
+        body.write(b'Content-Type: text/html\r\n\r\n')
+        body.write(html_content.encode('utf-8'))
+        body.write(f'\r\n--{boundary}--\r\n'.encode())
+        
+        # Criar requisição
+        req = urllib.request.Request(
+            url,
+            data=body.getvalue(),
+            headers={
+                'Content-Type': f'multipart/form-data; boundary={boundary}'
+            },
+            method='POST'
+        )
         
         # Fazer requisição
-        response = requests.post(url, files=files, timeout=30)
-        response.raise_for_status()
+        with urllib.request.urlopen(req, timeout=30) as response:
+            return response.read()
         
-        return response.content
-        
-    except requests.exceptions.RequestException as e:
+    except urllib.error.HTTPError as e:
+        raise Exception(f"Erro HTTP ao gerar PDF via Gotenberg: {e.code} - {e.reason}")
+    except urllib.error.URLError as e:
+        raise Exception(f"Erro de conexão ao gerar PDF via Gotenberg: {str(e.reason)}")
+    except Exception as e:
         raise Exception(f"Erro ao gerar PDF via Gotenberg: {str(e)}")
 
 
