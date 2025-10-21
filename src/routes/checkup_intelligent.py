@@ -1266,7 +1266,8 @@ def generate_intelligent_recommendations():
                 
             except Exception as db_error:
                 print(f"Erro ao salvar no banco: {db_error}")
-                db.session.rollback()
+                if db and hasattr(db, 'session'):
+                    db.session.rollback()
         
         # Enriquecer recomendações com links (referencia_html)
         try:
@@ -1288,7 +1289,7 @@ def generate_intelligent_recommendations():
         outras_recomendacoes = []
         
         # FRAX para HIV+ com ≥40 anos
-        if hiv_positive and age >= 40:
+        if is_hiv_positive and age >= 40:
             outras_recomendacoes.append({
                 'titulo': 'FRAX - Calculadora de Risco de Fraturas',
                 'descricao': 'Avaliação de risco de fraturas em homens e mulheres com mais de 40 anos. Pessoa vivendo com HIV ou aids tem alto risco de fratura por fragilidade.',
