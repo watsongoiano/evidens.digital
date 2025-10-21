@@ -1119,6 +1119,17 @@
                 anosConsumoField.style.display = 'block';
             }
         });
+
+        // Inicializar estado dos campos condicionais ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ocultar campos de tabagismo inicialmente (valor padrão é "nunca")
+            document.getElementById('macos_ano_field').style.display = 'none';
+            document.getElementById('anos_parou_fumar_field').style.display = 'none';
+            
+            // Ocultar campos de alcoolismo inicialmente (valor padrão é "nao")
+            document.getElementById('doses_semana_field').style.display = 'none';
+            document.getElementById('anos_consumo_alcool_field').style.display = 'none';
+        });
     </script>
 </body>
 </html>
