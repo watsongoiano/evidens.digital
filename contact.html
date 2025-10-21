@@ -47,30 +47,15 @@
             left: 50%;
             transform: translateX(-50%);
             text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            line-height: 1;
-        }
-
-        .logo-main {
             font-size: 1.8rem;
             font-weight: 300;
             color: #2c3e50;
-            margin-bottom: -5px;
         }
 
-        .logo-main sup {
+        .logo sup {
             font-size: 0.5em;
             vertical-align: super;
             margin-left: 1px;
-        }
-
-        .logo-sub {
-            font-size: 1.2rem;
-            font-weight: 300;
-            font-style: italic;
-            color: #27ae60;
         }
 
         .nav-links {
@@ -90,17 +75,17 @@
         }
 
         .back-btn {
-            background: #3498db;
+            background: #bdc3c7;
             color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
             text-decoration: none;
+            font-weight: 500;
             transition: background 0.3s;
         }
 
         .back-btn:hover {
-            background: #2980b9;
-            color: white;
+            background: #95a5a6;
         }
 
         .main-content {
@@ -109,75 +94,22 @@
             padding: 8rem 2rem 4rem;
         }
 
-        .page-title {
-            text-align: center;
-            font-size: 3rem;
-            color: #2c3e50;
-            margin-bottom: 1rem;
-        }
 
-        .page-subtitle {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #7f8c8d;
-            margin-bottom: 4rem;
-        }
 
         .contact-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3rem;
+            max-width: 600px;
+            margin: 0 auto;
             background: white;
             padding: 3rem;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        .contact-info h2,
         .contact-form-wrapper h2 {
             color: #2c3e50;
             font-size: 1.8rem;
             margin-bottom: 2rem;
-        }
-
-        .info-item {
-            display: flex;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            align-items: flex-start;
-        }
-
-        .info-icon {
-            font-size: 2rem;
-            min-width: 40px;
             text-align: center;
-        }
-
-        .info-text {
-            flex: 1;
-        }
-
-        .info-text strong {
-            color: #2c3e50;
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .info-text a {
-            color: #3498db;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .info-text a:hover {
-            color: #2980b9;
-            text-decoration: underline;
-        }
-
-        .info-text p {
-            color: #555;
-            line-height: 1.8;
         }
 
         .contact-form .form-group {
@@ -264,13 +196,7 @@
 
         @media (max-width: 768px) {
             .contact-container {
-                grid-template-columns: 1fr;
-                gap: 2rem;
                 padding: 2rem;
-            }
-
-            .page-title {
-                font-size: 2rem;
             }
 
             .main-content {
@@ -285,10 +211,7 @@
             <div class="nav-links">
                 <a href="/" class="back-btn">← Voltar</a>
             </div>
-            <a href="/" class="logo">
-                <span class="logo-main">evidēns<sup>®</sup></span>
-                <span class="logo-sub">check</span>
-            </a>
+            <a href="/" class="logo">evidēns<sup>®</sup></a>
             <div class="nav-links">
                 <a href="/intelligent-tools">Intelligent Tools</a>
             </div>
@@ -296,55 +219,7 @@
     </header>
 
     <main class="main-content">
-        <h1 class="page-title">📬 Entre em Contato</h1>
-        <p class="page-subtitle">Tem dúvidas ou sugestões? Estamos aqui para ajudar!</p>
-
         <div class="contact-container">
-            <!-- Contact Info -->
-            <div class="contact-info">
-                <h2>Informações de Contato</h2>
-
-                <div class="info-item">
-                    <span class="info-icon">🏢</span>
-                    <div class="info-text">
-                        <strong>Evidēns Digital</strong>
-                        <p>Plataforma de suporte à decisão clínica baseada em evidências científicas</p>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <span class="info-icon">📧</span>
-                    <div class="info-text">
-                        <strong>E-mail</strong>
-                        <a href="mailto:drrodolfofrota@outlook.com">drrodolfofrota@outlook.com</a>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <span class="info-icon">📱</span>
-                    <div class="info-text">
-                        <strong>WhatsApp</strong>
-                        <a href="https://wa.me/5511932255885" target="_blank">+55 11 93225-5885</a>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <span class="info-icon">📍</span>
-                    <div class="info-text">
-                        <strong>Endereço</strong>
-                        <p>Rua 9-A, 110, Setor Aeroporto<br>74075-250, Goiânia-GO</p>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <span class="info-icon">🔗</span>
-                    <div class="info-text">
-                        <strong>LinkedIn</strong>
-                        <a href="https://br.linkedin.com/in/rodolfo-frota-68445b253" target="_blank">Rodolfo Frota</a>
-                    </div>
-                </div>
-            </div>
-
             <!-- Contact Form -->
             <div class="contact-form-wrapper">
                 <h2>Envie uma Mensagem</h2>
