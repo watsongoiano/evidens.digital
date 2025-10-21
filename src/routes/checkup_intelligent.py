@@ -1034,8 +1034,17 @@ def generate_intelligent_recommendations():
         if is_hiv_positive:
             # Coletar dados HIV (aceitar tanto formato direto quanto hiv_data)
             hiv_data = data.get('hiv_data', {})
-            cd4 = int(hiv_data.get('cd4', 0) or data.get('cd4', 0)) if (hiv_data.get('cd4') or data.get('cd4')) else None
-            carga_viral = int(hiv_data.get('carga_viral', 0) or data.get('carga_viral', 0)) if (hiv_data.get('carga_viral') or data.get('carga_viral')) else None
+            try:
+                cd4_value = hiv_data.get('cd4') or data.get('cd4')
+                cd4 = int(cd4_value) if cd4_value and str(cd4_value).strip() else None
+            except (ValueError, TypeError):
+                cd4 = None
+            
+            try:
+                carga_viral_value = hiv_data.get('carga_viral') or data.get('carga_viral')
+                carga_viral = int(carga_viral_value) if carga_viral_value and str(carga_viral_value).strip() else None
+            except (ValueError, TypeError):
+                carga_viral = None
             em_tarv = (hiv_data.get('em_tarv') == 'sim') or (data.get('em_tarv') == 'sim')
             supressao_viral = (hiv_data.get('supressao_viral') == 'sim') or (data.get('supressao_viral') == 'sim')
             
