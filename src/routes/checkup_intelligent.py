@@ -1209,50 +1209,50 @@ def generate_intelligent_recommendations():
             try:
                 # Criar ou encontrar paciente
                 patient = Patient(
-                nome=data.get('nome', f'Paciente {age} anos'),
-                idade=age,
-                sexo=sex,
-                peso=weight,
-                altura=height
-            )
-            db.session.add(patient)
-            db.session.flush()  # Para obter o ID
-            
-            # Criar checkup
-            checkup = Checkup(
-                patient_id=patient.id,
-                pressao_sistolica=patient_data['systolicBP'],
-                pressao_diastolica=float(data.get('pressao_diastolica', 0)) if data.get('pressao_diastolica') else None,
-                colesterol_total=patient_data['totalCholesterol'],
-                hdl_colesterol=patient_data['hdlCholesterol'],
-                creatinina=patient_data['creatinine'],
-                hba1c=float(data.get('hba1c', 0)) if data.get('hba1c') else None,
-                risco_10_anos=risk_result['risk10Year'] if risk_result else None,
-                risco_30_anos=risk_result['risk30Year'] if risk_result else None,
-                classificacao_risco=risk_level,
-                comorbidades=json.dumps(data.get('comorbidades', [])),
-                historia_familiar=json.dumps(data.get('historia_familiar', [])),
-                tabagismo=data.get('tabagismo', 'nunca_fumou'),
-                medicacoes=data.get('medicacoes', ''),
-                pais_guideline=data.get('pais_guideline', 'BR')
-            )
-            db.session.add(checkup)
-            db.session.flush()
-            
-            # Salvar recomendações
-            for rec in recommendations:
-                recomendacao = Recomendacao(
-                    checkup_id=checkup.id,
-                    titulo=rec['titulo'],
-                    descricao=rec['descricao'],
-                    subtitulo=rec.get('subtitulo'),
-                    categoria=rec['categoria'],
-                    prioridade=rec['prioridade'],
-                    referencia=rec['referencia'],
-                    grau_evidencia=rec.get('grau_evidencia')
+                    nome=data.get('nome', f'Paciente {age} anos'),
+                    idade=age,
+                    sexo=sex,
+                    peso=weight,
+                    altura=height
                 )
-                db.session.add(recomendacao)
-            
+                db.session.add(patient)
+                db.session.flush()  # Para obter o ID
+                
+                # Criar checkup
+                checkup = Checkup(
+                    patient_id=patient.id,
+                    pressao_sistolica=patient_data['systolicBP'],
+                    pressao_diastolica=float(data.get('pressao_diastolica', 0)) if data.get('pressao_diastolica') else None,
+                    colesterol_total=patient_data['totalCholesterol'],
+                    hdl_colesterol=patient_data['hdlCholesterol'],
+                    creatinina=patient_data['creatinine'],
+                    hba1c=float(data.get('hba1c', 0)) if data.get('hba1c') else None,
+                    risco_10_anos=risk_result['risk10Year'] if risk_result else None,
+                    risco_30_anos=risk_result['risk30Year'] if risk_result else None,
+                    classificacao_risco=risk_level,
+                    comorbidades=json.dumps(data.get('comorbidades', [])),
+                    historia_familiar=json.dumps(data.get('historia_familiar', [])),
+                    tabagismo=data.get('tabagismo', 'nunca_fumou'),
+                    medicacoes=data.get('medicacoes', ''),
+                    pais_guideline=data.get('pais_guideline', 'BR')
+                )
+                db.session.add(checkup)
+                db.session.flush()
+                
+                # Salvar recomendações
+                for rec in recommendations:
+                    recomendacao = Recomendacao(
+                        checkup_id=checkup.id,
+                        titulo=rec['titulo'],
+                        descricao=rec['descricao'],
+                        subtitulo=rec.get('subtitulo'),
+                        categoria=rec['categoria'],
+                        prioridade=rec['prioridade'],
+                        referencia=rec['referencia'],
+                        grau_evidencia=rec.get('grau_evidencia')
+                    )
+                    db.session.add(recomendacao)
+                
                 db.session.commit()
                 
             except Exception as db_error:
