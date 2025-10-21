@@ -1029,11 +1029,12 @@ def generate_intelligent_recommendations():
         is_hiv_positive = 'hiv' in comorbidades
         
         if is_hiv_positive:
-            # Coletar dados HIV
-            cd4 = int(data.get('cd4', 0)) if data.get('cd4') else None
-            carga_viral = int(data.get('carga_viral', 0)) if data.get('carga_viral') else None
-            em_tarv = data.get('em_tarv') == 'sim'
-            supressao_viral = data.get('supressao_viral') == 'sim'
+            # Coletar dados HIV (aceitar tanto formato direto quanto hiv_data)
+            hiv_data = data.get('hiv_data', {})
+            cd4 = int(hiv_data.get('cd4', 0) or data.get('cd4', 0)) if (hiv_data.get('cd4') or data.get('cd4')) else None
+            carga_viral = int(hiv_data.get('carga_viral', 0) or data.get('carga_viral', 0)) if (hiv_data.get('carga_viral') or data.get('carga_viral')) else None
+            em_tarv = (hiv_data.get('em_tarv') == 'sim') or (data.get('em_tarv') == 'sim')
+            supressao_viral = (hiv_data.get('supressao_viral') == 'sim') or (data.get('supressao_viral') == 'sim')
             
             # EXAMES LABORATORIAIS PARA HIV+
             
