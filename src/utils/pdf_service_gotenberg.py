@@ -490,19 +490,22 @@ def gerar_pdf_via_gotenberg(html_content):
 
 
 def gerar_pdf_exames_laboratoriais(dados_paciente, exames):
-    """Gera PDF de solicitação de exames laboratoriais"""
-    html = gerar_html_solicitacao_exames(dados_paciente, exames, tipo='laboratoriais')
+    """Gera PDF de solicitação de exames laboratoriais (formato simplificado)"""
+    from .pdf_service_gotenberg_simple import gerar_html_exames_simples
+    html = gerar_html_exames_simples(dados_paciente, exames, tipo_exame="LABORATORIAIS")
     return gerar_pdf_via_gotenberg(html)
 
 
 def gerar_pdf_exames_imagem(dados_paciente, exames):
-    """Gera PDF de solicitação de exames de imagem"""
-    html = gerar_html_solicitacao_exames(dados_paciente, exames, tipo='imagem')
+    """Gera PDF de solicitação de exames de imagem (formato simplificado)"""
+    from .pdf_service_gotenberg_simple import gerar_html_exames_simples
+    html = gerar_html_exames_simples(dados_paciente, exames, tipo_exame="IMAGEM")
     return gerar_pdf_via_gotenberg(html)
 
 
 def gerar_pdf_vacinas(dados_paciente, vacinas):
-    """Gera PDF de prescrição de vacinas"""
-    html = gerar_html_prescricao_vacinas(dados_paciente, vacinas)
+    """Gera PDF de prescrição de vacinas (formato Receita Simples)"""
+    from .pdf_service_gotenberg_simple import gerar_html_prescricao_vacinas_simples
+    html = gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas)
     return gerar_pdf_via_gotenberg(html)
 

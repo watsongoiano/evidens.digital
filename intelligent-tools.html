@@ -432,6 +432,12 @@
             <p>Analise e receba recomendações essenciais baseadas em evidência científica</p>
 
             <form id="checkupForm">
+                <!-- Nome do Paciente -->
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label for="nome_paciente">Nome do Paciente</label>
+                    <input type="text" id="nome_paciente" name="nome_paciente" placeholder="Nome completo do paciente" required style="width: 100%;">
+                </div>
+
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="idade">Idade</label>
@@ -673,7 +679,7 @@
                 // Armazenar dados globalmente
                 currentRecommendations = result.recommendations || [];
                 currentPatientData = {
-                    nome: data.nome || 'Paciente',
+                    nome: data.nome_paciente || 'Paciente',
                     idade: data.idade,
                     sexo: data.sexo
                 };
