@@ -794,20 +794,28 @@ def generate_intelligent_recommendations():
             biomarker_recs = generate_biomarker_recommendations(risk_level, age, sex)
             recommendations.extend(biomarker_recs)
         
-        # Rastreamento de câncer de pulmão (LDCT)
+        # Rastreamento de câncer de pulmão (LDCT) - USPSTF 2021
         tabagismo = data.get('tabagismo', 'nunca_fumou')
         macos_ano = float(data.get('macos_ano', 0)) if data.get('macos_ano') else 0
+        anos_parou_fumar = float(data.get('anos_parou_fumar', 0)) if data.get('anos_parou_fumar') else 0
         
-        if (50 <= age <= 80 and 
-            macos_ano >= 20 and 
-            tabagismo in ['fumante_atual', 'ex_fumante']):
+        # Critérios: 50-80 anos, ≥20 maços-ano, fumante atual OU parou há <15 anos
+        elegivel_ldct = False
+        if 50 <= age <= 80 and macos_ano >= 20:
+            if tabagismo == 'atual':
+                elegivel_ldct = True
+            elif tabagismo == 'ex' and anos_parou_fumar < 15:
+                elegivel_ldct = True
+        
+        if elegivel_ldct:
             recommendations.append({
                 'titulo': 'Tomografia computadorizada de tórax de baixa dose (LDCT)',
                 'descricao': 'Rastreamento anual de câncer de pulmão. Indicado para adultos 50-80 anos com história de tabagismo de 20 maços-ano e que atualmente fumam ou pararam nos últimos 15 anos. Descontinuar se não fumou por 15 anos ou desenvolveu problema de saúde que limita substancialmente expectativa de vida.',
-                'subtitulo': 'Adultos 50-80 anos com 20 maços-ano | Anual',
+                'subtitulo': 'Adultos 50-80 anos com ≥20 maços-ano | Anual',
                 'categoria': 'imagem',
                 'prioridade': 'alta',
                 'referencia': 'USPSTF 2021',
+                'link': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening',
                 'grau_evidencia': 'B'
             })
         
