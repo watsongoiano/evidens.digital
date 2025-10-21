@@ -1205,9 +1205,10 @@ def generate_intelligent_recommendations():
                 })
         
     # Salvar no banco de dados se possível
-        try:
-            # Criar ou encontrar paciente
-            patient = Patient(
+        if db:
+            try:
+                # Criar ou encontrar paciente
+                patient = Patient(
                 nome=data.get('nome', f'Paciente {age} anos'),
                 idade=age,
                 sexo=sex,
@@ -1252,11 +1253,11 @@ def generate_intelligent_recommendations():
                 )
                 db.session.add(recomendacao)
             
-            db.session.commit()
-            
-        except Exception as db_error:
-            print(f"Erro ao salvar no banco: {db_error}")
-            db.session.rollback()
+                db.session.commit()
+                
+            except Exception as db_error:
+                print(f"Erro ao salvar no banco: {db_error}")
+                db.session.rollback()
         
         # Enriquecer recomendações com links (referencia_html)
         try:
