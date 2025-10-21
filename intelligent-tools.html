@@ -574,7 +574,7 @@
                     <textarea id="outras_comorbidades" name="outras_comorbidades" rows="3" placeholder="Ex: DPOC, artrite reumatoide, lúpus..."></textarea>
                 </div>
 
-                <div class="section-title">💊 Medicações Específicas</div>
+                <div class="section-title">💊 Medicações de uso contínuo</div>
                 <div class="checkbox-grid">
                     <div class="checkbox-item">
                         <input type="checkbox" id="anti_hipertensivos" name="medicacoes" value="anti_hipertensivos">
@@ -620,6 +620,9 @@
                     <textarea id="outras_condicoes_familiares" name="outras_condicoes_familiares" rows="3" placeholder="Ex: câncer de próstata, AVC, demência..."></textarea>
                 </div>
 
+                <div class="section-title">🍃 Hábitos de vida</div>
+                
+                <!-- Tabagismo -->
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="tabagismo">Tabagismo</label>
@@ -636,6 +639,27 @@
                     <div class="form-group">
                         <label for="anos_parou_fumar">Anos desde que parou de fumar (se ex-fumante)</label>
                         <input type="number" id="anos_parou_fumar" name="anos_parou_fumar" step="1">
+                    </div>
+                </div>
+
+                <!-- Alcoolismo -->
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="alcoolismo">Consumo de álcool</label>
+                        <select id="alcoolismo" name="alcoolismo">
+                            <option value="nao">Não consome</option>
+                            <option value="social">Social (ocasional)</option>
+                            <option value="moderado">Moderado (regular)</option>
+                            <option value="pesado">Pesado (diário/excessivo)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="doses_semana">Doses por semana (se consome)</label>
+                        <input type="number" id="doses_semana" name="doses_semana" step="1" placeholder="1 dose = 350ml cerveja ou 150ml vinho">
+                    </div>
+                    <div class="form-group">
+                        <label for="anos_consumo_alcool">Anos de consumo (se moderado/pesado)</label>
+                        <input type="number" id="anos_consumo_alcool" name="anos_consumo_alcool" step="1">
                     </div>
                 </div>
 
