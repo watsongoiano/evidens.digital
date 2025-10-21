@@ -1023,6 +1023,194 @@ def generate_intelligent_recommendations():
                     'grau_evidencia': 'C'
                 })
         
+        # ========== HIV MANAGEMENT (EACS 2024, NIH 2024, MS Brasil 2024) ==========
+        
+        # Verificar se é HIV positivo
+        is_hiv_positive = 'hiv' in comorbidades
+        
+        if is_hiv_positive:
+            # Coletar dados HIV
+            cd4 = int(data.get('cd4', 0)) if data.get('cd4') else None
+            carga_viral = int(data.get('carga_viral', 0)) if data.get('carga_viral') else None
+            em_tarv = data.get('em_tarv') == 'sim'
+            supressao_viral = data.get('supressao_viral') == 'sim'
+            
+            # EXAMES LABORATORIAIS PARA HIV+
+            
+            # CD4 Count - Frequência baseada em valor e TARV
+            frequencia_cd4 = 'A cada 6 meses'
+            if cd4 and cd4 < 350:
+                frequencia_cd4 = 'A cada 6 meses'
+            elif cd4 and 350 <= cd4 <= 500 and em_tarv:
+                frequencia_cd4 = 'Anualmente'
+            elif cd4 and cd4 > 500 and em_tarv:
+                # Se 2 exames consecutivos > 500, pode não solicitar
+                frequencia_cd4 = 'Não solicitar se >500 em 2 exames consecutivos com intervalo de 6 meses'
+            elif not em_tarv:
+                frequencia_cd4 = 'A cada 6 meses'
+            
+            recommendations.append({
+                'titulo': 'Contagem de linfócitos T CD4+',
+                'descricao': f'Monitoramento imunológico de pacientes HIV+. CD4 atual: {cd4 if cd4 else "não informado"} células/mm³. Essencial para avaliar urgência de início de TARV e necessidade de profilaxia de infecções oportunistas.',
+                'subtitulo': f'HIV+ | {frequencia_cd4}',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'MS Brasil 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # Carga Viral HIV
+            frequencia_cv = 'A cada 3-6 meses'
+            if em_tarv and supressao_viral:
+                frequencia_cv = 'A cada 6 meses'
+            elif em_tarv and not supressao_viral:
+                frequencia_cv = 'Após 8 semanas do início ou mudança de TARV'
+            
+            recommendations.append({
+                'titulo': 'Carga Viral do HIV (HIV RNA)',
+                'descricao': f'Monitoramento virológico. Carga viral atual: {carga_viral if carga_viral else "não informada"} cópias/mL. Objetivo: <50 cópias/mL (indetectável). Confirma eficácia da TARV e adesão ao tratamento.',
+                'subtitulo': f'HIV+ | {frequencia_cv}',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'MS Brasil 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # Genotipagem (teste de resistência)
+            if not em_tarv or (carga_viral and carga_viral > 1000):
+                recommendations.append({
+                    'titulo': 'Genotipagem do HIV (Teste de Resistência)',
+                    'descricao': 'Teste de resistência genotípica (PR/RT +/- gene integrase). Indicado antes do início da TARV e em caso de falha virológica. Essencial para escolha do esquema terapêutico adequado.',
+                    'subtitulo': 'HIV+ | Avaliação inicial ou falha virológica',
+                    'categoria': 'laboratorio',
+                    'prioridade': 'alta',
+                    'referencia': 'NIH 2024',
+                    'grau_evidencia': 'A'
+                })
+            
+            # Hemograma completo
+            recommendations.append({
+                'titulo': 'Hemograma completo com plaquetas',
+                'descricao': 'Monitoramento de citopenias relacionadas ao HIV ou TARV. Repetir em 2-8 semanas em caso de início ou troca de TARV com zidovudina ou outros medicamentos mielotóxicos.',
+                'subtitulo': 'HIV+ | A cada 6-12 meses',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'MS Brasil 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # Creatinina e TFGe
+            recommendations.append({
+                'titulo': 'Creatinina sérica e Taxa de filtração glomerular estimada (TFGe)',
+                'descricao': 'Avaliação de função renal. Intervalo de 3-6 meses em caso de uso de medicamentos nefrotóxicos (TFGe abaixo de 60 mL/min/1.73m² ou risco aumentado para doença renal).',
+                'subtitulo': 'HIV+ | Anual (ou 3-6 meses se nefrotóxicos)',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'MS Brasil 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # Exame básico de urina
+            recommendations.append({
+                'titulo': 'Exame básico de urina (EAS)',
+                'descricao': 'Rastreamento de alterações renais. Intervalo de 3-6 meses em caso de uso de medicamentos nefrotóxicos, proteinúria ou risco aumentado para doença renal.',
+                'subtitulo': 'HIV+ | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'MS Brasil 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # Perfil lipídico
+            recommendations.append({
+                'titulo': 'Perfil lipídico completo (CT, LDL, HDL, TG)',
+                'descricao': 'Avaliação de dislipidemia. Intervalo de 6-12 meses em caso de alteração na última análise. HIV e TARV podem aumentar risco cardiovascular.',
+                'subtitulo': 'HIV+ | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'MS Brasil 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # Glicemia de jejum
+            recommendations.append({
+                'titulo': 'Glicemia de jejum',
+                'descricao': 'Rastreamento de diabetes. Alguns antirretrovirais podem aumentar risco de hiperglicemia.',
+                'subtitulo': 'HIV+ | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'MS Brasil 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # Transaminases (TGO/AST e TGP/ALT)
+            recommendations.append({
+                'titulo': 'Transaminases (TGO/AST e TGP/ALT)',
+                'descricao': 'Avaliação de função hepática. Intervalos mais frequentes em caso de uso de medicamentos hepatotóxicos, doença hepática ou HCV/HBV.',
+                'subtitulo': 'HIV+ | A cada 3-12 meses',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'MS Brasil 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # Teste de sífilis
+            recommendations.append({
+                'titulo': 'Teste imunológico para sífilis (VDRL ou RPR)',
+                'descricao': 'Rastreamento de sífilis. Considerar maior frequência de triagem em caso de risco ou exposição. Pessoas não imunizadas (anti-HBs negativo) não necessitam nova triagem para HIV.',
+                'subtitulo': 'HIV+ | Semestral ou conforme indicação',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'MS Brasil 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # Anti-HCV
+            recommendations.append({
+                'titulo': 'Anti-HCV (Hepatite C)',
+                'descricao': 'Rastreamento de hepatite C. Solicitar carga viral de HCV em caso de anti-HCV positivo ou suspeita de infecção aguda.',
+                'subtitulo': 'HIV+ | Anual ou conforme indicação',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'MS Brasil 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # Triagem HBV (HBsAg, anti-HBs, anti-HBc total)
+            recommendations.append({
+                'titulo': 'Triagem HBV (HBsAg, anti-HBs, anti-HBc total)',
+                'descricao': 'Rastreamento de hepatite B. Vacinar pessoas não imunizadas (anti-HBs negativo). Pessoas imunizadas não necessitam nova triagem para HBV.',
+                'subtitulo': 'HIV+ | Avaliação inicial',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'MS Brasil 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # FRAX (se >40 anos)
+            if age >= 40:
+                recommendations.append({
+                    'titulo': 'FRAX para avaliação do risco de fraturas',
+                    'descricao': 'Avaliação de risco de fraturas em homens e mulheres com mais de 40 anos. Pessoa vivendo com HIV ou aids tem alto risco de fratura por fragilidade.',
+                    'subtitulo': 'HIV+ com ≥40 anos | Conforme indicação',
+                    'categoria': 'laboratorio',
+                    'prioridade': 'media',
+                    'referencia': 'MS Brasil 2024',
+                    'grau_evidencia': 'B'
+                })
+            
+            # Teste de gravidez (se aplicável)
+            if sex == 'feminino' and 15 <= age <= 49:
+                recommendations.append({
+                    'titulo': 'Teste de gravidez (Beta-hCG)',
+                    'descricao': 'Teste de gravidez quando possibilidade de gestação. TARV deve ser iniciada o mais rápido possível em gestantes para prevenir transmissão perinatal do HIV.',
+                    'subtitulo': 'Mulheres HIV+ em idade fértil | Conforme indicação',
+                    'categoria': 'laboratorio',
+                    'prioridade': 'alta',
+                    'referencia': 'NIH 2024',
+                    'grau_evidencia': 'A'
+                })
+        
     # Salvar no banco de dados se possível
         try:
             # Criar ou encontrar paciente

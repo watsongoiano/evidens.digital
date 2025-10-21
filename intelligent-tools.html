@@ -538,6 +538,43 @@
                         <input type="checkbox" id="obesidade" name="comorbidades" value="obesidade">
                         <label for="obesidade">Obesidade</label>
                     </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="hiv" name="comorbidades" value="hiv">
+                        <label for="hiv">HIV</label>
+                    </div>
+                </div>
+
+                <!-- Campos condicionais para HIV -->
+                <div id="hiv_fields" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                    <div class="section-title" style="font-size: 1rem; margin-bottom: 0.5rem;">📊 Dados HIV</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cd4">CD4 (células/mm³)</label>
+                            <input type="number" id="cd4" name="cd4" placeholder="Ex: 350">
+                        </div>
+                        <div class="form-group">
+                            <label for="carga_viral">Carga Viral (cópias/mL)</label>
+                            <input type="number" id="carga_viral" name="carga_viral" placeholder="Ex: 50">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="em_tarv">Em uso de TARV?</label>
+                            <select id="em_tarv" name="em_tarv">
+                                <option value="">Selecione...</option>
+                                <option value="sim">Sim</option>
+                                <option value="nao">Não</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="supressao_viral">Supressão viral?</label>
+                            <select id="supressao_viral" name="supressao_viral">
+                                <option value="">Selecione...</option>
+                                <option value="sim">Sim</option>
+                                <option value="nao">Não</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group full-width">
@@ -990,6 +1027,21 @@
                 }, 300);
             }
         }
+
+        // Listener para checkbox HIV
+        document.getElementById('hiv').addEventListener('change', function() {
+            const hivFields = document.getElementById('hiv_fields');
+            if (this.checked) {
+                hivFields.style.display = 'block';
+            } else {
+                hivFields.style.display = 'none';
+                // Limpar campos quando desmarcado
+                document.getElementById('cd4').value = '';
+                document.getElementById('carga_viral').value = '';
+                document.getElementById('em_tarv').value = '';
+                document.getElementById('supressao_viral').value = '';
+            }
+        });
     </script>
 </body>
 </html>
