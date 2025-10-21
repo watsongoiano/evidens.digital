@@ -81,6 +81,17 @@ def gerar_html_exames_simples(dados_paciente, exames, tipo_exame="LABORATORIAIS"
             .exam-list li {
                 margin: 5px 0;
             }
+            .signature-section {
+                margin-top: 80px;
+                text-align: center;
+            }
+            .signature-line {
+                border-top: 1px solid #000;
+                width: 300px;
+                margin: 0 auto;
+                padding-top: 5px;
+                font-size: 10pt;
+            }
         </style>
     </head>
     <body>
@@ -105,6 +116,12 @@ def gerar_html_exames_simples(dados_paciente, exames, tipo_exame="LABORATORIAIS"
                 <li>{{ exam.titulo }}</li>
                 {% endfor %}
             </ul>
+        </div>
+        
+        <div class="signature-section">
+            <div class="signature-line">
+                Assinatura e Carimbo do Médico
+            </div>
         </div>
     </body>
     </html>
@@ -185,6 +202,17 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
                 margin: 15px 0;
                 padding-left: 20px;
             }
+            .signature-section {
+                margin-top: 80px;
+                text-align: center;
+            }
+            .signature-line {
+                border-top: 1px solid #000;
+                width: 300px;
+                margin: 0 auto;
+                padding-top: 5px;
+                font-size: 10pt;
+            }
         </style>
     </head>
     <body>
@@ -208,6 +236,12 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
                 <p><strong>{{ loop.index }}. {{ vaccine.titulo }}</strong></p>
             </div>
             {% endfor %}
+        </div>
+        
+        <div class="signature-section">
+            <div class="signature-line">
+                Assinatura e Carimbo do Médico
+            </div>
         </div>
     </body>
     </html>
