@@ -48,7 +48,7 @@
             text-decoration: none;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
             line-height: 1;
         }
 
@@ -64,6 +64,7 @@
             font-weight: 300;
             font-style: italic;
             color: #27ae60;
+            align-self: flex-end;
         }
 
         .nav-links {
@@ -95,6 +96,10 @@
         .back-btn:hover {
             background: #95a5a6;
             color: #374151;
+        }
+
+        .conditional-field {
+            display: none;
         }
 
         .container {
@@ -632,11 +637,11 @@
                             <option value="ex">Ex-fumante</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group conditional-field" id="macos_ano_field">
                         <label for="macos_ano">Maços-ano (se fumante/ex-fumante)</label>
                         <input type="number" id="macos_ano" name="macos_ano" step="0.1">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group conditional-field" id="anos_parou_fumar_field">
                         <label for="anos_parou_fumar">Anos desde que parou de fumar (se ex-fumante)</label>
                         <input type="number" id="anos_parou_fumar" name="anos_parou_fumar" step="1">
                     </div>
@@ -653,11 +658,11 @@
                             <option value="pesado">Pesado (diário/excessivo)</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group conditional-field" id="doses_semana_field">
                         <label for="doses_semana">Doses por semana (se consome)</label>
                         <input type="number" id="doses_semana" name="doses_semana" step="1" placeholder="1 dose = 350ml cerveja ou 150ml vinho">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group conditional-field" id="anos_consumo_alcool_field">
                         <label for="anos_consumo_alcool">Anos de consumo (se moderado/pesado)</label>
                         <input type="number" id="anos_consumo_alcool" name="anos_consumo_alcool" step="1">
                     </div>
@@ -1071,6 +1076,47 @@
                 document.getElementById('carga_viral').value = '';
                 document.getElementById('em_tarv').value = '';
                 document.getElementById('supressao_viral').value = '';
+            }
+        });
+
+        // Listener para tabagismo - mostrar campos condicionais
+        document.getElementById('tabagismo').addEventListener('change', function() {
+            const macosAnoField = document.getElementById('macos_ano_field');
+            const anosParouField = document.getElementById('anos_parou_fumar_field');
+            
+            if (this.value === 'nunca') {
+                // Ocultar ambos os campos
+                macosAnoField.style.display = 'none';
+                anosParouField.style.display = 'none';
+                document.getElementById('macos_ano').value = '';
+                document.getElementById('anos_parou_fumar').value = '';
+            } else if (this.value === 'atual') {
+                // Mostrar apenas maços-ano
+                macosAnoField.style.display = 'block';
+                anosParouField.style.display = 'none';
+                document.getElementById('anos_parou_fumar').value = '';
+            } else if (this.value === 'ex') {
+                // Mostrar ambos os campos
+                macosAnoField.style.display = 'block';
+                anosParouField.style.display = 'block';
+            }
+        });
+
+        // Listener para alcoolismo - mostrar campos condicionais
+        document.getElementById('alcoolismo').addEventListener('change', function() {
+            const dosesSemanaField = document.getElementById('doses_semana_field');
+            const anosConsumoField = document.getElementById('anos_consumo_alcool_field');
+            
+            if (this.value === 'nao' || this.value === 'social') {
+                // Ocultar ambos os campos
+                dosesSemanaField.style.display = 'none';
+                anosConsumoField.style.display = 'none';
+                document.getElementById('doses_semana').value = '';
+                document.getElementById('anos_consumo_alcool').value = '';
+            } else if (this.value === 'moderado' || this.value === 'pesado') {
+                // Mostrar ambos os campos
+                dosesSemanaField.style.display = 'block';
+                anosConsumoField.style.display = 'block';
             }
         });
     </script>
