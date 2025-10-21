@@ -36,6 +36,11 @@ def intelligent_tools():
     """Rota para ferramentas inteligentes"""
     return send_from_directory(BASE_DIR, 'intelligent-tools.html')
 
+@app.route('/contact')
+def contact_page():
+    """Rota para página de contato"""
+    return send_from_directory(BASE_DIR, 'contact.html')
+
 @app.route('/analytics')
 def analytics_page():
     """Rota para página de analytics"""
