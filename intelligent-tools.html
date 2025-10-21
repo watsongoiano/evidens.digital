@@ -1133,5 +1133,271 @@
             document.getElementById('anos_consumo_alcool_field').style.display = 'none';
         });
     </script>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="contact-container">
+            <h2 class="contact-title">📬 Entre em Contato</h2>
+            <p class="contact-subtitle">Tem dúvidas ou sugestões? Estamos aqui para ajudar!</p>
+            
+            <div class="contact-content">
+                <!-- Contact Info -->
+                <div class="contact-info">
+                    <h3>Informações de Contato</h3>
+                    
+                    <div class="info-item">
+                        <span class="info-icon">🏢</span>
+                        <div class="info-text">
+                            <strong>Evidēns Digital</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-icon">📧</span>
+                        <div class="info-text">
+                            <strong>E-mail:</strong><br>
+                            <a href="mailto:drrodolfofrota@outlook.com">drrodolfofrota@outlook.com</a>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-icon">📱</span>
+                        <div class="info-text">
+                            <strong>WhatsApp:</strong><br>
+                            <a href="https://wa.me/5511932255885" target="_blank">+55 11 93225-5885</a>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-icon">📍</span>
+                        <div class="info-text">
+                            <strong>Endereço:</strong><br>
+                            Rua 9-A, 110, Setor Aeroporto<br>
+                            74075-250, Goiânia-GO
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-icon">🔗</span>
+                        <div class="info-text">
+                            <strong>LinkedIn:</strong><br>
+                            <a href="https://br.linkedin.com/in/rodolfo-frota-68445b253" target="_blank">Rodolfo Frota</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Form -->
+                <div class="contact-form-wrapper">
+                    <h3>Envie uma Mensagem</h3>
+                    <form id="contact-form" action="https://formspree.io/f/drrodolfofrota@outlook.com" method="POST" class="contact-form">
+                        <div class="form-group">
+                            <label for="contact-name">Nome Completo *</label>
+                            <input type="text" id="contact-name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-email">E-mail *</label>
+                            <input type="email" id="contact-email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-phone">Telefone (opcional)</label>
+                            <input type="tel" id="contact-phone" name="phone" placeholder="+55 11 99999-9999">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-subject">Assunto *</label>
+                            <input type="text" id="contact-subject" name="subject" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-message">Mensagem *</label>
+                            <textarea id="contact-message" name="message" rows="5" required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">Enviar Mensagem</button>
+                        <p id="form-status" class="form-status"></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .contact-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 4rem 2rem;
+            margin-top: 3rem;
+        }
+        
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .contact-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .contact-subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+        
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .contact-info h3,
+        .contact-form-wrapper h3 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: flex-start;
+        }
+        
+        .info-icon {
+            font-size: 1.5rem;
+            min-width: 30px;
+        }
+        
+        .info-text {
+            flex: 1;
+        }
+        
+        .info-text strong {
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        
+        .info-text a {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .info-text a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        
+        .contact-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .contact-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .contact-form textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .form-status {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .form-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .form-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .contact-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 2rem;
+            }
+            
+            .contact-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    
+    <script>
+        // Handle form submission
+        document.getElementById('contact-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            const statusDiv = document.getElementById('form-status');
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    statusDiv.textContent = '✅ Mensagem enviada com sucesso! Entraremos em contato em breve.';
+                    statusDiv.className = 'form-status success';
+                    form.reset();
+                } else {
+                    throw new Error('Erro no envio');
+                }
+            } catch (error) {
+                statusDiv.textContent = '❌ Erro ao enviar mensagem. Por favor, tente novamente ou entre em contato diretamente por e-mail.';
+                statusDiv.className = 'form-status error';
+            }
+        });
+    </script>
 </body>
 </html>
