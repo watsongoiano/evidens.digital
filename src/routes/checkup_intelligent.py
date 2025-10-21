@@ -1213,6 +1213,83 @@ def generate_intelligent_recommendations():
                     'grau_evidencia': 'A'
                 })
         
+        # ========== DPOC MANAGEMENT (GOLD COPD 2023) ==========
+        
+        is_dpoc = 'dpoc' in comorbidades
+        
+        if is_dpoc:
+            # Espirometria - exame fundamental para diagnóstico e monitoramento
+            recommendations.append({
+                'titulo': 'Espirometria',
+                'descricao': 'Exame essencial para confirmar o diagnóstico de DPOC, avaliar gravidade da obstrução do fluxo aéreo e monitorar progressão da doença. Deve ser realizada após broncodilatador.',
+                'subtitulo': 'DPOC | Anual ou conforme sintomas',
+                'categoria': 'imagem',
+                'prioridade': 'alta',
+                'referencia': 'GOLD COPD 2023',
+                'link': 'https://goldcopd.org/2023-gold-report-2/',
+                'grau_evidencia': 'A'
+            })
+            
+            # Teste de caminhada de 6 minutos
+            recommendations.append({
+                'titulo': 'Teste de caminhada de 6 minutos',
+                'descricao': 'Avalia capacidade funcional e tolerância ao exercício em pacientes com DPOC. Útil para avaliar resposta ao tratamento e prognóstico.',
+                'subtitulo': 'DPOC | Anual ou conforme indicação',
+                'categoria': 'imagem',
+                'prioridade': 'media',
+                'referencia': 'GOLD COPD 2023',
+                'link': 'https://goldcopd.org/2023-gold-report-2/',
+                'grau_evidencia': 'B'
+            })
+            
+            # Gasometria arterial
+            recommendations.append({
+                'titulo': 'Gasometria arterial',
+                'descricao': 'Avalia oxigenação e ventilação em pacientes com DPOC, especialmente em exacerbações ou doença avançada. Indica necessidade de oxigenoterapia.',
+                'subtitulo': 'DPOC | Conforme indicação clínica',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'GOLD COPD 2023',
+                'link': 'https://goldcopd.org/2023-gold-report-2/',
+                'grau_evidencia': 'A'
+            })
+            
+            # Eletrólitos
+            recommendations.append({
+                'titulo': 'Eletrólitos (Na, K, Cl)',
+                'descricao': 'Monitoramento de eletrólitos em pacientes com DPOC, especialmente aqueles em uso de diuréticos ou corticosteroides. Hipocalemia pode ocorrer com beta-agonistas.',
+                'subtitulo': 'DPOC | Conforme uso de medicações',
+                'categoria': 'laboratorio',
+                'prioridade': 'media',
+                'referencia': 'GOLD COPD 2023',
+                'link': 'https://goldcopd.org/2023-gold-report-2/',
+                'grau_evidencia': 'B'
+            })
+            
+            # Radiografia de tórax
+            recommendations.append({
+                'titulo': 'Radiografia de tórax',
+                'descricao': 'Exame de imagem para avaliar complicações (pneumonia, pneumotórax, insuficiência cardíaca) e excluir outros diagnósticos diferenciais.',
+                'subtitulo': 'DPOC | Conforme indicação clínica',
+                'categoria': 'imagem',
+                'prioridade': 'media',
+                'referencia': 'GOLD COPD 2023',
+                'link': 'https://goldcopd.org/2023-gold-report-2/',
+                'grau_evidencia': 'B'
+            })
+            
+            # Hemograma completo
+            recommendations.append({
+                'titulo': 'Hemograma completo',
+                'descricao': 'Avaliar policitemia secundária à hipoxemia crônica e descartar anemia que pode agravar dispneia.',
+                'subtitulo': 'DPOC | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'media',
+                'referencia': 'GOLD COPD 2023',
+                'link': 'https://goldcopd.org/2023-gold-report-2/',
+                'grau_evidencia': 'B'
+            })
+        
     # Salvar no banco de dados se possível
         if db:
             try:
