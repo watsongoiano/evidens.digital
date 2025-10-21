@@ -808,26 +808,219 @@ def generate_intelligent_recommendations():
                 'grau_evidencia': 'B'
             })
         
-        # Rastreamento de pré-diabetes e diabetes tipo 2
+        # ========== DIABETES SCREENING E MANAGEMENT (ADA 2024) ==========
+        
+        # Calcular IMC
         imc = None
         if weight and height:
             altura_m = height / 100
             imc = weight / (altura_m ** 2)
         
-        if (35 <= age <= 70 and 
-            imc and imc >= 25 and 
-            'diabetes_tipo_2' not in data.get('comorbidades', [])):
-            # Verifica se já não tem glicemia nas recomendações
-            tem_glicemia = any('glicemia' in rec.get('titulo', '').lower() for rec in recommendations)
-            if not tem_glicemia:
+        # Verificar se já é diabético
+        is_diabetic = 'diabetes_tipo_2' in comorbidades or 'diabetes' in comorbidades
+        
+        # Verificar HbA1C se fornecido
+        hba1c = float(data.get('hba1c', 0)) if data.get('hba1c') else None
+        if hba1c and hba1c > 6.5 and not is_diabetic:
+            # HbA1C > 6.5% indica diabetes - marcar automaticamente
+            is_diabetic = True
+            if 'diabetes_tipo_2' not in comorbidades:
+                comorbidades.append('diabetes_tipo_2')
+        
+        # SCREENING DE DIABETES (ADA 2024 Criteria)
+        should_screen_diabetes = False
+        
+        # Critério 1: Idade ≥35 anos (todos)
+        if age >= 35 and not is_diabetic:
+            should_screen_diabetes = True
+        
+        # Critério 2: Adultos com sobrepeso/obesidade + fatores de risco
+        if not is_diabetic and imc:
+            # IMC ≥25 (≥23 para asiáticos) + 1 fator de risco
+            if imc >= 25:
+                # Fatores de risco
+                has_risk_factors = False
+                
+                # Familiar de primeiro grau com diabetes
+                historia_familiar = data.get('historia_familiar', {})
+                if isinstance(historia_familiar, dict) and historia_familiar.get('diabetes'):
+                    has_risk_factors = True
+                
+                # Hipertensão
+                if has_hypertension:
+                    has_risk_factors = True
+                
+                # HDL < 35 mg/dL ou triglicerídeos > 250 mg/dL
+                hdl = float(data.get('hdl_colesterol', 0) or data.get('hdl', 0)) if (data.get('hdl_colesterol') or data.get('hdl')) else 0
+                if hdl > 0 and hdl < 35:
+                    has_risk_factors = True
+                
+                # Síndrome dos ovários policísticos (SOP)
+                if 'sop' in comorbidades or 'ovarios_policisticos' in comorbidades:
+                    has_risk_factors = True
+                
+                # Inatividade física
+                atividade_fisica = data.get('atividade_fisica', '')
+                if atividade_fisica == 'sedentario' or atividade_fisica == 'sedentário':
+                    has_risk_factors = True
+                
+                # Outras condições de resistência insulínica
+                if 'obesidade' in comorbidades or imc >= 30:
+                    has_risk_factors = True
+                
+                if has_risk_factors:
+                    should_screen_diabetes = True
+        
+        # Adicionar exames de screening se indicado
+        if should_screen_diabetes:
+            # Verificar se já não tem HbA1C nas recomendações
+            tem_hba1c = any('hba1c' in rec.get('titulo', '').lower() or 'hemoglobina glicada' in rec.get('titulo', '').lower() for rec in recommendations)
+            if not tem_hba1c:
                 recommendations.append({
-                    'titulo': 'Glicemia de jejum, soro',
-                    'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Indicado para adultos 35-70 anos com sobrepeso ou obesidade (IMC ≥25). Considerar rastreamento em idade mais precoce se história familiar, etnia de alto risco (Afro-americano, Hispânico/Latino, Asiático-americano) ou história de diabetes gestacional.',
-                    'subtitulo': 'Adultos 35-70 anos com IMC ≥25 | A cada 3 anos',
+                    'titulo': 'Hemoglobina glicada (HbA1c), soro',
+                    'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Valores de referência: <5,7% normal, 5,7-6,4% pré-diabetes, ≥6,5% diabetes. Reflete controle glicêmico dos últimos 2-3 meses. Indicado para adultos ≥35 anos ou com sobrepeso/obesidade + fatores de risco.',
+                    'subtitulo': 'Adultos ≥35 anos ou com fatores de risco | A cada 3 anos se normal',
                     'categoria': 'laboratorio',
                     'prioridade': 'alta',
-                    'referencia': 'USPSTF 2021',
+                    'referencia': 'ADA 2024',
                     'grau_evidencia': 'B'
+                })
+        
+        # EXAMES PARA DIABÉTICOS (ADA 2024 - Laboratory Evaluation)
+        if is_diabetic:
+            # Perfil lipídico completo
+            tem_lipidico = any('lipid' in rec.get('titulo', '').lower() or 'colesterol' in rec.get('titulo', '').lower() for rec in recommendations)
+            if not tem_lipidico:
+                recommendations.append({
+                    'titulo': 'Perfil lipídico completo (Colesterol total, LDL, HDL, Triglicerídeos), soro',
+                    'descricao': 'Avaliação do risco cardiovascular em pacientes diabéticos. Realizar anualmente ou mais frequentemente se em tratamento para dislipidemia.',
+                    'subtitulo': 'Diabéticos | Anual',
+                    'categoria': 'laboratorio',
+                    'prioridade': 'alta',
+                    'referencia': 'ADA 2024',
+                    'grau_evidencia': 'A'
+                })
+            
+            # Função hepática (TGO, TGP)
+            recommendations.append({
+                'titulo': 'Transaminases (TGO/AST e TGP/ALT), soro',
+                'descricao': 'Avaliação da função hepática em pacientes diabéticos. Importante antes de iniciar estatinas e para rastreamento de esteatose hepática não alcoólica (NAFLD).',
+                'subtitulo': 'Diabéticos | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'ADA 2024',
+                'grau_evidencia': 'B'
+            })
+            
+            # Relação albumina/creatinina urinária (microalbuminúria)
+            recommendations.append({
+                'titulo': 'Relação albumina/creatinina urinária (uACR)',
+                'descricao': 'Rastreamento de nefropatia diabética. Valores ≥30 mg/g indicam albuminúria e risco aumentado de doença renal. Realizar anualmente.',
+                'subtitulo': 'Diabéticos | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'ADA 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # Creatinina sérica e eGFR
+            tem_creatinina = any('creatinina' in rec.get('titulo', '').lower() for rec in recommendations)
+            if not tem_creatinina:
+                recommendations.append({
+                    'titulo': 'Creatinina sérica e Taxa de Filtração Glomerular estimada (eGFR)',
+                    'descricao': 'Avaliação da função renal em pacientes diabéticos. Realizar anualmente para detecção precoce de doença renal diabética.',
+                    'subtitulo': 'Diabéticos | Anual',
+                    'categoria': 'laboratorio',
+                    'prioridade': 'alta',
+                    'referencia': 'ADA 2024',
+                    'grau_evidencia': 'A'
+                })
+            
+            # TSH (para diabetes tipo 1, mas pode ser útil para tipo 2 também)
+            recommendations.append({
+                'titulo': 'Hormônio Tireoestimulante (TSH), soro',
+                'descricao': 'Rastreamento de disfunção tireoidiana em pacientes diabéticos, especialmente tipo 1. Diabetes e doenças tireoidianas frequentemente coexistem.',
+                'subtitulo': 'Diabéticos tipo 1 | A cada 1-2 anos',
+                'categoria': 'laboratorio',
+                'prioridade': 'media',
+                'referencia': 'ADA 2024',
+                'grau_evidencia': 'E'
+            })
+            
+            # Vitamina B12 (se em uso de metformina)
+            medicacoes_continuo_lower = medicacoes_continuo.lower()
+            if 'metformina' in medicacoes_continuo_lower or 'metformin' in medicacoes_continuo_lower:
+                recommendations.append({
+                    'titulo': 'Vitamina B12, soro',
+                    'descricao': 'Monitoramento de deficiência de vitamina B12 em pacientes em uso de metformina. A metformina pode reduzir a absorção de B12, especialmente em uso prolongado.',
+                    'subtitulo': 'Diabéticos em uso de metformina | Periódico',
+                    'categoria': 'laboratorio',
+                    'prioridade': 'media',
+                    'referencia': 'ADA 2024',
+                    'grau_evidencia': 'B'
+                })
+            
+            # Hemograma completo
+            recommendations.append({
+                'titulo': 'Hemograma completo com plaquetas',
+                'descricao': 'Avaliação hematológica em pacientes diabéticos. Importante para detectar anemia, infecções e outras alterações hematológicas.',
+                'subtitulo': 'Diabéticos | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'media',
+                'referencia': 'ADA 2024',
+                'grau_evidencia': 'E'
+            })
+            
+            # Potássio sérico (se em uso de IECA/BRA/diuréticos)
+            usa_ieca_bra = any(keyword in medicacoes_continuo_lower for keyword in ['enalapril', 'captopril', 'losartan', 'valsartan', 'ieca', 'bra'])
+            usa_diuretico = any(keyword in medicacoes_continuo_lower for keyword in ['hidroclorotiazida', 'furosemida', 'espironolactona', 'diurético', 'diuretico'])
+            
+            if usa_ieca_bra or usa_diuretico:
+                recommendations.append({
+                    'titulo': 'Potássio sérico',
+                    'descricao': 'Monitoramento de potássio em pacientes diabéticos em uso de IECA, BRA ou diuréticos. Importante para prevenir hiper ou hipocalemia.',
+                    'subtitulo': 'Diabéticos em uso de IECA/BRA/diuréticos | Periódico',
+                    'categoria': 'laboratorio',
+                    'prioridade': 'alta',
+                    'referencia': 'ADA 2024',
+                    'grau_evidencia': 'E'
+                })
+            
+            # Cálcio, vitamina D e fósforo (para pacientes apropriados)
+            recommendations.append({
+                'titulo': 'Cálcio, Vitamina D (25-OH) e Fósforo, soro',
+                'descricao': 'Avaliação do metabolismo ósseo em pacientes diabéticos, especialmente com doença renal ou osteoporose. Deficiência de vitamina D é comum em diabéticos.',
+                'subtitulo': 'Diabéticos com doença renal ou osteoporose | Conforme necessidade',
+                'categoria': 'laboratorio',
+                'prioridade': 'media',
+                'referencia': 'ADA 2024',
+                'grau_evidencia': 'E'
+            })
+            
+            # EXAMES DE IMAGEM PARA DIABÉTICOS
+            
+            # Fundoscopia (exame oftalmológico)
+            recommendations.append({
+                'titulo': 'Fundoscopia (Exame de fundo de olho)',
+                'descricao': 'Rastreamento de retinopatia diabética. Realizar exame oftalmológico completo com dilatação pupilar anualmente. A retinopatia diabética é a principal causa de cegueira em adultos.',
+                'subtitulo': 'Diabéticos | Anual',
+                'categoria': 'imagem',
+                'prioridade': 'alta',
+                'referencia': 'ADA 2024',
+                'grau_evidencia': 'A'
+            })
+            
+            # ECG (se ainda não estiver nas recomendações)
+            tem_ecg = any('eletrocardiograma' in rec.get('titulo', '').lower() or 'ecg' in rec.get('titulo', '').lower() for rec in recommendations)
+            if not tem_ecg:
+                recommendations.append({
+                    'titulo': 'Eletrocardiograma de repouso',
+                    'descricao': 'ECG de 12 derivações para rastreamento de doença cardiovascular em pacientes diabéticos. Diabetes é fator de risco importante para doença coronariana.',
+                    'subtitulo': 'Diabéticos | Anual',
+                    'categoria': 'imagem',
+                    'prioridade': 'alta',
+                    'referencia': 'ADA 2024',
+                    'grau_evidencia': 'C'
                 })
         
     # Salvar no banco de dados se possível
