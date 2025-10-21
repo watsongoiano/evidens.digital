@@ -496,18 +496,6 @@
                     </div>
                 </div>
 
-                <div class="section-title">💊 Medicações Específicas</div>
-                <div class="checkbox-grid">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="anti_hipertensivos" name="medicacoes" value="anti_hipertensivos">
-                        <label for="anti_hipertensivos">Medicamentos Anti-hipertensivos</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="estatinas" name="medicacoes" value="estatinas">
-                        <label for="estatinas">Estatinas</label>
-                    </div>
-                </div>
-
                 <div class="section-title">🏥 Comorbidades</div>
                 <div class="checkbox-grid">
                     <div class="checkbox-item">
@@ -582,6 +570,18 @@
                     <textarea id="outras_comorbidades" name="outras_comorbidades" rows="3" placeholder="Ex: DPOC, artrite reumatoide, lúpus..."></textarea>
                 </div>
 
+                <div class="section-title">💊 Medicações Específicas</div>
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="anti_hipertensivos" name="medicacoes" value="anti_hipertensivos">
+                        <label for="anti_hipertensivos">Medicamentos Anti-hipertensivos</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="estatinas" name="medicacoes" value="estatinas">
+                        <label for="estatinas">Estatinas</label>
+                    </div>
+                </div>
+
                 <div class="form-group full-width">
                     <label for="medicacoes_continuo">Medicações de Uso Contínuo</label>
                     <textarea id="medicacoes_continuo" name="medicacoes_continuo" rows="3" placeholder="Liste todas as medicações em uso contínuo com doses e frequência"></textarea>
@@ -632,7 +632,6 @@
                 </div>
 
                 <button type="submit" class="btn-primary">Gerar Recomendações Inteligentes</button>
-                <button type="button" class="btn-secondary" onclick="anexarPDFs()">📄 Anexar PDFs de Exames</button>
             </form>
 
             <div id="recommendations" class="recommendations">

@@ -1055,11 +1055,11 @@ def generate_intelligent_recommendations():
                 'subtitulo': f'HIV+ | {frequencia_cd4}',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil 2024',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
                 'grau_evidencia': 'A'
             })
             
-            # Carga Viral HIV
+            # Carga viral HIV
             frequencia_cv = 'A cada 3-6 meses'
             if em_tarv and supressao_viral:
                 frequencia_cv = 'A cada 6 meses'
@@ -1072,11 +1072,11 @@ def generate_intelligent_recommendations():
                 'subtitulo': f'HIV+ | {frequencia_cv}',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil 2024',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
                 'grau_evidencia': 'A'
             })
             
-            # Genotipagem (teste de resistência)
+            # Glicemia de jejumste de resistência)
             if not em_tarv or (carga_viral and carga_viral > 1000):
                 recommendations.append({
                     'titulo': 'Genotipagem do HIV (Teste de Resistência)',
@@ -1095,7 +1095,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | A cada 6-12 meses',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil 2024',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
                 'grau_evidencia': 'A'
             })
             
@@ -1106,7 +1106,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Anual (ou 3-6 meses se nefrotóxicos)',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil 2024',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
                 'grau_evidencia': 'A'
             })
             
@@ -1117,7 +1117,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Anual',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil 2024',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
                 'grau_evidencia': 'A'
             })
             
@@ -1128,18 +1128,18 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Anual',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil 2024',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
                 'grau_evidencia': 'A'
             })
             
-            # Glicemia de jejum
+            # Hemograma de jejum
             recommendations.append({
                 'titulo': 'Glicemia de jejum',
                 'descricao': 'Rastreamento de diabetes. Alguns antirretrovirais podem aumentar risco de hiperglicemia.',
                 'subtitulo': 'HIV+ | Anual',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil 2024',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
                 'grau_evidencia': 'A'
             })
             
@@ -1150,7 +1150,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | A cada 3-12 meses',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil 2024',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
                 'grau_evidencia': 'A'
             })
             
@@ -1161,7 +1161,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Semestral ou conforme indicação',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil 2024',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
                 'grau_evidencia': 'A'
             })
             
@@ -1172,7 +1172,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Anual ou conforme indicação',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil 2024',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
                 'grau_evidencia': 'A'
             })
             
@@ -1183,22 +1183,11 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Avaliação inicial',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil 2024',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
                 'grau_evidencia': 'A'
             })
             
-            # FRAX (se >40 anos)
-            if age >= 40:
-                recommendations.append({
-                    'titulo': 'FRAX para avaliação do risco de fraturas',
-                    'descricao': 'Avaliação de risco de fraturas em homens e mulheres com mais de 40 anos. Pessoa vivendo com HIV ou aids tem alto risco de fratura por fragilidade.',
-                    'subtitulo': 'HIV+ com ≥40 anos | Conforme indicação',
-                    'categoria': 'laboratorio',
-                    'prioridade': 'media',
-                    'referencia': 'MS Brasil 2024',
-                    'grau_evidencia': 'B'
-                })
-            
+
             # Teste de gravidez (se aplicável)
             if sex == 'feminino' and 15 <= age <= 49:
                 recommendations.append({
@@ -1281,12 +1270,29 @@ def generate_intelligent_recommendations():
         # Registrar analytics
         analytics.track_recommendation()
         
+        # Preparar outras recomendações (FRAX, calculadoras, etc.)
+        outras_recomendacoes = []
+        
+        # FRAX para HIV+ com ≥40 anos
+        if hiv_positive and age >= 40:
+            outras_recomendacoes.append({
+                'titulo': 'FRAX - Calculadora de Risco de Fraturas',
+                'descricao': 'Avaliação de risco de fraturas em homens e mulheres com mais de 40 anos. Pessoa vivendo com HIV ou aids tem alto risco de fratura por fragilidade.',
+                'subtitulo': 'HIV+ com ≥40 anos | Conforme indicação',
+                'tipo': 'calculadora',
+                'prioridade': 'media',
+                'link': 'https://www.fraxplus.org/pt/calculation-tool',
+                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'grau_evidencia': 'B'
+            })
+        
         # Preparar resposta
         response = {
             'success': True,
             'prevent_risk': risk_result,
             'risk_classification': risk_level,
             'recommendations': recommendations,
+            'outras_recomendacoes': outras_recomendacoes,
             'total_recommendations': len(recommendations)
         }
         
