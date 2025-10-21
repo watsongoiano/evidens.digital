@@ -421,7 +421,7 @@
             </div>
             <a href="/" class="logo">
                 <span class="logo-main">evidēns</span>
-                <span class="logo-sub">check</span>
+                <span class="logo-sub">check<sup>®</sup></span>
             </a>
             <div class="nav-links">
                 <a href="#contact">Contact</a>
@@ -628,44 +628,40 @@
                 <div class="section-title">🍃 Hábitos de vida</div>
                 
                 <!-- Tabagismo -->
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="tabagismo">Tabagismo</label>
-                        <select id="tabagismo" name="tabagismo">
-                            <option value="nunca">Nunca fumou</option>
-                            <option value="atual">Fumante atual</option>
-                            <option value="ex">Ex-fumante</option>
-                        </select>
-                    </div>
-                    <div class="form-group conditional-field" id="macos_ano_field">
-                        <label for="macos_ano">Maços-ano (se fumante/ex-fumante)</label>
-                        <input type="number" id="macos_ano" name="macos_ano" step="0.1">
-                    </div>
-                    <div class="form-group conditional-field" id="anos_parou_fumar_field">
-                        <label for="anos_parou_fumar">Anos desde que parou de fumar (se ex-fumante)</label>
-                        <input type="number" id="anos_parou_fumar" name="anos_parou_fumar" step="1">
-                    </div>
+                <div class="form-group">
+                    <label for="tabagismo">Tabagismo</label>
+                    <select id="tabagismo" name="tabagismo">
+                        <option value="nunca">Nunca fumou</option>
+                        <option value="atual">Fumante atual</option>
+                        <option value="ex">Ex-fumante</option>
+                    </select>
+                </div>
+                <div class="form-group conditional-field" id="macos_ano_field">
+                    <label for="macos_ano">Maços-ano (se fumante/ex-fumante)</label>
+                    <input type="number" id="macos_ano" name="macos_ano" step="0.1">
+                </div>
+                <div class="form-group conditional-field" id="anos_parou_fumar_field">
+                    <label for="anos_parou_fumar">Anos desde que parou de fumar (se ex-fumante)</label>
+                    <input type="number" id="anos_parou_fumar" name="anos_parou_fumar" step="1">
                 </div>
 
                 <!-- Alcoolismo -->
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="alcoolismo">Consumo de álcool</label>
-                        <select id="alcoolismo" name="alcoolismo">
-                            <option value="nao">Não consome</option>
-                            <option value="social">Social (ocasional)</option>
-                            <option value="moderado">Moderado (regular)</option>
-                            <option value="pesado">Pesado (diário/excessivo)</option>
-                        </select>
-                    </div>
-                    <div class="form-group conditional-field" id="doses_semana_field">
-                        <label for="doses_semana">Doses por semana (se consome)</label>
-                        <input type="number" id="doses_semana" name="doses_semana" step="1" placeholder="1 dose = 350ml cerveja ou 150ml vinho">
-                    </div>
-                    <div class="form-group conditional-field" id="anos_consumo_alcool_field">
-                        <label for="anos_consumo_alcool">Anos de consumo (se moderado/pesado)</label>
-                        <input type="number" id="anos_consumo_alcool" name="anos_consumo_alcool" step="1">
-                    </div>
+                <div class="form-group">
+                    <label for="alcoolismo">Consumo de álcool</label>
+                    <select id="alcoolismo" name="alcoolismo">
+                        <option value="nao">Não consome</option>
+                        <option value="social">Social (ocasional)</option>
+                        <option value="moderado">Moderado (regular)</option>
+                        <option value="pesado">Pesado (diário/excessivo)</option>
+                    </select>
+                </div>
+                <div class="form-group conditional-field" id="doses_semana_field">
+                    <label for="doses_semana">Doses por semana (se consome)</label>
+                    <input type="number" id="doses_semana" name="doses_semana" step="1" placeholder="1 dose = 350ml cerveja ou 150ml vinho">
+                </div>
+                <div class="form-group conditional-field" id="anos_consumo_alcool_field">
+                    <label for="anos_consumo_alcool">Anos de consumo (se moderado/pesado)</label>
+                    <input type="number" id="anos_consumo_alcool" name="anos_consumo_alcool" step="1">
                 </div>
 
                 <button type="submit" class="btn-primary">Gerar Recomendações Inteligentes</button>
