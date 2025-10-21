@@ -737,6 +737,9 @@ def generate_intelligent_recommendations():
         # Garantir que comorbidades é uma lista
         if isinstance(comorbidades, str):
             comorbidades = [comorbidades]
+        elif isinstance(comorbidades, dict):
+            # Se for objeto, extrair chaves onde valor é True
+            comorbidades = [k for k, v in comorbidades.items() if v]
         elif not isinstance(comorbidades, list):
             comorbidades = []
         
