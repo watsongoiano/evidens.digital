@@ -466,15 +466,16 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         })
 
     # Hepatite B (adultos não vacinados)
-    _add_rec({
-        'titulo': 'Hepatite B (Engerix-B® ou Euvax B®)',
-        'descricao': 'Esquema de 3 doses (0, 1, 6 meses) em não vacinados. Adultos até 59 anos devem ser vacinados.',
-        'subtitulo': 'Adultos 19-59 anos não imunizados | 3 doses',
-        'categoria': 'vacina',
-        'prioridade': 'alta',
-        'referencia': 'SBIm 2025 / CDC 2025',
-        'grau_evidencia': 'A'
-    })
+    if 19 <= age <= 59:
+        _add_rec({
+            'titulo': 'Hepatite B (Engerix-B® ou Euvax B®)',
+            'descricao': 'Esquema de 3 doses (0, 1, 6 meses) em não vacinados. Adultos até 59 anos devem ser vacinados.',
+            'subtitulo': 'Adultos 19-59 anos não imunizados | 3 doses',
+            'categoria': 'vacina',
+            'prioridade': 'alta',
+            'referencia': 'SBIm 2025 / CDC 2025',
+            'grau_evidencia': 'A'
+        })
 
     # dTpa (Tétano, difteria, coqueluche)
     _add_rec({
@@ -488,7 +489,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     })
 
     # Tríplice viral (Sarampo, caxumba, rubéola)
-    if age <= 59:  # Prioridade para adultos jovens não vacinados
+    if age <= 68:  # CDC 2025: recomendada até 68 anos
         _add_rec({
             'titulo': 'Tríplice viral - SCR (Priorix® ou M-M-R® II)',
             'descricao': '1 ou 2 doses para adultos não vacinados ou sem comprovação vacinal. Adultos até 68 anos.',
@@ -533,8 +534,8 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'grau_evidencia': 'B'
         })
 
-    # Meningocócica B (19-23 anos)
-    if 19 <= age <= 23:
+    # Meningocócica B (16-23 anos)
+    if 16 <= age <= 23:
         _add_rec({
             'titulo': 'Meningocócica B (Bexsero® ou Trumenba®)',
             'descricao': '2 doses conforme esquema do fabricante. Bexsero®: intervalo de 1 mês. Trumenba®: intervalo de 6 meses.',
@@ -546,15 +547,16 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         })
 
     # Dengue (Qdenga)
-    _add_rec({
-        'titulo': 'Dengue (Qdenga®)',
-        'descricao': '2 doses com intervalo de 3 meses. Indicada para áreas endêmicas. Licenciada para 4-60 anos.',
-        'subtitulo': '4-60 anos (áreas endêmicas) | 2 doses (0-3 meses) | Sem reforço',
-        'categoria': 'vacina',
-        'prioridade': 'media',
-        'referencia': 'SBIm 2025',
-        'grau_evidencia': 'B'
-    })
+    if 4 <= age <= 60:
+        _add_rec({
+            'titulo': 'Dengue (Qdenga®)',
+            'descricao': '2 doses com intervalo de 3 meses. Indicada para áreas endêmicas. Licenciada para 4-60 anos.',
+            'subtitulo': '4-60 anos (áreas endêmicas) | 2 doses (0-3 meses) | Sem reforço',
+            'categoria': 'vacina',
+            'prioridade': 'media',
+            'referencia': 'SBIm 2025',
+            'grau_evidencia': 'B'
+        })
 
     # COVID-19
     _add_rec({
@@ -627,11 +629,11 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         })
     
     # Hepatites A e B combinada (Twinrix) - alternativa para quem precisa das duas
-    if age >= 18:
+    if 18 <= age <= 59:
         _add_rec({
             'titulo': 'Hepatites A e B combinada (Twinrix®)',
             'descricao': '3 doses (esquema 0-1-6 meses) ou esquema acelerado (0-7-21 dias + reforço aos 12 meses). Alternativa para adultos que precisam de ambas as vacinas.',
-            'subtitulo': 'Adultos não imunizados | 3-4 doses (0-1-6 meses) | Sem reforço',
+            'subtitulo': 'Adultos 18-59 anos não imunizados | 3-4 doses (0-1-6 meses) | Sem reforço',
             'categoria': 'vacina',
             'prioridade': 'media',
             'referencia': 'SBIm 2025',
