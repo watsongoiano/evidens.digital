@@ -1468,19 +1468,62 @@ def generate_intelligent_recommendations():
             'total_recommendations': len(recommendations)
         }
         
-        # Deduplicar por título antes de responder
+        # Deduplicar por título antes de responder (deduplicação inteligente)
         try:
-            seen = set()
-            unique = []
+            from collections import defaultdict
+            import re
+            
+            # Agrupar exames similares
+            grupos = defaultdict(list)
+            
             for rec in recommendations:
-                key = (rec.get('titulo') or '').strip().lower()
-                if not key or key in seen:
+                titulo = (rec.get('titulo') or '').strip()
+                if not titulo:
                     continue
-                seen.add(key)
-                unique.append(rec)
+                
+                # Normalizar título para identificação de duplicados
+                # Remove material biológico, parênteses e pontuação
+                titulo_norm = re.sub(r',\s*(soro|plasma|sangue.*|urina)', '', titulo, flags=re.IGNORECASE)
+                titulo_norm = re.sub(r'\s*\([^)]*\)', '', titulo_norm)  # Remove parênteses
+                titulo_norm = re.sub(r'[^a-z0-9\s]', '', titulo_norm.lower())  # Remove pontuação
+                titulo_norm = ' '.join(titulo_norm.split())  # Normaliza espaços
+                
+                # Chave de agrupamento
+                key = titulo_norm
+                grupos[key].append(rec)
+            
+            # Manter apenas 1 exame por grupo, unindo referências
+            unique = []
+            for key, recs in grupos.items():
+                if len(recs) == 1:
+                    unique.append(recs[0])
+                else:
+                    # Múltiplas recomendações do mesmo exame - unir referências
+                    # Priorizar título mais completo (com material biológico)
+                    recs_sorted = sorted(recs, key=lambda r: len(r.get('titulo', '')), reverse=True)
+                    melhor = recs_sorted[0].copy()
+                    
+                    # Unir referências de todas as recomendações
+                    refs = []
+                    for r in recs:
+                        ref = r.get('referencia', '')
+                        if ref and ref not in refs:
+                            refs.append(ref)
+                    
+                    if refs:
+                        melhor['referencia'] = ' | '.join(refs)
+                    
+                    # Unir descrições se diferentes
+                    descricoes = list(set([r.get('descricao', '') for r in recs if r.get('descricao')]))
+                    if len(descricoes) > 1:
+                        melhor['descricao'] = ' '.join(descricoes[:2])  # Limitar a 2 descrições
+                    
+                    unique.append(melhor)
+            
             response['recommendations'] = unique
             response['total_recommendations'] = len(unique)
-        except Exception:
+        except Exception as e:
+            print(f"Erro na deduplicação: {e}")
             pass
 
         # Garantir chaves opcionais presentes em todas as recomendações
