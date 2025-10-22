@@ -174,7 +174,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     
     # Exames laboratoriais básicos - Rastreamento de Diabetes (3 exames separados)
     _add_rec({
-        'titulo': 'Glicemia de jejum, soro',
+        'titulo': 'Glicose, soro',
         'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Valores de referência: <100 mg/dL normal, 100-125 mg/dL pré-diabetes, ≥126 mg/dL diabetes.',
         'subtitulo': 'Adultos ≥35 anos | A cada 3 anos se normal',
         'categoria': 'laboratorio',
@@ -903,7 +903,7 @@ def generate_intelligent_recommendations():
             tem_lipidico = any('lipid' in rec.get('titulo', '').lower() or 'colesterol' in rec.get('titulo', '').lower() for rec in recommendations)
             if not tem_lipidico:
                 recommendations.append({
-                    'titulo': 'Perfil lipídico completo (Colesterol total, LDL, HDL, Triglicerídeos), soro',
+                    'titulo': 'Colesterol total e frações, soro',
                     'descricao': 'Avaliação do risco cardiovascular em pacientes diabéticos. Realizar anualmente ou mais frequentemente se em tratamento para dislipidemia.',
                     'subtitulo': 'Diabéticos | Anual',
                     'categoria': 'laboratorio',
@@ -914,7 +914,16 @@ def generate_intelligent_recommendations():
             
             # Função hepática (TGO, TGP)
             recommendations.append({
-                'titulo': 'Transaminases (TGO/AST e TGP/ALT), soro',
+                'titulo': 'Aspartato aminotransferase, soro',
+                'descricao': 'Avaliação da função hepática em pacientes diabéticos. Importante antes de iniciar estatinas e para rastreamento de esteatose hepática não alcoólica (NAFLD).',
+                'subtitulo': 'Diabéticos | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': '<a href="https://diabetesjournals.org/care/article/47/Supplement_1/S1/153904/Standards-of-Care-in-Diabetes-2024" target="_blank">ADA 2024</a>',
+                'grau_evidencia': 'A'
+            })
+            recommendations.append({
+                'titulo': 'Alanina aminotransferase, soro',
                 'descricao': 'Avaliação da função hepática em pacientes diabéticos. Importante antes de iniciar estatinas e para rastreamento de esteatose hepática não alcoólica (NAFLD).',
                 'subtitulo': 'Diabéticos | Anual',
                 'categoria': 'laboratorio',
@@ -1144,7 +1153,7 @@ def generate_intelligent_recommendations():
             
             # Perfil lipídico
             recommendations.append({
-                'titulo': 'Perfil lipídico completo (CT, LDL, HDL, TG)',
+                'titulo': 'Colesterol total e frações, soro',
                 'descricao': 'Avaliação de dislipidemia. Intervalo de 6-12 meses em caso de alteração na última análise. HIV e TARV podem aumentar risco cardiovascular.',
                 'subtitulo': 'HIV+ | Anual',
                 'categoria': 'laboratorio',
@@ -1155,7 +1164,7 @@ def generate_intelligent_recommendations():
             
             # Hemograma de jejum
             recommendations.append({
-                'titulo': 'Glicemia de jejum',
+                'titulo': 'Glicose, soro',
                 'descricao': 'Rastreamento de diabetes. Alguns antirretrovirais podem aumentar risco de hiperglicemia.',
                 'subtitulo': 'HIV+ | Anual',
                 'categoria': 'laboratorio',
@@ -1166,7 +1175,16 @@ def generate_intelligent_recommendations():
             
             # Transaminases (TGO/AST e TGP/ALT)
             recommendations.append({
-                'titulo': 'Transaminases (TGO/AST e TGP/ALT)',
+                'titulo': 'Aspartato aminotransferase, soro',
+                'descricao': 'Avaliação de função hepática. Intervalos mais frequentes em caso de uso de medicamentos hepatotóxicos, doença hepática ou HCV/HBV.',
+                'subtitulo': 'HIV+ | A cada 3-12 meses',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
+                'grau_evidencia': 'A'
+            })
+            recommendations.append({
+                'titulo': 'Alanina aminotransferase, soro',
                 'descricao': 'Avaliação de função hepática. Intervalos mais frequentes em caso de uso de medicamentos hepatotóxicos, doença hepática ou HCV/HBV.',
                 'subtitulo': 'HIV+ | A cada 3-12 meses',
                 'categoria': 'laboratorio',
@@ -1177,7 +1195,7 @@ def generate_intelligent_recommendations():
             
             # Teste de sífilis
             recommendations.append({
-                'titulo': 'Teste imunológico para sífilis (VDRL ou RPR)',
+                'titulo': 'VDRL, soro',
                 'descricao': 'Rastreamento de sífilis. Considerar maior frequência de triagem em caso de risco ou exposição. Pessoas não imunizadas (anti-HBs negativo) não necessitam nova triagem para HIV.',
                 'subtitulo': 'HIV+ | Semestral ou conforme indicação',
                 'categoria': 'laboratorio',
@@ -1188,7 +1206,7 @@ def generate_intelligent_recommendations():
             
             # Anti-HCV
             recommendations.append({
-                'titulo': 'Anti-HCV (Hepatite C)',
+                'titulo': 'Anticorpos anti-HCV, soro',
                 'descricao': 'Rastreamento de hepatite C. Solicitar carga viral de HCV em caso de anti-HCV positivo ou suspeita de infecção aguda.',
                 'subtitulo': 'HIV+ | Anual ou conforme indicação',
                 'categoria': 'laboratorio',
@@ -1199,7 +1217,25 @@ def generate_intelligent_recommendations():
             
             # Triagem HBV (HBsAg, anti-HBs, anti-HBc total)
             recommendations.append({
-                'titulo': 'Triagem HBV (HBsAg, anti-HBs, anti-HBc total)',
+                'titulo': 'Antígeno HBs, soro',
+                'descricao': 'Rastreamento de hepatite B (HBsAg). Vacinar pessoas não imunizadas (anti-HBs negativo). Pessoas imunizadas não necessitam nova triagem para HBV.',
+                'subtitulo': 'HIV+ | Avaliação inicial',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
+                'grau_evidencia': 'A'
+            })
+            recommendations.append({
+                'titulo': 'Anticorpos anti-HBs, soro',
+                'descricao': 'Rastreamento de hepatite B (anti-HBs). Vacinar pessoas não imunizadas (anti-HBs negativo). Pessoas imunizadas não necessitam nova triagem para HBV.',
+                'subtitulo': 'HIV+ | Avaliação inicial',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
+                'grau_evidencia': 'A'
+            })
+            recommendations.append({
+                'titulo': 'Anticorpos anti-HBc total, soro',
                 'descricao': 'Rastreamento de hepatite B. Vacinar pessoas não imunizadas (anti-HBs negativo). Pessoas imunizadas não necessitam nova triagem para HBV.',
                 'subtitulo': 'HIV+ | Avaliação inicial',
                 'categoria': 'laboratorio',
