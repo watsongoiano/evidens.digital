@@ -554,6 +554,10 @@
                         <input type="checkbox" id="dpoc" name="comorbidades" value="dpoc">
                         <label for="dpoc">DPOC</label>
                     </div>
+                    <div class="checkbox-item" id="gestante-item" style="display: none;">
+                        <input type="checkbox" id="gestante" name="gestante" value="true">
+                        <label for="gestante">Gestante</label>
+                    </div>
                 </div>
 
                 <!-- Campos condicionais para HIV -->
@@ -1132,6 +1136,19 @@
             }
         });
 
+        // Listener para campo sexo - mostrar checkbox Gestante apenas para sexo feminino
+        document.getElementById('sexo').addEventListener('change', function() {
+            const gestanteItem = document.getElementById('gestante-item');
+            const gestanteCheckbox = document.getElementById('gestante');
+            
+            if (this.value === 'feminino') {
+                gestanteItem.style.display = 'block';
+            } else {
+                gestanteItem.style.display = 'none';
+                gestanteCheckbox.checked = false; // Desmarcar se mudar para masculino
+            }
+        });
+
         // Inicializar estado dos campos condicionais ao carregar a página
         document.addEventListener('DOMContentLoaded', function() {
             // Ocultar campos de tabagismo inicialmente (valor padrão é "nunca")
@@ -1141,6 +1158,9 @@
             // Ocultar campos de alcoolismo inicialmente (valor padrão é "nao")
             document.getElementById('doses_semana_field').style.display = 'none';
             document.getElementById('anos_consumo_alcool_field').style.display = 'none';
+            
+            // Ocultar checkbox Gestante inicialmente
+            document.getElementById('gestante-item').style.display = 'none';
         });
     </script>
 

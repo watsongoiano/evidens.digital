@@ -138,7 +138,7 @@ def generate_biomarker_recommendations(risk_level, age, sex):
     
     return recommendations
 
-def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False):
+def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False, is_pregnant=False):
     """Gera recomendações baseadas em idade, sexo e condições clínicas
     
     Args:
@@ -602,12 +602,27 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'grau_evidencia': 'A'
         })
     
-    # Vírus Sincicial Respiratório (RSV) a partir de 50 anos
-    if age >= 50:
+    # Vírus Sincicial Respiratório (RSV)
+    # Abrysvo®: APENAS para gestantes (32-36 semanas)
+    # Arexvy®: para adultos ≥50 anos NÃO gestantes
+    
+    if is_pregnant and sex == 'feminino':
+        # Abrysvo® para gestantes (32-36 semanas)
+        _add_rec({
+            'titulo': 'Vírus Sincicial Respiratório - RSV (Abrysvo®)',
+            'descricao': 'Dose única durante a gestação (32-36 semanas) para proteção do bebê contra doença respiratória grave causada por RSV. Única vacina RSV aprovada para uso em gestantes. Administração sazonal preferencial.',
+            'subtitulo': 'Gestantes 32-36 semanas | Dose única | Sem reforço',
+            'categoria': 'vacina',
+            'prioridade': 'alta',
+            'referencia': 'CDC 2025 / ACOG 2025',
+            'grau_evidencia': 'A'
+        })
+    elif age >= 50 and not is_pregnant:
+        # Arexvy® para adultos ≥50 anos não gestantes
         # Prioridade alta para ≥75 anos, média para 50-74 anos
         prioridade_rsv = 'alta' if age >= 75 else 'media'
         _add_rec({
-            'titulo': 'Vírus Sincicial Respiratório - RSV (Arexvy® ou Abrysvo®)',
+            'titulo': 'Vírus Sincicial Respiratório - RSV (Arexvy®)',
             'descricao': 'Dose única. Recomendada para adultos ≥50 anos com maior risco de evolução grave (cardiopatia, pneumopatia, diabetes, obesidade, nefropatia). Obrigatória para ≥75 anos. Pode ser coadministrada com Shingrix®, Efluelda® e vacinas pneumocócicas.',
             'subtitulo': 'Adultos ≥50 anos (obrigatória ≥75 anos) | Dose única | Sem reforço',
             'categoria': 'vacina',
@@ -695,6 +710,7 @@ def generate_intelligent_recommendations():
         # Extrair dados do paciente
         age = int(data.get('idade', 0))
         sex = data.get('sexo', 'masculino')
+        is_pregnant = data.get('gestante', False) or data.get('gestante') == 'true'
         weight = float(data.get('peso', 0)) if data.get('peso') else None
         height = float(data.get('altura', 0)) if data.get('altura') else None
         
@@ -788,7 +804,8 @@ def generate_intelligent_recommendations():
         # Recomendações baseadas em idade, sexo e status de hipertensão
         age_sex_recs = generate_age_sex_recommendations(age, sex, country='BR', 
                                                          has_hypertension=has_hypertension,
-                                                         has_resistant_hypertension=has_resistant_hypertension)
+                                                         has_resistant_hypertension=has_resistant_hypertension,
+                                                         is_pregnant=is_pregnant)
         recommendations.extend(age_sex_recs)
         
         # Recomendações de biomarcadores se necessário
