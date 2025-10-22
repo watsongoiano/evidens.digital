@@ -947,7 +947,7 @@ def generate_intelligent_recommendations():
             tem_creatinina = any('creatinina' in rec.get('titulo', '').lower() for rec in recommendations)
             if not tem_creatinina:
                 recommendations.append({
-                    'titulo': 'Creatinina sérica e Taxa de Filtração Glomerular estimada (eGFR)',
+                    'titulo': 'Creatinina, soro',
                     'descricao': 'Avaliação da função renal em pacientes diabéticos. Realizar anualmente para detecção precoce de doença renal diabética.',
                     'subtitulo': 'Diabéticos | Anual',
                     'categoria': 'laboratorio',
@@ -997,7 +997,7 @@ def generate_intelligent_recommendations():
             
             if usa_ieca_bra or usa_diuretico:
                 recommendations.append({
-                    'titulo': 'Potássio sérico',
+                    'titulo': 'Potássio, soro',
                     'descricao': 'Monitoramento de potássio em pacientes diabéticos em uso de IECA, BRA ou diuréticos. Importante para prevenir hiper ou hipocalemia.',
                     'subtitulo': 'Diabéticos em uso de IECA/BRA/diuréticos | Periódico',
                     'categoria': 'laboratorio',
@@ -1008,7 +1008,25 @@ def generate_intelligent_recommendations():
             
             # Cálcio, vitamina D e fósforo (para pacientes apropriados)
             recommendations.append({
-                'titulo': 'Cálcio, Vitamina D (25-OH) e Fósforo, soro',
+                'titulo': 'Cálcio, soro',
+                'descricao': 'Avaliação do metabolismo ósseo e risco de osteoporose em pacientes diabéticos.',
+                'subtitulo': 'Diabéticos | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'media',
+                'referencia': '<a href="https://diabetesjournals.org/care/article/47/Supplement_1/S1/153904/Standards-of-Care-in-Diabetes-2024" target="_blank">ADA 2024</a>',
+                'grau_evidencia': 'B'
+            })
+            recommendations.append({
+                'titulo': '25-hidroxivitamina D, soro',
+                'descricao': 'Avaliação do metabolismo ósseo e risco de osteoporose em pacientes diabéticos.',
+                'subtitulo': 'Diabéticos | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'media',
+                'referencia': '<a href="https://diabetesjournals.org/care/article/47/Supplement_1/S1/153904/Standards-of-Care-in-Diabetes-2024" target="_blank">ADA 2024</a>',
+                'grau_evidencia': 'B'
+            })
+            recommendations.append({
+                'titulo': 'Fósforo, soro',
                 'descricao': 'Avaliação do metabolismo ósseo em pacientes diabéticos, especialmente com doença renal ou osteoporose. Deficiência de vitamina D é comum em diabéticos.',
                 'subtitulo': 'Diabéticos com doença renal ou osteoporose | Conforme necessidade',
                 'categoria': 'laboratorio',
@@ -1131,7 +1149,7 @@ def generate_intelligent_recommendations():
             
             # Creatinina e TFGe
             recommendations.append({
-                'titulo': 'Creatinina sérica e Taxa de filtração glomerular estimada (TFGe)',
+                'titulo': 'Creatinina, soro',
                 'descricao': 'Avaliação de função renal. Intervalo de 3-6 meses em caso de uso de medicamentos nefrotóxicos (TFGe abaixo de 60 mL/min/1.73m² ou risco aumentado para doença renal).',
                 'subtitulo': 'HIV+ | Anual (ou 3-6 meses se nefrotóxicos)',
                 'categoria': 'laboratorio',
@@ -1142,7 +1160,7 @@ def generate_intelligent_recommendations():
             
             # Exame básico de urina
             recommendations.append({
-                'titulo': 'Exame básico de urina (EAS)',
+                'titulo': 'EAS - Elementos Anormais e Sedimentoscopia, urina',
                 'descricao': 'Rastreamento de alterações renais. Intervalo de 3-6 meses em caso de uso de medicamentos nefrotóxicos, proteinúria ou risco aumentado para doença renal.',
                 'subtitulo': 'HIV+ | Anual',
                 'categoria': 'laboratorio',
@@ -1288,7 +1306,7 @@ def generate_intelligent_recommendations():
             
             # Gasometria arterial
             recommendations.append({
-                'titulo': 'Gasometria arterial',
+                'titulo': 'Gasometria arterial, sangue arterial',
                 'descricao': 'Avalia oxigenação e ventilação em pacientes com DPOC, especialmente em exacerbações ou doença avançada. Indica necessidade de oxigenoterapia.',
                 'subtitulo': 'DPOC | Conforme indicação clínica',
                 'categoria': 'laboratorio',
@@ -1300,7 +1318,25 @@ def generate_intelligent_recommendations():
             
             # Eletrólitos
             recommendations.append({
-                'titulo': 'Eletrólitos (Na, K, Cl)',
+                'titulo': 'Sódio, soro',
+                'descricao': 'Avaliação de distúrbios eletrolíticos. Importante em pacientes com DPOC grave ou em uso de diuréticos.',
+                'subtitulo': 'DPOC | Anual ou conforme indicação',
+                'categoria': 'laboratorio',
+                'prioridade': 'media',
+                'referencia': '<a href="https://goldcopd.org/2023-gold-report/" target="_blank">GOLD COPD 2023</a>',
+                'grau_evidencia': 'B'
+            })
+            recommendations.append({
+                'titulo': 'Potássio, soro',
+                'descricao': 'Avaliação de distúrbios eletrolíticos. Importante em pacientes com DPOC grave ou em uso de diuréticos.',
+                'subtitulo': 'DPOC | Anual ou conforme indicação',
+                'categoria': 'laboratorio',
+                'prioridade': 'media',
+                'referencia': '<a href="https://goldcopd.org/2023-gold-report/" target="_blank">GOLD COPD 2023</a>',
+                'grau_evidencia': 'B'
+            })
+            recommendations.append({
+                'titulo': 'Cloreto, soro',
                 'descricao': 'Monitoramento de eletrólitos em pacientes com DPOC, especialmente aqueles em uso de diuréticos ou corticosteroides. Hipocalemia pode ocorrer com beta-agonistas.',
                 'subtitulo': 'DPOC | Conforme uso de medicações',
                 'categoria': 'laboratorio',
@@ -1324,7 +1360,7 @@ def generate_intelligent_recommendations():
             
             # Hemograma completo
             recommendations.append({
-                'titulo': 'Hemograma completo',
+                'titulo': 'Hemograma completo, sangue total',
                 'descricao': 'Avaliar policitemia secundária à hipoxemia crônica e descartar anemia que pode agravar dispneia.',
                 'subtitulo': 'DPOC | Anual',
                 'categoria': 'laboratorio',
