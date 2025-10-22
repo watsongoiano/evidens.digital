@@ -790,6 +790,7 @@
             let riskHtml = '';
             if (cardiovascularRisk) {
                 const risk10yr = preventCalc.interpretRisk(cardiovascularRisk.risk_10yr);
+                const risk30yr = preventCalc.interpretRisk(cardiovascularRisk.risk_30yr);
                 riskHtml = `
                     <div class="cardiovascular-risk-section" style="margin-bottom: 2rem;">
                         <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Risco Cardiovascular (PREVENT 2024)</h3>
@@ -799,10 +800,10 @@
                                 <div style="font-size: 2.5rem; font-weight: bold; color: ${risk10yr.color}; margin: 0.5rem 0;">${cardiovascularRisk.risk_10yr}%</div>
                                 <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">${risk10yr.description}</p>
                             </div>
-                            <div class="risk-card" style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border-left: 5px solid #e67e22;">
+                            <div class="risk-card" style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border-left: 5px solid ${risk30yr.color};">
                                 <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Estimated 30-year<br>risk of CVD</h4>
-                                <div style="font-size: 2.5rem; font-weight: bold; color: #e67e22; margin: 0.5rem 0;">${cardiovascularRisk.risk_30yr}%</div>
-                                <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">Risco a longo prazo</p>
+                                <div style="font-size: 2.5rem; font-weight: bold; color: ${risk30yr.color}; margin: 0.5rem 0;">${cardiovascularRisk.risk_30yr}%</div>
+                                <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">${risk30yr.description}</p>
                             </div>
                         </div>
                         <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; border-left: 4px solid #3498db;">
