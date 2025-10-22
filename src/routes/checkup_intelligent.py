@@ -1076,7 +1076,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': f'HIV+ | {frequencia_cd4}',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
             
@@ -1093,7 +1093,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': f'HIV+ | {frequencia_cv}',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
             
@@ -1105,7 +1105,7 @@ def generate_intelligent_recommendations():
                     'subtitulo': 'HIV+ | Avaliação inicial ou falha virológica',
                     'categoria': 'laboratorio',
                     'prioridade': 'alta',
-                    'referencia': 'NIH 2024',
+                    'referencia': '<a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH 2024</a>',
                     'grau_evidencia': 'A'
                 })
             
@@ -1116,7 +1116,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | A cada 6-12 meses',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
             
@@ -1127,7 +1127,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Anual (ou 3-6 meses se nefrotóxicos)',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
             
@@ -1138,7 +1138,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Anual',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
             
@@ -1149,7 +1149,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Anual',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
             
@@ -1160,7 +1160,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Anual',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
             
@@ -1171,7 +1171,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | A cada 3-12 meses',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
             
@@ -1182,7 +1182,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Semestral ou conforme indicação',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
             
@@ -1193,7 +1193,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Anual ou conforme indicação',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
             
@@ -1204,7 +1204,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'HIV+ | Avaliação inicial',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
             
@@ -1217,7 +1217,7 @@ def generate_intelligent_recommendations():
                     'subtitulo': 'Mulheres HIV+ em idade fértil | Conforme indicação',
                     'categoria': 'laboratorio',
                     'prioridade': 'alta',
-                    'referencia': 'NIH 2024',
+                    'referencia': '<a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH 2024</a>',
                     'grau_evidencia': 'A'
                 })
         
@@ -1382,7 +1382,7 @@ def generate_intelligent_recommendations():
                 'tipo': 'calculadora',
                 'prioridade': 'media',
                 'link': 'https://www.fraxplus.org/pt/calculation-tool',
-                'referencia': 'MS Brasil PCDT HIV 2024 | EACS 11.1 | NIH/CDC HIV Guidelines',
+                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'B'
             })
         
