@@ -138,7 +138,7 @@ def generate_biomarker_recommendations(risk_level, age, sex):
     
     return recommendations
 
-def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False, is_pregnant=False):
+def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False, is_pregnant=False, tabagismo='nunca_fumou', macos_ano=0, has_dpoc=False):
     """Gera recomendações baseadas em idade, sexo e condições clínicas
     
     Args:
@@ -418,16 +418,19 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         })
     
     # Aneurisma de Aorta Abdominal (AAA)
+    # Critérios: Homens 65-75 anos E (DPOC OU fumante/ex-fumante com ≥10 maços-ano)
     if sex == 'masculino' and 65 <= age <= 75:
-        _add_rec({
-            'titulo': 'Ultrassonografia de aorta abdominal',
-            'descricao': 'Rastreamento de aneurisma de aorta abdominal. Homens 65-75 anos que já fumaram.',
-            'subtitulo': 'Homens 65-75 anos que já fumaram | Dose única',
-            'categoria': 'imagem',
-            'prioridade': 'alta',
-            'referencia': 'USPSTF 2019',
-            'grau_evidencia': 'B'
-        })
+        elegivel_aaa = has_dpoc or (tabagismo in ['atual', 'ex'] and macos_ano >= 10)
+        if elegivel_aaa:
+            _add_rec({
+                'titulo': 'Ultrassonografia com Doppler de Aorta Abdominal',
+                'descricao': 'Rastreamento de aneurisma de aorta abdominal. Homens 65-75 anos com DPOC ou história de tabagismo ≥10 maços-ano.',
+                'subtitulo': 'Homens 65-75 anos com DPOC ou ≥10 maços-ano | Dose única',
+                'categoria': 'imagem',
+                'prioridade': 'alta',
+                'referencia': 'USPSTF 2019',
+                'grau_evidencia': 'B'
+            })
     
     # Vacinas
     # Influenza - nome comercial varia conforme idade
@@ -798,6 +801,11 @@ def generate_intelligent_recommendations():
                 has_hypertension = True
                 break
         
+        # Extrair dados de tabagismo e DPOC
+        tabagismo = data.get('tabagismo', 'nunca_fumou')
+        macos_ano = float(data.get('macos_ano', 0)) if data.get('macos_ano') else 0
+        has_dpoc = 'dpoc' in comorbidades
+        
         # Gerar recomendações
         recommendations = []
         
@@ -805,7 +813,10 @@ def generate_intelligent_recommendations():
         age_sex_recs = generate_age_sex_recommendations(age, sex, country='BR', 
                                                          has_hypertension=has_hypertension,
                                                          has_resistant_hypertension=has_resistant_hypertension,
-                                                         is_pregnant=is_pregnant)
+                                                         is_pregnant=is_pregnant,
+                                                         tabagismo=tabagismo,
+                                                         macos_ano=macos_ano,
+                                                         has_dpoc=has_dpoc)
         recommendations.extend(age_sex_recs)
         
         # Recomendações de biomarcadores se necessário
@@ -814,8 +825,7 @@ def generate_intelligent_recommendations():
             recommendations.extend(biomarker_recs)
         
         # Rastreamento de câncer de pulmão (LDCT) - USPSTF 2021
-        tabagismo = data.get('tabagismo', 'nunca_fumou')
-        macos_ano = float(data.get('macos_ano', 0)) if data.get('macos_ano') else 0
+        # tabagismo e macos_ano já extraídos acima
         anos_parou_fumar = float(data.get('anos_parou_fumar', 0)) if data.get('anos_parou_fumar') else 0
         
         # Critérios: 50-80 anos, ≥20 maços-ano, fumante atual OU parou há <15 anos
