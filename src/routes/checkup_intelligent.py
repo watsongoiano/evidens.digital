@@ -436,7 +436,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Influenza - nome comercial varia conforme idade
     if age >= 65:
         _add_rec({
-            'titulo': 'Efluelda® (Influenza Tetravalente de Alta Dose)',
+            'titulo': 'Influenza Tetravalente (Efluelda®)',
             'descricao': 'Dose anual. Vacina de alta dose ou adjuvantada recomendada para idosos. Aplicar em dose única, INTRAMUSCULAR, anualmente.',
             'subtitulo': 'Adultos ≥65 anos | Anual | Reforço: anual',
             'categoria': 'vacina',
@@ -482,7 +482,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
 
     # dTpa (Tétano, difteria, coqueluche)
     _add_rec({
-        'titulo': 'dTpa (Adacel® ou Boostrix®)',
+            'titulo': 'dTpa (Adacel® ou Boostrix®)',
         'descricao': '1 dose de dTpa, depois reforço com dT ou dTpa a cada 10 anos. Gestantes devem receber dTpa a cada gestação.',
         'subtitulo': 'Adultos ≥18 anos | 1 dose inicial + reforços | Reforço: 10 anos (+ cada gestação)',
         'categoria': 'vacina',
@@ -494,7 +494,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Tríplice viral (Sarampo, caxumba, rubéola)
     if age <= 68:  # CDC 2025: recomendada até 68 anos
         _add_rec({
-            'titulo': 'Tríplice viral - SCR (Priorix® ou M-M-R® II)',
+            'titulo': 'Tríplice Viral - SCR (Priorix® ou M-M-R® II)',
             'descricao': '1 ou 2 doses para adultos não vacinados ou sem comprovação vacinal. Adultos até 68 anos.',
             'subtitulo': 'Adultos 19-68 anos não imunizados | 1-2 doses | Sem reforço',
             'categoria': 'vacina',
@@ -505,7 +505,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
 
     # Hepatite A
     _add_rec({
-        'titulo': 'Hepatite A (Havrix® ou Vaqta®)',
+            'titulo': 'Hepatite A (Havrix® ou Vaqta®)',
         'descricao': '2 doses com intervalo de 6 meses. Recomendada para grupos de risco, viajantes e áreas endêmicas.',
         'subtitulo': 'Grupos de risco e viajantes | 2 doses',
         'categoria': 'vacina',
@@ -516,7 +516,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
 
     # Febre amarela (para áreas endêmicas)
     _add_rec({
-        'titulo': 'Febre amarela (Stamaril®)',
+            'titulo': 'Febre Amarela (Stamaril®)',
         'descricao': 'Dose única ou 2 doses com intervalo de 10 anos (SBIm recomenda 2 doses). Indicada para residentes ou viajantes para áreas endêmicas.',
         'subtitulo': 'Áreas endêmicas | 1-2 doses | Reforço: 10 anos (se 2 doses)',
         'categoria': 'vacina',
@@ -563,7 +563,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
 
     # COVID-19
     _add_rec({
-        'titulo': 'COVID-19 (Comirnaty®, Spikevax® ou outras)',
+            'titulo': 'COVID-19 (Comirnaty®, Spikevax® ou outras)',
         'descricao': 'Dose de reforço anual conforme vacina disponível. Idosos ≥65 anos: pelo menos 2 doses da vacina atual.',
         'subtitulo': 'Todos ≥6 meses | Anual (atualizada)',
         'categoria': 'vacina',
@@ -575,7 +575,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Herpes zóster a partir de 50 anos
     if age >= 50:
         _add_rec({
-            'titulo': 'Herpes zóster (Shingrix®)',
+            'titulo': 'Herpes Zóster (Shingrix®)',
             'descricao': '2 doses com intervalo de 2 a 6 meses.',
             'subtitulo': 'Adultos ≥50 anos | 2 doses (0-2 a 6 meses) | Sem reforço',
             'categoria': 'vacina',
@@ -587,7 +587,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Pneumocócicas a partir de 50 anos
     if age >= 50:
         _add_rec({
-            'titulo': 'Pneumocócica Conjugada 20V (Prevenar 20®) OU 15V (Vaxneuvance®)',
+            'titulo': 'Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)',
             'descricao': 'VPC20 em dose única OU esquema sequencial VPC15 seguida de VPP23 após 6-12 meses. Pode ser coadministrada com Shingrix®, Efluelda® e Arexvy®.',
             'subtitulo': 'Adultos ≥50 anos | Dose única ou esquema sequencial | Sem reforço',
             'categoria': 'vacina',
@@ -596,7 +596,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'grau_evidencia': 'A'
         })
         _add_rec({
-            'titulo': 'Pneumocócica Polissacarídica 23V (Pneumovax 23®)',
+            'titulo': 'Pneumocócica 23V (Pneumovax 23®)',
             'descricao': '1 dose 6-12 meses após VPC15 (se esquema sequencial escolhido). Reforço 5 anos após a primeira dose de VPP23. Não necessária se VPC20 foi utilizada.',
             'subtitulo': 'Adultos ≥50 anos | Esquema sequencial (se VPC15) | Reforço: 5 anos',
             'categoria': 'vacina',
@@ -612,7 +612,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     if is_pregnant and sex == 'feminino':
         # Abrysvo® para gestantes (32-36 semanas)
         _add_rec({
-            'titulo': 'Vírus Sincicial Respiratório - RSV (Abrysvo®)',
+            'titulo': 'RSV - Vírus Sincicial Respiratório (Abrysvo®)',
             'descricao': 'Dose única durante a gestação (32-36 semanas) para proteção do bebê contra doença respiratória grave causada por RSV. Única vacina RSV aprovada para uso em gestantes. Administração sazonal preferencial.',
             'subtitulo': 'Gestantes 32-36 semanas | Dose única | Sem reforço',
             'categoria': 'vacina',
@@ -625,7 +625,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         # Prioridade alta para ≥75 anos, média para 50-74 anos
         prioridade_rsv = 'alta' if age >= 75 else 'media'
         _add_rec({
-            'titulo': 'Vírus Sincicial Respiratório - RSV (Arexvy®)',
+            'titulo': 'RSV - Vírus Sincicial Respiratório (Arexvy®)',
             'descricao': 'Dose única. Recomendada para adultos ≥50 anos com maior risco de evolução grave (cardiopatia, pneumopatia, diabetes, obesidade, nefropatia). Obrigatória para ≥75 anos. Pode ser coadministrada com Shingrix®, Efluelda® e vacinas pneumocócicas.',
             'subtitulo': 'Adultos ≥50 anos (obrigatória ≥75 anos) | Dose única | Sem reforço',
             'categoria': 'vacina',
@@ -649,7 +649,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Hepatites A e B combinada (Twinrix) - alternativa para quem precisa das duas
     if 18 <= age <= 59:
         _add_rec({
-            'titulo': 'Hepatites A e B combinada (Twinrix®)',
+            'titulo': 'Hepatites A e B Combinada (Twinrix®)',
             'descricao': '3 doses (esquema 0-1-6 meses) ou esquema acelerado (0-7-21 dias + reforço aos 12 meses). Alternativa para adultos que precisam de ambas as vacinas.',
             'subtitulo': 'Adultos 18-59 anos não imunizados | 3-4 doses (0-1-6 meses) | Sem reforço',
             'categoria': 'vacina',
