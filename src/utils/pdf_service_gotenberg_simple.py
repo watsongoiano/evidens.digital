@@ -268,7 +268,7 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
         <div class="vaccine-list">
             {% for vaccine in vacinas %}
             <div class="vaccine-item">
-                <p><strong>{{ loop.index }}. {{ vaccine.titulo|upper }}</strong> {{ '.' * 50 }} {{ vaccine.doses }}</p>
+                <p><strong>{{ loop.index }}. {{ vaccine.titulo|upper }}</strong> {{ vaccine.pontos }} {{ vaccine.doses }}</p>
                 <p style="margin-left: 20px; font-size: 0.9em;">{{ vaccine.detalhes }}</p>
             </div>
             {% endfor %}
@@ -285,12 +285,29 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
     
     # Adicionar detalhes de administração a cada vacina
     vacinas_com_detalhes = []
+    max_titulo_length = 0
+    
+    # Primeira passagem: encontrar o título mais longo
+    for vacina in vacinas:
+        titulo = vacina.get('titulo', 'Vacina')
+        titulo_length = len(titulo)
+        if titulo_length > max_titulo_length:
+            max_titulo_length = titulo_length
+    
+    # Segunda passagem: criar vacinas com pontos alinhados
     for vacina in vacinas:
         titulo = vacina.get('titulo', 'Vacina')
         detalhes_admin = get_detalhes_administracao_vacina(titulo)
         
+        # Calcular quantidade de pontos necessária para alinhamento
+        # Fórmula: pontos base (50) + diferença de comprimento
+        titulo_length = len(titulo)
+        pontos_necessarios = 50 + (max_titulo_length - titulo_length)
+        pontos = '.' * pontos_necessarios
+        
         vacina_completa = {
             'titulo': titulo,
+            'pontos': pontos,
             'doses': detalhes_admin['doses'],
             'detalhes': detalhes_admin['detalhes']
         }
