@@ -1023,6 +1023,16 @@
                     historico_familiar: currentPatientData.historico_familiar || []
                 };
                 
+                // Filtrar apenas vacinas do currentRecommendations
+                const vacinas = currentRecommendations.filter(rec => 
+                    (rec.categoria || '').toLowerCase() === 'vacina'
+                );
+                
+                if (vacinas.length === 0) {
+                    alert('Nenhuma vacina foi recomendada!');
+                    return;
+                }
+                
                 const response = await fetch('/api/gerar-pdf-vacinas', {
                     method: 'POST',
                     headers: {
@@ -1030,7 +1040,7 @@
                     },
                     body: JSON.stringify({
                         dados_paciente: dadosPaciente,
-                        recomendacoes: currentRecommendations
+                        recomendacoes: vacinas
                     })
                 });
                 

@@ -4,6 +4,41 @@ Template simplificado para PDFs de solicitação de exames e prescrição de vac
 
 from datetime import datetime
 from jinja2 import Template
+import re
+
+# Dicionário com informações de administração de vacinas
+VACINAS_ADMINISTRACAO = {
+    "influenza": {"doses": "1 dose anual", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Anualmente", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, anualmente."},
+    "gardasil": {"doses": "3 doses", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "0, 2 e 6 meses", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, no intervalo 0, 2 e 6 meses."},
+    "hpv": {"doses": "3 doses", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "0, 2 e 6 meses", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, no intervalo 0, 2 e 6 meses."},
+    "hepatite b": {"doses": "3 doses", "via": "INTRAMUSCULAR", "volume": "1,0ml", "intervalo": "0, 1 e 6 meses", "detalhes": "Aplicar uma dose (1,0ml), INTRAMUSCULAR, no intervalo 0, 1 e 6 meses."},
+    "dtpa": {"doses": "1 dose", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "A cada 10 anos", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, com reforço a cada 10 anos."},
+    "triplice viral": {"doses": "2 doses", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "0 e 1 mês", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA, no intervalo 0 e 1 mês."},
+    "scr": {"doses": "2 doses", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "0 e 1 mês", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA, no intervalo 0 e 1 mês."},
+    "hepatite a": {"doses": "2 doses", "via": "INTRAMUSCULAR", "volume": "1,0ml", "intervalo": "0 e 6 meses", "detalhes": "Aplicar uma dose (1,0ml), INTRAMUSCULAR, no intervalo 0 e 6 meses."},
+    "febre amarela": {"doses": "1 dose", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "Dose única", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA, dose única."},
+    "meningococica": {"doses": "1 dose", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Dose única ou reforço conforme indicação", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, dose única ou reforço conforme indicação médica."},
+    "dengue": {"doses": "2 doses", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "0 e 3 meses", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA, no intervalo 0 e 3 meses."},
+    "covid": {"doses": "Conforme esquema vigente", "via": "INTRAMUSCULAR", "volume": "Conforme fabricante", "intervalo": "Conforme esquema vigente", "detalhes": "Aplicar conforme esquema vacinal vigente e orientação do Ministério da Saúde."},
+    "varicela": {"doses": "2 doses", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "0 e 1-2 meses", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA, no intervalo 0 e 1-2 meses."},
+    "pneumococica": {"doses": "1-2 doses", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Conforme esquema", "detalhes": "Aplicar conforme esquema vacinal (VPC13 seguida de VPP23 após 2 meses)."},
+    "herpes zoster": {"doses": "2 doses", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "0 e 2-6 meses", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, no intervalo 0 e 2-6 meses."},
+    "twinrix": {"doses": "3 doses", "via": "INTRAMUSCULAR", "volume": "1,0ml", "intervalo": "0, 1 e 6 meses", "detalhes": "Aplicar uma dose (1,0ml), INTRAMUSCULAR, no intervalo 0, 1 e 6 meses."},
+    "rsv": {"doses": "1 dose", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Dose única", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, dose única."},
+    "dt": {"doses": "1 dose", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "A cada 10 anos", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, com reforço a cada 10 anos."}
+}
+
+def get_detalhes_administracao_vacina(titulo_vacina):
+    """Retorna detalhes de administração da vacina baseado no título"""
+    titulo_lower = titulo_vacina.lower()
+    
+    # Tentar match direto
+    for key, info in VACINAS_ADMINISTRACAO.items():
+        if key in titulo_lower:
+            return info
+    
+    # Fallback
+    return {"doses": "Conforme orientação médica", "via": "Conforme bula", "volume": "Conforme bula", "intervalo": "Conforme orientação médica", "detalhes": "Aplicar conforme orientação médica e bula do fabricante."}
 
 def gerar_html_exames_simples(dados_paciente, exames, tipo_exame="LABORATORIAIS"):
     """Gera HTML simplificado para solicitação de exames"""
@@ -233,7 +268,8 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
         <div class="vaccine-list">
             {% for vaccine in vacinas %}
             <div class="vaccine-item">
-                <p><strong>{{ loop.index }}. {{ vaccine.titulo }}</strong></p>
+                <p><strong>{{ loop.index }}. {{ vaccine.titulo|upper }}</strong> {{ '.' * 50 }} {{ vaccine.doses }}</p>
+                <p style="margin-left: 20px; font-size: 0.9em;">{{ vaccine.detalhes }}</p>
             </div>
             {% endfor %}
         </div>
@@ -247,6 +283,19 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
     </html>
     """
     
+    # Adicionar detalhes de administração a cada vacina
+    vacinas_com_detalhes = []
+    for vacina in vacinas:
+        titulo = vacina.get('titulo', 'Vacina')
+        detalhes_admin = get_detalhes_administracao_vacina(titulo)
+        
+        vacina_completa = {
+            'titulo': titulo,
+            'doses': detalhes_admin['doses'],
+            'detalhes': detalhes_admin['detalhes']
+        }
+        vacinas_com_detalhes.append(vacina_completa)
+    
     template = Template(template_html)
     
     html = template.render(
@@ -254,7 +303,7 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
         paciente_idade=f"{dados_paciente.get('idade', 'Não informada')} anos" if dados_paciente.get('idade') else 'Não informada',
         paciente_sexo='Feminino' if dados_paciente.get('sexo') in ['F', 'feminino'] else 'Masculino',
         data_emissao=datetime.now().strftime('%d/%m/%Y'),
-        vacinas=vacinas
+        vacinas=vacinas_com_detalhes
     )
     
     return html
