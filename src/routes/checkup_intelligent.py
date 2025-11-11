@@ -1591,6 +1591,78 @@ def generate_pdf_report():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Dicionário com informações detalhadas de administração de vacinas
+VACINAS_ADMINISTRACAO = {
+    "Gardasil 9": {"doses": "3 doses", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "0, 2 e 6 meses", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, no intervalo 0, 2 e 6 meses."},
+    "Hepatite B": {"doses": "3 doses", "via": "INTRAMUSCULAR", "volume": "1,0ml (adultos)", "intervalo": "0, 1 e 6 meses", "detalhes": "Aplicar uma dose (1,0ml), INTRAMUSCULAR, no intervalo 0, 1 e 6 meses."},
+    "Hepatite A": {"doses": "2 doses", "via": "INTRAMUSCULAR", "volume": "1,0ml", "intervalo": "0 e 6 meses", "detalhes": "Aplicar uma dose (1,0ml), INTRAMUSCULAR, no intervalo 0 e 6 meses."},
+    "Hepatites A e B combinada": {"doses": "3-4 doses", "via": "INTRAMUSCULAR", "volume": "1,0ml", "intervalo": "0, 1 e 6 meses (padrão) ou 0, 7, 21 dias e reforço aos 12 meses (acelerado)", "detalhes": "Aplicar uma dose (1,0ml), INTRAMUSCULAR. Esquema padrão: 0, 1 e 6 meses. Esquema acelerado: 0, 7, 21 dias e reforço aos 12 meses."},
+    "dTpa": {"doses": "1 dose (reforço a cada 10 anos)", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Dose única, reforço a cada 10 anos", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR. Reforço a cada 10 anos."},
+    "DT": {"doses": "1 dose (reforço a cada 10 anos)", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Dose única, reforço a cada 10 anos", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR. Reforço a cada 10 anos."},
+    "Tríplice viral": {"doses": "1-2 doses", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "Dose única ou 2 doses com intervalo de 1 mês", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA. Se necessário, segunda dose com intervalo mínimo de 1 mês."},
+    "Influenza": {"doses": "1 dose anual", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Anual", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, anualmente."},
+    "Pneumocócica 23-valente": {"doses": "1-2 doses", "via": "INTRAMUSCULAR ou SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "Dose única ou reforço após 5 anos (grupos de risco)", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR ou SUBCUTÂNEA. Reforço após 5 anos para grupos de risco."},
+    "Pneumocócica 13-valente": {"doses": "1 dose", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Dose única", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR."},
+    "Pneumocócica 20-valente": {"doses": "1 dose", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Dose única", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR."},
+    "Meningocócica ACWY": {"doses": "1 dose (reforço a cada 5 anos)", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Dose única, reforço a cada 5 anos para grupos de risco", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR. Reforço a cada 5 anos para grupos de risco."},
+    "Meningocócica B": {"doses": "2 doses", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "0 e 1-2 meses", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, no intervalo 0 e 1-2 meses."},
+    "Febre amarela": {"doses": "1 dose", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "Dose única (proteção por 10 anos)", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA. Reforço a cada 10 anos se necessário."},
+    "Dengue": {"doses": "2 doses", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "0 e 3 meses", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA, no intervalo 0 e 3 meses."},
+    "COVID-19": {"doses": "1 dose anual", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Anual (atualizada)", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, anualmente (vacina atualizada)."},
+    "Varicela": {"doses": "2 doses", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "0 e 1-2 meses", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA, no intervalo 0 e 1-2 meses."},
+    "Herpes Zóster": {"doses": "2 doses", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "0 e 2-6 meses", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, no intervalo 0 e 2-6 meses."},
+    "RSV": {"doses": "1 dose", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Dose única", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR."},
+    "RSV Gestantes": {"doses": "1 dose", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Dose única (32-36 semanas de gestação)", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, entre 32-36 semanas de gestação."}
+}
+
+def get_detalhes_administracao_vacina(titulo_vacina):
+    """Retorna os detalhes de administração de uma vacina baseado no título."""
+    titulo_normalizado = titulo_vacina.upper().strip()
+    
+    if "GARDASIL" in titulo_normalizado or "HPV" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Gardasil 9"]
+    elif "HEPATITE B" in titulo_normalizado and "COMBINADA" not in titulo_normalizado and "TWINRIX" not in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Hepatite B"]
+    elif "HEPATITE A" in titulo_normalizado and "COMBINADA" not in titulo_normalizado and "TWINRIX" not in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Hepatite A"]
+    elif "TWINRIX" in titulo_normalizado or ("HEPATITE" in titulo_normalizado and "COMBINADA" in titulo_normalizado):
+        return VACINAS_ADMINISTRACAO["Hepatites A e B combinada"]
+    elif "DTPA" in titulo_normalizado or "ADACEL" in titulo_normalizado or "BOOSTRIX" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["dTpa"]
+    elif "DT" in titulo_normalizado and "DTPA" not in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["DT"]
+    elif "TRÍPLICE VIRAL" in titulo_normalizado or "SCR" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Tríplice viral"]
+    elif "INFLUENZA" in titulo_normalizado or "GRIPE" in titulo_normalizado or "FLUARIX" in titulo_normalizado or "EFLUELDA" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Influenza"]
+    elif "PNEUMO 23" in titulo_normalizado or "PNEUMOCÓCICA 23" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Pneumocócica 23-valente"]
+    elif "PREVENAR 13" in titulo_normalizado or "PNEUMOCÓCICA 13" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Pneumocócica 13-valente"]
+    elif "PREVENAR 20" in titulo_normalizado or "PNEUMOCÓCICA 20" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Pneumocócica 20-valente"]
+    elif "MENINGOCÓCICA ACWY" in titulo_normalizado or "MENACTRA" in titulo_normalizado or "MENVEO" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Meningocócica ACWY"]
+    elif "MENINGOCÓCICA B" in titulo_normalizado or "BEXSERO" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Meningocócica B"]
+    elif "FEBRE AMARELA" in titulo_normalizado or "STAMARIL" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Febre amarela"]
+    elif "DENGUE" in titulo_normalizado or "QDENGA" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Dengue"]
+    elif "COVID" in titulo_normalizado or "COMIRNATY" in titulo_normalizado or "SPIKEVAX" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["COVID-19"]
+    elif "VARICELA" in titulo_normalizado or "VARILRIX" in titulo_normalizado or "VARIVAX" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Varicela"]
+    elif "HERPES ZÓSTER" in titulo_normalizado or "SHINGRIX" in titulo_normalizado or "ZOSTER" in titulo_normalizado:
+        return VACINAS_ADMINISTRACAO["Herpes Zóster"]
+    elif "RSV" in titulo_normalizado or "SINCICIAL" in titulo_normalizado:
+        if "ABRYSVO" in titulo_normalizado or "GESTANTE" in titulo_normalizado:
+            return VACINAS_ADMINISTRACAO["RSV Gestantes"]
+        else:
+            return VACINAS_ADMINISTRACAO["RSV"]
+    else:
+        return {"doses": "Conforme orientação médica", "via": "Conforme bula", "volume": "Conforme bula", "intervalo": "Conforme orientação médica", "detalhes": "Aplicar conforme orientação médica e bula do fabricante."}
+
 @checkup_intelligent_bp.route('/gerar-receita-vacinas', methods=['POST'])
 def gerar_receita_vacinas():
     try:
@@ -1675,12 +1747,18 @@ def gerar_receita_vacinas():
             titulo = vacina.get('titulo', 'Vacina')
             descricao = vacina.get('descricao', 'Aplicar conforme orientação médica.')
             ref_html = vacina.get('referencia_html')
+            
+            # Obter detalhes de administração
+            detalhes = get_detalhes_administracao_vacina(titulo)
+            doses = detalhes.get('doses', '1 dose')
+            detalhes_admin = detalhes.get('detalhes', 'Aplicar conforme orientação médica.')
+            
             html_content += f"""
                     <div class=\"vaccine-item\">
-                        <p><strong>{i} {titulo.upper()}</strong> ---------------------------------------------------- 1 dose</p>
-                        <p>{descricao}</p>"""
+                        <p><strong>{i}. {titulo.upper()}</strong> {'.' * 80} {doses}</p>
+                        <p style=\"margin-left: 1.5rem; margin-top: 0.5rem;\">{detalhes_admin}</p>"""
             if ref_html:
-                html_content += f"<p><small>Ref.: {ref_html}</small></p>"
+                html_content += f"<p style=\"margin-left: 1.5rem;\"><small>Ref.: {ref_html}</small></p>"
             html_content += "</div>"
 
         html_content += f"""

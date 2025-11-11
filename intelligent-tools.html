@@ -1071,6 +1071,20 @@
         function removeRecommendation(button) {
             const card = button.closest('.recommendation-card');
             if (card) {
+                // Extrair o título da recomendação para identificá-la
+                const tituloElement = card.querySelector('h5');
+                if (tituloElement && currentRecommendations) {
+                    const titulo = tituloElement.textContent.trim();
+                    
+                    // Remover do array currentRecommendations
+                    const index = currentRecommendations.findIndex(rec => rec.titulo === titulo);
+                    if (index !== -1) {
+                        currentRecommendations.splice(index, 1);
+                        console.log(`Recomendação removida: ${titulo}`);
+                    }
+                }
+                
+                // Animação de remoção visual
                 card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
                 card.style.opacity = '0';
                 card.style.transform = 'translateX(20px)';
