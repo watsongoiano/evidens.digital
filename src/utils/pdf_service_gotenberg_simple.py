@@ -17,7 +17,7 @@ VACINAS_ADMINISTRACAO = {
     "scr": {"doses": "2 doses", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "0 e 1 mês", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA, no intervalo 0 e 1 mês."},
     "hepatite a": {"doses": "2 doses", "via": "INTRAMUSCULAR", "volume": "1,0ml", "intervalo": "0 e 6 meses", "detalhes": "Aplicar uma dose (1,0ml), INTRAMUSCULAR, no intervalo 0 e 6 meses."},
     "febre amarela": {"doses": "1 dose", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "Dose única", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA, dose única."},
-    "meningococica": {"doses": "1 dose", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Dose única ou reforço conforme indicação", "detalhes": "Aplicar uma dose (0,5ml), INTRAMUSCULAR, dose única ou reforço conforme indicação médica."},
+    "meningococica": {"doses": "1 dose", "via": "INTRAMUSCULAR", "volume": "0,5ml", "intervalo": "Dose única com reforço a cada 5 anos para grupos de risco", "detalhes": "1 dose (0,5ml), INTRAMUSCULAR. Adolescentes: dose aos 11-12 anos e reforço aos 16 anos. Adultos: dose única, com reforço a cada 5 anos para grupos de risco."},
     "dengue": {"doses": "2 doses", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "0 e 3 meses", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA, no intervalo 0 e 3 meses."},
     "covid": {"doses": "Conforme esquema vigente", "via": "INTRAMUSCULAR", "volume": "Conforme fabricante", "intervalo": "Conforme esquema vigente", "detalhes": "Aplicar conforme esquema vacinal vigente e orientação do Ministério da Saúde."},
     "varicela": {"doses": "2 doses", "via": "SUBCUTÂNEA", "volume": "0,5ml", "intervalo": "0 e 1-2 meses", "detalhes": "Aplicar uma dose (0,5ml), SUBCUTÂNEA, no intervalo 0 e 1-2 meses."},
@@ -271,7 +271,7 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
         <div class="vaccine-list">
             {% for vaccine in vacinas %}
             <div class="vaccine-item">
-                <p class="vaccine-title"><strong>{{ loop.index }}. {{ vaccine.titulo|upper }}</strong> {{ vaccine.pontos }} {{ vaccine.doses }}</p>
+                <p class="vaccine-title"><strong>{{ loop.index }}. {{ vaccine.titulo|upper }}</strong></p>
                 <p style="margin-left: 20px; font-size: 0.9em;">{{ vaccine.detalhes }}</p>
             </div>
             {% endfor %}
@@ -292,13 +292,8 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
         titulo = vacina.get('titulo', 'Vacina')
         detalhes_admin = get_detalhes_administracao_vacina(titulo)
         
-        # Usar quantidade fixa de pontos para manter em uma linha
-        pontos = '.' * 70
-        
         vacina_completa = {
             'titulo': titulo,
-            'pontos': pontos,
-            'doses': detalhes_admin['doses'],
             'detalhes': detalhes_admin['detalhes']
         }
         vacinas_com_detalhes.append(vacina_completa)
