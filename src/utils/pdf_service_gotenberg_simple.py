@@ -237,6 +237,29 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
                 margin: 15px 0;
                 padding-left: 20px;
             }
+            .vaccine-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                margin-bottom: 5px;
+            }
+            .vaccine-name {
+                flex: 1;
+                padding-right: 10px;
+            }
+            .vaccine-dots {
+                flex-grow: 1;
+                border-bottom: 1px dotted #000;
+                margin: 0 5px;
+                min-width: 20px;
+                height: 0.5em;
+                align-self: flex-end;
+                margin-bottom: 0.3em;
+            }
+            .vaccine-doses {
+                white-space: nowrap;
+                text-align: right;
+            }
             .signature-section {
                 margin-top: 80px;
                 text-align: center;
@@ -268,7 +291,11 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
         <div class="vaccine-list">
             {% for vaccine in vacinas %}
             <div class="vaccine-item">
-                <p><strong>{{ loop.index }}. {{ vaccine.titulo|upper }}</strong> {{ vaccine.pontos }} {{ vaccine.doses }}</p>
+                <div class="vaccine-header">
+                    <span class="vaccine-name"><strong>{{ loop.index }}. {{ vaccine.titulo|upper }}</strong></span>
+                    <span class="vaccine-dots"></span>
+                    <span class="vaccine-doses">{{ vaccine.doses }}</span>
+                </div>
                 <p style="margin-left: 20px; font-size: 0.9em;">{{ vaccine.detalhes }}</p>
             </div>
             {% endfor %}
@@ -285,29 +312,12 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
     
     # Adicionar detalhes de administração a cada vacina
     vacinas_com_detalhes = []
-    max_titulo_length = 0
-    
-    # Primeira passagem: encontrar o título mais longo
-    for vacina in vacinas:
-        titulo = vacina.get('titulo', 'Vacina')
-        titulo_length = len(titulo)
-        if titulo_length > max_titulo_length:
-            max_titulo_length = titulo_length
-    
-    # Segunda passagem: criar vacinas com pontos alinhados
     for vacina in vacinas:
         titulo = vacina.get('titulo', 'Vacina')
         detalhes_admin = get_detalhes_administracao_vacina(titulo)
         
-        # Calcular quantidade de pontos necessária para alinhamento
-        # Fórmula: pontos base (50) + diferença de comprimento
-        titulo_length = len(titulo)
-        pontos_necessarios = 50 + (max_titulo_length - titulo_length)
-        pontos = '.' * pontos_necessarios
-        
         vacina_completa = {
             'titulo': titulo,
-            'pontos': pontos,
             'doses': detalhes_admin['doses'],
             'detalhes': detalhes_admin['detalhes']
         }
