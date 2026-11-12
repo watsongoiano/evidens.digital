@@ -103,7 +103,7 @@
                 document.getElementById('loading').style.display = 'block';
                 document.getElementById('stats-content').style.display = 'none';
                 
-                const response = await fetch('/analytics/stats');
+                const response = await fetch('/api/analytics/stats');
                 const data = await response.json();
                 
                 // Estatísticas totais

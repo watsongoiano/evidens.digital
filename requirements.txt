@@ -1,21 +1,4 @@
-# Core dependencies
-Flask==3.0.3
-Flask-CORS==4.0.0
-Werkzeug==3.0.3
-
-# Data processing
-python-dateutil==2.9.0.post0
-
-# Database (opcional para futuro)
-Flask-SQLAlchemy==3.1.1
-
-# PDF generation
-reportlab==4.2.5
-weasyprint==62.3
-qrcode==7.4.2
-Pillow==10.3.0
-Jinja2==3.1.4
-
-# HTTP requests (para Gotenberg)
-requests==2.31.0
-
+# As dependências de produção ficam em um único lugar: api/requirements.txt.
+# Este arquivo só aponta para lá, para que qualquer ferramenta que procure
+# requirements.txt na raiz instale exatamente o mesmo conjunto.
+-r api/requirements.txt

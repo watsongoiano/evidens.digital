@@ -1,6 +1,16 @@
 
 # Patches applied (2025-08-26T12:12:23)
 
+## 2026-11-12 — Limpeza de código fora do caminho de produção
+
+- Removidos pontos de entrada alternativos, banco de dados e rotas de pacientes, motor antigo, geradores de PDF
+  sem uso, telas antigas (`dist/`, `src/static/*.html`, cópias `.original`/`.new`), build e deploy obsoletos
+  (GitHub Pages, Netlify, `package.json`) e relatórios de depuração. Nenhuma saída do motor mudou
+  (`tests/test_caracterizacao.py`).
+- Dependências de produção reduzidas a Flask e flask-cors, em `api/requirements.txt`.
+- `analytics.html` passou a consultar `/api/analytics/stats` (a rota anterior não existia).
+- Testes de estrutura (`tests/test_estrutura.py`) impedem que código sem uso volte a se acumular.
+
 ## 2026-11-12 — Contenção de segurança clínica e documental
 
 Detalhes, controles e testes em `docs/registro-de-perigos.md`.

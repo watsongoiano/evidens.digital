@@ -94,7 +94,8 @@ def internal_error(e):
     """Handler para erros 500"""
     return jsonify({'error': 'Internal server error'}), 500
 
-# Para execução local
+# Para execução local. Escuta só na própria máquina; o modo de depuração (que
+# permite executar código pelo navegador) fica desligado, a menos que FLASK_DEBUG=1.
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=os.environ.get('FLASK_DEBUG') == '1', host='127.0.0.1', port=5000)
 
