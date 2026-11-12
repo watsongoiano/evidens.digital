@@ -1,0 +1,886 @@
+{
+  "h25_higido": {
+    "entrada": {
+      "idade": 25,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HIV 1 e 2, soro",
+        "Anti-HCV IgG, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Gardasil 9® (Vacina HPV 9-Valente)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Febre Amarela (Stamaril®)",
+        "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "Dengue (Qdenga®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Varicela (Varilrix® ou Varivax®)",
+        "Hepatites A e B Combinada (Twinrix®)"
+      ]
+    },
+    "nao_incluidas": [],
+    "outras_recomendacoes": []
+  },
+  "m30_higida": {
+    "entrada": {
+      "idade": 30,
+      "sexo": "feminino",
+      "tabagismo": "nunca",
+      "gestante": "nao",
+      "lactante": "nao",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HIV 1 e 2, soro",
+        "Anti-HCV IgG, soro",
+        "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Gardasil 9® (Vacina HPV 9-Valente)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Febre Amarela (Stamaril®)",
+        "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "Dengue (Qdenga®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Varicela (Varilrix® ou Varivax®)",
+        "Hepatites A e B Combinada (Twinrix®)"
+      ]
+    },
+    "nao_incluidas": [],
+    "outras_recomendacoes": []
+  },
+  "m30_sem_triagem": {
+    "entrada": {
+      "idade": 30,
+      "sexo": "feminino",
+      "tabagismo": "nunca"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HIV 1 e 2, soro",
+        "Anti-HCV IgG, soro",
+        "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Hepatites A e B Combinada (Twinrix®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Gardasil 9® (Vacina HPV 9-Valente)",
+        "dados_insuficientes"
+      ],
+      [
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "dados_insuficientes"
+      ],
+      [
+        "Febre Amarela (Stamaril®)",
+        "dados_insuficientes"
+      ],
+      [
+        "Dengue (Qdenga®)",
+        "dados_insuficientes"
+      ],
+      [
+        "Varicela (Varilrix® ou Varivax®)",
+        "dados_insuficientes"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "m30_gestante": {
+    "entrada": {
+      "idade": 30,
+      "sexo": "feminino",
+      "tabagismo": "nunca",
+      "gestante": "sim",
+      "lactante": "nao",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HIV 1 e 2, soro",
+        "Anti-HCV IgG, soro",
+        "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "RSV - Vírus Sincicial Respiratório (Abrysvo®)",
+        "Hepatites A e B Combinada (Twinrix®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Gardasil 9® (Vacina HPV 9-Valente)",
+        "contraindicada"
+      ],
+      [
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "contraindicada"
+      ],
+      [
+        "Febre Amarela (Stamaril®)",
+        "contraindicada"
+      ],
+      [
+        "Dengue (Qdenga®)",
+        "contraindicada"
+      ],
+      [
+        "Varicela (Varilrix® ou Varivax®)",
+        "contraindicada"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h45_ex_tabagista": {
+    "entrada": {
+      "idade": 45,
+      "sexo": "masculino",
+      "tabagismo": "ex",
+      "macos_ano": 25,
+      "anos_parou_fumar": 3,
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Gardasil 9® (Vacina HPV 9-Valente)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Febre Amarela (Stamaril®)",
+        "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "Dengue (Qdenga®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Varicela (Varilrix® ou Varivax®)",
+        "Hepatites A e B Combinada (Twinrix®)"
+      ]
+    },
+    "nao_incluidas": [],
+    "outras_recomendacoes": []
+  },
+  "m50_higida": {
+    "entrada": {
+      "idade": 50,
+      "sexo": "feminino",
+      "tabagismo": "nunca",
+      "gestante": "nao",
+      "lactante": "nao",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "Mamografia Digital - Bilateral",
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Febre Amarela (Stamaril®)",
+        "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "Dengue (Qdenga®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
+        "Pneumocócica 23V (Pneumovax 23®)",
+        "RSV - Vírus Sincicial Respiratório (Arexvy®)",
+        "Hepatites A e B Combinada (Twinrix®)"
+      ]
+    },
+    "nao_incluidas": [],
+    "outras_recomendacoes": []
+  },
+  "h55_pa_limitrofe_fumante": {
+    "entrada": {
+      "idade": 55,
+      "sexo": "masculino",
+      "tabagismo": "atual",
+      "macos_ano": 30,
+      "pas": 132,
+      "pad": 80,
+      "colesterol": 200,
+      "hdl": 45,
+      "creatinina": 1.0,
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "Potássio, soro",
+        "Ácido úrico, soro",
+        "EAS - Elementos Anormais e Sedimentoscopia",
+        "Razão albumina/creatinina, urina",
+        "PSA total, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)",
+        "Ecocardiograma transtorácico",
+        "Colonoscopia de Rastreio com ou sem biópsia",
+        "Tomografia computadorizada de tórax de baixa dose (LDCT)"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Febre Amarela (Stamaril®)",
+        "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "Dengue (Qdenga®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
+        "Pneumocócica 23V (Pneumovax 23®)",
+        "RSV - Vírus Sincicial Respiratório (Arexvy®)",
+        "Hepatites A e B Combinada (Twinrix®)"
+      ]
+    },
+    "nao_incluidas": [],
+    "outras_recomendacoes": []
+  },
+  "h60_dm_has": {
+    "entrada": {
+      "idade": 60,
+      "sexo": "masculino",
+      "tabagismo": "ex",
+      "macos_ano": 25,
+      "anos_parou_fumar": 3,
+      "comorbidades": [
+        "diabetes",
+        "hipertensao"
+      ],
+      "medicacoes_continuo": "metformina, losartana",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "Potássio, soro",
+        "Ácido úrico, soro",
+        "EAS - Elementos Anormais e Sedimentoscopia",
+        "Razão albumina/creatinina, urina",
+        "PSA total, soro",
+        "Aspartato aminotransferase, soro",
+        "Alanina aminotransferase, soro",
+        "Relação albumina/creatinina urinária (uACR)",
+        "Hormônio Tireoestimulante (TSH), soro",
+        "Vitamina B12, soro",
+        "Hemograma completo com plaquetas",
+        "Cálcio, soro",
+        "25-hidroxivitamina D, soro",
+        "Fósforo, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)",
+        "Ecocardiograma transtorácico",
+        "Colonoscopia de Rastreio com ou sem biópsia",
+        "Tomografia computadorizada de tórax de baixa dose (LDCT)",
+        "Fundoscopia (Exame de fundo de olho)"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Dengue (Qdenga®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
+        "Pneumocócica 23V (Pneumovax 23®)",
+        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h58_has_resistente": {
+    "entrada": {
+      "idade": 58,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "comorbidades": [
+        "hipertensao"
+      ],
+      "pas": 162,
+      "pad": 98,
+      "medicacoes_continuo": "losartana, anlodipino, hidroclorotiazida, espironolactona",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "Potássio, soro",
+        "Ácido úrico, soro",
+        "EAS - Elementos Anormais e Sedimentoscopia",
+        "Razão albumina/creatinina, urina",
+        "PSA total, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)",
+        "Ecocardiograma transtorácico",
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Febre Amarela (Stamaril®)",
+        "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "Dengue (Qdenga®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
+        "Pneumocócica 23V (Pneumovax 23®)",
+        "RSV - Vírus Sincicial Respiratório (Arexvy®)",
+        "Hepatites A e B Combinada (Twinrix®)"
+      ]
+    },
+    "nao_incluidas": [],
+    "outras_recomendacoes": []
+  },
+  "m62_dm": {
+    "entrada": {
+      "idade": 62,
+      "sexo": "feminino",
+      "tabagismo": "nunca",
+      "comorbidades": [
+        "diabetes"
+      ],
+      "pas": 120,
+      "pad": 70,
+      "hba1c": 7.4,
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular",
+        "Aspartato aminotransferase, soro",
+        "Alanina aminotransferase, soro",
+        "Relação albumina/creatinina urinária (uACR)",
+        "Hormônio Tireoestimulante (TSH), soro",
+        "Hemograma completo com plaquetas",
+        "Cálcio, soro",
+        "25-hidroxivitamina D, soro",
+        "Fósforo, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "Mamografia Digital - Bilateral",
+        "Colonoscopia de Rastreio com ou sem biópsia",
+        "Fundoscopia (Exame de fundo de olho)"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
+        "Pneumocócica 23V (Pneumovax 23®)",
+        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h68_ex_fumante_leve": {
+    "entrada": {
+      "idade": 68,
+      "sexo": "masculino",
+      "tabagismo": "ex",
+      "macos_ano": 5,
+      "anos_parou_fumar": 20,
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "PSA total, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Efluelda®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
+        "Pneumocócica 23V (Pneumovax 23®)",
+        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h68_dpoc_fumante": {
+    "entrada": {
+      "idade": 68,
+      "sexo": "masculino",
+      "tabagismo": "atual",
+      "macos_ano": 40,
+      "comorbidades": [
+        "dpoc"
+      ],
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "PSA total, soro",
+        "Gasometria arterial, sangue arterial",
+        "Sódio, soro",
+        "Potássio, soro",
+        "Cloreto, soro",
+        "Hemograma completo, sangue total"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "Colonoscopia de Rastreio com ou sem biópsia",
+        "Ultrassonografia com Doppler de Aorta Abdominal",
+        "Tomografia computadorizada de tórax de baixa dose (LDCT)",
+        "Espirometria",
+        "Teste de caminhada de 6 minutos",
+        "Radiografia de tórax"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Efluelda®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
+        "Pneumocócica 23V (Pneumovax 23®)",
+        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "m70_higida": {
+    "entrada": {
+      "idade": 70,
+      "sexo": "feminino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "Mamografia Digital - Bilateral",
+        "Densitometria óssea (DEXA)",
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Efluelda®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
+        "Pneumocócica 23V (Pneumovax 23®)",
+        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h88_higido": {
+    "entrada": {
+      "idade": 88,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "PSA total, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Efluelda®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
+        "Pneumocócica 23V (Pneumovax 23®)",
+        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h35_hiv_cd4_150": {
+    "entrada": {
+      "idade": 35,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "comorbidades": [
+        "hiv"
+      ],
+      "cd4": 150,
+      "carga_viral": 80000,
+      "em_tarv": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "Contagem de linfócitos T CD4+",
+        "Carga Viral do HIV (HIV RNA)",
+        "Genotipagem do HIV (Teste de Resistência)",
+        "Hemograma completo com plaquetas",
+        "EAS - Elementos Anormais e Sedimentoscopia, urina",
+        "Aspartato aminotransferase, soro",
+        "Alanina aminotransferase, soro",
+        "VDRL, soro",
+        "Anticorpos anti-HCV, soro",
+        "Antígeno HBs, soro",
+        "Anticorpos anti-HBs, soro",
+        "Anticorpos anti-HBc total, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Gardasil 9® (Vacina HPV 9-Valente)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Hepatites A e B Combinada (Twinrix®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "contraindicada"
+      ],
+      [
+        "Febre Amarela (Stamaril®)",
+        "contraindicada"
+      ],
+      [
+        "Dengue (Qdenga®)",
+        "contraindicada"
+      ],
+      [
+        "Varicela (Varilrix® ou Varivax®)",
+        "contraindicada"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h35_hiv_controlado": {
+    "entrada": {
+      "idade": 35,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "comorbidades": [
+        "hiv"
+      ],
+      "cd4": 600,
+      "carga_viral": 0,
+      "em_tarv": "sim",
+      "supressao_viral": "sim"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "Contagem de linfócitos T CD4+",
+        "Carga Viral do HIV (HIV RNA)",
+        "Hemograma completo com plaquetas",
+        "EAS - Elementos Anormais e Sedimentoscopia, urina",
+        "Aspartato aminotransferase, soro",
+        "Alanina aminotransferase, soro",
+        "VDRL, soro",
+        "Anticorpos anti-HCV, soro",
+        "Antígeno HBs, soro",
+        "Anticorpos anti-HBs, soro",
+        "Anticorpos anti-HBc total, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Gardasil 9® (Vacina HPV 9-Valente)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Hepatites A e B Combinada (Twinrix®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "precaucao"
+      ],
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ],
+      [
+        "Dengue (Qdenga®)",
+        "precaucao"
+      ],
+      [
+        "Varicela (Varilrix® ou Varivax®)",
+        "precaucao"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h40_imunossuprimido": {
+    "entrada": {
+      "idade": 40,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "sim"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso"
+      ],
+      "vacina": [
+        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Gardasil 9® (Vacina HPV 9-Valente)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite A (Havrix® ou Vaqta®)",
+        "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Hepatites A e B Combinada (Twinrix®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
+        "contraindicada"
+      ],
+      [
+        "Febre Amarela (Stamaril®)",
+        "contraindicada"
+      ],
+      [
+        "Dengue (Qdenga®)",
+        "contraindicada"
+      ],
+      [
+        "Varicela (Varilrix® ou Varivax®)",
+        "contraindicada"
+      ]
+    ],
+    "outras_recomendacoes": []
+  }
+}
