@@ -22,6 +22,7 @@ PAGINAS = ['/', '/intelligent-tools', '/contact', '/analytics']
     '/favicon.ico',
     '/favicon.png',
     '/src/static/styles/base.css',
+    '/static/evidens.css',
 ])
 def test_paginas_e_recursos_publicos_respondem(client, rota):
     assert client.get(rota).status_code == 200
@@ -35,6 +36,8 @@ def test_paginas_e_recursos_publicos_respondem(client, rota):
     '/config/medical_references.json',
     '/package.json',
     '/vercel.json',
+    '/tailwind.config.js',
+    '/static/evidens.src.css',
     '/prevent_calculator.js',
     '/src/routes/checkup_intelligent.py',
     '/requirements.txt',
@@ -193,3 +196,86 @@ def test_resposta_pendente_e_descartada_se_o_formulario_mudar(pagina):
     assert envio.index("await fetch('/api/checkup-intelligent'") < conferencia
     assert conferencia < envio.index('currentRecommendations = result.recommendations')
     assert conferencia < envio.index('mostrarErros(')
+
+
+# --- Novo front-end ---------------------------------------------------------
+
+@pytest.mark.parametrize('rota', ['/', '/intelligent-tools'])
+def test_paginas_usam_o_css_compilado_e_nao_o_tailwind_pelo_cdn(client, rota):
+    html = client.get(rota).get_data(as_text=True)
+    assert '/static/evidens.css' in html
+    assert 'cdn.tailwindcss.com' not in html
+    assert '<style>' not in html
+
+
+def test_css_compilado_cobre_as_classes_dos_cartoes_gerados_por_script(client):
+    css = client.get('/static/evidens.css').get_data(as_text=True)
+    for seletor in ('.recommendation-card', '.nao-incluida-card', '.selo', '.btn-escuro', '.campo', '.rv.in'):
+        assert seletor in css, seletor
+
+
+def test_home_leva_ao_check_up_e_nao_se_apresenta_como_prototipo(client):
+    html = client.get('/').get_data(as_text=True)
+    assert 'href="/intelligent-tools"' in html
+    assert 'href="#"' not in html
+    for trecho in ('Nenhuma análise clínica', 'sem motor clínico', 'Sem motor clínico', 'Neko Health', 'cdn.tailwindcss.com'):
+        assert trecho not in html, trecho
+    # A estratificação de risco está desativada; a home não pode anunciá-la como recurso.
+    assert 'Estratificação' not in html
+
+
+@pytest.mark.parametrize('rota', ['/', '/intelligent-tools', '/contact'])
+def test_paginas_mantem_o_vercel_analytics(client, rota):
+    assert '/_vercel/insights/script.js' in client.get(rota).get_data(as_text=True)
+
+
+# --- Números da home conferidos contra o motor ----------------------------
+
+def _varredura(client):
+    """Passa uma grade de perfis pelo motor e devolve os itens e as referências que aparecem."""
+    import itertools
+    itens, refs = {}, set()
+    grade = itertools.product(
+        (20, 30, 40, 50, 60, 70, 80), ('masculino', 'feminino'), ('nunca', 'atual', 'ex'),
+        ([], ['diabetes'], ['hipertensao'], ['hiv'], ['doenca_renal', 'cardiopatia'], ['dpoc'],
+         ['obesidade', 'dislipidemia'], ['has_resistente']),
+        ([], ['cancer_mama', 'cancer_colorretal', 'cancer_ovario']), ('nao', 'sim'))
+    for idade, sexo, tabagismo, comorbidades, familia, gestante in grade:
+        if gestante == 'sim' and (sexo != 'feminino' or idade > 50):
+            continue
+        dados = dict(idade=idade, sexo=sexo, tabagismo=tabagismo, comorbidades=comorbidades,
+                     historia_familiar=familia, imunossupressao='nao', gestante=gestante, lactante='nao',
+                     macos_ano='30' if tabagismo != 'nunca' else '', anos_parou_fumar='5' if tabagismo == 'ex' else '',
+                     cd4='500' if 'hiv' in comorbidades else '')
+        for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
+            itens[rec['titulo']] = rec['categoria']
+            refs.add(rec.get('referencia') or '')
+    return itens, ' '.join(refs)
+
+
+def test_numeros_da_home_correspondem_ao_motor(client):
+    html = client.get('/').get_data(as_text=True)
+    itens, refs = _varredura(client)
+    assert html.count(f'{len(itens)} recomendações') == 2  # faixa do hero e FAQ
+    # 15 sociedades e órgãos citados na home; todos precisam aparecer nas referências do motor.
+    fontes = ['SBIm', 'SBC', 'MS', 'USPSTF', 'CDC', 'NIH', 'AHA', 'ACC', 'ADA', 'ACOG', 'ESC', 'EAS', 'EACS', 'KDIGO', 'GOLD']
+    assert len(fontes) == 15
+    for fonte in fontes:
+        assert fonte in refs, fonte
+    assert '15<span' in html and '15 sociedades e órgãos de saúde' in html
+
+
+def test_caso_de_exemplo_da_home_e_a_saida_real_do_motor(client):
+    """Os números do caso fictício mostrado na home vêm do motor; se o motor mudar, a home precisa mudar junto."""
+    caso = dict(idade=42, sexo='feminino', tabagismo='ex', macos_ano='25', anos_parou_fumar='5',
+                comorbidades=['hipertensao'], historia_familiar=['cancer_colorretal'],
+                imunossupressao='nao', gestante='sim', lactante='nao')
+    r = client.post('/api/checkup-intelligent', json=caso).get_json()
+    por_tipo = {}
+    for rec in r['recommendations']:
+        por_tipo[rec['categoria']] = por_tipo.get(rec['categoria'], 0) + 1
+    assert (len(r['recommendations']), por_tipo['laboratorio'], por_tipo['imagem'], por_tipo['vacina']) == (24, 12, 4, 8)
+    assert [i['estado'] for i in r['nao_incluidas']] == ['contraindicada'] * 5
+    html = client.get('/').get_data(as_text=True)
+    for trecho in ('24 recomendações<br>', 'Laboratório · 12 itens', 'Imagem · 4 itens', 'Vacinas · 8 itens', '5 contraindicadas'):
+        assert trecho in html, trecho

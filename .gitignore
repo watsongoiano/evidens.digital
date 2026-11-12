@@ -93,3 +93,6 @@ node_modules/
 *.tmp
 *.temp
 .vercel
+
+# Node (compilação do CSS)
+node_modules/

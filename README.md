@@ -26,7 +26,11 @@ evidens.digital/
 │   │   ├── pdf_service_gotenberg_simple.py  # Templates das minutas
 │   │   ├── reference_links.py        # Links das fontes citadas
 │   │   └── analytics.py              # Contadores de uso
-│   └── static/styles/                # Estilos usados pelo painel de analytics
+│   └── static/styles/                # Estilos usados por contato e analytics
+├── static/
+│   ├── evidens.src.css           # Fonte do CSS (Tailwind + componentes)
+│   └── evidens.css               # CSS compilado, publicado (não editar à mão)
+├── tailwind.config.js            # Cores e fontes do design Evidēns
 ├── index.html                    # Página inicial
 ├── intelligent-tools.html        # Formulário do check-up e resultados
 ├── contact.html, analytics.html  # Contato e painel de uso
@@ -37,8 +41,9 @@ evidens.digital/
 └── requirements-dev.txt          # Produção + pytest
 ```
 
-Não há etapa de build: as páginas são HTML estático servido pela própria aplicação, que publica apenas a
-lista de arquivos declarada em `api/index.py` (`ARQUIVOS_PUBLICOS`).
+Não há etapa de build no deploy: as páginas são HTML estático servido pela própria aplicação, que publica apenas a
+lista de arquivos declarada em `api/index.py` (`ARQUIVOS_PUBLICOS`). O CSS é compilado localmente e versionado;
+veja a seção **CSS** em `docs/deploy.md`.
 
 ## 🛠️ Desenvolvimento local
 
