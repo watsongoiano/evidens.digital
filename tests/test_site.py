@@ -222,3 +222,8 @@ def test_home_leva_ao_check_up_e_nao_se_apresenta_como_prototipo(client):
         assert trecho not in html, trecho
     # A estratificação de risco está desativada; a home não pode anunciá-la como recurso.
     assert 'Estratificação' not in html
+
+
+@pytest.mark.parametrize('rota', ['/', '/intelligent-tools', '/contact'])
+def test_paginas_mantem_o_vercel_analytics(client, rota):
+    assert '/_vercel/insights/script.js' in client.get(rota).get_data(as_text=True)
