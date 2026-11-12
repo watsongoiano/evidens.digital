@@ -155,3 +155,17 @@ def test_motor_nao_tem_acesso_a_banco_de_dados():
     fonte = Path(motor.__file__).read_text(encoding='utf-8')
     assert 'db.session' not in fonte
     assert 'src.models' not in fonte
+
+
+def test_resposta_pendente_e_descartada_se_o_formulario_mudar(pagina):
+    """A resposta de um envio só vale se o formulário não mudou enquanto ela chegava."""
+    invalidar = re.search(r'function invalidarResultados\(evento\) \{(.*?)\n        \}', pagina, re.S).group(1)
+    # O contador avança antes do teste de "resultado visível": vale também com resposta pendente.
+    assert invalidar.index('revisaoDoFormulario += 1') < invalidar.index("recommendationsDiv.style.display === 'block'")
+
+    envio = re.search(r"checkupForm\.addEventListener\('submit'.*?\n        \}\);", pagina, re.S).group(0)
+    assert 'const revisaoDoEnvio = revisaoDoFormulario;' in envio
+    conferencia = envio.index('if (revisaoDoEnvio !== revisaoDoFormulario)')
+    assert envio.index("await fetch('/api/checkup-intelligent'") < conferencia
+    assert conferencia < envio.index('currentRecommendations = result.recommendations')
+    assert conferencia < envio.index('mostrarErros(')
