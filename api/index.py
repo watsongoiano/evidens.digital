@@ -56,19 +56,34 @@ def get_full_analytics():
     """Endpoint para visualizar estatísticas completas"""
     return jsonify(analytics.get_stats())
 
+# Arquivos que o site publica. A lista é explícita: antes, qualquer arquivo do
+# repositório com extensão .html, .js ou .json era servido, o que deixava
+# acessíveis por URL as telas antigas (com o cálculo de risco desativado e o
+# fluxo de documentos removido) e os arquivos de configuração.
+ARQUIVOS_PUBLICOS = frozenset({
+    'index.html',
+    'intelligent-tools.html',
+    'contact.html',
+    'analytics.html',
+    'favicon.ico',
+    'favicon.png',
+    'new_logo.png',
+    'evidenscheck.png',
+    'evidenscheck.svg',
+    'src/static/styles/tokens.css',
+    'src/static/styles/base.css',
+    'src/static/styles/components.css',
+})
+
+
 @app.route('/<path:filename>')
 def serve_static(filename):
-    """Servir arquivos estáticos"""
-    # Lista de extensões permitidas
-    allowed_extensions = {'.html', '.css', '.js', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.json', '.pdf'}
-    
-    file_path = BASE_DIR / filename
-    
-    # Verificar se o arquivo existe e tem extensão permitida
-    if file_path.exists() and file_path.suffix.lower() in allowed_extensions:
-        return send_from_directory(BASE_DIR, filename)
-    
-    # Se não encontrar, retornar 404
+    """Servir apenas os arquivos estáticos publicados pelo site."""
+    # O caminho servido vem da própria lista, nunca do texto da requisição.
+    publicado = next((nome for nome in ARQUIVOS_PUBLICOS if nome == filename), None)
+    if publicado is not None and (BASE_DIR / publicado).is_file():
+        return send_from_directory(BASE_DIR, publicado)
+
     return jsonify({'error': 'File not found'}), 404
 
 @app.errorhandler(404)

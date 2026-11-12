@@ -454,14 +454,14 @@
             <form id="checkupForm">
                 <!-- Nome do Paciente -->
                 <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label for="nome_paciente">Nome do Paciente</label>
-                    <input type="text" id="nome_paciente" name="nome_paciente" placeholder="Nome completo do paciente" required style="width: 100%;">
+                    <label for="nome_paciente">Nome do Paciente <span style="font-weight: 400; color: #7f8c8d;">(opcional — aparece apenas nos PDFs)</span></label>
+                    <input type="text" id="nome_paciente" name="nome_paciente" placeholder="Nome do paciente" maxlength="150" autocomplete="off" style="width: 100%;">
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="idade">Idade</label>
-                        <input type="number" id="idade" name="idade" required>
+                        <input type="number" id="idade" name="idade" min="18" max="120" step="1" required>
                     </div>
                     <div class="form-group">
                         <label for="sexo">Sexo</label>
@@ -471,16 +471,9 @@
                             <option value="feminino">Feminino</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="pais">País/Guideline base</label>
-                        <select id="pais" name="pais">
-                            <option value="brasil">Brasil (SBIm/SBC/SBD)</option>
-                            <option value="eua">EUA (CDC/USPSTF/ADA)</option>
-                        </select>
-                    </div>
                 </div>
 
-                <div class="section-title">📊 Dados Clínicos (para cálculo de risco cardiovascular)</div>
+                <div class="section-title">📊 Dados Clínicos</div>
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="peso">Peso (kg)</label>
@@ -554,10 +547,6 @@
                         <input type="checkbox" id="dpoc" name="comorbidades" value="dpoc">
                         <label for="dpoc">DPOC</label>
                     </div>
-                    <div class="checkbox-item" id="gestante-item" style="display: none;">
-                        <input type="checkbox" id="gestante" name="gestante" value="true">
-                        <label for="gestante">Gestante</label>
-                    </div>
                 </div>
 
                 <!-- Campos condicionais para HIV -->
@@ -590,6 +579,39 @@
                                 <option value="nao">Não</option>
                             </select>
                         </div>
+                    </div>
+                </div>
+
+                <div class="section-title">🛡️ Triagem de segurança para vacinas</div>
+                <p style="margin: -0.25rem 0 1rem; color: #7f8c8d; font-size: 0.9rem;">
+                    Vacinas de vírus vivo atenuado (tríplice viral, varicela, febre amarela e dengue) só entram nas
+                    recomendações quando estas perguntas estão respondidas. "Não informado" não é tratado como "não".
+                </p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="imunossupressao">Imunossupressão</label>
+                        <select id="imunossupressao" name="imunossupressao">
+                            <option value="desconhecido">Não informado</option>
+                            <option value="nao">Não</option>
+                            <option value="sim">Sim (doença ou tratamento imunossupressor)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="gestante-item" style="display: none;">
+                        <label for="gestante">Gestante</label>
+                        <select id="gestante" name="gestante">
+                            <option value="desconhecido">Não informado</option>
+                            <option value="nao">Não</option>
+                            <option value="sim">Sim</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="lactante-item" style="display: none;">
+                        <label for="lactante">Amamentando</label>
+                        <select id="lactante" name="lactante">
+                            <option value="desconhecido">Não informado</option>
+                            <option value="nao">Não</option>
+                            <option value="sim_menor_6m">Sim, criança com menos de 6 meses</option>
+                            <option value="sim_6m_ou_mais">Sim, criança com 6 meses ou mais</option>
+                        </select>
                     </div>
                 </div>
 
@@ -649,7 +671,8 @@
                 <!-- Tabagismo -->
                 <div class="form-group">
                     <label for="tabagismo">Tabagismo</label>
-                    <select id="tabagismo" name="tabagismo">
+                    <select id="tabagismo" name="tabagismo" required>
+                        <option value="" selected disabled>Selecione...</option>
                         <option value="nunca">Nunca fumou</option>
                         <option value="atual">Fumante atual</option>
                         <option value="ex">Ex-fumante</option>
@@ -683,12 +706,24 @@
                     <input type="number" id="anos_consumo_alcool" name="anos_consumo_alcool" step="1">
                 </div>
 
+                <div id="formErrors" role="alert" style="display: none; margin-bottom: 1rem; padding: 1rem; background: #fdecea; border-left: 4px solid #e74c3c; border-radius: 8px; color: #7b241c; font-size: 0.95rem;"></div>
+
                 <button type="submit" class="btn-primary">Gerar Recomendações Inteligentes</button>
             </form>
 
+            <div id="staleNotice" role="status" style="display: none; margin-top: 1.5rem; padding: 1rem; background: #fff8e1; border-left: 4px solid #f39c12; border-radius: 8px; color: #7d6608; font-size: 0.95rem;">
+                Os dados do paciente foram alterados. Gere as recomendações novamente.
+            </div>
+
             <div id="recommendations" class="recommendations">
                 <h3>Recomendações Inteligentes</h3>
+                <div id="avisoUso" style="margin-bottom: 1.5rem; padding: 1rem; background: #ffffff; border-left: 4px solid #3498db; border-radius: 8px; color: #2c3e50; font-size: 0.9rem;">
+                    <p style="margin: 0 0 0.5rem 0;"><strong>Sugestões para avaliação do médico — não constituem prescrição.</strong> Revise e individualize cada item antes de solicitar ou prescrever.</p>
+                    <p style="margin: 0 0 0.5rem 0;">Os PDFs são minutas sem assinatura digital: imprima, assine e carimbe.</p>
+                    <p style="margin: 0;">O cálculo de risco cardiovascular está temporariamente desativado, em validação.</p>
+                </div>
                 <div id="recommendationsContent"></div>
+                <div id="naoIncluidasContent"></div>
                 <div class="action-buttons">
                     <button class="action-btn" onclick="gerarPDFExamesLaboratoriais()">🧪 PDF Exames Laboratoriais</button>
                     <button class="action-btn" onclick="gerarPDFExamesImagem()">📷 PDF Exames de Imagem</button>
@@ -698,22 +733,29 @@
         </div>
     </div>
 
-    <script src="prevent_calculator.js"></script>
     <script>
-        // Inicializar calculadora PREVENT
-        const preventCalc = new PreventCalculator();
-        
-        // Variáveis globais para armazenar dados
+        // Estado da tela
         let currentRecommendations = [];
         let currentPatientData = {};
-        
-        document.getElementById('checkupForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
+
+        const checkupForm = document.getElementById('checkupForm');
+        const recommendationsDiv = document.getElementById('recommendations');
+        const staleNotice = document.getElementById('staleNotice');
+        const formErrors = document.getElementById('formErrors');
+
+        function escapeHtml(texto) {
+            return String(texto == null ? '' : texto)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // Converter o formulário em objeto (campos repetidos viram lista)
+        function lerFormulario() {
+            const formData = new FormData(checkupForm);
             const data = {};
-            
-            // Converter FormData para objeto
             for (let [key, value] of formData.entries()) {
                 if (data[key]) {
                     if (Array.isArray(data[key])) {
@@ -725,45 +767,90 @@
                     data[key] = value;
                 }
             }
-            
-            // Calcular risco cardiovascular PREVENT se dados suficientes
-            let cardiovascularRisk = null;
-            if (data.idade && data.sexo && data.colesterol && data.hdl && data.pas && data.creatinina) {
-                try {
-                    const riskParams = {
-                        idade: parseInt(data.idade),
-                        sexo: data.sexo,
-                        colesterol_total: parseInt(data.colesterol) || 200,
-                        hdl_colesterol: parseInt(data.hdl) || 45,
-                        pressao_sistolica: parseInt(data.pas) || 120,
-                        diabetes: data.diabetes_tipo2 === 'on',
-                        tabagismo: data.tabagismo || 'nunca',
-                        creatinina: parseFloat(data.creatinina) || 1.0,
-                        medicamentos_anti_hipertensivos: data.anti_hipertensivos === 'on',
-                        estatinas: data.estatinas === 'on'
-                    };
-                    
-                    cardiovascularRisk = preventCalc.calculateRisks(riskParams);
-                } catch (error) {
-                    console.error('Erro no cálculo de risco:', error);
-                }
+            return data;
+        }
+
+        function mostrarErros(mensagens) {
+            formErrors.innerHTML = '';
+            const titulo = document.createElement('strong');
+            titulo.textContent = 'Revise os dados informados:';
+            formErrors.appendChild(titulo);
+            const lista = document.createElement('ul');
+            lista.style.margin = '0.5rem 0 0 1.25rem';
+            mensagens.forEach(mensagem => {
+                const item = document.createElement('li');
+                item.textContent = mensagem;
+                lista.appendChild(item);
+            });
+            formErrors.appendChild(lista);
+            formErrors.style.display = 'block';
+            if (formErrors.scrollIntoView) {
+                formErrors.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-            
+        }
+
+        function limparErros() {
+            formErrors.style.display = 'none';
+            formErrors.innerHTML = '';
+        }
+
+        function limparResultados() {
+            currentRecommendations = [];
+            currentPatientData = {};
+            document.getElementById('recommendationsContent').innerHTML = '';
+            document.getElementById('naoIncluidasContent').innerHTML = '';
+            recommendationsDiv.style.display = 'none';
+        }
+
+        checkupForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            limparErros();
+            staleNotice.style.display = 'none';
+
+            // Cada envio recebe um número. Se o formulário mudar (ou houver novo envio)
+            // antes de a resposta chegar, o número deixa de valer e a resposta é descartada.
+            revisaoDoFormulario += 1;
+            const revisaoDoEnvio = revisaoDoFormulario;
+
+            const data = lerFormulario();
+
+            // O nome do paciente não é necessário para calcular as recomendações
+            // e não é enviado nesta etapa; ele só acompanha o pedido de PDF.
+            const payload = Object.assign({}, data);
+            delete payload.nome_paciente;
+
             try {
                 const response = await fetch('/api/checkup-intelligent', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(payload)
                 });
-                
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
+
+                let result = null;
+                try {
+                    result = await response.json();
+                } catch (erroDeLeitura) {
+                    result = null;
                 }
-                
-                const result = await response.json();
-                
+
+                if (revisaoDoEnvio !== revisaoDoFormulario) {
+                    // Os dados clínicos mudaram enquanto a resposta estava a caminho:
+                    // ela pertence a outro paciente/estado e não pode ser exibida.
+                    return;
+                }
+
+                if (response.status === 400 && result && Array.isArray(result.erros)) {
+                    limparResultados();
+                    mostrarErros(result.erros.map(item => item.mensagem));
+                    return;
+                }
+
+                if (!response.ok || !result) {
+                    throw new Error((result && result.error) || `Erro HTTP: ${response.status}`);
+                }
+
                 // Armazenar dados globalmente
                 currentRecommendations = result.recommendations || [];
                 currentPatientData = {
@@ -771,55 +858,45 @@
                     idade: data.idade,
                     sexo: data.sexo
                 };
-                
-                displayRecommendations(result.recommendations, cardiovascularRisk);
-                
+
+                displayRecommendations(currentRecommendations, result.nao_incluidas || []);
+
             } catch (error) {
+                if (revisaoDoEnvio !== revisaoDoFormulario) {
+                    return;
+                }
                 console.error('Erro:', error);
                 alert('Erro ao gerar recomendações: ' + error.message);
             }
         });
 
-        function displayRecommendations(recomendacoes, cardiovascularRisk = null) {
+        // Qualquer alteração nos dados clínicos invalida o resultado exibido: as recomendações
+        // e os PDFs têm de corresponder ao que está no formulário.
+        let revisaoDoFormulario = 0;
+        function invalidarResultados(evento) {
+            if (evento && evento.target && evento.target.id === 'nome_paciente') {
+                return;
+            }
+            // Invalida também qualquer resposta ainda pendente (ver o envio do formulário).
+            revisaoDoFormulario += 1;
+            if (recommendationsDiv.style.display === 'block') {
+                limparResultados();
+                staleNotice.style.display = 'block';
+            }
+        }
+        checkupForm.addEventListener('input', invalidarResultados);
+        checkupForm.addEventListener('change', invalidarResultados);
+
+        function displayRecommendations(recomendacoes, naoIncluidas) {
             const container = document.getElementById('recommendationsContent');
-            const recommendationsDiv = document.getElementById('recommendations');
-            
+
             if (!recomendacoes || recomendacoes.length === 0) {
                 container.innerHTML = '<p>Nenhuma recomendação específica para este perfil.</p>';
+                displayNaoIncluidas(naoIncluidas);
                 recommendationsDiv.style.display = 'block';
                 return;
             }
-            
-            // Adicionar seção de risco cardiovascular se disponível
-            let riskHtml = '';
-            if (cardiovascularRisk) {
-                const risk10yr = preventCalc.interpretRisk(cardiovascularRisk.risk_10yr);
-                const risk30yr = preventCalc.interpretRisk(cardiovascularRisk.risk_30yr);
-                riskHtml = `
-                    <div class="cardiovascular-risk-section" style="margin-bottom: 2rem;">
-                        <h3 style="color: #2c3e50; margin-bottom: 1rem;">📊 Risco Cardiovascular (PREVENT 2024)</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                            <div class="risk-card" style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border-left: 5px solid ${risk10yr.color};">
-                                <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Estimated 10-year<br>risk of CVD</h4>
-                                <div style="font-size: 2.5rem; font-weight: bold; color: ${risk10yr.color}; margin: 0.5rem 0;">${cardiovascularRisk.risk_10yr}%</div>
-                                <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">${risk10yr.description}</p>
-                            </div>
-                            <div class="risk-card" style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; border-left: 5px solid ${risk30yr.color};">
-                                <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Estimated 30-year<br>risk of CVD</h4>
-                                <div style="font-size: 2.5rem; font-weight: bold; color: ${risk30yr.color}; margin: 0.5rem 0;">${cardiovascularRisk.risk_30yr}%</div>
-                                <p style="margin: 0; color: #7f8c8d; font-size: 0.9rem;">${risk30yr.description}</p>
-                            </div>
-                        </div>
-                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; border-left: 4px solid #3498db;">
-                            <p style="margin: 0; font-size: 0.9rem; color: #2c3e50;">
-                                <strong>eGFR calculado:</strong> ${cardiovascularRisk.egfr} mL/min/1.73m² | 
-                                <strong>Baseado em:</strong> Equações PREVENT 2024 (AHA/ACC)
-                            </p>
-                        </div>
-                    </div>
-                `;
-            }
-            
+
             // Categorizar recomendações
             const categorias = {
                 'Exames Laboratoriais': [],
@@ -828,11 +905,10 @@
                 'Rastreamento': [],
                 'Outras': []
             };
-            
+
             recomendacoes.forEach(rec => {
                 const categoria = rec.categoria || '';
-                const prioridade = rec.prioridade || 'alta';
-                
+
                 // Usar a categoria definida no backend
                 if (categoria === 'laboratorio' || categoria === 'laboratorial') {
                     categorias['Exames Laboratoriais'].push(rec);
@@ -846,236 +922,173 @@
                     categorias['Outras'].push(rec);
                 }
             });
-            
-            let html = riskHtml;
-            
+
+            let html = '';
+
             Object.keys(categorias).forEach(categoria => {
                 if (categorias[categoria].length > 0) {
                     html += `<div class="recommendation-category">
                         <h4>${categoria}</h4>`;
-                    
-                    categorias[categoria].forEach((rec, index) => {
+
+                    categorias[categoria].forEach(rec => {
                         const titulo = rec.titulo || 'Recomendação';
                         const subtitulo = rec.subtitulo || '';
-                        const descricao = rec.descricao || '';
                         const prioridade = rec.prioridade || 'alta';
-                        const referencia = rec.referencia || '';
-                        const referencia_html = rec.referencia_html || rec.referencia || '';
-                        
-                        // Debug: log para verificar referencia_html
-                        if (titulo.includes('Painel lipídico') || titulo.includes('Lp(a)')) {
-                            console.log(`${titulo}:`, {referencia, referencia_html, referencias: rec.referencias});
-                        }
-                        
+                        // referencia_html é montado pelo servidor (links das fontes)
+                        const referencia_html = rec.referencia_html || escapeHtml(rec.referencia || '');
+
                         // Determinar cor da prioridade
                         let prioridadeColor = '#28a745'; // Verde para alta
                         if (prioridade === 'media') prioridadeColor = '#ffc107'; // Amarelo para média
                         if (prioridade === 'baixa') prioridadeColor = '#fd7e14'; // Laranja para baixa
-                        
+
                         html += `<div class="recommendation-card" style="background: white; border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #3498db; position: relative;">
                             <button onclick="removeRecommendation(this)" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.2rem; color: #95a5a6; cursor: pointer; padding: 5px;">×</button>
-                            
+
                             <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
                                 <span style="background: ${prioridadeColor}; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-right: 1rem;">
-                                    ${prioridade.toUpperCase()}
+                                    ${escapeHtml(prioridade.toUpperCase())}
                                 </span>
                             </div>
-                            
+
                             <h5 style="color: #2c3e50; margin: 0 0 0.25rem 0; font-size: 1.1rem; font-weight: 600;">
-                                ${titulo}
+                                ${escapeHtml(titulo)}
                             </h5>
-                            
+
                             ${subtitulo ? `<p style="color: #7f8c8d; margin: 0 0 0.75rem 0; font-size: 0.85rem; font-weight: 400;">
-                                ${subtitulo}
+                                ${escapeHtml(subtitulo)}
                             </p>` : ''}
-                            
+
                             ${referencia_html ? `<p style="color: #95a5a6; margin: 0; font-size: 0.8rem; font-style: italic;">
                                 <span style="margin-right: 0.5rem;">📚</span><span class="referencia-links">${referencia_html}</span>
                             </p>` : ''}
                         </div>`;
                     });
-                    
+
                     html += '</div>';
                 }
             });
-            
+
             container.innerHTML = html;
+            displayNaoIncluidas(naoIncluidas);
             recommendationsDiv.style.display = 'block';
         }
 
-        async function gerarPDFExamesLaboratoriais() {
+        // Itens que a triagem de segurança retirou da lista automática, com o motivo.
+        const ROTULOS_ESTADO = {
+            contraindicada: { texto: 'CONTRAINDICADA', cor: '#c0392b' },
+            precaucao: { texto: 'PRECAUÇÃO', cor: '#d35400' },
+            dados_insuficientes: { texto: 'DADOS INSUFICIENTES', cor: '#7f8c8d' }
+        };
+
+        function displayNaoIncluidas(itens) {
+            const container = document.getElementById('naoIncluidasContent');
+            container.innerHTML = '';
+            if (!itens || itens.length === 0) {
+                return;
+            }
+
+            let html = `<div class="recommendation-category">
+                <h4>Vacinas não incluídas automaticamente</h4>
+                <p style="color: #7f8c8d; margin: 0 0 1rem 0; font-size: 0.9rem;">Estes itens não entram nos PDFs. A decisão cabe ao médico.</p>`;
+
+            itens.forEach(item => {
+                const rotulo = ROTULOS_ESTADO[item.estado] || { texto: 'NÃO INCLUÍDA', cor: '#7f8c8d' };
+                html += `<div class="nao-incluida-card" style="background: white; border-radius: 15px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid ${rotulo.cor};">
+                    <span style="background: ${rotulo.cor}; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">${rotulo.texto}</span>
+                    <h5 style="color: #2c3e50; margin: 0.75rem 0 0.25rem 0; font-size: 1.05rem; font-weight: 600;">${escapeHtml(item.titulo)}</h5>
+                    <p style="color: #2c3e50; margin: 0 0 0.5rem 0; font-size: 0.9rem;">${escapeHtml(item.motivo)}</p>
+                    ${item.referencia ? `<p style="color: #95a5a6; margin: 0; font-size: 0.8rem; font-style: italic;"><span style="margin-right: 0.5rem;">📚</span>${escapeHtml(item.referencia)}</p>` : ''}
+                </div>`;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Dados enviados com o pedido de PDF. São lidos do formulário no momento do pedido,
+        // para que o servidor confira a triagem de vacinas com as respostas atuais.
+        function dadosDoPacienteParaPdf() {
+            const data = lerFormulario();
+            const comorbidades = [].concat(data.comorbidades || []);
+            return {
+                nome: (data.nome_paciente || '').trim() || 'Paciente',
+                idade: data.idade,
+                sexo: data.sexo,
+                gestante: data.gestante,
+                lactante: data.lactante,
+                imunossupressao: data.imunossupressao,
+                hiv: comorbidades.indexOf('hiv') !== -1,
+                cd4: data.cd4 || null
+            };
+        }
+
+        async function baixarPdf(endpoint, itens, prefixoArquivo, descricao) {
             try {
                 if (!currentRecommendations || currentRecommendations.length === 0) {
                     alert('Gere as recomendações primeiro!');
                     return;
                 }
-                
-                // Preparar dados do paciente
-                const dadosPaciente = {
-                    nome: currentPatientData.nome || 'Paciente',
-                    idade: currentPatientData.idade || currentPatientData.age,
-                    sexo: currentPatientData.sexo || currentPatientData.sex,
-                    comorbidades: currentPatientData.comorbidades || [],
-                    medicacoes: currentPatientData.medicacoes || [],
-                    tabagismo: currentPatientData.tabagismo || 'nunca_fumou',
-                    historico_familiar: currentPatientData.historico_familiar || []
-                };
-                
-                const response = await fetch('/api/gerar-pdf-exames-laboratoriais', {
+
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        dados_paciente: dadosPaciente,
-                        recomendacoes: currentRecommendations
+                        dados_paciente: dadosDoPacienteParaPdf(),
+                        recomendacoes: itens
                     })
                 });
-                
+
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
+                    let mensagem = `Erro HTTP: ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        mensagem = errorData.error || mensagem;
+                    } catch (erroDeLeitura) {
+                        // resposta sem JSON: mantém a mensagem genérica
+                    }
+                    throw new Error(mensagem);
                 }
-                
+
                 // Download do PDF
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `exames_laboratoriais_${new Date().getTime()}.pdf`;
+                a.download = `${prefixoArquivo}_${new Date().getTime()}.pdf`;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
-                
+
             } catch (error) {
                 console.error('Erro:', error);
-                alert('Erro ao gerar PDF de exames laboratoriais: ' + error.message);
+                alert(`Erro ao gerar PDF de ${descricao}: ` + error.message);
             }
         }
 
-        async function gerarPDFExamesImagem() {
-            try {
-                if (!currentRecommendations || currentRecommendations.length === 0) {
-                    alert('Gere as recomendações primeiro!');
-                    return;
-                }
-                
-                // Preparar dados do paciente
-                const dadosPaciente = {
-                    nome: currentPatientData.nome || 'Paciente',
-                    idade: currentPatientData.idade || currentPatientData.age,
-                    sexo: currentPatientData.sexo || currentPatientData.sex,
-                    comorbidades: currentPatientData.comorbidades || [],
-                    medicacoes: currentPatientData.medicacoes || [],
-                    tabagismo: currentPatientData.tabagismo || 'nunca_fumou',
-                    historico_familiar: currentPatientData.historico_familiar || []
-                };
-                
-                const response = await fetch('/api/gerar-pdf-exames-imagem', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        dados_paciente: dadosPaciente,
-                        recomendacoes: currentRecommendations
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
-                }
-                
-                // Download do PDF
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `exames_imagem_${new Date().getTime()}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao gerar PDF de exames de imagem: ' + error.message);
+        function gerarPDFExamesLaboratoriais() {
+            return baixarPdf('/api/gerar-pdf-exames-laboratoriais', currentRecommendations, 'exames_laboratoriais', 'exames laboratoriais');
+        }
+
+        function gerarPDFExamesImagem() {
+            return baixarPdf('/api/gerar-pdf-exames-imagem', currentRecommendations, 'exames_imagem', 'exames de imagem');
+        }
+
+        function gerarPDFVacinas() {
+            // Filtrar apenas vacinas do currentRecommendations
+            const vacinas = (currentRecommendations || []).filter(rec =>
+                (rec.categoria || '').toLowerCase() === 'vacina'
+            );
+
+            if (currentRecommendations && currentRecommendations.length > 0 && vacinas.length === 0) {
+                alert('Nenhuma vacina foi recomendada!');
+                return;
             }
-        }
 
-        async function gerarPDFVacinas() {
-            try {
-                if (!currentRecommendations || currentRecommendations.length === 0) {
-                    alert('Gere as recomendações primeiro!');
-                    return;
-                }
-                
-                // Preparar dados do paciente
-                const dadosPaciente = {
-                    nome: currentPatientData.nome || 'Paciente',
-                    idade: currentPatientData.idade || currentPatientData.age,
-                    sexo: currentPatientData.sexo || currentPatientData.sex,
-                    comorbidades: currentPatientData.comorbidades || [],
-                    medicacoes: currentPatientData.medicacoes || [],
-                    tabagismo: currentPatientData.tabagismo || 'nunca_fumou',
-                    historico_familiar: currentPatientData.historico_familiar || []
-                };
-                
-                // Filtrar apenas vacinas do currentRecommendations
-                const vacinas = currentRecommendations.filter(rec => 
-                    (rec.categoria || '').toLowerCase() === 'vacina'
-                );
-                
-                if (vacinas.length === 0) {
-                    alert('Nenhuma vacina foi recomendada!');
-                    return;
-                }
-                
-                const response = await fetch('/api/gerar-pdf-vacinas', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        dados_paciente: dadosPaciente,
-                        recomendacoes: vacinas
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
-                }
-                
-                // Download do PDF
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `prescricao_vacinas_${new Date().getTime()}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao gerar PDF de vacinas: ' + error.message);
-            }
-        }
-
-        function gerarRelatorioCompleto() {
-            alert('Funcionalidade em desenvolvimento');
-        }
-
-        function agendarLembretes() {
-            alert('Funcionalidade em desenvolvimento');
-        }
-
-        function anexarPDFs() {
-            alert('Funcionalidade em desenvolvimento');
+            return baixarPdf('/api/gerar-pdf-vacinas', vacinas, 'prescricao_vacinas', 'vacinas');
         }
 
         function removeRecommendation(button) {
@@ -1085,15 +1098,14 @@
                 const tituloElement = card.querySelector('h5');
                 if (tituloElement && currentRecommendations) {
                     const titulo = tituloElement.textContent.trim();
-                    
+
                     // Remover do array currentRecommendations
                     const index = currentRecommendations.findIndex(rec => rec.titulo === titulo);
                     if (index !== -1) {
                         currentRecommendations.splice(index, 1);
-                        console.log(`Recomendação removida: ${titulo}`);
                     }
                 }
-                
+
                 // Animação de remoção visual
                 card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
                 card.style.opacity = '0';
@@ -1123,7 +1135,7 @@
         document.getElementById('tabagismo').addEventListener('change', function() {
             const macosAnoField = document.getElementById('macos_ano_field');
             const anosParouField = document.getElementById('anos_parou_fumar_field');
-            
+
             if (this.value === 'nunca') {
                 // Ocultar ambos os campos
                 macosAnoField.style.display = 'none';
@@ -1146,7 +1158,7 @@
         document.getElementById('alcoolismo').addEventListener('change', function() {
             const dosesSemanaField = document.getElementById('doses_semana_field');
             const anosConsumoField = document.getElementById('anos_consumo_alcool_field');
-            
+
             if (this.value === 'nao' || this.value === 'social') {
                 // Ocultar ambos os campos
                 dosesSemanaField.style.display = 'none';
@@ -1160,31 +1172,30 @@
             }
         });
 
-        // Listener para campo sexo - mostrar checkbox Gestante apenas para sexo feminino
+        // Listener para campo sexo - gestação e amamentação só são perguntadas para o sexo feminino
         document.getElementById('sexo').addEventListener('change', function() {
-            const gestanteItem = document.getElementById('gestante-item');
-            const gestanteCheckbox = document.getElementById('gestante');
-            
-            if (this.value === 'feminino') {
-                gestanteItem.style.display = 'block';
-            } else {
-                gestanteItem.style.display = 'none';
-                gestanteCheckbox.checked = false; // Desmarcar se mudar para masculino
-            }
+            const feminino = this.value === 'feminino';
+            ['gestante', 'lactante'].forEach(campo => {
+                document.getElementById(campo + '-item').style.display = feminino ? 'block' : 'none';
+                if (!feminino) {
+                    document.getElementById(campo).value = 'desconhecido';
+                }
+            });
         });
 
         // Inicializar estado dos campos condicionais ao carregar a página
         document.addEventListener('DOMContentLoaded', function() {
-            // Ocultar campos de tabagismo inicialmente (valor padrão é "nunca")
+            // Ocultar campos de tabagismo inicialmente (nenhuma opção selecionada)
             document.getElementById('macos_ano_field').style.display = 'none';
             document.getElementById('anos_parou_fumar_field').style.display = 'none';
-            
+
             // Ocultar campos de alcoolismo inicialmente (valor padrão é "nao")
             document.getElementById('doses_semana_field').style.display = 'none';
             document.getElementById('anos_consumo_alcool_field').style.display = 'none';
-            
-            // Ocultar checkbox Gestante inicialmente
+
+            // Ocultar perguntas de gestação e amamentação inicialmente
             document.getElementById('gestante-item').style.display = 'none';
+            document.getElementById('lactante-item').style.display = 'none';
         });
     </script>
 

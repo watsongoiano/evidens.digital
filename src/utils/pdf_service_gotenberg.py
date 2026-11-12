@@ -241,7 +241,7 @@ def gerar_html_solicitacao_exames(dados_paciente, exames, tipo='laboratoriais'):
     </html>
     """
     
-    template = Template(template_html)
+    template = Template(template_html, autoescape=True)
     
     html = template.render(
         titulo=titulo,
@@ -431,7 +431,7 @@ def gerar_html_prescricao_vacinas(dados_paciente, vacinas):
     </html>
     """
     
-    template = Template(template_html)
+    template = Template(template_html, autoescape=True)
     
     html = template.render(
         paciente_nome=dados_paciente.get('nome', 'Não informado'),
@@ -450,15 +450,17 @@ def gerar_pdf_via_gotenberg(html_content):
     """Gera PDF usando Gotenberg (Chromium)"""
     
     try:
+        import base64
         import io
-        from urllib.parse import urlencode
-        
+        import secrets
+
         # Endpoint do Gotenberg para conversão HTML -> PDF
         url = f"{GOTENBERG_URL}/forms/chromium/convert/html"
-        
-        # Criar boundary para multipart/form-data
-        boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW'
-        
+
+        # Delimitador aleatório por requisição: um delimitador fixo permitiria que um
+        # texto contendo o próprio delimitador encerrasse a parte e acrescentasse campos.
+        boundary = '----EvidensFormBoundary' + secrets.token_hex(16)
+
         # Construir corpo da requisição multipart/form-data
         body = io.BytesIO()
         body.write(f'--{boundary}\r\n'.encode())
@@ -466,14 +468,24 @@ def gerar_pdf_via_gotenberg(html_content):
         body.write(b'Content-Type: text/html\r\n\r\n')
         body.write(html_content.encode('utf-8'))
         body.write(f'\r\n--{boundary}--\r\n'.encode())
-        
+
+        headers = {
+            'Content-Type': f'multipart/form-data; boundary={boundary}'
+        }
+
+        # Autenticação básica, quando configurada. Usa os mesmos nomes de variável que o
+        # Gotenberg lê no servidor (--api-enable-basic-auth), para configurar igual nos dois lados.
+        usuario = os.getenv('GOTENBERG_API_BASIC_AUTH_USERNAME')
+        senha = os.getenv('GOTENBERG_API_BASIC_AUTH_PASSWORD')
+        if usuario and senha:
+            credencial = base64.b64encode(f'{usuario}:{senha}'.encode()).decode()
+            headers['Authorization'] = f'Basic {credencial}'
+
         # Criar requisição
         req = urllib.request.Request(
             url,
             data=body.getvalue(),
-            headers={
-                'Content-Type': f'multipart/form-data; boundary={boundary}'
-            },
+            headers=headers,
             method='POST'
         )
         
