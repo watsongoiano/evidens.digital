@@ -1,20 +1,9 @@
 from flask import Blueprint, request, jsonify
-import json
-import math
 from datetime import datetime
 from src.utils.analytics import analytics
 from src.utils.reference_links import build_reference_links, build_reference_html
-from src.utils.prevent_calculator import calculate_prevent_risk, get_risk_classification
-from src.utils.reference_manager import apply_reference_overrides
-try:
-    from src.models.user import db
-    from src.models.medical import Patient, Checkup, Recomendacao
-except ImportError:
-    # Modelos não disponíveis em ambiente serverless
-    db = None
-    Patient = None
-    Checkup = None
-    Recomendacao = None
+from src.utils.seguranca_vacinas import aplicar_triagem_vacinas
+from src.utils.validacao import EntradaInvalida, SIM, ler_numero, normalizar_triagem, validar_entrada
 
 checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
 
@@ -54,54 +43,6 @@ def parse_date_ymd(date_str):
         pass
         
     return None
-
-# Funções calculate_prevent_risk e get_risk_classification agora são importadas de src.utils.prevent_calculator
-
-def generate_biomarker_recommendations(risk_level, age, sex):
-    """Gera recomendações de biomarcadores baseadas no nível de risco"""
-    recommendations = []
-    
-    if risk_level in ['borderline', 'intermediario', 'alto']:
-        recommendations.extend([
-            {
-                'titulo': 'Anti-HIV 1 e 2, soro',
-                'descricao': 'Teste para detecção de HIV',
-                'subtitulo': 'Rastreamento de HIV',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': 'MS 2024',
-                'grau_evidencia': 'A'
-            },
-            {
-                'titulo': 'Anti-HCV IgG, soro',
-                'descricao': 'Teste para detecção de Hepatite C',
-                'subtitulo': 'Rastreamento de Hepatite C',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': 'MS 2024',
-                'grau_evidencia': 'A'
-            },
-            {
-                'titulo': 'TOTG-75g, soro',
-                'descricao': 'Teste oral de tolerância à glicose',
-                'subtitulo': 'Avaliação de intolerância à glicose',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': 'ADA 2024',
-                'grau_evidencia': 'A'
-            },
-            {
-                'titulo': 'HbA1c, soro',
-                'descricao': 'Hemoglobina glicada',
-                'subtitulo': 'Rastreamento de diabetes',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': 'ADA 2024',
-                'grau_evidencia': 'A'
-            }
-        ])
-    
-    return recommendations
 
 def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False, is_pregnant=False, tabagismo='nunca_fumou', macos_ano=0, has_dpoc=False):
     """Gera recomendações baseadas em idade, sexo e condições clínicas
@@ -460,6 +401,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     if age <= 68:  # CDC 2025: recomendada até 68 anos
         _add_rec({
             'titulo': 'Tríplice Viral - SCR (Priorix® ou M-M-R® II)',
+            'viva_atenuada': True,
             'descricao': '1 ou 2 doses para adultos não vacinados ou sem comprovação vacinal. Adultos até 68 anos.',
             'subtitulo': 'Adultos 19-68 anos não imunizados | 1-2 doses | Sem reforço',
             'categoria': 'vacina',
@@ -482,6 +424,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Febre amarela (para áreas endêmicas)
     _add_rec({
             'titulo': 'Febre Amarela (Stamaril®)',
+            'viva_atenuada': True,
         'descricao': 'Dose única ou 2 doses com intervalo de 10 anos (SBIm recomenda 2 doses). Indicada para residentes ou viajantes para áreas endêmicas.',
         'subtitulo': 'Áreas endêmicas | 1-2 doses | Reforço: 10 anos (se 2 doses)',
         'categoria': 'vacina',
@@ -518,6 +461,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     if 4 <= age <= 60:
         _add_rec({
             'titulo': 'Dengue (Qdenga®)',
+            'viva_atenuada': True,
             'descricao': '2 doses com intervalo de 3 meses. Indicada para áreas endêmicas. Licenciada para 4-60 anos.',
             'subtitulo': '4-60 anos (áreas endêmicas) | 2 doses (0-3 meses) | Sem reforço',
             'categoria': 'vacina',
@@ -603,6 +547,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     if age <= 45:  # Prioridade para adultos jovens nascidos nos EUA
         _add_rec({
             'titulo': 'Varicela (Varilrix® ou Varivax®)',
+            'viva_atenuada': True,
             'descricao': '2 doses com intervalo de 1-2 meses para adultos suscetíveis (sem história de doença ou vacinação prévia). Contraindicada para gestantes.',
             'subtitulo': 'Adultos suscetíveis ≤45 anos | 2 doses (0-1 a 2 meses) | Sem reforço',
             'categoria': 'vacina',
@@ -671,41 +616,30 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
 def generate_intelligent_recommendations():
     try:
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'Dados não fornecidos'}), 400
-        
-        # Extrair dados do paciente
-        age = int(data.get('idade', 0))
-        sex = data.get('sexo', 'masculino')
-        is_pregnant = data.get('gestante', False) or data.get('gestante') == 'true'
-        weight = float(data.get('peso', 0)) if data.get('peso') else None
-        height = float(data.get('altura', 0)) if data.get('altura') else None
-        
-        # Aceitar tanto 'pas' quanto 'pressao_sistolica' (compatibilidade com formulário)
-        sbp_value = data.get('pas') or data.get('pressao_sistolica') or 0
-        dbp_value = data.get('pad') or data.get('pressao_diastolica') or 0
-        
-        # Dados clínicos para PREVENT
-        patient_data = {
-            'age': age,
-            'sex': sex,
-            'totalCholesterol': float(data.get('colesterol_total', 0) or data.get('colesterol', 0)) if (data.get('colesterol_total') or data.get('colesterol')) else 0,
-            'hdlCholesterol': float(data.get('hdl_colesterol', 0) or data.get('hdl', 0)) if (data.get('hdl_colesterol') or data.get('hdl')) else 0,
-            'systolicBP': float(sbp_value) if sbp_value else 0,
-            'diabetes': 'diabetes_tipo_2' in data.get('comorbidades', []) or 'diabetes' in data.get('comorbidades', []),
-            'smoking': data.get('tabagismo') == 'fumante_atual',
-            'weight': weight,
-            'height': height,
-            'creatinine': float(data.get('creatinina', 1.0)) if data.get('creatinina') else 1.0
-        }
-        
-        # Calcular risco PREVENT
-        risk_result = calculate_prevent_risk(patient_data)
-        risk_level = 'baixo'
-        
-        if risk_result:
-            risk_level = get_risk_classification(risk_result['risk10Year'])
+        # Validar e normalizar a entrada. Nada é presumido: idade, sexo e tabagismo são
+        # obrigatórios, valores impossíveis são recusados e dado ausente não vira valor padrão.
+        try:
+            data, triagem = validar_entrada(request.get_json(silent=True))
+        except EntradaInvalida as exc:
+            return jsonify({
+                'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in exc.erros),
+                'codigo': 'entrada_invalida',
+                'erros': exc.erros,
+            }), 400
+
+        # Dados do paciente (já normalizados)
+        age = data['idade']
+        sex = data['sexo']
+        is_pregnant = triagem['gestante'] == SIM
+        weight = data.get('peso')
+        height = data.get('altura')
+        sbp_value = data.get('pas') or 0
+        dbp_value = data.get('pad') or 0
+
+        # O cálculo de risco cardiovascular está desativado. A implementação anterior não
+        # correspondia às equações PREVENT publicadas e o resultado variava entre tela e
+        # servidor. Ele volta quando houver implementação única, validada contra os vetores
+        # de teste oficiais (ver docs/registro-de-perigos.md, P-06).
         
         # Detectar hipertensão automaticamente
         has_hypertension = False
@@ -767,7 +701,7 @@ def generate_intelligent_recommendations():
                 break
         
         # Extrair dados de tabagismo e DPOC
-        tabagismo = data.get('tabagismo', 'nunca_fumou')
+        tabagismo = data['tabagismo']
         macos_ano = float(data.get('macos_ano', 0)) if data.get('macos_ano') else 0
         has_dpoc = 'dpoc' in comorbidades
         
@@ -783,11 +717,6 @@ def generate_intelligent_recommendations():
                                                          macos_ano=macos_ano,
                                                          has_dpoc=has_dpoc)
         recommendations.extend(age_sex_recs)
-        
-        # Recomendações de biomarcadores se necessário
-        if risk_level in ['borderline', 'intermediario', 'alto']:
-            biomarker_recs = generate_biomarker_recommendations(risk_level, age, sex)
-            recommendations.extend(biomarker_recs)
         
         # Rastreamento de câncer de pulmão (LDCT) - USPSTF 2021
         # tabagismo e macos_ano já extraídos acima
@@ -1364,62 +1293,8 @@ def generate_intelligent_recommendations():
                 'grau_evidencia': 'B'
             })
         
-    # Salvar no banco de dados se possível
-        if db:
-            try:
-                # Criar ou encontrar paciente
-                patient = Patient(
-                    nome=data.get('nome', f'Paciente {age} anos'),
-                    idade=age,
-                    sexo=sex,
-                    peso=weight,
-                    altura=height
-                )
-                db.session.add(patient)
-                db.session.flush()  # Para obter o ID
-                
-                # Criar checkup
-                checkup = Checkup(
-                    patient_id=patient.id,
-                    pressao_sistolica=patient_data['systolicBP'],
-                    pressao_diastolica=float(data.get('pressao_diastolica', 0)) if data.get('pressao_diastolica') else None,
-                    colesterol_total=patient_data['totalCholesterol'],
-                    hdl_colesterol=patient_data['hdlCholesterol'],
-                    creatinina=patient_data['creatinine'],
-                    hba1c=float(data.get('hba1c', 0)) if data.get('hba1c') else None,
-                    risco_10_anos=risk_result['risk10Year'] if risk_result else None,
-                    risco_30_anos=risk_result['risk30Year'] if risk_result else None,
-                    classificacao_risco=risk_level,
-                    comorbidades=json.dumps(data.get('comorbidades', [])),
-                    historia_familiar=json.dumps(data.get('historia_familiar', [])),
-                    tabagismo=data.get('tabagismo', 'nunca_fumou'),
-                    medicacoes=data.get('medicacoes', ''),
-                    pais_guideline=data.get('pais_guideline', 'BR')
-                )
-                db.session.add(checkup)
-                db.session.flush()
-                
-                # Salvar recomendações
-                for rec in recommendations:
-                    recomendacao = Recomendacao(
-                        checkup_id=checkup.id,
-                        titulo=rec['titulo'],
-                        descricao=rec['descricao'],
-                        subtitulo=rec.get('subtitulo'),
-                        categoria=rec['categoria'],
-                        prioridade=rec['prioridade'],
-                        referencia=rec['referencia'],
-                        grau_evidencia=rec.get('grau_evidencia')
-                    )
-                    db.session.add(recomendacao)
-                
-                db.session.commit()
-                
-            except Exception as db_error:
-                print(f"Erro ao salvar no banco: {db_error}")
-                if db and hasattr(db, 'session'):
-                    db.session.rollback()
-        
+        # Nenhum dado do paciente é gravado: a consulta é calculada e descartada.
+
         # Enriquecer recomendações com links (referencia_html)
         try:
             for rec in recommendations:
@@ -1455,8 +1330,14 @@ def generate_intelligent_recommendations():
         # Preparar resposta
         response = {
             'success': True,
-            'prevent_risk': risk_result,
-            'risk_classification': risk_level,
+            # Mantidos por compatibilidade com clientes antigos; sempre vazios.
+            'prevent_risk': None,
+            'risk_classification': None,
+            'risco_cardiovascular': {
+                'status': 'desativado',
+                'motivo': 'Cálculo de risco cardiovascular desativado até a validação de uma '
+                          'implementação única das equações PREVENT.',
+            },
             'recommendations': recommendations,
             'outras_recomendacoes': outras_recomendacoes,
             'total_recommendations': len(recommendations)
@@ -1530,6 +1411,15 @@ def generate_intelligent_recommendations():
         except Exception:
             pass
 
+        # Triagem de segurança das vacinas. É a última etapa de propósito: vale para
+        # qualquer regra acima, inclusive as que forem acrescentadas depois.
+        contexto_vacinas = {'idade': age, 'hiv': is_hiv_positive, 'cd4': data.get('cd4')}
+        mantidas, nao_incluidas = aplicar_triagem_vacinas(response['recommendations'], triagem, contexto_vacinas)
+        response['recommendations'] = mantidas
+        response['total_recommendations'] = len(mantidas)
+        response['nao_incluidas'] = nao_incluidas
+        response['triagem_vacinas'] = triagem
+
         return jsonify(response)
         
     except Exception as e:
@@ -1569,155 +1459,144 @@ for _rota in ('/gerar-receita-vacinas', '/gerar-solicitacao-exames', '/generate-
 
 
 # ==================== ENDPOINTS DE GERAÇÃO DE PDFs ====================
+#
+# Produzem minutas em PDF (sem assinatura digital) a partir da lista que o navegador
+# devolve. O pedido é validado e limitado, o conteúdo é escapado nos templates e as
+# vacinas passam de novo pela triagem de segurança antes de irem para o papel.
+
+MAX_ITENS_PDF = 80
+MAX_TAMANHO_TITULO = 300
+MAX_TAMANHO_NOME = 150
+
+
+class PedidoDePdfInvalido(Exception):
+    """O pedido de PDF não pode ser atendido; a mensagem é mostrada ao usuário."""
+
+    def __init__(self, mensagem, codigo='pedido_invalido'):
+        super().__init__(mensagem)
+        self.mensagem = mensagem
+        self.codigo = codigo
+
+
+def _ler_pedido_de_pdf(categoria):
+    """Valida o corpo do pedido e devolve `(dados_paciente, itens)` da categoria pedida."""
+    corpo = request.get_json(silent=True)
+    if not isinstance(corpo, dict) or not corpo:
+        raise PedidoDePdfInvalido('Dados não fornecidos')
+
+    dados_paciente = corpo.get('dados_paciente') or {}
+    recomendacoes = corpo.get('recomendacoes') or []
+    if not isinstance(dados_paciente, dict) or not isinstance(recomendacoes, list):
+        raise PedidoDePdfInvalido('Pedido em formato inválido')
+    if len(recomendacoes) > MAX_ITENS_PDF:
+        raise PedidoDePdfInvalido(f'Lista com mais de {MAX_ITENS_PDF} itens')
+
+    nome = dados_paciente.get('nome')
+    if nome is not None and (not isinstance(nome, str) or len(nome) > MAX_TAMANHO_NOME):
+        raise PedidoDePdfInvalido('Nome do paciente inválido ou longo demais')
+
+    itens = []
+    for rec in recomendacoes:
+        if not isinstance(rec, dict):
+            raise PedidoDePdfInvalido('Item de recomendação em formato inválido')
+        if rec.get('categoria') != categoria:
+            continue
+        titulo = rec.get('titulo')
+        if not isinstance(titulo, str) or not titulo.strip() or len(titulo) > MAX_TAMANHO_TITULO:
+            raise PedidoDePdfInvalido('Item de recomendação com título inválido')
+        itens.append(rec)
+    return dados_paciente, itens
+
+
+def _conferir_triagem_das_vacinas(dados_paciente, vacinas):
+    """Segunda linha de defesa: recusa o PDF se houver vacina que a triagem não libera.
+
+    A triagem é relida dos dados do paciente enviados no pedido (as respostas
+    atuais do formulário). Resposta ausente vale como "desconhecido", de modo que
+    um pedido sem triagem não consegue imprimir vacinas de vírus vivo atenuado.
+    """
+    sexo = dados_paciente.get('sexo')
+    sexo = sexo.strip().lower() if isinstance(sexo, str) else None
+    idade = ler_numero(dados_paciente.get('idade'))
+    triagem, _ = normalizar_triagem(dados_paciente, sexo, idade)
+    contexto = {
+        'idade': idade,
+        'hiv': bool(dados_paciente.get('hiv')),
+        'cd4': ler_numero(dados_paciente.get('cd4')),
+    }
+    _, bloqueadas = aplicar_triagem_vacinas(vacinas, triagem, contexto)
+    if bloqueadas:
+        titulos = '; '.join(item['titulo'] for item in bloqueadas)
+        raise PedidoDePdfInvalido(
+            'A lista contém vacinas que a triagem de segurança não libera para este paciente '
+            f'({titulos}). Gere as recomendações novamente.',
+            codigo='triagem_vacinas',
+        )
+
+
+def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferir=None):
+    import io
+    from flask import send_file
+    from src.utils import pdf_service_gotenberg
+
+    try:
+        dados_paciente, itens = _ler_pedido_de_pdf(categoria)
+        if not itens:
+            raise PedidoDePdfInvalido(mensagem_vazia)
+        if conferir:
+            conferir(dados_paciente, itens)
+    except PedidoDePdfInvalido as exc:
+        return jsonify({'error': exc.mensagem, 'codigo': exc.codigo}), 400
+
+    try:
+        pdf_bytes = getattr(pdf_service_gotenberg, nome_gerador)(dados_paciente, itens)
+    except Exception as exc:
+        # O detalhe fica só no log do servidor; a resposta não expõe a infraestrutura.
+        print(f"❌ Erro ao gerar PDF ({categoria}): {exc}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'error': 'Não foi possível gerar o PDF no momento. Tente novamente em instantes.',
+            'codigo': 'falha_na_geracao',
+        }), 502
+
+    return send_file(
+        io.BytesIO(pdf_bytes),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f'{prefixo_arquivo}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+    )
+
 
 @checkup_intelligent_bp.route('/gerar-pdf-exames-laboratoriais', methods=['POST'])
 def gerar_pdf_exames_laboratoriais_endpoint():
+    """Minuta de solicitação de exames laboratoriais.
+
+    Corpo: {dados_paciente: {nome, idade, sexo}, recomendacoes: [...]}.
+    Só entram os itens de categoria `laboratorio`. Resposta: PDF.
     """
-    Endpoint para gerar PDF de solicitação de exames laboratoriais.
-    
-    Recebe JSON com:
-    - dados_paciente: {nome, idade, sexo, comorbidades}
-    - recomendacoes: lista de recomendações (filtra apenas laboratoriais)
-    
-    Retorna: PDF binário
-    """
-    try:
-        from src.utils.pdf_service_gotenberg import gerar_pdf_exames_laboratoriais, gerar_pdf_exames_imagem, gerar_pdf_vacinas
-        from flask import send_file
-        import io
-        from datetime import datetime
-        
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'Dados não fornecidos'}), 400
-        
-        dados_paciente = data.get('dados_paciente', {})
-        recomendacoes = data.get('recomendacoes', [])
-        
-        # Filtrar apenas exames laboratoriais
-        exames_lab = [
-            rec for rec in recomendacoes 
-            if rec.get('categoria') == 'laboratorio'
-        ]
-        
-        if not exames_lab:
-            return jsonify({'error': 'Nenhum exame laboratorial encontrado'}), 400
-        
-        # Gerar PDF
-        pdf_bytes = gerar_pdf_exames_laboratoriais(dados_paciente, exames_lab)
-        
-        # Retornar PDF
-        return send_file(
-            io.BytesIO(pdf_bytes),
-            mimetype='application/pdf',
-            as_attachment=True,
-            download_name=f'exames_laboratoriais_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
-        )
-        
-    except Exception as e:
-        print(f"❌ Erro ao gerar PDF laboratoriais: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'error': f'Erro ao gerar PDF de exames laboratoriais: {str(e)}'}), 500
+    return _gerar_pdf('laboratorio', 'gerar_pdf_exames_laboratoriais', 'exames_laboratoriais',
+                      'Nenhum exame laboratorial encontrado')
 
 
 @checkup_intelligent_bp.route('/gerar-pdf-exames-imagem', methods=['POST'])
 def gerar_pdf_exames_imagem_endpoint():
+    """Minuta de solicitação de exames de imagem.
+
+    Corpo: {dados_paciente: {nome, idade, sexo}, recomendacoes: [...]}.
+    Só entram os itens de categoria `imagem`. Resposta: PDF.
     """
-    Endpoint para gerar PDF de solicitação de exames de imagem.
-    
-    Recebe JSON com:
-    - dados_paciente: {nome, idade, sexo, comorbidades}
-    - recomendacoes: lista de recomendações (filtra apenas imagem)
-    
-    Retorna: PDF binário
-    """
-    try:
-        from src.utils.pdf_service_gotenberg import gerar_pdf_exames_laboratoriais, gerar_pdf_exames_imagem, gerar_pdf_vacinas
-        from flask import send_file
-        import io
-        from datetime import datetime
-        
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'Dados não fornecidos'}), 400
-        
-        dados_paciente = data.get('dados_paciente', {})
-        recomendacoes = data.get('recomendacoes', [])
-        
-        # Filtrar apenas exames de imagem
-        exames_imagem = [
-            rec for rec in recomendacoes 
-            if rec.get('categoria') == 'imagem'
-        ]
-        
-        if not exames_imagem:
-            return jsonify({'error': 'Nenhum exame de imagem encontrado'}), 400
-        
-        # Gerar PDF
-        pdf_bytes = gerar_pdf_exames_imagem(dados_paciente, exames_imagem)
-        
-        # Retornar PDF
-        return send_file(
-            io.BytesIO(pdf_bytes),
-            mimetype='application/pdf',
-            as_attachment=True,
-            download_name=f'exames_imagem_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
-        )
-        
-    except Exception as e:
-        print(f"❌ Erro ao gerar PDF imagem: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'error': f'Erro ao gerar PDF de exames de imagem: {str(e)}'}), 500
+    return _gerar_pdf('imagem', 'gerar_pdf_exames_imagem', 'exames_imagem',
+                      'Nenhum exame de imagem encontrado')
 
 
 @checkup_intelligent_bp.route('/gerar-pdf-vacinas', methods=['POST'])
 def gerar_pdf_vacinas_endpoint():
+    """Minuta de prescrição de vacinas.
+
+    Corpo: {dados_paciente: {nome, idade, sexo, gestante, lactante, imunossupressao,
+    hiv, cd4}, recomendacoes: [...]}. Só entram os itens de categoria `vacina`, e a
+    triagem de segurança é conferida de novo. Resposta: PDF.
     """
-    Endpoint para gerar PDF de prescrição de vacinas.
-    
-    Recebe JSON com:
-    - dados_paciente: {nome, idade, sexo}
-    - recomendacoes: lista de recomendações (filtra apenas vacinas)
-    
-    Retorna: PDF binário
-    """
-    try:
-        from src.utils.pdf_service_gotenberg import gerar_pdf_exames_laboratoriais, gerar_pdf_exames_imagem, gerar_pdf_vacinas
-        from flask import send_file
-        import io
-        from datetime import datetime
-        
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'Dados não fornecidos'}), 400
-        
-        dados_paciente = data.get('dados_paciente', {})
-        recomendacoes = data.get('recomendacoes', [])
-        
-        # Filtrar apenas vacinas
-        vacinas = [
-            rec for rec in recomendacoes 
-            if rec.get('categoria') == 'vacina'
-        ]
-        
-        if not vacinas:
-            return jsonify({'error': 'Nenhuma vacina encontrada'}), 400
-        
-        # Gerar PDF
-        pdf_bytes = gerar_pdf_vacinas(dados_paciente, vacinas)
-        
-        # Retornar PDF
-        return send_file(
-            io.BytesIO(pdf_bytes),
-            mimetype='application/pdf',
-            as_attachment=True,
-            download_name=f'vacinas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
-        )
-        
-    except Exception as e:
-        print(f"❌ Erro ao gerar PDF vacinas: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'error': f'Erro ao gerar PDF de vacinas: {str(e)}'}), 500
+    return _gerar_pdf('vacina', 'gerar_pdf_vacinas', 'vacinas',
+                      'Nenhuma vacina encontrada', conferir=_conferir_triagem_das_vacinas)

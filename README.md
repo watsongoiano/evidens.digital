@@ -140,20 +140,34 @@ Os arquivos buildados estarão em `dist/`
 ### POST /checkup-intelligent
 Gera recomendações personalizadas.
 
-- Corpo (JSON): dados do paciente (idade, sexo, medidas, histórico)
+- Corpo (JSON): dados do paciente. `idade` (18 a 120), `sexo` e `tabagismo` são obrigatórios; medidas e exames
+  são opcionais e, quando informados, precisam estar em faixas plausíveis. Nenhum campo recebe valor padrão clínico.
+- Triagem de segurança para vacinas: `gestante` e `imunossupressao` (`sim` | `nao` | `desconhecido`) e `lactante`
+  (`nao` | `sim_menor_6m` | `sim_6m_ou_mais` | `desconhecido`). Resposta ausente vale como `desconhecido`.
+- Entrada inválida: `400` com `codigo: "entrada_invalida"` e a lista `erros` (`campo`, `mensagem`).
 - Resposta (JSON):
-	- `prevent_risk`: objeto com riscos calculados (10 e 30 anos)
-	- `risk_classification`: baixo | borderline | intermediario | alto
 	- `recommendations`: lista de recomendações
-		- Cada item inclui: `titulo`, `descricao`, `categoria`, `prioridade`, `referencia`
-		- Novos campos: `referencias` (lista com `{label,url}`) e `referencia_html` (HTML com links clicáveis)
+		- Cada item inclui: `titulo`, `descricao`, `categoria`, `prioridade`, `referencia`,
+		  `referencias` (lista com `{label,url}`) e `referencia_html` (HTML com links clicáveis)
+	- `nao_incluidas`: vacinas retiradas da lista automática pela triagem, com `estado`
+	  (`contraindicada` | `precaucao` | `dados_insuficientes`), `motivo` e `referencia`
+	- `triagem_vacinas`: as respostas de triagem como foram lidas
+	- `risco_cardiovascular`: `{status: "desativado", motivo}`. `prevent_risk` e `risk_classification`
+	  continuam na resposta por compatibilidade e são sempre `null`
 
 Observação: Os campos de referência são construídos automaticamente a partir de `referencia` via heurísticas internas, incluindo mapeamentos para USPSTF, ADA, AHA/ACC, KDIGO, SBIm/ANVISA, entre outros.
+
+O cálculo de risco cardiovascular está desativado: as implementações anteriores não correspondiam às equações
+PREVENT publicadas. Os perigos conhecidos, os controles e os testes de cada um estão em
+[`docs/registro-de-perigos.md`](docs/registro-de-perigos.md).
 
 ### POST /gerar-pdf-exames-laboratoriais, /gerar-pdf-exames-imagem e /gerar-pdf-vacinas
 Geram minutas em PDF a partir da lista de recomendações retornadas pelo endpoint acima.
 
-- Corpo (JSON): `{ dados_paciente: { nome, idade, sexo }, recomendacoes: [...] }`
+- Corpo (JSON): `{ dados_paciente: { nome, idade, sexo, gestante, lactante, imunossupressao, hiv, cd4 }, recomendacoes: [...] }`
+- O pedido é validado e limitado (até 80 itens) e o conteúdo é escapado.
+- No PDF de vacinas a triagem é conferida de novo: se a lista tiver vacina de vírus vivo atenuado não liberada
+  para o paciente, a resposta é `400` com `codigo: "triagem_vacinas"`.
 - Resposta: PDF com campo de assinatura e carimbo do médico. Os documentos não têm assinatura digital.
 
 ### Endpoints desativados

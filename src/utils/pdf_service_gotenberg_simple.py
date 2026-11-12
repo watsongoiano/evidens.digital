@@ -40,6 +40,15 @@ def get_detalhes_administracao_vacina(titulo_vacina):
     # Fallback
     return {"doses": "Conforme orientação médica", "via": "Conforme bula", "volume": "Conforme bula", "intervalo": "Conforme orientação médica", "detalhes": "Aplicar conforme orientação médica e bula do fabricante."}
 
+def _rotulo_sexo(sexo):
+    """Sexo ausente não é impresso como masculino."""
+    if sexo in ('F', 'feminino'):
+        return 'Feminino'
+    if sexo in ('M', 'masculino'):
+        return 'Masculino'
+    return 'Não informado'
+
+
 def gerar_html_exames_simples(dados_paciente, exames, tipo_exame="LABORATORIAIS"):
     """Gera HTML simplificado para solicitação de exames"""
     
@@ -84,15 +93,6 @@ def gerar_html_exames_simples(dados_paciente, exames, tipo_exame="LABORATORIAIS"
             .clinic-info p {
                 margin: 3px 0;
             }
-            .doctor-name {
-                color: #2E7D32;
-                font-weight: bold;
-                margin-top: 10px;
-            }
-            .crm {
-                text-align: right;
-                font-weight: bold;
-            }
             .patient-info {
                 border-top: 1px solid #000;
                 border-bottom: 1px solid #000;
@@ -127,6 +127,11 @@ def gerar_html_exames_simples(dados_paciente, exames, tipo_exame="LABORATORIAIS"
                 padding-top: 5px;
                 font-size: 10pt;
             }
+            .aviso-minuta {
+                margin-top: 14px;
+                font-size: 8pt;
+                color: #444;
+            }
         </style>
     </head>
     <body>
@@ -157,18 +162,20 @@ def gerar_html_exames_simples(dados_paciente, exames, tipo_exame="LABORATORIAIS"
             <div class="signature-line">
                 Assinatura e Carimbo do Médico
             </div>
+            <p class="aviso-minuta">Documento sem assinatura digital. Válido somente com assinatura e carimbo do médico.</p>
         </div>
     </body>
     </html>
     """
     
-    template = Template(template_html)
+    # autoescape: nome do paciente e títulos chegam do navegador e não podem virar HTML.
+    template = Template(template_html, autoescape=True)
     
     html = template.render(
         titulo=titulo,
         paciente_nome=dados_paciente.get('nome', 'Não informado'),
         paciente_idade=f"{dados_paciente.get('idade', 'Não informada')} anos" if dados_paciente.get('idade') else 'Não informada',
-        paciente_sexo='Feminino' if dados_paciente.get('sexo') in ['F', 'feminino'] else 'Masculino',
+        paciente_sexo=_rotulo_sexo(dados_paciente.get('sexo')),
         data_emissao=datetime.now().strftime('%d/%m/%Y'),
         exames=exames
     )
@@ -212,15 +219,6 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
             .clinic-info p {
                 margin: 3px 0;
             }
-            .doctor-name {
-                color: #2E7D32;
-                font-weight: bold;
-                margin-top: 10px;
-            }
-            .crm {
-                text-align: right;
-                font-weight: bold;
-            }
             .patient-info {
                 border-top: 1px solid #000;
                 border-bottom: 1px solid #000;
@@ -250,6 +248,11 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
                 margin: 0 auto;
                 padding-top: 5px;
                 font-size: 10pt;
+            }
+            .aviso-minuta {
+                margin-top: 14px;
+                font-size: 8pt;
+                color: #444;
             }
         </style>
     </head>
@@ -281,6 +284,7 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
             <div class="signature-line">
                 Assinatura e Carimbo do Médico
             </div>
+            <p class="aviso-minuta">Documento sem assinatura digital. Válido somente com assinatura e carimbo do médico.</p>
         </div>
     </body>
     </html>
@@ -298,12 +302,13 @@ def gerar_html_prescricao_vacinas_simples(dados_paciente, vacinas):
         }
         vacinas_com_detalhes.append(vacina_completa)
     
-    template = Template(template_html)
+    # autoescape: nome do paciente e títulos chegam do navegador e não podem virar HTML.
+    template = Template(template_html, autoescape=True)
     
     html = template.render(
         paciente_nome=dados_paciente.get('nome', 'Não informado'),
         paciente_idade=f"{dados_paciente.get('idade', 'Não informada')} anos" if dados_paciente.get('idade') else 'Não informada',
-        paciente_sexo='Feminino' if dados_paciente.get('sexo') in ['F', 'feminino'] else 'Masculino',
+        paciente_sexo=_rotulo_sexo(dados_paciente.get('sexo')),
         data_emissao=datetime.now().strftime('%d/%m/%Y'),
         vacinas=vacinas_com_detalhes
     )
