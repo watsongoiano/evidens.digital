@@ -227,3 +227,38 @@ def test_home_leva_ao_check_up_e_nao_se_apresenta_como_prototipo(client):
 @pytest.mark.parametrize('rota', ['/', '/intelligent-tools', '/contact'])
 def test_paginas_mantem_o_vercel_analytics(client, rota):
     assert '/_vercel/insights/script.js' in client.get(rota).get_data(as_text=True)
+
+
+# --- Números da home conferidos contra o motor ----------------------------
+
+def _varredura(client):
+    """Passa uma grade de perfis pelo motor e devolve os itens e as referências que aparecem."""
+    import itertools
+    itens, refs = {}, set()
+    grade = itertools.product(
+        (20, 30, 40, 50, 60, 70, 80), ('masculino', 'feminino'), ('nunca', 'atual', 'ex'),
+        ([], ['diabetes'], ['hipertensao'], ['hiv'], ['doenca_renal', 'cardiopatia'], ['dpoc'],
+         ['obesidade', 'dislipidemia'], ['has_resistente']),
+        ([], ['cancer_mama', 'cancer_colorretal', 'cancer_ovario']))
+    for idade, sexo, tabagismo, comorbidades, familia in grade:
+        dados = dict(idade=idade, sexo=sexo, tabagismo=tabagismo, comorbidades=comorbidades,
+                     historia_familiar=familia, imunossupressao='nao', gestante='nao', lactante='nao',
+                     macos_ano='30' if tabagismo != 'nunca' else '', anos_parou_fumar='5' if tabagismo == 'ex' else '',
+                     cd4='500' if 'hiv' in comorbidades else '')
+        for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
+            itens[rec['titulo']] = rec['categoria']
+            refs.add(rec.get('referencia') or '')
+    return itens, ' '.join(refs)
+
+
+def test_numeros_da_home_correspondem_ao_motor(client):
+    html = client.get('/').get_data(as_text=True)
+    itens, refs = _varredura(client)
+    assert f'{len(itens)}<span class="text-[28px] ml-2 text-teal tracking-tight">recomendações</span>' in html
+    assert f'{len(itens)} recomendações mapeadas' in html
+    # As fontes nomeadas na home precisam aparecer nas referências do motor.
+    fontes = ['SBIm', 'USPSTF', 'CDC', 'SBC', 'AHA', 'ACC', 'ADA', 'ESC', 'EAS', 'KDIGO', 'GOLD', 'NIH', 'EACS', 'MS']
+    for fonte in fontes:
+        assert fonte in refs, fonte
+    # 12 fontes: SBIm, USPSTF, CDC, SBC, AHA/ACC, ADA, ESC/EAS, KDIGO, GOLD, NIH, EACS e MS.
+    assert '12 diretrizes' in html and '>12<span' in html and '12 fontes' in html
