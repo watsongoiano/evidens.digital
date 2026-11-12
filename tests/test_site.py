@@ -22,6 +22,7 @@ PAGINAS = ['/', '/intelligent-tools', '/contact', '/analytics']
     '/favicon.ico',
     '/favicon.png',
     '/src/static/styles/base.css',
+    '/static/evidens.css',
 ])
 def test_paginas_e_recursos_publicos_respondem(client, rota):
     assert client.get(rota).status_code == 200
@@ -35,6 +36,8 @@ def test_paginas_e_recursos_publicos_respondem(client, rota):
     '/config/medical_references.json',
     '/package.json',
     '/vercel.json',
+    '/tailwind.config.js',
+    '/static/evidens.src.css',
     '/prevent_calculator.js',
     '/src/routes/checkup_intelligent.py',
     '/requirements.txt',
@@ -193,3 +196,29 @@ def test_resposta_pendente_e_descartada_se_o_formulario_mudar(pagina):
     assert envio.index("await fetch('/api/checkup-intelligent'") < conferencia
     assert conferencia < envio.index('currentRecommendations = result.recommendations')
     assert conferencia < envio.index('mostrarErros(')
+
+
+# --- Novo front-end ---------------------------------------------------------
+
+@pytest.mark.parametrize('rota', ['/', '/intelligent-tools'])
+def test_paginas_usam_o_css_compilado_e_nao_o_tailwind_pelo_cdn(client, rota):
+    html = client.get(rota).get_data(as_text=True)
+    assert '/static/evidens.css' in html
+    assert 'cdn.tailwindcss.com' not in html
+    assert '<style>' not in html
+
+
+def test_css_compilado_cobre_as_classes_dos_cartoes_gerados_por_script(client):
+    css = client.get('/static/evidens.css').get_data(as_text=True)
+    for seletor in ('.recommendation-card', '.nao-incluida-card', '.selo', '.btn-escuro', '.campo', '.rv.in'):
+        assert seletor in css, seletor
+
+
+def test_home_leva_ao_check_up_e_nao_se_apresenta_como_prototipo(client):
+    html = client.get('/').get_data(as_text=True)
+    assert 'href="/intelligent-tools"' in html
+    assert 'href="#"' not in html
+    for trecho in ('Nenhuma análise clínica', 'sem motor clínico', 'Sem motor clínico', 'Neko Health', 'cdn.tailwindcss.com'):
+        assert trecho not in html, trecho
+    # A estratificação de risco está desativada; a home não pode anunciá-la como recurso.
+    assert 'Estratificação' not in html

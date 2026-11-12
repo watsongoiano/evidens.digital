@@ -17,7 +17,9 @@ from src.routes.checkup_intelligent import checkup_intelligent_bp
 from src.utils.analytics import analytics
 
 # Criar aplicação Flask
-app = Flask(__name__)
+# Sem a pasta estática automática do Flask: tudo o que é publicado passa pela
+# lista ARQUIVOS_PUBLICOS abaixo (a rota /static/<arquivo> serviria a pasta inteira).
+app = Flask(__name__, static_folder=None)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # Configurar CORS
@@ -70,6 +72,7 @@ ARQUIVOS_PUBLICOS = frozenset({
     'new_logo.png',
     'evidenscheck.png',
     'evidenscheck.svg',
+    'static/evidens.css',
     'src/static/styles/tokens.css',
     'src/static/styles/base.css',
     'src/static/styles/components.css',

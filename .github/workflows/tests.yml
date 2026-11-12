@@ -31,3 +31,21 @@ jobs:
 
       - name: Rodar testes
         run: python -m pytest
+
+  css:
+    # static/evidens.css é gerado a partir de static/evidens.src.css e
+    # tailwind.config.js. Este passo falha se o arquivo publicado não
+    # corresponder às páginas atuais (ex.: classe nova sem recompilar).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Recompilar o CSS
+        run: npx --yes tailwindcss@3.4.17 -c tailwind.config.js -i static/evidens.src.css -o static/evidens.css --minify
+
+      - name: Conferir que o CSS publicado está atualizado
+        run: git diff --exit-code static/evidens.css
