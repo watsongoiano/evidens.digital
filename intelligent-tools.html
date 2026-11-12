@@ -807,6 +807,11 @@
             limparErros();
             staleNotice.style.display = 'none';
 
+            // Cada envio recebe um número. Se o formulário mudar (ou houver novo envio)
+            // antes de a resposta chegar, o número deixa de valer e a resposta é descartada.
+            revisaoDoFormulario += 1;
+            const revisaoDoEnvio = revisaoDoFormulario;
+
             const data = lerFormulario();
 
             // O nome do paciente não é necessário para calcular as recomendações
@@ -830,6 +835,12 @@
                     result = null;
                 }
 
+                if (revisaoDoEnvio !== revisaoDoFormulario) {
+                    // Os dados clínicos mudaram enquanto a resposta estava a caminho:
+                    // ela pertence a outro paciente/estado e não pode ser exibida.
+                    return;
+                }
+
                 if (response.status === 400 && result && Array.isArray(result.erros)) {
                     limparResultados();
                     mostrarErros(result.erros.map(item => item.mensagem));
@@ -851,6 +862,9 @@
                 displayRecommendations(currentRecommendations, result.nao_incluidas || []);
 
             } catch (error) {
+                if (revisaoDoEnvio !== revisaoDoFormulario) {
+                    return;
+                }
                 console.error('Erro:', error);
                 alert('Erro ao gerar recomendações: ' + error.message);
             }
@@ -858,10 +872,13 @@
 
         // Qualquer alteração nos dados clínicos invalida o resultado exibido: as recomendações
         // e os PDFs têm de corresponder ao que está no formulário.
+        let revisaoDoFormulario = 0;
         function invalidarResultados(evento) {
             if (evento && evento.target && evento.target.id === 'nome_paciente') {
                 return;
             }
+            // Invalida também qualquer resposta ainda pendente (ver o envio do formulário).
+            revisaoDoFormulario += 1;
             if (recommendationsDiv.style.display === 'block') {
                 limparResultados();
                 staleNotice.style.display = 'block';
