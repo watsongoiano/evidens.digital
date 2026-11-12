@@ -1,0 +1,4 @@
+# Dependências para rodar os testes localmente e na integração contínua.
+# As dependências de produção são as de api/requirements.txt.
+-r api/requirements.txt
+pytest>=8,<9
