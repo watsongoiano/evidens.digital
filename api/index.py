@@ -79,8 +79,10 @@ ARQUIVOS_PUBLICOS = frozenset({
 @app.route('/<path:filename>')
 def serve_static(filename):
     """Servir apenas os arquivos estáticos publicados pelo site."""
-    if filename in ARQUIVOS_PUBLICOS and (BASE_DIR / filename).is_file():
-        return send_from_directory(BASE_DIR, filename)
+    # O caminho servido vem da própria lista, nunca do texto da requisição.
+    publicado = next((nome for nome in ARQUIVOS_PUBLICOS if nome == filename), None)
+    if publicado is not None and (BASE_DIR / publicado).is_file():
+        return send_from_directory(BASE_DIR, publicado)
 
     return jsonify({'error': 'File not found'}), 404
 
