@@ -239,10 +239,12 @@ def _varredura(client):
         (20, 30, 40, 50, 60, 70, 80), ('masculino', 'feminino'), ('nunca', 'atual', 'ex'),
         ([], ['diabetes'], ['hipertensao'], ['hiv'], ['doenca_renal', 'cardiopatia'], ['dpoc'],
          ['obesidade', 'dislipidemia'], ['has_resistente']),
-        ([], ['cancer_mama', 'cancer_colorretal', 'cancer_ovario']))
-    for idade, sexo, tabagismo, comorbidades, familia in grade:
+        ([], ['cancer_mama', 'cancer_colorretal', 'cancer_ovario']), ('nao', 'sim'))
+    for idade, sexo, tabagismo, comorbidades, familia, gestante in grade:
+        if gestante == 'sim' and (sexo != 'feminino' or idade > 50):
+            continue
         dados = dict(idade=idade, sexo=sexo, tabagismo=tabagismo, comorbidades=comorbidades,
-                     historia_familiar=familia, imunossupressao='nao', gestante='nao', lactante='nao',
+                     historia_familiar=familia, imunossupressao='nao', gestante=gestante, lactante='nao',
                      macos_ano='30' if tabagismo != 'nunca' else '', anos_parou_fumar='5' if tabagismo == 'ex' else '',
                      cd4='500' if 'hiv' in comorbidades else '')
         for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
@@ -254,11 +256,26 @@ def _varredura(client):
 def test_numeros_da_home_correspondem_ao_motor(client):
     html = client.get('/').get_data(as_text=True)
     itens, refs = _varredura(client)
-    assert f'{len(itens)}<span class="text-[28px] ml-2 text-teal tracking-tight">recomendações</span>' in html
-    assert f'{len(itens)} recomendações mapeadas' in html
-    # As fontes nomeadas na home precisam aparecer nas referências do motor.
-    fontes = ['SBIm', 'USPSTF', 'CDC', 'SBC', 'AHA', 'ACC', 'ADA', 'ESC', 'EAS', 'KDIGO', 'GOLD', 'NIH', 'EACS', 'MS']
+    assert html.count(f'{len(itens)} recomendações') == 2  # faixa do hero e FAQ
+    # 15 sociedades e órgãos citados na home; todos precisam aparecer nas referências do motor.
+    fontes = ['SBIm', 'SBC', 'MS', 'USPSTF', 'CDC', 'NIH', 'AHA', 'ACC', 'ADA', 'ACOG', 'ESC', 'EAS', 'EACS', 'KDIGO', 'GOLD']
+    assert len(fontes) == 15
     for fonte in fontes:
         assert fonte in refs, fonte
-    # 12 fontes: SBIm, USPSTF, CDC, SBC, AHA/ACC, ADA, ESC/EAS, KDIGO, GOLD, NIH, EACS e MS.
-    assert '12 diretrizes' in html and '>12<span' in html and '12 fontes' in html
+    assert '15<span' in html and '15 sociedades e órgãos de saúde' in html
+
+
+def test_caso_de_exemplo_da_home_e_a_saida_real_do_motor(client):
+    """Os números do caso fictício mostrado na home vêm do motor; se o motor mudar, a home precisa mudar junto."""
+    caso = dict(idade=42, sexo='feminino', tabagismo='ex', macos_ano='25', anos_parou_fumar='5',
+                comorbidades=['hipertensao'], historia_familiar=['cancer_colorretal'],
+                imunossupressao='nao', gestante='sim', lactante='nao')
+    r = client.post('/api/checkup-intelligent', json=caso).get_json()
+    por_tipo = {}
+    for rec in r['recommendations']:
+        por_tipo[rec['categoria']] = por_tipo.get(rec['categoria'], 0) + 1
+    assert (len(r['recommendations']), por_tipo['laboratorio'], por_tipo['imagem'], por_tipo['vacina']) == (24, 12, 4, 8)
+    assert [i['estado'] for i in r['nao_incluidas']] == ['contraindicada'] * 5
+    html = client.get('/').get_data(as_text=True)
+    for trecho in ('24 recomendações<br>', 'Laboratório · 12 itens', 'Imagem · 4 itens', 'Vacinas · 8 itens', '5 contraindicadas'):
+        assert trecho in html, trecho
