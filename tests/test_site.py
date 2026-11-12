@@ -63,6 +63,30 @@ def test_toda_referencia_local_das_paginas_existe(client, pagina):
         assert client.get(caminho).status_code == 200, f'{pagina} -> {referencia}'
 
 
+@pytest.mark.parametrize('pagina', PAGINAS)
+def test_toda_rota_de_api_chamada_pelas_paginas_existe(app, client, pagina):
+    """O painel de analytics chegou a consultar uma rota que não existia."""
+    html = client.get(pagina).get_data(as_text=True)
+    rotas = app.url_map.bind('localhost')
+    for caminho in sorted(set(re.findall(r"'(/api/[A-Za-z0-9_\-/]+)'", html))):
+        encontrados = []
+        for metodo in ('GET', 'POST'):
+            try:
+                endpoint, _ = rotas.match(caminho, method=metodo)
+            except Exception:
+                continue
+            if endpoint != 'serve_static':
+                encontrados.append(endpoint)
+        assert encontrados, f'{pagina} chama {caminho}, que não existe'
+        assert not any(e.startswith('checkup_intelligent.desativado_') for e in encontrados), caminho
+
+
+def test_painel_de_analytics_recebe_os_campos_que_exibe(client):
+    dados = client.get('/api/analytics/stats').get_json()
+    for periodo in ('total', 'today', 'this_month'):
+        assert set(dados[periodo]) >= {'visits', 'recommendations', 'exam_requests', 'vaccine_prescriptions'}
+
+
 # --- P-06: risco cardiovascular desativado -----------------------------------
 
 PERFIL_COMPLETO = {

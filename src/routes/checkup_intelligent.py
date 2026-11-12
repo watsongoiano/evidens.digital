@@ -7,43 +7,6 @@ from src.utils.validacao import EntradaInvalida, SIM, ler_numero, normalizar_tri
 
 checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
 
-def parse_date_ymd(date_str):
-    """
-    Parse date string in multiple formats: YYYY-MM-DD, DD/MM/YYYY, YYYY/MM/DD
-    Returns datetime object or None if invalid
-    """
-    if not date_str or date_str is None:
-        return None
-        
-    try:
-        # Remove any extra whitespace
-        date_str = str(date_str).strip()
-        if not date_str or date_str.lower() in ['null', 'none', '']:
-            return None
-            
-        # Try YYYY-MM-DD format first
-        try:
-            return datetime.strptime(date_str, '%Y-%m-%d')
-        except ValueError:
-            pass
-            
-        # Try DD/MM/YYYY format
-        try:
-            return datetime.strptime(date_str, '%d/%m/%Y')
-        except ValueError:
-            pass
-            
-        # Try YYYY/MM/DD format
-        try:
-            return datetime.strptime(date_str, '%Y/%m/%d')
-        except ValueError:
-            pass
-            
-    except (ValueError, TypeError, AttributeError):
-        pass
-        
-    return None
-
 def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False, is_pregnant=False, tabagismo='nunca_fumou', macos_ano=0, has_dpoc=False):
     """Gera recomendações baseadas em idade, sexo e condições clínicas
     

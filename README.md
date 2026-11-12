@@ -1,139 +1,67 @@
-# 🩺 Evidens Digital - Sistema de Check-up Médico Inteligente
+# 🩺 Evidens Digital
 
-Sistema completo de check-up médico com interface moderna e análises inteligentes, desenvolvido para ser hospedado em plataformas de deploy estático como Vercel.
+Apoio à decisão para check-up preventivo do adulto, voltado ao médico. A partir dos dados informados no
+formulário, o sistema sugere exames laboratoriais, exames de imagem e vacinas, mostra a fonte de cada item e
+gera minutas em PDF para impressão, assinatura e carimbo.
 
-## 🌟 Características
+> **Estado atual (novembro de 2026): versão em contenção.** As saídas são sugestões para avaliação do médico e
+> não constituem prescrição. O cálculo de risco cardiovascular está desativado e as regras de rastreio ainda
+> não foram revistas contra as fontes primárias. Os perigos conhecidos, o que controla cada um e o que segue em
+> aberto estão em [`docs/registro-de-perigos.md`](docs/registro-de-perigos.md).
 
-- 📋 **Check-up Médico Completo** - Questionário abrangente de saúde
-- 🤖 **Análise Inteligente** - Processamento automatizado dos dados
-- 📊 **Analytics Integrado** - Dashboard com métricas e insights
-- 🎨 **Interface Moderna** - Design responsivo e intuitivo
-- ⚡ **Deploy Fácil** - Configurado para Vercel e outros provedores
-- 🔒 **Seguro** - Implementação de boas práticas de segurança
-
-## 🏗️ Estrutura do Projeto
+## 🏗️ Estrutura do projeto
 
 ```
-evidens-digital/
-├── 📁 src/                     # Código fonte principal
-│   ├── 📄 main.py             # Aplicação Flask principal
-│   ├── 📁 models/             # Modelos de dados
-│   │   └── 📄 user.py         # Modelo de usuário
-│   ├── 📁 routes/             # Rotas da aplicação
-│   │   ├── 📄 checkup.py      # Rotas do check-up
-│   │   ├── 📄 checkup_intelligent.py # Análises inteligentes
-│   │   └── 📄 user.py         # Rotas de usuário
-│   ├── 📁 static/             # Arquivos estáticos
-│   │   ├── 📄 index.html      # Interface principal
-│   │   ├── 📄 analytics.html  # Dashboard de analytics
-│   │   └── 📄 favicon.ico     # Ícone do site
-│   ├── 📁 utils/              # Utilitários
-│   │   └── 📄 analytics.py    # Funções de análise
-│   └── 📁 database/           # Configurações de banco
-├── 📁 dist/                   # Arquivos buildados (gerado)
-├── 📄 build.py               # Script de build
-├── 📄 run_server.py          # Servidor de desenvolvimento
-├── 📄 vercel.json            # Configuração do Vercel
-├── 📄 package.json           # Configuração do projeto
-├── 📄 requirements.txt       # Dependências Python
-└── 📄 .env.example          # Variáveis de ambiente exemplo
-
+evidens.digital/
+├── api/
+│   ├── index.py                  # Entrada única da aplicação (Flask); é o que a Vercel executa
+│   └── requirements.txt          # Dependências de produção
+├── src/
+│   ├── routes/
+│   │   └── checkup_intelligent.py    # Motor de recomendações e endpoints de PDF
+│   ├── utils/
+│   │   ├── validacao.py              # Validação e normalização da entrada
+│   │   ├── seguranca_vacinas.py      # Triagem de segurança das vacinas
+│   │   ├── pdf_service_gotenberg.py  # Cliente do serviço de PDF (Gotenberg)
+│   │   ├── pdf_service_gotenberg_simple.py  # Templates das minutas
+│   │   ├── reference_links.py        # Links das fontes citadas
+│   │   └── analytics.py              # Contadores de uso
+│   └── static/styles/                # Estilos usados pelo painel de analytics
+├── index.html                    # Página inicial
+├── intelligent-tools.html        # Formulário do check-up e resultados
+├── contact.html, analytics.html  # Contato e painel de uso
+├── tests/                        # Suíte de testes (pytest)
+├── docs/                         # Registro de perigos e deploy
+├── vercel.json                   # Encaminha todas as rotas para api/index.py
+├── requirements.txt              # Aponta para api/requirements.txt
+└── requirements-dev.txt          # Produção + pytest
 ```
 
-## 🚀 Deploy no Vercel
+Não há etapa de build: as páginas são HTML estático servido pela própria aplicação, que publica apenas a
+lista de arquivos declarada em `api/index.py` (`ARQUIVOS_PUBLICOS`).
 
-### Deploy Automático (Recomendado)
+## 🛠️ Desenvolvimento local
 
-1. **Fork/Clone** este repositório
-2. Acesse [vercel.com](https://vercel.com) e faça login
-3. Clique em **"New Project"**
-4. Importe do GitHub: `juniorpagedown/evidens.digital`
-5. As configurações serão detectadas automaticamente
-6. Clique em **"Deploy"**
+Pré-requisito: Python 3.12.
 
-### Configurações do Vercel
-
-O projeto já inclui `vercel.json` com:
-- Build command: `python build.py`
-- Output directory: `dist`
-- Redirects para SPA
-- Otimizações automáticas
-
-## 🛠️ Desenvolvimento Local
-
-### Pré-requisitos
-
-- Python 3.8+
-- pip (gerenciador de pacotes Python)
-
-### Instalação
-
-1. **Clone o repositório:**
 ```bash
-git clone https://github.com/juniorpagedown/evidens.digital.git
+git clone https://github.com/watsongoiano/evidens.digital.git
 cd evidens.digital
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
+
+python api/index.py                # http://localhost:5000
+python -m pytest                   # testes
 ```
 
-2. **Crie um ambiente virtual:**
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# ou
-venv\Scripts\activate     # Windows
-```
+Os PDFs dependem de um Gotenberg acessível em `GOTENBERG_URL` (padrão `http://localhost:3000`). Para subir um
+localmente: `docker run --rm -p 3000:3000 gotenberg/gotenberg:8`.
 
-3. **Instale as dependências:**
-```bash
-pip install -r requirements.txt
-```
+## 🚀 Deploy
 
-4. **Configure as variáveis de ambiente:**
-```bash
-cp .env.example .env
-# Edite o arquivo .env com suas configurações
-```
-
-### Executar Localmente
-
-**Servidor de desenvolvimento:**
-```bash
-python run_server.py
-```
-
-**Ou usando npm:**
-```bash
-npm run dev
-```
-
-Acesse: `http://localhost:5000`
-
-### Build para Produção
-
-```bash
-# Gerar arquivos estáticos
-python build.py
-# ou
-npm run build
-```
-
-Os arquivos buildados estarão em `dist/`
-
-## 🏥 Funcionalidades
-
-### Check-up Médico
-- Questionário completo de saúde
-- Validação de dados em tempo real
-- Interface intuitiva e responsiva
-
-### Analytics Dashboard
-- Métricas de uso em tempo real
-- Gráficos interativos
-- Relatórios detalhados
-
-### Sistema Inteligente
-- Análise automatizada de respostas
-- Sugestões baseadas em dados
-- Relatórios personalizados
+O deploy é feito pela Vercel a cada push na branch `main`; os detalhes e as variáveis de ambiente estão em
+[`docs/deploy.md`](docs/deploy.md).
 
 ## � API principal e documentos gerados
 
@@ -174,11 +102,6 @@ Geram minutas em PDF a partir da lista de recomendações retornadas pelo endpoi
 `/gerar-receita-vacinas`, `/gerar-solicitacao-exames` e `/generate-pdf` respondem `410 Gone`. Os dois primeiros
 montavam documentos que declaravam assinatura digital sem que ela existisse; o terceiro não gerava nada.
 
-### Novas recomendações base por idade/sexo (exemplos)
-- HPV (Gardasil 9) até 45 anos, maior prioridade até 26 anos.
-- Hepatite B (esquema 0-1-6) em não vacinados.
-- Pneumocócicas a partir de 50 anos (VPC15/VPC13 e VPP23).
-
 ## 🧪 Testes
 
 Os testes ficam em `tests/` e exercitam a aplicação pela entrada de produção (`api/index.py`).
@@ -188,61 +111,29 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-## �🔧 Tecnologias Utilizadas
+- Cada controle de segurança do registro de perigos tem um teste que falha se o controle for removido.
+- `tests/test_caracterizacao.py` registra a saída do motor para um conjunto fixo de vinhetas. Ele não afirma que
+  as saídas estão corretas; serve para que toda mudança de comportamento apareça no pull request. Para atualizar
+  o registro quando a mudança for intencional:
+  `ATUALIZAR_CARACTERIZACAO=1 python -m pytest tests/test_caracterizacao.py`
+- `tests/test_estrutura.py` impede que código sem uso volte a se acumular.
+- A integração contínua (`.github/workflows/tests.yml`) roda a suíte em todo pull request.
 
-### Backend
-- **Flask** - Framework web Python
-- **SQLAlchemy** - ORM para banco de dados
-- **OpenAI** - Integração com IA
-- **Flask-CORS** - Controle de CORS
+## 🔧 Tecnologias
 
-### Frontend
-- **HTML5/CSS3** - Interface moderna
-- **JavaScript** - Interatividade
-- **Responsive Design** - Compatibilidade móvel
+- **Backend:** Python, Flask e Flask-CORS, em função serverless na Vercel.
+- **Frontend:** HTML, CSS e JavaScript sem framework.
+- **PDF:** Gotenberg (Chromium), em serviço separado.
 
-### Deploy
-- **Vercel** - Hospedagem e deploy
-- **Python Build System** - Sistema de build customizado
+## 📝 Variáveis de ambiente
 
-## 📊 Scripts Disponíveis
+Veja `.env.example`. As que a aplicação usa em produção:
 
-```bash
-# Desenvolvimento
-npm run dev          # Iniciar servidor de desenvolvimento
-python run_server.py # Iniciar servidor Python
-
-# Build
-npm run build        # Build para produção
-python build.py      # Build Python
-
-# Vercel
-npm run vercel-build # Build específico para Vercel
-```
-
-## 🌐 Deploy em Outras Plataformas
-
-### Netlify
-1. Configure `netlify.toml` (se necessário)
-2. Deploy automático do GitHub
-
-### Heroku
-1. Configure `Procfile`
-2. Deploy via git push
-
-### GitHub Pages
-1. Configure GitHub Actions
-2. Deploy automático
-
-## 📝 Variáveis de Ambiente
-
-```env
-# Exemplo de .env
-OPENAI_API_KEY=sua_chave_aqui
-DATABASE_URL=sua_url_do_banco
-SECRET_KEY=sua_chave_secreta
-ENVIRONMENT=production
-```
+| Variável | Uso |
+|---|---|
+| `GOTENBERG_URL` | Endereço do serviço de PDF |
+| `GOTENBERG_API_BASIC_AUTH_USERNAME`, `GOTENBERG_API_BASIC_AUTH_PASSWORD` | Autenticação básica do serviço de PDF (opcional, recomendada) |
+| `SECRET_KEY` | Chave do Flask |
 
 ## 🤝 Contribuição
 
@@ -264,7 +155,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para de
 
 ## 🆘 Suporte
 
-Para suporte, abra uma [issue](https://github.com/juniorpagedown/evidens.digital/issues) ou entre em contato.
+Para suporte, abra uma [issue](https://github.com/watsongoiano/evidens.digital/issues) ou entre em contato.
 
 ---
 
