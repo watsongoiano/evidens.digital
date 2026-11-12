@@ -150,32 +150,28 @@ Gera recomendações personalizadas.
 
 Observação: Os campos de referência são construídos automaticamente a partir de `referencia` via heurísticas internas, incluindo mapeamentos para USPSTF, ADA, AHA/ACC, KDIGO, SBIm/ANVISA, entre outros.
 
-### POST /gerar-solicitacao-exames e /gerar-receita-vacinas
-Geram documentos HTML imprimíveis a partir da lista de recomendações retornadas pelo endpoint acima.
+### POST /gerar-pdf-exames-laboratoriais, /gerar-pdf-exames-imagem e /gerar-pdf-vacinas
+Geram minutas em PDF a partir da lista de recomendações retornadas pelo endpoint acima.
 
-- Corpo (JSON): `{ recommendations: [...], patient_data: { nome, sexo, ... } }`
-- Negociação de conteúdo:
-	- Por padrão, retorna HTML se o cabeçalho `Accept` contiver `text/html`.
-	- Retorna JSON se o `Accept` for `application/json` ou se `?format=json`.
-	- Parâmetro `?format=html|json` (ou `response_type`) tem precedência sobre o cabeçalho.
-- Em caso de erro, a resposta acompanha o mesmo formato (HTML com página amigável ou JSON com `{error: ...}`).
+- Corpo (JSON): `{ dados_paciente: { nome, idade, sexo }, recomendacoes: [...] }`
+- Resposta: PDF com campo de assinatura e carimbo do médico. Os documentos não têm assinatura digital.
+
+### Endpoints desativados
+`/gerar-receita-vacinas`, `/gerar-solicitacao-exames` e `/generate-pdf` respondem `410 Gone`. Os dois primeiros
+montavam documentos que declaravam assinatura digital sem que ela existisse; o terceiro não gerava nada.
 
 ### Novas recomendações base por idade/sexo (exemplos)
 - HPV (Gardasil 9) até 45 anos, maior prioridade até 26 anos.
 - Hepatite B (esquema 0-1-6) em não vacinados.
 - Pneumocócicas a partir de 50 anos (VPC15/VPC13 e VPP23).
 
-## 🧪 Testes rápidos (smoke)
+## 🧪 Testes
 
-Um script simples em `scripts/test_smoke.py` valida:
-- Inclusão de HPV, Hepatite B e Pneumococo nas recomendações quando aplicável
-- Presença de `referencia_html` em pelo menos uma recomendação
-- Negociação de conteúdo dos endpoints de documentos (HTML vs JSON)
-
-Como executar localmente:
+Os testes ficam em `tests/` e exercitam a aplicação pela entrada de produção (`api/index.py`).
 
 ```bash
-python scripts/test_smoke.py
+pip install -r requirements-dev.txt
+python -m pytest
 ```
 
 ## �🔧 Tecnologias Utilizadas
