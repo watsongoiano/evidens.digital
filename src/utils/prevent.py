@@ -189,7 +189,7 @@ def estimar(idade, sexo, colesterol_total, hdl, pas, diabetes, fumante, imc_valo
     return {'modelo': modelo, 'dez_anos': traduzir(dez), 'trinta_anos': traduzir(trinta) if trinta else None}
 
 
-def categoria_sbc_2025(dcva_10_anos, diabetes=False, idade=None, sexo=None):
+def categoria_sbc_2025(dcva_10_anos, diabetes=False, idade=None, sexo=None, agravantes=()):
     """Categoria pelo risco de DCVA em 10 anos (Diretriz Brasileira de Dislipidemias 2025).
 
     Aplica a regra do DM2 da própria diretriz: homem ≥ 50 ou mulher ≥ 56 anos com DM2 é
@@ -206,6 +206,10 @@ def categoria_sbc_2025(dcva_10_anos, diabetes=False, idade=None, sexo=None):
             nivel = minimo
             motivo = (f'DM2 em {"mulher ≥ 56" if sexo == "feminino" else "homem ≥ 50"} anos'
                       if minimo == 2 else 'DM2 abaixo da idade de alto risco')
+    # Agravante de risco: baixo vira intermediário e intermediário vira alto (SBC 2025).
+    if agravantes and nivel < 2:
+        nivel += 1
+        motivo = '; '.join(filter(None, [motivo, 'agravante: ' + ', '.join(agravantes)]))
     categoria = [
         {'categoria': 'baixo', 'rotulo': 'Baixo', 'meta_ldl': '< 115 mg/dL'},
         {'categoria': 'intermediario', 'rotulo': 'Intermediário', 'meta_ldl': '< 100 mg/dL'},

@@ -90,7 +90,7 @@ def classificar_pa(pas, pad):
     return {'categoria': 'normal', 'rotulo': 'PA normal'}
 
 
-def inferir(data, egfr=None, gestante=False):
+def inferir(data, egfr=None, gestante=False, recusados=()):
     """Completa comorbidades e medicações a partir dos outros campos.
 
     Devolve ``(comorbidades, medicacoes, inferencias)``; cada inferência tem
@@ -101,11 +101,19 @@ def inferir(data, egfr=None, gestante=False):
     inferencias = []
 
     def marcar(lista, campo, valor, motivo):
-        if valor not in lista:
+        # "recusados": caixas automáticas que o médico desmarcou na tela.
+        if valor not in lista and valor not in recusados:
             lista.append(valor)
             inferencias.append({'campo': campo, 'valor': valor, 'rotulo': ROTULOS[valor], 'motivo': motivo})
 
     texto = achados_no_texto(data.get('medicacoes_continuo') or '')
+    # Itens da lista suspensa de medicações (src/utils/condicoes.py)
+    from src.utils.condicoes import MEDICACOES
+    for chave in list(medicacoes):
+        for alvo in MEDICACOES.get(chave, {}).get('marca', []):
+            destino = medicacoes if alvo in ('estatinas', 'anti_hipertensivos') else comorbidades
+            marcar(destino, 'medicacoes' if destino is medicacoes else 'comorbidades', alvo,
+                   f"uso de {MEDICACOES[chave]['rotulo']}")
     if 'estatinas' in texto:
         marcar(medicacoes, 'medicacoes', 'estatinas', 'estatina citada em "Outras medicações"')
     if 'anti_hipertensivos' in texto:

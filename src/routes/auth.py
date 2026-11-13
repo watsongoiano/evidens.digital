@@ -119,7 +119,9 @@ def eu():
 def cadastro():
     d = _corpo()
     try:
-        contas.criar(_texto(d, 'email'), _texto(d, 'nome'), _texto(d, 'registro'), _texto(d, 'perfil'), _texto(d, 'senha'))
+        perfil = _texto(d, 'perfil')
+        registro = contas.montar_registro(perfil, _texto(d, 'registro'), _texto(d, 'crm_uf'), _texto(d, 'crm_numero'))
+        contas.criar(_texto(d, 'email'), _texto(d, 'nome'), registro, perfil, _texto(d, 'senha'))
     except contas.DadosInvalidos as e:
         return jsonify({'error': 'Confira os dados informados.', 'erros': e.erros}), 400
     # Mesma resposta para e-mail novo e e-mail já cadastrado.
@@ -174,7 +176,8 @@ def configurar():
     if contas.existe_administrador():
         return jsonify({'error': 'O administrador já foi criado.'}), 409
     try:
-        u = contas.criar(_texto(d, 'email'), _texto(d, 'nome'), _texto(d, 'registro'), 'medico', _texto(d, 'senha'), administrador=True)
+        registro = contas.montar_registro('medico', _texto(d, 'registro'), _texto(d, 'crm_uf'), _texto(d, 'crm_numero'))
+        u = contas.criar(_texto(d, 'email'), _texto(d, 'nome'), registro, 'medico', _texto(d, 'senha'), administrador=True)
     except contas.DadosInvalidos as e:
         return jsonify({'error': 'Confira os dados informados.', 'erros': e.erros}), 400
     if u is None:

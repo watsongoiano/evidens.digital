@@ -185,8 +185,21 @@
       </div>
 
       <div class="campo mt-5">
-        <label for="outras_comorbidades">Outras comorbidades</label>
-        <textarea id="outras_comorbidades" name="outras_comorbidades" rows="3" placeholder="Ex: artrite reumatoide, lúpus..."></textarea>
+        <label for="lista_comorbidades">Outras comorbidades</label>
+        <select id="lista_comorbidades" data-lista="comorbidades" aria-describedby="lista_comorbidades-dica">
+            <option value="">Adicionar…</option>
+            <option value="hipotireoidismo">Hipotireoidismo</option>
+            <option value="masld">Esteatose hepática (MASLD)</option>
+            <option value="cirrose">Cirrose / hepatopatia crônica</option>
+            <option value="doenca_autoimune">Doença inflamatória autoimune (AR, lúpus, psoríase, DII)</option>
+            <option value="asma_grave">Asma moderada ou grave</option>
+            <option value="asplenia">Asplenia / esplenectomia</option>
+            <option value="osteoporose">Osteoporose</option>
+            <option value="gota">Gota</option>
+            <option value="neoplasia_ativa" data-imuno="1">Câncer em quimio ou radioterapia</option>
+        </select>
+        <div class="opcoes mt-3" id="lista_comorbidades-itens"></div>
+        <p id="lista_comorbidades-dica" class="text-[12px] text-ink/50 mt-2">Cada item escolhido aciona os exames, vacinas ou alertas correspondentes.</p>
       </div>
     </section>
 
@@ -201,6 +214,7 @@
             <option value="nao">Não</option>
             <option value="sim">Sim (doença ou tratamento imunossupressor)</option>
           </select>
+          <p id="imuno-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>Marcado como "Sim" porque um item escolhido (imunossupressor, quimio/radioterapia) implica imunossupressão.</p>
         </div>
         <div class="campo" id="lactante-item" style="display: none;">
           <label for="lactante">Amamentando</label>
@@ -221,23 +235,55 @@
         <label class="opcao" for="estatinas"><input type="checkbox" id="estatinas" name="medicacoes" value="estatinas">Estatinas</label>
       </div>
       <div class="campo mt-5">
-        <label for="medicacoes_continuo">Outras medicações</label>
-        <textarea id="medicacoes_continuo" name="medicacoes_continuo" rows="3" placeholder="Medicações em uso contínuo, com dose e frequência"></textarea>
+        <label for="lista_medicacoes">Outras medicações (por classe)</label>
+        <select id="lista_medicacoes" data-lista="medicacoes" aria-describedby="lista_medicacoes-dica">
+            <option value="">Adicionar…</option>
+            <option value="ieca_bra" data-marca="anti_hipertensivos">IECA ou BRA</option>
+            <option value="tiazidico" data-marca="anti_hipertensivos">Diurético tiazídico</option>
+            <option value="bcc" data-marca="anti_hipertensivos">Bloqueador de canal de cálcio</option>
+            <option value="betabloqueador">Betabloqueador</option>
+            <option value="espironolactona">Espironolactona / eplerenona</option>
+            <option value="diuretico_alca">Diurético de alça</option>
+            <option value="outro_hipolipemiante" data-marca="dislipidemia">Ezetimiba, fibrato ou iPCSK9</option>
+            <option value="metformina">Metformina</option>
+            <option value="insulina" data-marca="diabetes">Insulina</option>
+            <option value="sulfonilureia" data-marca="diabetes">Sulfonilureia</option>
+            <option value="idpp4_pioglitazona" data-marca="diabetes">iDPP-4 ou pioglitazona</option>
+            <option value="isglt2">iSGLT2</option>
+            <option value="aglp1">Agonista de GLP-1</option>
+            <option value="levotiroxina">Levotiroxina</option>
+            <option value="corticoide_cronico">Corticoide sistêmico ≥ 3 meses</option>
+            <option value="imunossupressor" data-imuno="1">Imunossupressor ou imunobiológico</option>
+            <option value="litio">Lítio</option>
+            <option value="amiodarona">Amiodarona</option>
+        </select>
+        <div class="opcoes mt-3" id="lista_medicacoes-itens"></div>
+        <p id="lista_medicacoes-dica" class="text-[12px] text-ink/50 mt-2">Classes com efeito no check-up: monitorização laboratorial, vacinas e coerência com as comorbidades.</p>
       </div>
     </section>
 
     <section class="secao" aria-labelledby="s-familia">
       <h2 id="s-familia" class="secao-titulo"><span class="secao-num">06</span>História familiar</h2>
+      <p class="secao-nota">Parentes de 1º grau (pais, irmãos, filhos).</p>
       <div class="opcoes mt-4">
         <label class="opcao" for="cancer_mama"><input type="checkbox" id="cancer_mama" name="historia_familiar" value="cancer_mama">Câncer de mama</label>
         <label class="opcao" for="cancer_colorretal"><input type="checkbox" id="cancer_colorretal" name="historia_familiar" value="cancer_colorretal">Câncer colorretal</label>
         <label class="opcao" for="cancer_ovario"><input type="checkbox" id="cancer_ovario" name="historia_familiar" value="cancer_ovario">Câncer de ovário</label>
         <label class="opcao" for="diabetes_familiar"><input type="checkbox" id="diabetes_familiar" name="historia_familiar" value="diabetes">Diabetes</label>
-        <label class="opcao" for="cardiopatia_familiar"><input type="checkbox" id="cardiopatia_familiar" name="historia_familiar" value="cardiopatia">Cardiopatia</label>
+        <label class="opcao" for="dac_precoce_familiar"><input type="checkbox" id="dac_precoce_familiar" name="historia_familiar" value="dac_precoce">DCV prematura (H &lt; 55, M &lt; 65)</label>
       </div>
       <div class="campo mt-5">
-        <label for="outras_condicoes_familiares">Outras condições familiares</label>
-        <textarea id="outras_condicoes_familiares" name="outras_condicoes_familiares" rows="3" placeholder="Ex: câncer de próstata, AVC, demência..."></textarea>
+        <label for="lista_familia">Outras condições em parente de 1º grau</label>
+        <select id="lista_familia" data-lista="historia_familiar" aria-describedby="lista_familia-dica">
+            <option value="">Adicionar…</option>
+            <option value="cancer_prostata">Câncer de próstata (pai ou irmão)</option>
+            <option value="osteoporose_fratura">Fratura de quadril em pai ou mãe</option>
+            <option value="hipercolesterolemia_familiar">Hipercolesterolemia familiar</option>
+            <option value="aneurisma_aorta">Aneurisma de aorta abdominal</option>
+            <option value="morte_subita">Morte súbita antes dos 50 anos</option>
+        </select>
+        <div class="opcoes mt-3" id="lista_familia-itens"></div>
+        <p id="lista_familia-dica" class="text-[12px] text-ink/50 mt-2">Mudam idade de início ou indicação de rastreamento.</p>
       </div>
     </section>
 
@@ -312,6 +358,7 @@
     </div>
 
     <div id="riscoContent"></div>
+    <div id="orientacoesContent"></div>
     <p class="text-[12px] text-ink/50 mt-6 flex flex-wrap gap-x-5 gap-y-1"><span><span class="inline-block w-2 h-2 rounded-full bg-teal align-middle mr-1"></span>prioridade alta</span><span><span class="inline-block w-2 h-2 rounded-full bg-aqua align-middle mr-1"></span>média</span><span><span class="inline-block w-2 h-2 rounded-full bg-ink/20 align-middle mr-1"></span>baixa</span><span><span class="rec-grau align-middle mr-1">A</span>grau de evidência</span></p>
     <div id="recommendationsContent"></div>
     <div id="naoIncluidasContent"></div>
@@ -431,6 +478,7 @@
             document.getElementById('recommendationsContent').innerHTML = '';
             document.getElementById('naoIncluidasContent').innerHTML = '';
             document.getElementById('riscoContent').innerHTML = '';
+            document.getElementById('orientacoesContent').innerHTML = '';
             recommendationsDiv.style.display = 'none';
         }
 
@@ -450,6 +498,7 @@
             // e não é enviado nesta etapa; ele só acompanha o pedido de PDF.
             const payload = Object.assign({}, data);
             delete payload.nome_paciente;
+            payload.inferencias_recusadas = window.inferenciasRecusadas ? window.inferenciasRecusadas() : [];
 
             try {
                 const response = await fetch('/api/checkup-intelligent', {
@@ -493,6 +542,7 @@
 
                 displayRecommendations(currentRecommendations, (result.nao_incluidas || []).concat(result.adiados_gestacao || [], result.proximas_gestacao || []));
                 exibirRisco(result.risco_cardiovascular);
+                exibirOrientacoes(result.orientacoes || []);
 
             } catch (error) {
                 if (revisaoDoEnvio !== revisaoDoFormulario) {
@@ -528,6 +578,16 @@
 
         const COR_CATEGORIA = { baixo: 'bg-teal', limitrofe: 'bg-[#C9A227]', intermediario: 'bg-[#D98B2B]', alto: 'bg-[#B53A2E]' };
         const pct = v => (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+
+        // Orientações que não viram pedido nem receita (idade de início, aconselhamento, alertas).
+        function exibirOrientacoes(itens) {
+            const alvo = document.getElementById('orientacoesContent');
+            if (!itens.length) { alvo.innerHTML = ''; return; }
+            alvo.innerHTML = `<div class="risco-cartao"><p class="campo-rotulo">Orientações · não entram nos PDFs</p>` + itens.map(o =>
+                `<div class="py-2.5 border-t border-ink/5 first:border-0"><p class="text-[14px] font-medium">${escapeHtml(o.titulo)}</p>
+                 <p class="text-[13px] text-ink/65 mt-0.5">${escapeHtml(o.descricao)}</p>
+                 <p class="text-[11px] text-ink/45 mt-1 font-mono">${escapeHtml(o.referencia)}</p></div>`).join('') + `</div>`;
+        }
 
         function exibirRisco(risco) {
             const alvo = document.getElementById('riscoContent');
@@ -933,24 +993,22 @@
         // Coerência entre campos (mesmas regras de src/utils/coerencia.py): um dado marca a caixa
         // que ele implica. Só desmarca o que a própria regra marcou; marcação manual é preservada.
         (function () {
-            let termos = null;
-            fetch('/api/coerencia', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null)
-                .then(j => { termos = j && j.termos; conferir(); }).catch(() => {});
             const auto = new Map();   // id da caixa -> motivo
             const recusados = new Set(); // caixas automáticas que o médico desmarcou
-            const sem = t => (t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-            function noTexto(classe) {
-                if (!termos) return false;
-                const t = ' ' + sem(document.getElementById('medicacoes_continuo').value).split(/[^a-z0-9-]+/).join(' ') + ' ';
-                return (termos[classe] || []).some(p => t.includes(' ' + p + ' '));
+            window.inferenciasRecusadas = () => [...recusados];
+            // itens das listas suspensas que implicam uma caixa (data-marca)
+            function daLista() {
+                const r = {};
+                document.querySelectorAll('input[data-marca]:checked').forEach(i => {
+                    i.dataset.marca.split(' ').forEach(id => { r[id] = 'uso de ' + i.dataset.rotulo; });
+                });
+                return r;
             }
             const num = id => { const v = parseFloat(String(document.getElementById(id)?.value || '').replace(',', '.')); return isNaN(v) ? null : v; };
             function regras() {
                 const marcado = id => document.getElementById(id).checked;
-                const r = {};
-                if (noTexto('estatinas')) r.estatinas = 'estatina citada em "Outras medicações"';
-                if (noTexto('anti_hipertensivos')) r.anti_hipertensivos = 'anti-hipertensivo citado em "Outras medicações"';
-                if (marcado('estatinas') || r.estatinas || noTexto('outros_hipolipemiantes')) r.dislipidemia = 'uso de hipolipemiante';
+                const r = daLista();
+                if (marcado('estatinas') || r.estatinas) r.dislipidemia = r.dislipidemia || 'uso de estatina';
                 if (marcado('anti_hipertensivos') || r.anti_hipertensivos) r.hipertensao = 'uso de anti-hipertensivo';
                 // PA de consultório, AHA/ACC 2025: estágio 1 ≥ 130/80, estágio 2 ≥ 140/90 (na gestação, só ≥ 140/90)
                 const pas = num('pas') || 0, pad = num('pad') || 0;
@@ -958,14 +1016,13 @@
                 const est2 = pas >= 140 || pad >= 90, est1 = pas >= 130 || pad >= 80;
                 if (est2 || (est1 && !gest)) r.hipertensao = `PA ${pas || '–'}/${pad || '–'} mmHg = HAS estágio ${est2 ? 2 : 1} (AHA/ACC 2025); confirmar com MRPA ou MAPA`;
                 if (marcado('has_resistente')) r.hipertensao = 'HAS resistente marcada';
-                if (noTexto('antidiabeticos')) r.diabetes = 'antidiabético citado em "Outras medicações"';
                 const hb = num('hba1c'); if (hb !== null && hb >= 6.5) r.diabetes = 'HbA1c ≥ 6,5% (ADA; confirmar com 2º exame)';
                 const peso = num('peso'), alt = num('altura');
                 if (peso && alt && peso / Math.pow(alt / 100, 2) >= 30) r.obesidade = 'IMC ≥ 30 kg/m²';
                 return r;
             }
             function conferir() {
-                // duas passadas: estatina vinda do texto também implica dislipidemia
+                // duas passadas: anti-hipertensivo vindo da lista também implica hipertensão
                 for (let passo = 0; passo < 2; passo++) {
                     const r = regras();
                     auto.forEach((motivo, id) => { if (!r[id]) { document.getElementById(id).checked = false; auto.delete(id); } });
@@ -983,11 +1040,47 @@
                     `<strong class="font-medium">${escapeHtml(document.querySelector('label[for="' + id + '"]').textContent.trim())}</strong> (${escapeHtml(m)})`).join('; ') + '. Desmarque se não se aplicar.';
                 document.getElementById('hba1c-aviso').hidden = !(auto.has('diabetes') && (num('hba1c') || 0) >= 6.5);
             }
-            ['medicacoes_continuo', 'hba1c', 'peso', 'altura', 'pas', 'pad', 'gestante'].forEach(id => {
+            ['hba1c', 'peso', 'altura', 'pas', 'pad', 'gestante'].forEach(id => {
                 document.getElementById(id).addEventListener('input', conferir);
                 document.getElementById(id).addEventListener('change', conferir);
             });
             ['estatinas', 'anti_hipertensivos', 'has_resistente'].forEach(id => document.getElementById(id).addEventListener('change', conferir));
+            document.addEventListener('lista-mudou', conferir);
+
+            // Listas suspensas: cada escolha vira um chip marcado (mesmo campo de lista do formulário).
+            let imunoAuto = false;
+            function conferirImuno() {
+                const precisa = !!document.querySelector('input[data-imuno]:checked');
+                const campo = document.getElementById('imunossupressao');
+                if (precisa && campo.value !== 'sim') { campo.value = 'sim'; imunoAuto = true; campo.dispatchEvent(new Event('change', { bubbles: true })); }
+                else if (!precisa && imunoAuto) { campo.value = 'desconhecido'; imunoAuto = false; campo.dispatchEvent(new Event('change', { bubbles: true })); }
+                document.getElementById('imuno-aviso').hidden = !(precisa && campo.value === 'sim');
+            }
+            document.getElementById('imunossupressao').addEventListener('change', e => { if (e.isTrusted) imunoAuto = false; });
+            document.querySelectorAll('select[data-lista]').forEach(sel => {
+                const caixa = document.getElementById(sel.id + '-itens');
+                sel.addEventListener('change', () => {
+                    const op = sel.selectedOptions[0];
+                    if (!op || !op.value) return;
+                    const id = sel.id + '_' + op.value;
+                    if (!document.getElementById(id)) {
+                        const rotulo = document.createElement('label');
+                        rotulo.className = 'opcao'; rotulo.htmlFor = id;
+                        const entrada = document.createElement('input');
+                        entrada.type = 'checkbox'; entrada.id = id; entrada.name = sel.dataset.lista; entrada.value = op.value; entrada.checked = true;
+                        entrada.dataset.rotulo = op.textContent;
+                        if (op.dataset.marca) entrada.dataset.marca = op.dataset.marca;
+                        if (op.dataset.imuno) entrada.dataset.imuno = '1';
+                        entrada.addEventListener('change', () => { rotulo.remove(); op.disabled = false; conferirImuno(); document.dispatchEvent(new Event('lista-mudou')); checkupForm.dispatchEvent(new Event('change', { bubbles: true })); });
+                        rotulo.append(entrada, op.textContent);
+                        caixa.append(rotulo);
+                        op.disabled = true;
+                    }
+                    sel.value = '';
+                    conferirImuno();
+                    document.dispatchEvent(new Event('lista-mudou'));
+                });
+            });
             // quem desmarca à mão uma caixa automática fica com a decisão
             ['dislipidemia', 'hipertensao', 'diabetes', 'obesidade', 'estatinas', 'anti_hipertensivos'].forEach(id =>
                 document.getElementById(id).addEventListener('change', e => {

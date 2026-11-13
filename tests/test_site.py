@@ -303,6 +303,18 @@ def _varredura(client):
         for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
             itens[rec['titulo']] = rec['categoria']
             refs.add(rec.get('referencia') or '')
+    # Listas suspensas (comorbidades, medicações e família): cada item sozinho, em idades e sexos distintos
+    from src.utils import condicoes
+    for idade, sexo in itertools.product((30, 47, 68), ('masculino', 'feminino')):
+        casos = ([dict(comorbidades=[k]) for k in condicoes.COMORBIDADES]
+                 + [dict(medicacoes=[k]) for k in condicoes.MEDICACOES]
+                 + [dict(historia_familiar=[k]) for k in list(condicoes.FAMILIA) + ['cancer_colorretal', 'cancer_mama', 'dac_precoce']])
+        for caso in casos:
+            dados = dict(dict(idade=idade, sexo=sexo, tabagismo='nunca', comorbidades=[], medicacoes=[],
+                              historia_familiar=[], imunossupressao='nao', gestante='nao', lactante='nao'), **caso)
+            for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
+                itens[rec['titulo']] = rec['categoria']
+                refs.add(rec.get('referencia') or '')
     return itens, ' '.join(refs)
 
 
@@ -415,7 +427,7 @@ def test_hba1c_a_partir_de_6_5_conta_como_diabetes(client, hba1c, diabetico):
 
 
 def test_hba1c_marca_o_chip_de_diabetes_na_tela(pagina):
-    assert "hb >= 6.5" in pagina and "fetch('/api/coerencia'" in pagina
+    assert "hb >= 6.5" in pagina and "input[data-marca]:checked" in pagina
 
 
 def test_exames_laboratoriais_so_aparecem_se_houver(pagina):
@@ -430,3 +442,39 @@ def test_campo_tem_exames_e_aceito_pela_api(client):
     r = client.post('/api/checkup-intelligent', json={'idade': '40', 'sexo': 'feminino', 'tabagismo': 'nunca',
                                                       'imunossupressao': 'nao', 'tem_exames': 'nao'})
     assert r.status_code == 200
+
+
+def test_listas_suspensas_substituem_o_texto_livre(pagina):
+    for antigo in ('outras_comorbidades', 'medicacoes_continuo', 'outras_condicoes_familiares'):
+        assert antigo not in pagina
+    from src.utils import condicoes
+    for lista, itens in (('comorbidades', condicoes.COMORBIDADES), ('medicacoes', condicoes.MEDICACOES),
+                         ('historia_familiar', condicoes.FAMILIA)):
+        assert f'data-lista="{lista}"' in pagina
+        for chave in itens:
+            assert f'<option value="{chave}"' in pagina, chave
+    assert 'value="dac_precoce"' in pagina and 'inferencias_recusadas' in pagina
+
+
+@pytest.mark.parametrize('dados, titulo', [
+    (dict(idade=42, historia_familiar=['cancer_colorretal']), 'Colonoscopia'),
+    (dict(idade=47, sexo='masculino', historia_familiar=['cancer_prostata']), 'PSA'),
+    (dict(idade=35, medicacoes=['metformina']), 'B12'),
+    (dict(idade=35, medicacoes=['levotiroxina']), 'TSH'),
+    (dict(idade=35, medicacoes=['ieca_bra']), 'Potássio'),
+])
+def test_itens_das_listas_acionam_exames(client, dados, titulo):
+    base = dict(sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[], imunossupressao='nao',
+                gestante='nao', lactante='nao')
+    recs = client.post('/api/checkup-intelligent', json=dict(base, **dados)).get_json()['recommendations']
+    assert any(titulo.lower() in r['titulo'].lower() for r in recs), [r['titulo'] for r in recs]
+
+
+def test_hpv_a_cada_cinco_anos_e_citologia_a_cada_tres(client):
+    base = dict(sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[], imunossupressao='nao',
+                gestante='nao', lactante='nao')
+    def colo(idade):
+        recs = client.post('/api/checkup-intelligent', json=dict(base, idade=idade)).get_json()['recommendations']
+        return next(r for r in recs if 'HPV' in r['titulo'] or 'Papanicolaou' in r['titulo'])
+    assert '3 anos' in str(colo(25)) and 'Papanicolaou' in colo(25)['titulo']
+    assert '5 anos' in str(colo(40)) and 'HPV' in colo(40)['titulo']
