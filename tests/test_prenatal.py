@@ -34,8 +34,8 @@ def test_primeira_consulta_tem_a_rotina_inicial():
 def test_janela_de_24_semanas():
     t = _titulos(_g(idade_gestacional='24'))
     assert 'TOTG-75g gestacional (jejum, 1 h e 2 h), soro' in t
-    assert 'Hemograma completo' not in t      # 28-36 é próxima etapa
-    assert 'Hemograma completo' in _proximas(_g(idade_gestacional='24'))
+    assert 'Hemograma completo' in t          # Williams, Tab. 10-1: hemoglobina/hematócrito de 24-28 semanas
+    assert 'Urocultura com antibiograma' not in t and 'Urocultura com antibiograma' in _proximas(_g(idade_gestacional='24'))
     assert 'Ultrassonografia morfológica de 2º trimestre' in t   # 20-24+6
     assert 'Ultrassonografia morfológica de 2º trimestre' not in _titulos(_g(idade_gestacional='25'))
 
@@ -69,9 +69,34 @@ def test_parto_prematuro_previo_antecipa_colo():
     assert 'Ultrassonografia transvaginal para medida do colo uterino' in t
 
 
-def test_menor_de_25_rastreia_clamidia():
+def test_clamidia_na_primeira_consulta_para_todas_e_reteste_no_terceiro_trimestre_ate_25_anos():
+    """Williams 26e, Tab. 10-1: clamídia tem ponto na 1ª consulta; reteste (C/D) no 3º trimestre se risco."""
     assert any('Clamídia' in x for x in _titulos(_g(primeira_consulta='sim'), idade=22))
-    assert not any('Clamídia' in x for x in _titulos(_g(primeira_consulta='sim'), idade=30))
+    assert any('Clamídia' in x for x in _titulos(_g(primeira_consulta='sim'), idade=30))
+    assert any('Clamídia' in x for x in _titulos(_g(idade_gestacional='32'), idade=22))
+    assert not any('Clamídia' in x for x in _titulos(_g(idade_gestacional='32'), idade=30))
+
+
+def test_pontos_da_tabela_10_1_do_williams():
+    """Cada item com ponto na tabela é pedido na coluna correspondente."""
+    primeira = _titulos(_g(idade_gestacional='10', primeira_consulta='sim'), idade=30)
+    for exame in ('Hemograma completo', 'Tipagem sanguínea ABO e fator Rh', 'Coombs indireto, soro',
+                  'EAS - Elementos Anormais e Sedimentoscopia', 'Urocultura com antibiograma', 'Rubéola IgG, soro',
+                  'Sífilis: teste treponêmico ou VDRL, soro', 'Clamídia e gonococo, PCR (urina ou swab)', 'HBsAg, soro',
+                  'HIV 1/2 (anticorpos e antígeno p24), soro'):
+        assert exame in primeira, exame
+    meio = _titulos(_g(idade_gestacional='26'), idade=30)
+    assert 'Hemograma completo' in meio and 'TOTG-75g gestacional (jejum, 1 h e 2 h), soro' in meio
+    assert 'Coombs indireto, soro' not in meio                       # letra A: só se indicado (Rh negativo)
+    assert 'Coombs indireto, soro' in _titulos(_g(idade_gestacional='26', fator_rh='negativo'), idade=30)
+    assert 'Cultura para estreptococo do grupo B (swab vaginal e retal)' in _titulos(_g(idade_gestacional='36'), idade=30)
+
+
+def test_papanicolaou_da_primeira_consulta_vem_do_rastreio_de_colo(client):
+    dados = dict(idade=27, sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[], imunossupressao='nao',
+                 gestante='sim', lactante='nao', idade_gestacional=10, primeira_consulta='sim')
+    t = [x['titulo'] for x in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']]
+    assert 'Citologia cervicovaginal (Papanicolaou)' in t
 
 
 @pytest.mark.parametrize('campo, valor', [('idade_gestacional', '50'), ('fator_rh', 'x'),
