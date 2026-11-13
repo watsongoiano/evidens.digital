@@ -258,6 +258,15 @@ def _varredura(client):
         for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
             itens[rec['titulo']] = rec['categoria']
             refs.add(rec.get('referencia') or '')
+    # Gestação: todas as janelas do pré-natal, com Rh negativo, toxoplasmose suscetível e risco
+    for idade, ig in itertools.product((22, 35), (8, 12, 15, 22, 26, 32, 36)):
+        dados = dict(idade=idade, sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[],
+                     imunossupressao='nao', gestante='sim', lactante='nao', idade_gestacional=ig,
+                     primeira_consulta='sim', fator_rh='negativo', toxoplasmose='suscetivel',
+                     gestacao_condicoes=['pe_previa', 'dmg_previo', 'prematuro_previo'])
+        for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
+            itens[rec['titulo']] = rec['categoria']
+            refs.add(rec.get('referencia') or '')
     return itens, ' '.join(refs)
 
 

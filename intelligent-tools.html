@@ -119,6 +119,53 @@
         </div>
       </div>
 
+      <div id="gestante-item" class="mt-5" style="display: none;">
+        <div class="campo sm:max-w-[320px]">
+          <label for="gestante">Gestante</label>
+          <select id="gestante" name="gestante">
+            <option value="desconhecido">Não informado</option>
+            <option value="nao">Não</option>
+            <option value="sim">Sim</option>
+          </select>
+        </div>
+        <div id="gestacao-bloco" class="bloco-condicional" style="display: none;">
+          <p class="campo-rotulo text-teal-dark">Dados da gestação</p>
+          <div class="grade">
+            <div class="campo"><label for="idade_gestacional">Idade gestacional (semanas)</label><input type="number" id="idade_gestacional" name="idade_gestacional" min="0" max="42" step="0.1" placeholder="Ex: 24" inputmode="decimal"></div>
+            <div class="campo">
+              <label for="primeira_consulta">Primeira consulta de pré-natal?</label>
+              <select id="primeira_consulta" name="primeira_consulta">
+                <option value="sim">Sim — pedir exames iniciais</option>
+                <option value="nao">Não — exames iniciais já feitos</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="fator_rh">Fator Rh materno</label>
+              <select id="fator_rh" name="fator_rh">
+                <option value="desconhecido">Não sabido</option>
+                <option value="positivo">Positivo</option>
+                <option value="negativo">Negativo</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="toxoplasmose">Toxoplasmose</label>
+              <select id="toxoplasmose" name="toxoplasmose">
+                <option value="desconhecido">Sorologia não sabida</option>
+                <option value="suscetivel">Suscetível (IgG negativa)</option>
+                <option value="imune">Imune (IgG positiva)</option>
+              </select>
+            </div>
+          </div>
+          <p class="campo-rotulo mt-4">História obstétrica e gestação atual</p>
+          <div class="opcoes">
+            <label class="opcao" for="gc_gemelar"><input type="checkbox" id="gc_gemelar" name="gestacao_condicoes" value="gemelar">Gestação gemelar</label>
+            <label class="opcao" for="gc_pe_previa"><input type="checkbox" id="gc_pe_previa" name="gestacao_condicoes" value="pe_previa">Pré-eclâmpsia prévia</label>
+            <label class="opcao" for="gc_dmg_previo"><input type="checkbox" id="gc_dmg_previo" name="gestacao_condicoes" value="dmg_previo">DMG prévio</label>
+            <label class="opcao" for="gc_prematuro_previo"><input type="checkbox" id="gc_prematuro_previo" name="gestacao_condicoes" value="prematuro_previo">Parto prematuro prévio</label>
+          </div>
+        </div>
+      </div>
+
       <div class="campo mt-5">
         <label for="outras_comorbidades">Outras comorbidades</label>
         <textarea id="outras_comorbidades" name="outras_comorbidades" rows="3" placeholder="Ex: artrite reumatoide, lúpus..."></textarea>
@@ -135,14 +182,6 @@
             <option value="desconhecido">Não informado</option>
             <option value="nao">Não</option>
             <option value="sim">Sim (doença ou tratamento imunossupressor)</option>
-          </select>
-        </div>
-        <div class="campo" id="gestante-item" style="display: none;">
-          <label for="gestante">Gestante</label>
-          <select id="gestante" name="gestante">
-            <option value="desconhecido">Não informado</option>
-            <option value="nao">Não</option>
-            <option value="sim">Sim</option>
           </select>
         </div>
         <div class="campo" id="lactante-item" style="display: none;">
@@ -433,7 +472,7 @@
                     sexo: data.sexo
                 };
 
-                displayRecommendations(currentRecommendations, result.nao_incluidas || []);
+                displayRecommendations(currentRecommendations, (result.nao_incluidas || []).concat(result.adiados_gestacao || []));
 
             } catch (error) {
                 if (revisaoDoEnvio !== revisaoDoFormulario) {
@@ -543,7 +582,8 @@
         const ROTULOS_ESTADO = {
             contraindicada: { texto: 'Contraindicada', classe: 'bg-[#C0392B] text-white', borda: 'border-[#E5B7B1]' },
             precaucao: { texto: 'Precaução', classe: 'bg-[#D35400] text-white', borda: 'border-[#EDC9A8]' },
-            dados_insuficientes: { texto: 'Dados insuficientes', classe: 'bg-ink/15 text-ink', borda: 'border-ink/15' }
+            dados_insuficientes: { texto: 'Dados insuficientes', classe: 'bg-ink/15 text-ink', borda: 'border-ink/15' },
+            adiado_gestacao: { texto: 'Adiado na gestação', classe: 'bg-sand text-ink', borda: 'border-[#E6DCC0]' }
         };
 
         function displayNaoIncluidas(itens) {
@@ -554,7 +594,7 @@
             }
 
             let html = `<div class="recommendation-category categoria">
-                <h4 class="categoria-titulo">Vacinas não incluídas automaticamente<span class="text-ink/30">${itens.length}</span></h4>
+                <h4 class="categoria-titulo">${itens.every(i => i.categoria === 'vacina') ? 'Vacinas não incluídas' : 'Itens não incluídos'} automaticamente<span class="text-ink/30">${itens.length}</span></h4>
                 <p class="text-[14px] text-ink/55 -mt-1 mb-3">Estes itens não entram nos PDFs. A decisão cabe ao médico.</p>`;
 
             itens.forEach(item => {
@@ -833,6 +873,19 @@
             }
         });
 
+        // Dados da gestação aparecem só para gestante
+        function atualizarBlocoGestacao() {
+            const gestante = document.getElementById('gestante').value === 'sim';
+            const bloco = document.getElementById('gestacao-bloco');
+            bloco.style.display = gestante ? 'block' : 'none';
+            if (!gestante) {
+                bloco.querySelectorAll('input[type=number]').forEach(i => { i.value = ''; });
+                bloco.querySelectorAll('input[type=checkbox]').forEach(i => { i.checked = false; });
+                bloco.querySelectorAll('select').forEach(sel => { sel.selectedIndex = 0; });
+            }
+        }
+        document.getElementById('gestante').addEventListener('change', atualizarBlocoGestacao);
+
         // Listener para campo sexo - gestação e amamentação só são perguntadas para o sexo feminino
         document.getElementById('sexo').addEventListener('change', function() {
             const feminino = this.value === 'feminino';
@@ -842,6 +895,7 @@
                     document.getElementById(campo).value = 'desconhecido';
                 }
             });
+            atualizarBlocoGestacao();
         });
 
         // Inicializar estado dos campos condicionais ao carregar a página

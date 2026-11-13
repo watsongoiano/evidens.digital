@@ -143,14 +143,21 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
-        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
-        "Colesterol total e frações, soro",
-        "Lipoproteína(a) - Lp(a), soro",
+        "Hemograma completo",
+        "Glicemia de jejum, soro",
+        "EAS - Elementos Anormais e Sedimentoscopia",
+        "Urocultura com antibiograma",
+        "HIV 1/2 (anticorpos e antígeno p24), soro",
+        "Sífilis: teste treponêmico ou VDRL, soro",
+        "HBsAg, soro",
+        "Anti-HCV IgG, soro",
+        "Rubéola IgG, soro",
+        "Citomegalovírus IgG e IgM, soro",
+        "Parasitológico de fezes",
+        "Tipagem sanguínea ABO e fator Rh",
+        "Toxoplasmose IgG e IgM, soro",
         "Creatinina, soro",
         "Anti-HIV 1 e 2, soro",
-        "Anti-HCV IgG, soro",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
