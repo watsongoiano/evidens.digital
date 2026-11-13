@@ -138,6 +138,7 @@ Veja `.env.example`. As que a aplicação usa em produção:
 | `DATABASE_URL` | Postgres das contas (a integração Neon da Vercel preenche) |
 | `SECRET_KEY` | Assina o cookie de sessão |
 | `SETUP_TOKEN` | Código de instalação do primeiro administrador |
+| `RESEND_API_KEY` | Opcional: liga o aviso por e-mail ao administrador a cada novo pedido de conta (docs/deploy.md) |
 
 ## 🤝 Contribuição
 

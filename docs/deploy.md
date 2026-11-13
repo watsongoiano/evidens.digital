@@ -26,6 +26,10 @@ Variáveis de ambiente na Vercel:
 | `DATABASE_URL` (ou `POSTGRES_URL`) | Conexão com o Postgres. A integração **Neon** da Vercel (Storage → Create Database → Neon) cria e preenche sozinha. |
 | `SECRET_KEY` | Assina o cookie de sessão. Valor longo e aleatório. Sem ela (ou com o valor padrão), a área de acesso fica desligada. |
 | `SETUP_TOKEN` | Código de instalação, usado uma única vez em `/configurar` para criar o administrador. Pode ser apagado depois. |
+| `RESEND_API_KEY` | Opcional. Liga o aviso por e-mail ao administrador a cada novo pedido de conta (ver abaixo). |
+| `AVISO_CADASTRO_PARA` | Opcional. Destinatários do aviso, separados por vírgula. Padrão: e-mail dos administradores. |
+| `AVISO_CADASTRO_DE` | Opcional. Remetente do aviso. Padrão: `Evidēns <onboarding@resend.dev>`. |
+| `SITE_URL` | Opcional. Endereço usado no link do e-mail. Padrão: `https://evidens.life`. |
 
 Sem banco ou sem chave, a home continua no ar e o check-up responde 503 ("área de acesso ainda não configurada").
 
@@ -72,3 +76,16 @@ O serviço Gotenberg no Railway, usado antes, pode ser desligado.
 - GitHub Pages: o fluxo que publicava a raiz do repositório como site estático foi removido. O site depende da
   API e não funciona como página estática. Se o Pages estiver ativo em Settings → Pages, desative.
 - Netlify, `build.py`, pasta `dist/`: removidos.
+
+## Aviso por e-mail de novo cadastro
+
+A cada pedido de abertura de conta, o administrador recebe um e-mail com nome, perfil, registro e e-mail de quem pediu, e o link de `/admin`. O envio usa a [Resend](https://resend.com) e fica desligado enquanto `RESEND_API_KEY` não existir.
+
+1. Crie uma conta na Resend **com o mesmo e-mail que deve receber os avisos** (o do administrador).
+2. Em *API Keys*, crie uma chave com permissão de envio.
+3. Na Vercel, em *Settings → Environment Variables*, cadastre `RESEND_API_KEY` com essa chave (ambiente *Production*) e refaça o deploy.
+4. Em `/admin`, a seção "Aviso por e-mail" mostra se está ligado e tem o botão "Enviar e-mail de teste".
+
+Com o remetente padrão (`onboarding@resend.dev`), a Resend só entrega ao e-mail do dono da conta Resend. Para avisar outros endereços, verifique o domínio `evidens.life` na Resend (registros DNS na GoDaddy) e defina `AVISO_CADASTRO_DE`, por exemplo `Evidēns <avisos@evidens.life>`.
+
+Uma falha no envio não impede o cadastro: fica registrada no log da função e o pedido continua aparecendo em `/admin`.

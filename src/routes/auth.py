@@ -6,7 +6,7 @@ from urllib.parse import urlsplit
 
 from flask import Blueprint, current_app, g, jsonify, request, session
 
-from src.utils import contas
+from src.utils import contas, notificacoes
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -121,9 +121,15 @@ def cadastro():
     try:
         perfil = _texto(d, 'perfil')
         registro = contas.montar_registro(perfil, _texto(d, 'registro'), _texto(d, 'crm_uf'), _texto(d, 'crm_numero'))
-        contas.criar(_texto(d, 'email'), _texto(d, 'nome'), registro, perfil, _texto(d, 'senha'))
+        novo = contas.criar(_texto(d, 'email'), _texto(d, 'nome'), registro, perfil, _texto(d, 'senha'))
     except contas.DadosInvalidos as e:
         return jsonify({'error': 'Confira os dados informados.', 'erros': e.erros}), 400
+    if novo and notificacoes.configurado():
+        # Aviso por e-mail ao administrador; falha no envio não impede o cadastro.
+        try:
+            notificacoes.avisar_novo_cadastro(novo, contas.listar(), _url_do_admin())
+        except Exception as erro:
+            print(f'⚠️ Aviso de novo cadastro falhou: {type(erro).__name__}')
     # Mesma resposta para e-mail novo e e-mail já cadastrado.
     return jsonify({'ok': True, 'mensagem': 'Cadastro recebido. Você poderá entrar assim que a conta for aprovada.'}), 202
 
@@ -184,6 +190,34 @@ def configurar():
         return jsonify({'error': 'Já existe uma conta com este e-mail, ou o administrador acabou de ser criado.'}), 409
     _abrir_sessao(u)
     return jsonify({'ok': True, 'usuario': contas.publico(u)}), 201
+
+
+def _url_do_admin():
+    # Endereço fixo (não o cabeçalho Host do pedido), para o link do e-mail não poder ser forjado.
+    base = (os.environ.get('SITE_URL') or '').strip().rstrip('/') or 'https://evidens.life'
+    return base + '/admin'
+
+
+@auth_bp.route('/admin/aviso')
+@exigir_administrador
+def admin_aviso_estado():
+    """Diz se o aviso por e-mail está ligado e para quem vai (sem expor a chave)."""
+    return jsonify({'configurado': notificacoes.configurado(),
+                    'destinatarios': notificacoes.destinatarios(contas.listar())})
+
+
+@auth_bp.route('/admin/aviso/teste', methods=['POST'])
+@exigir_administrador
+def admin_aviso_teste():
+    """Envia um e-mail de teste aos destinatários do aviso de novo cadastro."""
+    para = notificacoes.destinatarios(contas.listar())
+    ok, detalhe = notificacoes.enviar(
+        para, 'Evidēns: teste do aviso de novo cadastro',
+        'Este é um teste. Quando alguém pedir abertura de conta, você receberá um e-mail como este, '
+        f'com os dados do pedido e o link {_url_do_admin()}')
+    if not ok:
+        return jsonify({'error': f'Não foi possível enviar o e-mail de teste: {detalhe}'}), 502
+    return jsonify({'ok': True, 'destinatarios': para})
 
 
 @auth_bp.route('/admin/usuarios')
