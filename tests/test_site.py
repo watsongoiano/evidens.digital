@@ -98,36 +98,61 @@ def test_painel_de_analytics_recebe_os_campos_que_exibe(admin):
         assert set(dados[periodo]) >= {'visits', 'recommendations', 'exam_requests', 'vaccine_prescriptions'}
 
 
-# --- P-06: risco cardiovascular desativado -----------------------------------
+# --- P-06: risco cardiovascular pelo PREVENT ---------------------------------
 
 PERFIL_COMPLETO = {
     'idade': '55', 'sexo': 'masculino', 'tabagismo': 'atual', 'macos_ano': '30',
     'pas': '132', 'pad': '80', 'colesterol': '200', 'hdl': '45', 'creatinina': '1.0',
+    'peso': '80', 'altura': '175',
     'comorbidades': ['diabetes'], 'medicacoes': ['anti_hipertensivos'], 'imunossupressao': 'nao',
 }
 
 
-def test_api_nao_devolve_risco_cardiovascular(client):
-    dados = client.post('/api/checkup-intelligent', json=PERFIL_COMPLETO).get_json()
+def test_api_devolve_risco_prevent_igual_ao_modulo(client):
+    from src.utils import prevent
+    risco = client.post('/api/checkup-intelligent', json=PERFIL_COMPLETO).get_json()['risco_cardiovascular']
+    assert risco['status'] == 'calculado'
+    esperado = prevent.estimar(idade=55, sexo='masculino', colesterol_total=200, hdl=45, pas=132,
+                               diabetes=True, fumante=True, imc_valor=risco['imc'],
+                               egfr=prevent.egfr_ckd_epi_2021(1.0, 55, 'masculino'),
+                               anti_hipertensivo=True, estatina=False)
+    assert risco['dez_anos'] == esperado['dez_anos']
+    assert risco['trinta_anos'] == esperado['trinta_anos']
+    # 55 anos, homem, DM2: alto pela regra do diabetes da SBC 2025, qualquer que seja o escore.
+    assert risco['categoria_sbc_2025']['categoria'] == 'alto'
+    assert 'categoria_acc_aha_2026' in risco
 
-    assert dados['prevent_risk'] is None
-    assert dados['risk_classification'] is None
-    assert dados['risco_cardiovascular']['status'] == 'desativado'
-    assert dados['risco_cardiovascular']['motivo']
+
+def test_risco_lista_o_que_falta(client):
+    perfil = {k: v for k, v in PERFIL_COMPLETO.items() if k not in ('creatinina', 'peso')}
+    risco = client.post('/api/checkup-intelligent', json=perfil).get_json()['risco_cardiovascular']
+    assert risco['status'] == 'incompleto'
+    assert set(risco['faltando']) == {'creatinina', 'peso'}
 
 
-def test_calculadoras_de_risco_foram_removidas():
+@pytest.mark.parametrize('ajuste, status', [
+    ({'idade': '25'}, 'nao_aplicavel'),
+    ({'comorbidades': ['cardiopatia']}, 'nao_aplicavel'),
+    ({'colesterol': '400'}, 'fora_da_faixa'),
+])
+def test_risco_nao_calcula_fora_da_populacao(client, ajuste, status):
+    risco = client.post('/api/checkup-intelligent', json={**PERFIL_COMPLETO, **ajuste}).get_json()['risco_cardiovascular']
+    assert risco['status'] == status
+    assert risco['motivo']
+
+
+def test_calculadoras_antigas_continuam_fora():
     assert importlib.util.find_spec('src.utils.prevent_calculator') is None
     assert not (RAIZ / 'prevent_calculator.js').exists()
     assert not (RAIZ / 'config' / 'prevent_coefficients.json').exists()
 
 
-def test_pagina_nao_calcula_nem_exibe_risco(client):
+def test_pagina_exibe_risco_sem_calcular_no_navegador(client):
     html = client.get('/intelligent-tools').get_data(as_text=True)
-
-    for trecho in ('prevent_calculator', 'PreventCalculator', 'risk_10yr', 'Estimated 10-year', 'eGFR calculado'):
+    for trecho in ('prevent_calculator', 'PreventCalculator', 'Math.exp'):
         assert trecho not in html
-    assert 'risco cardiovascular está temporariamente desativado' in html
+    assert 'exibirRisco(result.risco_cardiovascular)' in html
+    assert 'temporariamente desativado' not in html
 
 
 # --- Página do check-up -------------------------------------------------------

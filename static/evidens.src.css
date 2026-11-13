@@ -73,6 +73,12 @@ html.lenis, html.lenis body { height: auto; }
   }
   .bloco-condicional { @apply mt-4 rounded-2xl bg-mist/50 border border-teal/15 p-5; }
 
+  .risco-cartao { @apply mt-8 rounded-[22px] bg-white border border-ink/10 p-6 sm:p-7; }
+  .risco-ponto { @apply inline-block w-2.5 h-2.5 rounded-full align-middle mr-2; }
+  .risco-tabela { @apply w-full text-[13px]; }
+  .risco-tabela th { @apply text-left font-mono text-[10px] tracking-[0.14em] uppercase text-ink/45 font-normal pb-2; }
+  .risco-tabela td { @apply py-1.5 border-t border-ink/5; }
+  .risco-tabela th:not(:first-child), .risco-tabela td:not(:first-child) { @apply text-right tabular-nums; }
   .aviso { @apply rounded-2xl px-5 py-4 text-[14px] leading-relaxed; }
   .aviso-erro { @apply bg-[#FBEAE8] text-[#7B241C] border border-[#E5B7B1]; }
   .aviso-atencao { @apply bg-sand text-ink border border-[#E6DCC0]; }
