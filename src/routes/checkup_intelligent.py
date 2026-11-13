@@ -302,236 +302,186 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
                 'grau_evidencia': 'B'
             })
     
-    # Vacinas
-    # Influenza - nome comercial varia conforme idade
-    if age >= 65:
+    # ===================== VACINAS — Calendários SBIm 2026/2027 =====================
+    # Adolescente (até 19 anos), Adulto (20-59) e Idoso (60+). Uma recomendação por
+    # vacina: quando há alternativas (vacinas isoladas x combinada, VPC20 x esquemas
+    # antigos), elas vão na descrição, não em cartões separados.
+    REF_SBIM = 'SBIm 2026/2027'
+    adolescente = age < 20
+    idoso = age >= 60
+
+    # Influenza
+    if idoso:
         _add_rec({
-            'titulo': 'Influenza Tetravalente (Efluelda®)',
-            'descricao': 'Dose anual. Vacina de alta dose ou adjuvantada recomendada para idosos. Aplicar em dose única, INTRAMUSCULAR, anualmente.',
-            'subtitulo': 'Adultos ≥65 anos | Anual | Reforço: anual',
-            'categoria': 'vacina',
-            'prioridade': 'alta',
-            'referencia': 'SBIm 2025 / CDC 2025',
-            'grau_evidencia': 'A'
+            'titulo': 'Influenza trivalente de alta concentração (Efluelda®, HD3V)',
+            'descricao': 'Dose única anual. Para 60+ a SBIm prefere a HD3V; se indisponível, usar 3V ou 4V padrão. Com fator de risco e situação epidemiológica, considerar 2ª dose 3 meses após.',
+            'subtitulo': '60+ anos | Dose anual | PNI: 3V; rede privada: 3V, 4V, HD3V',
+            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
     else:
         _add_rec({
-            'titulo': 'Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)',
-            'descricao': 'Dose anual. Aplicar em dose única, INTRAMUSCULAR, anualmente.',
-            'subtitulo': 'Todos ≥6 meses | Anual | Reforço: anual',
-            'categoria': 'vacina',
-            'prioridade': 'alta',
-            'referencia': 'SBIm 2025 / CDC 2025',
-            'grau_evidencia': 'A'
+            'titulo': 'Influenza (trivalente ou quadrivalente)',
+            'descricao': 'Dose única anual. Com fator de risco e situação epidemiológica, considerar 2ª dose 3 meses após a dose anual.',
+            'subtitulo': 'Rotina | Dose anual | PNI: 3V (grupos de risco); rede privada: 3V, 4V',
+            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
 
-    # HPV (masculino e feminino) até 45 anos
+    # HPV (a triagem retira em gestantes)
     if age <= 45:
-        prioridade_hpv = 'alta' if age <= 26 else 'media'
+        esquema_hpv = ('2 doses (0-6 meses) para não vacinados com menos de 20 anos.' if adolescente
+                       else '3 doses (0-1 a 2-6 meses) para não vacinados a partir de 20 anos.')
         _add_rec({
             'titulo': 'Gardasil 9® (Vacina HPV 9-Valente)',
-            'descricao': '2 doses (9-14 anos) ou 3 doses (15-45 anos). Esquema 0-2-6 meses para 3 doses ou 0-6 meses para 2 doses.',
-            'subtitulo': '9-45 anos | 2-3 doses conforme idade | Sem reforço',
-            'categoria': 'vacina',
-            'prioridade': prioridade_hpv,
-            'referencia': 'SBIm 2024',
-            'grau_evidencia': 'A'
+            'descricao': f'{esquema_hpv} Preferir HPV9 e revacinar quem recebeu HPV2/HPV4. Contraindicada na gestação. PNI oferece HPV4 a grupos específicos (imunossuprimidos, PrEP, vítimas de violência sexual, pós-tratamento de lesão de alto grau).',
+            'subtitulo': ('Até 19 anos | 2 doses (0-6m)' if adolescente else '20-45 anos | 3 doses (0-1/2-6m)') + ' | Sem reforço',
+            'categoria': 'vacina', 'prioridade': 'alta' if age <= 26 else 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
 
-    # Hepatite B (adultos não vacinados)
-    if 19 <= age <= 59:
-        _add_rec({
-            'titulo': 'Hepatite B (Engerix-B® ou Euvax B®)',
-            'descricao': 'Esquema de 3 doses (0, 1, 6 meses) em não vacinados. Adultos até 59 anos devem ser vacinados.',
-            'subtitulo': 'Adultos 19-59 anos não imunizados | 3 doses',
-            'categoria': 'vacina',
-            'prioridade': 'alta',
-            'referencia': 'SBIm 2025 / CDC 2025',
-            'grau_evidencia': 'A'
-        })
-
-    # dTpa (Tétano, difteria, coqueluche)
+    # dTpa
     _add_rec({
-            'titulo': 'dTpa (Adacel® ou Boostrix®)',
-        'descricao': '1 dose de dTpa, depois reforço com dT ou dTpa a cada 10 anos. Gestantes devem receber dTpa a cada gestação.',
-        'subtitulo': 'Adultos ≥18 anos | 1 dose inicial + reforços | Reforço: 10 anos (+ cada gestação)',
-        'categoria': 'vacina',
-        'prioridade': 'alta',
-        'referencia': 'SBIm 2025 / CDC 2025',
-        'grau_evidencia': 'A'
+        'titulo': 'dTpa (Adacel® ou Boostrix®)',
+        'descricao': 'Esquema completo: reforço com dTpa a cada 10 anos. Incompleto: 1 dose de dTpa e completar com dT até 3 doses com componente tetânico. Não vacinado/desconhecido: 1 dTpa + 2 dT (0-2-4 a 8 meses). Contactante de lactente: considerar antecipar o reforço para 5 anos. Viagem a área com pólio: dTpa-VIP.',
+        'subtitulo': 'Rotina | Reforço a cada 10 anos (+ cada gestação)',
+        'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
     })
 
-    # Tríplice viral (Sarampo, caxumba, rubéola)
-    if age <= 68:  # CDC 2025: recomendada até 68 anos
+    # Hepatites: uma recomendação só
+    if idoso:
+        _add_rec({
+            'titulo': 'Hepatite B (Engerix-B® ou Euvax B®)',
+            'descricao': 'Para não vacinados previamente: 3 doses (0-1-6 meses). Hepatite A em 60+ só em situações especiais (sorologia negativa, exposição, surto).',
+            'subtitulo': '60+ não vacinados | 3 doses (0-1-6m) | PNI: sim',
+            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
+        })
+    else:
+        _add_rec({
+            'titulo': 'Hepatites A e B (Twinrix® ou vacinas isoladas)',
+            'descricao': 'Para não vacinados: combinada A+B em 3 doses (0-1-6 meses), ou vacinas isoladas — hepatite A em 2 doses (0-6 meses) e hepatite B em 3 doses (0-1-6 meses). Hepatite B é gratuita no PNI; hepatite A e a combinada, só na rede privada. Indicar apenas o componente que faltar.',
+            'subtitulo': 'Não vacinados | Combinada 0-1-6m ou isoladas | PNI: hepatite B',
+            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
+        })
+
+    # Tríplice viral e varicela: rotina até 59 anos; em 60+ só em situação especial
+    if not idoso:
         _add_rec({
             'titulo': 'Tríplice Viral - SCR (Priorix® ou M-M-R® II)',
             'viva_atenuada': True,
-            'descricao': '1 ou 2 doses para adultos não vacinados ou sem comprovação vacinal. Adultos até 68 anos.',
-            'subtitulo': 'Adultos 19-68 anos não imunizados | 1-2 doses | Sem reforço',
-            'categoria': 'vacina',
-            'prioridade': 'media',
-            'referencia': 'SBIm 2025 / CDC 2025',
-            'grau_evidencia': 'A'
+            'descricao': '2 doses (intervalo mínimo de 1 mês) para quem não tem esquema completo. Com esquema completo não há 3ª dose de rotina (considerar em surto). Suscetível a varicela: considerar a tetraviral (SCRV).',
+            'subtitulo': 'Não vacinados ou incompletos | 2 doses | PNI: 2 doses até 29 anos, 1 dose 30-59',
+            'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
+        })
+        _add_rec({
+            'titulo': 'Varicela (Varilrix® ou Varivax®)',
+            'viva_atenuada': True,
+            'descricao': 'Para suscetíveis (sem doença ou vacinação prévia): 2 doses com intervalo de 1 a 2 meses. Considerar a tetraviral (SCRV) se também precisar da tríplice viral.',
+            'subtitulo': 'Suscetíveis | 2 doses (0-1 a 2m) | PNI: sim',
+            'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
 
-    # Hepatite A
+    # Febre amarela
     _add_rec({
-            'titulo': 'Hepatite A (Havrix® ou Vaqta®)',
-        'descricao': '2 doses com intervalo de 6 meses. Recomendada para grupos de risco, viajantes e áreas endêmicas.',
-        'subtitulo': 'Grupos de risco e viajantes | 2 doses',
-        'categoria': 'vacina',
-        'prioridade': 'media',
-        'referencia': 'SBIm 2025 / CDC 2025',
-        'grau_evidencia': 'A'
+        'titulo': 'Febre Amarela (Stamaril®)',
+        'viva_atenuada': True,
+        'descricao': 'SBIm: 2 doses com intervalo de 10 anos. PNI: dose única se a primeira foi aplicada a partir dos 5 anos. Para CIVP, aplicar até 10 dias antes da viagem.' + (' A partir de 60 anos, avaliar risco e benefício.' if idoso else ''),
+        'subtitulo': 'Não vacinados | SBIm: 2 doses (intervalo de 10 anos) | PNI: sim',
+        'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
     })
 
-    # Febre amarela (para áreas endêmicas)
-    _add_rec({
-            'titulo': 'Febre Amarela (Stamaril®)',
-            'viva_atenuada': True,
-        'descricao': 'Dose única ou 2 doses com intervalo de 10 anos (SBIm recomenda 2 doses). Indicada para residentes ou viajantes para áreas endêmicas.',
-        'subtitulo': 'Áreas endêmicas | 1-2 doses | Reforço: 10 anos (se 2 doses)',
-        'categoria': 'vacina',
-        'prioridade': 'media',
-        'referencia': 'SBIm 2025',
-        'grau_evidencia': 'A'
-    })
-
-    # Meningocócica ACWY
-    if age <= 59:
+    # Meningocócicas: rotina no adolescente; no adulto, conforme situação epidemiológica
+    if adolescente:
         _add_rec({
             'titulo': 'Meningocócica ACWY (Menactra® ou Menveo®)',
-            'descricao': 'Dose única ou reforço a cada 5 anos para grupos de risco. Adolescentes: dose aos 11-12 anos e reforço aos 16 anos.',
-            'subtitulo': 'Adolescentes 11-12 anos e adultos ≤59 anos | 1 dose | Reforço: 5 anos (grupos de risco)',
-            'categoria': 'vacina',
-            'prioridade': 'media',
-            'referencia': 'SBIm 2025 / CDC 2025',
-            'grau_evidencia': 'B'
+            'descricao': 'Vacinados na infância: reforço aos 11 anos ou 5 anos após a última dose. Não vacinados a partir de 16 anos: dose única. Sem ACWY, usar meningocócica C conjugada.',
+            'subtitulo': 'Adolescentes | Rotina | Rede privada',
+            'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'B'
         })
-
-    # Meningocócica B (16-23 anos)
-    if 16 <= age <= 23:
         _add_rec({
-            'titulo': 'Meningocócica B (Bexsero® ou Trumenba®)',
-            'descricao': '2 doses conforme esquema do fabricante. Bexsero®: intervalo de 1 mês. Trumenba®: intervalo de 6 meses.',
-            'subtitulo': 'Adolescentes 16-23 anos | 2 doses | Sem reforço',
-            'categoria': 'vacina',
-            'prioridade': 'media',
-            'referencia': 'SBIm 2025 / CDC 2025',
-            'grau_evidencia': 'B'
+            'titulo': 'Meningocócica B (Bexsero®)',
+            'descricao': '2 doses com intervalo mínimo de 1 mês. Grupos de alto risco para doença meningocócica invasiva têm esquema e reforços diferentes.',
+            'subtitulo': 'Adolescentes | Rotina | 2 doses | Rede privada',
+            'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'B'
         })
+    elif not idoso:
+        _add_rec({
+            'titulo': 'Meningocócica ACWY (Menactra® ou Menveo®)',
+            'descricao': 'Dose única, conforme situação epidemiológica (surto, viagem a área de risco). Sem ACWY, usar meningocócica C conjugada.',
+            'subtitulo': 'Adultos | Conforme situação epidemiológica | Dose única',
+            'categoria': 'vacina', 'prioridade': 'baixa', 'referencia': REF_SBIM, 'grau_evidencia': 'B'
+        })
+        if age <= 50:
+            _add_rec({
+                'titulo': 'Meningocócica B (Bexsero®)',
+                'descricao': '2 doses com intervalo mínimo de 1 mês, conforme situação epidemiológica. Licenciada até 50 anos.',
+                'subtitulo': 'Adultos até 50 anos | Conforme situação epidemiológica | 2 doses',
+                'categoria': 'vacina', 'prioridade': 'baixa', 'referencia': REF_SBIM, 'grau_evidencia': 'B'
+            })
 
-    # Dengue (Qdenga)
+    # Dengue (Qdenga) — triagem retira em gestante e lactante
     if 4 <= age <= 60:
         _add_rec({
             'titulo': 'Dengue (Qdenga®)',
             'viva_atenuada': True,
-            'descricao': '2 doses com intervalo de 3 meses. Indicada para áreas endêmicas. Licenciada para 4-60 anos.',
-            'subtitulo': '4-60 anos (áreas endêmicas) | 2 doses (0-3 meses) | Sem reforço',
-            'categoria': 'vacina',
-            'prioridade': 'media',
-            'referencia': 'SBIm 2025',
-            'grau_evidencia': 'B'
+            'descricao': '2 doses com intervalo de 3 meses (0-3), independentemente de contato prévio com dengue. Licenciada de 4 a 60 anos. Contraindicada em gestantes e lactantes.',
+            'subtitulo': 'Até 60 anos | 2 doses (0-3m) | Rede privada',
+            'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'B'
         })
 
     # COVID-19
     _add_rec({
-            'titulo': 'COVID-19 (Comirnaty®, Spikevax® ou outras)',
-        'descricao': 'Dose de reforço anual conforme vacina disponível. Idosos ≥65 anos: pelo menos 2 doses da vacina atual.',
-        'subtitulo': 'Todos ≥6 meses | Anual (atualizada)',
-        'categoria': 'vacina',
-        'prioridade': 'alta',
-        'referencia': 'CDC 2025',
-        'grau_evidencia': 'A'
+        'titulo': 'COVID-19 (Comirnaty®, Spikevax® ou outras)',
+        'descricao': ('1 dose a cada 6 meses. ' if idoso else '') + 'Conferir vacinas disponíveis e grupos contemplados pelo PNI (gov.br/saude).',
+        'subtitulo': '60+ | 1 dose a cada 6 meses' if idoso else 'Rotina | Conforme PNI vigente',
+        'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
     })
 
     # Herpes zóster a partir de 50 anos
     if age >= 50:
         _add_rec({
             'titulo': 'Herpes Zóster (Shingrix®)',
-            'descricao': '2 doses com intervalo de 2 a 6 meses.',
-            'subtitulo': 'Adultos ≥50 anos | 2 doses (0-2 a 6 meses) | Sem reforço',
-            'categoria': 'vacina',
-            'prioridade': 'alta',
-            'referencia': 'SBIm 2024 / CDC 2025',
-            'grau_evidencia': 'A'
+            'descricao': '2 doses com intervalo de 2 meses (0-2). Indicada mesmo após herpes-zóster (aguardar 6 meses ou a resolução). Após vacina atenuada prévia, aguardar no mínimo 2 meses.',
+            'subtitulo': 'A partir de 50 anos | 2 doses (0-2m) | Rede privada',
+            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
 
-    # Pneumocócicas a partir de 50 anos
+    # Pneumocócica: VPC20 em dose única (substitui o esquema VPC + VPP23)
     if age >= 50:
         _add_rec({
-            'titulo': 'Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)',
-            'descricao': 'VPC20 em dose única OU esquema sequencial VPC15 seguida de VPP23 após 6-12 meses. Pode ser coadministrada com Shingrix®, Efluelda® e Arexvy®.',
-            'subtitulo': 'Adultos ≥50 anos | Dose única ou esquema sequencial | Sem reforço',
-            'categoria': 'vacina',
-            'prioridade': 'alta',
-            'referencia': 'SBIm 2025 / CDC 2025',
-            'grau_evidencia': 'A'
+            'titulo': 'Pneumocócica conjugada 20-valente (Prevenar 20®)',
+            'descricao': 'Dose única. Já recebeu VPP23: aguardar 1 ano. Esquema incompleto com VPC13/VPC15 (± VPP23): completar com VPC20 (2 meses após VPC13/15 ou 1 ano após VPP23). Esquema completo (VPC13/15 + VPP23): dose adicional a critério médico.',
+            'subtitulo': 'A partir de 50 anos | Dose única | PNI: grupos de risco (CRIE)',
+            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
-        _add_rec({
-            'titulo': 'Pneumocócica 23V (Pneumovax 23®)',
-            'descricao': '1 dose 6-12 meses após VPC15 (se esquema sequencial escolhido). Reforço 5 anos após a primeira dose de VPP23. Não necessária se VPC20 foi utilizada.',
-            'subtitulo': 'Adultos ≥50 anos | Esquema sequencial (se VPC15) | Reforço: 5 anos',
-            'categoria': 'vacina',
-            'prioridade': 'alta',
-            'referencia': 'SBIm 2025 / CDC 2025',
-            'grau_evidencia': 'A'
-        })
-    
-    # Vírus Sincicial Respiratório (RSV)
-    # Abrysvo®: APENAS para gestantes (32-36 semanas)
-    # Arexvy®: para adultos ≥50 anos NÃO gestantes
-    
+
+    # Vírus sincicial respiratório
     if is_pregnant and sex == 'feminino':
-        # Abrysvo® para gestantes (32-36 semanas)
         _add_rec({
             'titulo': 'RSV - Vírus Sincicial Respiratório (Abrysvo®)',
-            'descricao': 'Dose única durante a gestação (32-36 semanas) para proteção do bebê contra doença respiratória grave causada por RSV. Única vacina RSV aprovada para uso em gestantes. Administração sazonal preferencial.',
-            'subtitulo': 'Gestantes 32-36 semanas | Dose única | Sem reforço',
-            'categoria': 'vacina',
-            'prioridade': 'alta',
-            'referencia': 'CDC 2025 / ACOG 2025',
-            'grau_evidencia': 'A'
+            'descricao': 'Dose única a cada gestação. SBIm/PNI: a partir de 28 semanas (24-27 a critério médico). ACOG/CDC: 32 a 36 semanas, preferencialmente na sazonalidade. Única vacina VSR licenciada para gestantes.',
+            'subtitulo': 'Gestantes ≥28 sem (SBIm) ou 32-36 sem (ACOG) | Dose única por gestação | PNI: sim',
+            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM + ' / ACOG 2025', 'grau_evidencia': 'A'
         })
-    elif age >= 50 and not is_pregnant:
-        # Arexvy® para adultos ≥50 anos não gestantes
-        # Prioridade alta para ≥75 anos, média para 50-74 anos
-        prioridade_rsv = 'alta' if age >= 75 else 'media'
+    elif age >= 70:
         _add_rec({
-            'titulo': 'RSV - Vírus Sincicial Respiratório (Arexvy®)',
-            'descricao': 'Dose única. Recomendada para adultos ≥50 anos com maior risco de evolução grave (cardiopatia, pneumopatia, diabetes, obesidade, nefropatia). Obrigatória para ≥75 anos. Pode ser coadministrada com Shingrix®, Efluelda® e vacinas pneumocócicas.',
-            'subtitulo': 'Adultos ≥50 anos (obrigatória ≥75 anos) | Dose única | Sem reforço',
-            'categoria': 'vacina',
-            'prioridade': prioridade_rsv,
-            'referencia': 'SBIm 2025 / CDC 2025',
-            'grau_evidencia': 'A'
+            'titulo': 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)',
+            'descricao': 'Dose única, em qualquer época do ano. Rotina a partir de 70 anos, independentemente de fator de risco. Pode ser aplicada junto com as outras vacinas da idade.',
+            'subtitulo': 'A partir de 70 anos | Rotina | Dose única | Rede privada',
+            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
-    
-    # Varicela (catapora) para suscetíveis não vacinados
-    if age <= 45:  # Prioridade para adultos jovens nascidos nos EUA
+    elif idoso:
         _add_rec({
-            'titulo': 'Varicela (Varilrix® ou Varivax®)',
-            'viva_atenuada': True,
-            'descricao': '2 doses com intervalo de 1-2 meses para adultos suscetíveis (sem história de doença ou vacinação prévia). Contraindicada para gestantes.',
-            'subtitulo': 'Adultos suscetíveis ≤45 anos | 2 doses (0-1 a 2 meses) | Sem reforço',
-            'categoria': 'vacina',
-            'prioridade': 'media',
-            'referencia': 'SBIm 2025 / CDC 2025',
-            'grau_evidencia': 'A'
+            'titulo': 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)',
+            'descricao': 'Dose única para 60-69 anos com maior risco: cardiopatia, pneumopatia, diabetes, obesidade, nefropatia, hepatopatia, imunossupressão, fragilidade ou institucionalização.',
+            'subtitulo': '60-69 anos com fator de risco | Dose única | Rede privada',
+            'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
-    
-    # Hepatites A e B combinada (Twinrix) - alternativa para quem precisa das duas
-    if 18 <= age <= 59:
+    elif has_dpoc:
         _add_rec({
-            'titulo': 'Hepatites A e B Combinada (Twinrix®)',
-            'descricao': '3 doses (esquema 0-1-6 meses) ou esquema acelerado (0-7-21 dias + reforço aos 12 meses). Alternativa para adultos que precisam de ambas as vacinas.',
-            'subtitulo': 'Adultos 18-59 anos não imunizados | 3-4 doses (0-1-6 meses) | Sem reforço',
-            'categoria': 'vacina',
-            'prioridade': 'media',
-            'referencia': 'SBIm 2025',
-            'grau_evidencia': 'A'
+            'titulo': 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)',
+            'descricao': 'Dose única para adultos com doença respiratória ou cardiovascular crônica clinicamente relevante (DPOC, asma moderada/grave, IC, coronariopatia, imunodeficiência moderada/grave).',
+            'subtitulo': 'Adultos com DPOC | Dose única | Rede privada',
+            'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'B'
         })
-    
+
     # Exames específicos para hipertensão resistente (AHA 2025 / SBC 2025)
     # Apenas adicionar se o paciente tiver hipertensão resistente
     if has_resistant_hypertension and age >= 18:
