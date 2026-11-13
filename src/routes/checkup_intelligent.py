@@ -677,8 +677,19 @@ def generate_intelligent_recommendations():
         if data.get('creatinina'):
             egfr_inferencia = prevent.egfr_ckd_epi_2021(float(data['creatinina']), data['idade'], data['sexo'])
         # Princípios ativos escolhidos na tela viram as classes com que o motor trabalha
-        from src.utils import medicamentos
+        from src.utils import doses, medicamentos
+        escolhidas = list(medicacoes_checkboxes)
+        try:
+            detalhes_doses = doses.ler(request.get_json(silent=True) or {}, escolhidas)
+        except doses.DetalheInvalido as exc:
+            return jsonify({'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in exc.erros),
+                            'codigo': 'entrada_invalida', 'erros': exc.erros}), 400
         medicacoes_checkboxes = medicamentos.classes_de(medicacoes_checkboxes)
+        # Dose e duração (corticoide, metotrexato, azatioprina, hidroxicloroquina, bisfosfonato) ajustam as classes
+        mais, menos, orientacoes_doses = doses.avaliar(
+            escolhidas, detalhes_doses, peso=data.get('peso'),
+            rotulos={k: medicamentos.MEDICAMENTOS[k]['rotulo'] for k in escolhidas if k in medicamentos.MEDICAMENTOS})
+        medicacoes_checkboxes = [c for c in medicacoes_checkboxes if c not in menos] + sorted(mais)
         comorbidades, medicacoes_checkboxes, inferencias = coerencia.inferir(
             {**data, 'comorbidades': comorbidades, 'medicacoes': medicacoes_checkboxes}, egfr=egfr_inferencia,
             gestante=is_pregnant, recusados=_lista_curta((request.get_json(silent=True) or {}).get('inferencias_recusadas')))
@@ -1441,7 +1452,7 @@ def generate_intelligent_recommendations():
         response['adiados_gestacao'] = adiados_gestacao
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['inferencias'] = inferencias
-        response['orientacoes'] = orientacoes
+        response['orientacoes'] = orientacoes_doses + orientacoes
         response['pa_classificacao'] = pa_classificacao
         response['proximas_gestacao'] = proximas_gestacao
         response['gestacao'] = gestacao

@@ -73,6 +73,15 @@ MEDICACOES = {
     'antitireoidiano': {'rotulo': 'Antitireoidiano'},
     'corticoide_cronico': {'rotulo': 'Corticoide sistêmico ≥ 3 meses'},
     'imunossupressor': {'rotulo': 'Imunossupressor ou imunobiológico', 'imunossupressao': True},
+    # Definidas pela dose e pela duração (src/utils/doses.py)
+    'corticoide_imunossupressor': {'rotulo': 'Corticoide em dose imunossupressora', 'imunossupressao': True},
+    'rastreio_tb_latente': {'rotulo': 'Corticoide ≥ 15 mg/dia por ≥ 1 mês'},
+    'metotrexato': {'rotulo': 'Metotrexato'},
+    'azatioprina': {'rotulo': 'Azatioprina'},
+    'leflunomida': {'rotulo': 'Leflunomida'},
+    'inibidor_calcineurina': {'rotulo': 'Ciclosporina ou tacrolimo'},
+    'biologico': {'rotulo': 'Imunobiológico ou inibidor de JAK'},
+    'bisfosfonato_longo': {'rotulo': 'Bisfosfonato por 5 anos ou mais'},
     'litio': {'rotulo': 'Lítio'},
     'amiodarona': {'rotulo': 'Amiodarona'},
     'varfarina': {'rotulo': 'Varfarina'},
@@ -443,7 +452,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Densitometria óssea (DEXA)', 'imagem',
             'Inibidor de aromatase: densitometria no início do tratamento e a cada 1-2 anos.',
             'Em uso de inibidor de aromatase', 'ASCO 2019', 'B')
-    if 'hidroxicloroquina' in med:
+    if 'hidroxicloroquina' in med and 'hidroxicloroquina_rastreio' not in med:
         orientar('Hidroxicloroquina',
                  'Exame oftalmológico basal no primeiro ano e rastreamento anual de retinopatia após 5 anos de uso '
                  '(antes, se dose > 5 mg/kg/dia, doença renal ou uso de tamoxifeno).', 'AAO 2016')
@@ -455,6 +464,38 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Densitometria óssea (DEXA)', 'imagem',
             'Corticoide ≥ 2,5 mg/dia de prednisona por ≥ 3 meses: avaliar risco de fratura (densitometria e FRAX) '
             'nos primeiros 6 meses e reavaliar a cada 1-2 anos.', 'Corticoide sistêmico ≥ 3 meses', 'ACR 2022', 'B', 'alta')
+    if 'corticoide_cronico' in med:
+        add('Hemoglobina glicada (HbA1c), soro', 'laboratorio',
+            'Corticoide sistêmico por 3 meses ou mais: rastrear hiperglicemia induzida por corticoide.',
+            'Corticoide sistêmico ≥ 3 meses | Anual', 'ADA 2025', 'B')
+        add('25-hidroxivitamina D, soro', 'laboratorio',
+            'Corticoide sistêmico por 3 meses ou mais: manter vitamina D adequada (prevenção de osteoporose induzida).',
+            'Corticoide sistêmico ≥ 3 meses', 'ACR 2022', 'B', 'baixa')
+    if 'rastreio_tb_latente' in med or 'biologico' in med:
+        motivo = ' e '.join(MEDICACOES[k]['rotulo'].lower() for k in ('rastreio_tb_latente', 'biologico') if k in med)
+        add('Prova tuberculínica (PPD) ou IGRA', 'laboratorio',
+            f'Rastreamento de tuberculose latente em uso de {motivo}; com resultado positivo e doença ativa afastada, tratar.',
+            'Imunossupressão | Antes ou no início do tratamento', 'MS 2019 (Manual de Tuberculose) / ACR 2022', 'A', 'alta')
+    if 'biologico' in med:
+        for titulo in ('Antígeno HBs, soro', 'Anticorpos anti-HBc total, soro'):
+            add(titulo, 'laboratorio', 'Imunobiológico ou inibidor de JAK: rastrear hepatite B antes do tratamento '
+                '(risco de reativação, sobretudo com rituximabe).', 'Imunobiológico | Antes do tratamento', 'ACR 2022 / AASLD 2018', 'A', 'alta')
+    for classe, exames, quando, ref in (
+            ('metotrexato', ('Hemograma completo com plaquetas', 'Aspartato aminotransferase, soro',
+                             'Alanina aminotransferase, soro', 'Creatinina, soro'), 'A cada 8-12 semanas', 'ACR 2021'),
+            ('azatioprina', ('Hemograma completo com plaquetas', 'Aspartato aminotransferase, soro',
+                             'Alanina aminotransferase, soro'), 'A cada 12 semanas', 'BSR 2017'),
+            ('leflunomida', ('Hemograma completo com plaquetas', 'Aspartato aminotransferase, soro',
+                             'Alanina aminotransferase, soro'), 'A cada 8-12 semanas', 'ACR 2021'),
+            ('inibidor_calcineurina', ('Creatinina, soro', 'Potássio, soro', 'Magnésio, soro'), 'A cada 1-3 meses', 'KDIGO 2009 (transplante)')):
+        if classe in med:
+            for titulo in exames:
+                add(titulo, 'laboratorio', f'Monitorização de toxicidade em uso de {MEDICACOES[classe]["rotulo"].lower()}.',
+                    f'Em uso de {MEDICACOES[classe]["rotulo"].lower()} | {quando}', ref, 'B')
+    if 'bisfosfonato_longo' in med:
+        add('Densitometria óssea (DEXA)', 'imagem',
+            'Bisfosfonato por 5 anos (oral) ou 3 anos (ácido zoledrônico): densitometria para decidir entre pausa e continuidade.',
+            'Bisfosfonato por tempo prolongado | Reavaliação', 'ASBMR 2016', 'B')
     if 'litio' in med:
         for titulo, texto in (('Lítio, soro', 'Litemia'), ('Hormônio Tireoestimulante (TSH), soro', 'Função tireoidiana'),
                               ('Creatinina, soro', 'Função renal'), ('Cálcio, soro', 'Hiperparatireoidismo associado ao lítio')):
@@ -498,8 +539,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
 
     # Vacinas por condição de risco (SBIm: comorbidade de risco em qualquer idade)
     risco_pneumo = {'cirrose', 'asma_grave', 'asplenia', 'anemia_falciforme', 'transplante', 'neoplasia_ativa',
-                    'doenca_autoimune', 'hepatite_b_cronica', 'hepatite_c'} & com or 'imunossupressor' in med \
-        or 'corticoide_cronico' in med
+                    'doenca_autoimune', 'hepatite_b_cronica', 'hepatite_c'} & com or {'imunossupressor', 'corticoide_cronico', 'corticoide_imunossupressor'} & med
     if risco_pneumo and idade < 50:
         add(PNEUMO, 'vacina', 'Dose única. Indicada em qualquer idade com comorbidade de risco para doença pneumocócica invasiva.',
             'Comorbidade de risco | Dose única | PNI: CRIE', SBIM, 'A', 'alta')
