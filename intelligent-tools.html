@@ -185,7 +185,7 @@
       </div>
 
       <!-- lista:comorbidades:inicio -->
-      <div class="campo mt-5 combo" id="lista_comorbidades" data-lista="comorbidades">
+      <div class="campo mt-5 combo" id="lista_comorbidades" data-campo="comorbidades">
         <label for="lista_comorbidades-busca">Outras comorbidades</label>
         <div class="relative">
           <input type="text" id="lista_comorbidades-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_comorbidades-opcoes" aria-describedby="lista_comorbidades-dica" autocomplete="off" placeholder="Digite para buscar: hipotireoidismo, asma, gota…">
@@ -242,33 +242,8 @@
       <!-- lista:comorbidades:fim -->
     </section>
 
-    <section class="secao" aria-labelledby="s-vacinas">
-      <h2 id="s-vacinas" class="secao-titulo"><span class="secao-num">04</span>Triagem de segurança para vacinas</h2>
-      <p class="secao-nota">Vacinas de vírus vivo atenuado (tríplice viral, varicela, febre amarela e dengue) só entram nas recomendações quando estas perguntas estão respondidas. "Não informado" não é tratado como "não".</p>
-      <div class="grade">
-        <div class="campo">
-          <label for="imunossupressao">Imunossupressão</label>
-          <select id="imunossupressao" name="imunossupressao">
-            <option value="desconhecido">Não informado</option>
-            <option value="nao">Não</option>
-            <option value="sim">Sim (doença ou tratamento imunossupressor)</option>
-          </select>
-          <p id="imuno-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>Marcado como "Sim" porque um item escolhido (imunossupressor, quimio/radioterapia) implica imunossupressão.</p>
-        </div>
-        <div class="campo" id="lactante-item" style="display: none;">
-          <label for="lactante">Amamentando</label>
-          <select id="lactante" name="lactante">
-            <option value="desconhecido">Não informado</option>
-            <option value="nao">Não</option>
-            <option value="sim_menor_6m">Sim, criança com menos de 6 meses</option>
-            <option value="sim_6m_ou_mais">Sim, criança com 6 meses ou mais</option>
-          </select>
-        </div>
-      </div>
-    </section>
-
     <section class="secao" aria-labelledby="s-medicacoes">
-      <h2 id="s-medicacoes" class="secao-titulo"><span class="secao-num">05</span>Medicações de uso contínuo</h2>
+      <h2 id="s-medicacoes" class="secao-titulo"><span class="secao-num">04</span>Medicações de uso contínuo</h2>
       <!-- lista:medicacoes:inicio -->
       <div class="opcoes mt-4">
         <label class="opcao" for="lista_medicacoes_losartana"><input type="checkbox" id="lista_medicacoes_losartana" name="medicacoes" value="losartana" data-rotulo="Losartana" data-marca="hipertensao">Losartana</label>
@@ -284,7 +259,7 @@
         <label class="opcao" for="lista_medicacoes_levotiroxina"><input type="checkbox" id="lista_medicacoes_levotiroxina" name="medicacoes" value="levotiroxina" data-rotulo="Levotiroxina">Levotiroxina</label>
         <label class="opcao" for="lista_medicacoes_omeprazol"><input type="checkbox" id="lista_medicacoes_omeprazol" name="medicacoes" value="omeprazol" data-rotulo="Omeprazol">Omeprazol</label>
       </div>
-      <div class="campo mt-5 combo" id="lista_medicacoes" data-lista="medicacoes">
+      <div class="campo mt-5 combo" id="lista_medicacoes" data-campo="medicacoes">
         <label for="lista_medicacoes-busca">Outras medicações</label>
         <div class="relative">
           <input type="text" id="lista_medicacoes-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_medicacoes-opcoes" aria-describedby="lista_medicacoes-dica" autocomplete="off" placeholder="Digite para buscar: anlodipino, rosuvastatina, bombinha…">
@@ -624,7 +599,7 @@
     </section>
 
     <section class="secao" aria-labelledby="s-familia">
-      <h2 id="s-familia" class="secao-titulo"><span class="secao-num">06</span>História familiar</h2>
+      <h2 id="s-familia" class="secao-titulo"><span class="secao-num">05</span>História familiar</h2>
       <p class="secao-nota">Parentes de 1º grau (pais, irmãos, filhos).</p>
       <div class="opcoes mt-4">
         <label class="opcao" for="cancer_mama"><input type="checkbox" id="cancer_mama" name="historia_familiar" value="cancer_mama">Câncer de mama</label>
@@ -634,7 +609,7 @@
         <label class="opcao" for="dac_precoce_familiar"><input type="checkbox" id="dac_precoce_familiar" name="historia_familiar" value="dac_precoce">DCV prematura (H &lt; 55, M &lt; 65)</label>
       </div>
       <!-- lista:familia:inicio -->
-      <div class="campo mt-5 combo" id="lista_familia" data-lista="historia_familiar">
+      <div class="campo mt-5 combo" id="lista_familia" data-campo="historia_familiar">
         <label for="lista_familia-busca">Outras condições em parente de 1º grau</label>
         <div class="relative">
           <input type="text" id="lista_familia-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_familia-opcoes" aria-describedby="lista_familia-dica" autocomplete="off" placeholder="Digite para buscar: próstata, aneurisma, hemocromatose…">
@@ -670,7 +645,7 @@
     </section>
 
     <section class="secao" aria-labelledby="s-habitos">
-      <h2 id="s-habitos" class="secao-titulo"><span class="secao-num">07</span>Hábitos de vida</h2>
+      <h2 id="s-habitos" class="secao-titulo"><span class="secao-num">06</span>Hábitos de vida</h2>
       <div class="grade mt-4">
         <fieldset class="campo sm:col-span-2">
           <legend class="campo-rotulo">Tabagismo</legend>
@@ -704,6 +679,31 @@
         <div class="campo conditional-field" id="anos_consumo_alcool_field" style="display: none;">
           <label for="anos_consumo_alcool">Anos de consumo</label>
           <input type="number" id="anos_consumo_alcool" name="anos_consumo_alcool" step="1" inputmode="numeric">
+        </div>
+      </div>
+    </section>
+
+    <section class="secao" aria-labelledby="s-vacinas">
+      <h2 id="s-vacinas" class="secao-titulo"><span class="secao-num">07</span>Triagem de segurança para vacinas</h2>
+      <p class="secao-nota">Vacinas de vírus vivo atenuado (tríplice viral, varicela, febre amarela e dengue) só entram nas recomendações quando estas perguntas estão respondidas. "Não informado" não é tratado como "não".</p>
+      <div class="grade">
+        <div class="campo">
+          <label for="imunossupressao">Imunossupressão</label>
+          <select id="imunossupressao" name="imunossupressao">
+            <option value="desconhecido">Não informado</option>
+            <option value="nao">Não</option>
+            <option value="sim">Sim (doença ou tratamento imunossupressor)</option>
+          </select>
+          <p id="imuno-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>Marcado como "Sim" porque um item escolhido (imunossupressor, quimio/radioterapia) implica imunossupressão.</p>
+        </div>
+        <div class="campo" id="lactante-item" style="display: none;">
+          <label for="lactante">Amamentando</label>
+          <select id="lactante" name="lactante">
+            <option value="desconhecido">Não informado</option>
+            <option value="nao">Não</option>
+            <option value="sim_menor_6m">Sim, criança com menos de 6 meses</option>
+            <option value="sim_6m_ou_mais">Sim, criança com 6 meses ou mais</option>
+          </select>
         </div>
       </div>
     </section>
@@ -1484,7 +1484,7 @@
                         const rotulo = document.createElement('label');
                         rotulo.className = 'opcao'; rotulo.htmlFor = combo.id + '_' + li.dataset.valor;
                         entrada = document.createElement('input');
-                        entrada.type = 'checkbox'; entrada.id = rotulo.htmlFor; entrada.name = combo.dataset.lista; entrada.value = li.dataset.valor; entrada.checked = true;
+                        entrada.type = 'checkbox'; entrada.id = rotulo.htmlFor; entrada.name = combo.dataset.campo; entrada.value = li.dataset.valor; entrada.checked = true;
                         entrada.dataset.rotulo = li.textContent;
                         if (li.dataset.marca) entrada.dataset.marca = li.dataset.marca;
                         if (li.dataset.imuno) entrada.dataset.imuno = '1';
