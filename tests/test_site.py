@@ -528,3 +528,11 @@ def test_check_up_nao_usa_o_atributo_das_listas_do_admin(pagina):
     """static/conta.js preenche todo [data-lista] com os cadastros (tela do admin). No check-up,
     isso apagava as listas com busca de quem é administrador ("Ninguém aqui.")."""
     assert 'data-lista' not in pagina
+
+
+def test_triagem_de_vacinas_e_o_ultimo_topico_do_formulario(pagina):
+    ordem = [pagina.index(f'id="{i}"') for i in ('s-identificacao', 's-clinicos', 's-comorbidades', 's-medicacoes',
+                                                  's-familia', 's-habitos', 's-vacinas')]
+    assert ordem == sorted(ordem)
+    assert '<span class="secao-num">07</span>Triagem de segurança para vacinas' in pagina
+    assert pagina.index('id="s-vacinas"') < pagina.index('Gerar recomendações')
