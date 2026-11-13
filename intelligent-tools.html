@@ -98,6 +98,7 @@
       <h2 id="s-comorbidades" class="secao-titulo"><span class="secao-num">03</span>Comorbidades e História Prévia</h2>
       <p class="secao-nota">Marque as que se aplicam.</p>
       <p id="coerencia-aviso" class="aviso aviso-info mb-4 text-[13px]" hidden></p>
+      <p id="coerencia-dica" class="text-[12px] text-ink/55 leading-relaxed mb-4" hidden></p>
       <div class="opcoes">
         <label class="opcao" for="diabetes"><input type="checkbox" id="diabetes" name="comorbidades" value="diabetes">Diabetes tipo 2</label>
         <label class="opcao" for="hipertensao"><input type="checkbox" id="hipertensao" name="comorbidades" value="hipertensao">Hipertensão</label>
@@ -246,10 +247,10 @@
         <label class="opcao" for="lista_medicacoes_hidroclorotiazida"><input type="checkbox" id="lista_medicacoes_hidroclorotiazida" name="medicacoes" value="hidroclorotiazida" data-rotulo="Hidroclorotiazida" data-marca="hipertensao">Hidroclorotiazida</label>
         <label class="opcao" for="lista_medicacoes_enalapril"><input type="checkbox" id="lista_medicacoes_enalapril" name="medicacoes" value="enalapril" data-rotulo="Enalapril" data-marca="hipertensao">Enalapril</label>
         <label class="opcao" for="lista_medicacoes_anlodipino"><input type="checkbox" id="lista_medicacoes_anlodipino" name="medicacoes" value="anlodipino" data-rotulo="Anlodipino" data-marca="hipertensao">Anlodipino</label>
-        <label class="opcao" for="lista_medicacoes_atenolol"><input type="checkbox" id="lista_medicacoes_atenolol" name="medicacoes" value="atenolol" data-rotulo="Atenolol">Atenolol</label>
+        <label class="opcao" for="lista_medicacoes_atenolol"><input type="checkbox" id="lista_medicacoes_atenolol" name="medicacoes" value="atenolol" data-rotulo="Atenolol" data-marca="hipertensao">Atenolol</label>
         <label class="opcao" for="lista_medicacoes_sinvastatina"><input type="checkbox" id="lista_medicacoes_sinvastatina" name="medicacoes" value="sinvastatina" data-rotulo="Sinvastatina" data-marca="dislipidemia">Sinvastatina</label>
         <label class="opcao" for="lista_medicacoes_atorvastatina"><input type="checkbox" id="lista_medicacoes_atorvastatina" name="medicacoes" value="atorvastatina" data-rotulo="Atorvastatina" data-marca="dislipidemia">Atorvastatina</label>
-        <label class="opcao" for="lista_medicacoes_metformina"><input type="checkbox" id="lista_medicacoes_metformina" name="medicacoes" value="metformina" data-rotulo="Metformina">Metformina</label>
+        <label class="opcao" for="lista_medicacoes_metformina"><input type="checkbox" id="lista_medicacoes_metformina" name="medicacoes" value="metformina" data-rotulo="Metformina" data-marca="diabetes">Metformina</label>
         <label class="opcao" for="lista_medicacoes_glibenclamida"><input type="checkbox" id="lista_medicacoes_glibenclamida" name="medicacoes" value="glibenclamida" data-rotulo="Glibenclamida" data-marca="diabetes">Glibenclamida</label>
         <label class="opcao" for="lista_medicacoes_aas_acido_acetilsalicilico"><input type="checkbox" id="lista_medicacoes_aas_acido_acetilsalicilico" name="medicacoes" value="aas_acido_acetilsalicilico" data-rotulo="AAS">AAS</label>
         <label class="opcao" for="lista_medicacoes_levotiroxina"><input type="checkbox" id="lista_medicacoes_levotiroxina" name="medicacoes" value="levotiroxina" data-rotulo="Levotiroxina">Levotiroxina</label>
@@ -305,17 +306,17 @@
             <li class="combo-grupo" role="presentation">Diuréticos</li>
             <li role="option" data-valor="clortalidona" data-busca="clortalidona diureticos diuretico pressao " data-marca="hipertensao">Clortalidona</li>
             <li role="option" data-valor="indapamida" data-busca="indapamida diureticos diuretico pressao " data-marca="hipertensao">Indapamida</li>
-            <li role="option" data-valor="furosemida" data-busca="furosemida diureticos diuretico pressao ">Furosemida</li>
-            <li role="option" data-valor="bumetanida" data-busca="bumetanida diureticos diuretico pressao ">Bumetanida</li>
-            <li role="option" data-valor="espironolactona" data-busca="espironolactona diureticos diuretico pressao ">Espironolactona</li>
-            <li role="option" data-valor="eplerenona" data-busca="eplerenona diureticos diuretico pressao ">Eplerenona</li>
-            <li role="option" data-valor="amilorida" data-busca="amilorida diureticos diuretico pressao ">Amilorida</li>
+            <li role="option" data-valor="furosemida" data-busca="furosemida diureticos diuretico pressao " data-talvez="hipertensao">Furosemida</li>
+            <li role="option" data-valor="bumetanida" data-busca="bumetanida diureticos diuretico pressao " data-talvez="hipertensao">Bumetanida</li>
+            <li role="option" data-valor="espironolactona" data-busca="espironolactona diureticos diuretico pressao " data-talvez="hipertensao">Espironolactona</li>
+            <li role="option" data-valor="eplerenona" data-busca="eplerenona diureticos diuretico pressao " data-talvez="hipertensao">Eplerenona</li>
+            <li role="option" data-valor="amilorida" data-busca="amilorida diureticos diuretico pressao " data-talvez="hipertensao">Amilorida</li>
             <li class="combo-grupo" role="presentation">Betabloqueadores</li>
-            <li role="option" data-valor="metoprolol" data-busca="metoprolol betabloqueadores betabloqueador ">Metoprolol</li>
-            <li role="option" data-valor="carvedilol" data-busca="carvedilol betabloqueadores betabloqueador ">Carvedilol</li>
-            <li role="option" data-valor="bisoprolol" data-busca="bisoprolol betabloqueadores betabloqueador ">Bisoprolol</li>
-            <li role="option" data-valor="nebivolol" data-busca="nebivolol betabloqueadores betabloqueador ">Nebivolol</li>
-            <li role="option" data-valor="propranolol" data-busca="propranolol betabloqueadores betabloqueador ">Propranolol</li>
+            <li role="option" data-valor="metoprolol" data-busca="metoprolol betabloqueadores betabloqueador " data-marca="hipertensao">Metoprolol</li>
+            <li role="option" data-valor="nebivolol" data-busca="nebivolol betabloqueadores betabloqueador " data-marca="hipertensao">Nebivolol</li>
+            <li role="option" data-valor="carvedilol" data-busca="carvedilol betabloqueadores betabloqueador " data-talvez="hipertensao">Carvedilol</li>
+            <li role="option" data-valor="bisoprolol" data-busca="bisoprolol betabloqueadores betabloqueador " data-talvez="hipertensao">Bisoprolol</li>
+            <li role="option" data-valor="propranolol" data-busca="propranolol betabloqueadores betabloqueador " data-talvez="hipertensao">Propranolol</li>
             <li class="combo-grupo" role="presentation">Outros anti-hipertensivos</li>
             <li role="option" data-valor="hidralazina" data-busca="hidralazina outros anti-hipertensivos pressao anti-hipertensivo " data-marca="hipertensao">Hidralazina</li>
             <li role="option" data-valor="clonidina" data-busca="clonidina outros anti-hipertensivos pressao anti-hipertensivo " data-marca="hipertensao">Clonidina</li>
@@ -338,7 +339,7 @@
             <li role="option" data-valor="perindopril_indapamida_anlodipino" data-busca="perindopril + indapamida + anlodipino associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Perindopril + indapamida + anlodipino</li>
             <li role="option" data-valor="atenolol_clortalidona" data-busca="atenolol + clortalidona associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Atenolol + clortalidona</li>
             <li class="combo-grupo" role="presentation">Insuficiência cardíaca, arritmia e angina</li>
-            <li role="option" data-valor="sacubitril_valsartana" data-busca="sacubitril + valsartana insuficiencia cardiaca, arritmia e angina coracao entresto">Sacubitril + valsartana</li>
+            <li role="option" data-valor="sacubitril_valsartana" data-busca="sacubitril + valsartana insuficiencia cardiaca, arritmia e angina coracao entresto" data-talvez="hipertensao">Sacubitril + valsartana</li>
             <li role="option" data-valor="amiodarona" data-busca="amiodarona insuficiencia cardiaca, arritmia e angina coracao ">Amiodarona</li>
             <li role="option" data-valor="digoxina" data-busca="digoxina insuficiencia cardiaca, arritmia e angina coracao ">Digoxina</li>
             <li role="option" data-valor="ivabradina" data-busca="ivabradina insuficiencia cardiaca, arritmia e angina coracao ">Ivabradina</li>
@@ -371,17 +372,17 @@
             <li role="option" data-valor="alogliptina" data-busca="alogliptina antidiabeticos diabetes " data-marca="diabetes">Alogliptina</li>
             <li role="option" data-valor="pioglitazona" data-busca="pioglitazona antidiabeticos diabetes " data-marca="diabetes">Pioglitazona</li>
             <li role="option" data-valor="acarbose" data-busca="acarbose antidiabeticos diabetes " data-marca="diabetes">Acarbose</li>
-            <li role="option" data-valor="dapagliflozina" data-busca="dapagliflozina antidiabeticos diabetes ">Dapagliflozina</li>
-            <li role="option" data-valor="empagliflozina" data-busca="empagliflozina antidiabeticos diabetes ">Empagliflozina</li>
-            <li role="option" data-valor="canagliflozina" data-busca="canagliflozina antidiabeticos diabetes ">Canagliflozina</li>
-            <li role="option" data-valor="semaglutida" data-busca="semaglutida antidiabeticos diabetes ">Semaglutida</li>
-            <li role="option" data-valor="liraglutida" data-busca="liraglutida antidiabeticos diabetes ">Liraglutida</li>
-            <li role="option" data-valor="dulaglutida" data-busca="dulaglutida antidiabeticos diabetes ">Dulaglutida</li>
-            <li role="option" data-valor="tirzepatida" data-busca="tirzepatida antidiabeticos diabetes ">Tirzepatida</li>
+            <li role="option" data-valor="dapagliflozina" data-busca="dapagliflozina antidiabeticos diabetes " data-talvez="diabetes">Dapagliflozina</li>
+            <li role="option" data-valor="empagliflozina" data-busca="empagliflozina antidiabeticos diabetes " data-talvez="diabetes">Empagliflozina</li>
+            <li role="option" data-valor="canagliflozina" data-busca="canagliflozina antidiabeticos diabetes " data-talvez="diabetes">Canagliflozina</li>
+            <li role="option" data-valor="semaglutida" data-busca="semaglutida antidiabeticos diabetes " data-talvez="diabetes">Semaglutida</li>
+            <li role="option" data-valor="liraglutida" data-busca="liraglutida antidiabeticos diabetes " data-talvez="diabetes">Liraglutida</li>
+            <li role="option" data-valor="dulaglutida" data-busca="dulaglutida antidiabeticos diabetes " data-talvez="diabetes">Dulaglutida</li>
+            <li role="option" data-valor="tirzepatida" data-busca="tirzepatida antidiabeticos diabetes " data-talvez="diabetes">Tirzepatida</li>
             <li role="option" data-valor="sitagliptina_metformina" data-busca="sitagliptina + metformina antidiabeticos diabetes " data-marca="diabetes">Sitagliptina + metformina</li>
             <li role="option" data-valor="vildagliptina_metformina" data-busca="vildagliptina + metformina antidiabeticos diabetes " data-marca="diabetes">Vildagliptina + metformina</li>
             <li role="option" data-valor="linagliptina_metformina" data-busca="linagliptina + metformina antidiabeticos diabetes " data-marca="diabetes">Linagliptina + metformina</li>
-            <li role="option" data-valor="dapagliflozina_metformina" data-busca="dapagliflozina + metformina antidiabeticos diabetes ">Dapagliflozina + metformina</li>
+            <li role="option" data-valor="dapagliflozina_metformina" data-busca="dapagliflozina + metformina antidiabeticos diabetes " data-marca="diabetes">Dapagliflozina + metformina</li>
             <li role="option" data-valor="empagliflozina_linagliptina" data-busca="empagliflozina + linagliptina antidiabeticos diabetes " data-marca="diabetes">Empagliflozina + linagliptina</li>
             <li class="combo-grupo" role="presentation">Insulinas</li>
             <li role="option" data-valor="insulina_nph" data-busca="insulina nph insulinas diabetes insulina " data-marca="diabetes">Insulina NPH</li>
@@ -1380,48 +1381,69 @@
         // Coerência entre campos (mesmas regras de src/utils/coerencia.py): um dado marca a caixa
         // que ele implica. Só desmarca o que a própria regra marcou; marcação manual é preservada.
         (function () {
-            const auto = new Map();   // id da caixa -> motivo
-            const recusados = new Set(); // caixas automáticas que o médico desmarcou
-            window.inferenciasRecusadas = () => [...recusados];
-            // itens das listas suspensas que implicam uma caixa (data-marca)
-            function daLista() {
-                const r = {};
-                document.querySelectorAll('input[data-marca]:checked').forEach(i => {
-                    i.dataset.marca.split(' ').forEach(id => { r[id] = 'uso de ' + i.dataset.rotulo; });
-                });
-                return r;
-            }
+            const auto = new Map();      // id da caixa -> motivo
+            // Caixa automática que o médico desmarcou -> fontes que a pediam naquele momento. A recusa vale
+            // para essas fontes; um motivo novo (outra medicação, PA medida depois) volta a marcar.
+            const recusados = new Map();
+            window.inferenciasRecusadas = () => [...recusados.keys()];
             const num = id => { const v = parseFloat(String(document.getElementById(id)?.value || '').replace(',', '.')); return isNaN(v) ? null : v; };
+            const ROTULO_CAIXA = id => document.querySelector('label[for="' + id + '"]').textContent.trim();
+            // Devolve { caixa: [{ fonte, motivo }] }. O último motivo da lista é o que aparece no aviso.
             function regras() {
-                const marcado = id => document.getElementById(id).checked;
-                const r = daLista(); // medicação escolhida já aponta a comorbidade que implica
+                const r = {};
+                const pedir = (id, fonte, motivo) => { (r[id] = r[id] || []).push({ fonte, motivo }); };
+                // medicação escolhida (botão ou lista) aponta a comorbidade que implica
+                document.querySelectorAll('input[data-marca]:checked').forEach(i =>
+                    i.dataset.marca.split(' ').forEach(id => pedir(id, 'med:' + i.value, 'uso de ' + i.dataset.rotulo)));
                 // PA de consultório, AHA/ACC 2025: estágio 1 ≥ 130/80, estágio 2 ≥ 140/90 (na gestação, só ≥ 140/90)
                 const pas = num('pas') || 0, pad = num('pad') || 0;
                 const gest = document.getElementById('gestante').value === 'sim';
                 const est2 = pas >= 140 || pad >= 90, est1 = pas >= 130 || pad >= 80;
-                if (est2 || (est1 && !gest)) r.hipertensao = `PA ${pas || '–'}/${pad || '–'} mmHg = HAS estágio ${est2 ? 2 : 1} (AHA/ACC 2025); confirmar com MRPA ou MAPA`;
-                if (marcado('has_resistente')) r.hipertensao = 'HAS resistente marcada';
-                const hb = num('hba1c'); if (hb !== null && hb >= 6.5) r.diabetes = 'HbA1c ≥ 6,5% (ADA; confirmar com 2º exame)';
+                if (est2 || (est1 && !gest)) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg = HAS estágio ${est2 ? 2 : 1} (AHA/ACC 2025); confirmar com MRPA ou MAPA`);
+                if (document.getElementById('has_resistente').checked) pedir('hipertensao', 'has_resistente', 'HAS resistente marcada');
+                const hb = num('hba1c'); if (hb !== null && hb >= 6.5) pedir('diabetes', 'hba1c', 'HbA1c ≥ 6,5% (ADA; confirmar com 2º exame)');
                 const peso = num('peso'), alt = num('altura');
-                if (peso && alt && peso / Math.pow(alt / 100, 2) >= 30) r.obesidade = 'IMC ≥ 30 kg/m²';
+                if (peso && alt && peso / Math.pow(alt / 100, 2) >= 30) pedir('obesidade', 'imc', 'IMC ≥ 30 kg/m²');
                 return r;
             }
-            function conferir() {
-                for (let passo = 0; passo < 1; passo++) {
-                    const r = regras();
-                    auto.forEach((motivo, id) => { if (!r[id]) { document.getElementById(id).checked = false; auto.delete(id); } });
-                    recusados.forEach(id => { if (!r[id]) recusados.delete(id); });
-                    Object.entries(r).forEach(([id, motivo]) => {
-                        if (recusados.has(id)) return;
-                        const caixa = document.getElementById(id);
-                        if (caixa && !caixa.checked) { caixa.checked = true; auto.set(id, motivo); }
-                        else if (auto.has(id)) auto.set(id, motivo);
-                    });
+            // O que NÃO foi marcado e por quê: medicação com outras indicações e PA elevada (não é hipertensão)
+            function dicas() {
+                const frases = [];
+                const porCaixa = {};
+                document.querySelectorAll('input[data-talvez]:checked').forEach(i => i.dataset.talvez.split(' ').forEach(id => {
+                    if (!document.getElementById(id).checked) (porCaixa[id] = porCaixa[id] || []).push(i.dataset.rotulo);
+                }));
+                Object.entries(porCaixa).forEach(([id, nomes]) => frases.push(
+                    `${nomes.join(', ')}: não marca${nomes.length > 1 ? 'm' : ''} "${ROTULO_CAIXA(id)}" sozinho${nomes.length > 1 ? 's' : ''}, porque também se usa${nomes.length > 1 ? 'm' : ''} em outras indicações. Marque a caixa se for o caso.`));
+                const pas = num('pas'), pad = num('pad');
+                if (pas !== null && pas >= 120 && pas < 130 && !document.getElementById('hipertensao').checked) {
+                    // sem a diastólica não dá para classificar: 125/95 já é estágio 2
+                    if (pad === null) frases.push(`PA ${pas}/– mmHg: informe a diastólica para classificar a pressão.`);
+                    else if (pad < 80) frases.push(`PA ${pas}/${pad} mmHg: elevada pela AHA/ACC 2025 (120-129 e < 80). Não é hipertensão; a caixa não é marcada.`);
                 }
+                const gest = document.getElementById('gestante').value === 'sim';
+                if (gest && pas !== null && pad !== null && (pas >= 130 || pad >= 80) && pas < 140 && pad < 90 && !document.getElementById('hipertensao').checked) {
+                    frases.push(`PA ${pas}/${pad} mmHg na gestação: hipertensão só a partir de 140/90; a caixa não é marcada.`);
+                }
+                return frases;
+            }
+            function conferir() {
+                const r = regras();
+                auto.forEach((motivo, id) => { if (!r[id]) { document.getElementById(id).checked = false; auto.delete(id); } });
+                recusados.forEach((fontes, id) => { if (!r[id] || r[id].some(x => !fontes.has(x.fonte))) recusados.delete(id); });
+                Object.entries(r).forEach(([id, lista]) => {
+                    if (recusados.has(id)) return;
+                    const caixa = document.getElementById(id), motivo = lista[lista.length - 1].motivo;
+                    if (caixa && !caixa.checked) { caixa.checked = true; auto.set(id, motivo); }
+                    else if (auto.has(id)) auto.set(id, motivo);
+                });
                 const aviso = document.getElementById('coerencia-aviso');
                 aviso.hidden = auto.size === 0;
                 aviso.innerHTML = 'Marcado automaticamente: ' + [...auto].map(([id, m]) =>
-                    `<strong class="font-medium">${escapeHtml(document.querySelector('label[for="' + id + '"]').textContent.trim())}</strong> (${escapeHtml(m)})`).join('; ') + '. Desmarque se não se aplicar.';
+                    `<strong class="font-medium">${escapeHtml(ROTULO_CAIXA(id))}</strong> (${escapeHtml(m)})`).join('; ') + '. Desmarque se não se aplicar.';
+                const dica = document.getElementById('coerencia-dica'), frases = dicas();
+                dica.hidden = frases.length === 0;
+                dica.textContent = frases.join(' ');
                 document.getElementById('hba1c-aviso').hidden = !(auto.has('diabetes') && (num('hba1c') || 0) >= 6.5);
             }
             ['hba1c', 'peso', 'altura', 'pas', 'pad', 'gestante'].forEach(id => {
@@ -1523,7 +1545,10 @@
                         if (mostra) { algum = true; if (grupo) grupo.hidden = false; }
                     });
                     vazio.hidden = algum;
-                    ativar(termos.length ? opcoes.find(li => !li.hidden) || null : null);
+                    const digitado = semAcento(busca.value).trim(), visiveis = opcoes.filter(li => !li.hidden);
+                    // preferência: nome igual ao digitado, depois nome que começa por ele, depois o primeiro da lista
+                    const nome = li => semAcento(li.textContent).trim();
+                    ativar(termos.length ? visiveis.find(li => nome(li) === digitado) || visiveis.find(li => nome(li).startsWith(digitado)) || visiveis[0] || null : null);
                 }
                 function abrir() { filtrar(); lista.hidden = false; busca.setAttribute('aria-expanded', 'true'); }
                 function fechar() { lista.hidden = true; busca.setAttribute('aria-expanded', 'false'); ativar(null); }
@@ -1538,6 +1563,7 @@
                         entrada.type = 'checkbox'; entrada.id = rotulo.htmlFor; entrada.name = combo.dataset.campo; entrada.value = li.dataset.valor; entrada.checked = true;
                         entrada.dataset.rotulo = li.textContent;
                         if (li.dataset.marca) entrada.dataset.marca = li.dataset.marca;
+                        if (li.dataset.talvez) entrada.dataset.talvez = li.dataset.talvez;
                         if (li.dataset.imuno) entrada.dataset.imuno = '1';
                         if (li.dataset.detalhe) { entrada.dataset.detalhe = li.dataset.detalhe; if (li.dataset.parametro) entrada.dataset.parametro = li.dataset.parametro; }
                         // chip criado pela lista: desmarcar remove
@@ -1571,7 +1597,11 @@
             // quem desmarca à mão uma caixa automática fica com a decisão
             ['dislipidemia', 'hipertensao', 'diabetes', 'obesidade'].forEach(id =>
                 document.getElementById(id).addEventListener('change', e => {
-                    if (auto.has(id) && !e.target.checked) { auto.delete(id); recusados.add(id); conferir(); }
+                    if (auto.has(id) && !e.target.checked) {
+                        auto.delete(id);
+                        recusados.set(id, new Set((regras()[id] || []).map(x => x.fonte)));
+                    }
+                    conferir(); // também atualiza as dicas quando a caixa é marcada à mão
                 }));
         })();
 

@@ -6,6 +6,9 @@ triagem de vacinas), com a fonte ao lado. As chaves vão nos mesmos campos de
 lista do formulário (``comorbidades``, ``medicacoes``, ``historia_familiar``).
 
 ``marca`` diz quais caixas o item implica (as mesmas regras de coerência da tela).
+``talvez`` diz quais caixas o item NÃO marca sozinho, porque tem outras indicações frequentes
+(betabloqueador na IC, iSGLT2 na IC e na DRC, agonista de GLP-1 na obesidade): a tela avisa e o
+médico marca se for o caso.
 """
 from __future__ import annotations
 
@@ -54,21 +57,23 @@ COMORBIDADES = {
 # princípio ativo (src/utils/medicamentos.py), que é trocado pela classe antes das regras.
 MEDICACOES = {
     'ieca_bra': {'rotulo': 'IECA ou BRA', 'marca': ['anti_hipertensivos']},
-    'arni': {'rotulo': 'sacubitril/valsartana', 'reduz_pa': True},
+    'arni': {'rotulo': 'sacubitril/valsartana', 'reduz_pa': True, 'talvez': ['hipertensao']},
     'tiazidico': {'rotulo': 'Diurético tiazídico', 'marca': ['anti_hipertensivos']},
     'bcc': {'rotulo': 'Bloqueador de canal de cálcio', 'marca': ['anti_hipertensivos']},
     'anti_hipertensivo_outro': {'rotulo': 'Outro anti-hipertensivo', 'marca': ['anti_hipertensivos']},
-    'betabloqueador': {'rotulo': 'Betabloqueador', 'reduz_pa': True},
-    'espironolactona': {'rotulo': 'Espironolactona / eplerenona', 'reduz_pa': True},
-    'diuretico_alca': {'rotulo': 'Diurético de alça', 'reduz_pa': True},
+    'betabloqueador': {'rotulo': 'Betabloqueador', 'reduz_pa': True, 'talvez': ['hipertensao']},
+    # atenolol, metoprolol e nebivolol: uso principal é hipertensão
+    'betabloqueador_has': {'rotulo': 'Betabloqueador', 'marca': ['anti_hipertensivos']},
+    'espironolactona': {'rotulo': 'Espironolactona / eplerenona', 'reduz_pa': True, 'talvez': ['hipertensao']},
+    'diuretico_alca': {'rotulo': 'Diurético de alça', 'reduz_pa': True, 'talvez': ['hipertensao']},
     'estatina': {'rotulo': 'Estatina', 'marca': ['estatinas']},
     'outro_hipolipemiante': {'rotulo': 'Ezetimiba, fibrato ou iPCSK9', 'marca': ['dislipidemia']},
-    'metformina': {'rotulo': 'Metformina'},
+    'metformina': {'rotulo': 'Metformina', 'marca': ['diabetes']},
     'insulina': {'rotulo': 'Insulina', 'marca': ['diabetes']},
     'sulfonilureia': {'rotulo': 'Sulfonilureia', 'marca': ['diabetes']},
     'idpp4_pioglitazona': {'rotulo': 'iDPP-4, pioglitazona ou acarbose', 'marca': ['diabetes']},
-    'isglt2': {'rotulo': 'iSGLT2'},
-    'aglp1': {'rotulo': 'Agonista de GLP-1'},
+    'isglt2': {'rotulo': 'iSGLT2', 'talvez': ['diabetes']},
+    'aglp1': {'rotulo': 'Agonista de GLP-1', 'talvez': ['diabetes']},
     'levotiroxina': {'rotulo': 'Levotiroxina'},
     'antitireoidiano': {'rotulo': 'Antitireoidiano'},
     'corticoide_cronico': {'rotulo': 'Corticoide sistêmico ≥ 3 meses'},

@@ -42,7 +42,8 @@ GRUPOS = [
         ('Amilorida', ['espironolactona']),
     ]),
     ('Betabloqueadores', ['betabloqueador'], 'betabloqueador', [
-        'Atenolol', 'Metoprolol', 'Carvedilol', 'Bisoprolol', 'Nebivolol', 'Propranolol',
+        ('Atenolol', ['betabloqueador', 'betabloqueador_has']), ('Metoprolol', ['betabloqueador', 'betabloqueador_has']),
+        ('Nebivolol', ['betabloqueador', 'betabloqueador_has']), 'Carvedilol', 'Bisoprolol', 'Propranolol',
     ]),
     ('Outros anti-hipertensivos', ['anti_hipertensivo_outro'], 'pressao anti-hipertensivo', [
         'Hidralazina', 'Clonidina', 'Metildopa', 'Minoxidil (oral)', 'Alisquireno',

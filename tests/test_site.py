@@ -593,3 +593,18 @@ def test_colonoscopia_de_lynch_nao_aparece_duas_vezes(client):
 def test_escolha_manual_de_imunossupressao_nao_e_desfeita_pela_lista(pagina):
     """O clique no botão marca o evento como escolha do médico; a marcação automática só desfaz o que ela mesma fez."""
     assert 'ev.doUsuario = true' in pagina and 'e.isTrusted || e.doUsuario' in pagina
+
+
+def test_tela_explica_o_que_nao_marcou_e_recusa_vale_por_fonte(pagina):
+    """Medicação com outras indicações e PA elevada geram dica; a recusa de uma caixa vale só para as
+    fontes que a pediam (um motivo novo volta a marcar)."""
+    assert 'id="coerencia-dica"' in pagina and 'input[data-talvez]:checked' in pagina
+    assert 'elevada pela AHA/ACC 2025' in pagina
+    # sem a diastólica a tela pede o dado em vez de dizer que não é hipertensão (125/95 é estágio 2)
+    assert 'informe a diastólica para classificar' in pagina and 'pad === null) frases.push' in pagina
+    assert 'const recusados = new Map();' in pagina and "r[id].some(x => !fontes.has(x.fonte))" in pagina
+    # os 12 botões: atenolol marca hipertensão e metformina marca diabetes
+    import re
+    for chave, caixa in (('atenolol', 'hipertensao'), ('metformina', 'diabetes'), ('losartana', 'hipertensao')):
+        item = re.search(r'id="lista_medicacoes_%s"[^>]*>' % chave, pagina).group(0)
+        assert f'data-marca="{caixa}"' in item, item
