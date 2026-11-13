@@ -4,6 +4,7 @@ from datetime import datetime
 from src.utils.analytics import analytics
 from src.utils.reference_links import build_reference_links, build_reference_html
 from src.utils import coerencia
+from src.utils import condicoes
 from src.utils import prenatal
 from src.utils import prevent
 from src.utils.seguranca_vacinas import aplicar_triagem_vacinas
@@ -241,14 +242,26 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
                 'grau_evidencia': 'B'
             })
         
-        if 21 <= age <= 65:
+        # Colo do útero: citologia a cada 3 anos dos 21 aos 29; dos 30 aos 65, teste de HPV
+        # de alto risco a cada 5 anos (USPSTF 2018). No Brasil, o MS adota DNA-HPV dos 25 aos 64.
+        if 21 <= age <= 29:
             _add_rec({
-                'titulo': 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular',
-                'descricao': 'Papanicolaou a cada 3 anos (21-65 anos)',
-                'subtitulo': 'Mulheres 21-65 anos | A cada 3 anos',
+                'titulo': 'Citologia cervicovaginal (Papanicolaou)',
+                'descricao': 'Citologia a cada 3 anos dos 21 aos 29 anos (USPSTF). No Brasil, o MS recomenda o teste de DNA-HPV a cada 5 anos a partir dos 25 anos, onde disponível.',
+                'subtitulo': 'Mulheres 21-29 anos | A cada 3 anos',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'USPSTF',
+                'referencia': 'USPSTF 2018 / MS 2024',
+                'grau_evidencia': 'A'
+            })
+        elif 30 <= age <= 65:
+            _add_rec({
+                'titulo': 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular',
+                'descricao': 'Teste de HPV de alto risco a cada 5 anos dos 30 aos 65 anos. Alternativas: citologia isolada a cada 3 anos ou coteste a cada 5 anos.',
+                'subtitulo': 'Mulheres 30-65 anos | A cada 5 anos',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'USPSTF 2018 / MS 2024',
                 'grau_evidencia': 'A'
             })
     
@@ -534,7 +547,14 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     
     return recommendations
 
-def calcular_risco_cardiovascular(data, comorbidades, medicacoes, is_diabetic, is_pregnant):
+def _lista_curta(valor):
+    """Lista de textos curtos vinda do navegador (ou vazia)."""
+    if not isinstance(valor, list):
+        return set()
+    return {v for v in valor[:30] if isinstance(v, str) and len(v) <= 40}
+
+
+def calcular_risco_cardiovascular(data, comorbidades, medicacoes, is_diabetic, is_pregnant, agravantes=()):
     """PREVENT em 10/30 anos com as categorias SBC 2025 e ACC/AHA 2026, ou o motivo de não calcular."""
     if is_pregnant:
         return {'status': 'nao_aplicavel', 'motivo': 'PREVENT não é validado na gestação.'}
@@ -576,11 +596,11 @@ def calcular_risco_cardiovascular(data, comorbidades, medicacoes, is_diabetic, i
         'imc': imc_valor,
         'dez_anos': r['dez_anos'],
         'trinta_anos': r['trinta_anos'],
-        'categoria_sbc_2025': prevent.categoria_sbc_2025(dcva, is_diabetic, idade, sexo),
+        'categoria_sbc_2025': prevent.categoria_sbc_2025(dcva, is_diabetic, idade, sexo, agravantes=agravantes),
         'categoria_acc_aha_2026': prevent.categoria_acc_aha_2026(dcva),
-        'observacao': 'Categoria SBC pelo escore e pela idade no DM2. Agravantes (história familiar '
-                      'precoce, Lp(a), PCR-us, doenças inflamatórias, fatores femininos), '
-                      'estratificadores do DM2, LDL ≥ 190 e CAC podem reclassificar para cima.',
+        'observacao': 'Categoria SBC pelo escore, pela idade no DM2 e pelos agravantes informados (história familiar '
+                      'de DCV prematura, obesidade, MASLD, doença inflamatória crônica, HIV). Lp(a), PCR-us, fatores '
+                      'femininos, estratificadores do DM2, LDL ≥ 190 e CAC também reclassificam e ficam a cargo do médico.',
     }
 
 
@@ -658,7 +678,12 @@ def generate_intelligent_recommendations():
             egfr_inferencia = prevent.egfr_ckd_epi_2021(float(data['creatinina']), data['idade'], data['sexo'])
         comorbidades, medicacoes_checkboxes, inferencias = coerencia.inferir(
             {**data, 'comorbidades': comorbidades, 'medicacoes': medicacoes_checkboxes}, egfr=egfr_inferencia,
-            gestante=is_pregnant)
+            gestante=is_pregnant, recusados=_lista_curta((request.get_json(silent=True) or {}).get('inferencias_recusadas')))
+        familia = data.get('historia_familiar') or []
+        familia = [k for k, v in familia.items() if v] if isinstance(familia, dict) else list(familia)
+        # Itens que implicam imunossupressão valem como "Sim" na triagem de vacinas.
+        if condicoes.imunossupressao_implicada(comorbidades, medicacoes_checkboxes):
+            triagem['imunossupressao'] = SIM
         pa_classificacao = coerencia.classificar_pa(data.get('pas'), data.get('pad'))
         
         # Verificar se tem hipertensão nas comorbidades
@@ -760,7 +785,8 @@ def generate_intelligent_recommendations():
                 
                 # Familiar de primeiro grau com diabetes
                 historia_familiar = data.get('historia_familiar', {})
-                if isinstance(historia_familiar, dict) and historia_familiar.get('diabetes'):
+                if (isinstance(historia_familiar, dict) and historia_familiar.get('diabetes')) or \
+                        (isinstance(historia_familiar, list) and 'diabetes' in historia_familiar):
                     has_risk_factors = True
                 
                 # Hipertensão
@@ -1295,6 +1321,10 @@ def generate_intelligent_recommendations():
         # Registrar analytics
         analytics.track_recommendation()
         
+        # Listas de comorbidades, medicações e história familiar (src/utils/condicoes.py)
+        orientacoes = condicoes.aplicar(recommendations, age, sex, comorbidades, medicacoes_checkboxes, familia,
+                                        gestante=is_pregnant)
+
         # Gestação: rotina do pré-natal pela idade gestacional; itens do check-up geral que
         # não se aplicam na gestação saem da lista e aparecem como "adiados".
         adiados_gestacao, proximas_gestacao = [], []
@@ -1327,7 +1357,8 @@ def generate_intelligent_recommendations():
             'success': True,
             # Mantidos por compatibilidade com clientes antigos; sempre vazios.
             'risco_cardiovascular': calcular_risco_cardiovascular(
-                data, comorbidades, medicacoes_checkboxes, is_diabetic, is_pregnant),
+                data, comorbidades, medicacoes_checkboxes, is_diabetic, is_pregnant,
+                agravantes=condicoes.agravantes_de_risco(comorbidades, familia, hiv='hiv' in comorbidades)),
             'recommendations': recommendations,
             'outras_recomendacoes': outras_recomendacoes,
             'total_recommendations': len(recommendations)
@@ -1413,6 +1444,7 @@ def generate_intelligent_recommendations():
         response['adiados_gestacao'] = adiados_gestacao
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['inferencias'] = inferencias
+        response['orientacoes'] = orientacoes
         response['pa_classificacao'] = pa_classificacao
         response['proximas_gestacao'] = proximas_gestacao
         response['gestacao'] = gestacao
@@ -1550,7 +1582,9 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
         return jsonify({'error': exc.mensagem, 'codigo': exc.codigo}), 400
 
     try:
-        pdf_bytes = getattr(pdf_minutas, nome_gerador)(dados_paciente, itens)
+        from src.routes.auth import usuario_atual
+        pdf_bytes = getattr(pdf_minutas, nome_gerador)(
+            dados_paciente, itens, responsavel=pdf_minutas.responsavel_de(usuario_atual()))
     except Exception as exc:
         # O detalhe fica só no log do servidor; a resposta não expõe a infraestrutura.
         print(f"❌ Erro ao gerar PDF ({categoria}): {exc}")

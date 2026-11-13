@@ -132,7 +132,7 @@ def titulos_do_motor(app):
         (18, 25, 35, 45, 50, 55, 60, 65, 70, 80), ('masculino', 'feminino'), ('nunca', 'atual', 'ex'),
         ([], ['diabetes'], ['hipertensao'], ['hiv'], ['doenca_renal', 'dcv_aterosclerotica'], ['insuficiencia_cardiaca'], ['dpoc'],
          ['obesidade', 'dislipidemia'], ['has_resistente']),
-        ([], ['cancer_mama', 'cancer_colorretal', 'cancer_ovario', 'diabetes', 'cardiopatia']),
+        ([], ['cancer_mama', 'cancer_colorretal', 'cancer_ovario', 'diabetes', 'dac_precoce']),
         ('nao', 'sim'), ('nao', 'sim_menor_6m'))
     for idade, sexo, tab, com, fam, gest, lact in grade:
         if sexo != 'feminino' and (gest == 'sim' or lact != 'nao'):
@@ -157,4 +157,16 @@ def titulos_do_motor(app):
         for rec in cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
             if rec.get('categoria') in encontrados:
                 encontrados[rec['categoria']].add(rec['titulo'])
+    # Listas suspensas (comorbidades, medicações e família): cada item sozinho, em idades e sexos distintos
+    from src.utils import condicoes
+    for idade, sexo in itertools.product((30, 47, 68), ('masculino', 'feminino')):
+        casos = ([dict(comorbidades=[k]) for k in condicoes.COMORBIDADES]
+                 + [dict(medicacoes=[k]) for k in condicoes.MEDICACOES]
+                 + [dict(historia_familiar=[k]) for k in list(condicoes.FAMILIA) + ['cancer_colorretal', 'cancer_mama', 'dac_precoce']])
+        for caso in casos:
+            dados = dict(dict(idade=idade, sexo=sexo, tabagismo='nunca', comorbidades=[], medicacoes=[],
+                              historia_familiar=[], imunossupressao='nao', gestante='nao', lactante='nao'), **caso)
+            for rec in cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
+                if rec.get('categoria') in encontrados:
+                    encontrados[rec['categoria']].add(rec['titulo'])
     return {c: sorted(v, key=lambda t: t.lower()) for c, v in encontrados.items()}

@@ -149,6 +149,44 @@ def validar_senha(senha):
     return None
 
 
+UFS = ('AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR',
+       'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO')
+
+
+def montar_registro(perfil, registro='', crm_uf='', crm_numero=''):
+    """Registro gravado: 'CRM-UF número' para médico e residente; matrícula e faculdade para estudante.
+
+    O CRM chega em dois campos (lista de UF + número). Um registro já no formato
+    'CRM-GO 12345' também é aceito, para quem envia o campo único.
+    """
+    registro, uf, numero = (registro or '').strip(), (crm_uf or '').strip().upper(), (crm_numero or '').strip()
+    if perfil == 'estudante':
+        return registro
+    if not uf and not numero:
+        m = re.match(r'^CRM[-\s/]*([A-Za-z]{2})[-\s/]*([\d.]{1,9})$', registro, re.I)
+        if m:
+            uf, numero = m.group(1).upper(), m.group(2)
+    numero = numero.replace('.', '').lstrip('0')
+    erros = []
+    if uf not in UFS:
+        erros.append('Escolha o estado (UF) do CRM.')
+    if not re.fullmatch(r'\d{1,7}', numero or ''):
+        erros.append('Informe o número do CRM, só com algarismos.')
+    if erros:
+        raise DadosInvalidos(erros)
+    return f'CRM-{uf} {numero}'
+
+
+def crm_de(usuario):
+    """'CRM-GO 12345' se o registro do usuário é um CRM; senão None (estudante)."""
+    r = ((usuario or {}).get('registro') or '').strip()
+    # contas antigas gravaram o CRM em texto livre ('CRM GO 26.815', 'crm/go 26815')
+    m = re.match(r'^CRM[-\s/]*([A-Za-z]{2})[-\s/]*([\d.]{1,9})$', r, re.I)
+    if not m or m.group(1).upper() not in UFS:
+        return None
+    return f"CRM-{m.group(1).upper()} {m.group(2).replace('.', '')}"
+
+
 def _validar_cadastro(email, nome, registro, perfil, senha):
     erros = []
     if not _EMAIL.match(email) or len(email) > 254:

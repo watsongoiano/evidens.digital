@@ -220,3 +220,25 @@ def test_rota_de_saude_do_banco(anonimo, monkeypatch):
     assert anonimo.get('/api/auth/saude').get_json() == {'ok': True}
     monkeypatch.setenv('DATABASE_URL', 'sqlite:////caminho/que/nao/existe/x.sqlite')
     assert anonimo.get('/api/auth/saude').status_code == 503
+
+
+def test_crm_em_dois_campos_vira_registro_padronizado(anonimo, contas):
+    r = anonimo.post('/api/auth/cadastro', json=dict(email='doiscampos@exemplo.test', nome='Pessoa de Teste', perfil='medico',
+                                                     crm_uf='go', crm_numero='26.815', senha=SENHA_DE_TESTE))
+    assert r.status_code == 202
+    assert next(u for u in contas.listar() if u['email'] == 'doiscampos@exemplo.test')['registro'] == 'CRM-GO 26815'
+
+
+@pytest.mark.parametrize('campos', [dict(crm_uf='XX', crm_numero='123'), dict(crm_uf='GO', crm_numero='abc'),
+                                    dict(crm_uf='', crm_numero='')])
+def test_crm_invalido_e_recusado(anonimo, campos):
+    r = anonimo.post('/api/auth/cadastro', json=dict(email='ruim@exemplo.test', nome='Pessoa de Teste', perfil='residente',
+                                                     senha=SENHA_DE_TESTE, **campos))
+    assert r.status_code == 400
+
+
+def test_estudante_informa_matricula(anonimo, contas):
+    r = anonimo.post('/api/auth/cadastro', json=dict(email='aluna@exemplo.test', nome='Aluna de Teste', perfil='estudante',
+                                                     registro='2023001 · UFG', senha=SENHA_DE_TESTE))
+    assert r.status_code == 202
+    assert next(u for u in contas.listar() if u['email'] == 'aluna@exemplo.test')['registro'] == '2023001 · UFG'

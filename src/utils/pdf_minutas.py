@@ -72,6 +72,18 @@ def _texto(valor, maximo=300):
     return s[:maximo]
 
 
+def responsavel_de(usuario):
+    """Quem responde pelo documento, a partir da conta logada.
+
+    Médico e residente (registro 'CRM-UF número') assinam: nome e CRM vão sob a linha.
+    Estudante não assina: o nome aparece como quem preparou a minuta.
+    """
+    if not usuario or not (usuario.get('nome') or '').strip():
+        return None
+    from src.utils import contas
+    return {'nome': usuario['nome'].strip(), 'crm': contas.crm_de(usuario)}
+
+
 class _Minuta(FPDF):
     def __init__(self, titulo):
         super().__init__(orientation='P', unit='mm', format='A4')
@@ -112,26 +124,36 @@ class _Minuta(FPDF):
 
     def assinatura(self):
         """Linha de assinatura no fim da última página (nova página se não couber)."""
-        if self.get_y() > 232:
+        if self.get_y() > 224:
             self.add_page()
         # A assinatura fica dentro da margem reservada à quebra automática: desligá-la aqui.
         self.set_auto_page_break(auto=False)
-        self.set_y(-44)
+        self.set_y(-52)
         self.set_draw_color(20, 41, 47)
         self.line(60, self.get_y(), 150, self.get_y())
         self.set_font('DejaVu', '', 9.5)
         self.set_text_color(20, 41, 47)
-        self.cell(0, 6, LINHA_ASSINATURA, align='C', new_x='LMARGIN', new_y='NEXT')
+        resp = getattr(self, 'responsavel', None)
+        if resp and resp.get('crm'):
+            self.set_font('DejaVu', 'B', 9.5)
+            self.cell(0, 5, resp['nome'], align='C', new_x='LMARGIN', new_y='NEXT')
+            self.set_font('DejaVu', '', 9.5)
+            self.cell(0, 5, resp['crm'], align='C', new_x='LMARGIN', new_y='NEXT')
+            self.set_font('DejaVu', '', 8.5)
+        self.cell(0, 5, LINHA_ASSINATURA, align='C', new_x='LMARGIN', new_y='NEXT')
         self.set_font('DejaVu', '', 8)
         self.set_text_color(90, 100, 103)
+        if resp and not resp.get('crm'):
+            self.multi_cell(0, 4.5, f"Minuta preparada por {resp['nome']} (estudante de medicina).", align='C', new_x='LMARGIN', new_y='NEXT')
         self.multi_cell(0, 4.5, AVISO, align='C')
 
     def bytes(self):
         return bytes(self.output())
 
 
-def _pdf_de_exames(dados_paciente, exames, tipo):
+def _pdf_de_exames(dados_paciente, exames, tipo, responsavel=None):
     pdf = _Minuta(f'SOLICITAÇÃO DE EXAMES {tipo}')
+    pdf.responsavel = responsavel
     pdf.add_page()
     pdf.dados_do_paciente(dados_paciente)
     pdf.set_font('DejaVu', 'B', 11)
@@ -153,16 +175,17 @@ def _pdf_de_exames(dados_paciente, exames, tipo):
     return pdf.bytes()
 
 
-def gerar_pdf_exames_laboratoriais(dados_paciente, exames):
-    return _pdf_de_exames(dados_paciente, exames, 'LABORATORIAIS')
+def gerar_pdf_exames_laboratoriais(dados_paciente, exames, responsavel=None):
+    return _pdf_de_exames(dados_paciente, exames, 'LABORATORIAIS', responsavel)
 
 
-def gerar_pdf_exames_imagem(dados_paciente, exames):
-    return _pdf_de_exames(dados_paciente, exames, 'DE IMAGEM')
+def gerar_pdf_exames_imagem(dados_paciente, exames, responsavel=None):
+    return _pdf_de_exames(dados_paciente, exames, 'DE IMAGEM', responsavel)
 
 
-def gerar_pdf_vacinas(dados_paciente, vacinas):
+def gerar_pdf_vacinas(dados_paciente, vacinas, responsavel=None):
     pdf = _Minuta('RECEITA DE VACINAS')
+    pdf.responsavel = responsavel
     pdf.add_page()
     pdf.dados_do_paciente(dados_paciente)
     pdf.set_font('DejaVu', 'B', 11)
