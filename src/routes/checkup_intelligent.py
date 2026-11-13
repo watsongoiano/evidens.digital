@@ -9,7 +9,7 @@ from src.utils.validacao import EntradaInvalida, SIM, ler_numero, normalizar_tri
 
 checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
 
-def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False, is_pregnant=False, tabagismo='nunca_fumou', macos_ano=0, has_dpoc=False):
+def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False, is_pregnant=False, tabagismo='nunca_fumou', macos_ano=0, has_dpoc=False, has_cardiopatia_cronica=False):
     """Gera recomendações baseadas em idade, sexo e condições clínicas
     
     Args:
@@ -444,8 +444,9 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
 
-    # Pneumocócica: VPC20 em dose única (substitui o esquema VPC + VPP23)
-    if age >= 50:
+    # Pneumocócica: VPC20 em dose única (substitui o esquema VPC + VPP23). SBIm: rotina a partir
+    # de 50 anos e em qualquer idade com comorbidade de risco (cardiopatia ou pneumopatia crônica).
+    if age >= 50 or has_dpoc or has_cardiopatia_cronica:
         _add_rec({
             'titulo': 'Pneumocócica conjugada 20-valente (Prevenar 20®)',
             'descricao': 'Dose única. Já recebeu VPP23: aguardar 1 ano. Esquema incompleto com VPC13/VPC15 (± VPP23): completar com VPC20 (2 meses após VPC13/15 ou 1 ano após VPP23). Esquema completo (VPC13/15 + VPP23): dose adicional a critério médico.',
@@ -475,11 +476,12 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'subtitulo': '60-69 anos com fator de risco | Dose única | Rede privada',
             'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
-    elif has_dpoc:
+    elif has_dpoc or has_cardiopatia_cronica:
+        qual = ' e '.join(x for x, sim in (('DPOC', has_dpoc), ('doença cardiovascular crônica', has_cardiopatia_cronica)) if sim)
         _add_rec({
             'titulo': 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)',
-            'descricao': 'Dose única para adultos com doença respiratória ou cardiovascular crônica clinicamente relevante (DPOC, asma moderada/grave, IC, coronariopatia, imunodeficiência moderada/grave).',
-            'subtitulo': 'Adultos com DPOC | Dose única | Rede privada',
+            'descricao': 'Dose única para adultos com doença respiratória ou cardiovascular crônica clinicamente relevante (DPOC, asma moderada/grave, insuficiência cardíaca, coronariopatia, imunodeficiência moderada/grave).',
+            'subtitulo': f'Adultos com {qual} | Dose única | Rede privada',
             'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'B'
         })
 
@@ -532,10 +534,14 @@ def calcular_risco_cardiovascular(data, comorbidades, medicacoes, is_diabetic, i
     """PREVENT em 10/30 anos com as categorias SBC 2025 e ACC/AHA 2026, ou o motivo de não calcular."""
     if is_pregnant:
         return {'status': 'nao_aplicavel', 'motivo': 'PREVENT não é validado na gestação.'}
-    if 'cardiopatia' in comorbidades:
+    if {'dcv_aterosclerotica', 'cardiopatia'} & set(comorbidades):
         return {'status': 'nao_aplicavel',
-                'motivo': 'Com cardiopatia/DCV estabelecida o paciente já é de prevenção secundária; '
-                          'o PREVENT só se aplica a quem não tem DCV conhecida.'}
+                'motivo': 'DCV aterosclerótica estabelecida: prevenção secundária, sem cálculo de PREVENT. '
+                          'SBC 2025: risco muito alto (meta LDL < 50 mg/dL; extremo se eventos múltiplos ou '
+                          'evento + 2 condições de alto risco: < 40 mg/dL).'}
+    if 'insuficiencia_cardiaca' in comorbidades:
+        return {'status': 'nao_aplicavel',
+                'motivo': 'Insuficiência cardíaca estabelecida: o PREVENT só se aplica a quem não tem DCV conhecida.'}
     idade, sexo = data['idade'], data['sexo']
     faltando = [rotulo for chave, rotulo in (('colesterol', 'colesterol total'), ('hdl', 'HDL'),
                                               ('pas', 'pressão sistólica'), ('peso', 'peso'),
@@ -651,9 +657,10 @@ def generate_intelligent_recommendations():
             has_hypertension = True
             has_resistant_hypertension = True
         
-        # Verificar se tem cardiopatia (frequentemente associada a HAS)
-        if 'cardiopatia' in comorbidades:
-            has_hypertension = True
+        # Doença cardiovascular estabelecida. "Cardiopatia" genérica saiu do formulário por não
+        # corresponder a nenhuma diretriz; valor antigo é tratado como DCV aterosclerótica.
+        has_dcv_aterosclerotica = bool({'dcv_aterosclerotica', 'cardiopatia'} & set(comorbidades))
+        has_ic = 'insuficiencia_cardiaca' in comorbidades
         
         # Verificar se marcou checkbox de anti-hipertensivos
         if 'anti_hipertensivos' in medicacoes_checkboxes:
@@ -684,7 +691,8 @@ def generate_intelligent_recommendations():
                                                          is_pregnant=is_pregnant,
                                                          tabagismo=tabagismo,
                                                          macos_ano=macos_ano,
-                                                         has_dpoc=has_dpoc)
+                                                         has_dpoc=has_dpoc,
+                                                         has_cardiopatia_cronica=has_dcv_aterosclerotica or has_ic)
         recommendations.extend(age_sex_recs)
         
         # Rastreamento de câncer de pulmão (LDCT) - USPSTF 2021

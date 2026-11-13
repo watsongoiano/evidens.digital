@@ -21,7 +21,12 @@
 <header class="px-4 sm:px-6 lg:px-[6%] pt-4 lg:pt-6">
   <div class="max-w-[1240px] mx-auto bg-white h-[60px] pl-5 pr-2.5 lg:pl-6 flex items-center justify-between rounded-[3px] border border-ink/5">
     <a href="/" class="flex items-center gap-2.5" aria-label="Evidēns — início">
-      <span class="text-[22px] font-medium tracking-tight">evidēns <span class="text-teal text-[13px] font-medium">check</span></span>
+      <span class="grid grid-cols-3 gap-[3px]" aria-hidden="true">
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i>
+      </span>
+      <span class="text-[28px] font-medium tracking-tight leading-none">evidēns <span class="text-teal text-[13px] font-medium">check</span></span>
     </a>
     <nav class="flex items-center gap-2 lg:gap-6 text-[13px] uppercase tracking-[0.12em] text-ink/75">
       <a href="/" class="hidden sm:inline hover:text-teal transition">Início</a>
@@ -85,7 +90,8 @@
         <label class="opcao" for="has_resistente"><input type="checkbox" id="has_resistente" name="comorbidades" value="has_resistente">HAS resistente</label>
         <label class="opcao" for="dislipidemia"><input type="checkbox" id="dislipidemia" name="comorbidades" value="dislipidemia">Dislipidemia</label>
         <label class="opcao" for="doenca_renal"><input type="checkbox" id="doenca_renal" name="comorbidades" value="doenca_renal">Doença renal crônica</label>
-        <label class="opcao" for="cardiopatia"><input type="checkbox" id="cardiopatia" name="comorbidades" value="cardiopatia">Cardiopatia</label>
+        <label class="opcao" for="dcv_aterosclerotica"><input type="checkbox" id="dcv_aterosclerotica" name="comorbidades" value="dcv_aterosclerotica">DCV aterosclerótica (IAM, AVC, DAP)</label>
+        <label class="opcao" for="insuficiencia_cardiaca"><input type="checkbox" id="insuficiencia_cardiaca" name="comorbidades" value="insuficiencia_cardiaca">Insuficiência cardíaca</label>
         <label class="opcao" for="obesidade"><input type="checkbox" id="obesidade" name="comorbidades" value="obesidade">Obesidade</label>
         <label class="opcao" for="hiv"><input type="checkbox" id="hiv" name="comorbidades" value="hiv">HIV</label>
         <label class="opcao" for="dpoc"><input type="checkbox" id="dpoc" name="comorbidades" value="dpoc">DPOC</label>
