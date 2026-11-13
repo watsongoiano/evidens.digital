@@ -36,3 +36,23 @@ def test_catalogo_une_motor_e_extras_sem_repetir(client):
 
 def test_catalogo_exige_login(anonimo):
     assert anonimo.get('/api/catalogo').status_code == 401
+
+
+def test_gerador_do_catalogo_nao_usa_o_banco_configurado(tmp_path):
+    """O gerador cria e aprova uma conta para varrer o motor: isso só pode acontecer num banco descartável."""
+    import os
+    import sqlite3
+    import subprocess
+    import sys
+    from pathlib import Path
+    raiz = Path(__file__).resolve().parents[1]
+    banco = tmp_path / 'banco-real.sqlite'
+    sqlite3.connect(banco).close()
+    copia = tmp_path / 'repo'
+    import shutil
+    shutil.copytree(raiz, copia, ignore=shutil.ignore_patterns('.git', 'node_modules', '__pycache__'))
+    ambiente = {**os.environ, 'DATABASE_URL': f'sqlite:///{banco}', 'POSTGRES_URL': f'sqlite:///{banco}'}
+    subprocess.run([sys.executable, str(copia / 'scripts' / 'gerar_catalogo.py')], env=ambiente,
+                   check=True, capture_output=True, timeout=600)
+    tabelas = sqlite3.connect(banco).execute("select name from sqlite_master where type='table'").fetchall()
+    assert tabelas == []   # nada foi criado no banco "real"

@@ -7,15 +7,22 @@ import importlib.util
 import io
 import json
 import os
+import shutil
 import sys
+import tempfile
 from contextlib import redirect_stdout
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ))
 
-os.environ.setdefault('DATABASE_URL', 'sqlite:///' + str(RAIZ / 'catalogo-tmp.sqlite'))
-os.environ.setdefault('SECRET_KEY', 'chave-apenas-para-gerar-o-catalogo')
+# Banco SEMPRE descartável e isolado: nunca herdar DATABASE_URL/POSTGRES_URL do ambiente,
+# senão a conta usada pela varredura ficaria gravada (e aprovada) no banco real.
+PASTA_TEMPORARIA = tempfile.mkdtemp(prefix='evidens-catalogo-')
+for variavel in [v for v in os.environ if v.startswith(('DATABASE_', 'POSTGRES_', 'PG'))]:
+    del os.environ[variavel]
+os.environ['DATABASE_URL'] = 'sqlite:///' + os.path.join(PASTA_TEMPORARIA, 'catalogo.sqlite')
+os.environ['SECRET_KEY'] = 'chave-apenas-para-gerar-o-catalogo'
 
 from src.utils import catalogo  # noqa: E402
 
@@ -43,8 +50,5 @@ with redirect_stdout(io.StringIO()):
     titulos = catalogo.titulos_do_motor(_App())
 
 catalogo.ARQUIVO_DO_MOTOR.write_text(json.dumps(titulos, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
-try:
-    os.remove(RAIZ / 'catalogo-tmp.sqlite')
-except FileNotFoundError:
-    pass
+shutil.rmtree(PASTA_TEMPORARIA, ignore_errors=True)
 print({c: len(v) for c, v in titulos.items()})
