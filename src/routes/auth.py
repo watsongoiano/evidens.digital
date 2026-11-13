@@ -1,6 +1,7 @@
 """Área de acesso: cadastro com aprovação, login, senha e administração de contas."""
 import hmac
 import os
+import time
 from functools import wraps
 from urllib.parse import urlsplit
 
@@ -127,7 +128,8 @@ def cadastro():
     if novo and notificacoes.configurado():
         # Aviso por e-mail ao administrador; falha no envio não impede o cadastro.
         try:
-            notificacoes.avisar_novo_cadastro(novo, contas.listar(), _url_do_admin())
+            notificacoes.avisar_novo_cadastro(novo, contas.listar(), _url_do_admin(),
+                                              pedidos_na_ultima_hora=contas.criados_desde(time.time() - 3600))
         except Exception as erro:
             print(f'⚠️ Aviso de novo cadastro falhou: {type(erro).__name__}')
     # Mesma resposta para e-mail novo e e-mail já cadastrado.

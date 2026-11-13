@@ -22,6 +22,7 @@ URL_RESEND = 'https://api.resend.com/emails'
 REMETENTE_PADRAO = 'Evidēns <onboarding@resend.dev>'
 PERFIS = {'medico': 'Médico(a)', 'residente': 'Residente', 'estudante': 'Estudante de medicina'}
 TEMPO_LIMITE = 4  # segundos
+LIMITE_POR_HORA = 10  # avisos individuais por hora; acima disso sai um único aviso de volume
 
 
 def configurado() -> bool:
@@ -82,11 +83,24 @@ def enviar(para, assunto, texto):
         return False, type(erro).__name__
 
 
-def avisar_novo_cadastro(usuario, administradores, url_admin):
-    """Avisa os administradores. Falha vira log; o cadastro segue."""
+def avisar_novo_cadastro(usuario, administradores, url_admin, pedidos_na_ultima_hora=1):
+    """Avisa os administradores. Falha vira log; o cadastro segue.
+
+    O cadastro é aberto a qualquer pessoa, então o número de e-mails é limitado: até
+    ``LIMITE_POR_HORA`` avisos individuais por hora; o pedido seguinte gera um único aviso de
+    volume e os demais daquela hora não geram e-mail (continuam aparecendo em /admin).
+    """
     if not configurado():
         return False
-    assunto, texto = mensagem_de_cadastro(usuario, url_admin)
+    if pedidos_na_ultima_hora > LIMITE_POR_HORA + 1:
+        return False
+    if pedidos_na_ultima_hora == LIMITE_POR_HORA + 1:
+        assunto = 'Evidēns: muitos pedidos de conta na última hora'
+        texto = (f'Mais de {LIMITE_POR_HORA} pedidos de abertura de conta chegaram na última hora. '
+                 'Os avisos individuais ficam suspensos até o volume baixar, para não lotar a sua caixa.\n\n'
+                 f'Confira os pedidos em: {url_admin}')
+    else:
+        assunto, texto = mensagem_de_cadastro(usuario, url_admin)
     ok, detalhe = enviar(destinatarios(administradores), assunto, texto)
     if not ok:
         print(f'⚠️ Aviso de novo cadastro não enviado: {detalhe}')

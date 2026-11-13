@@ -19,8 +19,8 @@ class _Resposta:
 
 
 @pytest.fixture()
-def resend(monkeypatch):
-    """Liga o aviso e captura o que seria enviado à Resend."""
+def resend(monkeypatch, contas):
+    """Liga o aviso e captura o que seria enviado à Resend (o banco de teste é compartilhado: zera a contagem da hora)."""
     enviados = []
 
     def falso(pedido, timeout=None):
@@ -28,6 +28,7 @@ def resend(monkeypatch):
                          'corpo': json.loads(pedido.data.decode('utf-8')), 'timeout': timeout})
         return _Resposta()
 
+    monkeypatch.setattr(contas, 'criados_desde', lambda instante: 1)
     monkeypatch.setenv('RESEND_API_KEY', 're_teste_123')
     monkeypatch.delenv('AVISO_CADASTRO_PARA', raising=False)
     monkeypatch.delenv('AVISO_CADASTRO_DE', raising=False)
@@ -114,3 +115,23 @@ def test_aviso_e_restrito_ao_administrador(client, anonimo):
     assert client.get('/api/admin/aviso').status_code == 403
     assert client.post('/api/admin/aviso/teste', json={}).status_code == 403
     assert anonimo.get('/api/admin/aviso').status_code in (401, 403)
+
+
+def test_enxurrada_de_cadastros_nao_lota_a_caixa_do_administrador(anonimo, administrador, resend, contas, monkeypatch):
+    """Até o limite por hora, um aviso por pedido; depois, um único aviso de volume e mais nada."""
+    monkeypatch.setattr(contas, 'criados_desde', lambda instante: contador[0])
+    contador = [0]
+    for n in range(1, notificacoes.LIMITE_POR_HORA + 5):
+        contador[0] = n
+        assert _cadastrar(anonimo, f'enxurrada{n}@exemplo.test').status_code == 202
+    assert len(resend) == notificacoes.LIMITE_POR_HORA + 1
+    assert 'muitos pedidos' in resend[-1]['corpo']['subject']
+    assert all('novo pedido de conta' in e['corpo']['subject'] for e in resend[:-1])
+
+
+def test_contagem_de_cadastros_recentes(contas):
+    import time
+    antes = contas.criados_desde(time.time() - 3600)
+    contas.criar('recente@exemplo.test', 'Pessoa Recente', 'CRM-GO 77', 'medico', SENHA_DE_TESTE)
+    assert contas.criados_desde(time.time() - 3600) == antes + 1
+    assert contas.criados_desde(time.time() + 60) == 0
