@@ -357,3 +357,18 @@ def test_paginas_do_administrador_respondem_e_nao_tem_referencia_quebrada(admin,
     for referencia in _referencias_locais(resposta.get_data(as_text=True)):
         caminho = referencia if referencia.startswith('/') else '/' + referencia
         assert admin.get(caminho, follow_redirects=True).status_code == 200, f'{pagina} -> {referencia}'
+
+
+@pytest.mark.parametrize('pagina', ['index.html', 'intelligent-tools.html', 'login.html', 'cadastro.html',
+                                    'conta.html', 'configurar.html', 'admin.html'])
+def test_logo_do_cabecalho_e_a_mesma_palavra_do_rodape(pagina):
+    """Cabeçalho usa só a palavra "evidēns", como o rodapé; sem o ícone de pontos."""
+    html = (RAIZ / pagina).read_text(encoding='utf-8')
+    cabecalho = html.split('</header>')[0]
+    assert 'grid-cols-3 gap-[3px]' not in cabecalho
+    assert 'font-medium tracking-tight">evidēns' in cabecalho
+
+
+def test_icone_da_aba_e_servido(client):
+    for caminho in ('/favicon.ico', '/favicon.png', '/apple-touch-icon.png'):
+        assert client.get(caminho).status_code == 200, caminho
