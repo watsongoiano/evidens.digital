@@ -370,5 +370,10 @@ def test_logo_do_cabecalho_e_a_mesma_palavra_do_rodape(pagina):
 
 
 def test_icone_da_aba_e_servido(client):
-    for caminho in ('/favicon.ico', '/favicon.png', '/apple-touch-icon.png'):
+    for caminho in ('/favicon.ico', '/favicon.png', '/favicon.svg', '/apple-touch-icon.png'):
         assert client.get(caminho).status_code == 200, caminho
+    svg = client.get('/favicon.svg')
+    assert svg.mimetype == 'image/svg+xml'
+    # cor do ícone acompanha o tema do navegador (claro/escuro), sem fundo próprio
+    corpo = svg.get_data(as_text=True)
+    assert '@media (prefers-color-scheme:dark)' in corpo and '<rect class="m"' in corpo

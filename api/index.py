@@ -148,6 +148,7 @@ ARQUIVOS_PUBLICOS = frozenset({
     'static/conta.js',
     'favicon.ico',
     'favicon.png',
+    'favicon.svg',
     'apple-touch-icon.png',
     'new_logo.png',
     'evidenscheck.png',
