@@ -29,7 +29,7 @@ Variáveis de ambiente na Vercel:
 | `RESEND_API_KEY` | Opcional. Liga o aviso por e-mail ao administrador a cada novo pedido de conta (ver abaixo). |
 | `AVISO_CADASTRO_PARA` | Opcional. Destinatários do aviso, separados por vírgula. Padrão: e-mail dos administradores. |
 | `AVISO_CADASTRO_DE` | Opcional. Remetente dos e-mails. Padrão: `Evidēns <onboarding@resend.dev>`. Com um remetente do domínio verificado, liga também as boas-vindas. |
-| `EMAIL_RESPOSTA` | Opcional. Endereço de resposta (reply-to) do e-mail de boas-vindas. |
+| `EMAIL_CONTATO` | Opcional. E-mail de contato mostrado no texto das boas-vindas e usado como resposta (reply-to). |
 | `SITE_URL` | Opcional. Endereço usado no link do e-mail. Padrão: `https://evidens.life`. |
 
 Sem banco ou sem chave, a home continua no ar e o check-up responde 503 ("área de acesso ainda não configurada").
@@ -93,7 +93,7 @@ Uma falha no envio não impede o cadastro: fica registrada no log da função e 
 
 ## E-mail de boas-vindas
 
-Quem pede a conta recebe um e-mail dizendo o que acontece agora (aprovação pelo responsável técnico), que a ferramenta está em fase de desenvolvimento e que feedbacks são bem-vindos, com o link da página de contato.
+Quem pede a conta recebe um e-mail que apresenta a ferramenta (cerca de 30% dos exames laboratoriais são provavelmente desnecessários e proporção parecida dos necessários deixa de ser pedida; Zhi et al., PLOS ONE 2013), diz o que acontece agora (conferência do cadastro e liberação do acesso), que a ferramenta está em fase de desenvolvimento e que feedbacks são bem-vindos, com o link da página de contato e, se `EMAIL_CONTATO` estiver definido, o e-mail de contato.
 
 O remetente padrão da Resend só entrega ao dono da conta Resend, então as boas-vindas ficam desligadas até existir um remetente do próprio domínio:
 

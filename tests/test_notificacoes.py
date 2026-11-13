@@ -149,16 +149,24 @@ def test_boas_vindas_desligadas_sem_remetente_do_dominio(anonimo, administrador,
 
 def test_boas_vindas_vao_para_quem_se_cadastrou(anonimo, administrador, resend, monkeypatch):
     monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
-    monkeypatch.setenv('EMAIL_RESPOSTA', 'retorno@exemplo.test')
+    monkeypatch.setenv('EMAIL_CONTATO', 'retorno@exemplo.test')
     assert _cadastrar(anonimo, 'bv1@exemplo.test', nome='Maria Nova Silva').status_code == 202
     assert len(resend) == 2
     bv = next(e['corpo'] for e in resend if e['corpo']['to'] == ['bv1@exemplo.test'])
     assert bv['subject'] == 'Bem-vindo(a) ao Evidēns' and bv['from'] == 'Evidēns <contato@exemplo.test>'
     assert bv['reply_to'] == 'retorno@exemplo.test'
     for trecho in ('Olá, Maria.', 'fase de desenvolvimento', 'feedback', 'https://evidens.life/login',
-                   'https://evidens.life/contact', 'responsável técnico confere'):
+                   'https://evidens.life/contact ou pelo e-mail retorno@exemplo.test', 'conferir o cadastro',
+                   'cerca de 30% dos exames laboratoriais', 'PLOS ONE, 2013',
+                   'https://hms.harvard.edu/news/unnecessary-testing', 'Criador e responsável técnico'):
         assert trecho in bv['text'], trecho
     assert SENHA_DE_TESTE not in bv['text'] and administrador['email'] not in bv['text']
+
+
+def test_boas_vindas_sem_email_de_contato_mostram_so_a_pagina(monkeypatch):
+    monkeypatch.delenv('EMAIL_CONTATO', raising=False)
+    _, texto = notificacoes.mensagem_de_boas_vindas({'nome': 'Ana'}, 'https://evidens.life')
+    assert 'https://evidens.life/contact\n' in texto and 'pelo e-mail' not in texto
 
 
 def test_email_ja_cadastrado_nao_recebe_boas_vindas(anonimo, administrador, resend, monkeypatch):

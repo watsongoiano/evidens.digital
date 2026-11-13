@@ -9,7 +9,7 @@ sem dependência extra. Configuração por variáveis de ambiente:
                           entrega ao e-mail do dono da conta Resend; para outros destinatários,
                           verifique um domínio na Resend e use um remetente dele.
 
-- ``EMAIL_RESPOSTA``      opcional: endereço de resposta (reply-to) do e-mail de boas-vindas.
+- ``EMAIL_CONTATO``       opcional: e-mail de contato mostrado nas boas-vindas e usado como resposta (reply-to).
 
 Boas-vindas: enviadas a quem acabou de pedir a conta, só quando ``AVISO_CADASTRO_DE`` aponta um
 remetente de domínio verificado (o remetente padrão da Resend não entrega a terceiros).
@@ -69,27 +69,44 @@ def boas_vindas_ligadas() -> bool:
     return configurado() and bool(remetente_proprio())
 
 
+def email_de_contato() -> str:
+    """Endereço mostrado no e-mail de boas-vindas e usado como resposta (reply-to), se configurado."""
+    return _sem_quebra(os.environ.get('EMAIL_CONTATO'))
+
+
 def mensagem_de_boas_vindas(usuario, url_site):
-    """Texto de boas-vindas: o que acontece agora, fase de desenvolvimento e convite a dar feedback."""
+    """Texto de boas-vindas: por que a ferramenta existe, o que acontece agora, fase de desenvolvimento
+    e convite a dar feedback. Os números vêm de Zhi M et al., PLOS ONE 2013 (revisão de 15 anos de
+    literatura; resumo em hms.harvard.edu/news/unnecessary-testing)."""
     primeiro_nome = (_sem_quebra(usuario.get('nome')).split(' ') or [''])[0]
+    contato = email_de_contato()
     corpo = '\n'.join([
         f'Olá, {primeiro_nome}.' if primeiro_nome else 'Olá.',
         '',
-        'Recebemos o seu pedido de conta no Evidēns, ferramenta de check-up baseado em evidências.',
+        'Ficamos felizes com o seu pedido de conta no Evidēns!',
         '',
-        'O que acontece agora: o responsável técnico confere o seu registro profissional e libera o acesso. '
-        f'Assim que a conta for aprovada, entre em {url_site}/login com o e-mail e a senha que você cadastrou.',
+        'Uma breve apresentação: você sabia que cerca de 30% dos exames laboratoriais pedidos são provavelmente '
+        'desnecessários, e que uma proporção parecida de exames necessários deixa de ser pedida? Foi o que mostrou '
+        'uma revisão de 15 anos de literatura, com 1,6 milhão de resultados, feita por pesquisadores ligados à '
+        'Harvard Medical School (Zhi et al., PLOS ONE, 2013: https://hms.harvard.edu/news/unnecessary-testing). '
+        'O Evidēns nasceu para ajudar nos dois lados: é uma ferramenta de apoio ao check-up baseada em evidências '
+        'científicas, que indica o que pedir, para quem e com qual referência.',
         '',
-        'O Evidēns está em fase de desenvolvimento. As recomendações são sugestões para a avaliação do médico: '
-        'revise e individualize cada item antes de solicitar ou prescrever, e desconfie do que parecer estranho.',
+        'O seu pedido já foi enviado para a nossa equipe conferir o cadastro e liberar o acesso. É só aguardar: '
+        f'assim que a conta for aprovada, entre em {url_site}/login com o e-mail e a senha que você cadastrou!',
+        '',
+        'Lembre-se: o Evidēns está em fase de desenvolvimento e as recomendações são sugestões para a avaliação '
+        'médica. Sempre revise e individualize cada item antes de solicitar ou prescrever, e desconfie do que '
+        'parecer estranho!',
         '',
         'Ficamos felizes com qualquer feedback: um erro encontrado, uma referência desatualizada, uma ideia de '
-        f'melhoria. É só escrever pela página de contato: {url_site}/contact',
+        f'melhoria. É só escrever pela página de contato: {url_site}/contact'
+        + (f' ou pelo e-mail {contato}' if contato else ''),
         '',
-        'Obrigado por testar.',
+        'Muito obrigado por testar!',
         '',
         'Dr. Rodolfo Cambraia Frota · CRM-GO 26815',
-        'Responsável técnico · Evidēns',
+        'Criador e responsável técnico · Evidēns',
     ])
     return 'Bem-vindo(a) ao Evidēns', corpo
 
@@ -153,7 +170,7 @@ def enviar_boas_vindas(usuario, url_site, pedidos_na_ultima_hora=1):
         return False
     assunto, texto = mensagem_de_boas_vindas(usuario, url_site)
     ok, detalhe = enviar([usuario['email']], assunto, texto,
-                         responder_para=(os.environ.get('EMAIL_RESPOSTA') or '').strip() or None)
+                         responder_para=email_de_contato() or None)
     if not ok:
         print(f'⚠️ E-mail de boas-vindas não enviado: {detalhe}')
     return ok
