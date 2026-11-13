@@ -30,7 +30,7 @@ Os testes ficam em `tests/` e rodam com `python -m pytest`.
 
 | ID | Perigo | Situação |
 |---|---|---|
-| P-12 | Serviço de PDF (Gotenberg) aceita requisições de qualquer origem | O cliente já envia autenticação básica quando `GOTENBERG_API_BASIC_AUTH_USERNAME` e `GOTENBERG_API_BASIC_AUTH_PASSWORD` estão definidas. Falta ativar `--api-enable-basic-auth` no serviço e definir as variáveis nos dois lados |
+| P-12 | Serviço de PDF externo aceitava requisições de qualquer origem | Resolvido: os PDFs passaram a ser gerados dentro da própria função; não há mais serviço externo |
 | P-13 | O PDF imprime a lista que o navegador envia | O conteúdo é validado, limitado e escapado, e as vacinas atenuadas são conferidas de novo. O servidor ainda não recalcula as recomendações a partir dos dados do paciente |
 | P-14 | Nome do paciente trafega até o servidor e o serviço de PDF | Passou a ser opcional e só acompanha o pedido de PDF. Continua saindo do navegador quando informado |
 

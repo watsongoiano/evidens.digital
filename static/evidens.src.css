@@ -77,6 +77,15 @@ html.lenis, html.lenis body { height: auto; }
   .categoria-titulo { @apply flex items-center gap-3 text-[12px] tracking-[0.18em] uppercase text-ink/50 mb-3; }
   .recommendation-card { @apply relative rounded-2xl bg-white border border-ink/10 px-5 py-4 mb-3 transition; }
   .recommendation-card h5 { @apply text-[17px] font-medium tracking-tight pr-8; }
+  /* Formato compacto: uma linha por item */
+  .rec-linha { @apply grid items-center gap-x-3 rounded-xl px-3 py-1.5 mb-1; grid-template-columns: 10px minmax(0, 1fr) auto 28px; }
+  .rec-prioridade { @apply w-2.5 h-2.5 rounded-full; }
+  .rec-linha h5.rec-titulo { @apply text-[14px] font-medium tracking-tight leading-snug pr-0; }
+  .rec-sub { @apply text-[12px] text-ink/55 leading-snug; }
+  .rec-fonte { @apply text-[11px] text-ink/45 leading-snug; }
+  .rec-grau { @apply inline-flex items-center justify-center w-6 h-6 rounded-md bg-ink text-white text-[11px] font-semibold; }
+  .rec-remover { @apply w-7 h-7 rounded-full text-ink/50 hover:text-ink hover:bg-paper transition; }
+  dialog#dialogoAcrescimo::backdrop { background: rgba(20,41,47,.45); }
   .nao-incluida-card { @apply rounded-2xl bg-white border px-5 py-4 mb-3; }
   .nao-incluida-card h5 { @apply text-[16px] font-medium tracking-tight mt-3; }
   .selo { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] tracking-[0.14em] font-medium uppercase; }

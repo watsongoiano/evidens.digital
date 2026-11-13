@@ -22,8 +22,7 @@ evidens.digital/
 │   ├── utils/
 │   │   ├── validacao.py              # Validação e normalização da entrada
 │   │   ├── seguranca_vacinas.py      # Triagem de segurança das vacinas
-│   │   ├── pdf_service_gotenberg.py  # Cliente do serviço de PDF (Gotenberg)
-│   │   ├── pdf_service_gotenberg_simple.py  # Templates das minutas
+│   │   ├── pdf_minutas.py            # Minutas em PDF (fpdf2, fontes em assets/fonts)
 │   │   ├── reference_links.py        # Links das fontes citadas
 │   │   └── analytics.py              # Contadores de uso
 │   └── static/styles/                # Estilos usados por contato e analytics
@@ -61,8 +60,7 @@ python api/index.py                # http://localhost:5000
 python -m pytest                   # testes
 ```
 
-Os PDFs dependem de um Gotenberg acessível em `GOTENBERG_URL` (padrão `http://localhost:3000`). Para subir um
-localmente: `docker run --rm -p 3000:3000 gotenberg/gotenberg:8`.
+Os PDFs são gerados pela própria aplicação; não há serviço externo a subir.
 
 ## 🚀 Deploy
 
@@ -127,9 +125,9 @@ python -m pytest
 
 ## 🔧 Tecnologias
 
-- **Backend:** Python, Flask e Flask-CORS, em função serverless na Vercel.
+- **Backend:** Python e Flask, em função serverless na Vercel; contas em Postgres (Neon).
 - **Frontend:** HTML, CSS e JavaScript sem framework.
-- **PDF:** Gotenberg (Chromium), em serviço separado.
+- **PDF:** fpdf2, dentro da própria função.
 
 ## 📝 Variáveis de ambiente
 
@@ -137,9 +135,9 @@ Veja `.env.example`. As que a aplicação usa em produção:
 
 | Variável | Uso |
 |---|---|
-| `GOTENBERG_URL` | Endereço do serviço de PDF |
-| `GOTENBERG_API_BASIC_AUTH_USERNAME`, `GOTENBERG_API_BASIC_AUTH_PASSWORD` | Autenticação básica do serviço de PDF (opcional, recomendada) |
-| `SECRET_KEY` | Chave do Flask |
+| `DATABASE_URL` | Postgres das contas (a integração Neon da Vercel preenche) |
+| `SECRET_KEY` | Assina o cookie de sessão |
+| `SETUP_TOKEN` | Código de instalação do primeiro administrador |
 
 ## 🤝 Contribuição
 

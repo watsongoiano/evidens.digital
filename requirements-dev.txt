@@ -2,3 +2,4 @@
 # As dependências de produção são as de api/requirements.txt.
 -r api/requirements.txt
 pytest>=8,<9
+pypdf>=5,<7   # leitura dos PDFs nos testes
