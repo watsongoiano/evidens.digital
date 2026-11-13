@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastros — Evidēns</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="/static/evidens.css">
+<script defer src="/static/conta.js"></script>
+</head>
+<body class="bg-paper text-ink font-sans min-h-screen flex flex-col">
+
+<header class="px-4 sm:px-6 lg:px-[6%] pt-4 lg:pt-6">
+  <div class="max-w-[1240px] mx-auto bg-white h-[60px] pl-5 pr-2.5 lg:pl-6 flex items-center justify-between rounded-[3px] border border-ink/5">
+    <a href="/" class="flex items-center gap-2.5" aria-label="Evidēns — início">
+      <span class="grid grid-cols-3 gap-[3px]" aria-hidden="true">
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i>
+      </span>
+      <span class="text-[22px] font-medium tracking-tight">evidēns</span>
+    </a>
+    <nav class="flex items-center gap-2 lg:gap-6 text-[13px] uppercase tracking-[0.12em] text-ink/75"><a href="/intelligent-tools" class="hover:text-teal transition">Check-up</a><a href="/conta" class="hidden sm:inline hover:text-teal transition">Conta</a><button type="button" data-sair class="inline-flex items-center bg-ink text-white font-medium uppercase tracking-[0.12em] rounded-[3px] px-4 h-10 hover:bg-teal transition">Sair</button></nav>
+  </div>
+</header>
+
+<main class="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 pt-14 lg:pt-20 pb-24">
+  <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">ADMINISTRAÇÃO</p>
+  <h1 class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Cadastros <span class="font-serif italic text-teal tracking-tight">para conferir.</span></h1>
+  <p class="text-[16px] text-ink/65 leading-relaxed mt-5">Confira o registro profissional antes de aprovar. Bloquear encerra na hora as sessões abertas da pessoa.</p>
+  <div data-erro role="alert" class="aviso aviso-erro mt-8" style="display: none;"></div>
+  <div data-ok role="status" class="aviso aviso-atencao mt-8" style="display: none;"></div>
+  <section class="mt-10"><h2 class="categoria-titulo">Aguardando aprovação <span data-contagem="pendente" class="text-ink/30"></span></h2><div data-lista="pendente"></div></section>
+  <section class="mt-10"><h2 class="categoria-titulo">Aprovados <span data-contagem="aprovado" class="text-ink/30"></span></h2><div data-lista="aprovado"></div></section>
+  <section class="mt-10"><h2 class="categoria-titulo">Bloqueados <span data-contagem="bloqueado" class="text-ink/30"></span></h2><div data-lista="bloqueado"></div></section>
+</main>
+
+<footer class="max-w-[1100px] w-full mx-auto px-4 sm:px-6 pb-10">
+  <div class="flex flex-col md:flex-row md:justify-between gap-3 pt-8 border-t border-ink/10 text-[12px] text-ink/50">
+    <p>Responsável técnico: Dr. Rodolfo Cambraia Frota · CRM-GO 26815</p>
+    <p>© 2026 Evidēns · <a href="/contact" class="hover:text-teal">Contato</a></p>
+  </div>
+</footer>
+</body>
+</html>

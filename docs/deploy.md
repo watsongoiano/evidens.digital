@@ -18,6 +18,29 @@
 | `GOTENBERG_API_BASIC_AUTH_USERNAME` | recomendada | Usuário da autenticação básica do serviço de PDF |
 | `GOTENBERG_API_BASIC_AUTH_PASSWORD` | recomendada | Senha da autenticação básica do serviço de PDF |
 
+## Área de acesso (contas)
+
+O check-up inteiro exige login. As contas ficam num banco Postgres; dados de pacientes continuam não sendo gravados.
+
+Variáveis de ambiente na Vercel:
+
+| Variável | Para quê |
+| --- | --- |
+| `DATABASE_URL` (ou `POSTGRES_URL`) | Conexão com o Postgres. A integração **Neon** da Vercel (Storage → Create Database → Neon) cria e preenche sozinha. |
+| `SECRET_KEY` | Assina o cookie de sessão. Valor longo e aleatório. Sem ela (ou com o valor padrão), a área de acesso fica desligada. |
+| `SETUP_TOKEN` | Código de instalação, usado uma única vez em `/configurar` para criar o administrador. Pode ser apagado depois. |
+
+Sem banco ou sem chave, a home continua no ar e o check-up responde 503 ("área de acesso ainda não configurada").
+
+Fluxo:
+
+1. O administrador é criado em `/configurar`, com o código de instalação. A página deixa de funcionar assim que existe um administrador.
+2. Médicos, residentes e estudantes se cadastram em `/cadastro` e ficam **pendentes**.
+3. O administrador confere o registro e aprova (ou recusa) em `/admin`. Bloquear derruba na hora as sessões da pessoa.
+4. Não há envio de e-mail: quem esquece a senha pede uma **senha temporária**, gerada pelo administrador em `/admin` e mostrada uma única vez.
+
+Proteções: senha com hash (scrypt), mínimo de 10 caracteres; bloqueio de 15 minutos após 5 senhas erradas para o mesmo e-mail; cookie de sessão `HttpOnly`, `Secure` e `SameSite=Lax`, válido por 12 horas; envios vindos de outro site são recusados; trocar a senha encerra as outras sessões.
+
 ## CSS
 
 As páginas `index.html` e `intelligent-tools.html` usam `static/evidens.css`, gerado com Tailwind a partir de

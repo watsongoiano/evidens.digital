@@ -30,6 +30,7 @@ evidens.digital/
 ├── static/
 │   ├── evidens.src.css           # Fonte do CSS (Tailwind + componentes)
 │   └── evidens.css               # CSS compilado, publicado (não editar à mão)
+├── login.html, cadastro.html, conta.html, admin.html, configurar.html   # Área de acesso
 ├── tailwind.config.js            # Cores e fontes do design Evidēns
 ├── index.html                    # Página inicial
 ├── intelligent-tools.html        # Formulário do check-up e resultados
