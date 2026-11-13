@@ -30,17 +30,18 @@
     </a>
     <div class="flex items-center gap-2 lg:gap-8">
       <nav id="main-nav" class="hidden lg:flex items-center gap-7 text-[13px] uppercase tracking-[0.12em] text-ink/75">
+        <a href="#referencias" class="hover:text-teal transition">Diretrizes</a>
         <a href="#visao" class="hover:text-teal transition">O algoritmo</a>
         <a href="#metodo" class="hover:text-teal transition">Como funciona</a>
-        <a href="#principios" class="hover:text-teal transition">Segurança</a>
+        <a href="#check" class="hover:text-teal transition">Evidēns Check</a>
         <a href="#faq" class="hover:text-teal transition">Perguntas</a>
       </nav>
-      <a href="/intelligent-tools" class="hidden sm:inline-flex items-center gap-2 bg-ink text-white text-[13px] uppercase tracking-[0.12em] font-medium rounded-[3px] px-4 h-10 hover:bg-teal transition">Abrir o check-up</a>
+      <a href="/login" class="hidden sm:inline-flex items-center gap-2 bg-ink text-white text-[13px] uppercase tracking-[0.12em] font-medium rounded-[3px] px-4 h-10 hover:bg-teal transition">Entrar</a>
       <button id="menu-btn" class="lg:hidden w-10 h-10 rounded-[3px] border border-ink/15 flex items-center justify-center" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
     </div>
   </div>
   <div id="mobile-menu" class="hidden lg:hidden max-w-[1240px] mx-auto bg-white border-t border-ink/5 px-5 py-4 flex-col gap-4 text-[14px] uppercase tracking-[0.1em]">
-    <a href="#visao">O algoritmo</a><a href="#metodo">Como funciona</a><a href="#principios">Segurança</a><a href="/intelligent-tools">Abrir o check-up</a><a href="#faq">Perguntas</a>
+    <a href="#referencias">Diretrizes</a><a href="#visao">O algoritmo</a><a href="#metodo">Como funciona</a><a href="#check">Evidēns Check</a><a href="#faq">Perguntas</a><a href="/login" class="text-teal">Entrar</a>
   </div>
 </header>
 
@@ -93,7 +94,7 @@
       <p class="h-fade [--d:.8s] text-white/80 text-[15px] lg:text-[17px] leading-[1.7] max-w-[680px] mt-7">O Evidēns condensa mais de 2 mil páginas de diretrizes, de 15 sociedades e órgãos de saúde, num só algoritmo. Numa tela, ele mostra <strong class="text-white font-semibold">o que rastrear, quais exames pedir e quais vacinas indicar</strong> — cada item com a sua fonte.</p>
       <div class="h-fade [--d:1s] flex flex-wrap justify-center gap-3 mt-8">
         <a href="/intelligent-tools" class="inline-flex items-center gap-2 bg-white text-ink text-[15px] font-medium rounded-full pl-6 pr-5 h-12 hover:bg-aqua transition">Abrir o check-up <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></a>
-        <a href="#metodo" class="inline-flex items-center gap-2 border border-white/40 text-white text-[15px] rounded-full px-6 h-12 hover:bg-white/10 transition">Ver um exemplo <i class="fa-solid fa-arrow-down text-[11px]"></i></a>
+        <a href="#metodo" class="inline-flex items-center gap-2 border border-white/40 text-white text-[15px] rounded-full px-6 h-12 hover:bg-white/10 transition">Como funciona <i class="fa-solid fa-arrow-down text-[11px]"></i></a>
       </div>
     </div>
 
@@ -106,7 +107,7 @@
     <span class="lg:order-last lg:ml-auto text-[12px] text-ink/45"><b class="font-medium text-ink/70">APOIO À DECISÃO</b> — Sugestões para o médico revisar. A conduta é sempre sua.</span>
     <span class="flex items-center gap-2"><i class="fa-regular fa-gem text-teal text-[11px]"></i>71 recomendações mapeadas</span>
     <span class="flex items-center gap-2"><i class="fa-regular fa-gem text-teal text-[11px]"></i>Fonte em cada item</span>
-    <span class="flex items-center gap-2"><i class="fa-regular fa-gem text-teal text-[11px]"></i>Sem cadastro, nada gravado</span>
+    <span class="flex items-center gap-2"><i class="fa-regular fa-gem text-teal text-[11px]"></i>Dados do paciente não são gravados</span>
     <span class="flex items-center gap-2"><i class="fa-regular fa-gem text-teal text-[11px]"></i>Triagem de segurança nas vacinas</span>
   </div>
 </section>
@@ -135,6 +136,40 @@
       <p class="text-[64px] lg:text-[80px] font-light tracking-tightest leading-none mt-6">1<span class="text-[28px] ml-2 text-teal tracking-tight">algoritmo</span></p>
       <p class="text-[15px] text-ink/65 mt-4 max-w-[280px]">Decisão rápida, pedidos de exames e receitas de vacinas, numa só tela.</p>
     </div>
+  </div>
+
+  <!-- References -->
+  <div id="referencias" class="mt-20 rounded-[24px] bg-white border border-ink/[0.06] p-6 sm:p-10 lg:p-12">
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
+      <div>
+        <p class="flex items-center gap-2 text-[12px] tracking-[0.2em] text-teal font-medium mb-5"><span class="w-1.5 h-1.5 rounded-full bg-teal"></span>BASEADO EM DIRETRIZES DE</p>
+        <h3 class="font-light text-[30px] lg:text-[40px] leading-[1.05] tracking-tightest">15 instituições de referência. <span class="font-serif italic text-teal tracking-tight">Uma única base.</span></h3>
+      </div>
+      <p class="text-[15px] text-ink/60 leading-relaxed max-w-[400px]">Recomendações extraídas de sociedades médicas e órgãos de saúde brasileiros e internacionais. Cada item do check-up cita a sua.</p>
+    </div>
+    <div class="flex items-center justify-between mb-4"><p class="font-mono text-[11px] tracking-[0.18em] text-ink/50">NACIONAIS</p><p class="font-mono text-[11px] text-ink/40">3</p></div>
+    <ul id="ref-list" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 border-t border-l border-ink/10">
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">SBIm</p><p class="text-[13px] text-ink/55 leading-snug mt-1">Sociedade Brasileira de Imunizações</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">SBC</p><p class="text-[13px] text-ink/55 leading-snug mt-1">Sociedade Brasileira de Cardiologia</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">MS</p><p class="text-[13px] text-ink/55 leading-snug mt-1">Ministério da Saúde do Brasil</p></li>
+    </ul>
+
+    <div class="flex items-center justify-between mt-12 mb-4"><p class="font-mono text-[11px] tracking-[0.18em] text-ink/50">INTERNACIONAIS</p><p class="font-mono text-[11px] text-ink/40">12</p></div>
+    <ul id="ref-list-int" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 border-t border-l border-ink/10">
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">USPSTF</p><p class="text-[13px] text-ink/55 leading-snug mt-1">US Preventive Services Task Force</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">AHA</p><p class="text-[13px] text-ink/55 leading-snug mt-1">American Heart Association</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">ACC</p><p class="text-[13px] text-ink/55 leading-snug mt-1">American College of Cardiology</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">ADA</p><p class="text-[13px] text-ink/55 leading-snug mt-1">American Diabetes Association</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">ACOG</p><p class="text-[13px] text-ink/55 leading-snug mt-1">American College of Obstetricians and Gynecologists</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">CDC</p><p class="text-[13px] text-ink/55 leading-snug mt-1">Centers for Disease Control and Prevention</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">NIH</p><p class="text-[13px] text-ink/55 leading-snug mt-1">National Institutes of Health</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">ESC</p><p class="text-[13px] text-ink/55 leading-snug mt-1">European Society of Cardiology</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">EAS</p><p class="text-[13px] text-ink/55 leading-snug mt-1">European Atherosclerosis Society</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">EACS</p><p class="text-[13px] text-ink/55 leading-snug mt-1">European AIDS Clinical Society</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">KDIGO</p><p class="text-[13px] text-ink/55 leading-snug mt-1">Kidney Disease: Improving Global Outcomes</p></li>
+      <li class="border-r border-b border-ink/10 p-5 hover:bg-mist/40 transition"><p class="text-[17px] font-medium tracking-tight">GOLD</p><p class="text-[13px] text-ink/55 leading-snug mt-1">Global Initiative for Chronic Obstructive Lung Disease</p></li>
+      <li class="col-span-2 sm:col-span-3 border-r border-b border-ink/10 p-5 bg-mist/50 flex items-center gap-4"><span class="w-9 h-9 shrink-0 rounded-full bg-white flex items-center justify-center text-teal text-[13px]"><i class="fa-solid fa-link"></i></span><p class="text-[14px] text-ink/70 leading-snug">Cada recomendação mostra a fonte e o ano, com link para o documento original.</p></li>
+    </ul>
   </div>
 </section>
 
@@ -214,32 +249,11 @@
         </div>
       </div>
 
-      <div class="lg:col-span-6">
+      <div class="lg:col-span-5 lg:col-start-8">
         <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">O ALGORITMO EVIDĒNS</p>
-        <h2 class="font-light text-[40px] lg:text-[60px] leading-[1] tracking-tightest">Mais de 2 mil páginas.<br><span class="font-serif italic text-teal tracking-tight">Um algoritmo.</span></h2>
-        <p class="text-[17px] text-ink/65 leading-relaxed mt-6 max-w-[500px]">O Evidēns reúne mais de <strong class="text-ink font-medium">2 mil páginas de diretrizes de 15 sociedades e órgãos de saúde</strong> num algoritmo conciso, feito <em class="font-serif italic text-teal-dark text-[19px]">de médico para médicos</em>. Em vez de procurar a resposta em dezenas de fontes, você chega em poucos segundos a uma conduta baseada em evidência científica.</p>
-        <ul id="domain-list" class="mt-10 border-t border-ink/10">
-          <li class="flex items-start gap-5 py-5 border-b border-ink/10">
-            <span class="text-[12px] text-ink/40 w-6 pt-1.5">01</span>
-            <div><p class="text-[11px] tracking-[0.18em] text-ink/45">DECISÃO</p><p class="text-[22px] font-light tracking-tight">Tomada de decisão rápida</p><p class="text-[14px] text-ink/55 mt-1">Condutas guiadas pela evidência, no tempo da consulta.</p></div>
-          </li>
-          <li class="flex items-start gap-5 py-5 border-b border-ink/10">
-            <span class="text-[12px] text-ink/40 w-6 pt-1.5">02</span>
-            <div><p class="text-[11px] tracking-[0.18em] text-ink/45">EXAMES</p><p class="text-[22px] font-light tracking-tight">Geração de pedidos de exames</p><p class="text-[14px] text-ink/55 mt-1">Solicitações prontas a partir do raciocínio clínico.</p></div>
-          </li>
-          <li class="flex items-start gap-5 py-5 border-b border-ink/10">
-            <span class="text-[12px] text-ink/40 w-6 pt-1.5">03</span>
-            <div><p class="text-[11px] tracking-[0.18em] text-ink/45">VACINAS</p><p class="text-[22px] font-light tracking-tight">Receitas de vacinas</p><p class="text-[14px] text-ink/55 mt-1">Prescrição alinhada ao perfil e ao histórico do paciente.</p></div>
-          </li>
-        </ul>
-        <div class="flex flex-wrap items-center gap-2 mt-7 text-[12px] text-ink/60">
-          <span class="text-ink/45 mr-1">Considera:</span>
-          <span class="rounded-full bg-white/70 px-3 py-1">Idade e sexo</span>
-          <span class="rounded-full bg-white/70 px-3 py-1">Comorbidades</span>
-          <span class="rounded-full bg-white/70 px-3 py-1">Tabagismo e álcool</span>
-          <span class="rounded-full bg-white/70 px-3 py-1">História familiar</span>
-          <span class="rounded-full bg-white/70 px-3 py-1">Gestação e imunossupressão</span>
-        </div>
+        <h2 class="font-light text-[40px] lg:text-[64px] leading-[1] tracking-tightest">Mais de 2 mil páginas.<br><span class="font-serif italic text-teal tracking-tight">Uma decisão clara.</span></h2>
+        <p class="text-[17px] lg:text-[18px] text-ink/65 leading-relaxed mt-7 max-w-[480px]">O Evidēns reúne mais de <strong class="text-ink font-medium">2 mil páginas de diretrizes de 15 sociedades e órgãos de saúde</strong> num algoritmo conciso, feito <em class="font-serif italic text-teal-dark text-[20px]">de médico para médicos</em>. Em vez de procurar a resposta em dezenas de fontes, você chega em poucos segundos a uma conduta baseada em evidência científica.</p>
+        <a href="#metodo" class="inline-flex items-center gap-2 bg-ink text-white text-[15px] font-medium rounded-full pl-6 pr-5 h-12 mt-10 hover:bg-teal transition">Ver como funciona <i class="fa-solid fa-arrow-down text-[11px]"></i></a>
       </div>
     </div>
   </div>
@@ -249,46 +263,130 @@
 <section id="metodo" class="max-w-[1360px] mx-auto px-6 lg:px-10 py-24 lg:py-32">
   <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-14">
     <div>
-      <p class="text-[12px] tracking-[0.2em] text-ink/50 font-medium mb-6">COMO FUNCIONA / 01–03</p>
+      <p class="text-[12px] tracking-[0.2em] text-ink/50 font-medium mb-6">COMO FUNCIONA / 3 PASSOS</p>
       <h2 class="font-light text-[40px] lg:text-[64px] leading-[0.98] tracking-tightest">Do guideline à prescrição<br><span class="font-serif italic text-teal tracking-tight">em poucos segundos.</span></h2>
     </div>
-    <p class="text-[16px] text-ink/65 max-w-[460px] leading-relaxed">Imagine uma paciente fictícia: mulher, 42 anos, G3P2CA0 com 24 semanas, hipertensa, ex-tabagista de 25 maços-ano, mãe com câncer colorretal, que vem à consulta para o pré-natal. <strong class="text-ink font-medium">O que você pediria? Quais as recomendações de rastreio para essa paciente?</strong></p>
   </div>
 
-  <div class="grid lg:grid-cols-12 gap-6">
-    <div id="method-tabs" class="lg:col-span-5 flex flex-col gap-3">
-      <button data-tab="0" class="tab text-left rounded-2xl p-6 lg:p-7 transition border border-transparent">
-        <div class="flex items-start gap-4"><span class="text-[12px] text-teal mt-2">01</span><div><p class="text-[26px] font-light tracking-tight">Informar o paciente</p><p class="text-[14px] text-ink/55 mt-1">Três campos obrigatórios; o resto refina.</p></div></div>
-        <div class="bar h-[2px] bg-ink/10 rounded-full mt-6 overflow-hidden"><div class="h-full bg-teal w-0 transition-all duration-500"></div></div>
-      </button>
-      <button data-tab="1" class="tab text-left rounded-2xl p-6 lg:p-7 transition border border-transparent">
-        <div class="flex items-start gap-4"><span class="text-[12px] text-teal mt-2">02</span><div><p class="text-[26px] font-light tracking-tight">Revisar as recomendações</p><p class="text-[14px] text-ink/55 mt-1">Cada item com fonte, prioridade e periodicidade.</p></div></div>
-        <div class="bar h-[2px] bg-ink/10 rounded-full mt-6 overflow-hidden"><div class="h-full bg-teal w-0 transition-all duration-500"></div></div>
-      </button>
-      <button data-tab="2" class="tab text-left rounded-2xl p-6 lg:p-7 transition border border-transparent">
-        <div class="flex items-start gap-4"><span class="text-[12px] text-teal mt-2">03</span><div><p class="text-[26px] font-light tracking-tight">Gerar os documentos</p><p class="text-[14px] text-ink/55 mt-1">Pedidos e receita em PDF, para assinar.</p></div></div>
-        <div class="bar h-[2px] bg-ink/10 rounded-full mt-6 overflow-hidden"><div class="h-full bg-teal w-0 transition-all duration-500"></div></div>
-      </button>
-    </div>
-
-    <div class="lg:col-span-7 rounded-[24px] bg-mist/70 relative overflow-hidden p-6 sm:p-10 lg:p-14 flex items-center justify-center">
-      <p class="absolute top-6 left-6 sm:left-10 text-[11px] tracking-[0.2em] text-ink/45">EVIDĒNS CHECK / PASSO <span id="iface-num">01</span></p>
-      <div id="iface-card" class="relative w-full max-w-[520px] bg-white rounded-2xl shadow-[0_30px_80px_-30px_rgba(20,41,47,0.35)] p-7 sm:p-8 mt-8">
-        <div class="flex items-center justify-between pb-5 border-b border-ink/10">
-          <p id="iface-title" class="text-[15px] font-medium">Dados da paciente</p>
-          <span class="flex items-center gap-1.5 text-[12px] text-teal"><span class="w-1.5 h-1.5 rounded-full bg-teal"></span>Exemplo</span>
-        </div>
-        <h3 id="iface-head" class="text-[32px] sm:text-[36px] font-light tracking-tight leading-[1.05] mt-7">Três campos obrigatórios.</h3>
-        <p id="iface-desc" class="text-[14px] text-ink/60 leading-relaxed mt-3">Idade, sexo e tabagismo bastam para começar.</p>
-        <div id="iface-grid" class="grid grid-cols-2 gap-3 mt-7"></div>
-        <div class="flex items-center justify-between pt-5 mt-7 border-t border-ink/10 text-[12px] text-ink/50">
-          <span>Caso fictício · saída real do algoritmo</span>
-          <span id="iface-count">01 / 03</span>
+  <div id="steps" class="grid lg:grid-cols-2 gap-5">
+    <!-- Step 01 -->
+    <article id="step-1" class="rounded-[24px] bg-white border border-ink/[0.07] p-6 sm:p-8 lg:p-10 flex flex-col">
+      <div class="flex items-center justify-between">
+        <span class="font-serif italic text-teal text-[44px] leading-none">01</span>
+        <span class="font-mono text-[10px] tracking-[0.18em] text-ink/40">DADOS · &lt; 1 MIN</span>
+      </div>
+      <h3 class="text-[26px] lg:text-[30px] font-light tracking-tight leading-[1.1] mt-6">Insira os dados do paciente</h3>
+      <p class="text-[15px] text-ink/60 leading-relaxed mt-2 max-w-[440px]">Idade, sexo, comorbidades, hábitos e história familiar em campos organizados.</p>
+      <div class="flex-1 mt-8 rounded-2xl bg-mist/60 p-5 sm:p-7 flex items-center justify-center">
+        <div class="w-full max-w-[400px] bg-white rounded-xl shadow-[0_20px_50px_-24px_rgba(20,41,47,.35)] p-5">
+          <div class="flex items-center justify-between pb-3 border-b border-ink/10">
+            <p class="text-[13px] font-medium">Novo check-up</p>
+            <span class="font-mono text-[10px] text-ink/45">1 / 3</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5 mt-4">
+            <div class="rounded-lg border border-ink/10 px-3 py-2"><p class="font-mono text-[9px] tracking-[0.14em] text-ink/45">IDADE</p><p class="text-[14px] font-medium mt-0.5">52 anos</p></div>
+            <div class="rounded-lg border border-ink/10 px-3 py-2"><p class="font-mono text-[9px] tracking-[0.14em] text-ink/45">SEXO</p><p class="text-[14px] font-medium mt-0.5">Masculino</p></div>
+          </div>
+          <p class="font-mono text-[9px] tracking-[0.14em] text-ink/45 mt-4">COMORBIDADES</p>
+          <div class="flex flex-wrap gap-1.5 mt-2 text-[12px]">
+            <span class="rounded-full bg-teal text-white px-2.5 py-1"><i class="fa-solid fa-check text-[9px] mr-1"></i>Hipertensão</span>
+            <span class="rounded-full border border-ink/15 px-2.5 py-1 text-ink/60">Diabetes</span>
+            <span class="rounded-full bg-teal text-white px-2.5 py-1"><i class="fa-solid fa-check text-[9px] mr-1"></i>Dislipidemia</span>
+            <span class="rounded-full border border-ink/15 px-2.5 py-1 text-ink/60">DRC</span>
+          </div>
+          <p class="font-mono text-[9px] tracking-[0.14em] text-ink/45 mt-4">TABAGISMO</p>
+          <div class="flex flex-wrap gap-1.5 mt-2 text-[12px]">
+            <span class="rounded-full bg-teal text-white px-2.5 py-1"><i class="fa-solid fa-check text-[9px] mr-1"></i>Nunca fumou</span>
+            <span class="rounded-full border border-ink/15 px-2.5 py-1 text-ink/60">Ex-fumante</span>
+            <span class="rounded-full border border-ink/15 px-2.5 py-1 text-ink/60">Fumante</span>
+          </div>
         </div>
       </div>
-    </div>
+    </article>
+
+    <!-- Step 02 -->
+    <article id="step-2" class="rounded-[24px] bg-white border border-ink/[0.07] p-6 sm:p-8 lg:p-10 flex flex-col">
+      <div class="flex items-center justify-between">
+        <span class="font-serif italic text-teal text-[44px] leading-none">02</span>
+        <span class="font-mono text-[10px] tracking-[0.18em] text-ink/40">TRIAGEM</span>
+      </div>
+      <h3 class="text-[26px] lg:text-[30px] font-light tracking-tight leading-[1.1] mt-6">Responda à triagem de segurança</h3>
+      <p class="text-[15px] text-ink/60 leading-relaxed mt-2 max-w-[440px]">Perguntas objetivas antes das vacinas de vírus vivo. "Não informado" nunca é tratado como "não".</p>
+      <div class="flex-1 mt-8 rounded-2xl bg-mist/60 p-5 sm:p-7 flex items-center justify-center">
+        <div class="w-full max-w-[400px] bg-white rounded-xl shadow-[0_20px_50px_-24px_rgba(20,41,47,.35)] p-5">
+          <div class="flex items-center justify-between">
+            <p class="font-mono text-[10px] tracking-[0.14em] text-ink/45">TRIAGEM · VACINAS ATENUADAS</p>
+            <span class="font-mono text-[10px] text-teal">1 / 3</span>
+          </div>
+          <div class="h-1 rounded-full bg-ink/10 mt-2 overflow-hidden"><div class="h-full w-1/3 bg-teal rounded-full"></div></div>
+          <p class="text-[16px] font-medium leading-snug mt-5">O paciente tem imunossupressão, por doença ou por tratamento?</p>
+          <div class="grid grid-cols-3 gap-2 mt-4 text-[13px]">
+            <span class="rounded-lg border border-ink/15 py-2 text-center text-ink/60">Sim</span>
+            <span class="rounded-lg bg-ink text-white py-2 text-center">Não</span>
+            <span class="rounded-lg border border-ink/15 py-2 text-center text-ink/60">Não informado</span>
+          </div>
+          <div class="flex items-center gap-2 mt-5 pt-4 border-t border-ink/10 text-[11px] text-ink/50">
+            <i class="fa-solid fa-shield-halved text-teal text-[10px]"></i>Decide tríplice viral, varicela, febre amarela e dengue
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Step 03 -->
+    <article id="step-3" class="lg:col-span-2 rounded-[24px] bg-ink text-white p-6 sm:p-8 lg:p-12 grid lg:grid-cols-12 gap-10 items-center relative overflow-hidden">
+      <div class="absolute -left-32 -bottom-40 w-[520px] h-[520px] rounded-full bg-teal/25 blur-[120px]"></div>
+      <div class="relative lg:col-span-5">
+        <div class="flex items-center gap-4">
+          <span class="font-serif italic text-aqua text-[44px] leading-none">03</span>
+          <span class="font-mono text-[10px] tracking-[0.18em] text-white/45">CONDUTA</span>
+        </div>
+        <h3 class="text-[30px] lg:text-[40px] font-light tracking-tight leading-[1.08] mt-6">Receba a conduta guiada por <span class="font-serif italic text-aqua">evidência científica.</span></h3>
+        <p class="text-[16px] text-white/65 leading-relaxed mt-4 max-w-[440px]">Check-up baseado em evidência, com pedidos de exames e receita de vacinas em PDF, prontos para imprimir, assinar e carimbar.</p>
+        <div class="flex flex-wrap gap-2 mt-8 text-[13px]">
+          <span class="inline-flex items-center gap-2 rounded-full border border-white/20 px-3.5 py-2"><i class="fa-solid fa-vial text-aqua text-[11px]"></i>Pedido de laboratório</span>
+          <span class="inline-flex items-center gap-2 rounded-full border border-white/20 px-3.5 py-2"><i class="fa-solid fa-syringe text-aqua text-[11px]"></i>Receita de vacinas</span>
+          <span class="inline-flex items-center gap-2 rounded-full border border-white/20 px-3.5 py-2"><i class="fa-solid fa-x-ray text-aqua text-[11px]"></i>Pedido de imagem</span>
+        </div>
+      </div>
+      <div class="relative lg:col-span-7">
+        <div id="conduta-table" class="bg-white text-ink rounded-2xl overflow-hidden shadow-[0_30px_80px_-30px_rgba(0,0,0,.6)]">
+          <div class="flex items-center justify-between px-5 py-4 bg-paper border-b border-ink/10">
+            <p class="font-mono text-[11px] tracking-[0.16em] text-ink/60">PACIENTE · H · 52 ANOS · HAS · DISLIPIDEMIA</p>
+            <span class="text-[11px] text-teal flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-teal"></span>4 de 30</span>
+          </div>
+          <div class="grid grid-cols-[1.1fr_1.2fr_auto] sm:grid-cols-[1.1fr_1.2fr_110px_40px] gap-x-4 px-5 py-3 border-b border-ink/10 font-mono text-[9.5px] tracking-[0.14em] text-ink/45">
+            <span>DOMÍNIO</span><span>RECOMENDAÇÃO</span><span class="hidden sm:block">FONTE</span><span class="text-right">NÍVEL</span>
+          </div>
+          <div class="grid grid-cols-[1.1fr_1.2fr_auto] sm:grid-cols-[1.1fr_1.2fr_110px_40px] gap-x-4 items-start px-5 py-4 border-b border-ink/10">
+            <div><p class="font-mono text-[9.5px] tracking-[0.14em] text-teal">RASTREAMENTO</p><p class="text-[14px] font-medium leading-tight mt-1">Câncer colorretal</p></div>
+            <p class="text-[13px] text-ink/60 leading-snug pt-0.5">Colonoscopia a cada 10 anos (45–75 anos)</p>
+            <span class="hidden sm:inline-block self-start font-mono text-[10px] text-ink/70 bg-mist/70 rounded-md px-2 py-1 whitespace-nowrap">USPSTF 2021</span>
+            <span class="justify-self-end w-6 h-6 rounded-md bg-ink text-white text-[11px] font-semibold flex items-center justify-center">B</span>
+          </div>
+          <div class="grid grid-cols-[1.1fr_1.2fr_auto] sm:grid-cols-[1.1fr_1.2fr_110px_40px] gap-x-4 items-start px-5 py-4 border-b border-ink/10">
+            <div><p class="font-mono text-[9.5px] tracking-[0.14em] text-teal">EXAME</p><p class="text-[14px] font-medium leading-tight mt-1">Glicose, soro</p></div>
+            <p class="text-[13px] text-ink/60 leading-snug pt-0.5">A cada 3 anos se normal (≥ 35 anos)</p>
+            <span class="hidden sm:inline-block self-start font-mono text-[10px] text-ink/70 bg-mist/70 rounded-md px-2 py-1 whitespace-nowrap">ADA 2024</span>
+            <span class="justify-self-end w-6 h-6 rounded-md bg-ink text-white text-[11px] font-semibold flex items-center justify-center">A</span>
+          </div>
+          <div class="grid grid-cols-[1.1fr_1.2fr_auto] sm:grid-cols-[1.1fr_1.2fr_110px_40px] gap-x-4 items-start px-5 py-4 border-b border-ink/10">
+            <div><p class="font-mono text-[9.5px] tracking-[0.14em] text-teal">EXAME</p><p class="text-[14px] font-medium leading-tight mt-1">Albumina/creatinina, urina</p></div>
+            <p class="text-[13px] text-ink/60 leading-snug pt-0.5">Anual no adulto com HAS</p>
+            <span class="hidden sm:inline-block self-start font-mono text-[10px] text-ink/70 bg-mist/70 rounded-md px-2 py-1 whitespace-nowrap">AHA / SBC 2025</span>
+            <span class="justify-self-end w-6 h-6 rounded-md bg-ink text-white text-[11px] font-semibold flex items-center justify-center">A</span>
+          </div>
+          <div class="grid grid-cols-[1.1fr_1.2fr_auto] sm:grid-cols-[1.1fr_1.2fr_110px_40px] gap-x-4 items-start px-5 py-4">
+            <div><p class="font-mono text-[9.5px] tracking-[0.14em] text-teal">VACINA</p><p class="text-[14px] font-medium leading-tight mt-1">Herpes-zóster</p></div>
+            <p class="text-[13px] text-ink/60 leading-snug pt-0.5">2 doses, intervalo de 2 a 6 meses (≥ 50 anos)</p>
+            <span class="hidden sm:inline-block self-start font-mono text-[10px] text-ink/70 bg-mist/70 rounded-md px-2 py-1 whitespace-nowrap">SBIm 2024</span>
+            <span class="justify-self-end w-6 h-6 rounded-md bg-ink text-white text-[11px] font-semibold flex items-center justify-center">A</span>
+          </div>
+        </div>
+      </div>
+    </article>
   </div>
 </section>
+
 
 <!-- Dark: Evidēns Check -->
 <section id="check" class="px-3 sm:px-4">
@@ -305,27 +403,27 @@
         <div id="check-mockup" class="w-full max-w-[560px] bg-paper rounded-2xl shadow-2xl lg:-rotate-2 overflow-hidden">
           <div class="flex items-center justify-between px-7 py-5 border-b border-ink/10">
             <p class="font-semibold tracking-tight">evidēns <span class="text-teal text-[12px] font-medium">check</span></p>
-            <p class="text-[11px] tracking-wider text-ink/45">F · 42 ANOS · GESTANTE · HAS</p>
+            <p class="text-[11px] tracking-wider text-ink/45">H · 52 ANOS · HAS · DISLIPIDEMIA</p>
           </div>
           <div class="px-7 pt-7 pb-4">
             <p class="text-[11px] tracking-[0.18em] text-teal">RESULTADO · CASO FICTÍCIO</p>
-            <h3 class="text-[34px] font-light tracking-tight leading-[1.05] mt-3">24 recomendações<br><span class="font-serif italic">para revisar.</span></h3>
+            <h3 class="text-[34px] font-light tracking-tight leading-[1.05] mt-3">30 recomendações<br><span class="font-serif italic">para revisar.</span></h3>
             <div class="mt-6">
               <div class="flex items-center justify-between gap-3 py-4 border-t border-ink/10">
-                <div class="flex items-center gap-4"><span class="w-9 h-9 shrink-0 rounded-full bg-mist flex items-center justify-center text-teal text-[13px]"><i class="fa-solid fa-vial"></i></span><div><p class="text-[14px] font-medium">Exames laboratoriais</p><p class="text-[12px] text-ink/50">Glicemia, TOTG, função renal, albuminúria…</p></div></div>
+                <div class="flex items-center gap-4"><span class="w-9 h-9 shrink-0 rounded-full bg-mist flex items-center justify-center text-teal text-[13px]"><i class="fa-solid fa-vial"></i></span><div><p class="text-[14px] font-medium">Exames laboratoriais</p><p class="text-[12px] text-ink/50">Glicemia, lipídios, Lp(a), função renal, PSA…</p></div></div>
                 <span class="text-[11px] text-teal border border-teal/30 rounded-full px-3 py-1">12</span>
               </div>
               <div class="flex items-center justify-between gap-3 py-4 border-t border-ink/10">
-                <div class="flex items-center gap-4"><span class="w-9 h-9 shrink-0 rounded-full bg-mist flex items-center justify-center text-teal text-[13px]"><i class="fa-solid fa-x-ray"></i></span><div><p class="text-[14px] font-medium">Exames de imagem</p><p class="text-[12px] text-ink/50">ECG, ecocardiograma, MAPA…</p></div></div>
+                <div class="flex items-center gap-4"><span class="w-9 h-9 shrink-0 rounded-full bg-mist flex items-center justify-center text-teal text-[13px]"><i class="fa-solid fa-x-ray"></i></span><div><p class="text-[14px] font-medium">Exames de imagem</p><p class="text-[12px] text-ink/50">ECG, ecocardiograma, MAPA, colonoscopia</p></div></div>
                 <span class="text-[11px] text-teal border border-teal/30 rounded-full px-3 py-1">4</span>
               </div>
               <div class="flex items-center justify-between gap-3 py-4 border-t border-ink/10">
-                <div class="flex items-center gap-4"><span class="w-9 h-9 shrink-0 rounded-full bg-mist flex items-center justify-center text-teal text-[13px]"><i class="fa-solid fa-syringe"></i></span><div><p class="text-[14px] font-medium">Vacinas</p><p class="text-[12px] text-ink/50">Influenza, dTpa, VSR, hepatite B…</p></div></div>
-                <span class="text-[11px] text-teal border border-teal/30 rounded-full px-3 py-1">8</span>
+                <div class="flex items-center gap-4"><span class="w-9 h-9 shrink-0 rounded-full bg-mist flex items-center justify-center text-teal text-[13px]"><i class="fa-solid fa-syringe"></i></span><div><p class="text-[14px] font-medium">Vacinas</p><p class="text-[12px] text-ink/50">Influenza, herpes-zóster, pneumocócica, dTpa…</p></div></div>
+                <span class="text-[11px] text-teal border border-teal/30 rounded-full px-3 py-1">14</span>
               </div>
               <div class="flex items-center justify-between gap-3 py-4 border-t border-ink/10">
-                <div class="flex items-center gap-4"><span class="w-9 h-9 shrink-0 rounded-full bg-sand flex items-center justify-center text-ink/60 text-[13px]"><i class="fa-solid fa-shield-halved"></i></span><div><p class="text-[14px] font-medium">Contraindicadas na gestação</p><p class="text-[12px] text-ink/50">Tríplice viral, varicela, febre amarela, dengue, HPV</p></div></div>
-                <span class="text-[11px] text-ink/50 border border-ink/15 rounded-full px-3 py-1">5</span>
+                <div class="flex items-center gap-4"><span class="w-9 h-9 shrink-0 rounded-full bg-sand flex items-center justify-center text-ink/60 text-[13px]"><i class="fa-solid fa-shield-halved"></i></span><div><p class="text-[14px] font-medium">Retidas pela triagem</p><p class="text-[12px] text-ink/50">Nenhuma: triagem respondida, sem contraindicação</p></div></div>
+                <span class="text-[11px] text-ink/50 border border-ink/15 rounded-full px-3 py-1">0</span>
               </div>
             </div>
           </div>
@@ -338,46 +436,14 @@
   </div>
 </section>
 
-<!-- Principles cards -->
-<section id="principios" class="max-w-[1360px] mx-auto px-6 lg:px-10 py-24 lg:py-32">
-  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
-    <h2 class="font-light text-[40px] lg:text-[60px] leading-[1] tracking-tightest max-w-[700px]">Rigoroso por dentro.<br><span class="font-serif italic text-teal tracking-tight">Sereno por fora.</span></h2>
-    <p class="text-[17px] text-ink/65 max-w-[420px] leading-relaxed">Três regras que o algoritmo segue em todo atendimento.</p>
-  </div>
-  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-    <article id="card-ciencia" class="group">
-      <div class="aspect-[3/4] rounded-[22px] overflow-hidden bg-mist"><img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_1dad4ffd76_275961eeb07ff58a.png" alt="" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-700"></div>
-      <div class="flex items-start justify-between mt-5"><div><p class="text-[22px] font-light tracking-tight">Cada item com a sua fonte</p><p class="text-[14px] text-ink/55 mt-1">Diretriz e ano ao lado de cada recomendação, com link para o documento original.</p></div><span class="text-[12px] text-ink/40">01</span></div>
-    </article>
-    <article id="card-seguranca" class="group">
-      <div class="aspect-[3/4] rounded-[22px] overflow-hidden bg-mist"><svg viewBox="0 0 300 400" class="w-full h-full" role="img" aria-label="Estados da triagem de vacinas">
-        <rect width="300" height="400" fill="#DCEBEE"/>
-        <g fill="none" stroke="#0E97B5" stroke-opacity=".18"><circle cx="150" cy="200" r="150"/><circle cx="150" cy="200" r="105" stroke-dasharray="3 5"/></g>
-        <path d="M150 62 l52 20 v44 c0 36 -22 60 -52 72 c-30 -12 -52 -36 -52 -72 v-44 z" fill="#14292F"/>
-        <path d="M128 128 l16 16 l30 -34" fill="none" stroke="#8FD6E0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-        <g font-family="Inter Tight, sans-serif" font-size="13" font-weight="500">
-          <rect x="52" y="232" width="196" height="36" rx="18" fill="#fff"/><circle cx="74" cy="250" r="6" fill="#C0392B"/><text x="90" y="254.500" fill="#14292F">Contraindicada</text>
-          <rect x="52" y="278" width="196" height="36" rx="18" fill="#fff"/><circle cx="74" cy="296" r="6" fill="#D35400"/><text x="90" y="300.500" fill="#14292F">Precaução</text>
-          <rect x="52" y="324" width="196" height="36" rx="18" fill="#fff"/><circle cx="74" cy="342" r="6" fill="#9AA8AB"/><text x="90" y="346.500" fill="#14292F">Dados insuficientes</text>
-        </g>
-      </svg></div>
-      <div class="flex items-start justify-between mt-5"><div><p class="text-[22px] font-light tracking-tight">Segurança antes da automação</p><p class="text-[14px] text-ink/55 mt-1">Vacinas de vírus vivo só entram com a triagem respondida. "Não informado" nunca vira "não".</p></div><span class="text-[12px] text-ink/40">02</span></div>
-    </article>
-    <article id="card-privacidade" class="group">
-      <div class="aspect-[3/4] rounded-[22px] overflow-hidden bg-mist"><img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_db9114a3c9_2a0076bd64b4ac49.png" alt="" loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-700"></div>
-      <div class="flex items-start justify-between mt-5"><div><p class="text-[22px] font-light tracking-tight">Nada fica gravado</p><p class="text-[14px] text-ink/55 mt-1">Os dados servem ao cálculo e são descartados. O nome do paciente é opcional e só vai para o PDF.</p></div><span class="text-[12px] text-ink/40">03</span></div>
-    </article>
-  </div>
-</section>
-
 <!-- Sand: evidence meets care -->
-<section id="cuidado" class="px-3 sm:px-4">
+<section id="cuidado" class="px-3 sm:px-4 pt-24 lg:pt-32">
   <div class="rounded-[28px] bg-sand overflow-hidden grid lg:grid-cols-2">
     <div class="px-6 sm:px-10 lg:px-14 py-20 lg:py-28 flex flex-col justify-center">
       <p class="text-[12px] tracking-[0.2em] text-ink/50 font-medium mb-8">MAIS DO QUE TECNOLOGIA</p>
       <h2 class="font-light text-[48px] lg:text-[76px] leading-[0.95] tracking-tightest">A evidência<br>encontra o <span class="font-serif italic text-teal-dark tracking-tight">cuidado.</span></h2>
       <p class="text-[17px] text-ink/65 leading-relaxed mt-8 max-w-[480px]">Menos tempo procurando a diretriz certa. Mais tempo explicando ao paciente por que rastrear, e o que fazer com o resultado.</p>
-      <a href="/intelligent-tools" class="inline-flex items-center gap-2 bg-ink text-white text-[15px] font-medium rounded-full pl-6 pr-5 h-12 mt-10 self-start hover:bg-teal transition">Começar uma avaliação <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></a>
+      <a href="/intelligent-tools" class="inline-flex items-center gap-2 bg-ink text-white text-[15px] font-medium rounded-full pl-6 pr-5 h-12 mt-10 self-start hover:bg-teal transition">Comece uma avaliação grátis <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></a>
     </div>
     <div class="relative min-h-[420px] lg:min-h-[640px]">
       <svg viewBox="0 0 600 640" preserveAspectRatio="xMidYMid slice" class="absolute inset-0 w-full h-full" aria-hidden="true">
@@ -400,55 +466,72 @@
 <!-- FAQ -->
 <section id="faq" class="max-w-[1360px] mx-auto px-6 lg:px-10 py-24 lg:py-32 grid lg:grid-cols-12 gap-10">
   <div class="lg:col-span-4">
-    <p class="text-[12px] tracking-[0.2em] text-ink/50 font-medium mb-6">PERGUNTAS FREQUENTES</p>
-    <h2 class="font-light text-[40px] lg:text-[52px] leading-[1] tracking-tightest">O que você <span class="font-serif italic text-teal tracking-tight">precisa saber.</span></h2>
+    <div class="lg:sticky lg:top-28">
+      <p class="text-[12px] tracking-[0.2em] text-ink/50 font-medium mb-6">PERGUNTAS FREQUENTES</p>
+      <h2 class="font-light text-[44px] lg:text-[60px] leading-[1] tracking-tightest">O que você<br><span class="font-serif italic text-teal tracking-tight">precisa saber.</span></h2>
+    </div>
   </div>
-  <div class="lg:col-span-8 border-t border-ink/10">
+  <div id="faq-list" class="lg:col-span-8 border-t border-ink/10">
     <details class="border-b border-ink/10" open>
-      <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer text-[20px] font-light tracking-tight">O Evidēns substitui o julgamento médico?<span class="faq-icon w-9 h-9 shrink-0 rounded-full border border-ink/15 flex items-center justify-center text-[12px] transition"><i class="fa-solid fa-plus"></i></span></summary>
-      <p class="pb-6 pr-14 text-[15px] text-ink/60 leading-relaxed">Não. Ele organiza o que as diretrizes recomendam para aquele perfil. Cada item é uma sugestão para você revisar e individualizar; a conduta e a assinatura são suas.</p>
+      <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer text-[20px] lg:text-[22px] font-light tracking-tight">O Evidēns substitui o julgamento médico?<span class="faq-icon w-10 h-10 shrink-0 rounded-full bg-white border border-ink/10 flex items-center justify-center text-[12px] transition"><i class="fa-solid fa-plus"></i></span></summary>
+      <p class="pb-7 pr-14 text-[15px] text-ink/60 leading-[1.75] max-w-[640px]">Não. Ele organiza o que as diretrizes recomendam para aquele perfil. Cada item é uma sugestão para você revisar e individualizar; a conduta e a assinatura são suas.</p>
     </details>
     <details class="border-b border-ink/10">
-      <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer text-[20px] font-light tracking-tight">O que tem na plataforma?<span class="faq-icon w-9 h-9 shrink-0 rounded-full border border-ink/15 flex items-center justify-center text-[12px] transition"><i class="fa-solid fa-plus"></i></span></summary>
-      <p class="pb-6 pr-14 text-[15px] text-ink/60 leading-relaxed">71 recomendações para o check-up do adulto: rastreamento, exames laboratoriais, exames de imagem e vacinas, ajustadas por idade, sexo, comorbidades, hábitos, história familiar e gestação. Cada item traz a fonte e a periodicidade. A partir da lista, a plataforma gera as minutas em PDF dos pedidos de exames e da receita de vacinas.</p>
+      <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer text-[20px] lg:text-[22px] font-light tracking-tight">O que tem na plataforma?<span class="faq-icon w-10 h-10 shrink-0 rounded-full bg-white border border-ink/10 flex items-center justify-center text-[12px] transition"><i class="fa-solid fa-plus"></i></span></summary>
+      <p class="pb-7 pr-14 text-[15px] text-ink/60 leading-[1.75] max-w-[640px]"><strong class="font-medium text-ink">71 recomendações</strong> para o check-up do adulto: rastreamento, exames laboratoriais, exames de imagem e vacinas, ajustadas por idade, sexo, comorbidades, hábitos, história familiar e gestação. Cada item traz a fonte e a periodicidade. A partir da lista, a plataforma gera as minutas em PDF dos pedidos de exames e da receita de vacinas.</p>
     </details>
     <details class="border-b border-ink/10">
-      <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer text-[20px] font-light tracking-tight">Quais diretrizes estão por trás das recomendações?<span class="faq-icon w-9 h-9 shrink-0 rounded-full border border-ink/15 flex items-center justify-center text-[12px] transition"><i class="fa-solid fa-plus"></i></span></summary>
-      <p class="pb-6 pr-14 text-[15px] text-ink/60 leading-relaxed">SBIm, SBC, Ministério da Saúde, USPSTF, CDC, NIH, AHA, ACC, ADA, ACOG, ESC, EAS, EACS, KDIGO e GOLD. Cada recomendação mostra a fonte e o ano, com link para o documento.</p>
+      <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer text-[20px] lg:text-[22px] font-light tracking-tight">Quais diretrizes estão por trás das recomendações?<span class="faq-icon w-10 h-10 shrink-0 rounded-full bg-white border border-ink/10 flex items-center justify-center text-[12px] transition"><i class="fa-solid fa-plus"></i></span></summary>
+      <div class="pb-7 pr-14 max-w-[640px]">
+        <div class="flex flex-wrap gap-1.5">
+          <span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">SBIm</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">SBC</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">Ministério da Saúde</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">USPSTF</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">CDC</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">NIH</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">AHA</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">ACC</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">ADA</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">ACOG</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">ESC</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">EAS</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">EACS</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">KDIGO</span><span class="rounded-full bg-white border border-ink/10 px-3 py-1 text-[12px] font-medium">GOLD</span>
+        </div>
+        <p class="text-[15px] text-ink/60 leading-[1.75] mt-4">Cada recomendação mostra a fonte e o ano, com link para o documento.</p>
+      </div>
     </details>
     <details class="border-b border-ink/10">
-      <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer text-[20px] font-light tracking-tight">Para quem é pensado?<span class="faq-icon w-9 h-9 shrink-0 rounded-full border border-ink/15 flex items-center justify-center text-[12px] transition"><i class="fa-solid fa-plus"></i></span></summary>
-      <p class="pb-6 pr-14 text-[15px] text-ink/60 leading-relaxed">Para médicos que fazem consulta de check-up de adultos (18 anos ou mais): clínica médica, medicina de família, cardiologia, ginecologia e afins.</p>
+      <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer text-[20px] lg:text-[22px] font-light tracking-tight">Para quem é pensado?<span class="faq-icon w-10 h-10 shrink-0 rounded-full bg-white border border-ink/10 flex items-center justify-center text-[12px] transition"><i class="fa-solid fa-plus"></i></span></summary>
+      <p class="pb-7 pr-14 text-[15px] text-ink/60 leading-[1.75] max-w-[640px]">Para médicos que fazem consulta de check-up de adultos (18 anos ou mais): clínica médica, medicina de família, cardiologia, ginecologia e afins.</p>
     </details>
     <details class="border-b border-ink/10">
-      <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer text-[20px] font-light tracking-tight">O que ainda não está incluído?<span class="faq-icon w-9 h-9 shrink-0 rounded-full border border-ink/15 flex items-center justify-center text-[12px] transition"><i class="fa-solid fa-plus"></i></span></summary>
-      <p class="pb-6 pr-14 text-[15px] text-ink/60 leading-relaxed">O cálculo de risco cardiovascular está desativado enquanto é validado. A rotina de exames própria do pré-natal e a pediatria ainda não fazem parte: na gestante, o Evidēns ajusta as vacinas e mantém o rastreio do adulto.</p>
+      <summary class="flex items-center justify-between gap-6 py-6 cursor-pointer text-[20px] lg:text-[22px] font-light tracking-tight">O que ainda não está incluído?<span class="faq-icon w-10 h-10 shrink-0 rounded-full bg-white border border-ink/10 flex items-center justify-center text-[12px] transition"><i class="fa-solid fa-plus"></i></span></summary>
+      <p class="pb-7 pr-14 text-[15px] text-ink/60 leading-[1.75] max-w-[640px]">O cálculo de risco cardiovascular está desativado enquanto é validado. A rotina de exames própria do pré-natal e a pediatria ainda não fazem parte: na gestante, o Evidēns ajusta as vacinas e mantém o rastreio do adulto.</p>
     </details>
   </div>
 </section>
 
 <!-- Final CTA -->
 <section id="cta" class="px-3 sm:px-4 pb-4">
-  <div class="rounded-[28px] bg-teal text-white px-6 sm:px-10 lg:px-14 py-20 lg:py-24 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10 relative overflow-hidden">
+  <div class="rounded-[28px] bg-teal text-white px-6 sm:px-10 lg:px-14 pt-20 lg:pt-24 pb-8 lg:pb-10 relative overflow-hidden">
     <svg class="absolute right-0 top-0 h-full opacity-20" viewBox="0 0 300 300" preserveAspectRatio="xMaxYMid meet"><defs><pattern id="dots2" width="12" height="12" patternUnits="userSpaceOnUse"><circle cx="6" cy="6" r="1.8" fill="#fff"/></pattern></defs><rect width="300" height="300" fill="url(#dots2)"/></svg>
-    <div class="relative">
-      <p class="text-[12px] tracking-[0.2em] text-white/75 font-medium mb-6">SEM CADASTRO · NADA GRAVADO</p>
-      <h2 class="font-light text-[36px] lg:text-[56px] leading-[1] tracking-tightest max-w-[620px]">Seu próximo check-up<br>em <span class="font-serif italic tracking-tight">poucos minutos.</span></h2>
+    <div id="cta-main" class="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
+      <div class="relative">
+        <p class="text-[12px] tracking-[0.2em] text-white/80 font-medium mb-6">DIRETRIZES ATUALIZADAS. DECISÕES FUNDAMENTADAS.</p>
+        <h2 class="font-light text-[40px] lg:text-[64px] leading-[0.98] tracking-tightest">Seu próximo check-up<br>em <span class="font-serif italic tracking-tight">poucos minutos.</span></h2>
+      </div>
+      <a href="/cadastro" class="relative inline-flex items-center gap-2 bg-white text-ink text-[15px] font-medium rounded-full pl-6 pr-5 h-12 self-start lg:self-auto shrink-0 hover:bg-ink hover:text-white transition">Criar conta <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></a>
     </div>
-    <a href="/intelligent-tools" class="relative inline-flex items-center gap-2 bg-white text-ink text-[15px] font-medium rounded-full pl-6 pr-5 h-12 self-start lg:self-auto hover:bg-ink hover:text-white transition">Abrir o check-up <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></a>
+    <p class="relative mt-16 lg:mt-20 flex items-center gap-3 text-[12px] text-white/75"><span class="w-8 h-px bg-white/50"></span>Disponível para médicos, residentes e estudantes de medicina.</p>
   </div>
 </section>
 
 <!-- Footer -->
 <footer id="footer" class="max-w-[1360px] mx-auto px-6 lg:px-10 pt-16 pb-10">
   <div class="grid md:grid-cols-12 gap-10 pb-14 border-b border-ink/10">
-    <div class="md:col-span-5">
+    <div class="md:col-span-4">
       <p class="text-[28px] font-medium tracking-tight">evidēns</p>
       <p class="text-[14px] text-ink/55 mt-3 max-w-[340px]">Check-up do adulto baseado em diretrizes, para apoiar a decisão do médico.</p>
     </div>
-    <div class="md:col-span-2 text-[14px] space-y-3"><p class="text-ink/40 text-[12px] tracking-wider mb-4">PLATAFORMA</p><a href="/intelligent-tools" class="block hover:text-teal">Evidēns Check</a><a href="#metodo" class="block hover:text-teal">Como funciona</a><a href="#visao" class="block hover:text-teal">O algoritmo</a></div>
-    <div class="md:col-span-2 text-[14px] space-y-3"><p class="text-ink/40 text-[12px] tracking-wider mb-4">CONTATO</p><a href="/contact" class="block hover:text-teal">Fale conosco</a><a href="#faq" class="block hover:text-teal">Perguntas</a></div>
-    <div class="md:col-span-3 text-[14px] space-y-2"><p class="text-ink/40 text-[12px] tracking-wider mb-4">AUTORIA</p><p>Dr. Rodolfo Cambraia Frota</p><p class="text-ink/55">CRM-GO 26.815</p></div>
+    <div class="md:col-span-2 text-[14px] space-y-3"><p class="text-ink/40 text-[12px] tracking-wider mb-4">PLATAFORMA</p><a href="/intelligent-tools" class="block hover:text-teal">Evidēns Check</a><a href="#metodo" class="block hover:text-teal">Como funciona</a><a href="#visao" class="block hover:text-teal">O algoritmo</a><a href="#faq" class="block hover:text-teal">Perguntas</a></div>
+    <div id="responsavel-tecnico" class="md:col-span-3 text-[14px]">
+      <p class="text-ink/40 text-[12px] tracking-wider mb-4">RESPONSÁVEL TÉCNICO</p>
+      <p class="font-medium">Dr. Rodolfo Cambraia Frota</p>
+      <p class="text-ink/55 mt-1">CRM-GO 26815</p>
+    </div>
+    <div id="contato" class="md:col-span-3 text-[14px]">
+      <p class="text-ink/40 text-[12px] tracking-wider mb-4">CONTATO</p>
+      <a href="mailto:rodolfo.cambraiafrota@einstein.br" class="inline-flex items-center gap-2 hover:text-teal break-all"><i class="fa-regular fa-envelope text-teal text-[13px]"></i>rodolfo.cambraiafrota@einstein.br</a>
+      <a href="/contact" class="block mt-3 hover:text-teal">Fale conosco</a></div>
   </div>
   <div class="flex flex-col md:flex-row md:justify-between gap-3 pt-8 text-[12px] text-ink/50">
     <p>Sugestões para avaliação do médico — não constituem prescrição nem substituem a consulta.</p>
@@ -464,34 +547,6 @@
   });
 
 
-  // Method tabs
-  const data = [
-    { title: 'Dados da paciente', head: 'Três campos obrigatórios.', desc: 'Idade, sexo e tabagismo bastam para começar. Gestação, comorbidades, hábitos e história familiar refinam a lista.',
-      grid: [['PACIENTE','Mulher, 42 anos'],['GESTAÇÃO','G3P2CA0 · 24 semanas'],['COMORBIDADE','Hipertensão'],['HÁBITOS E FAMÍLIA','Ex-tabagista · mãe com CCR']] },
-    { title: 'Recomendações', head: 'Cada item com a sua fonte.', desc: '24 itens para este perfil, separados por tipo, com prioridade, periodicidade e a diretriz que sustenta cada um.',
-      grid: [['VACINA · SBIm / CDC 2025','dTpa'],['VACINA · CDC / ACOG 2025','VSR com 32–36 semanas'],['LAB · AHA / SBC 2025','Albumina/creatinina urinária'],['LAB · ADA 2024','TOTG 75 g']] },
-    { title: 'Documentos', head: 'Minutas prontas para assinar.', desc: 'Pedido de laboratório, pedido de imagem e receita de vacinas em PDF. As vacinas contraindicadas na gestação ficam fora da receita.',
-      grid: [['PDF','Laboratório · 12 itens'],['PDF','Imagem · 4 itens'],['PDF','Vacinas · 8 itens'],['FORA DA RECEITA','5 contraindicadas']] },
-  ];
-  const tabs = document.querySelectorAll('.tab');
-  function setTab(idx) {
-    tabs.forEach((t, i) => {
-      const on = i === idx;
-      t.classList.toggle('bg-mist/70', on); t.classList.toggle('bg-white', !on);
-      t.classList.toggle('border-ink/10', !on);
-      t.querySelector('.bar > div').style.width = on ? '100%' : '0%';
-    });
-    const d = data[idx];
-    document.getElementById('iface-title').textContent = d.title;
-    document.getElementById('iface-head').textContent = d.head;
-    document.getElementById('iface-desc').textContent = d.desc;
-    document.getElementById('iface-num').textContent = '0' + (idx + 1);
-    document.getElementById('iface-count').textContent = '0' + (idx + 1) + ' / 03';
-    document.getElementById('iface-grid').innerHTML = d.grid.map(g =>
-      `<div class="rounded-xl bg-paper border border-ink/5 p-4"><p class="text-[10px] tracking-[0.16em] text-ink/45">${g[0]}</p><p class="text-[16px] font-medium mt-1.5">${g[1]}</p></div>`).join('');
-  }
-  tabs.forEach((t, i) => t.addEventListener('click', () => setTab(i)));
-  setTab(0);
 </script>
 
 <script>
@@ -555,14 +610,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Scroll reveals (auto-applied, staggered per parent)
   const groups = [
-    '#hero-markers > *', '#abordagem > *', '#stats > div',
-    '#visao .grid > div > *', '#domain-list li',
-    '#metodo > div:first-child > div > *', '#metodo > div:first-child > p', '#method-tabs .tab', '#iface-card',
+    '#hero-markers > *', '#abordagem > *', '#stats > div', '#ref-list li', '#ref-list-int li',
+    '#visao .grid > div > *',
+    '#metodo > div:first-child > div > *', '#metodo > div:first-child > p', '#steps > article',
     '#check .grid > div:first-child > *', '#check .grid > div:last-child',
-    '#principios > div:first-child > *', '#principios article',
     '#cuidado .grid > div:first-child > *',
-    '#faq > div:first-child > *', '#faq details',
-    '#cta .relative > *', '#cta > div > a', '#footer > div > div', '#footer > div:last-child > p'
+    '#faq > div:first-child > div > *', '#faq details',
+    '#cta-main > *', '#footer > div > div', '#footer > div:last-child > p'
   ];
   const rv = [];
   groups.forEach(sel => document.querySelectorAll(sel).forEach(el => {
@@ -572,7 +626,7 @@ document.addEventListener('DOMContentLoaded', function () {
     el.style.setProperty('--d', Math.min(sibs.indexOf(el) * 0.09, 0.5) + 's');
     rv.push(el);
   }));
-  document.querySelectorAll('#principios article > div:first-child, #cuidado .grid > div:last-child').forEach((el, i) => {
+  document.querySelectorAll('#cuidado .grid > div:last-child').forEach((el, i) => {
     el.classList.add('rv-img'); el.style.setProperty('--d', (i % 3) * 0.1 + 's'); rv.push(el);
   });
   if (reduce || auto) rv.forEach(el => el.classList.add('in'));

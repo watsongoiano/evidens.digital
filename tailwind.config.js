@@ -2,7 +2,7 @@
 // O CSS publicado (static/evidens.css) é gerado a partir deste arquivo e de
 // static/evidens.src.css — ver docs/deploy.md, seção "CSS".
 module.exports = {
-  content: ['./index.html', './intelligent-tools.html', './contact.html'],
+  content: ['./index.html', './intelligent-tools.html', './contact.html', './login.html', './cadastro.html', './configurar.html', './conta.html', './admin.html', './static/conta.js'],
   theme: {
     extend: {
       fontFamily: {

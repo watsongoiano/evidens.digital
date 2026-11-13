@@ -11,14 +11,16 @@ import pytest
 
 RAIZ = Path(__file__).resolve().parent.parent
 
-PAGINAS = ['/', '/intelligent-tools', '/contact', '/analytics']
+# Páginas vistas por uma médica com conta aprovada (o fixture `client`).
+PAGINAS = ['/', '/intelligent-tools', '/contact', '/cadastro', '/conta']
+PAGINAS_DO_ADMIN = ['/admin', '/analytics']
 
 
 # --- Arquivos publicados ----------------------------------------------------
 
 @pytest.mark.parametrize('rota', PAGINAS + [
     '/index.html',
-    '/intelligent-tools.html',
+    '/static/conta.js',
     '/favicon.ico',
     '/favicon.png',
     '/src/static/styles/base.css',
@@ -30,6 +32,11 @@ def test_paginas_e_recursos_publicos_respondem(client, rota):
 
 @pytest.mark.parametrize('rota', [
     '/src/static/index.html',                 # tela antiga, com cálculo de risco próprio
+    '/intelligent-tools.html',                # só pela rota /intelligent-tools, que exige login
+    '/analytics.html',
+    '/admin.html',
+    '/conta.html',
+    '/src/utils/contas.py',
     '/dist/index.html',
     '/src/static/database_dashboard.html',
     '/config/base_recommendations.json',
@@ -63,7 +70,8 @@ def test_toda_referencia_local_das_paginas_existe(client, pagina):
     html = client.get(pagina).get_data(as_text=True)
     for referencia in _referencias_locais(html):
         caminho = referencia if referencia.startswith('/') else '/' + referencia
-        assert client.get(caminho).status_code == 200, f'{pagina} -> {referencia}'
+        # /login redireciona para o check-up quem já entrou: vale a página final.
+        assert client.get(caminho, follow_redirects=True).status_code == 200, f'{pagina} -> {referencia}'
 
 
 @pytest.mark.parametrize('pagina', PAGINAS)
@@ -84,8 +92,8 @@ def test_toda_rota_de_api_chamada_pelas_paginas_existe(app, client, pagina):
         assert not any(e.startswith('checkup_intelligent.desativado_') for e in encontrados), caminho
 
 
-def test_painel_de_analytics_recebe_os_campos_que_exibe(client):
-    dados = client.get('/api/analytics/stats').get_json()
+def test_painel_de_analytics_recebe_os_campos_que_exibe(admin):
+    dados = admin.get('/api/analytics/stats').get_json()
     for periodo in ('total', 'today', 'this_month'):
         assert set(dados[periodo]) >= {'visits', 'recommendations', 'exam_requests', 'vaccine_prescriptions'}
 
@@ -266,16 +274,43 @@ def test_numeros_da_home_correspondem_ao_motor(client):
 
 
 def test_caso_de_exemplo_da_home_e_a_saida_real_do_motor(client):
-    """Os números do caso fictício mostrado na home vêm do motor; se o motor mudar, a home precisa mudar junto."""
-    caso = dict(idade=42, sexo='feminino', tabagismo='ex', macos_ano='25', anos_parou_fumar='5',
-                comorbidades=['hipertensao'], historia_familiar=['cancer_colorretal'],
-                imunossupressao='nao', gestante='sim', lactante='nao')
+    """Os números e as linhas do paciente de exemplo da home vêm do motor; se o motor mudar, a home muda junto."""
+    caso = dict(idade=52, sexo='masculino', tabagismo='nunca', comorbidades=['hipertensao', 'dislipidemia'],
+                historia_familiar=[], imunossupressao='nao')
     r = client.post('/api/checkup-intelligent', json=caso).get_json()
+    recs = r['recommendations']
     por_tipo = {}
-    for rec in r['recommendations']:
+    for rec in recs:
         por_tipo[rec['categoria']] = por_tipo.get(rec['categoria'], 0) + 1
-    assert (len(r['recommendations']), por_tipo['laboratorio'], por_tipo['imagem'], por_tipo['vacina']) == (24, 12, 4, 8)
-    assert [i['estado'] for i in r['nao_incluidas']] == ['contraindicada'] * 5
+    assert (len(recs), por_tipo['laboratorio'], por_tipo['imagem'], por_tipo['vacina']) == (30, 12, 4, 14)
+    assert r['nao_incluidas'] == []
     html = client.get('/').get_data(as_text=True)
-    for trecho in ('24 recomendações<br>', 'Laboratório · 12 itens', 'Imagem · 4 itens', 'Vacinas · 8 itens', '5 contraindicadas'):
+    for trecho in ('4 de 30', '30 recomendações<br>', 'px-3 py-1">12</span>', 'px-3 py-1">4</span>', 'px-3 py-1">14</span>'):
         assert trecho in html, trecho
+    # As quatro linhas da tabela de conduta: item, fonte e grau de evidência como o motor devolve.
+    def achar(pedaco):
+        return next(rec for rec in recs if pedaco in rec['titulo'])
+    for pedaco, fonte, grau in (('Colonoscopia', 'USPSTF 2021', 'B'), ('Glicose, soro', 'ADA 2024', 'A'),
+                                ('Razão albumina/creatinina', 'SBC 2025', 'A'), ('Herpes Zóster', 'SBIm 2024', 'A')):
+        rec = achar(pedaco)
+        assert fonte in rec['referencia'] and rec['grau_evidencia'] == grau, pedaco
+
+
+def test_home_so_lista_instituicoes_que_o_motor_cita(client):
+    import re as _re
+    html = client.get('/').get_data(as_text=True)
+    bloco = html[html.index('id="referencias"'):html.index('id="visao"')]
+    siglas = _re.findall(r'<p class="text-\[17px\] font-medium tracking-tight">([^<]+)</p>', bloco)
+    _, refs = _varredura(client)
+    assert len(siglas) == 15 and '15 instituições de referência' in bloco
+    for sigla in siglas:
+        assert sigla in refs, sigla
+
+
+@pytest.mark.parametrize('pagina', PAGINAS_DO_ADMIN)
+def test_paginas_do_administrador_respondem_e_nao_tem_referencia_quebrada(admin, pagina):
+    resposta = admin.get(pagina)
+    assert resposta.status_code == 200
+    for referencia in _referencias_locais(resposta.get_data(as_text=True)):
+        caminho = referencia if referencia.startswith('/') else '/' + referencia
+        assert admin.get(caminho, follow_redirects=True).status_code == 200, f'{pagina} -> {referencia}'
