@@ -684,12 +684,13 @@ def generate_intelligent_recommendations():
         except doses.DetalheInvalido as exc:
             return jsonify({'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in exc.erros),
                             'codigo': 'entrada_invalida', 'erros': exc.erros}), 400
-        medicacoes_checkboxes = medicamentos.classes_de(medicacoes_checkboxes)
-        # Dose e duração (corticoide, metotrexato, azatioprina, hidroxicloroquina, bisfosfonato) ajustam as classes
-        mais, menos, orientacoes_doses = doses.avaliar(
+        # Dose e duração (corticoide, metotrexato, azatioprina, hidroxicloroquina, bisfosfonato) ajustam as
+        # classes: a exclusão vale só para o medicamento avaliado, não para outro que traga a mesma classe.
+        mais, excluir_por_medicamento, orientacoes_doses = doses.avaliar(
             escolhidas, detalhes_doses, peso=data.get('peso'),
             rotulos={k: medicamentos.MEDICAMENTOS[k]['rotulo'] for k in escolhidas if k in medicamentos.MEDICAMENTOS})
-        medicacoes_checkboxes = [c for c in medicacoes_checkboxes if c not in menos] + sorted(mais)
+        medicacoes_checkboxes = medicamentos.classes_de(escolhidas, excluir_por_medicamento)
+        medicacoes_checkboxes += [c for c in sorted(mais) if c not in medicacoes_checkboxes]
         comorbidades, medicacoes_checkboxes, inferencias = coerencia.inferir(
             {**data, 'comorbidades': comorbidades, 'medicacoes': medicacoes_checkboxes}, egfr=egfr_inferencia,
             gestante=is_pregnant, recusados=_lista_curta((request.get_json(silent=True) or {}).get('inferencias_recusadas')))

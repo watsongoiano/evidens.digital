@@ -193,11 +193,15 @@ MEDICAMENTOS = _montar()
 assert all(k in MEDICAMENTOS for k in MAIS_USADOS)
 
 
-def classes_de(medicacoes):
-    """Troca cada princípio ativo pelas suas classes; chaves de classe (e as antigas) passam direto."""
+def classes_de(medicacoes, excluir=None):
+    """Troca cada princípio ativo pelas suas classes; chaves de classe (e as antigas) passam direto.
+
+    ``excluir`` (``{medicamento: {classes}}``) tira uma classe só da contribuição daquele medicamento.
+    """
+    excluir = excluir or {}
     saida = []
     for chave in medicacoes:
         for c in (MEDICAMENTOS[chave]['classes'] if chave in MEDICAMENTOS else [chave]):
-            if c not in saida:
+            if c not in saida and c not in excluir.get(chave, ()):
                 saida.append(c)
     return saida

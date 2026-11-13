@@ -60,7 +60,7 @@ def test_curso_curto_em_dose_baixa_nao_muda_nada(client):
 @pytest.mark.parametrize('remedio, dose, equivalente', [
     ('dexametasona', 4, 26.7), ('hidrocortisona', 100, 25), ('metilprednisolona', 16, 20), ('deflazacorte', 30, 25)])
 def test_equivalencia_de_corticoides(remedio, dose, equivalente):
-    mais, menos, orient = doses.avaliar([remedio], {remedio: {'dose': dose, 'duracao': 3}})
+    mais, _, orient = doses.avaliar([remedio], {remedio: {'dose': dose, 'duracao': 3}})
     assert 'corticoide_imunossupressor' in mais
     assert f'{equivalente:g}'.replace('.', ',') in orient[0]['descricao']
 
@@ -128,3 +128,25 @@ def test_tela_pergunta_dose_e_duracao(client):
         assert f'data-valor="{chave}"' in pagina and f'data-detalhe="{tipo}"' in pagina, chave
     assert 'id="medicacoes-detalhes"' in pagina and 'id="detalhes-medicacao"' in pagina
     assert 'function imunossuprime(item)' in pagina
+    assert 'linha.innerHTML' not in pagina   # campos montados sem interpretar texto como HTML
+
+
+def test_metotrexato_baixo_com_imunobiologico_continua_imunossupressao(client):
+    """A exclusão vale para o metotrexato, não para o adalimumabe que traz a mesma classe."""
+    r = _pedir(client, medicacoes=['metotrexato', 'adalimumabe'], dose__metotrexato=15)
+    assert r['triagem_vacinas']['imunossupressao'] == 'sim'
+    r = _pedir(client, medicacoes=['metotrexato', 'azatioprina'], dose__metotrexato=15)   # azatioprina sem dose
+    assert r['triagem_vacinas']['imunossupressao'] == 'sim'
+
+
+def test_dois_corticoides_com_duracoes_diferentes_nao_somam_a_exposicao():
+    """Prednisona 5 mg há 1 ano + dexametasona 4 mg há 1 semana: a dose alta só existe há 1 semana."""
+    mais, excluir, orient = doses.avaliar(['prednisona', 'dexametasona'], {
+        'prednisona': {'dose': 5, 'duracao': 52}, 'dexametasona': {'dose': 4, 'duracao': 1}})
+    assert 'corticoide_imunossupressor' not in mais and 'rastreio_tb_latente' not in mais
+    assert not excluir                                    # 5 mg por 52 semanas segue sendo uso crônico
+    assert any('3 meses ou mais' in o['titulo'] for o in orient)
+    # as duas em dose alta por tempo suficiente somam
+    mais, _, _ = doses.avaliar(['prednisona', 'dexametasona'], {
+        'prednisona': {'dose': 10, 'duracao': 6}, 'dexametasona': {'dose': 2, 'duracao': 6}})
+    assert {'corticoide_imunossupressor', 'rastreio_tb_latente'} <= mais

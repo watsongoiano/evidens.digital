@@ -89,13 +89,17 @@ def _texto(numero):
 
 
 def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
-    """Devolve ``(acrescentar, retirar, orientacoes)`` de classes, a partir da dose e da duração.
+    """Devolve ``(acrescentar, excluir, orientacoes)`` a partir da dose e da duração.
+
+    ``acrescentar`` são classes novas. ``excluir`` é ``{medicamento: {classes}}``: a classe sai só da
+    contribuição daquele medicamento, de modo que outro medicamento que a traga continua valendo
+    (metotrexato em dose baixa junto de um imunobiológico segue como imunossupressão).
 
     Sem dose ou duração, vale o comportamento conservador: corticoide tratado como uso crônico,
     metotrexato e azatioprina como imunossupressores; e a orientação pede o dado que falta.
     """
     rotulos = rotulos or {}
-    acrescentar, retirar, orientacoes = set(), set(), []
+    acrescentar, excluir, orientacoes = set(), {}, []
 
     def nome(chave):
         return rotulos.get(chave, chave.replace('_', ' ').capitalize())
@@ -112,32 +116,40 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
                      'imunossupressão (vacinas de vírus vivo), se cabe densitometria e rastreio de tuberculose latente.',
                      'ACR 2022 / SBIm 2026/2027')
         else:
-            # mais de um corticoide: soma das doses equivalentes, maior duração
-            dose = sum(detalhes[m]['dose'] * POR_MEDICAMENTO[m][1] for m in corticoides)
-            semanas = max(detalhes[m]['duracao'] for m in corticoides)
-            quais = ' + '.join(nome(m) for m in corticoides)
-            resumo = f'{quais}: {_texto(round(dose, 1))} mg/dia de prednisona (equivalente) há {_texto(semanas)} semanas'
-            if not (dose >= 2.5 and semanas >= 12):
-                retirar.add('corticoide_cronico')
-            if dose >= 20 and semanas >= 2:
+            equivalente = {m: detalhes[m]['dose'] * POR_MEDICAMENTO[m][1] for m in corticoides}
+
+            def mantida_por(semanas):
+                """Dose (em prednisona) mantida por pelo menos ``semanas``: soma só de quem tem essa duração."""
+                return sum(equivalente[m] for m in corticoides if detalhes[m]['duracao'] >= semanas)
+
+            imunossupressor = mantida_por(2) >= 20
+            tb_latente = mantida_por(4) >= 15
+            dose_alta_prolongada = mantida_por(4) >= 20
+            cronico = mantida_por(12) >= 2.5
+            resumo = '; '.join(f"{nome(m)} {_texto(round(equivalente[m], 1))} mg/dia de prednisona (equivalente) há "
+                               f"{_texto(detalhes[m]['duracao'])} semanas" for m in corticoides)
+            if not cronico:
+                for m in corticoides:
+                    excluir.setdefault(m, set()).add('corticoide_cronico')
+            if imunossupressor:
                 acrescentar.add('corticoide_imunossupressor')
                 orientar('Corticoide em dose imunossupressora',
                          f'{resumo}. A partir de 20 mg/dia por 14 dias ou mais há imunossupressão: vacinas de vírus vivo '
                          'atenuado ficam contraindicadas e só voltam 4 semanas depois de suspender; as inativadas seguem indicadas.',
                          'SBIm 2026/2027 / CDC/ACIP 2025')
-            if dose >= 15 and semanas >= 4:
+            if tb_latente:
                 acrescentar.add('rastreio_tb_latente')
-            if dose >= 20 and semanas >= 4:
+            if dose_alta_prolongada:
                 orientar('Corticoide em dose alta por 4 semanas ou mais',
                          'Considerar profilaxia de pneumocistose quando houver outro fator de imunossupressão (outro '
                          'imunossupressor, neoplasia hematológica, vasculite) e tratar ou pesquisar estrongiloidíase antes de '
                          'manter dose alta (área endêmica).', 'ATS 2011 / MS 2019')
-            if dose >= 2.5 and semanas >= 12:
+            if cronico:
                 orientar('Corticoide por 3 meses ou mais',
                          f'{resumo}. Além da avaliação de fratura (densitometria e FRAX): garantir cálcio e vitamina D, '
                          'acompanhar glicemia e pressão arterial, exame oftalmológico periódico (catarata e glaucoma) e, na '
                          'suspensão, redução gradual pelo risco de insuficiência adrenal.', 'ACR 2022')
-            elif not (dose >= 20 and semanas >= 2):
+            elif not imunossupressor:
                 orientar('Corticoide sistêmico em dose ou tempo baixos',
                          f'{resumo}: abaixo dos limiares de imunossupressão (20 mg/dia por 2 semanas) e de risco de fratura '
                          '(2,5 mg/dia por 3 meses). Não muda as vacinas nem indica densitometria.', 'ACR 2022 / SBIm 2026/2027')
@@ -151,7 +163,7 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
         else:
             limite = 0.4 * float(peso) if peso else 20
             if dose <= limite:
-                retirar.add('imunossupressor')
+                excluir.setdefault('metotrexato', set()).add('imunossupressor')
                 orientar('Metotrexato em dose de baixo grau de imunossupressão',
                          f'{_texto(dose)} mg/semana (limite de baixo grau: {_texto(round(limite, 1))} mg/semana). Vacinas '
                          'inativadas seguem indicadas; as de vírus vivo podem ser consideradas caso a caso, e a resposta de '
@@ -163,7 +175,7 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
                      'Sem dose e peso, foi tratada como imunossupressora. Até 3 mg/kg/dia conta como imunossupressão de baixo grau.',
                      'CDC/ACIP 2025 / IDSA 2013')
         elif dose <= 3 * float(peso):
-            retirar.add('imunossupressor')
+            excluir.setdefault('azatioprina', set()).add('imunossupressor')
             orientar('Azatioprina em dose de baixo grau de imunossupressão',
                      f'{_texto(dose)} mg/dia ({_texto(round(dose / float(peso), 1))} mg/kg/dia; limite de baixo grau: 3 mg/kg/dia). '
                      'Vacinas de vírus vivo podem ser consideradas caso a caso.', 'CDC/ACIP 2025 / IDSA 2013')
@@ -188,4 +200,4 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
                  f"{' + '.join(nome(m) for m in longos)} por tempo suficiente para reavaliar (5 anos por via oral, 3 anos de "
                  'ácido zoledrônico). Com baixo risco de fratura, considerar pausa de 2-3 anos; com alto risco, manter '
                  '(até 10 anos por via oral) ou trocar de classe.', 'ASBMR 2016')
-    return acrescentar, retirar, orientacoes
+    return acrescentar, excluir, orientacoes

@@ -1456,10 +1456,23 @@
                     const def = DETALHES[item.dataset.detalhe];
                     const linha = document.createElement('div');
                     linha.dataset.item = item.value;
-                    const campos = ['dose', 'duracao'].filter(c => def[c]).map(c =>
-                        `<div class="campo"><label for="${c}__${item.value}">${escapeHtml(item.dataset.rotulo)} · ${escapeHtml(def[c])}</label>` +
-                        `<input type="number" id="${c}__${item.value}" name="${c}__${item.value}" min="0" step="any" inputmode="decimal"></div>`).join('');
-                    linha.innerHTML = `<div class="grade">${campos}</div><p class="text-[12px] text-ink/50 mt-2">${escapeHtml(def.ajuda)}</p>`;
+                    const grade = document.createElement('div');
+                    grade.className = 'grade';
+                    ['dose', 'duracao'].filter(c => def[c]).forEach(c => {
+                        const campo = document.createElement('div'); campo.className = 'campo';
+                        const rotulo = document.createElement('label');
+                        const entrada = document.createElement('input');
+                        entrada.type = 'number'; entrada.min = '0'; entrada.step = 'any'; entrada.inputMode = 'decimal';
+                        entrada.id = entrada.name = c + '__' + item.value;
+                        rotulo.htmlFor = entrada.id;
+                        rotulo.textContent = item.dataset.rotulo + ' · ' + def[c];
+                        campo.append(rotulo, entrada);
+                        grade.appendChild(campo);
+                    });
+                    const ajuda = document.createElement('p');
+                    ajuda.className = 'text-[12px] text-ink/50 mt-2';
+                    ajuda.textContent = def.ajuda;
+                    linha.append(grade, ajuda);
                     linha.querySelectorAll('input').forEach(i => i.addEventListener('input', conferirImuno));
                     linhas.appendChild(linha);
                 });
