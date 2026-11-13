@@ -243,6 +243,12 @@ def existe_administrador():
         return executar('SELECT 1 FROM usuarios WHERE administrador = 1 LIMIT 1').fetchone() is not None
 
 
+def criados_desde(instante):
+    """Quantas contas foram criadas a partir de ``instante`` (segundos desde a época)."""
+    with _conexao() as executar:
+        return executar('SELECT COUNT(*) FROM usuarios WHERE criado_em >= ?', (int(instante),)).fetchone()[0]
+
+
 def listar():
     with _conexao() as executar:
         linhas = executar(_SELECT + 'ORDER BY criado_em DESC').fetchall()

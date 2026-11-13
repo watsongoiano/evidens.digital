@@ -140,5 +140,31 @@
     }
 
     carregar();
+
+    // Aviso por e-mail a cada novo pedido de conta
+    const aviso = document.querySelector('[data-aviso]');
+    if (aviso) {
+      const estado = aviso.querySelector('[data-aviso-estado]');
+      const botao = aviso.querySelector('[data-aviso-teste]');
+      fetch('/api/admin/aviso', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(d => {
+        if (!d) { estado.textContent = 'Não foi possível verificar o aviso por e-mail.'; return; }
+        if (!d.configurado) {
+          estado.textContent = 'Desligado. Para receber um e-mail a cada novo pedido de conta, cadastre a variável RESEND_API_KEY na Vercel (passo a passo em docs/deploy.md).';
+          return;
+        }
+        estado.textContent = d.destinatarios.length
+          ? 'Ligado. Cada novo pedido de conta é avisado a: ' + d.destinatarios.join(', ') + '.'
+          : 'Ligado, mas sem destinatário: defina AVISO_CADASTRO_PARA na Vercel.';
+        botao.disabled = !d.destinatarios.length;
+      }).catch(() => { estado.textContent = 'Não foi possível verificar o aviso por e-mail.'; });
+      botao.addEventListener('click', async () => {
+        mostrar(erro, ''); mostrar(ok, '');
+        botao.disabled = true;
+        const { resposta, dados } = await enviar('/api/admin/aviso/teste');
+        botao.disabled = false;
+        if (!resposta.ok) { mostrar(erro, (dados && dados.error) || 'Não foi possível enviar o e-mail de teste.'); return; }
+        mostrar(ok, 'E-mail de teste enviado a ' + dados.destinatarios.join(', ') + '. Confira também a caixa de spam.');
+      });
+    }
   }
 })();
