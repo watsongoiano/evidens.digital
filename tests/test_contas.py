@@ -242,3 +242,11 @@ def test_estudante_informa_matricula(anonimo, contas):
                                                      registro='2023001 · UFG', senha=SENHA_DE_TESTE))
     assert r.status_code == 202
     assert next(u for u in contas.listar() if u['email'] == 'aluna@exemplo.test')['registro'] == '2023001 · UFG'
+
+
+def test_depois_do_cadastro_a_pessoa_vai_para_o_login_com_o_aviso(anonimo):
+    """O formulário de cadastro leva ao login; lá, o aviso de que a conta aguarda aprovação."""
+    assert 'data-form="cadastro" data-destino="/login?cadastro=recebido"' in anonimo.get('/cadastro').get_data(as_text=True)
+    assert anonimo.get('/login?cadastro=recebido').status_code == 200
+    js = anonimo.get('/static/conta.js').get_data(as_text=True)
+    assert "get('cadastro') === 'recebido'" in js and 'Cadastro recebido.' in js
