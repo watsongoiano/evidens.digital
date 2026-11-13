@@ -139,7 +139,16 @@ def _pdf_de_exames(dados_paciente, exames, tipo):
     pdf.set_font('DejaVu', '', 10.5)
     for n, exame in enumerate(exames, 1):
         pdf.set_x(24)
+        pdf.set_font('DejaVu', '', 10.5)
         pdf.multi_cell(0, 6.2, f'{n}. {_texto(exame.get("titulo"))}')
+        quando = exame.get('quando_pdf')
+        if isinstance(quando, str) and quando.strip():
+            # Pré-natal: a janela gestacional vai no pedido, para exame antecipado não parecer imediato.
+            pdf.set_font('DejaVu', '', 9)
+            pdf.set_text_color(90, 100, 103)
+            pdf.set_x(30)
+            pdf.multi_cell(0, 5, _texto(quando[:160]))
+            pdf.set_text_color(20, 41, 47)
     pdf.assinatura()
     return pdf.bytes()
 

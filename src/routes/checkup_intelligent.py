@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 from src.utils.analytics import analytics
 from src.utils.reference_links import build_reference_links, build_reference_html
+from src.utils import prenatal
 from src.utils import prevent
 from src.utils.seguranca_vacinas import aplicar_triagem_vacinas
 from src.utils.validacao import EntradaInvalida, SIM, ler_numero, normalizar_triagem, validar_entrada
@@ -591,6 +592,16 @@ def generate_intelligent_recommendations():
         age = data['idade']
         sex = data['sexo']
         is_pregnant = triagem['gestante'] == SIM
+        gestacao = None
+        if is_pregnant:
+            try:
+                gestacao = prenatal.normalizar(request.get_json(silent=True) or {})
+            except prenatal.GestacaoInvalida as exc:
+                return jsonify({
+                    'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in exc.erros),
+                    'codigo': 'entrada_invalida',
+                    'erros': exc.erros,
+                }), 400
         weight = data.get('peso')
         height = data.get('altura')
         sbp_value = data.get('pas') or 0
@@ -1269,6 +1280,17 @@ def generate_intelligent_recommendations():
         # Registrar analytics
         analytics.track_recommendation()
         
+        # Gestação: rotina do pré-natal pela idade gestacional; itens do check-up geral que
+        # não se aplicam na gestação saem da lista e aparecem como "adiados".
+        adiados_gestacao, proximas_gestacao = [], []
+        if gestacao is not None:
+            exames_pn, proximas_gestacao = prenatal.programacao(gestacao, age, hipertensa=has_hypertension,
+                                                                diabetica=is_diabetic)
+            titulos_pn = {r['titulo'].lower() for r in exames_pn}
+            recommendations = [r for r in recommendations if (r.get('titulo') or '').lower() not in titulos_pn]
+            recommendations, adiados_gestacao = prenatal.adiar(recommendations, diabetica=is_diabetic)
+            recommendations = exames_pn + recommendations
+
         # Preparar outras recomendações (FRAX, calculadoras, etc.)
         outras_recomendacoes = []
         
@@ -1368,9 +1390,15 @@ def generate_intelligent_recommendations():
         # qualquer regra acima, inclusive as que forem acrescentadas depois.
         contexto_vacinas = {'idade': age, 'hiv': is_hiv_positive, 'cd4': data.get('cd4')}
         mantidas, nao_incluidas = aplicar_triagem_vacinas(response['recommendations'], triagem, contexto_vacinas)
+        if gestacao is not None:
+            mantidas, vacinas_futuras = prenatal.vacinas_fora_da_janela(mantidas, gestacao['ig'])
+            proximas_gestacao = sorted(proximas_gestacao + vacinas_futuras, key=lambda x: x['semana'])
         response['recommendations'] = mantidas
         response['total_recommendations'] = len(mantidas)
         response['nao_incluidas'] = nao_incluidas
+        response['adiados_gestacao'] = adiados_gestacao
+        response['proximas_gestacao'] = proximas_gestacao
+        response['gestacao'] = gestacao
         response['triagem_vacinas'] = triagem
 
         return jsonify(response)
@@ -1457,6 +1485,9 @@ def _ler_pedido_de_pdf(categoria):
         titulo = rec.get('titulo')
         if not isinstance(titulo, str) or not titulo.strip() or len(titulo) > MAX_TAMANHO_TITULO:
             raise PedidoDePdfInvalido('Item de recomendação com título inválido')
+        quando = rec.get('quando_pdf')
+        if quando is not None and (not isinstance(quando, str) or len(quando) > 160):
+            raise PedidoDePdfInvalido('Item de recomendação com janela gestacional inválida')
         itens.append(rec)
     return dados_paciente, itens
 

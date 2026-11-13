@@ -141,10 +141,20 @@ def titulos_do_motor(app):
             continue
         dados = dict(idade=idade, sexo=sexo, tabagismo=tab, comorbidades=com, historia_familiar=fam,
                      imunossupressao='nao', gestante=gest, lactante=lact,
+                     idade_gestacional='20' if gest == 'sim' else '', primeira_consulta='sim',
                      macos_ano='30' if tab != 'nunca' else '', anos_parou_fumar='5' if tab == 'ex' else '',
                      cd4='500' if 'hiv' in com else '', alcoolismo='pesado', doses_semana='20')
         resposta = cliente.post('/api/checkup-intelligent', json=dados)
         for rec in resposta.get_json()['recommendations']:
+            if rec.get('categoria') in encontrados:
+                encontrados[rec['categoria']].add(rec['titulo'])
+    # Gestação: todas as janelas do pré-natal, com Rh negativo, toxoplasmose suscetível e risco
+    for idade, ig in itertools.product((22, 35), (8, 12, 15, 22, 26, 32, 36)):
+        dados = dict(idade=idade, sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[],
+                     imunossupressao='nao', gestante='sim', lactante='nao', idade_gestacional=ig,
+                     primeira_consulta='sim', fator_rh='negativo', toxoplasmose='suscetivel',
+                     gestacao_condicoes=['pe_previa', 'dmg_previo', 'prematuro_previo'])
+        for rec in cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
             if rec.get('categoria') in encontrados:
                 encontrados[rec['categoria']].add(rec['titulo'])
     return {c: sorted(v, key=lambda t: t.lower()) for c, v in encontrados.items()}

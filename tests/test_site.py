@@ -286,8 +286,18 @@ def _varredura(client):
             continue
         dados = dict(idade=idade, sexo=sexo, tabagismo=tabagismo, comorbidades=comorbidades,
                      historia_familiar=familia, imunossupressao='nao', gestante=gestante, lactante='nao',
+                     idade_gestacional='20' if gestante == 'sim' else '', primeira_consulta='sim',
                      macos_ano='30' if tabagismo != 'nunca' else '', anos_parou_fumar='5' if tabagismo == 'ex' else '',
                      cd4='500' if 'hiv' in comorbidades else '')
+        for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
+            itens[rec['titulo']] = rec['categoria']
+            refs.add(rec.get('referencia') or '')
+    # Gestação: todas as janelas do pré-natal, com Rh negativo, toxoplasmose suscetível e risco
+    for idade, ig in itertools.product((22, 35), (8, 12, 15, 22, 26, 32, 36)):
+        dados = dict(idade=idade, sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[],
+                     imunossupressao='nao', gestante='sim', lactante='nao', idade_gestacional=ig,
+                     primeira_consulta='sim', fator_rh='negativo', toxoplasmose='suscetivel',
+                     gestacao_condicoes=['pe_previa', 'dmg_previo', 'prematuro_previo'])
         for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
             itens[rec['titulo']] = rec['categoria']
             refs.add(rec.get('referencia') or '')
