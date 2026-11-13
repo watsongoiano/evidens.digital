@@ -132,7 +132,9 @@ def test_risco_lista_o_que_falta(client):
 
 @pytest.mark.parametrize('ajuste, status', [
     ({'idade': '25'}, 'nao_aplicavel'),
-    ({'comorbidades': ['cardiopatia']}, 'nao_aplicavel'),
+    ({'comorbidades': ['dcv_aterosclerotica']}, 'nao_aplicavel'),
+    ({'comorbidades': ['insuficiencia_cardiaca']}, 'nao_aplicavel'),
+    ({'comorbidades': ['cardiopatia']}, 'nao_aplicavel'),   # valor antigo
     ({'colesterol': '400'}, 'fora_da_faixa'),
 ])
 def test_risco_nao_calcula_fora_da_populacao(client, ajuste, status):
@@ -278,7 +280,7 @@ def _varredura(client):
     itens, refs = {}, set()
     grade = itertools.product(
         (20, 30, 40, 50, 60, 70, 80), ('masculino', 'feminino'), ('nunca', 'atual', 'ex'),
-        ([], ['diabetes'], ['hipertensao'], ['hiv'], ['doenca_renal', 'cardiopatia'], ['dpoc'],
+        ([], ['diabetes'], ['hipertensao'], ['hiv'], ['doenca_renal', 'dcv_aterosclerotica'], ['insuficiencia_cardiaca'], ['dpoc'],
          ['obesidade', 'dislipidemia'], ['has_resistente']),
         ([], ['cancer_mama', 'cancer_colorretal', 'cancer_ovario']), ('nao', 'sim'))
     for idade, sexo, tabagismo, comorbidades, familia, gestante in grade:
@@ -362,11 +364,13 @@ def test_paginas_do_administrador_respondem_e_nao_tem_referencia_quebrada(admin,
 @pytest.mark.parametrize('pagina', ['index.html', 'intelligent-tools.html', 'login.html', 'cadastro.html',
                                     'conta.html', 'configurar.html', 'admin.html'])
 def test_logo_do_cabecalho_e_a_mesma_palavra_do_rodape(pagina):
-    """Cabeçalho usa só a palavra "evidēns", como o rodapé; sem o ícone de pontos."""
+    """Cabeçalho mantém o ícone de pontos e usa a palavra "evidēns" no mesmo tamanho do rodapé (28 px)."""
     html = (RAIZ / pagina).read_text(encoding='utf-8')
     cabecalho = html.split('</header>')[0]
-    assert 'grid-cols-3 gap-[3px]' not in cabecalho
-    assert 'font-medium tracking-tight">evidēns' in cabecalho
+    assert 'grid-cols-3 gap-[3px]' in cabecalho
+    assert 'text-[28px] font-medium tracking-tight leading-none">evidēns' in cabecalho
+    rodape = (RAIZ / 'index.html').read_text(encoding='utf-8').split('<footer')[1]
+    assert 'text-[28px] font-medium tracking-tight">evidēns' in rodape
 
 
 def test_icone_da_aba_e_servido(client):
@@ -377,3 +381,27 @@ def test_icone_da_aba_e_servido(client):
     # cor do ícone acompanha o tema do navegador (claro/escuro), sem fundo próprio
     corpo = svg.get_data(as_text=True)
     assert '@media (prefers-color-scheme:dark)' in corpo and '<rect class="m"' in corpo
+
+
+def test_cardiopatia_generica_saiu_do_formulario(pagina):
+    assert 'value="cardiopatia"' not in pagina.split('name="historia_familiar"')[0].split('s-comorbidades')[1]
+    assert 'value="dcv_aterosclerotica"' in pagina and 'value="insuficiencia_cardiaca"' in pagina
+
+
+def test_insuficiencia_cardiaca_puxa_vacinas_de_risco_antes_dos_50(client):
+    base = {'idade': '40', 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao'}
+    sem = {r['titulo'] for r in client.post('/api/checkup-intelligent', json=base).get_json()['recommendations']}
+    com = {r['titulo'] for r in client.post('/api/checkup-intelligent',
+                                           json={**base, 'comorbidades': ['insuficiencia_cardiaca']}).get_json()['recommendations']}
+    novas = com - sem
+    assert any('Pneumocócica' in t for t in novas) and any('Sincicial' in t for t in novas)
+    recs = client.post('/api/checkup-intelligent', json={**base, 'comorbidades': ['insuficiencia_cardiaca']}).get_json()['recommendations']
+    pneumo = next(r for r in recs if 'Pneumocócica' in r['titulo'])
+    assert 'A partir de 50 anos' not in pneumo['subtitulo'] and 'Comorbidade de risco' in pneumo['subtitulo']
+
+
+def test_dcv_aterosclerotica_nao_vira_hipertensao(client):
+    base = {'idade': '45', 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao'}
+    com = {r['titulo'] for r in client.post('/api/checkup-intelligent',
+                                           json={**base, 'comorbidades': ['dcv_aterosclerotica']}).get_json()['recommendations']}
+    assert not any('MAPA' in t for t in com)

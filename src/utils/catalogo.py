@@ -130,7 +130,7 @@ def titulos_do_motor(app):
     encontrados = {c: set() for c in CATEGORIAS}
     grade = itertools.product(
         (18, 25, 35, 45, 50, 55, 60, 65, 70, 80), ('masculino', 'feminino'), ('nunca', 'atual', 'ex'),
-        ([], ['diabetes'], ['hipertensao'], ['hiv'], ['doenca_renal', 'cardiopatia'], ['dpoc'],
+        ([], ['diabetes'], ['hipertensao'], ['hiv'], ['doenca_renal', 'dcv_aterosclerotica'], ['insuficiencia_cardiaca'], ['dpoc'],
          ['obesidade', 'dislipidemia'], ['has_resistente']),
         ([], ['cancer_mama', 'cancer_colorretal', 'cancer_ovario', 'diabetes', 'cardiopatia']),
         ('nao', 'sim'), ('nao', 'sim_menor_6m'))
