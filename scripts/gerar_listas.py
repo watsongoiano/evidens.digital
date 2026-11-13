@@ -43,7 +43,7 @@ def _opcao(valor, rotulo, busca, extra='', alvo=None):
 
 
 def _combo(ident, campo, rotulo, exemplo, dica, linhas):
-    return f'''      <div class="campo mt-5 combo" id="{ident}" data-lista="{campo}">
+    return f'''      <div class="campo mt-5 combo" id="{ident}" data-campo="{campo}">
         <label for="{ident}-busca">{rotulo}</label>
         <div class="relative">
           <input type="text" id="{ident}-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="{ident}-opcoes" aria-describedby="{ident}-dica" autocomplete="off" placeholder="Digite para buscar: {exemplo}">

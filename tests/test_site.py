@@ -450,7 +450,7 @@ def test_listas_com_busca_substituem_o_texto_livre(pagina):
     from src.utils import condicoes, medicamentos
     for lista, itens in (('comorbidades', condicoes.COMORBIDADES), ('medicacoes', medicamentos.MEDICAMENTOS),
                          ('historia_familiar', condicoes.FAMILIA)):
-        assert f'data-lista="{lista}"' in pagina
+        assert f'data-campo="{lista}"' in pagina
         for chave in itens:
             assert f'role="option" data-valor="{chave}"' in pagina, chave
     assert 'value="dac_precoce"' in pagina and 'inferencias_recusadas' in pagina
@@ -522,3 +522,9 @@ def test_hpv_a_cada_cinco_anos_e_citologia_a_cada_tres(client):
 
 def test_botoes_de_pdf_ficam_abaixo_das_recomendacoes(pagina):
     assert pagina.index('id="recommendationsContent"') < pagina.index('gerarPDFExamesLaboratoriais()"') < pagina.index('id="naoIncluidasContent"')
+
+
+def test_check_up_nao_usa_o_atributo_das_listas_do_admin(pagina):
+    """static/conta.js preenche todo [data-lista] com os cadastros (tela do admin). No check-up,
+    isso apagava as listas com busca de quem é administrador ("Ninguém aqui.")."""
+    assert 'data-lista' not in pagina

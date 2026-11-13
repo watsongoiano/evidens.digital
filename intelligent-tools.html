@@ -185,7 +185,7 @@
       </div>
 
       <!-- lista:comorbidades:inicio -->
-      <div class="campo mt-5 combo" id="lista_comorbidades" data-lista="comorbidades">
+      <div class="campo mt-5 combo" id="lista_comorbidades" data-campo="comorbidades">
         <label for="lista_comorbidades-busca">Outras comorbidades</label>
         <div class="relative">
           <input type="text" id="lista_comorbidades-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_comorbidades-opcoes" aria-describedby="lista_comorbidades-dica" autocomplete="off" placeholder="Digite para buscar: hipotireoidismo, asma, gota…">
@@ -284,7 +284,7 @@
         <label class="opcao" for="lista_medicacoes_levotiroxina"><input type="checkbox" id="lista_medicacoes_levotiroxina" name="medicacoes" value="levotiroxina" data-rotulo="Levotiroxina">Levotiroxina</label>
         <label class="opcao" for="lista_medicacoes_omeprazol"><input type="checkbox" id="lista_medicacoes_omeprazol" name="medicacoes" value="omeprazol" data-rotulo="Omeprazol">Omeprazol</label>
       </div>
-      <div class="campo mt-5 combo" id="lista_medicacoes" data-lista="medicacoes">
+      <div class="campo mt-5 combo" id="lista_medicacoes" data-campo="medicacoes">
         <label for="lista_medicacoes-busca">Outras medicações</label>
         <div class="relative">
           <input type="text" id="lista_medicacoes-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_medicacoes-opcoes" aria-describedby="lista_medicacoes-dica" autocomplete="off" placeholder="Digite para buscar: anlodipino, rosuvastatina, bombinha…">
@@ -634,7 +634,7 @@
         <label class="opcao" for="dac_precoce_familiar"><input type="checkbox" id="dac_precoce_familiar" name="historia_familiar" value="dac_precoce">DCV prematura (H &lt; 55, M &lt; 65)</label>
       </div>
       <!-- lista:familia:inicio -->
-      <div class="campo mt-5 combo" id="lista_familia" data-lista="historia_familiar">
+      <div class="campo mt-5 combo" id="lista_familia" data-campo="historia_familiar">
         <label for="lista_familia-busca">Outras condições em parente de 1º grau</label>
         <div class="relative">
           <input type="text" id="lista_familia-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_familia-opcoes" aria-describedby="lista_familia-dica" autocomplete="off" placeholder="Digite para buscar: próstata, aneurisma, hemocromatose…">
@@ -1484,7 +1484,7 @@
                         const rotulo = document.createElement('label');
                         rotulo.className = 'opcao'; rotulo.htmlFor = combo.id + '_' + li.dataset.valor;
                         entrada = document.createElement('input');
-                        entrada.type = 'checkbox'; entrada.id = rotulo.htmlFor; entrada.name = combo.dataset.lista; entrada.value = li.dataset.valor; entrada.checked = true;
+                        entrada.type = 'checkbox'; entrada.id = rotulo.htmlFor; entrada.name = combo.dataset.campo; entrada.value = li.dataset.valor; entrada.checked = true;
                         entrada.dataset.rotulo = li.textContent;
                         if (li.dataset.marca) entrada.dataset.marca = li.dataset.marca;
                         if (li.dataset.imuno) entrada.dataset.imuno = '1';
