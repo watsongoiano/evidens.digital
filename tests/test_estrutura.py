@@ -14,6 +14,7 @@ ENTRADA = RAIZ / 'api' / 'index.py'
 # Código que não faz parte da aplicação em produção, mantido de propósito.
 FERRAMENTAS = {
     'scripts/gerar_catalogo.py',   # gera src/data/catalogo_motor.json
+    'scripts/gerar_listas.py',     # regera as listas com busca de intelligent-tools.html
     'scripts/generate_favicon.py',
 }
 

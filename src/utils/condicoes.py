@@ -12,45 +12,91 @@ from __future__ import annotations
 ORDEM_PRIORIDADE = {'baixa': 0, 'media': 1, 'alta': 2}
 
 COMORBIDADES = {
-    'hipotireoidismo': {'rotulo': 'Hipotireoidismo'},
-    'masld': {'rotulo': 'Esteatose hepática (MASLD)', 'agravante': 'esteatose hepática (MASLD)'},
-    'cirrose': {'rotulo': 'Cirrose / hepatopatia crônica'},
+    'pre_diabetes': {'rotulo': 'Pré-diabetes', 'busca': 'glicemia de jejum alterada intolerancia'},
+    'hipotireoidismo': {'rotulo': 'Hipotireoidismo', 'busca': 'tireoide hashimoto'},
+    'hipertireoidismo': {'rotulo': 'Hipertireoidismo', 'busca': 'tireoide graves'},
+    'masld': {'rotulo': 'Esteatose hepática (MASLD)', 'agravante': 'esteatose hepática (MASLD)',
+              'busca': 'gordura no figado nafld'},
+    'cirrose': {'rotulo': 'Cirrose / hepatopatia crônica', 'busca': 'figado'},
+    'hepatite_b_cronica': {'rotulo': 'Hepatite B crônica', 'busca': 'figado hbv'},
+    'hepatite_c': {'rotulo': 'Hepatite C', 'busca': 'figado hcv'},
     'doenca_autoimune': {'rotulo': 'Doença inflamatória autoimune (AR, lúpus, psoríase, DII)',
-                         'agravante': 'doença inflamatória crônica'},
+                         'agravante': 'doença inflamatória crônica',
+                         'busca': 'artrite reumatoide les crohn retocolite espondilite'},
     'asma_grave': {'rotulo': 'Asma moderada ou grave'},
-    'asplenia': {'rotulo': 'Asplenia / esplenectomia'},
-    'osteoporose': {'rotulo': 'Osteoporose'},
-    'gota': {'rotulo': 'Gota'},
-    'neoplasia_ativa': {'rotulo': 'Câncer em quimio ou radioterapia', 'imunossupressao': True},
+    'asplenia': {'rotulo': 'Asplenia / esplenectomia', 'busca': 'baco'},
+    'anemia_falciforme': {'rotulo': 'Doença falciforme', 'busca': 'anemia falciforme hemoglobinopatia'},
+    'transplante': {'rotulo': 'Transplante de órgão sólido ou de medula', 'imunossupressao': True},
+    'neoplasia_ativa': {'rotulo': 'Câncer em quimio ou radioterapia', 'imunossupressao': True,
+                        'busca': 'neoplasia tumor quimioterapia'},
+    'cirurgia_bariatrica': {'rotulo': 'Cirurgia bariátrica prévia', 'busca': 'bypass sleeve gastroplastia'},
+    'osteoporose': {'rotulo': 'Osteoporose', 'busca': 'osso fratura'},
+    'gota': {'rotulo': 'Gota', 'busca': 'acido urico'},
+    # Sem exame ou vacina própria no check-up: ficam registradas para a consulta.
+    'fibrilacao_atrial': {'rotulo': 'Fibrilação atrial', 'busca': 'arritmia fa'},
+    'apneia_sono': {'rotulo': 'Apneia obstrutiva do sono', 'busca': 'saos ronco'},
+    'depressao': {'rotulo': 'Depressão'},
+    'ansiedade': {'rotulo': 'Transtorno de ansiedade'},
+    'epilepsia': {'rotulo': 'Epilepsia', 'busca': 'convulsao'},
+    'enxaqueca': {'rotulo': 'Enxaqueca', 'busca': 'migranea cefaleia'},
+    'demencia': {'rotulo': 'Demência', 'busca': 'alzheimer'},
+    'parkinson': {'rotulo': 'Doença de Parkinson'},
+    'hpb': {'rotulo': 'Hiperplasia prostática benigna', 'busca': 'prostata'},
+    'sop': {'rotulo': 'Síndrome dos ovários policísticos', 'busca': 'sop'},
+    'endometriose': {'rotulo': 'Endometriose'},
+    'drge': {'rotulo': 'Doença do refluxo gastroesofágico', 'busca': 'refluxo drge'},
+    'doenca_celiaca': {'rotulo': 'Doença celíaca', 'busca': 'gluten'},
+    'osteoartrite': {'rotulo': 'Osteoartrite', 'busca': 'artrose'},
+    'fibromialgia': {'rotulo': 'Fibromialgia'},
 }
 
+# Classes de medicação: é nelas que o motor decide exame, vacina e coerência. A tela oferece o
+# princípio ativo (src/utils/medicamentos.py), que é trocado pela classe antes das regras.
 MEDICACOES = {
     'ieca_bra': {'rotulo': 'IECA ou BRA', 'marca': ['anti_hipertensivos']},
+    'arni': {'rotulo': 'sacubitril/valsartana'},
     'tiazidico': {'rotulo': 'Diurético tiazídico', 'marca': ['anti_hipertensivos']},
     'bcc': {'rotulo': 'Bloqueador de canal de cálcio', 'marca': ['anti_hipertensivos']},
+    'anti_hipertensivo_outro': {'rotulo': 'Outro anti-hipertensivo', 'marca': ['anti_hipertensivos']},
     'betabloqueador': {'rotulo': 'Betabloqueador'},
     'espironolactona': {'rotulo': 'Espironolactona / eplerenona'},
     'diuretico_alca': {'rotulo': 'Diurético de alça'},
+    'estatina': {'rotulo': 'Estatina', 'marca': ['estatinas']},
     'outro_hipolipemiante': {'rotulo': 'Ezetimiba, fibrato ou iPCSK9', 'marca': ['dislipidemia']},
     'metformina': {'rotulo': 'Metformina'},
     'insulina': {'rotulo': 'Insulina', 'marca': ['diabetes']},
     'sulfonilureia': {'rotulo': 'Sulfonilureia', 'marca': ['diabetes']},
-    'idpp4_pioglitazona': {'rotulo': 'iDPP-4 ou pioglitazona', 'marca': ['diabetes']},
+    'idpp4_pioglitazona': {'rotulo': 'iDPP-4, pioglitazona ou acarbose', 'marca': ['diabetes']},
     'isglt2': {'rotulo': 'iSGLT2'},
     'aglp1': {'rotulo': 'Agonista de GLP-1'},
     'levotiroxina': {'rotulo': 'Levotiroxina'},
+    'antitireoidiano': {'rotulo': 'Antitireoidiano'},
     'corticoide_cronico': {'rotulo': 'Corticoide sistêmico ≥ 3 meses'},
     'imunossupressor': {'rotulo': 'Imunossupressor ou imunobiológico', 'imunossupressao': True},
     'litio': {'rotulo': 'Lítio'},
     'amiodarona': {'rotulo': 'Amiodarona'},
+    'varfarina': {'rotulo': 'Varfarina'},
+    'doac': {'rotulo': 'Anticoagulante oral direto'},
+    'antipsicotico_atipico': {'rotulo': 'Antipsicótico de 2ª geração'},
+    'inibidor_aromatase': {'rotulo': 'Inibidor de aromatase'},
+    'hidroxicloroquina': {'rotulo': 'Hidroxicloroquina'},
 }
 
 FAMILIA = {
-    'cancer_prostata': {'rotulo': 'Câncer de próstata (pai ou irmão)'},
-    'osteoporose_fratura': {'rotulo': 'Fratura de quadril em pai ou mãe'},
-    'hipercolesterolemia_familiar': {'rotulo': 'Hipercolesterolemia familiar'},
-    'aneurisma_aorta': {'rotulo': 'Aneurisma de aorta abdominal'},
+    'avc_precoce': {'rotulo': 'AVC precoce (H < 55, M < 65)', 'busca': 'derrame'},
+    'hipercolesterolemia_familiar': {'rotulo': 'Hipercolesterolemia familiar', 'busca': 'colesterol'},
     'morte_subita': {'rotulo': 'Morte súbita antes dos 50 anos'},
+    'aneurisma_aorta': {'rotulo': 'Aneurisma de aorta abdominal'},
+    'cancer_prostata': {'rotulo': 'Câncer de próstata (pai ou irmão)'},
+    'cancer_endometrio': {'rotulo': 'Câncer de endométrio', 'busca': 'utero lynch'},
+    'cancer_pancreas': {'rotulo': 'Câncer de pâncreas'},
+    'cancer_gastrico': {'rotulo': 'Câncer gástrico', 'busca': 'estomago'},
+    'melanoma': {'rotulo': 'Melanoma', 'busca': 'pele'},
+    'osteoporose_fratura': {'rotulo': 'Fratura de quadril em pai ou mãe', 'busca': 'osteoporose'},
+    'hemocromatose': {'rotulo': 'Hemocromatose hereditária', 'busca': 'ferro ferritina'},
+    'rim_policistico': {'rotulo': 'Doença renal policística', 'busca': 'rins cistos'},
+    'trombose': {'rotulo': 'Trombose venosa ou trombofilia', 'busca': 'tvp tep embolia'},
+    'glaucoma': {'rotulo': 'Glaucoma', 'busca': 'olho'},
 }
 # Marcadas por chip na tela (e "cardiopatia" é o valor antigo de DAC precoce).
 FAMILIA_CHIPS = ('cancer_mama', 'cancer_colorretal', 'cancer_ovario', 'diabetes', 'dac_precoce', 'cardiopatia')
@@ -73,7 +119,7 @@ def agravantes_de_risco(comorbidades, familia, hiv=False):
         lista.append('obesidade')
     if hiv:
         lista.append('HIV')
-    if {'dac_precoce', 'cardiopatia'} & set(familia):
+    if {'dac_precoce', 'cardiopatia', 'avc_precoce'} & set(familia):
         lista.append('história familiar de DCV prematura')
     return lista
 
@@ -140,7 +186,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  'História familiar de câncer de mama ou ovário: aplicar ferramenta de rastreio de risco familiar; '
                  'se positiva, encaminhar para aconselhamento genético e, se indicado, teste de BRCA.',
                  'USPSTF 2019 (grau B)')
-    if {'dac_precoce', 'cardiopatia'} & fam:
+    if {'dac_precoce', 'cardiopatia', 'avc_precoce'} & fam:
         orientar('História familiar de DCV prematura',
                  'Agravante de risco cardiovascular (já considerado na categoria SBC). Em risco intermediário, o escore '
                  'de cálcio coronário pode reclassificar.', 'SBC 2025')
@@ -167,9 +213,44 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Morte súbita antes dos 50 anos em parente de 1º grau: ECG e avaliação clínica dirigida '
             '(canalopatias, cardiomiopatias).', 'Morte súbita precoce na família', 'AHA/ACC/HRS 2017', 'B')
 
+    if 'hemocromatose' in fam:
+        for titulo in ('Ferritina, soro', 'Índice de saturação de transferrina, soro'):
+            add(titulo, 'laboratorio', 'Parente de 1º grau com hemocromatose hereditária: ferritina e saturação de '
+                'transferrina; se alteradas, pesquisar mutações do gene HFE.',
+                'Hemocromatose na família | Rastreio em cascata', 'ACG 2019 / EASL 2022', 'B')
+    if 'rim_policistico' in fam:
+        add('Ultrassonografia de rins e vias urinárias', 'imagem',
+            'Parente de 1º grau com doença renal policística autossômica dominante: ultrassonografia renal no adulto em risco, '
+            'após aconselhamento sobre as implicações do diagnóstico.', 'DRPAD na família | Adulto em risco',
+            'KDIGO 2025 (DRPAD)', 'B')
+    if 'cancer_endometrio' in fam:
+        orientar('Câncer de endométrio na família',
+                 'Com câncer colorretal ou de endométrio em parentes de 1º grau, sobretudo antes dos 50 anos, considerar '
+                 'síndrome de Lynch e encaminhar para aconselhamento genético.', 'NCCN 2024 / ACG 2015')
+    if 'cancer_pancreas' in fam:
+        orientar('Câncer de pâncreas na família',
+                 'Dois ou mais parentes de 1º grau acometidos, ou síndrome hereditária conhecida, indicam avaliação em '
+                 'centro de referência (ressonância ou ecoendoscopia). Um parente isolado não indica rastreamento.',
+                 'AGA 2020 / CAPS 2020')
+    if 'cancer_gastrico' in fam:
+        orientar('Câncer gástrico na família',
+                 'Pesquisar e tratar Helicobacter pylori; endoscopia conforme sintomas e risco individual.',
+                 'Maastricht VI 2022 / ACG 2024')
+    if 'melanoma' in fam:
+        orientar('Melanoma na família', 'Exame dermatológico de corpo inteiro periódico e orientação de fotoproteção.',
+                 'AAD 2019')
+    if 'trombose' in fam:
+        orientar('Trombose venosa na família',
+                 'Pesar o risco antes de prescrever estrogênio (anticoncepcional combinado, terapia hormonal). Pesquisa de '
+                 'trombofilia não é rotina em assintomáticos.', 'ASH 2023')
+    if 'glaucoma' in fam and idade >= 40:
+        orientar('Glaucoma na família', 'Avaliação oftalmológica com tonometria e fundoscopia a cada 1-2 anos a partir dos 40 anos.',
+                 'AAO 2020')
+
     # ---------------- Medicações ----------------
-    if {'ieca_bra', 'espironolactona', 'tiazidico', 'diuretico_alca'} & med:
-        quais = ', '.join(MEDICACOES[k]['rotulo'] for k in ('ieca_bra', 'espironolactona', 'tiazidico', 'diuretico_alca') if k in med)
+    renais = ('ieca_bra', 'arni', 'espironolactona', 'tiazidico', 'diuretico_alca')
+    if set(renais) & med:
+        quais = ', '.join(MEDICACOES[k]['rotulo'] for k in renais if k in med)
         add('Potássio, soro', 'laboratorio', f'Monitorização em uso de {quais}.', f'Em uso de {quais} | Anual',
             'KDIGO 2024 / AHA 2025', 'B')
         add('Creatinina, soro', 'laboratorio', f'Função renal em uso de {quais}.', f'Em uso de {quais} | Anual',
@@ -181,6 +262,32 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Vitamina B12, soro', 'laboratorio',
             'Uso prolongado de metformina associa-se a deficiência de B12; dosar periodicamente, sobretudo com anemia '
             'ou neuropatia.', 'Em uso de metformina | Periódico', 'ADA 2025', 'B')
+    if 'antitireoidiano' in med or 'hipertireoidismo' in com:
+        add('Hormônio Tireoestimulante (TSH), soro', 'laboratorio',
+            'Hipertireoidismo: TSH (com T4 livre) a cada 4-8 semanas até o controle e depois a cada 3-6 meses.',
+            'Hipertireoidismo / antitireoidiano', 'ATA 2016', 'B')
+    if 'varfarina' in med:
+        add('Tempo de protrombina (TP/INR), plasma', 'laboratorio',
+            'Varfarina: INR a cada 4 semanas com dose estável (até 12 semanas se INR consistentemente no alvo).',
+            'Em uso de varfarina | A cada 4-12 semanas', 'CHEST 2012', 'B', 'alta')
+    if 'doac' in med:
+        add('Creatinina, soro', 'laboratorio',
+            'Anticoagulante oral direto: função renal ao menos anual (mais frequente se ClCr < 60 mL/min ou idade ≥ 75 anos) '
+            'para ajuste de dose.', 'Em uso de anticoagulante oral direto | Anual', 'EHRA 2021', 'B')
+        add('Hemograma completo com plaquetas', 'laboratorio', 'Anticoagulante oral direto: hemoglobina ao menos anual.',
+            'Em uso de anticoagulante oral direto | Anual', 'EHRA 2021', 'B')
+    if 'antipsicotico_atipico' in med:
+        for titulo in ('Glicose, soro', 'Colesterol total e frações, soro'):
+            add(titulo, 'laboratorio', 'Antipsicótico de 2ª geração: monitorização metabólica (peso, glicemia e lipídios) '
+                'em 12 semanas e depois anualmente.', 'Em uso de antipsicótico de 2ª geração | Anual', 'ADA/APA 2004', 'B')
+    if 'inibidor_aromatase' in med:
+        add('Densitometria óssea (DEXA)', 'imagem',
+            'Inibidor de aromatase: densitometria no início do tratamento e a cada 1-2 anos.',
+            'Em uso de inibidor de aromatase', 'ASCO 2019', 'B')
+    if 'hidroxicloroquina' in med:
+        orientar('Hidroxicloroquina',
+                 'Exame oftalmológico basal no primeiro ano e rastreamento anual de retinopatia após 5 anos de uso '
+                 '(antes, se dose > 5 mg/kg/dia, doença renal ou uso de tamoxifeno).', 'AAO 2016')
     if 'levotiroxina' in med or 'hipotireoidismo' in com:
         add('Hormônio Tireoestimulante (TSH), soro', 'laboratorio',
             'Hipotireoidismo em reposição: TSH anual com dose estável (6-8 semanas após ajuste).',
@@ -199,6 +306,17 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                 'HRS 2007 (Goldschlager)', 'B')
 
     # ---------------- Comorbidades ----------------
+    if 'pre_diabetes' in com:
+        add('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'Pré-diabetes: reavaliar a glicemia ao menos uma vez por ano.',
+            'Pré-diabetes | Anual', 'ADA 2025', 'B')
+    if 'cirurgia_bariatrica' in com:
+        for titulo in ('Hemograma completo com plaquetas', 'Ferritina, soro', 'Vitamina B12, soro', '25-hidroxivitamina D, soro'):
+            add(titulo, 'laboratorio', 'Após cirurgia bariátrica: rastreamento anual de deficiências nutricionais '
+                '(ferro, B12, vitamina D).', 'Cirurgia bariátrica prévia | Anual', 'ASMBS 2019', 'B')
+    if 'hepatite_c' in com or 'hepatite_b_cronica' in com:
+        add('Hepatites A e B (Twinrix® ou vacinas isoladas)', 'vacina',
+            'Hepatite viral crônica: vacinar os suscetíveis contra hepatite A (e contra hepatite B, na hepatite C).',
+            'Hepatopatia crônica | Suscetíveis', SBIM, 'A', 'alta')
     if 'masld' in com:
         for titulo in ('Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro', 'Hemograma completo com plaquetas'):
             add(titulo, 'laboratorio', 'Para o cálculo do FIB-4 (idade, AST, ALT, plaquetas): estratifica risco de fibrose '
@@ -220,7 +338,8 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'ACR 2020', 'A')
 
     # Vacinas por condição de risco (SBIm: comorbidade de risco em qualquer idade)
-    risco_pneumo = {'cirrose', 'asma_grave', 'asplenia', 'neoplasia_ativa', 'doenca_autoimune'} & com or 'imunossupressor' in med \
+    risco_pneumo = {'cirrose', 'asma_grave', 'asplenia', 'anemia_falciforme', 'transplante', 'neoplasia_ativa',
+                    'doenca_autoimune', 'hepatite_b_cronica', 'hepatite_c'} & com or 'imunossupressor' in med \
         or 'corticoide_cronico' in med
     if risco_pneumo and idade < 50:
         add(PNEUMO, 'vacina', 'Dose única. Indicada em qualquer idade com comorbidade de risco para doença pneumocócica invasiva.',
@@ -232,8 +351,8 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'CDC/ACIP 2022 / ' + SBIM, 'A', 'alta')
     if 'asma_grave' in com and 18 <= idade < 60 and not gestante:
         add(VSR, 'vacina', 'Dose única para adultos com asma moderada ou grave.', 'Asma moderada/grave | Dose única', SBIM, 'B')
-    if 'asplenia' in com:
-        # Esquema de risco substitui o de rotina na tela e no PDF (esquema_pdf)
+    if {'asplenia', 'anemia_falciforme'} & com:
+        # Asplenia anatômica ou funcional (doença falciforme). Esquema de risco substitui o de rotina na tela e no PDF (esquema_pdf)
         add('Meningocócica ACWY (Menactra® ou Menveo®)', 'vacina',
             'Asplenia: 2 doses com 8 semanas de intervalo e reforço a cada 5 anos.', 'Asplenia | 2 doses + reforço 5/5 anos',
             'CDC/ACIP 2025 / ' + SBIM, 'A', 'alta', substituir=True, esquema='asplenia')

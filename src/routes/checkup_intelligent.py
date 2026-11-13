@@ -676,6 +676,9 @@ def generate_intelligent_recommendations():
         egfr_inferencia = None
         if data.get('creatinina'):
             egfr_inferencia = prevent.egfr_ckd_epi_2021(float(data['creatinina']), data['idade'], data['sexo'])
+        # Princípios ativos escolhidos na tela viram as classes com que o motor trabalha
+        from src.utils import medicamentos
+        medicacoes_checkboxes = medicamentos.classes_de(medicacoes_checkboxes)
         comorbidades, medicacoes_checkboxes, inferencias = coerencia.inferir(
             {**data, 'comorbidades': comorbidades, 'medicacoes': medicacoes_checkboxes}, egfr=egfr_inferencia,
             gestante=is_pregnant, recusados=_lista_curta((request.get_json(silent=True) or {}).get('inferencias_recusadas')))
