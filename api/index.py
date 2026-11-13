@@ -60,14 +60,15 @@ app.register_blueprint(auth_bp, url_prefix='/api')
 
 def _pagina(arquivo, privada=False):
     resposta = send_from_directory(BASE_DIR, arquivo)
-    if privada:
-        resposta.headers['Cache-Control'] = 'no-store'
+    # Páginas HTML sempre revalidadas: um navegador que guardou a home antiga
+    # (botões sem destino) deixaria de ver a área de acesso mesmo depois do deploy.
+    resposta.headers['Cache-Control'] = 'no-store' if privada else 'no-cache'
     return resposta
 
 @app.route('/')
 def index():
-    """Rota raiz - redireciona para index.html"""
-    return send_from_directory(BASE_DIR, 'index.html')
+    """Página inicial."""
+    return _pagina('index.html')
 
 @app.route('/intelligent-tools')
 def intelligent_tools():
@@ -113,7 +114,7 @@ def admin_page():
 @app.route('/contact')
 def contact_page():
     """Rota para página de contato"""
-    return send_from_directory(BASE_DIR, 'contact.html')
+    return _pagina('contact.html')
 
 @app.route('/analytics')
 def analytics_page():

@@ -1540,7 +1540,7 @@ def _conferir_triagem_das_vacinas(dados_paciente, vacinas):
 def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferir=None):
     import io
     from flask import send_file
-    from src.utils import pdf_service_gotenberg
+    from src.utils import pdf_minutas
 
     try:
         dados_paciente, itens = _ler_pedido_de_pdf(categoria)
@@ -1552,7 +1552,7 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
         return jsonify({'error': exc.mensagem, 'codigo': exc.codigo}), 400
 
     try:
-        pdf_bytes = getattr(pdf_service_gotenberg, nome_gerador)(dados_paciente, itens)
+        pdf_bytes = getattr(pdf_minutas, nome_gerador)(dados_paciente, itens)
     except Exception as exc:
         # O detalhe fica só no log do servidor; a resposta não expõe a infraestrutura.
         print(f"❌ Erro ao gerar PDF ({categoria}): {exc}")
@@ -1569,6 +1569,13 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
         as_attachment=True,
         download_name=f'{prefixo_arquivo}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
     )
+
+
+@checkup_intelligent_bp.route('/catalogo')
+def catalogo_endpoint():
+    """Itens que o médico pode acrescentar a um pedido ou receita, por categoria."""
+    from src.utils.catalogo import catalogo
+    return jsonify(catalogo())
 
 
 @checkup_intelligent_bp.route('/gerar-pdf-exames-laboratoriais', methods=['POST'])
