@@ -27,7 +27,13 @@ VACINAS_ADMINISTRACAO = {
     "tríplice viral": "Aplicar uma dose (0,5 ml), SUBCUTÂNEA, no intervalo 0 e 1 mês.",
     "scr": "Aplicar uma dose (0,5 ml), SUBCUTÂNEA, no intervalo 0 e 1 mês.",
     "febre amarela": "Aplicar uma dose (0,5 ml), SUBCUTÂNEA, dose única.",
-    "meningoc": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR. Reforço a cada 5 anos para grupos de risco.",
+    # Meningocócicas: cada tipo com seu esquema; outra meningocócica (C, por exemplo) cai na
+    # posologia padrão em vez de herdar o esquema de outro tipo.
+    "acwy": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR. Reforço a cada 5 anos para grupos de risco.",
+    "meningocócica b": "Aplicar duas doses (0,5 ml), INTRAMUSCULAR. Bexsero®: intervalo de 1 mês. Trumenba®: intervalo de 6 meses. Sem reforço de rotina.",
+    "meningococica b": "Aplicar duas doses (0,5 ml), INTRAMUSCULAR. Bexsero®: intervalo de 1 mês. Trumenba®: intervalo de 6 meses. Sem reforço de rotina.",
+    "bexsero": "Aplicar duas doses (0,5 ml), INTRAMUSCULAR, com intervalo de 1 mês. Sem reforço de rotina.",
+    "trumenba": "Aplicar duas doses (0,5 ml), INTRAMUSCULAR, com intervalo de 6 meses. Sem reforço de rotina.",
     "dengue": "Aplicar uma dose (0,5 ml), SUBCUTÂNEA, no intervalo 0 e 3 meses.",
     "covid": "Aplicar conforme esquema vacinal vigente e orientação do Ministério da Saúde.",
     "varicela": "Aplicar uma dose (0,5 ml), SUBCUTÂNEA, no intervalo 0 e 1-2 meses.",

@@ -704,6 +704,8 @@
                 return;
             }
             categoriaDoDialogo = categoria;
+            // Texto digitado num diálogo anterior (de outra categoria) não pode vazar para este.
+            document.getElementById('acrescimoBusca').value = '';
             const doc = DOCUMENTOS[categoria];
             document.getElementById('acrescimoTitulo').textContent = doc.pergunta;
             const painel = document.getElementById('acrescimoPainel');
@@ -719,6 +721,7 @@
         }
 
         function fecharDialogo() {
+            document.getElementById('acrescimoBusca').value = '';
             const dialogo = document.getElementById('dialogoAcrescimo');
             if (dialogo.open) dialogo.close();
         }
@@ -732,7 +735,8 @@
         document.getElementById('acrescimoBusca').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); adicionarDoCampo(); } });
         document.getElementById('acrescimoCancelar').addEventListener('click', fecharDialogo);
         document.getElementById('acrescimoGerar').addEventListener('click', () => {
-            if (document.getElementById('acrescimoBusca').value.trim()) adicionarDoCampo();
+            const painelAberto = document.getElementById('acrescimoPainel').style.display !== 'none';
+            if (painelAberto && document.getElementById('acrescimoBusca').value.trim()) adicionarDoCampo();
             const categoria = categoriaDoDialogo;
             fecharDialogo();
             const doc = DOCUMENTOS[categoria];

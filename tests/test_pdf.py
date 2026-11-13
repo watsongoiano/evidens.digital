@@ -233,3 +233,19 @@ class _RespostaFalsa:
 
     def read(self):
         return PDF_FALSO
+
+
+@pytest.mark.parametrize('titulo, esperado', [
+    ('Meningocócica ACWY (Menactra® ou Menveo®)', 'Reforço a cada 5 anos'),
+    ('Meningocócica B (Bexsero® ou Trumenba®)', 'duas doses'),
+    ('Bexsero', 'intervalo de 1 mês'),
+])
+def test_posologia_meningococica_por_tipo(titulo, esperado):
+    from src.utils.pdf_minutas import posologia_da_vacina
+    assert esperado in posologia_da_vacina(titulo)
+
+
+def test_meningococica_sem_esquema_proprio_usa_posologia_padrao():
+    from src.utils.pdf_minutas import POSOLOGIA_PADRAO, posologia_da_vacina
+    assert posologia_da_vacina('Meningocócica C conjugada') == POSOLOGIA_PADRAO
+    assert 'Reforço a cada 5 anos' not in posologia_da_vacina('Meningocócica B (Bexsero® ou Trumenba®)')
