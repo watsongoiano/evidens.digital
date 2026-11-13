@@ -165,6 +165,10 @@
       });
       fetch('/api/admin/aviso', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(d => {
         if (!d) { estado.textContent = 'Não foi possível verificar o aviso por e-mail.'; return; }
+        estadoBv.textContent = d.boas_vindas
+          ? 'Boas-vindas: ligadas. Quem pede a conta recebe um e-mail explicando a aprovação, a fase de desenvolvimento e o convite a dar feedback.'
+          : 'Boas-vindas: desligadas. Para enviar e-mail a quem se cadastra, verifique o domínio evidens.life na Resend e defina AVISO_CADASTRO_DE na Vercel (passo a passo em docs/deploy.md).';
+        botaoBv.disabled = !d.boas_vindas;
         if (!d.configurado) {
           estado.textContent = 'Desligado. Para receber um e-mail a cada novo pedido de conta, cadastre a variável RESEND_API_KEY na Vercel (passo a passo em docs/deploy.md).';
           return;
@@ -173,10 +177,6 @@
           ? 'Ligado. Cada novo pedido de conta é avisado a: ' + d.destinatarios.join(', ') + '.'
           : 'Ligado, mas sem destinatário: defina AVISO_CADASTRO_PARA na Vercel.';
         botao.disabled = !d.destinatarios.length;
-        estadoBv.textContent = d.boas_vindas
-          ? 'Boas-vindas: ligadas. Quem pede a conta recebe um e-mail explicando a aprovação, a fase de desenvolvimento e o convite a dar feedback.'
-          : 'Boas-vindas: desligadas. Para enviar e-mail a quem se cadastra, verifique o domínio evidens.life na Resend e defina AVISO_CADASTRO_DE na Vercel (passo a passo em docs/deploy.md).';
-        botaoBv.disabled = !d.boas_vindas;
       }).catch(() => { estado.textContent = 'Não foi possível verificar o aviso por e-mail.'; });
       botao.addEventListener('click', async () => {
         mostrar(erro, ''); mostrar(ok, '');
