@@ -624,13 +624,12 @@ def generate_intelligent_recommendations():
         has_hypertension = False
         has_resistant_hypertension = False
         
-        # 1. Detecção por valores de PA (SBP >130 ou DBP >90)
+        # 1. PA de consultório: classificada pela AHA/ACC 2025 em src/utils/coerencia.py
+        # (estágio 1 ≥ 130/80, estágio 2 ≥ 140/90; na gestação, ≥ 140/90), com pedido de
+        # confirmação fora do consultório (MRPA/MAPA).
         sbp = float(sbp_value) if sbp_value else 0
         dbp = float(dbp_value) if dbp_value else 0
-        if sbp > 130 or dbp > 90:
-            has_hypertension = True
-            print(f"[DEBUG] Hipertensão detectada por PA: SBP={sbp}, DBP={dbp}")
-        
+
         # 2. Detecção por checkboxes clínicos
         comorbidades = data.get('comorbidades', [])
         # Garantir que comorbidades é uma lista
@@ -658,7 +657,9 @@ def generate_intelligent_recommendations():
         if data.get('creatinina'):
             egfr_inferencia = prevent.egfr_ckd_epi_2021(float(data['creatinina']), data['idade'], data['sexo'])
         comorbidades, medicacoes_checkboxes, inferencias = coerencia.inferir(
-            {**data, 'comorbidades': comorbidades, 'medicacoes': medicacoes_checkboxes}, egfr=egfr_inferencia)
+            {**data, 'comorbidades': comorbidades, 'medicacoes': medicacoes_checkboxes}, egfr=egfr_inferencia,
+            gestante=is_pregnant)
+        pa_classificacao = coerencia.classificar_pa(data.get('pas'), data.get('pad'))
         
         # Verificar se tem hipertensão nas comorbidades
         if 'hipertensao' in comorbidades or 'hipertensão' in comorbidades:
@@ -1412,6 +1413,7 @@ def generate_intelligent_recommendations():
         response['adiados_gestacao'] = adiados_gestacao
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['inferencias'] = inferencias
+        response['pa_classificacao'] = pa_classificacao
         response['proximas_gestacao'] = proximas_gestacao
         response['gestacao'] = gestacao
         response['triagem_vacinas'] = triagem

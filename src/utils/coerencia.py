@@ -53,6 +53,12 @@ def _normalizar(texto):
     return ' '.join(re.split(r'[^a-z0-9-]+', texto))
 
 
+def _pa_texto(data):
+    def n(v):
+        return f'{float(v):g}' if v not in (None, '') else '–'
+    return f"{n(data.get('pas'))}/{n(data.get('pad'))} mmHg"
+
+
 def achados_no_texto(texto):
     """Classes de medicação citadas no texto livre (palavra inteira, sem acento)."""
     t = f' {_normalizar(texto)} '
@@ -60,7 +66,21 @@ def achados_no_texto(texto):
             if any(f' {termo} ' in t for termo in termos)}
 
 
-def inferir(data, egfr=None):
+def classificar_pa(pas, pad):
+    """Categoria da PA de consultório pela diretriz AHA/ACC 2025 (mesmas faixas de 2017)."""
+    if not pas and not pad:
+        return None
+    pas, pad = float(pas or 0), float(pad or 0)
+    if pas >= 140 or pad >= 90:
+        return {'categoria': 'estagio2', 'rotulo': 'HAS estágio 2'}
+    if pas >= 130 or pad >= 80:
+        return {'categoria': 'estagio1', 'rotulo': 'HAS estágio 1'}
+    if pas >= 120:
+        return {'categoria': 'elevada', 'rotulo': 'PA elevada'}
+    return {'categoria': 'normal', 'rotulo': 'PA normal'}
+
+
+def inferir(data, egfr=None, gestante=False):
     """Completa comorbidades e medicações a partir dos outros campos.
 
     Devolve ``(comorbidades, medicacoes, inferencias)``; cada inferência tem
@@ -86,6 +106,13 @@ def inferir(data, egfr=None):
         marcar(comorbidades, 'comorbidades', 'dislipidemia', 'uso de hipolipemiante')
     if 'anti_hipertensivos' in medicacoes:
         marcar(comorbidades, 'comorbidades', 'hipertensao', 'uso de anti-hipertensivo')
+    pa = classificar_pa(data.get('pas'), data.get('pad'))
+    if pa:
+        # Fora da gestação, corte AHA/ACC 2025 (≥ 130/80). Na gestação, ≥ 140/90.
+        limiar = pa['categoria'] == 'estagio2' or (pa['categoria'] == 'estagio1' and not gestante)
+        if limiar:
+            marcar(comorbidades, 'comorbidades', 'hipertensao',
+                   f"PA {_pa_texto(data)} = {pa['rotulo']} (AHA/ACC 2025); confirmar com MRPA ou MAPA")
     if 'has_resistente' in comorbidades:
         marcar(comorbidades, 'comorbidades', 'hipertensao', 'HAS resistente marcada')
     if 'antidiabeticos' in texto:
