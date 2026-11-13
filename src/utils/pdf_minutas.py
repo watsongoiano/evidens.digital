@@ -48,8 +48,22 @@ VACINAS_ADMINISTRACAO = {
 POSOLOGIA_PADRAO = 'Aplicar conforme orientação médica e bula do fabricante.'
 
 
-def posologia_da_vacina(titulo):
+# Esquemas de grupo de risco: substituem a posologia de rotina quando a recomendação traz 'esquema_pdf'.
+ESQUEMAS_DE_RISCO = {
+    'asplenia': {
+        'acwy': 'Asplenia: aplicar duas doses (0,5 ml), INTRAMUSCULAR, com 8 semanas de intervalo. Reforço a cada 5 anos.',
+        'meningocócica b': 'Asplenia: aplicar duas doses (0,5 ml), INTRAMUSCULAR, com 1 mês de intervalo (Bexsero®). '
+                           'Reforço 1 ano após o esquema e, depois, a cada 2-3 anos.',
+        'hib': 'Asplenia: aplicar uma dose (0,5 ml), INTRAMUSCULAR, dose única se não vacinado previamente.',
+    },
+}
+
+
+def posologia_da_vacina(titulo, esquema=None):
     t = f' {titulo.lower()}'
+    for termo, texto in ESQUEMAS_DE_RISCO.get(esquema, {}).items():
+        if termo in t:
+            return texto
     for termo, texto in VACINAS_ADMINISTRACAO.items():
         if termo in t:
             return texto
@@ -75,13 +89,17 @@ def _texto(valor, maximo=300):
 def responsavel_de(usuario):
     """Quem responde pelo documento, a partir da conta logada.
 
-    Médico e residente (registro 'CRM-UF número') assinam: nome e CRM vão sob a linha.
-    Estudante não assina: o nome aparece como quem preparou a minuta.
+    Médico e residente assinam: nome sob a linha, com o CRM quando o registro é reconhecido
+    (conta antiga com registro fora do padrão sai só com o nome). Estudante não assina:
+    o nome aparece como quem preparou a minuta.
     """
     if not usuario or not (usuario.get('nome') or '').strip():
         return None
     from src.utils import contas
-    return {'nome': usuario['nome'].strip(), 'crm': contas.crm_de(usuario)}
+    # O perfil da conta decide quem assina; o texto do registro só fornece o CRM.
+    estudante = usuario.get('perfil') == 'estudante'
+    return {'nome': usuario['nome'].strip(), 'estudante': estudante,
+            'crm': None if estudante else contas.crm_de(usuario)}
 
 
 class _Minuta(FPDF):
@@ -134,16 +152,17 @@ class _Minuta(FPDF):
         self.set_font('DejaVu', '', 9.5)
         self.set_text_color(20, 41, 47)
         resp = getattr(self, 'responsavel', None)
-        if resp and resp.get('crm'):
+        if resp and not resp.get('estudante'):
             self.set_font('DejaVu', 'B', 9.5)
             self.cell(0, 5, resp['nome'], align='C', new_x='LMARGIN', new_y='NEXT')
             self.set_font('DejaVu', '', 9.5)
-            self.cell(0, 5, resp['crm'], align='C', new_x='LMARGIN', new_y='NEXT')
+            if resp.get('crm'):
+                self.cell(0, 5, resp['crm'], align='C', new_x='LMARGIN', new_y='NEXT')
             self.set_font('DejaVu', '', 8.5)
         self.cell(0, 5, LINHA_ASSINATURA, align='C', new_x='LMARGIN', new_y='NEXT')
         self.set_font('DejaVu', '', 8)
         self.set_text_color(90, 100, 103)
-        if resp and not resp.get('crm'):
+        if resp and resp.get('estudante'):
             self.multi_cell(0, 4.5, f"Minuta preparada por {resp['nome']} (estudante de medicina).", align='C', new_x='LMARGIN', new_y='NEXT')
         self.multi_cell(0, 4.5, AVISO, align='C')
 
@@ -197,7 +216,7 @@ def gerar_pdf_vacinas(dados_paciente, vacinas, responsavel=None):
         pdf.multi_cell(0, 6.2, f'{n}. {titulo.upper()}')
         pdf.set_font('DejaVu', '', 9.5)
         pdf.set_x(30)
-        pdf.multi_cell(0, 5.5, posologia_da_vacina(titulo))
+        pdf.multi_cell(0, 5.5, posologia_da_vacina(titulo, vacina.get('esquema_pdf')))
         pdf.ln(2)
     pdf.assinatura()
     return pdf.bytes()

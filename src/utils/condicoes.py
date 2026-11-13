@@ -78,8 +78,9 @@ def agravantes_de_risco(comorbidades, familia, hiv=False):
     return lista
 
 
-def _rec(titulo, categoria, descricao, subtitulo, referencia, grau, prioridade='media', substituir=False):
-    return {'titulo': titulo, 'categoria': categoria, 'descricao': descricao, 'subtitulo': subtitulo,
+def _rec(titulo, categoria, descricao, subtitulo, referencia, grau, prioridade='media', substituir=False, esquema=None):
+    extra = {'esquema_pdf': esquema} if esquema else {}
+    return {**extra, 'titulo': titulo, 'categoria': categoria, 'descricao': descricao, 'subtitulo': subtitulo,
             'referencia': referencia, 'grau_evidencia': grau, 'prioridade': prioridade, '_substituir': substituir}
 
 
@@ -91,7 +92,7 @@ def _garantir(recs, nova):
             if ORDEM_PRIORIDADE.get(nova['prioridade'], 0) > ORDEM_PRIORIDADE.get(r.get('prioridade'), 0):
                 r['prioridade'] = nova['prioridade']
             if substituir:
-                r.update({k: nova[k] for k in ('descricao', 'subtitulo', 'referencia', 'grau_evidencia')})
+                r.update({k: nova[k] for k in ('descricao', 'subtitulo', 'referencia', 'grau_evidencia', 'esquema_pdf') if k in nova})
             else:
                 if nova['subtitulo'] not in (r.get('subtitulo') or ''):
                     r['subtitulo'] = f"{r.get('subtitulo') or ''} | Também: {nova['subtitulo']}".strip(' |')
@@ -232,13 +233,14 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     if 'asma_grave' in com and 18 <= idade < 60 and not gestante:
         add(VSR, 'vacina', 'Dose única para adultos com asma moderada ou grave.', 'Asma moderada/grave | Dose única', SBIM, 'B')
     if 'asplenia' in com:
+        # Esquema de risco substitui o de rotina na tela e no PDF (esquema_pdf)
         add('Meningocócica ACWY (Menactra® ou Menveo®)', 'vacina',
             'Asplenia: 2 doses com 8 semanas de intervalo e reforço a cada 5 anos.', 'Asplenia | 2 doses + reforço 5/5 anos',
-            'CDC/ACIP 2025 / ' + SBIM, 'A', 'alta')
-        add('Meningocócica B (Bexsero®)', 'vacina', 'Asplenia: 2 doses; reforço 1 ano depois e a cada 2-3 anos.',
-            'Asplenia | 2 doses + reforços', 'CDC/ACIP 2025 / ' + SBIM, 'A', 'alta')
+            'CDC/ACIP 2025 / ' + SBIM, 'A', 'alta', substituir=True, esquema='asplenia')
+        add('Meningocócica B (Bexsero®)', 'vacina', 'Asplenia: 2 doses com 1 mês de intervalo; reforço 1 ano depois e a cada 2-3 anos.',
+            'Asplenia | 2 doses + reforços', 'CDC/ACIP 2025 / ' + SBIM, 'A', 'alta', substituir=True, esquema='asplenia')
         add('Haemophilus influenzae tipo b (Hib)', 'vacina', 'Asplenia: dose única se não vacinado.', 'Asplenia | Dose única',
-            'CDC/ACIP 2025 / ' + SBIM, 'B', 'alta')
+            'CDC/ACIP 2025 / ' + SBIM, 'B', 'alta', substituir=True, esquema='asplenia')
     if imuno:
         orientar('Imunossupressão',
                  'Item marcado implica imunossupressão: a triagem de vacinas foi tratada como "Sim" e as vacinas de vírus '

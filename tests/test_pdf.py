@@ -264,7 +264,7 @@ def test_pdf_traz_nome_e_crm_do_medico_logado(client, html_enviado):
 
 def test_pdf_de_estudante_nao_assina():
     resp = pdf_minutas.responsavel_de({'nome': 'Aluno Um', 'registro': '2023001 · UFG', 'perfil': 'estudante'})
-    assert resp == {'nome': 'Aluno Um', 'crm': None}
+    assert resp == {'nome': 'Aluno Um', 'crm': None, 'estudante': True}
     texto = _texto_do_pdf(pdf_minutas.gerar_pdf_exames_laboratoriais(
         {'nome': 'Paciente', 'sexo': 'feminino'}, [{'titulo': 'Hemograma completo'}], responsavel=resp))
     assert 'Minuta preparada por Aluno Um (estudante de medicina)' in texto
@@ -275,3 +275,34 @@ def test_crm_antigo_em_texto_livre_e_reconhecido():
     from src.utils import contas
     assert contas.crm_de({'registro': 'crm go 26.815'}) == 'CRM-GO 26815'
     assert contas.crm_de({'registro': 'matrícula 123 UFG'}) is None
+
+
+def test_perfil_decide_quem_assina_nao_o_texto_do_registro():
+    medico = pdf_minutas.responsavel_de({'nome': 'Dra. Antiga', 'registro': '12345/SP', 'perfil': 'medico'})
+    assert medico == {'nome': 'Dra. Antiga', 'crm': None, 'estudante': False}
+    texto = _texto_do_pdf(pdf_minutas.gerar_pdf_exames_laboratoriais(
+        {'nome': 'Paciente', 'sexo': 'feminino'}, [{'titulo': 'Hemograma completo'}], responsavel=medico))
+    assert 'Dra. Antiga' in texto and 'estudante' not in texto
+    aluno = pdf_minutas.responsavel_de({'nome': 'Aluno Dois', 'registro': 'CRM-GO 123', 'perfil': 'estudante'})
+    assert aluno['estudante'] and aluno['crm'] is None
+
+
+def test_asplenia_leva_o_esquema_de_risco_para_a_tela_e_o_pdf(client, html_enviado):
+    dados = dict(idade=35, sexo='masculino', tabagismo='nunca', comorbidades=['asplenia'], historia_familiar=[],
+                 imunossupressao='nao', gestante='nao', lactante='nao')
+    recs = client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']
+    men = [r for r in recs if 'Meningocócica' in r['titulo'] or 'Hib' in r['titulo']]
+    assert len(men) == 3 and len({r['titulo'] for r in men}) == 3
+    for r in men:
+        assert r['esquema_pdf'] == 'asplenia' and r['descricao'].startswith('Asplenia')
+    resposta = client.post('/api/gerar-pdf-vacinas', json={'nome_paciente': 'Paciente', 'sexo': 'masculino', 'idade': 35,
+                                                         'imunossupressao': 'nao', 'gestante': 'nao', 'recomendacoes': men})
+    assert resposta.status_code == 200, resposta.get_json()
+    texto = html_enviado[0]
+    assert '8 semanas' in texto and 'a cada 2-3 anos' in texto and 'Sem reforço de rotina' not in texto
+
+
+def test_esquema_desconhecido_e_recusado(client):
+    r = client.post('/api/gerar-pdf-vacinas', json={'nome_paciente': 'P', 'sexo': 'masculino', 'recomendacoes': [
+        {'titulo': 'Meningocócica B (Bexsero®)', 'categoria': 'vacina', 'esquema_pdf': 'texto livre'}]})
+    assert r.status_code == 400

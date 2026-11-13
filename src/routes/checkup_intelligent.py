@@ -1537,6 +1537,8 @@ def _ler_pedido_de_pdf(categoria):
         quando = rec.get('quando_pdf')
         if quando is not None and (not isinstance(quando, str) or len(quando) > 160):
             raise PedidoDePdfInvalido('Item de recomendação com janela gestacional inválida')
+        if rec.get('esquema_pdf') is not None and rec['esquema_pdf'] not in ESQUEMAS_DE_RISCO:
+            raise PedidoDePdfInvalido('Item de recomendação com esquema vacinal inválido')
         itens.append(rec)
     return dados_paciente, itens
 
@@ -1565,6 +1567,9 @@ def _conferir_triagem_das_vacinas(dados_paciente, vacinas):
             f'({titulos}). Gere as recomendações novamente.',
             codigo='triagem_vacinas',
         )
+
+
+from src.utils.pdf_minutas import ESQUEMAS_DE_RISCO  # noqa: E402
 
 
 def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferir=None):
