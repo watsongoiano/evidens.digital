@@ -5,7 +5,17 @@ Fontes
   Risco, v.3 (CPTW53.3, revisão 01/08/2024).
 - Ministério da Saúde. Atenção ao pré-natal de baixo risco (Cadernos de Atenção Básica 32),
   2012; Protocolos da Atenção Básica — Saúde das Mulheres, 2016.
-- Williams Obstetrics, 26ª ed., Tabela 10-1 (componentes da rotina de pré-natal).
+- Williams Obstetrics, 26ª ed., Tabela 10-1 (componentes da rotina de pré-natal). É o guia da rotina
+  laboratorial: todo item marcado com ponto na tabela é pedido na coluna correspondente.
+    1ª consulta: hemoglobina/hematócrito, tipagem ABO e Rh, pesquisa de anticorpos (Coombs indireto),
+                 Papanicolaou, proteína urinária (urina tipo I), urocultura, rubéola, sífilis, clamídia,
+                 hepatite B e HIV.
+    24-28 semanas: hemoglobina/hematócrito, teste de tolerância à glicose e, na Rh negativo, nova
+                 pesquisa de anticorpos com 28 semanas (A).
+    29-41 semanas: reteste de sífilis, clamídia, gonococo, hepatite B e HIV (C, D) e cultura de
+                 estreptococo do grupo B com 35-37 semanas (E).
+  As letras B (oferecer rastreio de aneuploidias, tubo neural e fibrose cística) e F (tuberculose em
+  alto risco) não geram pedido automático.
 - USPSTF: clamídia/gonorreia (2021), ácido acetilsalicílico para pré-eclâmpsia (2021).
 - ACOG Practice Bulletin 222 (2020) e Committee Opinion 797 (2020, estreptococo do grupo B).
 
@@ -119,7 +129,10 @@ def _janelas(g, idade, hipertensa, diabetica, hiv=False):
                  'Rastreio de colo curto (≤ 25 mm). Com parto prematuro anterior, medir a partir de 16 semanas.',
                  f'Pré-natal | {colo_inicio}-24 semanas', prioridade='media', grau='B'),
         ]),
-        (24, 29, '24-28 semanas', ([_rec('Coombs indireto, soro', 'laboratorio',
+        (24, 29, '24-28 semanas', [
+            _rec('Hemograma completo', 'laboratorio', 'Hemoglobina/hematócrito de 24-28 semanas (rastreio de anemia).',
+                 'Pré-natal | 24-28 semanas'),
+        ] + ([_rec('Coombs indireto, soro', 'laboratorio',
                                          'Gestante Rh negativo: repetir com 28 semanas; se negativo, imunoglobulina anti-D com 28 semanas e até 72 h após o parto (se RN Rh positivo).',
                                          'Pré-natal | Rh negativo: 28 semanas')] if rh_neg else [])),
         (28, 37, '28-36 semanas', [
@@ -132,7 +145,10 @@ def _janelas(g, idade, hipertensa, diabetica, hiv=False):
             _rec('HBsAg, soro', 'laboratorio', 'Repetir no 3º trimestre (Einstein/MS).', 'Pré-natal | 28-36 semanas', prioridade='media'),
             _rec('Ultrassonografia obstétrica com Doppler', 'imagem', 'Crescimento e vitalidade fetal (protocolo Einstein).',
                  'Pré-natal | 28-36 semanas', prioridade='media', grau='B'),
-        ] + ([_rec('Toxoplasmose IgG e IgM, soro', 'laboratorio',
+        ] + ([_rec('Clamídia e gonococo, PCR (urina ou swab)', 'laboratorio',
+                   'Reteste no 3º trimestre para menores de 25 anos ou com fator de risco.',
+                   'Pré-natal | 28-36 semanas | < 25 anos', grau='B', referencia='Williams 26e / USPSTF 2021')]
+             if idade < 25 else []) + ([_rec('Toxoplasmose IgG e IgM, soro', 'laboratorio',
                    'Repetir a cada trimestre enquanto suscetível (IgG negativa).', 'Pré-natal | Suscetível: a cada trimestre')]
              if toxo_repetir else [])),
         (35, 38, '35-37 semanas', [
@@ -208,15 +224,18 @@ def _primeira_consulta(g, idade, hipertensa, diabetica, hiv=False):
     ]
     if g['rh'] != 'positivo':
         recs.append(_rec('Tipagem sanguínea ABO e fator Rh', 'laboratorio', 'Risco de aloimunização Rh.', 'Pré-natal | 1ª consulta'))
-    if g['rh'] == 'negativo':
-        recs.append(_rec('Coombs indireto, soro', 'laboratorio', 'Gestante Rh negativo.', 'Pré-natal | 1ª consulta'))
+    # Williams, Tab. 10-1: pesquisa de anticorpos irregulares na 1ª consulta para todas (não só Rh negativo)
+    recs.append(_rec('Coombs indireto, soro', 'laboratorio',
+                     'Pesquisa de anticorpos irregulares na primeira consulta, para todas as gestantes. Na Rh negativo, '
+                     'repetir com 28 semanas.', 'Pré-natal | 1ª consulta'))
     if g['toxo'] != 'imune':
         recs.append(_rec('Toxoplasmose IgG e IgM, soro', 'laboratorio', 'Suscetível: repetir a cada trimestre.', 'Pré-natal | 1ª consulta'))
-    if idade < 25:
-        recs.append(_rec('Clamídia e gonococo, PCR (urina ou swab)', 'laboratorio',
-                         'Rastreio para menores de 25 anos ou com fator de risco; repetir no 3º trimestre se risco.',
-                         'Pré-natal | 1ª consulta | < 25 anos', grau='B',
-                         referencia='USPSTF 2021 / Williams 26e'))
+    recs.append(_rec('Clamídia e gonococo, PCR (urina ou swab)', 'laboratorio',
+                     'Clamídia: rastreio na primeira consulta para todas. Gonococo: para menores de 25 anos ou com fator de '
+                     'risco. Repetir no 3º trimestre se menor de 25 anos ou com risco.',
+                     'Pré-natal | 1ª consulta', grau='B', referencia='Williams 26e / USPSTF 2021'))
+    # Papanicolaou (ponto da 1ª consulta na Tab. 10-1): vem do rastreio de colo do check-up geral, que na
+    # gestação segue na lista (citologia de 21 a 29 anos; teste de HPV a partir de 30).
     if not diabetica and ('dmg_previo' in g['condicoes']):
         recs.append(_rec('Hemoglobina glicada (HbA1c), soro', 'laboratorio',
                          'Fator de risco para diabetes: rastrear diabetes não diagnosticado antes de 15 semanas.',
@@ -245,8 +264,8 @@ def exames(g, idade, hipertensa=False, diabetica=False, hiv=False):
     return programacao(g, idade, hipertensa, diabetica, hiv)[0]
 
 
-INICIAIS = ('tipagem ABO/Rh, hemograma, glicemia de jejum, urina tipo I e urocultura, HIV, sífilis, HBsAg, anti-HCV, '
-            'toxoplasmose, rubéola e citomegalovírus')
+INICIAIS = ('tipagem ABO/Rh, Coombs indireto, hemograma, glicemia de jejum, urina tipo I e urocultura, HIV, '
+            'sífilis, HBsAg, anti-HCV, clamídia, toxoplasmose, rubéola e citomegalovírus')
 
 
 def programacao(g, idade, hipertensa=False, diabetica=False, hiv=False):
