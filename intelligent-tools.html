@@ -81,7 +81,7 @@
     </section>
 
     <section class="secao" aria-labelledby="s-comorbidades">
-      <h2 id="s-comorbidades" class="secao-titulo"><span class="secao-num">03</span>Comorbidades</h2>
+      <h2 id="s-comorbidades" class="secao-titulo"><span class="secao-num">03</span>Comorbidades e História Prévia</h2>
       <p class="secao-nota">Marque as que se aplicam.</p>
       <div class="opcoes">
         <label class="opcao" for="diabetes"><input type="checkbox" id="diabetes" name="comorbidades" value="diabetes">Diabetes tipo 2</label>
@@ -254,10 +254,37 @@
       <p>O cálculo de risco cardiovascular está temporariamente desativado, em validação.</p>
     </div>
 
+    <p class="text-[12px] text-ink/50 mt-6 flex flex-wrap gap-x-5 gap-y-1"><span><span class="inline-block w-2 h-2 rounded-full bg-teal align-middle mr-1"></span>prioridade alta</span><span><span class="inline-block w-2 h-2 rounded-full bg-aqua align-middle mr-1"></span>média</span><span><span class="inline-block w-2 h-2 rounded-full bg-ink/20 align-middle mr-1"></span>baixa</span><span><span class="rec-grau align-middle mr-1">A</span>grau de evidência</span></p>
     <div id="recommendationsContent"></div>
     <div id="naoIncluidasContent"></div>
   </section>
 </main>
+
+<dialog id="dialogoAcrescimo" class="rounded-[22px] p-0 w-[min(640px,94vw)] bg-white border border-ink/10 shadow-2xl backdrop:bg-ink/40">
+  <form method="dialog" class="p-6 sm:p-8">
+    <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-3">ANTES DE GERAR O PDF</p>
+    <h3 id="acrescimoTitulo" class="text-[22px] font-light tracking-tight">Deseja acrescentar algum exame?</h3>
+    <p class="text-[14px] text-ink/55 mt-2">Os itens acrescentados entram só neste documento. Vacinas acrescentadas passam pela mesma triagem de segurança.</p>
+
+    <div id="acrescimoPainel" class="mt-5" style="display: none;">
+      <div class="campo">
+        <label for="acrescimoBusca">Buscar no catálogo ou digitar um item</label>
+        <div class="flex gap-2">
+          <input type="text" id="acrescimoBusca" list="acrescimoLista" placeholder="Ex: TSH, soro" maxlength="300" autocomplete="off" class="flex-1">
+          <datalist id="acrescimoLista"></datalist>
+          <button type="button" id="acrescimoAdicionar" class="btn-claro shrink-0"><i class="fa-solid fa-plus text-[11px]"></i>Adicionar</button>
+        </div>
+      </div>
+      <div id="acrescimoItens" class="flex flex-wrap gap-2 mt-4"></div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3 mt-6">
+      <button type="button" id="acrescimoSim" class="btn-claro">Sim, acrescentar</button>
+      <button type="button" id="acrescimoGerar" class="btn-escuro">Gerar o PDF <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button>
+      <button type="button" id="acrescimoCancelar" class="text-[14px] text-ink/55 underline underline-offset-2 ml-auto">Cancelar</button>
+    </div>
+  </form>
+</dialog>
 
 <footer class="max-w-[1100px] mx-auto px-4 sm:px-6 pb-10">
   <div class="flex flex-col md:flex-row md:justify-between gap-3 pt-8 border-t border-ink/10 text-[12px] text-ink/50">
@@ -341,6 +368,7 @@
 
         function limparResultados() {
             currentRecommendations = [];
+            limparAcrescimos();
             currentPatientData = {};
             document.getElementById('recommendationsContent').innerHTML = '';
             document.getElementById('naoIncluidasContent').innerHTML = '';
@@ -433,9 +461,9 @@
         checkupForm.addEventListener('change', invalidarResultados);
 
         const SELOS_PRIORIDADE = {
-            alta: { texto: 'Prioridade alta', classe: 'bg-teal text-white' },
-            media: { texto: 'Prioridade média', classe: 'bg-aqua/60 text-ink' },
-            baixa: { texto: 'Prioridade baixa', classe: 'bg-ink/10 text-ink/70' }
+            alta: { texto: 'Prioridade alta', classe: 'bg-teal text-white', ponto: 'bg-teal' },
+            media: { texto: 'Prioridade média', classe: 'bg-aqua/60 text-ink', ponto: 'bg-aqua' },
+            baixa: { texto: 'Prioridade baixa', classe: 'bg-ink/10 text-ink/70', ponto: 'bg-ink/20' }
         };
 
         function displayRecommendations(recomendacoes, naoIncluidas) {
@@ -485,16 +513,19 @@
                         const titulo = rec.titulo || 'Recomendação';
                         const subtitulo = rec.subtitulo || '';
                         const prioridade = rec.prioridade || 'alta';
+                        const grau = (rec.grau_evidencia || '').toString().trim();
                         // referencia_html é montado pelo servidor (links das fontes)
                         const referencia_html = rec.referencia_html || escapeHtml(rec.referencia || '');
                         const selo = SELOS_PRIORIDADE[prioridade] || SELOS_PRIORIDADE.alta;
 
-                        html += `<div class="recommendation-card">
-                            <button type="button" onclick="removeRecommendation(this)" aria-label="Retirar esta recomendação" class="absolute top-3 right-3 w-8 h-8 rounded-full text-ink/35 hover:text-ink hover:bg-paper transition"><i class="fa-solid fa-xmark"></i></button>
-                            <span class="selo ${selo.classe}">${escapeHtml(selo.texto)}</span>
-                            <h5 class="mt-2">${escapeHtml(titulo)}</h5>
-                            ${subtitulo ? `<p class="text-[14px] text-ink/60 mt-1">${escapeHtml(subtitulo)}</p>` : ''}
-                            ${referencia_html ? `<p class="text-[12px] text-ink/50 mt-3 flex gap-2"><i class="fa-solid fa-book-medical text-teal/70 mt-0.5"></i><span class="referencia-links">${referencia_html}</span></p>` : ''}
+                        html += `<div class="recommendation-card rec-linha" data-titulo="${escapeHtml(titulo)}">
+                            <span class="rec-prioridade ${selo.ponto}" title="${escapeHtml(selo.texto)}"></span>
+                            <div class="min-w-0">
+                                <h5 class="rec-titulo">${escapeHtml(titulo)}</h5>
+                                ${(subtitulo || referencia_html) ? `<p class="rec-sub">${subtitulo ? escapeHtml(subtitulo) : ''}${subtitulo && referencia_html ? '<span class="text-ink/30 mx-1.5">·</span>' : ''}${referencia_html ? `<span class="referencia-links">${referencia_html}</span>` : ''}</p>` : ''}
+                            </div>
+                            ${grau ? `<span class="rec-grau" title="Grau de evidência ${escapeHtml(grau)}">${escapeHtml(grau)}</span>` : '<span></span>'}
+                            <button type="button" onclick="removeRecommendation(this)" aria-label="Retirar esta recomendação" class="rec-remover"><i class="fa-solid fa-xmark"></i></button>
                         </div>`;
                     });
 
@@ -602,27 +633,123 @@
             }
         }
 
-        function gerarPDFExamesLaboratoriais() {
-            return baixarPdf('/api/gerar-pdf-exames-laboratoriais', currentRecommendations, 'exames_laboratoriais', 'exames laboratoriais');
+        // --- Acréscimo de itens antes do PDF --------------------------------------
+        const DOCUMENTOS = {
+            laboratorio: { endpoint: '/api/gerar-pdf-exames-laboratoriais', arquivo: 'exames_laboratoriais', descricao: 'exames laboratoriais', pergunta: 'Deseja acrescentar algum exame laboratorial?' },
+            imagem: { endpoint: '/api/gerar-pdf-exames-imagem', arquivo: 'exames_imagem', descricao: 'exames de imagem', pergunta: 'Deseja acrescentar algum exame de imagem?' },
+            vacina: { endpoint: '/api/gerar-pdf-vacinas', arquivo: 'prescricao_vacinas', descricao: 'vacinas', pergunta: 'Deseja acrescentar alguma vacina?' }
+        };
+        let catalogo = null;
+        const acrescentados = { laboratorio: [], imagem: [], vacina: [] };
+        let categoriaDoDialogo = null;
+
+        async function carregarCatalogo() {
+            if (catalogo) return catalogo;
+            try {
+                const r = await fetch('/api/catalogo', { credentials: 'same-origin' });
+                catalogo = r.ok ? await r.json() : {};
+            } catch (e) {
+                catalogo = {};
+            }
+            return catalogo;
         }
 
-        function gerarPDFExamesImagem() {
-            return baixarPdf('/api/gerar-pdf-exames-imagem', currentRecommendations, 'exames_imagem', 'exames de imagem');
+        function limparAcrescimos() {
+            Object.keys(acrescentados).forEach(c => { acrescentados[c] = []; });
         }
 
-        function gerarPDFVacinas() {
-            // Filtrar apenas vacinas do currentRecommendations
-            const vacinas = (currentRecommendations || []).filter(rec =>
-                (rec.categoria || '').toLowerCase() === 'vacina'
-            );
+        function itensDaCategoria(categoria) {
+            const base = (currentRecommendations || []).filter(rec => (rec.categoria || '').toLowerCase() === categoria);
+            const presentes = new Set(base.map(r => (r.titulo || '').trim().toLowerCase()));
+            const extras = acrescentados[categoria]
+                .filter(t => !presentes.has(t.toLowerCase()))
+                .map(t => ({ titulo: t, categoria: categoria, acrescentado: true }));
+            return base.concat(extras);
+        }
 
-            if (currentRecommendations && currentRecommendations.length > 0 && vacinas.length === 0) {
-                alert('Nenhuma vacina foi recomendada!');
+        function desenharAcrescentados(categoria) {
+            const caixa = document.getElementById('acrescimoItens');
+            caixa.innerHTML = '';
+            if (!acrescentados[categoria].length) {
+                caixa.innerHTML = '<p class="text-[13px] text-ink/45">Nenhum item acrescentado ainda.</p>';
                 return;
             }
-
-            return baixarPdf('/api/gerar-pdf-vacinas', vacinas, 'prescricao_vacinas', 'vacinas');
+            acrescentados[categoria].forEach((titulo, i) => {
+                const chip = document.createElement('span');
+                chip.className = 'inline-flex items-center gap-2 rounded-full bg-mist/70 border border-teal/20 pl-3 pr-1.5 py-1 text-[13px]';
+                const texto = document.createElement('span'); texto.textContent = titulo;
+                const x = document.createElement('button'); x.type = 'button'; x.className = 'w-6 h-6 rounded-full text-ink/40 hover:text-ink hover:bg-white'; x.setAttribute('aria-label', 'Retirar'); x.innerHTML = '<i class="fa-solid fa-xmark text-[11px]"></i>';
+                x.addEventListener('click', () => { acrescentados[categoria].splice(i, 1); desenharAcrescentados(categoria); });
+                chip.append(texto, x);
+                caixa.appendChild(chip);
+            });
         }
+
+        function adicionarDoCampo() {
+            const campo = document.getElementById('acrescimoBusca');
+            const titulo = campo.value.trim().slice(0, 300);
+            if (!titulo || !categoriaDoDialogo) return;
+            const lista = acrescentados[categoriaDoDialogo];
+            const jaTem = itensDaCategoria(categoriaDoDialogo).some(r => (r.titulo || '').trim().toLowerCase() === titulo.toLowerCase());
+            if (!jaTem) lista.push(titulo);
+            campo.value = '';
+            desenharAcrescentados(categoriaDoDialogo);
+            campo.focus();
+        }
+
+        async function abrirDialogoDePdf(categoria) {
+            if (!currentRecommendations || currentRecommendations.length === 0) {
+                alert('Gere as recomendações primeiro!');
+                return;
+            }
+            categoriaDoDialogo = categoria;
+            // Texto digitado num diálogo anterior (de outra categoria) não pode vazar para este.
+            document.getElementById('acrescimoBusca').value = '';
+            const doc = DOCUMENTOS[categoria];
+            document.getElementById('acrescimoTitulo').textContent = doc.pergunta;
+            const painel = document.getElementById('acrescimoPainel');
+            painel.style.display = acrescentados[categoria].length ? 'block' : 'none';
+            document.getElementById('acrescimoSim').style.display = acrescentados[categoria].length ? 'none' : '';
+            desenharAcrescentados(categoria);
+            const datalist = document.getElementById('acrescimoLista');
+            datalist.innerHTML = '';
+            const cat = await carregarCatalogo();
+            (cat[categoria] || []).forEach(t => { const o = document.createElement('option'); o.value = t; datalist.appendChild(o); });
+            const dialogo = document.getElementById('dialogoAcrescimo');
+            if (typeof dialogo.showModal === 'function') dialogo.showModal(); else dialogo.setAttribute('open', '');
+        }
+
+        function fecharDialogo() {
+            document.getElementById('acrescimoBusca').value = '';
+            const dialogo = document.getElementById('dialogoAcrescimo');
+            if (dialogo.open) dialogo.close();
+        }
+
+        document.getElementById('acrescimoSim').addEventListener('click', () => {
+            document.getElementById('acrescimoPainel').style.display = 'block';
+            document.getElementById('acrescimoSim').style.display = 'none';
+            document.getElementById('acrescimoBusca').focus();
+        });
+        document.getElementById('acrescimoAdicionar').addEventListener('click', adicionarDoCampo);
+        document.getElementById('acrescimoBusca').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); adicionarDoCampo(); } });
+        document.getElementById('acrescimoCancelar').addEventListener('click', fecharDialogo);
+        document.getElementById('acrescimoGerar').addEventListener('click', () => {
+            const painelAberto = document.getElementById('acrescimoPainel').style.display !== 'none';
+            if (painelAberto && document.getElementById('acrescimoBusca').value.trim()) adicionarDoCampo();
+            const categoria = categoriaDoDialogo;
+            fecharDialogo();
+            const doc = DOCUMENTOS[categoria];
+            const itens = itensDaCategoria(categoria);
+            if (!itens.length) {
+                alert(categoria === 'vacina' ? 'Nenhuma vacina foi recomendada!' : 'Nenhum item desta categoria para imprimir.');
+                return;
+            }
+            baixarPdf(doc.endpoint, itens, doc.arquivo, doc.descricao);
+        });
+
+        function gerarPDFExamesLaboratoriais() { return abrirDialogoDePdf('laboratorio'); }
+        function gerarPDFExamesImagem() { return abrirDialogoDePdf('imagem'); }
+        function gerarPDFVacinas() { return abrirDialogoDePdf('vacina'); }
 
         function removeRecommendation(button) {
             const card = button.closest('.recommendation-card');
@@ -630,7 +757,7 @@
                 // Extrair o título da recomendação para identificá-la
                 const tituloElement = card.querySelector('h5');
                 if (tituloElement && currentRecommendations) {
-                    const titulo = tituloElement.textContent.trim();
+                    const titulo = card.dataset.titulo || tituloElement.textContent.trim();
 
                     // Remover do array currentRecommendations
                     const index = currentRecommendations.findIndex(rec => rec.titulo === titulo);

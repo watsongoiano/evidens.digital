@@ -13,10 +13,7 @@
 
 | Variável | Obrigatória | Uso |
 |---|---|---|
-| `GOTENBERG_URL` | sim | Endereço do serviço de PDF |
 | `SECRET_KEY` | sim | Chave do Flask; use um valor aleatório longo |
-| `GOTENBERG_API_BASIC_AUTH_USERNAME` | recomendada | Usuário da autenticação básica do serviço de PDF |
-| `GOTENBERG_API_BASIC_AUTH_PASSWORD` | recomendada | Senha da autenticação básica do serviço de PDF |
 
 ## Área de acesso (contas)
 
@@ -56,17 +53,11 @@ A verificação **Testes → css** no GitHub falha se o arquivo publicado não e
 As imagens da página inicial estão hospedadas fora do projeto (UX Pilot). Para não depender desse endereço,
 salve-as em `assets/`, inclua-as em `ARQUIVOS_PUBLICOS` (`api/index.py`) e troque os endereços em `index.html`.
 
-## Serviço de PDF (Gotenberg, no Railway)
+## PDFs
 
-O serviço fica em outro repositório (`gotenberg-pdf-service`). Enquanto ele aceitar requisições sem
-autenticação, qualquer pessoa que conheça o endereço pode usá-lo. Para fechar:
-
-1. No Railway, defina `GOTENBERG_API_BASIC_AUTH_USERNAME` e `GOTENBERG_API_BASIC_AUTH_PASSWORD`.
-2. Inicie o Gotenberg com a opção `--api-enable-basic-auth` (confira o nome da opção na documentação da versão em uso).
-3. Na Vercel, defina as mesmas duas variáveis, com os mesmos valores.
-4. Gere um PDF pela página para confirmar.
-
-Faça os passos 1 a 3 juntos: com a autenticação ligada só de um lado, a geração de PDF para de funcionar.
+As minutas (pedidos de exames e receita de vacinas) são geradas dentro da própria função, com a biblioteca
+`fpdf2` e as fontes DejaVu em `assets/fonts`. Não há serviço externo nem variável de ambiente para isso.
+O serviço Gotenberg no Railway, usado antes, pode ser desligado.
 
 ## Conferência depois de um deploy
 
