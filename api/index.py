@@ -2,8 +2,9 @@
 Evidens Digital - API Principal
 Sistema de Check-up Médico Inteligente
 """
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
+from datetime import timedelta
+
+from flask import Flask, request, jsonify, redirect, send_from_directory
 import os
 import sys
 from pathlib import Path
@@ -15,18 +16,53 @@ sys.path.insert(0, str(BASE_DIR))
 # Importar módulos do sistema
 from src.routes.checkup_intelligent import checkup_intelligent_bp
 from src.utils.analytics import analytics
+from src.routes import auth
+from src.routes.auth import auth_bp, exigir_administrador, usuario_atual
 
 # Criar aplicação Flask
 # Sem a pasta estática automática do Flask: tudo o que é publicado passa pela
 # lista ARQUIVOS_PUBLICOS abaixo (a rota /static/<arquivo> serviria a pasta inteira).
 app = Flask(__name__, static_folder=None)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', auth.CHAVE_PADRAO)
 
-# Configurar CORS
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+# Sessão: cookie assinado, inacessível a scripts, só por HTTPS na Vercel,
+# não enviado em requisições iniciadas por outros sites, válido por 12 horas.
+app.config.update(
+    SESSION_COOKIE_NAME='evidens_sessao',
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=bool(os.environ.get('VERCEL')),
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
+    MAX_CONTENT_LENGTH=1024 * 1024,
+)
+
+# O site e a API ficam no mesmo endereço: não há liberação para outros sites
+# (CORS), e envios vindos de outra origem são recusados.
+@app.before_request
+def _recusar_envio_de_outro_site():
+    if request.method == 'POST' and request.path.startswith('/api/') and not auth.origem_confiavel():
+        return jsonify({'error': 'Requisição recusada: origem não reconhecida.'}), 403
+
+
+# Todo o check-up (recomendações e PDFs) exige conta aprovada.
+@checkup_intelligent_bp.before_request
+def _checkup_exige_login():
+    if not auth.disponivel():
+        return jsonify({'error': auth.MSG_INDISPONIVEL}), 503
+    if usuario_atual() is None:
+        return jsonify({'error': auth.MSG_LOGIN, 'login': '/login'}), 401
+
 
 # Registrar blueprints
 app.register_blueprint(checkup_intelligent_bp, url_prefix='/api')
+app.register_blueprint(auth_bp, url_prefix='/api')
+
+
+def _pagina(arquivo, privada=False):
+    resposta = send_from_directory(BASE_DIR, arquivo)
+    if privada:
+        resposta.headers['Cache-Control'] = 'no-store'
+    return resposta
 
 @app.route('/')
 def index():
@@ -35,8 +71,44 @@ def index():
 
 @app.route('/intelligent-tools')
 def intelligent_tools():
-    """Rota para ferramentas inteligentes"""
-    return send_from_directory(BASE_DIR, 'intelligent-tools.html')
+    """Check-up: só para quem entrou."""
+    if usuario_atual() is None:
+        return redirect('/login?destino=check-up')
+    return _pagina('intelligent-tools.html', privada=True)
+
+
+@app.route('/login')
+def login_page():
+    if usuario_atual() is not None:
+        return redirect('/intelligent-tools')
+    return _pagina('login.html', privada=True)
+
+
+@app.route('/cadastro')
+def cadastro_page():
+    return _pagina('cadastro.html')
+
+
+@app.route('/configurar')
+def configurar_page():
+    return _pagina('configurar.html', privada=True)
+
+
+@app.route('/conta')
+def conta_page():
+    if usuario_atual() is None:
+        return redirect('/login')
+    return _pagina('conta.html', privada=True)
+
+
+@app.route('/admin')
+def admin_page():
+    u = usuario_atual()
+    if u is None:
+        return redirect('/login')
+    if not u['administrador']:
+        return redirect('/intelligent-tools')
+    return _pagina('admin.html', privada=True)
 
 @app.route('/contact')
 def contact_page():
@@ -45,15 +117,22 @@ def contact_page():
 
 @app.route('/analytics')
 def analytics_page():
-    """Rota para página de analytics"""
-    return send_from_directory(BASE_DIR, 'analytics.html')
+    """Painel de uso: só para o administrador."""
+    u = usuario_atual()
+    if u is None:
+        return redirect('/login')
+    if not u['administrador']:
+        return redirect('/intelligent-tools')
+    return _pagina('analytics.html', privada=True)
 
 @app.route('/api/analytics/stats')
+@exigir_administrador
 def get_analytics_stats():
     """Endpoint para visualizar estatísticas de acesso"""
     return jsonify(analytics.get_summary())
 
 @app.route('/api/analytics/full')
+@exigir_administrador
 def get_full_analytics():
     """Endpoint para visualizar estatísticas completas"""
     return jsonify(analytics.get_stats())
@@ -64,9 +143,8 @@ def get_full_analytics():
 # fluxo de documentos removido) e os arquivos de configuração.
 ARQUIVOS_PUBLICOS = frozenset({
     'index.html',
-    'intelligent-tools.html',
     'contact.html',
-    'analytics.html',
+    'static/conta.js',
     'favicon.ico',
     'favicon.png',
     'new_logo.png',

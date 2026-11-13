@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="/static/evidens.css">
+<script defer src="/static/conta.js"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body class="bg-paper text-ink font-sans">
@@ -26,9 +27,10 @@
       </span>
       <span class="text-[22px] font-medium tracking-tight">evidēns <span class="text-teal text-[13px] font-medium">check</span></span>
     </a>
-    <nav class="flex items-center gap-2 lg:gap-7 text-[13px] uppercase tracking-[0.12em] text-ink/75">
+    <nav class="flex items-center gap-2 lg:gap-6 text-[13px] uppercase tracking-[0.12em] text-ink/75">
       <a href="/" class="hidden sm:inline hover:text-teal transition">Início</a>
-      <a href="/contact" class="inline-flex items-center bg-ink text-white font-medium rounded-[3px] px-4 h-10 hover:bg-teal transition">Contato</a>
+      <a href="/conta" class="hover:text-teal transition">Conta</a>
+      <button type="button" data-sair class="inline-flex items-center bg-ink text-white font-medium uppercase tracking-[0.12em] rounded-[3px] px-4 h-10 hover:bg-teal transition">Sair</button>
     </nav>
   </div>
 </header>
@@ -266,6 +268,18 @@
 </footer>
 
     <script>
+        // Sessão encerrada (ou conta bloqueada) no meio do uso: volta para o login.
+        (function () {
+            const buscar = window.fetch.bind(window);
+            window.fetch = async function (...args) {
+                const resposta = await buscar(...args);
+                if (resposta.status === 401) {
+                    window.location.href = '/login?destino=check-up';
+                }
+                return resposta;
+            };
+        })();
+
         // Estado da tela
         let currentRecommendations = [];
         let currentPatientData = {};

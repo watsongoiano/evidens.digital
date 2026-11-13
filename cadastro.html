@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Criar conta — Evidēns</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="/static/evidens.css">
+<script defer src="/static/conta.js"></script>
+</head>
+<body class="bg-paper text-ink font-sans min-h-screen flex flex-col">
+
+<header class="px-4 sm:px-6 lg:px-[6%] pt-4 lg:pt-6">
+  <div class="max-w-[1240px] mx-auto bg-white h-[60px] pl-5 pr-2.5 lg:pl-6 flex items-center justify-between rounded-[3px] border border-ink/5">
+    <a href="/" class="flex items-center gap-2.5" aria-label="Evidēns — início">
+      <span class="grid grid-cols-3 gap-[3px]" aria-hidden="true">
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i>
+      </span>
+      <span class="text-[22px] font-medium tracking-tight">evidēns</span>
+    </a>
+    <nav class="flex items-center gap-2 lg:gap-6 text-[13px] uppercase tracking-[0.12em] text-ink/75"><a href="/" class="hidden sm:inline hover:text-teal transition">Início</a><a href="/login" class="inline-flex items-center bg-ink text-white font-medium rounded-[3px] px-4 h-10 hover:bg-teal transition">Entrar</a></nav>
+  </div>
+</header>
+
+<main class="flex-1 w-full max-w-[720px] mx-auto px-4 sm:px-6 pt-14 lg:pt-20 pb-24">
+  <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">CRIAR CONTA</p>
+  <h1 class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Acesso para médicos, residentes e <span class="font-serif italic text-teal tracking-tight">estudantes de medicina.</span></h1>
+  <p class="text-[16px] text-ink/65 leading-relaxed mt-5">Preencha os dados abaixo. A conta é liberada depois de conferida pelo responsável técnico.</p>
+  <form data-form="cadastro"  class="secao mt-10 flex flex-col gap-5" novalidate>
+    <div class="grade">
+      <div class="campo sm:col-span-2"><label for="nome">Nome completo</label><input type="text" id="nome" name="nome" required autocomplete="name" maxlength="150"></div>
+      <div class="campo "><label for="email">E-mail</label><input type="email" id="email" name="email" required autocomplete="email" maxlength="254"></div>
+      <div class="campo"><label for="perfil">Perfil</label><select id="perfil" name="perfil" required><option value="" selected disabled>Selecione...</option><option value="medico">Médico(a)</option><option value="residente">Residente</option><option value="estudante">Estudante de medicina</option></select></div>
+      <div class="campo sm:col-span-2"><label for="registro">CRM e UF, ou matrícula e faculdade</label><input type="text" id="registro" name="registro" required maxlength="40" placeholder="Ex: CRM-GO 12345"></div>
+      <div class="campo "><label for="senha">Senha (mínimo de 10 caracteres)</label><input type="password" id="senha" name="senha" required autocomplete="new-password" minlength="10" maxlength="200"></div>
+      <div class="campo "><label for="senha2">Repita a senha</label><input type="password" id="senha2" name="senha2" required autocomplete="new-password" minlength="10" maxlength="200"></div>
+    </div>
+    <div data-erro role="alert" class="aviso aviso-erro" style="display: none;"></div>
+    <div data-ok role="status" class="aviso aviso-info" style="display: none;"></div>
+    <div class="flex flex-wrap items-center gap-4">
+      <button type="submit" class="btn-escuro">Enviar cadastro <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button>
+      <a href="/login" class="text-[14px] text-teal-dark underline underline-offset-2">Já tenho conta</a>
+    </div>
+  </form>
+  <p class="text-[13px] text-ink/50 mt-6 leading-relaxed">Guardamos apenas nome, e-mail, registro profissional e perfil, para conferir e liberar o acesso. A senha é armazenada de forma irreversível. Dados de pacientes não são gravados.</p>
+</main>
+
+<footer class="max-w-[1100px] w-full mx-auto px-4 sm:px-6 pb-10">
+  <div class="flex flex-col md:flex-row md:justify-between gap-3 pt-8 border-t border-ink/10 text-[12px] text-ink/50">
+    <p>Responsável técnico: Dr. Rodolfo Cambraia Frota · CRM-GO 26815</p>
+    <p>© 2026 Evidēns · <a href="/contact" class="hover:text-teal">Contato</a></p>
+  </div>
+</footer>
+</body>
+</html>
