@@ -74,27 +74,24 @@ def email_de_contato() -> str:
     return _sem_quebra(os.environ.get('EMAIL_CONTATO'))
 
 
-def mensagem_de_boas_vindas(usuario, url_site):
-    """Texto de boas-vindas: por que a ferramenta existe, o que acontece agora, fase de desenvolvimento
-    e convite a dar feedback. Os números vêm de Zhi M et al., PLOS ONE 2013 (revisão de 15 anos de
-    literatura; resumo em hms.harvard.edu/news/unnecessary-testing)."""
-    primeiro_nome = (_sem_quebra(usuario.get('nome')).split(' ') or [''])[0]
+def _primeiro_nome(usuario):
+    return (_sem_quebra(usuario.get('nome')).split(' ') or [''])[0]
+
+
+def _apresentacao():
+    # Números de Zhi M et al., PLOS ONE 2013 (revisão de 15 anos de literatura; resumo em
+    # hms.harvard.edu/news/unnecessary-testing).
+    return ('você sabia que cerca de 30% dos exames laboratoriais pedidos são provavelmente '
+            'desnecessários, e que uma proporção parecida de exames necessários deixa de ser pedida? Foi o que mostrou '
+            'uma revisão de 15 anos de literatura, com 1,6 milhão de resultados, feita por pesquisadores ligados à '
+            'Harvard Medical School (Zhi et al., PLOS ONE, 2013: https://hms.harvard.edu/news/unnecessary-testing). '
+            'O Evidēns nasceu para ajudar nos dois lados: é uma ferramenta de apoio ao check-up baseada em evidências '
+            'científicas, que indica o que pedir, para quem e com qual referência.')
+
+
+def _fecho(url_site):
     contato = email_de_contato()
-    corpo = '\n'.join([
-        f'Olá, {primeiro_nome}.' if primeiro_nome else 'Olá.',
-        '',
-        'Ficamos felizes com o seu pedido de conta no Evidēns!',
-        '',
-        'Uma breve apresentação: você sabia que cerca de 30% dos exames laboratoriais pedidos são provavelmente '
-        'desnecessários, e que uma proporção parecida de exames necessários deixa de ser pedida? Foi o que mostrou '
-        'uma revisão de 15 anos de literatura, com 1,6 milhão de resultados, feita por pesquisadores ligados à '
-        'Harvard Medical School (Zhi et al., PLOS ONE, 2013: https://hms.harvard.edu/news/unnecessary-testing). '
-        'O Evidēns nasceu para ajudar nos dois lados: é uma ferramenta de apoio ao check-up baseada em evidências '
-        'científicas, que indica o que pedir, para quem e com qual referência.',
-        '',
-        'O seu pedido já foi enviado para a nossa equipe conferir o cadastro e liberar o acesso. É só aguardar: '
-        f'assim que a conta for aprovada, entre em {url_site}/login com o e-mail e a senha que você cadastrou!',
-        '',
+    return [
         'Lembre-se: o Evidēns está em fase de desenvolvimento e as recomendações são sugestões para a avaliação '
         'médica. Sempre revise e individualize cada item antes de solicitar ou prescrever, e desconfie do que '
         'parecer estranho!',
@@ -107,8 +104,49 @@ def mensagem_de_boas_vindas(usuario, url_site):
         '',
         'Dr. Rodolfo Cambraia Frota · CRM-GO 26815',
         'Criador e responsável técnico · Evidēns',
-    ])
+    ]
+
+
+def mensagem_de_boas_vindas(usuario, url_site):
+    """Texto de boas-vindas: por que a ferramenta existe, o que acontece agora, fase de desenvolvimento
+    e convite a dar feedback."""
+    primeiro_nome = _primeiro_nome(usuario)
+    corpo = '\n'.join([
+        f'Olá, {primeiro_nome}.' if primeiro_nome else 'Olá.',
+        '',
+        'Ficamos felizes com o seu pedido de conta no Evidēns!',
+        '',
+        'Uma breve apresentação: ' + _apresentacao(),
+        '',
+        'O seu pedido já foi enviado para a nossa equipe conferir o cadastro e liberar o acesso. É só aguardar: '
+        f'assim que a conta for aprovada, entre em {url_site}/login com o e-mail e a senha que você cadastrou!',
+        '',
+    ] + _fecho(url_site))
     return 'Bem-vindo(a) ao Evidēns', corpo
+
+
+def mensagem_de_agradecimento(usuario, url_site):
+    """Agradecimento a quem criou a conta antes de existir o e-mail de boas-vindas. O parágrafo do acesso
+    muda conforme a conta já esteja aprovada ou ainda em conferência."""
+    primeiro_nome = _primeiro_nome(usuario)
+    if usuario.get('situacao') == 'aprovado':
+        acesso = (f'A sua conta já está liberada: é só entrar em {url_site}/login com o e-mail e a senha que '
+                  'você cadastrou!')
+    else:
+        acesso = ('O seu cadastro está em conferência pela nossa equipe. Assim que a conta for aprovada, entre em '
+                  f'{url_site}/login com o e-mail e a senha que você cadastrou!')
+    corpo = '\n'.join([
+        f'Olá, {primeiro_nome}.' if primeiro_nome else 'Olá.',
+        '',
+        'Muito obrigado por já ter criado a sua conta no Evidēns! Você está entre os primeiros a testar a '
+        'plataforma, e isso faz diferença para nós.',
+        '',
+        'Para quem ainda não conhece a nossa motivação: ' + _apresentacao(),
+        '',
+        acesso,
+        '',
+    ] + _fecho(url_site))
+    return 'Obrigado por testar o Evidēns', corpo
 
 
 def enviar(para, assunto, texto, responder_para=None):
@@ -164,9 +202,14 @@ def avisar_novo_cadastro(usuario, administradores, url_admin, pedidos_na_ultima_
     return ok
 
 
+def boas_vindas_cabem(pedidos_na_ultima_hora=1) -> bool:
+    """Boas-vindas ligadas e dentro do limite por hora (o mesmo do aviso ao administrador)."""
+    return boas_vindas_ligadas() and pedidos_na_ultima_hora <= LIMITE_POR_HORA
+
+
 def enviar_boas_vindas(usuario, url_site, pedidos_na_ultima_hora=1):
     """Boas-vindas a quem pediu a conta. Mesmo limite por hora do aviso; falha vira log."""
-    if not boas_vindas_ligadas() or pedidos_na_ultima_hora > LIMITE_POR_HORA:
+    if not boas_vindas_cabem(pedidos_na_ultima_hora):
         return False
     assunto, texto = mensagem_de_boas_vindas(usuario, url_site)
     ok, detalhe = enviar([usuario['email']], assunto, texto,
@@ -174,3 +217,11 @@ def enviar_boas_vindas(usuario, url_site, pedidos_na_ultima_hora=1):
     if not ok:
         print(f'⚠️ E-mail de boas-vindas não enviado: {detalhe}')
     return ok
+
+
+def enviar_agradecimento(usuario, url_site):
+    """Agradecimento a uma conta que já existia. Devolve ``(ok, detalhe)``."""
+    if not boas_vindas_ligadas():
+        return False, 'envio a terceiros desligado (falta RESEND_API_KEY ou AVISO_CADASTRO_DE)'
+    assunto, texto = mensagem_de_agradecimento(usuario, url_site)
+    return enviar([usuario['email']], assunto, texto, responder_para=email_de_contato() or None)

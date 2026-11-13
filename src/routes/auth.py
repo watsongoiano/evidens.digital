@@ -131,7 +131,10 @@ def cadastro():
             na_ultima_hora = contas.criados_desde(time.time() - 3600)
             notificacoes.avisar_novo_cadastro(novo, contas.listar(), _url_do_site() + '/admin',
                                               pedidos_na_ultima_hora=na_ultima_hora)
-            notificacoes.enviar_boas_vindas(novo, _url_do_site(), pedidos_na_ultima_hora=na_ultima_hora)
+            # A reserva vem antes do envio e vale também contra o agradecimento: a conta recebe um ou outro.
+            if notificacoes.boas_vindas_cabem(na_ultima_hora) and contas.reservar_email(novo['id'], 'boas_vindas'):
+                if not notificacoes.enviar_boas_vindas(novo, _url_do_site(), pedidos_na_ultima_hora=na_ultima_hora):
+                    contas.liberar_email(novo['id'], 'boas_vindas')
         except Exception as erro:
             print(f'⚠️ E-mail de cadastro falhou: {type(erro).__name__}')
     # Mesma resposta para e-mail novo e e-mail já cadastrado.
@@ -211,7 +214,8 @@ def admin_aviso_estado():
     """Diz se o aviso por e-mail está ligado e para quem vai (sem expor a chave)."""
     return jsonify({'configurado': notificacoes.configurado(),
                     'destinatarios': notificacoes.destinatarios(contas.listar()),
-                    'boas_vindas': notificacoes.boas_vindas_ligadas()})
+                    'boas_vindas': notificacoes.boas_vindas_ligadas(),
+                    'agradecimento_pendentes': len(contas.sem_email())})
 
 
 @auth_bp.route('/admin/aviso/teste', methods=['POST'])
@@ -265,3 +269,48 @@ def admin_acao(uid, acao):
         u, temporaria = contas.gerar_senha_temporaria(uid)
         return jsonify({'ok': True, 'usuario': contas.publico(u), 'senha_temporaria': temporaria})
     return jsonify({'error': 'Ação desconhecida.'}), 404
+
+
+LOTE_DE_AGRADECIMENTO = 5  # por pedido: cabe no tempo da função e no limite de envios por segundo da Resend
+
+
+@auth_bp.route('/admin/agradecimento/teste', methods=['POST'])
+@exigir_administrador
+def admin_agradecimento_teste():
+    """Envia ao próprio administrador o e-mail de agradecimento, para conferir o texto antes do envio."""
+    u = usuario_atual()
+    if not notificacoes.boas_vindas_ligadas():
+        return jsonify({'error': 'O envio a quem se cadastra está desligado: falta RESEND_API_KEY ou o remetente '
+                                 'do domínio (AVISO_CADASTRO_DE).'}), 502
+    assunto, texto = notificacoes.mensagem_de_agradecimento(u, _url_do_site())
+    ok, detalhe = notificacoes.enviar([u['email']], assunto, texto)
+    if not ok:
+        return jsonify({'error': f'Não foi possível enviar o e-mail de agradecimento: {detalhe}'}), 502
+    return jsonify({'ok': True, 'destinatarios': [u['email']]})
+
+
+@auth_bp.route('/admin/agradecimento', methods=['POST'])
+@exigir_administrador
+def admin_agradecimento():
+    """Envia o agradecimento a um lote de contas que ainda não receberam e-mail nosso.
+
+    Cada conta recebe uma vez só: a marca é feita antes do envio e desfeita se o envio falhar.
+    A página chama de novo enquanto houver ``restantes`` e o lote anterior tiver enviado algo.
+    """
+    if not notificacoes.boas_vindas_ligadas():
+        return jsonify({'error': 'O envio a quem se cadastra está desligado: falta RESEND_API_KEY ou o remetente '
+                                 'do domínio (AVISO_CADASTRO_DE).'}), 502
+    enviados, falhas = 0, []
+    for i, conta in enumerate(contas.sem_email(LOTE_DE_AGRADECIMENTO)):
+        if not contas.reservar_email(conta['id'], 'agradecimento'):
+            continue  # outro pedido simultâneo já pegou esta conta
+        if i:
+            time.sleep(0.6)
+        ok, detalhe = notificacoes.enviar_agradecimento(conta, _url_do_site())
+        if ok:
+            enviados += 1
+        else:
+            contas.liberar_email(conta['id'], 'agradecimento')
+            falhas.append(detalhe)
+    return jsonify({'ok': True, 'enviados': enviados, 'falhas': len(falhas),
+                    'motivo': falhas[0] if falhas else None, 'restantes': len(contas.sem_email())})
