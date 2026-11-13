@@ -450,7 +450,9 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Pneumocócica conjugada 20-valente (Prevenar 20®)',
             'descricao': 'Dose única. Já recebeu VPP23: aguardar 1 ano. Esquema incompleto com VPC13/VPC15 (± VPP23): completar com VPC20 (2 meses após VPC13/15 ou 1 ano após VPP23). Esquema completo (VPC13/15 + VPP23): dose adicional a critério médico.',
-            'subtitulo': 'A partir de 50 anos | Dose única | PNI: grupos de risco (CRIE)',
+            'subtitulo': ('A partir de 50 anos' if age >= 50 else 'Comorbidade de risco (' + ', '.join(
+                x for x, sim in (('DPOC', has_dpoc), ('doença cardiovascular crônica', has_cardiopatia_cronica)) if sim)
+                + ')') + ' | Dose única | PNI: grupos de risco (CRIE)',
             'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
 

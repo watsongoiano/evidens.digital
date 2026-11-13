@@ -395,6 +395,9 @@ def test_insuficiencia_cardiaca_puxa_vacinas_de_risco_antes_dos_50(client):
                                            json={**base, 'comorbidades': ['insuficiencia_cardiaca']}).get_json()['recommendations']}
     novas = com - sem
     assert any('Pneumocócica' in t for t in novas) and any('Sincicial' in t for t in novas)
+    recs = client.post('/api/checkup-intelligent', json={**base, 'comorbidades': ['insuficiencia_cardiaca']}).get_json()['recommendations']
+    pneumo = next(r for r in recs if 'Pneumocócica' in r['titulo'])
+    assert 'A partir de 50 anos' not in pneumo['subtitulo'] and 'Comorbidade de risco' in pneumo['subtitulo']
 
 
 def test_dcv_aterosclerotica_nao_vira_hipertensao(client):
