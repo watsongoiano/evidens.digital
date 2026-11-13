@@ -99,6 +99,16 @@ def _conferir_ambiente():
         return jsonify({'error': MSG_INDISPONIVEL}), 503
 
 
+@auth_bp.route('/auth/saude')
+def saude():
+    """Verifica a conexão com o banco de contas (sem expor dados)."""
+    try:
+        contas.existe_administrador()
+    except Exception:
+        return jsonify({'ok': False, 'error': 'Sem conexão com o banco de contas.'}), 503
+    return jsonify({'ok': True})
+
+
 @auth_bp.route('/auth/eu')
 def eu():
     u = usuario_atual()

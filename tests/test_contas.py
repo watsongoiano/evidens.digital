@@ -214,3 +214,9 @@ def test_banco_nao_aceita_um_segundo_administrador(contas, administrador):
     """Mesmo sem a conferência da rota (duas instalações simultâneas), o banco recusa."""
     assert contas.criar('segundo@exemplo.test', 'Segundo Admin', 'CRM-GO 2', 'medico', SENHA_DE_TESTE, administrador=True) is None
     assert sum(1 for u in contas.listar() if u['administrador']) == 1
+
+
+def test_rota_de_saude_do_banco(anonimo, monkeypatch):
+    assert anonimo.get('/api/auth/saude').get_json() == {'ok': True}
+    monkeypatch.setenv('DATABASE_URL', 'sqlite:////caminho/que/nao/existe/x.sqlite')
+    assert anonimo.get('/api/auth/saude').status_code == 503
