@@ -34,7 +34,7 @@ def test_outros_hipolipemiantes_marcam_dislipidemia_sem_marcar_estatina(texto):
 
 @pytest.mark.parametrize('texto, diabetes', [
     ('insulina NPH 20 UI', True), ('gliclazida MR 60', True), ('sitagliptina 100', True),
-    ('metformina 850 2x/dia', False),      # pré-diabetes/SOP: não prova DM
+    ('metformina 850 2x/dia', True),       # marca; o médico desmarca em pré-diabetes ou SOP
     ('dapagliflozina 10', False),          # IC/DRC
     ('semaglutida 1 mg', False),           # obesidade
 ])
@@ -112,12 +112,39 @@ def test_pa_com_um_componente_so_classifica_o_que_e_certo(pas, pad, categoria):
         assert c.get('incompleta') is True
 
 
-def test_betabloqueador_conta_como_tratamento_so_com_hipertensao():
-    """Atenolol isolado não marca hipertensão (IC, FA); com hipertensão, vale como anti-hipertensivo no PREVENT."""
+def test_betabloqueador_de_ic_conta_como_tratamento_so_com_hipertensao():
+    """Carvedilol isolado não marca hipertensão (IC, FA); com hipertensão, vale como anti-hipertensivo no PREVENT."""
     from src.utils import coerencia, medicamentos
-    classes = medicamentos.classes_de(['atenolol'])
+    classes = medicamentos.classes_de(['carvedilol'])
     com, med, _ = coerencia.inferir({'comorbidades': [], 'medicacoes': list(classes)})
     assert 'hipertensao' not in com and 'anti_hipertensivos' not in med
     com, med, inf = coerencia.inferir({'comorbidades': ['hipertensao'], 'medicacoes': list(classes)})
     assert 'anti_hipertensivos' in med
     assert any(i['valor'] == 'anti_hipertensivos' for i in inf)
+
+
+@pytest.mark.parametrize('remedio, caixa', [
+    ('atenolol', 'hipertensao'), ('metoprolol', 'hipertensao'), ('nebivolol', 'hipertensao'), ('losartana', 'hipertensao'),
+    ('hidroclorotiazida', 'hipertensao'), ('anlodipino', 'hipertensao'), ('clonidina', 'hipertensao'),
+    ('metformina', 'diabetes'), ('glibenclamida', 'diabetes'), ('sitagliptina', 'diabetes'), ('insulina_nph', 'diabetes'),
+    ('dapagliflozina_metformina', 'diabetes'), ('sinvastatina', 'dislipidemia'), ('ezetimiba', 'dislipidemia'),
+])
+def test_medicacao_marca_a_comorbidade_que_implica(remedio, caixa):
+    from src.utils import coerencia, medicamentos
+    com, _, inf = coerencia.inferir({'comorbidades': [], 'medicacoes': medicamentos.classes_de([remedio])})
+    assert caixa in com, (remedio, com)
+
+
+@pytest.mark.parametrize('remedio, caixa', [
+    ('carvedilol', 'hipertensao'), ('bisoprolol', 'hipertensao'), ('propranolol', 'hipertensao'),
+    ('espironolactona', 'hipertensao'), ('furosemida', 'hipertensao'), ('sacubitril_valsartana', 'hipertensao'),
+    ('empagliflozina', 'diabetes'), ('dapagliflozina', 'diabetes'), ('semaglutida', 'diabetes'), ('tirzepatida', 'diabetes'),
+])
+def test_medicacao_com_outras_indicacoes_nao_marca_sozinha_mas_a_tela_avisa(remedio, caixa, client):
+    from src.utils import coerencia, medicamentos
+    com, _, _ = coerencia.inferir({'comorbidades': [], 'medicacoes': medicamentos.classes_de([remedio])})
+    assert caixa not in com
+    pagina = client.get('/intelligent-tools').get_data(as_text=True)
+    import re
+    item = re.search(r'data-valor="%s"[^>]*>' % remedio, pagina).group(0)
+    assert f'data-talvez="{caixa}"' in item, item
