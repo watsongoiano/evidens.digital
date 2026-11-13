@@ -58,23 +58,18 @@ def _combo(ident, campo, rotulo, exemplo, dica, linhas):
 '''
 
 
-def _chips_da_pagina(pagina, campo):
-    """Caixas fixas da tela (fora das listas): entram na busca apontando para a própria caixa."""
-    return re.findall(r'<label class="opcao" for="(\w+)"><input type="checkbox" id="\1" name="%s" value="\w+"[^>]*>([^<]+)</label>'
-                      % campo, pagina)
-
-
 def blocos(pagina):
-    def simples(itens, campo, titulo_fixas):
-        linhas = [f'            <li class="combo-grupo" role="presentation">{titulo_fixas}</li>']
-        for ident, rotulo in _chips_da_pagina(pagina, campo):
-            rotulo = html.unescape(rotulo)
-            linhas.append(_opcao(ident, rotulo, medicamentos.sem_acento(rotulo), alvo=ident))
-        linhas.append('            <li class="combo-grupo" role="presentation">Outras</li>')
+    def simples(itens):
+        """O que já é botão na tela não entra na lista (sem duplicata); itens com 'grupo' vêm agrupados."""
+        linhas, grupo = [], object()
         for chave, item in itens.items():
-            busca = medicamentos.sem_acento(f"{item['rotulo']} {item.get('busca', '')}")
+            if item.get('grupo') != grupo:
+                grupo = item.get('grupo')
+                linhas.append(f'            <li class="combo-grupo" role="presentation">{html.escape(grupo or "Outras condições")}</li>'
+                              if any(i.get('grupo') for i in itens.values()) else None)
+            busca = medicamentos.sem_acento(f"{item['rotulo']} {item.get('busca', '')} {item.get('grupo') or ''}")
             linhas.append(_opcao(chave, item['rotulo'], busca, _atributos(imuno=item.get('imunossupressao'))))
-        return linhas
+        return [li for li in linhas if li]
 
     chips = []
     for chave in medicamentos.MAIS_USADOS:
@@ -85,6 +80,8 @@ def blocos(pagina):
                      f'{_atributos(_marcas(m["classes"]), _imuno(m["classes"]))}>{html.escape(rotulo)}</label>')
     linhas, grupo = [], None
     for chave, m in medicamentos.MEDICAMENTOS.items():
+        if chave in medicamentos.MAIS_USADOS:
+            continue  # já é botão
         if m['grupo'] != grupo:
             grupo = m['grupo']
             linhas.append(f'            <li class="combo-grupo" role="presentation">{html.escape(grupo)}</li>')
@@ -93,14 +90,14 @@ def blocos(pagina):
     return {
         'comorbidades': _combo('lista_comorbidades', 'comorbidades', 'Outras comorbidades', 'hipotireoidismo, asma, gota…',
                                'Digite o nome ou escolha na lista. Os itens com exame, vacina ou alerta próprios entram nas recomendações.',
-                               simples(condicoes.COMORBIDADES, 'comorbidades', 'Principais')),
+                               simples(condicoes.COMORBIDADES)),
         'medicacoes': '      <div class="opcoes mt-4">\n' + '\n'.join(chips) + '\n      </div>\n'
                       + _combo('lista_medicacoes', 'medicacoes', 'Outras medicações', 'anlodipino, rosuvastatina, bombinha…',
                                'Busca por princípio ativo ou classe. A medicação define monitorização laboratorial, vacinas e '
                                'coerência com as comorbidades.', linhas),
         'familia': _combo('lista_familia', 'historia_familiar', 'Outras condições em parente de 1º grau',
-                          'próstata, aneurisma, hemocromatose…', 'Mudam idade de início ou indicação de rastreamento.',
-                          simples(condicoes.FAMILIA, 'historia_familiar', 'Principais')),
+                          'BRCA, Lynch, hipercolesterolemia familiar…', 'Síndromes hereditárias trazem o rastreamento específico; as demais mudam idade de início ou indicação.',
+                          simples(condicoes.FAMILIA)),
     }
 
 
