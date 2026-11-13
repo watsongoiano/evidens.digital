@@ -1416,8 +1416,10 @@
                 Object.entries(porCaixa).forEach(([id, nomes]) => frases.push(
                     `${nomes.join(', ')}: não marca${nomes.length > 1 ? 'm' : ''} "${ROTULO_CAIXA(id)}" sozinho${nomes.length > 1 ? 's' : ''}, porque também se usa${nomes.length > 1 ? 'm' : ''} em outras indicações. Marque a caixa se for o caso.`));
                 const pas = num('pas'), pad = num('pad');
-                if (pas !== null && pas >= 120 && pas < 130 && (pad === null || pad < 80) && !document.getElementById('hipertensao').checked) {
-                    frases.push(`PA ${pas}/${pad === null ? '–' : pad} mmHg: elevada pela AHA/ACC 2025 (120-129 e < 80). Não é hipertensão; a caixa não é marcada.`);
+                if (pas !== null && pas >= 120 && pas < 130 && !document.getElementById('hipertensao').checked) {
+                    // sem a diastólica não dá para classificar: 125/95 já é estágio 2
+                    if (pad === null) frases.push(`PA ${pas}/– mmHg: informe a diastólica para classificar a pressão.`);
+                    else if (pad < 80) frases.push(`PA ${pas}/${pad} mmHg: elevada pela AHA/ACC 2025 (120-129 e < 80). Não é hipertensão; a caixa não é marcada.`);
                 }
                 const gest = document.getElementById('gestante').value === 'sim';
                 if (gest && pas !== null && pad !== null && (pas >= 130 || pad >= 80) && pas < 140 && pad < 90 && !document.getElementById('hipertensao').checked) {
