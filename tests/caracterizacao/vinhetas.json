@@ -139,7 +139,9 @@
       "tabagismo": "nunca",
       "gestante": "sim",
       "lactante": "nao",
-      "imunossupressao": "nao"
+      "imunossupressao": "nao",
+      "idade_gestacional": "20",
+      "primeira_consulta": "sim"
     },
     "recomendacoes": {
       "laboratorio": [
@@ -161,6 +163,8 @@
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
+        "Ultrassonografia morfológica de 2º trimestre",
+        "Ultrassonografia transvaginal para medida do colo uterino",
         "Eletrocardiograma de repouso"
       ],
       "vacina": [
@@ -169,8 +173,7 @@
         "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
-        "RSV - Vírus Sincicial Respiratório (Abrysvo®)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
       ]
     },
     "nao_incluidas": [

@@ -5,7 +5,7 @@ from src.utils import prenatal
 
 
 def _g(**kw):
-    base = {'idade_gestacional': '', 'primeira_consulta': 'nao', 'fator_rh': 'desconhecido',
+    base = {'idade_gestacional': '10', 'primeira_consulta': 'nao', 'fator_rh': 'desconhecido',
             'toxoplasmose': 'desconhecido', 'gestacao_condicoes': []}
     base.update(kw)
     return prenatal.normalizar(base)
@@ -15,6 +15,10 @@ def _titulos(g, idade=30, **kw):
     return [r['titulo'] for r in prenatal.exames(g, idade, **kw)]
 
 
+def _proximas(g, idade=30, **kw):
+    return [r['titulo'] for r in prenatal.programacao(g, idade, **kw)[1]]
+
+
 def test_primeira_consulta_tem_a_rotina_inicial():
     t = _titulos(_g(idade_gestacional='8', primeira_consulta='sim'))
     for item in ('Hemograma completo', 'Glicemia de jejum, soro', 'Urocultura com antibiograma',
@@ -22,14 +26,16 @@ def test_primeira_consulta_tem_a_rotina_inicial():
                  'HBsAg, soro', 'Anti-HCV IgG, soro', 'Toxoplasmose IgG e IgM, soro',
                  'Tipagem sanguínea ABO e fator Rh', 'Ultrassonografia obstétrica transvaginal'):
         assert item in t, item
-    # próxima janela já sai para deixar pedida
-    assert 'Ultrassonografia morfológica de 1º trimestre (translucência nucal)' in t
+    # próxima janela NÃO vai para a lista nem para o PDF: só como lembrete
+    assert 'Ultrassonografia morfológica de 1º trimestre (translucência nucal)' not in t
+    assert 'Ultrassonografia morfológica de 1º trimestre (translucência nucal)' in _proximas(_g(idade_gestacional='8'))
 
 
 def test_janela_de_24_semanas():
     t = _titulos(_g(idade_gestacional='24'))
     assert 'TOTG-75g gestacional (jejum, 1 h e 2 h), soro' in t
-    assert 'Hemograma completo' in t          # próxima janela (28-36)
+    assert 'Hemograma completo' not in t      # 28-36 é próxima etapa
+    assert 'Hemograma completo' in _proximas(_g(idade_gestacional='24'))
     assert 'Ultrassonografia morfológica de 2º trimestre' in t   # 20-24+6
     assert 'Ultrassonografia morfológica de 2º trimestre' not in _titulos(_g(idade_gestacional='25'))
 
@@ -47,7 +53,8 @@ def test_toxo_imune_nao_repete():
 
 def test_estreptococo_b_no_fim():
     assert 'Cultura para estreptococo do grupo B (swab vaginal e retal)' in _titulos(_g(idade_gestacional='36'))
-    assert 'Cultura para estreptococo do grupo B (swab vaginal e retal)' in _titulos(_g(idade_gestacional='30'))  # próxima
+    assert 'Cultura para estreptococo do grupo B (swab vaginal e retal)' not in _titulos(_g(idade_gestacional='30'))
+    assert 'Cultura para estreptococo do grupo B (swab vaginal e retal)' in _proximas(_g(idade_gestacional='30'))
     assert 'Cultura para estreptococo do grupo B (swab vaginal e retal)' not in _titulos(_g(idade_gestacional='22'))
 
 
@@ -58,7 +65,7 @@ def test_hipertensa_tem_exames_basais_de_pre_eclampsia_e_aas():
 
 
 def test_parto_prematuro_previo_antecipa_colo():
-    t = _titulos(_g(idade_gestacional='15', gestacao_condicoes=['prematuro_previo']))
+    t = _titulos(_g(idade_gestacional='16', gestacao_condicoes=['prematuro_previo']))
     assert 'Ultrassonografia transvaginal para medida do colo uterino' in t
 
 
@@ -108,6 +115,9 @@ def test_api_gestante_de_24_semanas(client):
     # vacinas de vírus vivo continuam barradas pela triagem
     assert not any('Febre Amarela' in t or 'Tríplice Viral' in t for t in titulos)
     assert r['gestacao']['ig'] == 24
+    proximas = {x['titulo'] for x in r['proximas_gestacao']}
+    assert 'Cultura para estreptococo do grupo B (swab vaginal e retal)' in proximas
+    assert 'Cultura para estreptococo do grupo B (swab vaginal e retal)' not in titulos
 
 
 def test_api_recusa_ig_impossivel(client):
@@ -123,15 +133,20 @@ def test_nao_gestante_ignora_subcampos(client):
 
 
 def test_colo_tem_janela_propria_com_prematuro_previo():
-    g = _g(idade_gestacional='15', gestacao_condicoes=['prematuro_previo'])
-    recs = {r['titulo']: r for r in prenatal.exames(g, 30)}
-    assert 'Ultrassonografia transvaginal para medida do colo uterino' in recs
-    assert 'Ultrassonografia morfológica de 2º trimestre' not in recs   # continua em 20-24
     g = _g(idade_gestacional='17', gestacao_condicoes=['prematuro_previo'])
-    recs = {r['titulo']: r for r in prenatal.exames(g, 30)}
-    assert 'janela atual' in recs['Ultrassonografia transvaginal para medida do colo uterino']['quando_pdf']
-    morf = recs['Ultrassonografia morfológica de 2º trimestre']
-    assert 'Pedido antecipado' in morf['quando_pdf'] and '16-24' not in morf['subtitulo']
+    assert 'Ultrassonografia transvaginal para medida do colo uterino' in _titulos(g)
+    assert 'Ultrassonografia morfológica de 2º trimestre' not in _titulos(g)       # 20-24
+    assert 'Ultrassonografia morfológica de 2º trimestre' in _proximas(g)
+    assert 'Ultrassonografia transvaginal para medida do colo uterino' not in _titulos(_g(idade_gestacional='17'))
+
+
+def test_nenhum_exame_da_lista_e_de_janela_futura():
+    for ig in range(5, 41):
+        g = _g(idade_gestacional=str(ig), fator_rh='negativo', toxoplasmose='suscetivel',
+               gestacao_condicoes=['prematuro_previo'])
+        for r in prenatal.exames(g, 30):
+            assert 'antecipado' not in r['quando_pdf'].lower()
+            assert 'Deixar pedido' not in r['subtitulo']
 
 
 def test_janela_gestacional_vai_para_o_pdf(client):
@@ -142,13 +157,28 @@ def test_janela_gestacional_vai_para_o_pdf(client):
     corpo = {'dados_paciente': {'nome': 'Teste', 'idade': 30, 'sexo': 'feminino'}, 'recomendacoes': imagem}
     resp = client.post('/api/gerar-pdf-exames-imagem', json=corpo)
     assert resp.status_code == 200
-    texto = ' '.join(p.extract_text() for p in PdfReader(io.BytesIO(resp.data)).pages)
-    texto = ' '.join(texto.split())
-    assert 'Pedido antecipado: realizar com 11-13+6 semanas de gestação' in texto
-    assert 'Realizar com 7-9 semanas de gestação (janela atual)' in texto
+    texto = ' '.join(' '.join(p.extract_text() for p in PdfReader(io.BytesIO(resp.data)).pages).split())
+    assert 'Realizar com 7-9 semanas de gestação' in texto
+    assert 'translucência nucal' not in texto
+
+
+@pytest.mark.parametrize('falta', ['idade_gestacional', 'primeira_consulta'])
+def test_gestante_exige_ig_e_primeira_consulta(falta):
+    with pytest.raises(prenatal.GestacaoInvalida) as exc:
+        _g(**{falta: ''})
+    assert exc.value.erros[0]['campo'] == falta
 
 
 def test_pdf_recusa_janela_gestacional_longa_demais(client):
     corpo = {'dados_paciente': {'nome': 'T'}, 'recomendacoes': [
         {'titulo': 'Hemograma completo', 'categoria': 'laboratorio', 'quando_pdf': 'x' * 500}]}
     assert client.post('/api/gerar-pdf-exames-laboratoriais', json=corpo).status_code == 400
+
+
+@pytest.mark.parametrize('ig, dtpa_agora, vsr_agora', [('14', False, False), ('22', True, False), ('30', True, True)])
+def test_vacinas_da_gestacao_so_na_janela(client, ig, dtpa_agora, vsr_agora):
+    r = client.post('/api/checkup-intelligent', json={**CASO_DA_HOME, 'idade_gestacional': ig}).get_json()
+    agora = ' '.join(x['titulo'] for x in r['recommendations'])
+    depois = ' '.join(x['titulo'] for x in r['proximas_gestacao'])
+    assert ('dTpa' in agora) is dtpa_agora and ('dTpa' in depois) is (not dtpa_agora)
+    assert ('Abrysvo' in agora) is vsr_agora and ('Abrysvo' in depois) is (not vsr_agora)

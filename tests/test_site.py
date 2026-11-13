@@ -253,6 +253,7 @@ def _varredura(client):
             continue
         dados = dict(idade=idade, sexo=sexo, tabagismo=tabagismo, comorbidades=comorbidades,
                      historia_familiar=familia, imunossupressao='nao', gestante=gestante, lactante='nao',
+                     idade_gestacional='20' if gestante == 'sim' else '', primeira_consulta='sim',
                      macos_ano='30' if tabagismo != 'nunca' else '', anos_parou_fumar='5' if tabagismo == 'ex' else '',
                      cd4='500' if 'hiv' in comorbidades else '')
         for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:

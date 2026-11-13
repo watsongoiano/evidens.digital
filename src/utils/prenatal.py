@@ -50,6 +50,8 @@ def normalizar(entrada):
     erros = []
     ig = entrada.get('idade_gestacional')
     if ig in (None, ''):
+        erros.append({'campo': 'idade_gestacional',
+                      'mensagem': 'Gestante: informe a idade gestacional em semanas (define quais exames são para agora).'})
         ig = None
     else:
         try:
@@ -60,6 +62,8 @@ def normalizar(entrada):
             erros.append({'campo': 'idade_gestacional', 'mensagem': 'Idade gestacional deve estar entre 0 e 42 semanas.'})
             ig = None
     primeira = SIM_NAO.get(str(entrada.get('primeira_consulta') or '').lower())
+    if primeira is None:
+        erros.append({'campo': 'primeira_consulta', 'mensagem': 'Gestante: diga se é a primeira consulta de pré-natal.'})
     rh = str(entrada.get('fator_rh') or 'desconhecido').lower()
     if rh not in ('positivo', 'negativo', 'desconhecido'):
         erros.append({'campo': 'fator_rh', 'mensagem': 'Fator Rh: valor inválido.'})
@@ -192,29 +196,44 @@ def _risco_pre_eclampsia(g, hipertensa, diabetica):
 
 
 def exames(g, idade, hipertensa=False, diabetica=False):
-    """Exames do pré-natal para a gestação ``g`` (saída de :func:`normalizar`)."""
-    recs = []
+    """Exames do pré-natal para fazer AGORA (1ª consulta + janela atual + basais de risco)."""
+    return programacao(g, idade, hipertensa, diabetica)[0]
+
+
+def programacao(g, idade, hipertensa=False, diabetica=False):
+    """Devolve ``(agora, proximas)``.
+
+    ``agora`` vai para a lista e para os PDFs. ``proximas`` são os exames das janelas
+    seguintes: aparecem só como informação ("Próximas etapas do pré-natal"), nunca no PDF.
+    """
+    agora, proximas = [], []
     ig = g['ig']
-    if g['primeira_consulta'] or ig is None:
-        recs += [{**r, 'quando_pdf': 'Primeira consulta de pré-natal.'} for r in _primeira_consulta(g, idade, hipertensa, diabetica)]
+    if g['primeira_consulta']:
+        agora += [{**r, 'quando_pdf': 'Primeira consulta de pré-natal.'}
+                  for r in _primeira_consulta(g, idade, hipertensa, diabetica)]
     if ig is not None:
-        janelas = _janelas(g, idade, hipertensa, diabetica)
-        futuras = [inicio for inicio, _, _, _ in janelas if inicio > ig]
-        proximo_inicio = min(futuras) if futuras else None
-        for inicio, fim, nome, itens in janelas:
+        for inicio, fim, nome, itens in _janelas(g, idade, hipertensa, diabetica):
             if inicio <= ig < fim:
-                recs += [{**r, 'quando_pdf': f'Realizar com {nome} de gestação (janela atual).'} for r in itens]
-            elif inicio == proximo_inicio:
-                recs += [{**r, 'subtitulo': r['subtitulo'] + f' | Deixar pedido para {nome}', 'prioridade': 'media',
-                          'quando_pdf': f'Pedido antecipado: realizar com {nome} de gestação, não agora.'} for r in itens]
-    recs += [{**r, 'quando_pdf': 'Basal: alto risco de pré-eclâmpsia.'} for r in _risco_pre_eclampsia(g, hipertensa, diabetica)]
+                agora += [{**r, 'quando_pdf': f'Realizar com {nome} de gestação.'} for r in itens]
+            elif inicio > ig:
+                proximas += [{'titulo': r['titulo'], 'categoria': r['categoria'], 'estado': 'proxima_janela',
+                              'motivo': f'Pedir com {nome} de gestação. {r["descricao"]}',
+                              'referencia': r['referencia'], 'semana': inicio} for r in itens]
+    agora += [{**r, 'quando_pdf': 'Basal: alto risco de pré-eclâmpsia.'}
+              for r in _risco_pre_eclampsia(g, hipertensa, diabetica)]
     vistos, unicos = set(), []
-    for r in recs:
-        if r['titulo'] in vistos:
-            continue
-        vistos.add(r['titulo'])
-        unicos.append(r)
-    return unicos
+    for r in agora:
+        if r['titulo'] not in vistos:
+            vistos.add(r['titulo'])
+            unicos.append(r)
+    ja = set(vistos)
+    prox_unicas = []
+    for r in sorted(proximas, key=lambda x: x['semana']):
+        chave = (r['titulo'], r['semana'])
+        if chave not in ja:
+            ja.add(chave)
+            prox_unicas.append(r)
+    return unicos, prox_unicas
 
 
 _ADIAR = {k.lower(): v for k, v in ADIAR_NA_GESTACAO.items()}
@@ -234,3 +253,27 @@ def adiar(recomendacoes, diabetica=False):
         else:
             mantidas.append(r)
     return mantidas, adiadas
+
+
+# Vacinas da gestação que têm idade gestacional mínima (MS/PNI e SBIm 2026/2027).
+VACINAS_COM_JANELA = [
+    ('dtpa', 20, 'dTpa a cada gestação a partir de 20 semanas (MS/PNI; SBIm).'),
+    ('abrysvo', 28, 'VSR (Abrysvo®) a partir de 28 semanas (SBIm/PNI; ACOG: 32-36 semanas).'),
+]
+
+
+def vacinas_fora_da_janela(recomendacoes, ig):
+    """Tira da lista (e dos PDFs) as vacinas da gestante cuja janela ainda não abriu."""
+    if ig is None:
+        return recomendacoes, []
+    mantidas, proximas = [], []
+    for r in recomendacoes:
+        titulo = (r.get('titulo') or '').lower()
+        regra = next(((sem, texto) for termo, sem, texto in VACINAS_COM_JANELA
+                      if r.get('categoria') == 'vacina' and termo in titulo and ig < sem), None)
+        if regra:
+            proximas.append({'titulo': r['titulo'], 'categoria': 'vacina', 'estado': 'proxima_janela',
+                             'motivo': regra[1], 'referencia': r.get('referencia', ''), 'semana': regra[0]})
+        else:
+            mantidas.append(r)
+    return mantidas, proximas

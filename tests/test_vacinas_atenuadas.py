@@ -35,6 +35,9 @@ def _vacinas(resposta):
 
 def _consultar(client, **campos):
     corpo = {'tabagismo': 'nunca', **campos}
+    if corpo.get('gestante') == 'sim':   # gestante exige IG e 1ª consulta
+        corpo.setdefault('idade_gestacional', '20')
+        corpo.setdefault('primeira_consulta', 'sim')
     resposta = client.post('/api/checkup-intelligent', json=corpo)
     assert resposta.status_code == 200, resposta.get_json()
     return resposta.get_json()

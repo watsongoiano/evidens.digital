@@ -1237,9 +1237,10 @@ def generate_intelligent_recommendations():
         
         # Gestação: rotina do pré-natal pela idade gestacional; itens do check-up geral que
         # não se aplicam na gestação saem da lista e aparecem como "adiados".
-        adiados_gestacao = []
+        adiados_gestacao, proximas_gestacao = [], []
         if gestacao is not None:
-            exames_pn = prenatal.exames(gestacao, age, hipertensa=has_hypertension, diabetica=is_diabetic)
+            exames_pn, proximas_gestacao = prenatal.programacao(gestacao, age, hipertensa=has_hypertension,
+                                                                diabetica=is_diabetic)
             titulos_pn = {r['titulo'].lower() for r in exames_pn}
             recommendations = [r for r in recommendations if (r.get('titulo') or '').lower() not in titulos_pn]
             recommendations, adiados_gestacao = prenatal.adiar(recommendations, diabetica=is_diabetic)
@@ -1349,10 +1350,14 @@ def generate_intelligent_recommendations():
         # qualquer regra acima, inclusive as que forem acrescentadas depois.
         contexto_vacinas = {'idade': age, 'hiv': is_hiv_positive, 'cd4': data.get('cd4')}
         mantidas, nao_incluidas = aplicar_triagem_vacinas(response['recommendations'], triagem, contexto_vacinas)
+        if gestacao is not None:
+            mantidas, vacinas_futuras = prenatal.vacinas_fora_da_janela(mantidas, gestacao['ig'])
+            proximas_gestacao = sorted(proximas_gestacao + vacinas_futuras, key=lambda x: x['semana'])
         response['recommendations'] = mantidas
         response['total_recommendations'] = len(mantidas)
         response['nao_incluidas'] = nao_incluidas
         response['adiados_gestacao'] = adiados_gestacao
+        response['proximas_gestacao'] = proximas_gestacao
         response['gestacao'] = gestacao
         response['triagem_vacinas'] = triagem
 

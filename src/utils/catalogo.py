@@ -141,6 +141,7 @@ def titulos_do_motor(app):
             continue
         dados = dict(idade=idade, sexo=sexo, tabagismo=tab, comorbidades=com, historia_familiar=fam,
                      imunossupressao='nao', gestante=gest, lactante=lact,
+                     idade_gestacional='20' if gest == 'sim' else '', primeira_consulta='sim',
                      macos_ano='30' if tab != 'nunca' else '', anos_parou_fumar='5' if tab == 'ex' else '',
                      cd4='500' if 'hiv' in com else '', alcoolismo='pesado', doses_semana='20')
         resposta = cliente.post('/api/checkup-intelligent', json=dados)
