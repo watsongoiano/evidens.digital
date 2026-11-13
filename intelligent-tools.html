@@ -190,49 +190,37 @@
         <div class="relative">
           <input type="text" id="lista_comorbidades-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_comorbidades-opcoes" aria-describedby="lista_comorbidades-dica" autocomplete="off" placeholder="Digite para buscar: hipotireoidismo, asma, gota…">
           <ul id="lista_comorbidades-opcoes" role="listbox" class="combo-lista" hidden>
-            <li class="combo-grupo" role="presentation">Principais</li>
-            <li role="option" data-valor="diabetes" data-busca="diabetes tipo 2" data-alvo="diabetes">Diabetes tipo 2</li>
-            <li role="option" data-valor="hipertensao" data-busca="hipertensao" data-alvo="hipertensao">Hipertensão</li>
-            <li role="option" data-valor="has_resistente" data-busca="has resistente" data-alvo="has_resistente">HAS resistente</li>
-            <li role="option" data-valor="dislipidemia" data-busca="dislipidemia" data-alvo="dislipidemia">Dislipidemia</li>
-            <li role="option" data-valor="doenca_renal" data-busca="doenca renal cronica" data-alvo="doenca_renal">Doença renal crônica</li>
-            <li role="option" data-valor="dcv_aterosclerotica" data-busca="dcv aterosclerotica (iam, avc, dap)" data-alvo="dcv_aterosclerotica">DCV aterosclerótica (IAM, AVC, DAP)</li>
-            <li role="option" data-valor="insuficiencia_cardiaca" data-busca="insuficiencia cardiaca" data-alvo="insuficiencia_cardiaca">Insuficiência cardíaca</li>
-            <li role="option" data-valor="obesidade" data-busca="obesidade" data-alvo="obesidade">Obesidade</li>
-            <li role="option" data-valor="hiv" data-busca="hiv" data-alvo="hiv">HIV</li>
-            <li role="option" data-valor="dpoc" data-busca="dpoc" data-alvo="dpoc">DPOC</li>
-            <li class="combo-grupo" role="presentation">Outras</li>
-            <li role="option" data-valor="pre_diabetes" data-busca="pre-diabetes glicemia de jejum alterada intolerancia">Pré-diabetes</li>
-            <li role="option" data-valor="hipotireoidismo" data-busca="hipotireoidismo tireoide hashimoto">Hipotireoidismo</li>
-            <li role="option" data-valor="hipertireoidismo" data-busca="hipertireoidismo tireoide graves">Hipertireoidismo</li>
-            <li role="option" data-valor="masld" data-busca="esteatose hepatica (masld) gordura no figado nafld">Esteatose hepática (MASLD)</li>
-            <li role="option" data-valor="cirrose" data-busca="cirrose / hepatopatia cronica figado">Cirrose / hepatopatia crônica</li>
-            <li role="option" data-valor="hepatite_b_cronica" data-busca="hepatite b cronica figado hbv">Hepatite B crônica</li>
-            <li role="option" data-valor="hepatite_c" data-busca="hepatite c figado hcv">Hepatite C</li>
-            <li role="option" data-valor="doenca_autoimune" data-busca="doenca inflamatoria autoimune (ar, lupus, psoriase, dii) artrite reumatoide les crohn retocolite espondilite">Doença inflamatória autoimune (AR, lúpus, psoríase, DII)</li>
-            <li role="option" data-valor="asma_grave" data-busca="asma moderada ou grave ">Asma moderada ou grave</li>
-            <li role="option" data-valor="asplenia" data-busca="asplenia / esplenectomia baco">Asplenia / esplenectomia</li>
-            <li role="option" data-valor="anemia_falciforme" data-busca="doenca falciforme anemia falciforme hemoglobinopatia">Doença falciforme</li>
-            <li role="option" data-valor="transplante" data-busca="transplante de orgao solido ou de medula " data-imuno="1">Transplante de órgão sólido ou de medula</li>
-            <li role="option" data-valor="neoplasia_ativa" data-busca="cancer em quimio ou radioterapia neoplasia tumor quimioterapia" data-imuno="1">Câncer em quimio ou radioterapia</li>
-            <li role="option" data-valor="cirurgia_bariatrica" data-busca="cirurgia bariatrica previa bypass sleeve gastroplastia">Cirurgia bariátrica prévia</li>
-            <li role="option" data-valor="osteoporose" data-busca="osteoporose osso fratura">Osteoporose</li>
-            <li role="option" data-valor="gota" data-busca="gota acido urico">Gota</li>
-            <li role="option" data-valor="fibrilacao_atrial" data-busca="fibrilacao atrial arritmia fa">Fibrilação atrial</li>
-            <li role="option" data-valor="apneia_sono" data-busca="apneia obstrutiva do sono saos ronco">Apneia obstrutiva do sono</li>
-            <li role="option" data-valor="depressao" data-busca="depressao ">Depressão</li>
-            <li role="option" data-valor="ansiedade" data-busca="transtorno de ansiedade ">Transtorno de ansiedade</li>
-            <li role="option" data-valor="epilepsia" data-busca="epilepsia convulsao">Epilepsia</li>
-            <li role="option" data-valor="enxaqueca" data-busca="enxaqueca migranea cefaleia">Enxaqueca</li>
-            <li role="option" data-valor="demencia" data-busca="demencia alzheimer">Demência</li>
-            <li role="option" data-valor="parkinson" data-busca="doenca de parkinson ">Doença de Parkinson</li>
-            <li role="option" data-valor="hpb" data-busca="hiperplasia prostatica benigna prostata">Hiperplasia prostática benigna</li>
-            <li role="option" data-valor="sop" data-busca="sindrome dos ovarios policisticos sop">Síndrome dos ovários policísticos</li>
-            <li role="option" data-valor="endometriose" data-busca="endometriose ">Endometriose</li>
-            <li role="option" data-valor="drge" data-busca="doenca do refluxo gastroesofagico refluxo drge">Doença do refluxo gastroesofágico</li>
-            <li role="option" data-valor="doenca_celiaca" data-busca="doenca celiaca gluten">Doença celíaca</li>
-            <li role="option" data-valor="osteoartrite" data-busca="osteoartrite artrose">Osteoartrite</li>
-            <li role="option" data-valor="fibromialgia" data-busca="fibromialgia ">Fibromialgia</li>
+            <li role="option" data-valor="pre_diabetes" data-busca="pre-diabetes glicemia de jejum alterada intolerancia ">Pré-diabetes</li>
+            <li role="option" data-valor="hipotireoidismo" data-busca="hipotireoidismo tireoide hashimoto ">Hipotireoidismo</li>
+            <li role="option" data-valor="hipertireoidismo" data-busca="hipertireoidismo tireoide graves ">Hipertireoidismo</li>
+            <li role="option" data-valor="masld" data-busca="esteatose hepatica (masld) gordura no figado nafld ">Esteatose hepática (MASLD)</li>
+            <li role="option" data-valor="cirrose" data-busca="cirrose / hepatopatia cronica figado ">Cirrose / hepatopatia crônica</li>
+            <li role="option" data-valor="hepatite_b_cronica" data-busca="hepatite b cronica figado hbv ">Hepatite B crônica</li>
+            <li role="option" data-valor="hepatite_c" data-busca="hepatite c figado hcv ">Hepatite C</li>
+            <li role="option" data-valor="doenca_autoimune" data-busca="doenca inflamatoria autoimune (ar, lupus, psoriase, dii) artrite reumatoide les crohn retocolite espondilite ">Doença inflamatória autoimune (AR, lúpus, psoríase, DII)</li>
+            <li role="option" data-valor="asma_grave" data-busca="asma moderada ou grave  ">Asma moderada ou grave</li>
+            <li role="option" data-valor="asplenia" data-busca="asplenia / esplenectomia baco ">Asplenia / esplenectomia</li>
+            <li role="option" data-valor="anemia_falciforme" data-busca="doenca falciforme anemia falciforme hemoglobinopatia ">Doença falciforme</li>
+            <li role="option" data-valor="transplante" data-busca="transplante de orgao solido ou de medula  " data-imuno="1">Transplante de órgão sólido ou de medula</li>
+            <li role="option" data-valor="neoplasia_ativa" data-busca="cancer em quimio ou radioterapia neoplasia tumor quimioterapia " data-imuno="1">Câncer em quimio ou radioterapia</li>
+            <li role="option" data-valor="cirurgia_bariatrica" data-busca="cirurgia bariatrica previa bypass sleeve gastroplastia ">Cirurgia bariátrica prévia</li>
+            <li role="option" data-valor="osteoporose" data-busca="osteoporose osso fratura ">Osteoporose</li>
+            <li role="option" data-valor="gota" data-busca="gota acido urico ">Gota</li>
+            <li role="option" data-valor="fibrilacao_atrial" data-busca="fibrilacao atrial arritmia fa ">Fibrilação atrial</li>
+            <li role="option" data-valor="apneia_sono" data-busca="apneia obstrutiva do sono saos ronco ">Apneia obstrutiva do sono</li>
+            <li role="option" data-valor="depressao" data-busca="depressao  ">Depressão</li>
+            <li role="option" data-valor="ansiedade" data-busca="transtorno de ansiedade  ">Transtorno de ansiedade</li>
+            <li role="option" data-valor="epilepsia" data-busca="epilepsia convulsao ">Epilepsia</li>
+            <li role="option" data-valor="enxaqueca" data-busca="enxaqueca migranea cefaleia ">Enxaqueca</li>
+            <li role="option" data-valor="demencia" data-busca="demencia alzheimer ">Demência</li>
+            <li role="option" data-valor="parkinson" data-busca="doenca de parkinson  ">Doença de Parkinson</li>
+            <li role="option" data-valor="hpb" data-busca="hiperplasia prostatica benigna prostata ">Hiperplasia prostática benigna</li>
+            <li role="option" data-valor="sop" data-busca="sindrome dos ovarios policisticos sop ">Síndrome dos ovários policísticos</li>
+            <li role="option" data-valor="endometriose" data-busca="endometriose  ">Endometriose</li>
+            <li role="option" data-valor="drge" data-busca="doenca do refluxo gastroesofagico refluxo drge ">Doença do refluxo gastroesofágico</li>
+            <li role="option" data-valor="doenca_celiaca" data-busca="doenca celiaca gluten ">Doença celíaca</li>
+            <li role="option" data-valor="osteoartrite" data-busca="osteoartrite artrose ">Osteoartrite</li>
+            <li role="option" data-valor="fibromialgia" data-busca="fibromialgia  ">Fibromialgia</li>
             <li class="combo-vazio" role="presentation" hidden>Nada encontrado.</li>
           </ul>
         </div>
@@ -265,8 +253,6 @@
           <input type="text" id="lista_medicacoes-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_medicacoes-opcoes" aria-describedby="lista_medicacoes-dica" autocomplete="off" placeholder="Digite para buscar: anlodipino, rosuvastatina, bombinha…">
           <ul id="lista_medicacoes-opcoes" role="listbox" class="combo-lista" hidden>
             <li class="combo-grupo" role="presentation">Estatinas</li>
-            <li role="option" data-valor="sinvastatina" data-busca="sinvastatina estatinas estatina colesterol " data-marca="dislipidemia">Sinvastatina</li>
-            <li role="option" data-valor="atorvastatina" data-busca="atorvastatina estatinas estatina colesterol " data-marca="dislipidemia">Atorvastatina</li>
             <li role="option" data-valor="rosuvastatina" data-busca="rosuvastatina estatinas estatina colesterol " data-marca="dislipidemia">Rosuvastatina</li>
             <li role="option" data-valor="pravastatina" data-busca="pravastatina estatinas estatina colesterol " data-marca="dislipidemia">Pravastatina</li>
             <li role="option" data-valor="pitavastatina" data-busca="pitavastatina estatinas estatina colesterol " data-marca="dislipidemia">Pitavastatina</li>
@@ -288,20 +274,17 @@
             <li role="option" data-valor="omega_3_esteres_etilicos" data-busca="omega-3 (esteres etilicos) outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Ômega-3 (ésteres etílicos)</li>
             <li class="combo-grupo" role="presentation">IECA</li>
             <li role="option" data-valor="captopril" data-busca="captopril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Captopril</li>
-            <li role="option" data-valor="enalapril" data-busca="enalapril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Enalapril</li>
             <li role="option" data-valor="ramipril" data-busca="ramipril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Ramipril</li>
             <li role="option" data-valor="lisinopril" data-busca="lisinopril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Lisinopril</li>
             <li role="option" data-valor="perindopril" data-busca="perindopril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Perindopril</li>
             <li role="option" data-valor="benazepril" data-busca="benazepril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Benazepril</li>
             <li class="combo-grupo" role="presentation">BRA</li>
-            <li role="option" data-valor="losartana" data-busca="losartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Losartana</li>
             <li role="option" data-valor="valsartana" data-busca="valsartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Valsartana</li>
             <li role="option" data-valor="olmesartana" data-busca="olmesartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Olmesartana</li>
             <li role="option" data-valor="candesartana" data-busca="candesartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Candesartana</li>
             <li role="option" data-valor="telmisartana" data-busca="telmisartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Telmisartana</li>
             <li role="option" data-valor="irbesartana" data-busca="irbesartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Irbesartana</li>
             <li class="combo-grupo" role="presentation">Bloqueadores de canal de cálcio</li>
-            <li role="option" data-valor="anlodipino" data-busca="anlodipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo amlodipina anlodipina" data-marca="hipertensao">Anlodipino</li>
             <li role="option" data-valor="levanlodipino" data-busca="levanlodipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Levanlodipino</li>
             <li role="option" data-valor="nifedipino" data-busca="nifedipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Nifedipino</li>
             <li role="option" data-valor="felodipino" data-busca="felodipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Felodipino</li>
@@ -312,7 +295,6 @@
             <li role="option" data-valor="diltiazem" data-busca="diltiazem bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Diltiazem</li>
             <li role="option" data-valor="verapamil" data-busca="verapamil bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Verapamil</li>
             <li class="combo-grupo" role="presentation">Diuréticos</li>
-            <li role="option" data-valor="hidroclorotiazida" data-busca="hidroclorotiazida diureticos diuretico pressao " data-marca="hipertensao">Hidroclorotiazida</li>
             <li role="option" data-valor="clortalidona" data-busca="clortalidona diureticos diuretico pressao " data-marca="hipertensao">Clortalidona</li>
             <li role="option" data-valor="indapamida" data-busca="indapamida diureticos diuretico pressao " data-marca="hipertensao">Indapamida</li>
             <li role="option" data-valor="furosemida" data-busca="furosemida diureticos diuretico pressao ">Furosemida</li>
@@ -321,7 +303,6 @@
             <li role="option" data-valor="eplerenona" data-busca="eplerenona diureticos diuretico pressao ">Eplerenona</li>
             <li role="option" data-valor="amilorida" data-busca="amilorida diureticos diuretico pressao ">Amilorida</li>
             <li class="combo-grupo" role="presentation">Betabloqueadores</li>
-            <li role="option" data-valor="atenolol" data-busca="atenolol betabloqueadores betabloqueador ">Atenolol</li>
             <li role="option" data-valor="metoprolol" data-busca="metoprolol betabloqueadores betabloqueador ">Metoprolol</li>
             <li role="option" data-valor="carvedilol" data-busca="carvedilol betabloqueadores betabloqueador ">Carvedilol</li>
             <li role="option" data-valor="bisoprolol" data-busca="bisoprolol betabloqueadores betabloqueador ">Bisoprolol</li>
@@ -360,7 +341,6 @@
             <li role="option" data-valor="trimetazidina" data-busca="trimetazidina insuficiencia cardiaca, arritmia e angina coracao ">Trimetazidina</li>
             <li role="option" data-valor="ranolazina" data-busca="ranolazina insuficiencia cardiaca, arritmia e angina coracao ">Ranolazina</li>
             <li class="combo-grupo" role="presentation">Antiagregantes</li>
-            <li role="option" data-valor="aas_acido_acetilsalicilico" data-busca="aas (acido acetilsalicilico) antiagregantes antiplaquetario aspirina">AAS (ácido acetilsalicílico)</li>
             <li role="option" data-valor="clopidogrel" data-busca="clopidogrel antiagregantes antiplaquetario ">Clopidogrel</li>
             <li role="option" data-valor="ticagrelor" data-busca="ticagrelor antiagregantes antiplaquetario ">Ticagrelor</li>
             <li role="option" data-valor="prasugrel" data-busca="prasugrel antiagregantes antiplaquetario ">Prasugrel</li>
@@ -374,8 +354,6 @@
             <li role="option" data-valor="dabigatrana" data-busca="dabigatrana anticoagulantes anticoagulante ">Dabigatrana</li>
             <li role="option" data-valor="enoxaparina" data-busca="enoxaparina anticoagulantes anticoagulante ">Enoxaparina</li>
             <li class="combo-grupo" role="presentation">Antidiabéticos</li>
-            <li role="option" data-valor="metformina" data-busca="metformina antidiabeticos diabetes glifage">Metformina</li>
-            <li role="option" data-valor="glibenclamida" data-busca="glibenclamida antidiabeticos diabetes " data-marca="diabetes">Glibenclamida</li>
             <li role="option" data-valor="gliclazida" data-busca="gliclazida antidiabeticos diabetes " data-marca="diabetes">Gliclazida</li>
             <li role="option" data-valor="glimepirida" data-busca="glimepirida antidiabeticos diabetes " data-marca="diabetes">Glimepirida</li>
             <li role="option" data-valor="sitagliptina" data-busca="sitagliptina antidiabeticos diabetes " data-marca="diabetes">Sitagliptina</li>
@@ -411,7 +389,6 @@
             <li role="option" data-valor="insulina_glargina_lixisenatida" data-busca="insulina glargina + lixisenatida insulinas diabetes insulina " data-marca="diabetes">Insulina glargina + lixisenatida</li>
             <li role="option" data-valor="insulina_degludeca_liraglutida" data-busca="insulina degludeca + liraglutida insulinas diabetes insulina " data-marca="diabetes">Insulina degludeca + liraglutida</li>
             <li class="combo-grupo" role="presentation">Tireoide</li>
-            <li role="option" data-valor="levotiroxina" data-busca="levotiroxina tireoide tireoide puran synthroid euthyrox">Levotiroxina</li>
             <li role="option" data-valor="metimazol_tiamazol" data-busca="metimazol (tiamazol) tireoide tireoide tapazol">Metimazol (tiamazol)</li>
             <li role="option" data-valor="propiltiouracila" data-busca="propiltiouracila tireoide tireoide ">Propiltiouracila</li>
             <li class="combo-grupo" role="presentation">Asma e DPOC</li>
@@ -440,7 +417,6 @@
             <li role="option" data-valor="omalizumabe" data-busca="omalizumabe asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Omalizumabe</li>
             <li role="option" data-valor="mepolizumabe" data-busca="mepolizumabe asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Mepolizumabe</li>
             <li class="combo-grupo" role="presentation">Protetores gástricos</li>
-            <li role="option" data-valor="omeprazol" data-busca="omeprazol protetores gastricos estomago ibp prazol ">Omeprazol</li>
             <li role="option" data-valor="pantoprazol" data-busca="pantoprazol protetores gastricos estomago ibp prazol ">Pantoprazol</li>
             <li role="option" data-valor="esomeprazol" data-busca="esomeprazol protetores gastricos estomago ibp prazol ">Esomeprazol</li>
             <li role="option" data-valor="lansoprazol" data-busca="lansoprazol protetores gastricos estomago ibp prazol ">Lansoprazol</li>
@@ -612,34 +588,44 @@
       <div class="campo mt-5 combo" id="lista_familia" data-campo="historia_familiar">
         <label for="lista_familia-busca">Outras condições em parente de 1º grau</label>
         <div class="relative">
-          <input type="text" id="lista_familia-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_familia-opcoes" aria-describedby="lista_familia-dica" autocomplete="off" placeholder="Digite para buscar: próstata, aneurisma, hemocromatose…">
+          <input type="text" id="lista_familia-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_familia-opcoes" aria-describedby="lista_familia-dica" autocomplete="off" placeholder="Digite para buscar: BRCA, Lynch, hipercolesterolemia familiar…">
           <ul id="lista_familia-opcoes" role="listbox" class="combo-lista" hidden>
-            <li class="combo-grupo" role="presentation">Principais</li>
-            <li role="option" data-valor="cancer_mama" data-busca="cancer de mama" data-alvo="cancer_mama">Câncer de mama</li>
-            <li role="option" data-valor="cancer_colorretal" data-busca="cancer colorretal" data-alvo="cancer_colorretal">Câncer colorretal</li>
-            <li role="option" data-valor="cancer_ovario" data-busca="cancer de ovario" data-alvo="cancer_ovario">Câncer de ovário</li>
-            <li role="option" data-valor="diabetes_familiar" data-busca="diabetes" data-alvo="diabetes_familiar">Diabetes</li>
-            <li role="option" data-valor="dac_precoce_familiar" data-busca="dcv prematura (h &lt; 55, m &lt; 65)" data-alvo="dac_precoce_familiar">DCV prematura (H &lt; 55, M &lt; 65)</li>
-            <li class="combo-grupo" role="presentation">Outras</li>
-            <li role="option" data-valor="avc_precoce" data-busca="avc precoce (h &lt; 55, m &lt; 65) derrame">AVC precoce (H &lt; 55, M &lt; 65)</li>
-            <li role="option" data-valor="hipercolesterolemia_familiar" data-busca="hipercolesterolemia familiar colesterol">Hipercolesterolemia familiar</li>
-            <li role="option" data-valor="morte_subita" data-busca="morte subita antes dos 50 anos ">Morte súbita antes dos 50 anos</li>
-            <li role="option" data-valor="aneurisma_aorta" data-busca="aneurisma de aorta abdominal ">Aneurisma de aorta abdominal</li>
-            <li role="option" data-valor="cancer_prostata" data-busca="cancer de prostata (pai ou irmao) ">Câncer de próstata (pai ou irmão)</li>
-            <li role="option" data-valor="cancer_endometrio" data-busca="cancer de endometrio utero lynch">Câncer de endométrio</li>
-            <li role="option" data-valor="cancer_pancreas" data-busca="cancer de pancreas ">Câncer de pâncreas</li>
-            <li role="option" data-valor="cancer_gastrico" data-busca="cancer gastrico estomago">Câncer gástrico</li>
-            <li role="option" data-valor="melanoma" data-busca="melanoma pele">Melanoma</li>
-            <li role="option" data-valor="osteoporose_fratura" data-busca="fratura de quadril em pai ou mae osteoporose">Fratura de quadril em pai ou mãe</li>
-            <li role="option" data-valor="hemocromatose" data-busca="hemocromatose hereditaria ferro ferritina">Hemocromatose hereditária</li>
-            <li role="option" data-valor="rim_policistico" data-busca="doenca renal policistica rins cistos">Doença renal policística</li>
-            <li role="option" data-valor="trombose" data-busca="trombose venosa ou trombofilia tvp tep embolia">Trombose venosa ou trombofilia</li>
-            <li role="option" data-valor="glaucoma" data-busca="glaucoma olho">Glaucoma</li>
+            <li class="combo-grupo" role="presentation">Síndromes e doenças hereditárias</li>
+            <li role="option" data-valor="brca" data-busca="mutacao brca1 / brca2 mama ovario hboc hereditario sindromes e doencas hereditarias">Mutação BRCA1 / BRCA2</li>
+            <li role="option" data-valor="li_fraumeni" data-busca="sindrome de li-fraumeni (tp53) sarcoma sindromes e doencas hereditarias">Síndrome de Li-Fraumeni (TP53)</li>
+            <li role="option" data-valor="lynch" data-busca="sindrome de lynch (mlh1, msh2, msh6, pms2) hnpcc colorretal endometrio hereditario sindromes e doencas hereditarias">Síndrome de Lynch (MLH1, MSH2, MSH6, PMS2)</li>
+            <li role="option" data-valor="paf" data-busca="polipose adenomatosa familiar (apc) paf polipos colorretal sindromes e doencas hereditarias">Polipose adenomatosa familiar (APC)</li>
+            <li role="option" data-valor="cdh1" data-busca="cancer gastrico difuso hereditario (cdh1) estomago sindromes e doencas hereditarias">Câncer gástrico difuso hereditário (CDH1)</li>
+            <li role="option" data-valor="cowden" data-busca="sindrome de cowden (pten) hamartoma sindromes e doencas hereditarias">Síndrome de Cowden (PTEN)</li>
+            <li role="option" data-valor="nem1" data-busca="neoplasia endocrina multipla tipo 1 (men1) nem1 paratireoide hipofise sindromes e doencas hereditarias">Neoplasia endócrina múltipla tipo 1 (MEN1)</li>
+            <li role="option" data-valor="nem2" data-busca="neoplasia endocrina multipla tipo 2 / carcinoma medular de tireoide (ret) nem2 men2 feocromocitoma sindromes e doencas hereditarias">Neoplasia endócrina múltipla tipo 2 / carcinoma medular de tireoide (RET)</li>
+            <li role="option" data-valor="hipercolesterolemia_familiar" data-busca="hipercolesterolemia familiar colesterol ldl sindromes e doencas hereditarias">Hipercolesterolemia familiar</li>
+            <li role="option" data-valor="cardiomiopatia_hipertrofica" data-busca="cardiomiopatia hipertrofica cmh coracao sindromes e doencas hereditarias">Cardiomiopatia hipertrófica</li>
+            <li role="option" data-valor="cardiomiopatia_dilatada" data-busca="cardiomiopatia dilatada familiar coracao sindromes e doencas hereditarias">Cardiomiopatia dilatada familiar</li>
+            <li role="option" data-valor="canalopatia" data-busca="sindrome do qt longo, brugada ou outra canalopatia arritmia hereditaria sindromes e doencas hereditarias">Síndrome do QT longo, Brugada ou outra canalopatia</li>
+            <li role="option" data-valor="aorta_toracica" data-busca="aneurisma ou disseccao de aorta toracica / sindrome de marfan  sindromes e doencas hereditarias">Aneurisma ou dissecção de aorta torácica / síndrome de Marfan</li>
+            <li role="option" data-valor="aneurisma_cerebral" data-busca="aneurisma cerebral (2 ou mais parentes de 1º grau) hemorragia subaracnoide sindromes e doencas hereditarias">Aneurisma cerebral (2 ou mais parentes de 1º grau)</li>
+            <li role="option" data-valor="hemocromatose" data-busca="hemocromatose hereditaria ferro ferritina hfe sindromes e doencas hereditarias">Hemocromatose hereditária</li>
+            <li role="option" data-valor="rim_policistico" data-busca="doenca renal policistica rins cistos drpad sindromes e doencas hereditarias">Doença renal policística</li>
+            <li role="option" data-valor="alfa1" data-busca="deficiencia de alfa-1 antitripsina enfisema sindromes e doencas hereditarias">Deficiência de alfa-1 antitripsina</li>
+            <li role="option" data-valor="doenca_celiaca_familiar" data-busca="doenca celiaca gluten sindromes e doencas hereditarias">Doença celíaca</li>
+            <li class="combo-grupo" role="presentation">Outras condições</li>
+            <li role="option" data-valor="avc_precoce" data-busca="avc precoce (h &lt; 55, m &lt; 65) derrame ">AVC precoce (H &lt; 55, M &lt; 65)</li>
+            <li role="option" data-valor="morte_subita" data-busca="morte subita antes dos 50 anos  ">Morte súbita antes dos 50 anos</li>
+            <li role="option" data-valor="aneurisma_aorta" data-busca="aneurisma de aorta abdominal  ">Aneurisma de aorta abdominal</li>
+            <li role="option" data-valor="cancer_prostata" data-busca="cancer de prostata (pai ou irmao)  ">Câncer de próstata (pai ou irmão)</li>
+            <li role="option" data-valor="cancer_endometrio" data-busca="cancer de endometrio utero ">Câncer de endométrio</li>
+            <li role="option" data-valor="cancer_pancreas" data-busca="cancer de pancreas  ">Câncer de pâncreas</li>
+            <li role="option" data-valor="cancer_gastrico" data-busca="cancer gastrico estomago ">Câncer gástrico</li>
+            <li role="option" data-valor="melanoma" data-busca="melanoma pele ">Melanoma</li>
+            <li role="option" data-valor="osteoporose_fratura" data-busca="fratura de quadril em pai ou mae osteoporose ">Fratura de quadril em pai ou mãe</li>
+            <li role="option" data-valor="trombose" data-busca="trombose venosa ou trombofilia tvp tep embolia ">Trombose venosa ou trombofilia</li>
+            <li role="option" data-valor="glaucoma" data-busca="glaucoma olho ">Glaucoma</li>
             <li class="combo-vazio" role="presentation" hidden>Nada encontrado.</li>
           </ul>
         </div>
         <div class="opcoes mt-3" id="lista_familia-itens"></div>
-        <p id="lista_familia-dica" class="text-[12px] text-ink/50 mt-2">Mudam idade de início ou indicação de rastreamento.</p>
+        <p id="lista_familia-dica" class="text-[12px] text-ink/50 mt-2">Síndromes hereditárias trazem o rastreamento específico; as demais mudam idade de início ou indicação.</p>
       </div>
       <!-- lista:familia:fim -->
     </section>
@@ -1437,7 +1423,8 @@
                 else if (!precisa && imunoAuto) { campo.value = 'desconhecido'; imunoAuto = false; campo.dispatchEvent(new Event('change', { bubbles: true })); }
                 document.getElementById('imuno-aviso').hidden = !(precisa && campo.value === 'sim');
             }
-            document.getElementById('imunossupressao').addEventListener('change', e => { if (e.isTrusted) imunoAuto = false; });
+            // resposta dada pelo médico (clique no botão) deixa de ser automática e não é desfeita
+            document.getElementById('imunossupressao').addEventListener('change', e => { if (e.isTrusted || e.doUsuario) imunoAuto = false; });
             // Caixas fixas (mais usados, comorbidades e família): qualquer mudança refaz a conferência.
             checkupForm.addEventListener('change', e => {
                 if (e.target.matches('input[type="checkbox"][name="medicacoes"], input[type="checkbox"][name="comorbidades"]')) { conferirImuno(); conferir(); }
@@ -1560,6 +1547,54 @@
             });
             atualizarBlocoGestacao();
         });
+
+        // Listas suspensas curtas viram botões. O <select> continua no formulário (oculto) e é a fonte
+        // do valor: o envio, as regras e os campos condicionais não mudam.
+        (function () {
+            const grupos = [];
+            checkupForm.querySelectorAll('select').forEach(sel => {
+                const rotulo = checkupForm.querySelector('label[for="' + sel.id + '"]');
+                const grupo = document.createElement('div');
+                grupo.className = 'opcoes'; grupo.setAttribute('role', 'radiogroup'); grupo.id = sel.id + '-botoes';
+                if (rotulo) { rotulo.id = rotulo.id || sel.id + '-rotulo'; grupo.setAttribute('aria-labelledby', rotulo.id); }
+                const opcional = [...sel.options].some(o => o.value === ''); // "Selecione...": pode ficar sem resposta
+                [...sel.options].filter(o => o.value !== '').forEach(o => {
+                    const b = document.createElement('button');
+                    b.type = 'button'; b.className = 'opcao'; b.setAttribute('role', 'radio'); b.dataset.valor = o.value; b.textContent = o.textContent;
+                    b.addEventListener('click', () => {
+                        sel.value = (opcional && sel.value === o.value) ? '' : o.value;
+                        ['input', 'change'].forEach(tipo => {
+                            const ev = new Event(tipo, { bubbles: true });
+                            ev.doUsuario = true; // escolha do médico, não atualização automática
+                            sel.dispatchEvent(ev);
+                        });
+                    });
+                    b.addEventListener('keydown', e => {
+                        const passo = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+                        if (!passo) return;
+                        e.preventDefault();
+                        const todos = [...grupo.children], alvo = todos[(todos.indexOf(b) + passo + todos.length) % todos.length];
+                        alvo.focus(); alvo.click();
+                    });
+                    grupo.appendChild(b);
+                });
+                sel.hidden = true;
+                sel.insertAdjacentElement('afterend', grupo);
+                grupos.push([sel, grupo]);
+            });
+            function sincronizar() {
+                grupos.forEach(([sel, grupo]) => {
+                    const marcado = [...grupo.children].find(b => b.dataset.valor === sel.value);
+                    [...grupo.children].forEach((b, n) => {
+                        b.setAttribute('aria-checked', b === marcado ? 'true' : 'false');
+                        b.tabIndex = (b === marcado || (!marcado && n === 0)) ? 0 : -1;
+                    });
+                });
+            }
+            // valores também mudam por código (imunossupressão implicada, limpeza de campos condicionais)
+            ['input', 'change', 'reset'].forEach(tipo => checkupForm.addEventListener(tipo, () => setTimeout(sincronizar)));
+            sincronizar();
+        })();
 
         // Inicializar estado dos campos condicionais ao carregar a página
         document.addEventListener('DOMContentLoaded', function() {

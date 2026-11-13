@@ -82,19 +82,43 @@ MEDICACOES = {
     'hidroxicloroquina': {'rotulo': 'Hidroxicloroquina'},
 }
 
+HEREDITARIAS = 'Síndromes e doenças hereditárias'
 FAMILIA = {
+    # Com rastreamento próprio para o parente de 1º grau (portador confirmado ou ainda não testado)
+    'brca': {'rotulo': 'Mutação BRCA1 / BRCA2', 'grupo': HEREDITARIAS, 'busca': 'mama ovario hboc hereditario'},
+    'li_fraumeni': {'rotulo': 'Síndrome de Li-Fraumeni (TP53)', 'grupo': HEREDITARIAS, 'busca': 'sarcoma'},
+    'lynch': {'rotulo': 'Síndrome de Lynch (MLH1, MSH2, MSH6, PMS2)', 'grupo': HEREDITARIAS,
+              'busca': 'hnpcc colorretal endometrio hereditario'},
+    'paf': {'rotulo': 'Polipose adenomatosa familiar (APC)', 'grupo': HEREDITARIAS, 'busca': 'paf polipos colorretal'},
+    'cdh1': {'rotulo': 'Câncer gástrico difuso hereditário (CDH1)', 'grupo': HEREDITARIAS, 'busca': 'estomago'},
+    'cowden': {'rotulo': 'Síndrome de Cowden (PTEN)', 'grupo': HEREDITARIAS, 'busca': 'hamartoma'},
+    'nem1': {'rotulo': 'Neoplasia endócrina múltipla tipo 1 (MEN1)', 'grupo': HEREDITARIAS,
+             'busca': 'nem1 paratireoide hipofise'},
+    'nem2': {'rotulo': 'Neoplasia endócrina múltipla tipo 2 / carcinoma medular de tireoide (RET)',
+             'grupo': HEREDITARIAS, 'busca': 'nem2 men2 feocromocitoma'},
+    'hipercolesterolemia_familiar': {'rotulo': 'Hipercolesterolemia familiar', 'grupo': HEREDITARIAS,
+                                     'busca': 'colesterol ldl'},
+    'cardiomiopatia_hipertrofica': {'rotulo': 'Cardiomiopatia hipertrófica', 'grupo': HEREDITARIAS, 'busca': 'cmh coracao'},
+    'cardiomiopatia_dilatada': {'rotulo': 'Cardiomiopatia dilatada familiar', 'grupo': HEREDITARIAS, 'busca': 'coracao'},
+    'canalopatia': {'rotulo': 'Síndrome do QT longo, Brugada ou outra canalopatia', 'grupo': HEREDITARIAS,
+                    'busca': 'arritmia hereditaria'},
+    'aorta_toracica': {'rotulo': 'Aneurisma ou dissecção de aorta torácica / síndrome de Marfan', 'grupo': HEREDITARIAS},
+    'aneurisma_cerebral': {'rotulo': 'Aneurisma cerebral (2 ou mais parentes de 1º grau)', 'grupo': HEREDITARIAS,
+                           'busca': 'hemorragia subaracnoide'},
+    'hemocromatose': {'rotulo': 'Hemocromatose hereditária', 'grupo': HEREDITARIAS, 'busca': 'ferro ferritina hfe'},
+    'rim_policistico': {'rotulo': 'Doença renal policística', 'grupo': HEREDITARIAS, 'busca': 'rins cistos drpad'},
+    'alfa1': {'rotulo': 'Deficiência de alfa-1 antitripsina', 'grupo': HEREDITARIAS, 'busca': 'enfisema'},
+    'doenca_celiaca_familiar': {'rotulo': 'Doença celíaca', 'grupo': HEREDITARIAS, 'busca': 'gluten'},
+    # Outras condições que mudam idade de início ou indicação
     'avc_precoce': {'rotulo': 'AVC precoce (H < 55, M < 65)', 'busca': 'derrame'},
-    'hipercolesterolemia_familiar': {'rotulo': 'Hipercolesterolemia familiar', 'busca': 'colesterol'},
     'morte_subita': {'rotulo': 'Morte súbita antes dos 50 anos'},
     'aneurisma_aorta': {'rotulo': 'Aneurisma de aorta abdominal'},
     'cancer_prostata': {'rotulo': 'Câncer de próstata (pai ou irmão)'},
-    'cancer_endometrio': {'rotulo': 'Câncer de endométrio', 'busca': 'utero lynch'},
+    'cancer_endometrio': {'rotulo': 'Câncer de endométrio', 'busca': 'utero'},
     'cancer_pancreas': {'rotulo': 'Câncer de pâncreas'},
     'cancer_gastrico': {'rotulo': 'Câncer gástrico', 'busca': 'estomago'},
     'melanoma': {'rotulo': 'Melanoma', 'busca': 'pele'},
     'osteoporose_fratura': {'rotulo': 'Fratura de quadril em pai ou mãe', 'busca': 'osteoporose'},
-    'hemocromatose': {'rotulo': 'Hemocromatose hereditária', 'busca': 'ferro ferritina'},
-    'rim_policistico': {'rotulo': 'Doença renal policística', 'busca': 'rins cistos'},
     'trombose': {'rotulo': 'Trombose venosa ou trombofilia', 'busca': 'tvp tep embolia'},
     'glaucoma': {'rotulo': 'Glaucoma', 'busca': 'olho'},
 }
@@ -204,6 +228,9 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Hipercolesterolemia familiar em parente de 1º grau: perfil lipídico em qualquer idade (rastreio em cascata). '
             'LDL-c ≥ 190 mg/dL sugere HF.', 'Hipercolesterolemia familiar na família | Rastreio em cascata',
             'SBC 2025', 'A', 'alta')
+        orientar('Hipercolesterolemia familiar na família',
+                 'Aplicar os critérios da Dutch Lipid Clinic Network; teste genético em cascata quando a variante familiar é '
+                 'conhecida. Na HF confirmada, o risco não se estima por escore: tratar como alto risco.', 'SBC 2025')
     if 'aneurisma_aorta' in fam and 65 <= idade <= 75:
         add('Ultrassonografia com Doppler de Aorta Abdominal', 'imagem',
             'Parente de 1º grau com aneurisma de aorta abdominal: ultrassonografia uma vez entre 65 e 75 anos, '
@@ -213,6 +240,138 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Morte súbita antes dos 50 anos em parente de 1º grau: ECG e avaliação clínica dirigida '
             '(canalopatias, cardiomiopatias).', 'Morte súbita precoce na família', 'AHA/ACC/HRS 2017', 'B')
 
+    # ---- Síndromes hereditárias: parente de 1º grau portador (paciente portador ou ainda não testado) ----
+    CASCATA = ('Oferecer aconselhamento e teste genético em cascata; os exames listados valem para o portador '
+               'confirmado e para o parente de 1º grau ainda não testado.')
+    QUEM = 'Portador ou parente de 1º grau não testado'
+    mulher, homem = sexo == 'feminino', sexo == 'masculino'
+
+    def rm_mamas(inicio, ref, motivo):
+        if mulher and inicio <= idade <= 75:
+            add('Ressonância magnética de mamas', 'imagem',
+                f'{motivo}: ressonância magnética de mamas anual a partir de {inicio} anos, alternada ou associada à mamografia.',
+                f'{motivo} | {QUEM} | Anual a partir de {inicio} anos', ref, 'A', 'alta')
+
+    def mamografia_anual(inicio, ref, motivo):
+        if mulher and inicio <= idade <= 75:
+            add('Mamografia Digital - Bilateral', 'imagem', f'{motivo}: mamografia anual a partir de {inicio} anos.',
+                f'{motivo} | {QUEM} | Anual a partir de {inicio} anos', ref, 'A', 'alta', substituir=True)
+
+    def colonoscopia(inicio, intervalo, ref, motivo, grau='A'):
+        if idade >= inicio:
+            add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
+                f'{motivo}: colonoscopia {intervalo}, a partir de {inicio} anos.',
+                f'{motivo} | {QUEM} | {intervalo.capitalize()}', ref, grau, 'alta', substituir=True)
+
+    if 'brca' in fam:
+        rm_mamas(25, 'NCCN 2025 / ACS 2007', 'BRCA1/2 na família')
+        mamografia_anual(30, 'NCCN 2025', 'BRCA1/2 na família')
+        if homem and idade >= 40:
+            add('PSA total, soro', 'laboratorio',
+                'BRCA1/2 na família: rastreamento de câncer de próstata a partir dos 40 anos no portador de BRCA2 '
+                '(considerar em BRCA1).', f'BRCA1/2 na família | {QUEM} | A partir de 40 anos', 'NCCN 2025', 'B')
+        orientar('Mutação BRCA1/2 na família',
+                 CASCATA + ' Portadoras: discutir salpingo-ooforectomia redutora de risco (35-40 anos em BRCA1, 40-45 em '
+                 'BRCA2) e mastectomia redutora. Homens portadores: exame clínico das mamas a partir de 35 anos. '
+                 'Pâncreas: rastrear o portador que também tem caso de câncer de pâncreas na família.', 'NCCN 2025')
+    if 'li_fraumeni' in fam:
+        rm_mamas(20, 'NCCN 2025 / Kratz 2017', 'Li-Fraumeni na família')
+        for titulo in ('Ressonância magnética de corpo inteiro', 'Ressonância magnética de crânio'):
+            add(titulo, 'imagem', 'Li-Fraumeni (protocolo de Toronto): ressonância de corpo inteiro e de crânio anuais, '
+                'sem contraste quando possível.', f'Li-Fraumeni na família | {QUEM} | Anual', 'NCCN 2025 / Kratz 2017', 'B', 'alta')
+        colonoscopia(25, 'a cada 2-5 anos', 'NCCN 2025 / Kratz 2017', 'Li-Fraumeni na família', 'B')
+        orientar('Síndrome de Li-Fraumeni na família',
+                 CASCATA + ' Exame físico completo e neurológico a cada 6-12 meses, exame dermatológico anual e '
+                 'endoscopia digestiva alta junto com a colonoscopia. Evitar radiação ionizante sempre que houver alternativa.',
+                 'NCCN 2025 / Kratz 2017')
+    if 'lynch' in fam:
+        colonoscopia(20, 'a cada 1-2 anos', 'NCCN 2025 / ACG 2015', 'Síndrome de Lynch na família')
+        if idade >= 30:
+            add('Endoscopia digestiva alta', 'imagem',
+                'Síndrome de Lynch: endoscopia digestiva alta com biópsias e pesquisa de H. pylori a cada 2-4 anos, a partir de 30-40 anos.',
+                f'Síndrome de Lynch na família | {QUEM} | A cada 2-4 anos', 'NCCN 2025', 'B')
+        orientar('Síndrome de Lynch na família',
+                 CASCATA + ' Início da colonoscopia aos 20-25 anos em MLH1/MSH2 e aos 30-35 em MSH6/PMS2. Mulheres: '
+                 'orientar sobre sangramento uterino anormal, considerar biópsia de endométrio a cada 1-2 anos a partir de '
+                 '30-35 anos e discutir histerectomia com salpingo-ooforectomia após prole constituída.', 'NCCN 2025 / ACG 2015')
+    if 'paf' in fam:
+        colonoscopia(18, 'anual', 'NCCN 2025 / ACG 2015', 'Polipose adenomatosa familiar')
+        if idade >= 20:
+            add('Endoscopia digestiva alta', 'imagem',
+                'Polipose adenomatosa familiar: endoscopia digestiva alta com avaliação da papila a partir de 20-25 anos; '
+                'intervalo conforme o estágio de Spigelman.', f'PAF na família | {QUEM}', 'NCCN 2025 / ACG 2015', 'B')
+        orientar('Polipose adenomatosa familiar na família',
+                 CASCATA + ' No portador, a colonoscopia começa aos 10-15 anos; discutir colectomia conforme a carga de pólipos. '
+                 'Considerar ultrassonografia de tireoide.', 'NCCN 2025 / ACG 2015')
+    if 'cdh1' in fam:
+        add('Endoscopia digestiva alta', 'imagem',
+            'CDH1: endoscopia digestiva alta anual com múltiplas biópsias (protocolo de Cambridge) para quem adia a gastrectomia.',
+            f'CDH1 na família | {QUEM} | Anual', 'IGCLC 2020 / NCCN 2025', 'B', 'alta')
+        rm_mamas(30, 'IGCLC 2020 / NCCN 2025', 'CDH1 na família')
+        orientar('Câncer gástrico difuso hereditário na família',
+                 CASCATA + ' No portador de variante patogênica de CDH1, discutir gastrectomia total profilática entre 18 e 40 anos.',
+                 'IGCLC 2020 / NCCN 2025')
+    if 'cowden' in fam:
+        rm_mamas(30, 'NCCN 2025', 'Síndrome de Cowden na família')
+        mamografia_anual(30, 'NCCN 2025', 'Síndrome de Cowden na família')
+        add('Ultrassonografia de tireoide', 'imagem', 'Síndrome de Cowden (PTEN): ultrassonografia de tireoide anual.',
+            f'Síndrome de Cowden na família | {QUEM} | Anual', 'NCCN 2025', 'B')
+        colonoscopia(35, 'a cada 5 anos', 'NCCN 2025', 'Síndrome de Cowden na família', 'B')
+        if idade >= 40:
+            add('Ultrassonografia de rins e vias urinárias', 'imagem',
+                'Síndrome de Cowden (PTEN): ultrassonografia renal a cada 1-2 anos a partir dos 40 anos.',
+                f'Síndrome de Cowden na família | {QUEM} | A cada 1-2 anos', 'NCCN 2025', 'C')
+        orientar('Síndrome de Cowden na família',
+                 CASCATA + ' Mulheres: orientar sobre sangramento uterino anormal e considerar rastreamento de endométrio a partir de 35 anos.',
+                 'NCCN 2025')
+    if 'nem1' in fam:
+        for titulo in ('Cálcio, soro', 'Paratormônio (PTH), soro', 'Prolactina, soro'):
+            add(titulo, 'laboratorio', 'NEM1: cálcio, PTH e prolactina anuais.', f'NEM1 na família | {QUEM} | Anual',
+                'Endocrine Society 2012', 'B')
+        orientar('Neoplasia endócrina múltipla tipo 1 na família',
+                 CASCATA + ' No portador: gastrina e imagem pancreática anuais; ressonância de hipófise a cada 3-5 anos.',
+                 'Endocrine Society 2012')
+    if 'nem2' in fam:
+        for titulo in ('Calcitonina, soro', 'Metanefrinas, plasma ou urina de 24h', 'Cálcio, soro'):
+            add(titulo, 'laboratorio', 'NEM2 / carcinoma medular de tireoide familiar: calcitonina, metanefrinas e cálcio anuais.',
+                f'NEM2 na família | {QUEM} | Anual', 'ATA 2015', 'B', 'alta')
+        add('Ultrassonografia de tireoide', 'imagem', 'NEM2 / carcinoma medular de tireoide familiar: ultrassonografia cervical.',
+            f'NEM2 na família | {QUEM}', 'ATA 2015', 'B')
+        orientar('NEM2 / carcinoma medular de tireoide na família',
+                 CASCATA + ' O teste do gene RET define a conduta: no portador, tireoidectomia profilática na idade indicada pelo '
+                 'risco da mutação.', 'ATA 2015')
+    if 'cardiomiopatia_hipertrofica' in fam or 'cardiomiopatia_dilatada' in fam:
+        qual = 'cardiomiopatia hipertrófica' if 'cardiomiopatia_hipertrofica' in fam else 'cardiomiopatia dilatada familiar'
+        ref = 'AHA/ACC 2024' if 'cardiomiopatia_hipertrofica' in fam else 'AHA/ACC/HFSA 2022'
+        for titulo in ('Eletrocardiograma de repouso', 'Ecocardiograma transtorácico'):
+            add(titulo, 'imagem', f'Parente de 1º grau com {qual}: ECG e ecocardiograma a cada 3-5 anos no adulto '
+                '(antes, se surgirem sintomas).', f'{qual.capitalize()} na família | A cada 3-5 anos', ref, 'B', 'alta')
+        orientar(f'{qual.capitalize()} na família', 'Oferecer aconselhamento e teste genético em cascata quando a variante '
+                 'familiar é conhecida; teste negativo para a variante dispensa o seguimento.', ref)
+    if 'canalopatia' in fam:
+        add('Eletrocardiograma de repouso', 'imagem',
+            'Parente de 1º grau com QT longo, Brugada ou outra canalopatia: ECG de 12 derivações e avaliação com cardiologista.',
+            'Canalopatia na família', 'HRS/EHRA/APHRS 2013', 'B', 'alta')
+        orientar('Canalopatia na família', 'Oferecer teste genético em cascata quando a variante familiar é conhecida; '
+                 'conforme a síndrome, teste ergométrico ou Holter. Revisar fármacos que prolongam o QT.', 'HRS/EHRA/APHRS 2013')
+    if 'aorta_toracica' in fam:
+        add('Ecocardiograma transtorácico', 'imagem',
+            'Parente de 1º grau com aneurisma ou dissecção de aorta torácica (ou síndrome de Marfan): imagem da raiz da aorta '
+            'e da aorta ascendente.', 'Doença da aorta torácica na família', 'ACC/AHA 2022', 'B', 'alta')
+        orientar('Doença da aorta torácica na família', 'Considerar teste genético quando há síndrome ou variante conhecida; '
+                 'se a aorta ascendente não for bem vista ao ecocardiograma, angiotomografia ou angiorressonância.', 'ACC/AHA 2022')
+    if 'aneurisma_cerebral' in fam:
+        add('Angiorressonância de crânio', 'imagem',
+            'Dois ou mais parentes de 1º grau com aneurisma cerebral ou hemorragia subaracnoide: rastreamento não invasivo '
+            '(angiorressonância ou angiotomografia).', 'Aneurisma cerebral em 2 ou mais parentes de 1º grau', 'AHA/ASA 2015', 'B')
+    if 'alfa1' in fam:
+        add('Alfa-1 antitripsina, soro', 'laboratorio',
+            'Parente de 1º grau com deficiência de alfa-1 antitripsina: dosagem sérica (e genotipagem se baixa).',
+            'Deficiência de alfa-1 antitripsina na família', 'ATS/ERS 2003', 'B')
+    if 'doenca_celiaca_familiar' in fam:
+        for titulo in ('Anticorpo antitransglutaminase tecidual IgA, soro', 'Imunoglobulina A (IgA), soro'):
+            add(titulo, 'laboratorio', 'Parente de 1º grau com doença celíaca: sorologia (antitransglutaminase IgA com IgA total), '
+                'em dieta com glúten.', 'Doença celíaca na família', 'ACG 2023', 'B')
     if 'hemocromatose' in fam:
         for titulo in ('Ferritina, soro', 'Índice de saturação de transferrina, soro'):
             add(titulo, 'laboratorio', 'Parente de 1º grau com hemocromatose hereditária: ferritina e saturação de '

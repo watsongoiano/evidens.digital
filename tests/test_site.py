@@ -452,7 +452,10 @@ def test_listas_com_busca_substituem_o_texto_livre(pagina):
                          ('historia_familiar', condicoes.FAMILIA)):
         assert f'data-campo="{lista}"' in pagina
         for chave in itens:
-            assert f'role="option" data-valor="{chave}"' in pagina, chave
+            if chave in medicamentos.MAIS_USADOS:   # já é botão: não repete na lista
+                assert f'role="option" data-valor="{chave}"' not in pagina, chave
+            else:
+                assert f'role="option" data-valor="{chave}"' in pagina, chave
     assert 'value="dac_precoce"' in pagina and 'inferencias_recusadas' in pagina
     assert pagina.count('role="combobox" aria-autocomplete') == 3
 
@@ -536,3 +539,57 @@ def test_triagem_de_vacinas_e_o_ultimo_topico_do_formulario(pagina):
     assert ordem == sorted(ordem)
     assert '<span class="secao-num">07</span>Triagem de segurança para vacinas' in pagina
     assert pagina.index('id="s-vacinas"') < pagina.index('Gerar recomendações')
+
+
+def test_lista_nao_repete_o_que_ja_e_botao(pagina):
+    import html as _html
+    import re
+    from src.utils.medicamentos import sem_acento
+    nome = lambda t: sem_acento(_html.unescape(t)).split(' (')[0].strip()
+    botoes = {nome(t) for t in re.findall(r'<label class="opcao" for="\w+"><input type="checkbox"[^>]*>([^<]+)</label>', pagina)}
+    lista = {nome(t) for t in re.findall(r'<li role="option"[^>]*>([^<]+)</li>', pagina)}
+    assert len(botoes) > 20 and not (botoes & lista), botoes & lista
+
+
+def test_listas_suspensas_curtas_viram_botoes(pagina):
+    assert "checkupForm.querySelectorAll('select')" in pagina and "setAttribute('role', 'radio')" in pagina
+
+
+@pytest.mark.parametrize('dados, titulos', [
+    (dict(idade=32, sexo='feminino', historia_familiar=['brca']), ['Ressonância magnética de mamas', 'Mamografia']),
+    (dict(idade=45, sexo='masculino', historia_familiar=['brca']), ['PSA']),
+    (dict(idade=30, sexo='feminino', historia_familiar=['li_fraumeni']),
+     ['Ressonância magnética de corpo inteiro', 'Ressonância magnética de crânio', 'Ressonância magnética de mamas', 'Colonoscopia']),
+    (dict(idade=28, sexo='masculino', historia_familiar=['lynch']), ['Colonoscopia']),
+    (dict(idade=35, sexo='feminino', historia_familiar=['lynch']), ['Colonoscopia', 'Endoscopia digestiva alta']),
+    (dict(idade=22, sexo='masculino', historia_familiar=['paf']), ['Colonoscopia', 'Endoscopia digestiva alta']),
+    (dict(idade=35, sexo='feminino', historia_familiar=['cdh1']), ['Endoscopia digestiva alta', 'Ressonância magnética de mamas']),
+    (dict(idade=42, sexo='feminino', historia_familiar=['cowden']), ['Ultrassonografia de tireoide', 'Colonoscopia', 'Ressonância magnética de mamas']),
+    (dict(idade=30, sexo='masculino', historia_familiar=['nem1']), ['Paratormônio', 'Prolactina', 'Cálcio']),
+    (dict(idade=30, sexo='masculino', historia_familiar=['nem2']), ['Calcitonina', 'Metanefrinas']),
+    (dict(idade=30, sexo='masculino', historia_familiar=['cardiomiopatia_hipertrofica']), ['Ecocardiograma', 'Eletrocardiograma']),
+    (dict(idade=30, sexo='masculino', historia_familiar=['aorta_toracica']), ['Ecocardiograma']),
+    (dict(idade=30, sexo='masculino', historia_familiar=['aneurisma_cerebral']), ['Angiorressonância de crânio']),
+    (dict(idade=30, sexo='masculino', historia_familiar=['alfa1']), ['Alfa-1 antitripsina']),
+    (dict(idade=30, sexo='masculino', historia_familiar=['doenca_celiaca_familiar']), ['antitransglutaminase']),
+])
+def test_sindromes_hereditarias_trazem_o_rastreamento_especifico(client, dados, titulos):
+    base = dict(tabagismo='nunca', comorbidades=[], imunossupressao='nao', gestante='nao', lactante='nao')
+    r = client.post('/api/checkup-intelligent', json=dict(base, **dados)).get_json()
+    recs = [x['titulo'] for x in r['recommendations']]
+    for t in titulos:
+        assert any(t.lower() in x.lower() for x in recs), (t, recs)
+    assert r['orientacoes'] or dados['historia_familiar'][0] in ('aneurisma_cerebral', 'alfa1', 'doenca_celiaca_familiar')
+
+
+def test_colonoscopia_de_lynch_nao_aparece_duas_vezes(client):
+    dados = dict(idade=55, sexo='masculino', tabagismo='nunca', comorbidades=[], historia_familiar=['lynch'],
+                 imunossupressao='nao', gestante='nao', lactante='nao')
+    recs = client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']
+    colo = [r for r in recs if 'colonoscopia' in r['titulo'].lower()]
+    assert len(colo) == 1 and '1-2 anos' in colo[0]['descricao']
+
+
+def test_escolha_manual_de_imunossupressao_nao_e_desfeita_pela_lista(pagina):
+    """O clique no botão marca o evento como escolha do médico; a marcação automática só desfaz o que ela mesma fez."""
+    assert 'ev.doUsuario = true' in pagina and 'e.isTrusted || e.doUsuario' in pagina
