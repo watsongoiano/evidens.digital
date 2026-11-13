@@ -184,23 +184,62 @@
         </div>
       </div>
 
-      <div class="campo mt-5">
-        <label for="lista_comorbidades">Outras comorbidades</label>
-        <select id="lista_comorbidades" data-lista="comorbidades" aria-describedby="lista_comorbidades-dica">
-            <option value="">Adicionar…</option>
-            <option value="hipotireoidismo">Hipotireoidismo</option>
-            <option value="masld">Esteatose hepática (MASLD)</option>
-            <option value="cirrose">Cirrose / hepatopatia crônica</option>
-            <option value="doenca_autoimune">Doença inflamatória autoimune (AR, lúpus, psoríase, DII)</option>
-            <option value="asma_grave">Asma moderada ou grave</option>
-            <option value="asplenia">Asplenia / esplenectomia</option>
-            <option value="osteoporose">Osteoporose</option>
-            <option value="gota">Gota</option>
-            <option value="neoplasia_ativa" data-imuno="1">Câncer em quimio ou radioterapia</option>
-        </select>
+      <!-- lista:comorbidades:inicio -->
+      <div class="campo mt-5 combo" id="lista_comorbidades" data-lista="comorbidades">
+        <label for="lista_comorbidades-busca">Outras comorbidades</label>
+        <div class="relative">
+          <input type="text" id="lista_comorbidades-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_comorbidades-opcoes" aria-describedby="lista_comorbidades-dica" autocomplete="off" placeholder="Digite para buscar: hipotireoidismo, asma, gota…">
+          <ul id="lista_comorbidades-opcoes" role="listbox" class="combo-lista" hidden>
+            <li class="combo-grupo" role="presentation">Principais</li>
+            <li role="option" data-valor="diabetes" data-busca="diabetes tipo 2" data-alvo="diabetes">Diabetes tipo 2</li>
+            <li role="option" data-valor="hipertensao" data-busca="hipertensao" data-alvo="hipertensao">Hipertensão</li>
+            <li role="option" data-valor="has_resistente" data-busca="has resistente" data-alvo="has_resistente">HAS resistente</li>
+            <li role="option" data-valor="dislipidemia" data-busca="dislipidemia" data-alvo="dislipidemia">Dislipidemia</li>
+            <li role="option" data-valor="doenca_renal" data-busca="doenca renal cronica" data-alvo="doenca_renal">Doença renal crônica</li>
+            <li role="option" data-valor="dcv_aterosclerotica" data-busca="dcv aterosclerotica (iam, avc, dap)" data-alvo="dcv_aterosclerotica">DCV aterosclerótica (IAM, AVC, DAP)</li>
+            <li role="option" data-valor="insuficiencia_cardiaca" data-busca="insuficiencia cardiaca" data-alvo="insuficiencia_cardiaca">Insuficiência cardíaca</li>
+            <li role="option" data-valor="obesidade" data-busca="obesidade" data-alvo="obesidade">Obesidade</li>
+            <li role="option" data-valor="hiv" data-busca="hiv" data-alvo="hiv">HIV</li>
+            <li role="option" data-valor="dpoc" data-busca="dpoc" data-alvo="dpoc">DPOC</li>
+            <li class="combo-grupo" role="presentation">Outras</li>
+            <li role="option" data-valor="pre_diabetes" data-busca="pre-diabetes glicemia de jejum alterada intolerancia">Pré-diabetes</li>
+            <li role="option" data-valor="hipotireoidismo" data-busca="hipotireoidismo tireoide hashimoto">Hipotireoidismo</li>
+            <li role="option" data-valor="hipertireoidismo" data-busca="hipertireoidismo tireoide graves">Hipertireoidismo</li>
+            <li role="option" data-valor="masld" data-busca="esteatose hepatica (masld) gordura no figado nafld">Esteatose hepática (MASLD)</li>
+            <li role="option" data-valor="cirrose" data-busca="cirrose / hepatopatia cronica figado">Cirrose / hepatopatia crônica</li>
+            <li role="option" data-valor="hepatite_b_cronica" data-busca="hepatite b cronica figado hbv">Hepatite B crônica</li>
+            <li role="option" data-valor="hepatite_c" data-busca="hepatite c figado hcv">Hepatite C</li>
+            <li role="option" data-valor="doenca_autoimune" data-busca="doenca inflamatoria autoimune (ar, lupus, psoriase, dii) artrite reumatoide les crohn retocolite espondilite">Doença inflamatória autoimune (AR, lúpus, psoríase, DII)</li>
+            <li role="option" data-valor="asma_grave" data-busca="asma moderada ou grave ">Asma moderada ou grave</li>
+            <li role="option" data-valor="asplenia" data-busca="asplenia / esplenectomia baco">Asplenia / esplenectomia</li>
+            <li role="option" data-valor="anemia_falciforme" data-busca="doenca falciforme anemia falciforme hemoglobinopatia">Doença falciforme</li>
+            <li role="option" data-valor="transplante" data-busca="transplante de orgao solido ou de medula " data-imuno="1">Transplante de órgão sólido ou de medula</li>
+            <li role="option" data-valor="neoplasia_ativa" data-busca="cancer em quimio ou radioterapia neoplasia tumor quimioterapia" data-imuno="1">Câncer em quimio ou radioterapia</li>
+            <li role="option" data-valor="cirurgia_bariatrica" data-busca="cirurgia bariatrica previa bypass sleeve gastroplastia">Cirurgia bariátrica prévia</li>
+            <li role="option" data-valor="osteoporose" data-busca="osteoporose osso fratura">Osteoporose</li>
+            <li role="option" data-valor="gota" data-busca="gota acido urico">Gota</li>
+            <li role="option" data-valor="fibrilacao_atrial" data-busca="fibrilacao atrial arritmia fa">Fibrilação atrial</li>
+            <li role="option" data-valor="apneia_sono" data-busca="apneia obstrutiva do sono saos ronco">Apneia obstrutiva do sono</li>
+            <li role="option" data-valor="depressao" data-busca="depressao ">Depressão</li>
+            <li role="option" data-valor="ansiedade" data-busca="transtorno de ansiedade ">Transtorno de ansiedade</li>
+            <li role="option" data-valor="epilepsia" data-busca="epilepsia convulsao">Epilepsia</li>
+            <li role="option" data-valor="enxaqueca" data-busca="enxaqueca migranea cefaleia">Enxaqueca</li>
+            <li role="option" data-valor="demencia" data-busca="demencia alzheimer">Demência</li>
+            <li role="option" data-valor="parkinson" data-busca="doenca de parkinson ">Doença de Parkinson</li>
+            <li role="option" data-valor="hpb" data-busca="hiperplasia prostatica benigna prostata">Hiperplasia prostática benigna</li>
+            <li role="option" data-valor="sop" data-busca="sindrome dos ovarios policisticos sop">Síndrome dos ovários policísticos</li>
+            <li role="option" data-valor="endometriose" data-busca="endometriose ">Endometriose</li>
+            <li role="option" data-valor="drge" data-busca="doenca do refluxo gastroesofagico refluxo drge">Doença do refluxo gastroesofágico</li>
+            <li role="option" data-valor="doenca_celiaca" data-busca="doenca celiaca gluten">Doença celíaca</li>
+            <li role="option" data-valor="osteoartrite" data-busca="osteoartrite artrose">Osteoartrite</li>
+            <li role="option" data-valor="fibromialgia" data-busca="fibromialgia ">Fibromialgia</li>
+            <li class="combo-vazio" role="presentation" hidden>Nada encontrado.</li>
+          </ul>
+        </div>
         <div class="opcoes mt-3" id="lista_comorbidades-itens"></div>
-        <p id="lista_comorbidades-dica" class="text-[12px] text-ink/50 mt-2">Cada item escolhido aciona os exames, vacinas ou alertas correspondentes.</p>
+        <p id="lista_comorbidades-dica" class="text-[12px] text-ink/50 mt-2">Digite o nome ou escolha na lista. Os itens com exame, vacina ou alerta próprios entram nas recomendações.</p>
       </div>
+      <!-- lista:comorbidades:fim -->
     </section>
 
     <section class="secao" aria-labelledby="s-vacinas">
@@ -230,36 +269,358 @@
 
     <section class="secao" aria-labelledby="s-medicacoes">
       <h2 id="s-medicacoes" class="secao-titulo"><span class="secao-num">05</span>Medicações de uso contínuo</h2>
+      <!-- lista:medicacoes:inicio -->
       <div class="opcoes mt-4">
-        <label class="opcao" for="anti_hipertensivos"><input type="checkbox" id="anti_hipertensivos" name="medicacoes" value="anti_hipertensivos">Anti-hipertensivos</label>
-        <label class="opcao" for="estatinas"><input type="checkbox" id="estatinas" name="medicacoes" value="estatinas">Estatinas</label>
+        <label class="opcao" for="lista_medicacoes_losartana"><input type="checkbox" id="lista_medicacoes_losartana" name="medicacoes" value="losartana" data-rotulo="Losartana" data-marca="hipertensao">Losartana</label>
+        <label class="opcao" for="lista_medicacoes_hidroclorotiazida"><input type="checkbox" id="lista_medicacoes_hidroclorotiazida" name="medicacoes" value="hidroclorotiazida" data-rotulo="Hidroclorotiazida" data-marca="hipertensao">Hidroclorotiazida</label>
+        <label class="opcao" for="lista_medicacoes_enalapril"><input type="checkbox" id="lista_medicacoes_enalapril" name="medicacoes" value="enalapril" data-rotulo="Enalapril" data-marca="hipertensao">Enalapril</label>
+        <label class="opcao" for="lista_medicacoes_anlodipino"><input type="checkbox" id="lista_medicacoes_anlodipino" name="medicacoes" value="anlodipino" data-rotulo="Anlodipino" data-marca="hipertensao">Anlodipino</label>
+        <label class="opcao" for="lista_medicacoes_atenolol"><input type="checkbox" id="lista_medicacoes_atenolol" name="medicacoes" value="atenolol" data-rotulo="Atenolol">Atenolol</label>
+        <label class="opcao" for="lista_medicacoes_sinvastatina"><input type="checkbox" id="lista_medicacoes_sinvastatina" name="medicacoes" value="sinvastatina" data-rotulo="Sinvastatina" data-marca="dislipidemia">Sinvastatina</label>
+        <label class="opcao" for="lista_medicacoes_atorvastatina"><input type="checkbox" id="lista_medicacoes_atorvastatina" name="medicacoes" value="atorvastatina" data-rotulo="Atorvastatina" data-marca="dislipidemia">Atorvastatina</label>
+        <label class="opcao" for="lista_medicacoes_metformina"><input type="checkbox" id="lista_medicacoes_metformina" name="medicacoes" value="metformina" data-rotulo="Metformina">Metformina</label>
+        <label class="opcao" for="lista_medicacoes_glibenclamida"><input type="checkbox" id="lista_medicacoes_glibenclamida" name="medicacoes" value="glibenclamida" data-rotulo="Glibenclamida" data-marca="diabetes">Glibenclamida</label>
+        <label class="opcao" for="lista_medicacoes_aas_acido_acetilsalicilico"><input type="checkbox" id="lista_medicacoes_aas_acido_acetilsalicilico" name="medicacoes" value="aas_acido_acetilsalicilico" data-rotulo="AAS">AAS</label>
+        <label class="opcao" for="lista_medicacoes_levotiroxina"><input type="checkbox" id="lista_medicacoes_levotiroxina" name="medicacoes" value="levotiroxina" data-rotulo="Levotiroxina">Levotiroxina</label>
+        <label class="opcao" for="lista_medicacoes_omeprazol"><input type="checkbox" id="lista_medicacoes_omeprazol" name="medicacoes" value="omeprazol" data-rotulo="Omeprazol">Omeprazol</label>
       </div>
-      <div class="campo mt-5">
-        <label for="lista_medicacoes">Outras medicações (por classe)</label>
-        <select id="lista_medicacoes" data-lista="medicacoes" aria-describedby="lista_medicacoes-dica">
-            <option value="">Adicionar…</option>
-            <option value="ieca_bra" data-marca="anti_hipertensivos">IECA ou BRA</option>
-            <option value="tiazidico" data-marca="anti_hipertensivos">Diurético tiazídico</option>
-            <option value="bcc" data-marca="anti_hipertensivos">Bloqueador de canal de cálcio</option>
-            <option value="betabloqueador">Betabloqueador</option>
-            <option value="espironolactona">Espironolactona / eplerenona</option>
-            <option value="diuretico_alca">Diurético de alça</option>
-            <option value="outro_hipolipemiante" data-marca="dislipidemia">Ezetimiba, fibrato ou iPCSK9</option>
-            <option value="metformina">Metformina</option>
-            <option value="insulina" data-marca="diabetes">Insulina</option>
-            <option value="sulfonilureia" data-marca="diabetes">Sulfonilureia</option>
-            <option value="idpp4_pioglitazona" data-marca="diabetes">iDPP-4 ou pioglitazona</option>
-            <option value="isglt2">iSGLT2</option>
-            <option value="aglp1">Agonista de GLP-1</option>
-            <option value="levotiroxina">Levotiroxina</option>
-            <option value="corticoide_cronico">Corticoide sistêmico ≥ 3 meses</option>
-            <option value="imunossupressor" data-imuno="1">Imunossupressor ou imunobiológico</option>
-            <option value="litio">Lítio</option>
-            <option value="amiodarona">Amiodarona</option>
-        </select>
+      <div class="campo mt-5 combo" id="lista_medicacoes" data-lista="medicacoes">
+        <label for="lista_medicacoes-busca">Outras medicações</label>
+        <div class="relative">
+          <input type="text" id="lista_medicacoes-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_medicacoes-opcoes" aria-describedby="lista_medicacoes-dica" autocomplete="off" placeholder="Digite para buscar: anlodipino, rosuvastatina, bombinha…">
+          <ul id="lista_medicacoes-opcoes" role="listbox" class="combo-lista" hidden>
+            <li class="combo-grupo" role="presentation">Estatinas</li>
+            <li role="option" data-valor="sinvastatina" data-busca="sinvastatina estatinas estatina colesterol " data-marca="dislipidemia">Sinvastatina</li>
+            <li role="option" data-valor="atorvastatina" data-busca="atorvastatina estatinas estatina colesterol " data-marca="dislipidemia">Atorvastatina</li>
+            <li role="option" data-valor="rosuvastatina" data-busca="rosuvastatina estatinas estatina colesterol " data-marca="dislipidemia">Rosuvastatina</li>
+            <li role="option" data-valor="pravastatina" data-busca="pravastatina estatinas estatina colesterol " data-marca="dislipidemia">Pravastatina</li>
+            <li role="option" data-valor="pitavastatina" data-busca="pitavastatina estatinas estatina colesterol " data-marca="dislipidemia">Pitavastatina</li>
+            <li role="option" data-valor="fluvastatina" data-busca="fluvastatina estatinas estatina colesterol " data-marca="dislipidemia">Fluvastatina</li>
+            <li role="option" data-valor="lovastatina" data-busca="lovastatina estatinas estatina colesterol " data-marca="dislipidemia">Lovastatina</li>
+            <li role="option" data-valor="ezetimiba_sinvastatina" data-busca="ezetimiba + sinvastatina estatinas estatina colesterol " data-marca="dislipidemia">Ezetimiba + sinvastatina</li>
+            <li role="option" data-valor="rosuvastatina_ezetimiba" data-busca="rosuvastatina + ezetimiba estatinas estatina colesterol " data-marca="dislipidemia">Rosuvastatina + ezetimiba</li>
+            <li class="combo-grupo" role="presentation">Outros hipolipemiantes</li>
+            <li role="option" data-valor="ezetimiba" data-busca="ezetimiba outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Ezetimiba</li>
+            <li role="option" data-valor="fenofibrato" data-busca="fenofibrato outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Fenofibrato</li>
+            <li role="option" data-valor="ciprofibrato" data-busca="ciprofibrato outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Ciprofibrato</li>
+            <li role="option" data-valor="bezafibrato" data-busca="bezafibrato outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Bezafibrato</li>
+            <li role="option" data-valor="genfibrozila" data-busca="genfibrozila outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Genfibrozila</li>
+            <li role="option" data-valor="acido_bempedoico" data-busca="acido bempedoico outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Ácido bempedoico</li>
+            <li role="option" data-valor="evolocumabe" data-busca="evolocumabe outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Evolocumabe</li>
+            <li role="option" data-valor="alirocumabe" data-busca="alirocumabe outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Alirocumabe</li>
+            <li role="option" data-valor="inclisirana" data-busca="inclisirana outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Inclisirana</li>
+            <li role="option" data-valor="colestiramina" data-busca="colestiramina outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Colestiramina</li>
+            <li role="option" data-valor="omega_3_esteres_etilicos" data-busca="omega-3 (esteres etilicos) outros hipolipemiantes colesterol triglicerideos fibrato " data-marca="dislipidemia">Ômega-3 (ésteres etílicos)</li>
+            <li class="combo-grupo" role="presentation">IECA</li>
+            <li role="option" data-valor="captopril" data-busca="captopril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Captopril</li>
+            <li role="option" data-valor="enalapril" data-busca="enalapril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Enalapril</li>
+            <li role="option" data-valor="ramipril" data-busca="ramipril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Ramipril</li>
+            <li role="option" data-valor="lisinopril" data-busca="lisinopril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Lisinopril</li>
+            <li role="option" data-valor="perindopril" data-busca="perindopril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Perindopril</li>
+            <li role="option" data-valor="benazepril" data-busca="benazepril ieca ieca pressao anti-hipertensivo " data-marca="hipertensao">Benazepril</li>
+            <li class="combo-grupo" role="presentation">BRA</li>
+            <li role="option" data-valor="losartana" data-busca="losartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Losartana</li>
+            <li role="option" data-valor="valsartana" data-busca="valsartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Valsartana</li>
+            <li role="option" data-valor="olmesartana" data-busca="olmesartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Olmesartana</li>
+            <li role="option" data-valor="candesartana" data-busca="candesartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Candesartana</li>
+            <li role="option" data-valor="telmisartana" data-busca="telmisartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Telmisartana</li>
+            <li role="option" data-valor="irbesartana" data-busca="irbesartana bra bra sartana pressao anti-hipertensivo " data-marca="hipertensao">Irbesartana</li>
+            <li class="combo-grupo" role="presentation">Bloqueadores de canal de cálcio</li>
+            <li role="option" data-valor="anlodipino" data-busca="anlodipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo amlodipina anlodipina" data-marca="hipertensao">Anlodipino</li>
+            <li role="option" data-valor="levanlodipino" data-busca="levanlodipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Levanlodipino</li>
+            <li role="option" data-valor="nifedipino" data-busca="nifedipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Nifedipino</li>
+            <li role="option" data-valor="felodipino" data-busca="felodipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Felodipino</li>
+            <li role="option" data-valor="lercanidipino" data-busca="lercanidipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Lercanidipino</li>
+            <li role="option" data-valor="lacidipino" data-busca="lacidipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Lacidipino</li>
+            <li role="option" data-valor="manidipino" data-busca="manidipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Manidipino</li>
+            <li role="option" data-valor="nitrendipino" data-busca="nitrendipino bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Nitrendipino</li>
+            <li role="option" data-valor="diltiazem" data-busca="diltiazem bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Diltiazem</li>
+            <li role="option" data-valor="verapamil" data-busca="verapamil bloqueadores de canal de calcio bcc pressao anti-hipertensivo " data-marca="hipertensao">Verapamil</li>
+            <li class="combo-grupo" role="presentation">Diuréticos</li>
+            <li role="option" data-valor="hidroclorotiazida" data-busca="hidroclorotiazida diureticos diuretico pressao " data-marca="hipertensao">Hidroclorotiazida</li>
+            <li role="option" data-valor="clortalidona" data-busca="clortalidona diureticos diuretico pressao " data-marca="hipertensao">Clortalidona</li>
+            <li role="option" data-valor="indapamida" data-busca="indapamida diureticos diuretico pressao " data-marca="hipertensao">Indapamida</li>
+            <li role="option" data-valor="furosemida" data-busca="furosemida diureticos diuretico pressao ">Furosemida</li>
+            <li role="option" data-valor="bumetanida" data-busca="bumetanida diureticos diuretico pressao ">Bumetanida</li>
+            <li role="option" data-valor="espironolactona" data-busca="espironolactona diureticos diuretico pressao ">Espironolactona</li>
+            <li role="option" data-valor="eplerenona" data-busca="eplerenona diureticos diuretico pressao ">Eplerenona</li>
+            <li role="option" data-valor="amilorida" data-busca="amilorida diureticos diuretico pressao ">Amilorida</li>
+            <li class="combo-grupo" role="presentation">Betabloqueadores</li>
+            <li role="option" data-valor="atenolol" data-busca="atenolol betabloqueadores betabloqueador ">Atenolol</li>
+            <li role="option" data-valor="metoprolol" data-busca="metoprolol betabloqueadores betabloqueador ">Metoprolol</li>
+            <li role="option" data-valor="carvedilol" data-busca="carvedilol betabloqueadores betabloqueador ">Carvedilol</li>
+            <li role="option" data-valor="bisoprolol" data-busca="bisoprolol betabloqueadores betabloqueador ">Bisoprolol</li>
+            <li role="option" data-valor="nebivolol" data-busca="nebivolol betabloqueadores betabloqueador ">Nebivolol</li>
+            <li role="option" data-valor="propranolol" data-busca="propranolol betabloqueadores betabloqueador ">Propranolol</li>
+            <li class="combo-grupo" role="presentation">Outros anti-hipertensivos</li>
+            <li role="option" data-valor="hidralazina" data-busca="hidralazina outros anti-hipertensivos pressao anti-hipertensivo " data-marca="hipertensao">Hidralazina</li>
+            <li role="option" data-valor="clonidina" data-busca="clonidina outros anti-hipertensivos pressao anti-hipertensivo " data-marca="hipertensao">Clonidina</li>
+            <li role="option" data-valor="metildopa" data-busca="metildopa outros anti-hipertensivos pressao anti-hipertensivo " data-marca="hipertensao">Metildopa</li>
+            <li role="option" data-valor="minoxidil_oral" data-busca="minoxidil (oral) outros anti-hipertensivos pressao anti-hipertensivo " data-marca="hipertensao">Minoxidil (oral)</li>
+            <li role="option" data-valor="alisquireno" data-busca="alisquireno outros anti-hipertensivos pressao anti-hipertensivo " data-marca="hipertensao">Alisquireno</li>
+            <li class="combo-grupo" role="presentation">Associações anti-hipertensivas</li>
+            <li role="option" data-valor="losartana_hidroclorotiazida" data-busca="losartana + hidroclorotiazida associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Losartana + hidroclorotiazida</li>
+            <li role="option" data-valor="valsartana_hidroclorotiazida" data-busca="valsartana + hidroclorotiazida associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Valsartana + hidroclorotiazida</li>
+            <li role="option" data-valor="olmesartana_hidroclorotiazida" data-busca="olmesartana + hidroclorotiazida associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Olmesartana + hidroclorotiazida</li>
+            <li role="option" data-valor="candesartana_hidroclorotiazida" data-busca="candesartana + hidroclorotiazida associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Candesartana + hidroclorotiazida</li>
+            <li role="option" data-valor="telmisartana_hidroclorotiazida" data-busca="telmisartana + hidroclorotiazida associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Telmisartana + hidroclorotiazida</li>
+            <li role="option" data-valor="irbesartana_hidroclorotiazida" data-busca="irbesartana + hidroclorotiazida associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Irbesartana + hidroclorotiazida</li>
+            <li role="option" data-valor="enalapril_hidroclorotiazida" data-busca="enalapril + hidroclorotiazida associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Enalapril + hidroclorotiazida</li>
+            <li role="option" data-valor="perindopril_indapamida" data-busca="perindopril + indapamida associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Perindopril + indapamida</li>
+            <li role="option" data-valor="valsartana_anlodipino" data-busca="valsartana + anlodipino associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Valsartana + anlodipino</li>
+            <li role="option" data-valor="olmesartana_anlodipino" data-busca="olmesartana + anlodipino associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Olmesartana + anlodipino</li>
+            <li role="option" data-valor="losartana_anlodipino" data-busca="losartana + anlodipino associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Losartana + anlodipino</li>
+            <li role="option" data-valor="perindopril_anlodipino" data-busca="perindopril + anlodipino associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Perindopril + anlodipino</li>
+            <li role="option" data-valor="perindopril_indapamida_anlodipino" data-busca="perindopril + indapamida + anlodipino associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Perindopril + indapamida + anlodipino</li>
+            <li role="option" data-valor="atenolol_clortalidona" data-busca="atenolol + clortalidona associacoes anti-hipertensivas pressao anti-hipertensivo associacao " data-marca="hipertensao">Atenolol + clortalidona</li>
+            <li class="combo-grupo" role="presentation">Insuficiência cardíaca, arritmia e angina</li>
+            <li role="option" data-valor="sacubitril_valsartana" data-busca="sacubitril + valsartana insuficiencia cardiaca, arritmia e angina coracao entresto">Sacubitril + valsartana</li>
+            <li role="option" data-valor="amiodarona" data-busca="amiodarona insuficiencia cardiaca, arritmia e angina coracao ">Amiodarona</li>
+            <li role="option" data-valor="digoxina" data-busca="digoxina insuficiencia cardiaca, arritmia e angina coracao ">Digoxina</li>
+            <li role="option" data-valor="ivabradina" data-busca="ivabradina insuficiencia cardiaca, arritmia e angina coracao ">Ivabradina</li>
+            <li role="option" data-valor="propafenona" data-busca="propafenona insuficiencia cardiaca, arritmia e angina coracao ">Propafenona</li>
+            <li role="option" data-valor="sotalol" data-busca="sotalol insuficiencia cardiaca, arritmia e angina coracao ">Sotalol</li>
+            <li role="option" data-valor="mononitrato_de_isossorbida" data-busca="mononitrato de isossorbida insuficiencia cardiaca, arritmia e angina coracao ">Mononitrato de isossorbida</li>
+            <li role="option" data-valor="dinitrato_de_isossorbida" data-busca="dinitrato de isossorbida insuficiencia cardiaca, arritmia e angina coracao ">Dinitrato de isossorbida</li>
+            <li role="option" data-valor="trimetazidina" data-busca="trimetazidina insuficiencia cardiaca, arritmia e angina coracao ">Trimetazidina</li>
+            <li role="option" data-valor="ranolazina" data-busca="ranolazina insuficiencia cardiaca, arritmia e angina coracao ">Ranolazina</li>
+            <li class="combo-grupo" role="presentation">Antiagregantes</li>
+            <li role="option" data-valor="aas_acido_acetilsalicilico" data-busca="aas (acido acetilsalicilico) antiagregantes antiplaquetario aspirina">AAS (ácido acetilsalicílico)</li>
+            <li role="option" data-valor="clopidogrel" data-busca="clopidogrel antiagregantes antiplaquetario ">Clopidogrel</li>
+            <li role="option" data-valor="ticagrelor" data-busca="ticagrelor antiagregantes antiplaquetario ">Ticagrelor</li>
+            <li role="option" data-valor="prasugrel" data-busca="prasugrel antiagregantes antiplaquetario ">Prasugrel</li>
+            <li role="option" data-valor="ticlopidina" data-busca="ticlopidina antiagregantes antiplaquetario ">Ticlopidina</li>
+            <li role="option" data-valor="cilostazol" data-busca="cilostazol antiagregantes antiplaquetario ">Cilostazol</li>
+            <li class="combo-grupo" role="presentation">Anticoagulantes</li>
+            <li role="option" data-valor="varfarina" data-busca="varfarina anticoagulantes anticoagulante marevan">Varfarina</li>
+            <li role="option" data-valor="rivaroxabana" data-busca="rivaroxabana anticoagulantes anticoagulante ">Rivaroxabana</li>
+            <li role="option" data-valor="apixabana" data-busca="apixabana anticoagulantes anticoagulante ">Apixabana</li>
+            <li role="option" data-valor="edoxabana" data-busca="edoxabana anticoagulantes anticoagulante ">Edoxabana</li>
+            <li role="option" data-valor="dabigatrana" data-busca="dabigatrana anticoagulantes anticoagulante ">Dabigatrana</li>
+            <li role="option" data-valor="enoxaparina" data-busca="enoxaparina anticoagulantes anticoagulante ">Enoxaparina</li>
+            <li class="combo-grupo" role="presentation">Antidiabéticos</li>
+            <li role="option" data-valor="metformina" data-busca="metformina antidiabeticos diabetes glifage">Metformina</li>
+            <li role="option" data-valor="glibenclamida" data-busca="glibenclamida antidiabeticos diabetes " data-marca="diabetes">Glibenclamida</li>
+            <li role="option" data-valor="gliclazida" data-busca="gliclazida antidiabeticos diabetes " data-marca="diabetes">Gliclazida</li>
+            <li role="option" data-valor="glimepirida" data-busca="glimepirida antidiabeticos diabetes " data-marca="diabetes">Glimepirida</li>
+            <li role="option" data-valor="sitagliptina" data-busca="sitagliptina antidiabeticos diabetes " data-marca="diabetes">Sitagliptina</li>
+            <li role="option" data-valor="vildagliptina" data-busca="vildagliptina antidiabeticos diabetes " data-marca="diabetes">Vildagliptina</li>
+            <li role="option" data-valor="linagliptina" data-busca="linagliptina antidiabeticos diabetes " data-marca="diabetes">Linagliptina</li>
+            <li role="option" data-valor="saxagliptina" data-busca="saxagliptina antidiabeticos diabetes " data-marca="diabetes">Saxagliptina</li>
+            <li role="option" data-valor="alogliptina" data-busca="alogliptina antidiabeticos diabetes " data-marca="diabetes">Alogliptina</li>
+            <li role="option" data-valor="pioglitazona" data-busca="pioglitazona antidiabeticos diabetes " data-marca="diabetes">Pioglitazona</li>
+            <li role="option" data-valor="acarbose" data-busca="acarbose antidiabeticos diabetes " data-marca="diabetes">Acarbose</li>
+            <li role="option" data-valor="dapagliflozina" data-busca="dapagliflozina antidiabeticos diabetes ">Dapagliflozina</li>
+            <li role="option" data-valor="empagliflozina" data-busca="empagliflozina antidiabeticos diabetes ">Empagliflozina</li>
+            <li role="option" data-valor="canagliflozina" data-busca="canagliflozina antidiabeticos diabetes ">Canagliflozina</li>
+            <li role="option" data-valor="semaglutida" data-busca="semaglutida antidiabeticos diabetes ">Semaglutida</li>
+            <li role="option" data-valor="liraglutida" data-busca="liraglutida antidiabeticos diabetes ">Liraglutida</li>
+            <li role="option" data-valor="dulaglutida" data-busca="dulaglutida antidiabeticos diabetes ">Dulaglutida</li>
+            <li role="option" data-valor="tirzepatida" data-busca="tirzepatida antidiabeticos diabetes ">Tirzepatida</li>
+            <li role="option" data-valor="sitagliptina_metformina" data-busca="sitagliptina + metformina antidiabeticos diabetes " data-marca="diabetes">Sitagliptina + metformina</li>
+            <li role="option" data-valor="vildagliptina_metformina" data-busca="vildagliptina + metformina antidiabeticos diabetes " data-marca="diabetes">Vildagliptina + metformina</li>
+            <li role="option" data-valor="linagliptina_metformina" data-busca="linagliptina + metformina antidiabeticos diabetes " data-marca="diabetes">Linagliptina + metformina</li>
+            <li role="option" data-valor="dapagliflozina_metformina" data-busca="dapagliflozina + metformina antidiabeticos diabetes ">Dapagliflozina + metformina</li>
+            <li role="option" data-valor="empagliflozina_linagliptina" data-busca="empagliflozina + linagliptina antidiabeticos diabetes " data-marca="diabetes">Empagliflozina + linagliptina</li>
+            <li class="combo-grupo" role="presentation">Insulinas</li>
+            <li role="option" data-valor="insulina_nph" data-busca="insulina nph insulinas diabetes insulina " data-marca="diabetes">Insulina NPH</li>
+            <li role="option" data-valor="insulina_regular" data-busca="insulina regular insulinas diabetes insulina " data-marca="diabetes">Insulina regular</li>
+            <li role="option" data-valor="insulina_glargina" data-busca="insulina glargina insulinas diabetes insulina " data-marca="diabetes">Insulina glargina</li>
+            <li role="option" data-valor="insulina_degludeca" data-busca="insulina degludeca insulinas diabetes insulina " data-marca="diabetes">Insulina degludeca</li>
+            <li role="option" data-valor="insulina_detemir" data-busca="insulina detemir insulinas diabetes insulina " data-marca="diabetes">Insulina detemir</li>
+            <li role="option" data-valor="insulina_icodeca" data-busca="insulina icodeca insulinas diabetes insulina " data-marca="diabetes">Insulina icodeca</li>
+            <li role="option" data-valor="insulina_asparte" data-busca="insulina asparte insulinas diabetes insulina " data-marca="diabetes">Insulina asparte</li>
+            <li role="option" data-valor="insulina_lispro" data-busca="insulina lispro insulinas diabetes insulina " data-marca="diabetes">Insulina lispro</li>
+            <li role="option" data-valor="insulina_glulisina" data-busca="insulina glulisina insulinas diabetes insulina " data-marca="diabetes">Insulina glulisina</li>
+            <li role="option" data-valor="insulina_bifasica" data-busca="insulina bifasica insulinas diabetes insulina " data-marca="diabetes">Insulina bifásica</li>
+            <li role="option" data-valor="insulina_glargina_lixisenatida" data-busca="insulina glargina + lixisenatida insulinas diabetes insulina " data-marca="diabetes">Insulina glargina + lixisenatida</li>
+            <li role="option" data-valor="insulina_degludeca_liraglutida" data-busca="insulina degludeca + liraglutida insulinas diabetes insulina " data-marca="diabetes">Insulina degludeca + liraglutida</li>
+            <li class="combo-grupo" role="presentation">Tireoide</li>
+            <li role="option" data-valor="levotiroxina" data-busca="levotiroxina tireoide tireoide puran synthroid euthyrox">Levotiroxina</li>
+            <li role="option" data-valor="metimazol_tiamazol" data-busca="metimazol (tiamazol) tireoide tireoide tapazol">Metimazol (tiamazol)</li>
+            <li role="option" data-valor="propiltiouracila" data-busca="propiltiouracila tireoide tireoide ">Propiltiouracila</li>
+            <li class="combo-grupo" role="presentation">Asma e DPOC</li>
+            <li role="option" data-valor="salbutamol" data-busca="salbutamol asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Salbutamol</li>
+            <li role="option" data-valor="fenoterol" data-busca="fenoterol asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Fenoterol</li>
+            <li role="option" data-valor="terbutalina" data-busca="terbutalina asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Terbutalina</li>
+            <li role="option" data-valor="ipratropio" data-busca="ipratropio asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Ipratrópio</li>
+            <li role="option" data-valor="formoterol" data-busca="formoterol asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Formoterol</li>
+            <li role="option" data-valor="tiotropio" data-busca="tiotropio asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Tiotrópio</li>
+            <li role="option" data-valor="umeclidinio" data-busca="umeclidinio asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Umeclidínio</li>
+            <li role="option" data-valor="budesonida_inalatoria" data-busca="budesonida inalatoria asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Budesonida inalatória</li>
+            <li role="option" data-valor="beclometasona_inalatoria" data-busca="beclometasona inalatoria asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Beclometasona inalatória</li>
+            <li role="option" data-valor="fluticasona_inalatoria" data-busca="fluticasona inalatoria asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Fluticasona inalatória</li>
+            <li role="option" data-valor="mometasona_inalatoria" data-busca="mometasona inalatoria asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Mometasona inalatória</li>
+            <li role="option" data-valor="formoterol_budesonida" data-busca="formoterol + budesonida asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Formoterol + budesonida</li>
+            <li role="option" data-valor="formoterol_beclometasona" data-busca="formoterol + beclometasona asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Formoterol + beclometasona</li>
+            <li role="option" data-valor="salmeterol_fluticasona" data-busca="salmeterol + fluticasona asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Salmeterol + fluticasona</li>
+            <li role="option" data-valor="vilanterol_fluticasona" data-busca="vilanterol + fluticasona asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Vilanterol + fluticasona</li>
+            <li role="option" data-valor="umeclidinio_vilanterol" data-busca="umeclidinio + vilanterol asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Umeclidínio + vilanterol</li>
+            <li role="option" data-valor="indacaterol_glicopirronio" data-busca="indacaterol + glicopirronio asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Indacaterol + glicopirrônio</li>
+            <li role="option" data-valor="tiotropio_olodaterol" data-busca="tiotropio + olodaterol asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Tiotrópio + olodaterol</li>
+            <li role="option" data-valor="fluticasona_umeclidinio_vilanterol" data-busca="fluticasona + umeclidinio + vilanterol asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Fluticasona + umeclidínio + vilanterol</li>
+            <li role="option" data-valor="beclometasona_formoterol_glicopirronio" data-busca="beclometasona + formoterol + glicopirronio asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Beclometasona + formoterol + glicopirrônio</li>
+            <li role="option" data-valor="montelucaste" data-busca="montelucaste asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Montelucaste</li>
+            <li role="option" data-valor="teofilina" data-busca="teofilina asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Teofilina</li>
+            <li role="option" data-valor="omalizumabe" data-busca="omalizumabe asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Omalizumabe</li>
+            <li role="option" data-valor="mepolizumabe" data-busca="mepolizumabe asma e dpoc bombinha inalatorio broncodilatador asma dpoc ">Mepolizumabe</li>
+            <li class="combo-grupo" role="presentation">Protetores gástricos</li>
+            <li role="option" data-valor="omeprazol" data-busca="omeprazol protetores gastricos estomago ibp prazol ">Omeprazol</li>
+            <li role="option" data-valor="pantoprazol" data-busca="pantoprazol protetores gastricos estomago ibp prazol ">Pantoprazol</li>
+            <li role="option" data-valor="esomeprazol" data-busca="esomeprazol protetores gastricos estomago ibp prazol ">Esomeprazol</li>
+            <li role="option" data-valor="lansoprazol" data-busca="lansoprazol protetores gastricos estomago ibp prazol ">Lansoprazol</li>
+            <li role="option" data-valor="dexlansoprazol" data-busca="dexlansoprazol protetores gastricos estomago ibp prazol ">Dexlansoprazol</li>
+            <li role="option" data-valor="rabeprazol" data-busca="rabeprazol protetores gastricos estomago ibp prazol ">Rabeprazol</li>
+            <li role="option" data-valor="vonoprazana" data-busca="vonoprazana protetores gastricos estomago ibp prazol ">Vonoprazana</li>
+            <li class="combo-grupo" role="presentation">Antidepressivos</li>
+            <li role="option" data-valor="sertralina" data-busca="sertralina antidepressivos depressao ansiedade ">Sertralina</li>
+            <li role="option" data-valor="fluoxetina" data-busca="fluoxetina antidepressivos depressao ansiedade ">Fluoxetina</li>
+            <li role="option" data-valor="escitalopram" data-busca="escitalopram antidepressivos depressao ansiedade ">Escitalopram</li>
+            <li role="option" data-valor="citalopram" data-busca="citalopram antidepressivos depressao ansiedade ">Citalopram</li>
+            <li role="option" data-valor="paroxetina" data-busca="paroxetina antidepressivos depressao ansiedade ">Paroxetina</li>
+            <li role="option" data-valor="fluvoxamina" data-busca="fluvoxamina antidepressivos depressao ansiedade ">Fluvoxamina</li>
+            <li role="option" data-valor="venlafaxina" data-busca="venlafaxina antidepressivos depressao ansiedade ">Venlafaxina</li>
+            <li role="option" data-valor="desvenlafaxina" data-busca="desvenlafaxina antidepressivos depressao ansiedade ">Desvenlafaxina</li>
+            <li role="option" data-valor="duloxetina" data-busca="duloxetina antidepressivos depressao ansiedade ">Duloxetina</li>
+            <li role="option" data-valor="vortioxetina" data-busca="vortioxetina antidepressivos depressao ansiedade ">Vortioxetina</li>
+            <li role="option" data-valor="vilazodona" data-busca="vilazodona antidepressivos depressao ansiedade ">Vilazodona</li>
+            <li role="option" data-valor="bupropiona" data-busca="bupropiona antidepressivos depressao ansiedade ">Bupropiona</li>
+            <li role="option" data-valor="mirtazapina" data-busca="mirtazapina antidepressivos depressao ansiedade ">Mirtazapina</li>
+            <li role="option" data-valor="trazodona" data-busca="trazodona antidepressivos depressao ansiedade ">Trazodona</li>
+            <li role="option" data-valor="agomelatina" data-busca="agomelatina antidepressivos depressao ansiedade ">Agomelatina</li>
+            <li role="option" data-valor="amitriptilina" data-busca="amitriptilina antidepressivos depressao ansiedade ">Amitriptilina</li>
+            <li role="option" data-valor="nortriptilina" data-busca="nortriptilina antidepressivos depressao ansiedade ">Nortriptilina</li>
+            <li role="option" data-valor="clomipramina" data-busca="clomipramina antidepressivos depressao ansiedade ">Clomipramina</li>
+            <li role="option" data-valor="imipramina" data-busca="imipramina antidepressivos depressao ansiedade ">Imipramina</li>
+            <li class="combo-grupo" role="presentation">Ansiolíticos e hipnóticos</li>
+            <li role="option" data-valor="clonazepam" data-busca="clonazepam ansioliticos e hipnoticos ansiedade insonia benzodiazepinico rivotril">Clonazepam</li>
+            <li role="option" data-valor="alprazolam" data-busca="alprazolam ansioliticos e hipnoticos ansiedade insonia benzodiazepinico ">Alprazolam</li>
+            <li role="option" data-valor="bromazepam" data-busca="bromazepam ansioliticos e hipnoticos ansiedade insonia benzodiazepinico ">Bromazepam</li>
+            <li role="option" data-valor="diazepam" data-busca="diazepam ansioliticos e hipnoticos ansiedade insonia benzodiazepinico ">Diazepam</li>
+            <li role="option" data-valor="lorazepam" data-busca="lorazepam ansioliticos e hipnoticos ansiedade insonia benzodiazepinico ">Lorazepam</li>
+            <li role="option" data-valor="zolpidem" data-busca="zolpidem ansioliticos e hipnoticos ansiedade insonia benzodiazepinico ">Zolpidem</li>
+            <li role="option" data-valor="eszopiclona" data-busca="eszopiclona ansioliticos e hipnoticos ansiedade insonia benzodiazepinico ">Eszopiclona</li>
+            <li role="option" data-valor="zopiclona" data-busca="zopiclona ansioliticos e hipnoticos ansiedade insonia benzodiazepinico ">Zopiclona</li>
+            <li class="combo-grupo" role="presentation">Antipsicóticos e estabilizadores de humor</li>
+            <li role="option" data-valor="quetiapina" data-busca="quetiapina antipsicoticos e estabilizadores de humor antipsicotico ">Quetiapina</li>
+            <li role="option" data-valor="olanzapina" data-busca="olanzapina antipsicoticos e estabilizadores de humor antipsicotico ">Olanzapina</li>
+            <li role="option" data-valor="risperidona" data-busca="risperidona antipsicoticos e estabilizadores de humor antipsicotico ">Risperidona</li>
+            <li role="option" data-valor="aripiprazol" data-busca="aripiprazol antipsicoticos e estabilizadores de humor antipsicotico ">Aripiprazol</li>
+            <li role="option" data-valor="clozapina" data-busca="clozapina antipsicoticos e estabilizadores de humor antipsicotico ">Clozapina</li>
+            <li role="option" data-valor="paliperidona" data-busca="paliperidona antipsicoticos e estabilizadores de humor antipsicotico ">Paliperidona</li>
+            <li role="option" data-valor="ziprasidona" data-busca="ziprasidona antipsicoticos e estabilizadores de humor antipsicotico ">Ziprasidona</li>
+            <li role="option" data-valor="lurasidona" data-busca="lurasidona antipsicoticos e estabilizadores de humor antipsicotico ">Lurasidona</li>
+            <li role="option" data-valor="brexpiprazol" data-busca="brexpiprazol antipsicoticos e estabilizadores de humor antipsicotico ">Brexpiprazol</li>
+            <li role="option" data-valor="amissulprida" data-busca="amissulprida antipsicoticos e estabilizadores de humor antipsicotico ">Amissulprida</li>
+            <li role="option" data-valor="haloperidol" data-busca="haloperidol antipsicoticos e estabilizadores de humor antipsicotico ">Haloperidol</li>
+            <li role="option" data-valor="clorpromazina" data-busca="clorpromazina antipsicoticos e estabilizadores de humor antipsicotico ">Clorpromazina</li>
+            <li role="option" data-valor="levomepromazina" data-busca="levomepromazina antipsicoticos e estabilizadores de humor antipsicotico ">Levomepromazina</li>
+            <li role="option" data-valor="litio" data-busca="litio antipsicoticos e estabilizadores de humor antipsicotico carbolitium">Lítio</li>
+            <li class="combo-grupo" role="presentation">Anticonvulsivantes</li>
+            <li role="option" data-valor="acido_valproico_divalproato" data-busca="acido valproico / divalproato anticonvulsivantes epilepsia convulsao ">Ácido valproico / divalproato</li>
+            <li role="option" data-valor="carbamazepina" data-busca="carbamazepina anticonvulsivantes epilepsia convulsao ">Carbamazepina</li>
+            <li role="option" data-valor="oxcarbazepina" data-busca="oxcarbazepina anticonvulsivantes epilepsia convulsao ">Oxcarbazepina</li>
+            <li role="option" data-valor="lamotrigina" data-busca="lamotrigina anticonvulsivantes epilepsia convulsao ">Lamotrigina</li>
+            <li role="option" data-valor="levetiracetam" data-busca="levetiracetam anticonvulsivantes epilepsia convulsao ">Levetiracetam</li>
+            <li role="option" data-valor="fenitoina" data-busca="fenitoina anticonvulsivantes epilepsia convulsao ">Fenitoína</li>
+            <li role="option" data-valor="fenobarbital" data-busca="fenobarbital anticonvulsivantes epilepsia convulsao ">Fenobarbital</li>
+            <li role="option" data-valor="topiramato" data-busca="topiramato anticonvulsivantes epilepsia convulsao ">Topiramato</li>
+            <li role="option" data-valor="lacosamida" data-busca="lacosamida anticonvulsivantes epilepsia convulsao ">Lacosamida</li>
+            <li role="option" data-valor="clobazam" data-busca="clobazam anticonvulsivantes epilepsia convulsao ">Clobazam</li>
+            <li role="option" data-valor="gabapentina" data-busca="gabapentina anticonvulsivantes epilepsia convulsao ">Gabapentina</li>
+            <li role="option" data-valor="pregabalina" data-busca="pregabalina anticonvulsivantes epilepsia convulsao ">Pregabalina</li>
+            <li class="combo-grupo" role="presentation">Parkinson, demência e TDAH</li>
+            <li role="option" data-valor="levodopa_benserazida" data-busca="levodopa + benserazida parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Levodopa + benserazida</li>
+            <li role="option" data-valor="levodopa_carbidopa" data-busca="levodopa + carbidopa parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Levodopa + carbidopa</li>
+            <li role="option" data-valor="pramipexol" data-busca="pramipexol parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Pramipexol</li>
+            <li role="option" data-valor="rasagilina" data-busca="rasagilina parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Rasagilina</li>
+            <li role="option" data-valor="amantadina" data-busca="amantadina parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Amantadina</li>
+            <li role="option" data-valor="biperideno" data-busca="biperideno parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Biperideno</li>
+            <li role="option" data-valor="donepezila" data-busca="donepezila parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Donepezila</li>
+            <li role="option" data-valor="rivastigmina" data-busca="rivastigmina parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Rivastigmina</li>
+            <li role="option" data-valor="galantamina" data-busca="galantamina parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Galantamina</li>
+            <li role="option" data-valor="memantina" data-busca="memantina parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Memantina</li>
+            <li role="option" data-valor="metilfenidato" data-busca="metilfenidato parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Metilfenidato</li>
+            <li role="option" data-valor="lisdexanfetamina" data-busca="lisdexanfetamina parkinson, demencia e tdah parkinson alzheimer demencia tdah ">Lisdexanfetamina</li>
+            <li class="combo-grupo" role="presentation">Corticoides sistêmicos</li>
+            <li role="option" data-valor="prednisona" data-busca="prednisona corticoides sistemicos corticoide ">Prednisona</li>
+            <li role="option" data-valor="prednisolona" data-busca="prednisolona corticoides sistemicos corticoide ">Prednisolona</li>
+            <li role="option" data-valor="dexametasona" data-busca="dexametasona corticoides sistemicos corticoide ">Dexametasona</li>
+            <li role="option" data-valor="hidrocortisona" data-busca="hidrocortisona corticoides sistemicos corticoide ">Hidrocortisona</li>
+            <li role="option" data-valor="fludrocortisona" data-busca="fludrocortisona corticoides sistemicos corticoide ">Fludrocortisona</li>
+            <li class="combo-grupo" role="presentation">Imunossupressores e imunobiológicos</li>
+            <li role="option" data-valor="metotrexato" data-busca="metotrexato imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Metotrexato</li>
+            <li role="option" data-valor="azatioprina" data-busca="azatioprina imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Azatioprina</li>
+            <li role="option" data-valor="micofenolato" data-busca="micofenolato imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Micofenolato</li>
+            <li role="option" data-valor="ciclosporina" data-busca="ciclosporina imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Ciclosporina</li>
+            <li role="option" data-valor="tacrolimo" data-busca="tacrolimo imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Tacrolimo</li>
+            <li role="option" data-valor="sirolimo" data-busca="sirolimo imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Sirolimo</li>
+            <li role="option" data-valor="everolimo" data-busca="everolimo imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Everolimo</li>
+            <li role="option" data-valor="leflunomida" data-busca="leflunomida imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Leflunomida</li>
+            <li role="option" data-valor="tofacitinibe" data-busca="tofacitinibe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Tofacitinibe</li>
+            <li role="option" data-valor="upadacitinibe" data-busca="upadacitinibe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Upadacitinibe</li>
+            <li role="option" data-valor="adalimumabe" data-busca="adalimumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Adalimumabe</li>
+            <li role="option" data-valor="etanercepte" data-busca="etanercepte imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Etanercepte</li>
+            <li role="option" data-valor="infliximabe" data-busca="infliximabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Infliximabe</li>
+            <li role="option" data-valor="golimumabe" data-busca="golimumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Golimumabe</li>
+            <li role="option" data-valor="tocilizumabe" data-busca="tocilizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Tocilizumabe</li>
+            <li role="option" data-valor="rituximabe" data-busca="rituximabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Rituximabe</li>
+            <li role="option" data-valor="ustequinumabe" data-busca="ustequinumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Ustequinumabe</li>
+            <li role="option" data-valor="risanquizumabe" data-busca="risanquizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Risanquizumabe</li>
+            <li role="option" data-valor="guselcumabe" data-busca="guselcumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Guselcumabe</li>
+            <li role="option" data-valor="natalizumabe" data-busca="natalizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Natalizumabe</li>
+            <li role="option" data-valor="ocrelizumabe" data-busca="ocrelizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Ocrelizumabe</li>
+            <li role="option" data-valor="fingolimode" data-busca="fingolimode imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Fingolimode</li>
+            <li class="combo-grupo" role="presentation">Reumatologia e gota</li>
+            <li role="option" data-valor="hidroxicloroquina" data-busca="hidroxicloroquina reumatologia e gota reumatismo gota ">Hidroxicloroquina</li>
+            <li role="option" data-valor="sulfassalazina" data-busca="sulfassalazina reumatologia e gota reumatismo gota ">Sulfassalazina</li>
+            <li role="option" data-valor="mesalazina" data-busca="mesalazina reumatologia e gota reumatismo gota ">Mesalazina</li>
+            <li role="option" data-valor="alopurinol" data-busca="alopurinol reumatologia e gota reumatismo gota ">Alopurinol</li>
+            <li role="option" data-valor="colchicina" data-busca="colchicina reumatologia e gota reumatismo gota ">Colchicina</li>
+            <li role="option" data-valor="benzbromarona" data-busca="benzbromarona reumatologia e gota reumatismo gota ">Benzbromarona</li>
+            <li class="combo-grupo" role="presentation">Osteoporose</li>
+            <li role="option" data-valor="alendronato" data-busca="alendronato osteoporose osso osteoporose ">Alendronato</li>
+            <li role="option" data-valor="risedronato" data-busca="risedronato osteoporose osso osteoporose ">Risedronato</li>
+            <li role="option" data-valor="ibandronato" data-busca="ibandronato osteoporose osso osteoporose ">Ibandronato</li>
+            <li role="option" data-valor="acido_zoledronico" data-busca="acido zoledronico osteoporose osso osteoporose ">Ácido zoledrônico</li>
+            <li role="option" data-valor="denosumabe" data-busca="denosumabe osteoporose osso osteoporose ">Denosumabe</li>
+            <li role="option" data-valor="teriparatida" data-busca="teriparatida osteoporose osso osteoporose ">Teriparatida</li>
+            <li role="option" data-valor="calcio_vitamina_d" data-busca="calcio + vitamina d osteoporose osso osteoporose ">Cálcio + vitamina D</li>
+            <li role="option" data-valor="colecalciferol_vitamina_d" data-busca="colecalciferol (vitamina d) osteoporose osso osteoporose ">Colecalciferol (vitamina D)</li>
+            <li class="combo-grupo" role="presentation">Urologia</li>
+            <li role="option" data-valor="tansulosina" data-busca="tansulosina urologia prostata bexiga ">Tansulosina</li>
+            <li role="option" data-valor="doxazosina" data-busca="doxazosina urologia prostata bexiga ">Doxazosina</li>
+            <li role="option" data-valor="silodosina" data-busca="silodosina urologia prostata bexiga ">Silodosina</li>
+            <li role="option" data-valor="finasterida" data-busca="finasterida urologia prostata bexiga ">Finasterida</li>
+            <li role="option" data-valor="dutasterida" data-busca="dutasterida urologia prostata bexiga ">Dutasterida</li>
+            <li role="option" data-valor="dutasterida_tansulosina" data-busca="dutasterida + tansulosina urologia prostata bexiga ">Dutasterida + tansulosina</li>
+            <li role="option" data-valor="solifenacina" data-busca="solifenacina urologia prostata bexiga ">Solifenacina</li>
+            <li role="option" data-valor="mirabegrona" data-busca="mirabegrona urologia prostata bexiga ">Mirabegrona</li>
+            <li role="option" data-valor="oxibutinina" data-busca="oxibutinina urologia prostata bexiga ">Oxibutinina</li>
+            <li class="combo-grupo" role="presentation">Hormônios e oncologia hormonal</li>
+            <li role="option" data-valor="anticoncepcional_combinado" data-busca="anticoncepcional combinado hormonios e oncologia hormonal hormonio anticoncepcional reposicao ">Anticoncepcional combinado</li>
+            <li role="option" data-valor="anticoncepcional_so_com_progestagenio" data-busca="anticoncepcional so com progestagenio hormonios e oncologia hormonal hormonio anticoncepcional reposicao ">Anticoncepcional só com progestagênio</li>
+            <li role="option" data-valor="terapia_hormonal_da_menopausa" data-busca="terapia hormonal da menopausa hormonios e oncologia hormonal hormonio anticoncepcional reposicao ">Terapia hormonal da menopausa</li>
+            <li role="option" data-valor="tibolona" data-busca="tibolona hormonios e oncologia hormonal hormonio anticoncepcional reposicao ">Tibolona</li>
+            <li role="option" data-valor="testosterona" data-busca="testosterona hormonios e oncologia hormonal hormonio anticoncepcional reposicao ">Testosterona</li>
+            <li role="option" data-valor="tamoxifeno" data-busca="tamoxifeno hormonios e oncologia hormonal hormonio anticoncepcional reposicao ">Tamoxifeno</li>
+            <li role="option" data-valor="anastrozol" data-busca="anastrozol hormonios e oncologia hormonal hormonio anticoncepcional reposicao ">Anastrozol</li>
+            <li role="option" data-valor="letrozol" data-busca="letrozol hormonios e oncologia hormonal hormonio anticoncepcional reposicao ">Letrozol</li>
+            <li role="option" data-valor="exemestano" data-busca="exemestano hormonios e oncologia hormonal hormonio anticoncepcional reposicao ">Exemestano</li>
+            <li class="combo-grupo" role="presentation">Antirretrovirais</li>
+            <li role="option" data-valor="tenofovir_lamivudina_dolutegravir" data-busca="tenofovir + lamivudina + dolutegravir antirretrovirais hiv tarv prep ">Tenofovir + lamivudina + dolutegravir</li>
+            <li role="option" data-valor="dolutegravir" data-busca="dolutegravir antirretrovirais hiv tarv prep ">Dolutegravir</li>
+            <li role="option" data-valor="tenofovir_entricitabina" data-busca="tenofovir + entricitabina antirretrovirais hiv tarv prep ">Tenofovir + entricitabina</li>
+            <li role="option" data-valor="bictegravir_entricitabina_tenofovir_alafenamida" data-busca="bictegravir + entricitabina + tenofovir alafenamida antirretrovirais hiv tarv prep ">Bictegravir + entricitabina + tenofovir alafenamida</li>
+            <li role="option" data-valor="darunavir_ritonavir" data-busca="darunavir + ritonavir antirretrovirais hiv tarv prep ">Darunavir + ritonavir</li>
+            <li role="option" data-valor="cabotegravir" data-busca="cabotegravir antirretrovirais hiv tarv prep ">Cabotegravir</li>
+            <li class="combo-vazio" role="presentation" hidden>Nada encontrado.</li>
+          </ul>
+        </div>
         <div class="opcoes mt-3" id="lista_medicacoes-itens"></div>
-        <p id="lista_medicacoes-dica" class="text-[12px] text-ink/50 mt-2">Classes com efeito no check-up: monitorização laboratorial, vacinas e coerência com as comorbidades.</p>
+        <p id="lista_medicacoes-dica" class="text-[12px] text-ink/50 mt-2">Busca por princípio ativo ou classe. A medicação define monitorização laboratorial, vacinas e coerência com as comorbidades.</p>
       </div>
+      <!-- lista:medicacoes:fim -->
     </section>
 
     <section class="secao" aria-labelledby="s-familia">
@@ -272,19 +633,40 @@
         <label class="opcao" for="diabetes_familiar"><input type="checkbox" id="diabetes_familiar" name="historia_familiar" value="diabetes">Diabetes</label>
         <label class="opcao" for="dac_precoce_familiar"><input type="checkbox" id="dac_precoce_familiar" name="historia_familiar" value="dac_precoce">DCV prematura (H &lt; 55, M &lt; 65)</label>
       </div>
-      <div class="campo mt-5">
-        <label for="lista_familia">Outras condições em parente de 1º grau</label>
-        <select id="lista_familia" data-lista="historia_familiar" aria-describedby="lista_familia-dica">
-            <option value="">Adicionar…</option>
-            <option value="cancer_prostata">Câncer de próstata (pai ou irmão)</option>
-            <option value="osteoporose_fratura">Fratura de quadril em pai ou mãe</option>
-            <option value="hipercolesterolemia_familiar">Hipercolesterolemia familiar</option>
-            <option value="aneurisma_aorta">Aneurisma de aorta abdominal</option>
-            <option value="morte_subita">Morte súbita antes dos 50 anos</option>
-        </select>
+      <!-- lista:familia:inicio -->
+      <div class="campo mt-5 combo" id="lista_familia" data-lista="historia_familiar">
+        <label for="lista_familia-busca">Outras condições em parente de 1º grau</label>
+        <div class="relative">
+          <input type="text" id="lista_familia-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_familia-opcoes" aria-describedby="lista_familia-dica" autocomplete="off" placeholder="Digite para buscar: próstata, aneurisma, hemocromatose…">
+          <ul id="lista_familia-opcoes" role="listbox" class="combo-lista" hidden>
+            <li class="combo-grupo" role="presentation">Principais</li>
+            <li role="option" data-valor="cancer_mama" data-busca="cancer de mama" data-alvo="cancer_mama">Câncer de mama</li>
+            <li role="option" data-valor="cancer_colorretal" data-busca="cancer colorretal" data-alvo="cancer_colorretal">Câncer colorretal</li>
+            <li role="option" data-valor="cancer_ovario" data-busca="cancer de ovario" data-alvo="cancer_ovario">Câncer de ovário</li>
+            <li role="option" data-valor="diabetes_familiar" data-busca="diabetes" data-alvo="diabetes_familiar">Diabetes</li>
+            <li role="option" data-valor="dac_precoce_familiar" data-busca="dcv prematura (h &lt; 55, m &lt; 65)" data-alvo="dac_precoce_familiar">DCV prematura (H &lt; 55, M &lt; 65)</li>
+            <li class="combo-grupo" role="presentation">Outras</li>
+            <li role="option" data-valor="avc_precoce" data-busca="avc precoce (h &lt; 55, m &lt; 65) derrame">AVC precoce (H &lt; 55, M &lt; 65)</li>
+            <li role="option" data-valor="hipercolesterolemia_familiar" data-busca="hipercolesterolemia familiar colesterol">Hipercolesterolemia familiar</li>
+            <li role="option" data-valor="morte_subita" data-busca="morte subita antes dos 50 anos ">Morte súbita antes dos 50 anos</li>
+            <li role="option" data-valor="aneurisma_aorta" data-busca="aneurisma de aorta abdominal ">Aneurisma de aorta abdominal</li>
+            <li role="option" data-valor="cancer_prostata" data-busca="cancer de prostata (pai ou irmao) ">Câncer de próstata (pai ou irmão)</li>
+            <li role="option" data-valor="cancer_endometrio" data-busca="cancer de endometrio utero lynch">Câncer de endométrio</li>
+            <li role="option" data-valor="cancer_pancreas" data-busca="cancer de pancreas ">Câncer de pâncreas</li>
+            <li role="option" data-valor="cancer_gastrico" data-busca="cancer gastrico estomago">Câncer gástrico</li>
+            <li role="option" data-valor="melanoma" data-busca="melanoma pele">Melanoma</li>
+            <li role="option" data-valor="osteoporose_fratura" data-busca="fratura de quadril em pai ou mae osteoporose">Fratura de quadril em pai ou mãe</li>
+            <li role="option" data-valor="hemocromatose" data-busca="hemocromatose hereditaria ferro ferritina">Hemocromatose hereditária</li>
+            <li role="option" data-valor="rim_policistico" data-busca="doenca renal policistica rins cistos">Doença renal policística</li>
+            <li role="option" data-valor="trombose" data-busca="trombose venosa ou trombofilia tvp tep embolia">Trombose venosa ou trombofilia</li>
+            <li role="option" data-valor="glaucoma" data-busca="glaucoma olho">Glaucoma</li>
+            <li class="combo-vazio" role="presentation" hidden>Nada encontrado.</li>
+          </ul>
+        </div>
         <div class="opcoes mt-3" id="lista_familia-itens"></div>
         <p id="lista_familia-dica" class="text-[12px] text-ink/50 mt-2">Mudam idade de início ou indicação de rastreamento.</p>
       </div>
+      <!-- lista:familia:fim -->
     </section>
 
     <section class="secao" aria-labelledby="s-habitos">
@@ -1010,9 +1392,7 @@
             const num = id => { const v = parseFloat(String(document.getElementById(id)?.value || '').replace(',', '.')); return isNaN(v) ? null : v; };
             function regras() {
                 const marcado = id => document.getElementById(id).checked;
-                const r = daLista();
-                if (marcado('estatinas') || r.estatinas) r.dislipidemia = r.dislipidemia || 'uso de estatina';
-                if (marcado('anti_hipertensivos') || r.anti_hipertensivos) r.hipertensao = 'uso de anti-hipertensivo';
+                const r = daLista(); // medicação escolhida já aponta a comorbidade que implica
                 // PA de consultório, AHA/ACC 2025: estágio 1 ≥ 130/80, estágio 2 ≥ 140/90 (na gestação, só ≥ 140/90)
                 const pas = num('pas') || 0, pad = num('pad') || 0;
                 const gest = document.getElementById('gestante').value === 'sim';
@@ -1025,8 +1405,7 @@
                 return r;
             }
             function conferir() {
-                // duas passadas: anti-hipertensivo vindo da lista também implica hipertensão
-                for (let passo = 0; passo < 2; passo++) {
+                for (let passo = 0; passo < 1; passo++) {
                     const r = regras();
                     auto.forEach((motivo, id) => { if (!r[id]) { document.getElementById(id).checked = false; auto.delete(id); } });
                     recusados.forEach(id => { if (!r[id]) recusados.delete(id); });
@@ -1047,8 +1426,7 @@
                 document.getElementById(id).addEventListener('input', conferir);
                 document.getElementById(id).addEventListener('change', conferir);
             });
-            ['estatinas', 'anti_hipertensivos', 'has_resistente'].forEach(id => document.getElementById(id).addEventListener('change', conferir));
-            document.addEventListener('lista-mudou', conferir);
+            document.getElementById('has_resistente').addEventListener('change', conferir);
 
             // Listas suspensas: cada escolha vira um chip marcado (mesmo campo de lista do formulário).
             let imunoAuto = false;
@@ -1060,32 +1438,86 @@
                 document.getElementById('imuno-aviso').hidden = !(precisa && campo.value === 'sim');
             }
             document.getElementById('imunossupressao').addEventListener('change', e => { if (e.isTrusted) imunoAuto = false; });
-            document.querySelectorAll('select[data-lista]').forEach(sel => {
-                const caixa = document.getElementById(sel.id + '-itens');
-                sel.addEventListener('change', () => {
-                    const op = sel.selectedOptions[0];
-                    if (!op || !op.value) return;
-                    const id = sel.id + '_' + op.value;
-                    if (!document.getElementById(id)) {
+            // Caixas fixas (mais usados, comorbidades e família): qualquer mudança refaz a conferência.
+            checkupForm.addEventListener('change', e => {
+                if (e.target.matches('input[type="checkbox"][name="medicacoes"], input[type="checkbox"][name="comorbidades"]')) { conferirImuno(); conferir(); }
+            });
+
+            // Listas com busca: digitar filtra; escolher vira um chip marcado (mesmo campo de lista do formulário).
+            const semAcento = t => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+            document.querySelectorAll('.combo').forEach(combo => {
+                const busca = combo.querySelector('input[role="combobox"]');
+                const lista = combo.querySelector('[role="listbox"]');
+                const caixa = document.getElementById(combo.id + '-itens');
+                const opcoes = [...lista.querySelectorAll('[role="option"]')];
+                const vazio = lista.querySelector('.combo-vazio');
+                opcoes.forEach((li, n) => { li.id = combo.id + '-op' + n; });
+                let ativa = null;
+                const alvoDe = li => document.getElementById(li.dataset.alvo || combo.id + '_' + li.dataset.valor);
+                function ativar(li) {
+                    if (ativa) ativa.removeAttribute('aria-selected');
+                    ativa = li;
+                    if (li) { li.setAttribute('aria-selected', 'true'); busca.setAttribute('aria-activedescendant', li.id); li.scrollIntoView({ block: 'nearest' }); }
+                    else busca.removeAttribute('aria-activedescendant');
+                }
+                function filtrar() {
+                    const termos = semAcento(busca.value).split(/\s+/).filter(Boolean);
+                    let grupo = null, algum = false;
+                    [...lista.children].forEach(li => {
+                        if (li.classList.contains('combo-grupo')) { grupo = li; li.hidden = true; return; }
+                        if (li === vazio) return;
+                        const alvo = alvoDe(li);
+                        const mostra = !(alvo && alvo.checked) && termos.every(t => li.dataset.busca.includes(t));
+                        li.hidden = !mostra;
+                        if (mostra) { algum = true; if (grupo) grupo.hidden = false; }
+                    });
+                    vazio.hidden = algum;
+                    ativar(termos.length ? opcoes.find(li => !li.hidden) || null : null);
+                }
+                function abrir() { filtrar(); lista.hidden = false; busca.setAttribute('aria-expanded', 'true'); }
+                function fechar() { lista.hidden = true; busca.setAttribute('aria-expanded', 'false'); ativar(null); }
+                function escolher(li) {
+                    let entrada = alvoDe(li);
+                    if (entrada) {
+                        entrada.checked = true;
+                    } else {
                         const rotulo = document.createElement('label');
-                        rotulo.className = 'opcao'; rotulo.htmlFor = id;
-                        const entrada = document.createElement('input');
-                        entrada.type = 'checkbox'; entrada.id = id; entrada.name = sel.dataset.lista; entrada.value = op.value; entrada.checked = true;
-                        entrada.dataset.rotulo = op.textContent;
-                        if (op.dataset.marca) entrada.dataset.marca = op.dataset.marca;
-                        if (op.dataset.imuno) entrada.dataset.imuno = '1';
-                        entrada.addEventListener('change', () => { rotulo.remove(); op.disabled = false; conferirImuno(); document.dispatchEvent(new Event('lista-mudou')); checkupForm.dispatchEvent(new Event('change', { bubbles: true })); });
-                        rotulo.append(entrada, op.textContent);
+                        rotulo.className = 'opcao'; rotulo.htmlFor = combo.id + '_' + li.dataset.valor;
+                        entrada = document.createElement('input');
+                        entrada.type = 'checkbox'; entrada.id = rotulo.htmlFor; entrada.name = combo.dataset.lista; entrada.value = li.dataset.valor; entrada.checked = true;
+                        entrada.dataset.rotulo = li.textContent;
+                        if (li.dataset.marca) entrada.dataset.marca = li.dataset.marca;
+                        if (li.dataset.imuno) entrada.dataset.imuno = '1';
+                        // chip criado pela lista: desmarcar remove
+                        entrada.addEventListener('change', () => { if (!entrada.checked) rotulo.remove(); });
+                        rotulo.append(entrada, li.textContent);
                         caixa.append(rotulo);
-                        op.disabled = true;
                     }
-                    sel.value = '';
-                    conferirImuno();
-                    document.dispatchEvent(new Event('lista-mudou'));
+                    busca.value = '';
+                    fechar();
+                    entrada.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                busca.addEventListener('focus', abrir);
+                busca.addEventListener('input', abrir);
+                busca.addEventListener('blur', () => setTimeout(fechar, 150));
+                busca.addEventListener('keydown', e => {
+                    const visiveis = opcoes.filter(li => !li.hidden);
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (lista.hidden) abrir();
+                        if (!visiveis.length) return;
+                        const i = visiveis.indexOf(ativa), passo = e.key === 'ArrowDown' ? 1 : -1;
+                        ativar(visiveis[(i + passo + visiveis.length) % visiveis.length]);
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault(); // Enter na busca nunca envia o formulário
+                        if (!lista.hidden && ativa) escolher(ativa);
+                    } else if (e.key === 'Escape') { fechar(); }
                 });
+                lista.addEventListener('mousedown', e => e.preventDefault()); // mantém o foco na busca
+                lista.addEventListener('click', e => { const li = e.target.closest('[role="option"]'); if (li) escolher(li); });
             });
             // quem desmarca à mão uma caixa automática fica com a decisão
-            ['dislipidemia', 'hipertensao', 'diabetes', 'obesidade', 'estatinas', 'anti_hipertensivos'].forEach(id =>
+            ['dislipidemia', 'hipertensao', 'diabetes', 'obesidade'].forEach(id =>
                 document.getElementById(id).addEventListener('change', e => {
                     if (auto.has(id) && !e.target.checked) { auto.delete(id); recusados.add(id); conferir(); }
                 }));

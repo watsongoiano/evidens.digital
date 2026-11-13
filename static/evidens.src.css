@@ -71,6 +71,12 @@ html.lenis, html.lenis body { height: auto; }
     @apply w-2.5 mr-1.5 border-white;
     border-width: 0 0 2px 2px; height: 6px; transform: translateY(-2px) rotate(-45deg);
   }
+  /* Lista com busca (comorbidades, medicações, família) */
+  .combo-lista { @apply absolute z-20 left-0 right-0 top-full mt-1 max-h-72 overflow-y-auto rounded-xl border border-ink/15 bg-white shadow-xl py-1; }
+  .combo-lista [role="option"] { @apply px-4 py-2 text-[14px] text-ink/80 cursor-pointer; }
+  .combo-lista [role="option"]:hover, .combo-lista [role="option"][aria-selected="true"] { @apply bg-mist text-ink; }
+  .combo-grupo { @apply px-4 pt-3 pb-1 font-mono text-[10px] tracking-[0.14em] uppercase text-teal; }
+  .combo-vazio { @apply px-4 py-3 text-[13px] text-ink/50; }
   .bloco-condicional { @apply mt-4 rounded-2xl bg-mist/50 border border-teal/15 p-5; }
 
   .risco-cartao { @apply mt-8 rounded-[22px] bg-white border border-ink/10 p-6 sm:p-7; }

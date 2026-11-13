@@ -22,6 +22,7 @@
   "Cálcio, soro",
   "EAS - Elementos Anormais e Sedimentoscopia",
   "EAS - Elementos Anormais e Sedimentoscopia, urina",
+  "Ferritina, soro",
   "Fósforo, soro",
   "Gasometria arterial, sangue arterial",
   "Genotipagem do HIV (Teste de Resistência)",
@@ -48,6 +49,7 @@
   "Rubéola IgG, soro",
   "Sífilis: teste treponêmico ou VDRL, soro",
   "Sódio, soro",
+  "Tempo de protrombina (TP/INR), plasma",
   "Teste de gravidez (Beta-hCG)",
   "TGO e TGP, soro",
   "Tipagem sanguínea ABO e fator Rh",
@@ -57,7 +59,8 @@
   "Urocultura com antibiograma",
   "VDRL, soro",
   "Vitamina B12, soro",
-  "Ácido úrico, soro"
+  "Ácido úrico, soro",
+  "Índice de saturação de transferrina, soro"
  ],
  "imagem": [
   "Colonoscopia de Rastreio com ou sem biópsia",
@@ -75,6 +78,7 @@
   "Tomografia computadorizada de tórax de baixa dose (LDCT)",
   "Ultrassonografia com Doppler de Aorta Abdominal",
   "Ultrassonografia de abdome superior",
+  "Ultrassonografia de rins e vias urinárias",
   "Ultrassonografia morfológica de 1º trimestre (translucência nucal)",
   "Ultrassonografia morfológica de 2º trimestre",
   "Ultrassonografia obstétrica com Doppler",

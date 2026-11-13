@@ -444,16 +444,49 @@ def test_campo_tem_exames_e_aceito_pela_api(client):
     assert r.status_code == 200
 
 
-def test_listas_suspensas_substituem_o_texto_livre(pagina):
-    for antigo in ('outras_comorbidades', 'medicacoes_continuo', 'outras_condicoes_familiares'):
+def test_listas_com_busca_substituem_o_texto_livre(pagina):
+    for antigo in ('outras_comorbidades', 'medicacoes_continuo', 'outras_condicoes_familiares', '<select id="lista_'):
         assert antigo not in pagina
-    from src.utils import condicoes
-    for lista, itens in (('comorbidades', condicoes.COMORBIDADES), ('medicacoes', condicoes.MEDICACOES),
+    from src.utils import condicoes, medicamentos
+    for lista, itens in (('comorbidades', condicoes.COMORBIDADES), ('medicacoes', medicamentos.MEDICAMENTOS),
                          ('historia_familiar', condicoes.FAMILIA)):
         assert f'data-lista="{lista}"' in pagina
         for chave in itens:
-            assert f'<option value="{chave}"' in pagina, chave
+            assert f'role="option" data-valor="{chave}"' in pagina, chave
     assert 'value="dac_precoce"' in pagina and 'inferencias_recusadas' in pagina
+    assert pagina.count('role="combobox" aria-autocomplete') == 3
+
+
+def test_listas_da_pagina_estao_em_dia_com_o_gerador(pagina):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('gerar_listas', 'scripts/gerar_listas.py')
+    gerador = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gerador)
+    assert gerador.aplicar(pagina) == pagina, 'rode: python scripts/gerar_listas.py'
+
+
+def test_classes_de_medicacao_sairam_dos_botoes(pagina):
+    """No lugar de "Estatinas" e "Anti-hipertensivos", os 12 princípios ativos mais usados."""
+    from src.utils import medicamentos
+    assert 'id="estatinas"' not in pagina and 'id="anti_hipertensivos"' not in pagina
+    assert len(medicamentos.MAIS_USADOS) == 12
+    for chave in medicamentos.MAIS_USADOS:
+        assert f'id="lista_medicacoes_{chave}" name="medicacoes" value="{chave}"' in pagina
+
+
+@pytest.mark.parametrize('remedio, classe, marcadas', [
+    ('losartana', 'ieca_bra', {'anti_hipertensivos', 'hipertensao'}),
+    ('sinvastatina', 'estatina', {'estatinas', 'dislipidemia'}),
+    ('glibenclamida', 'sulfonilureia', {'diabetes'}),
+    ('losartana_hidroclorotiazida', 'tiazidico', {'anti_hipertensivos', 'hipertensao'}),
+])
+def test_principio_ativo_vale_pela_classe(client, remedio, classe, marcadas):
+    from src.utils import medicamentos
+    assert classe in medicamentos.classes_de([remedio])
+    dados = dict(idade=55, sexo='masculino', tabagismo='nunca', comorbidades=[], medicacoes=[remedio],
+                 historia_familiar=[], imunossupressao='nao', gestante='nao', lactante='nao')
+    r = client.post('/api/checkup-intelligent', json=dados).get_json()
+    assert marcadas <= {i['valor'] for i in r['inferencias']}, r['inferencias']
 
 
 @pytest.mark.parametrize('dados, titulo', [
@@ -462,6 +495,13 @@ def test_listas_suspensas_substituem_o_texto_livre(pagina):
     (dict(idade=35, medicacoes=['metformina']), 'B12'),
     (dict(idade=35, medicacoes=['levotiroxina']), 'TSH'),
     (dict(idade=35, medicacoes=['ieca_bra']), 'Potássio'),
+    (dict(idade=35, medicacoes=['enalapril']), 'Potássio'),
+    (dict(idade=60, medicacoes=['varfarina']), 'protrombina'),
+    (dict(idade=60, medicacoes=['apixabana']), 'Creatinina'),
+    (dict(idade=30, medicacoes=['quetiapina']), 'Glicose'),
+    (dict(idade=55, medicacoes=['anastrozol']), 'Densitometria'),
+    (dict(idade=40, comorbidades=['cirurgia_bariatrica']), 'Ferritina'),
+    (dict(idade=40, historia_familiar=['hemocromatose']), 'transferrina'),
 ])
 def test_itens_das_listas_acionam_exames(client, dados, titulo):
     base = dict(sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[], imunossupressao='nao',

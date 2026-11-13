@@ -134,6 +134,15 @@ def inferir(data, egfr=None, gestante=False, recusados=()):
                    f"PA {_pa_texto(data)} = {pa['rotulo']} (AHA/ACC 2025); confirmar com MRPA ou MAPA")
     if 'has_resistente' in comorbidades:
         marcar(comorbidades, 'comorbidades', 'hipertensao', 'HAS resistente marcada')
+    # Betabloqueador, espironolactona, diurético de alça e sacubitril/valsartana têm outras indicações
+    # (IC, FA, edema) e por isso não marcam hipertensão. Com hipertensão presente, contam como
+    # tratamento anti-hipertensivo (é o que o PREVENT pergunta).
+    if 'hipertensao' in comorbidades and 'anti_hipertensivos' not in medicacoes:
+        for chave in medicacoes:
+            if MEDICACOES.get(chave, {}).get('reduz_pa'):
+                marcar(medicacoes, 'medicacoes', 'anti_hipertensivos',
+                       f"hipertensão em uso de {MEDICACOES[chave]['rotulo'].lower()}")
+                break
     if 'antidiabeticos' in texto:
         marcar(comorbidades, 'comorbidades', 'diabetes', 'antidiabético citado em "Outras medicações"')
     hba1c = data.get('hba1c')
