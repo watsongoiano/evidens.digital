@@ -131,8 +131,10 @@ def cadastro():
             na_ultima_hora = contas.criados_desde(time.time() - 3600)
             notificacoes.avisar_novo_cadastro(novo, contas.listar(), _url_do_site() + '/admin',
                                               pedidos_na_ultima_hora=na_ultima_hora)
-            if notificacoes.enviar_boas_vindas(novo, _url_do_site(), pedidos_na_ultima_hora=na_ultima_hora):
-                contas.reservar_email(novo['id'], 'boas_vindas')
+            # A reserva vem antes do envio e vale também contra o agradecimento: a conta recebe um ou outro.
+            if notificacoes.boas_vindas_cabem(na_ultima_hora) and contas.reservar_email(novo['id'], 'boas_vindas'):
+                if not notificacoes.enviar_boas_vindas(novo, _url_do_site(), pedidos_na_ultima_hora=na_ultima_hora):
+                    contas.liberar_email(novo['id'], 'boas_vindas')
         except Exception as erro:
             print(f'⚠️ E-mail de cadastro falhou: {type(erro).__name__}')
     # Mesma resposta para e-mail novo e e-mail já cadastrado.

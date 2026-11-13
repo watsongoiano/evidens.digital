@@ -263,3 +263,32 @@ def test_agradecimento_de_teste_vai_so_ao_administrador(admin, administrador, an
     r = admin.post('/api/admin/agradecimento/teste', json={})
     assert r.status_code == 200 and [e['corpo']['to'] for e in resend] == [[administrador['email']]]
     assert admin.get('/api/admin/aviso').get_json()['agradecimento_pendentes'] == 2   # o teste não gasta a fila
+
+
+def test_conta_recebe_boas_vindas_ou_agradecimento_nunca_os_dois(contas, antigos):
+    """A reserva é por conta: quem chega depois (qualquer que seja o tipo) não envia."""
+    uid = antigos['pendente']['id']
+    assert contas.reservar_email(uid, 'boas_vindas') is True
+    assert contas.reservar_email(uid, 'agradecimento') is False
+    assert contas.reservar_email(uid, 'boas_vindas') is False
+    contas.liberar_email(uid, 'boas_vindas')
+    assert contas.reservar_email(uid, 'agradecimento') is True
+
+
+def test_boas_vindas_nao_saem_se_o_agradecimento_reservou_a_conta_antes(anonimo, administrador, resend, contas, monkeypatch):
+    """Cadastro simultâneo a um lote de agradecimento: se o lote reservou a conta, as boas-vindas não saem."""
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    original = contas.reservar_email
+    monkeypatch.setattr(contas, 'reservar_email',
+                        lambda uid, tipo: original(uid, 'agradecimento') and False if tipo == 'boas_vindas' else original(uid, tipo))
+    _cadastrar(anonimo, 'corrida@exemplo.test')
+    assert [e['corpo']['to'] for e in resend] == [[administrador['email']]]   # só o aviso ao administrador
+
+
+def test_falha_nas_boas_vindas_devolve_a_conta_a_fila_do_agradecimento(anonimo, administrador, contas, monkeypatch):
+    monkeypatch.setenv('RESEND_API_KEY', 're_teste_123')
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    monkeypatch.setattr(contas, 'criados_desde', lambda instante: 1)
+    monkeypatch.setattr(notificacoes, 'enviar', lambda *a, **k: (False, 'HTTP 500'))
+    _cadastrar(anonimo, 'bv-falhou@exemplo.test')
+    assert 'bv-falhou@exemplo.test' in [u['email'] for u in contas.sem_email()]

@@ -202,9 +202,14 @@ def avisar_novo_cadastro(usuario, administradores, url_admin, pedidos_na_ultima_
     return ok
 
 
+def boas_vindas_cabem(pedidos_na_ultima_hora=1) -> bool:
+    """Boas-vindas ligadas e dentro do limite por hora (o mesmo do aviso ao administrador)."""
+    return boas_vindas_ligadas() and pedidos_na_ultima_hora <= LIMITE_POR_HORA
+
+
 def enviar_boas_vindas(usuario, url_site, pedidos_na_ultima_hora=1):
     """Boas-vindas a quem pediu a conta. Mesmo limite por hora do aviso; falha vira log."""
-    if not boas_vindas_ligadas() or pedidos_na_ultima_hora > LIMITE_POR_HORA:
+    if not boas_vindas_cabem(pedidos_na_ultima_hora):
         return False
     assunto, texto = mensagem_de_boas_vindas(usuario, url_site)
     ok, detalhe = enviar([usuario['email']], assunto, texto,

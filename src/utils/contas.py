@@ -79,13 +79,13 @@ _ESQUEMA = [
         quando BIGINT NOT NULL
     )""",
     "CREATE INDEX IF NOT EXISTS tentativas_login_quando ON tentativas_login (quando)",
-    # E-mails já enviados a cada conta (boas-vindas, agradecimento): evita mandar duas vezes.
+    # Primeiro e-mail de cada conta: boas-vindas OU agradecimento, nunca os dois. A unicidade é por
+    # conta, então a reserva vale para os dois caminhos de envio ao mesmo tempo.
     """CREATE TABLE IF NOT EXISTS emails_enviados (
         id {pk},
-        usuario_id BIGINT NOT NULL,
+        usuario_id BIGINT NOT NULL UNIQUE,
         tipo TEXT NOT NULL,
-        quando BIGINT NOT NULL,
-        UNIQUE (usuario_id, tipo)
+        quando BIGINT NOT NULL
     )""",
     # No máximo um administrador: a regra fica no banco, para que duas instalações
     # simultâneas com o código certo não criem duas contas privilegiadas.
@@ -258,10 +258,11 @@ def criados_desde(instante):
 
 
 def reservar_email(uid, tipo):
-    """Marca que o e-mail ``tipo`` vai para a conta. False se já estava marcado (não enviar de novo)."""
+    """Reserva a conta para o e-mail ``tipo`` antes de enviar. False se a conta já tinha reserva
+    (de boas-vindas ou de agradecimento): quem perde a disputa não envia."""
     with _conexao() as executar:
         cur = executar('INSERT INTO emails_enviados (usuario_id, tipo, quando) VALUES (?, ?, ?) '
-                       'ON CONFLICT (usuario_id, tipo) DO NOTHING', (int(uid), tipo, int(time.time())))
+                       'ON CONFLICT (usuario_id) DO NOTHING', (int(uid), tipo, int(time.time())))
         return cur.rowcount == 1
 
 
