@@ -99,7 +99,8 @@ def test_nome_com_quebra_de_linha_nao_forja_campos_no_email():
 
 def test_painel_mostra_o_estado_e_envia_teste(admin, administrador, resend):
     estado = admin.get('/api/admin/aviso').get_json()
-    assert estado == {'configurado': True, 'destinatarios': [administrador['email']], 'boas_vindas': False}
+    assert estado == {'configurado': True, 'destinatarios': [administrador['email']], 'boas_vindas': False,
+                      'agradecimento_pendentes': estado['agradecimento_pendentes']}
     r = admin.post('/api/admin/aviso/teste', json={})
     assert r.status_code == 200 and r.get_json()['destinatarios'] == [administrador['email']]
     assert 'teste' in resend[-1]['corpo']['subject']
@@ -196,3 +197,69 @@ def test_painel_informa_e_testa_as_boas_vindas(admin, administrador, resend, mon
 
 def test_teste_de_boas_vindas_e_restrito_ao_administrador(client):
     assert client.post('/api/admin/boas-vindas/teste', json={}).status_code == 403
+
+
+# ---------------------------------------------------------------------------
+# Agradecimento a quem criou a conta antes das boas-vindas
+# ---------------------------------------------------------------------------
+@pytest.fixture()
+def antigos(contas, anonimo, administrador, monkeypatch):
+    """Zera a fila (o banco de teste é compartilhado) e cria três contas sem e-mail: aprovada, pendente e bloqueada."""
+    monkeypatch.delenv('RESEND_API_KEY', raising=False)
+    for u in contas.sem_email():
+        contas.reservar_email(u['id'], 'agradecimento')
+    criados = {}
+    for chave, situacao in (('aprovada', 'aprovado'), ('pendente', 'pendente'), ('bloqueada', 'bloqueado')):
+        u = contas.criar(f'antigo-{chave}-{len(contas.listar())}@exemplo.test', f'{chave.capitalize()} Antiga',
+                         'CRM-GO 999', 'medico', SENHA_DE_TESTE)
+        criados[chave] = contas.definir_situacao(u['id'], situacao) if situacao != 'pendente' else u
+    return criados
+
+
+def test_agradecimento_vai_uma_vez_a_aprovados_e_pendentes(admin, antigos, resend, monkeypatch):
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    monkeypatch.setattr('src.routes.auth.time.sleep', lambda s: None)
+    assert admin.get('/api/admin/aviso').get_json()['agradecimento_pendentes'] == 2
+    r = admin.post('/api/admin/agradecimento', json={}).get_json()
+    assert r == {'ok': True, 'enviados': 2, 'falhas': 0, 'motivo': None, 'restantes': 0}
+    por_destino = {e['corpo']['to'][0]: e['corpo'] for e in resend}
+    assert set(por_destino) == {antigos['aprovada']['email'], antigos['pendente']['email']}
+    aprovada, pendente = por_destino[antigos['aprovada']['email']], por_destino[antigos['pendente']['email']]
+    assert aprovada['subject'] == 'Obrigado por testar o Evidēns'
+    for trecho in ('Olá, Aprovada.', 'Muito obrigado por já ter criado a sua conta', 'já está liberada',
+                   'cerca de 30% dos exames laboratoriais', 'fase de desenvolvimento', 'https://evidens.life/contact'):
+        assert trecho in aprovada['text'], trecho
+    assert 'em conferência pela nossa equipe' in pendente['text'] and 'já está liberada' not in pendente['text']
+    # segundo clique: ninguém recebe de novo
+    antes = len(resend)
+    assert admin.post('/api/admin/agradecimento', json={}).get_json()['enviados'] == 0 and len(resend) == antes
+
+
+def test_falha_no_envio_devolve_a_conta_a_fila(admin, antigos, resend, monkeypatch):
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    monkeypatch.setattr('src.routes.auth.time.sleep', lambda s: None)
+    monkeypatch.setattr(notificacoes, 'enviar', lambda *a, **k: (False, 'HTTP 429'))
+    r = admin.post('/api/admin/agradecimento', json={}).get_json()
+    assert r['enviados'] == 0 and r['falhas'] == 2 and r['motivo'] == 'HTTP 429' and r['restantes'] == 2
+
+
+def test_quem_recebeu_boas_vindas_nao_entra_no_agradecimento(anonimo, admin, antigos, resend, contas, monkeypatch):
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    antes = len(contas.sem_email())
+    _cadastrar(anonimo, 'novo-com-boas-vindas@exemplo.test')
+    assert len(contas.sem_email()) == antes
+
+
+def test_agradecimento_exige_envio_ligado_e_administrador(admin, client, antigos, resend):
+    assert admin.post('/api/admin/agradecimento', json={}).status_code == 502      # sem remetente do domínio
+    assert admin.post('/api/admin/agradecimento/teste', json={}).status_code == 502
+    assert client.post('/api/admin/agradecimento', json={}).status_code == 403
+    assert client.post('/api/admin/agradecimento/teste', json={}).status_code == 403
+    assert resend == []
+
+
+def test_agradecimento_de_teste_vai_so_ao_administrador(admin, administrador, antigos, resend, monkeypatch):
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    r = admin.post('/api/admin/agradecimento/teste', json={})
+    assert r.status_code == 200 and [e['corpo']['to'] for e in resend] == [[administrador['email']]]
+    assert admin.get('/api/admin/aviso').get_json()['agradecimento_pendentes'] == 2   # o teste não gasta a fila

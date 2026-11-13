@@ -103,3 +103,12 @@ O remetente padrão da Resend só entrega ao dono da conta Resend, então as boa
 4. Em `/admin`, use "Enviar boas-vindas de teste para mim".
 
 Com isso o aviso ao administrador também passa a sair do domínio e pode ir a qualquer endereço. As boas-vindas respeitam o mesmo limite de 10 e-mails por hora e só vão para contas recém-criadas (um e-mail já cadastrado não recebe nada).
+
+## Agradecimento a quem já tinha conta
+
+As contas criadas antes de existir o e-mail de boas-vindas não receberam nada. Em `/admin`, a seção de e-mail mostra quantas são e tem dois botões: "Enviar agradecimento de teste para mim" (para ler o texto) e "Enviar agradecimento a N contas" (pede confirmação no segundo clique).
+
+- Só funciona com as boas-vindas ligadas (domínio verificado e `AVISO_CADASTRO_DE`).
+- Vai para contas aprovadas e pendentes; o administrador e as contas bloqueadas ficam de fora.
+- Cada conta recebe uma vez só: o envio fica registrado, e quem recebeu as boas-vindas não entra na lista.
+- O envio é feito em lotes de 5; se algum falhar, a conta volta para a lista e basta clicar de novo.

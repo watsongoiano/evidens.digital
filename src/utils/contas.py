@@ -79,6 +79,14 @@ _ESQUEMA = [
         quando BIGINT NOT NULL
     )""",
     "CREATE INDEX IF NOT EXISTS tentativas_login_quando ON tentativas_login (quando)",
+    # E-mails já enviados a cada conta (boas-vindas, agradecimento): evita mandar duas vezes.
+    """CREATE TABLE IF NOT EXISTS emails_enviados (
+        id {pk},
+        usuario_id BIGINT NOT NULL,
+        tipo TEXT NOT NULL,
+        quando BIGINT NOT NULL,
+        UNIQUE (usuario_id, tipo)
+    )""",
     # No máximo um administrador: a regra fica no banco, para que duas instalações
     # simultâneas com o código certo não criem duas contas privilegiadas.
     "CREATE UNIQUE INDEX IF NOT EXISTS um_so_administrador ON usuarios (administrador) WHERE administrador = 1",
@@ -247,6 +255,30 @@ def criados_desde(instante):
     """Quantas contas foram criadas a partir de ``instante`` (segundos desde a época)."""
     with _conexao() as executar:
         return executar('SELECT COUNT(*) FROM usuarios WHERE criado_em >= ?', (int(instante),)).fetchone()[0]
+
+
+def reservar_email(uid, tipo):
+    """Marca que o e-mail ``tipo`` vai para a conta. False se já estava marcado (não enviar de novo)."""
+    with _conexao() as executar:
+        cur = executar('INSERT INTO emails_enviados (usuario_id, tipo, quando) VALUES (?, ?, ?) '
+                       'ON CONFLICT (usuario_id, tipo) DO NOTHING', (int(uid), tipo, int(time.time())))
+        return cur.rowcount == 1
+
+
+def liberar_email(uid, tipo):
+    """Desfaz a marca quando o envio falhou, para a conta voltar à fila."""
+    with _conexao() as executar:
+        executar('DELETE FROM emails_enviados WHERE usuario_id = ? AND tipo = ?', (int(uid), tipo))
+
+
+def sem_email(limite=None):
+    """Contas (fora o administrador e as bloqueadas) que ainda não receberam nenhum e-mail nosso,
+    da mais antiga para a mais nova."""
+    with _conexao() as executar:
+        linhas = executar(_SELECT + "WHERE administrador = 0 AND situacao <> 'bloqueado' "
+                          'AND id NOT IN (SELECT usuario_id FROM emails_enviados) ORDER BY criado_em, id').fetchall()
+    usuarios = [_usuario(l) for l in linhas]
+    return usuarios if limite is None else usuarios[:limite]
 
 
 def listar():

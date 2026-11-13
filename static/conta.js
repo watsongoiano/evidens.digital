@@ -163,12 +163,60 @@
         if (!resposta.ok) { mostrar(erro, (dados && dados.error) || 'Não foi possível enviar o e-mail de boas-vindas.'); return; }
         mostrar(ok, 'Boas-vindas de teste enviadas a ' + dados.destinatarios.join(', ') + '.');
       });
+      // Agradecimento a quem criou a conta antes de existir o e-mail de boas-vindas
+      const estadoAg = aviso.querySelector('[data-agradecimento-estado]');
+      const testeAg = aviso.querySelector('[data-agradecimento-teste]');
+      const enviarAg = aviso.querySelector('[data-agradecimento-enviar]');
+      let pendentesAg = 0, confirmarAg = false, ligadoAg = false;
+      function pintarAgradecimento(ligado) {
+        if (ligado !== undefined) ligadoAg = !!ligado;
+        confirmarAg = false;
+        const n = pendentesAg, pessoas = n === 1 ? '1 conta' : n + ' contas';
+        estadoAg.textContent = n
+          ? 'Agradecimento: ' + pessoas + ' ainda não ' + (n === 1 ? 'recebeu' : 'receberam') + ' e-mail nosso (contas criadas antes das boas-vindas). Cada conta recebe uma vez só.'
+            + (ligadoAg ? '' : ' O envio fica disponível quando as boas-vindas estiverem ligadas.')
+          : 'Agradecimento: todas as contas já receberam e-mail nosso.';
+        enviarAg.textContent = n ? 'Enviar agradecimento a ' + pessoas : 'Enviar agradecimento';
+        enviarAg.disabled = !ligadoAg || !n;
+        testeAg.disabled = !ligadoAg;
+      }
+      testeAg.addEventListener('click', async () => {
+        mostrar(erro, ''); mostrar(ok, '');
+        testeAg.disabled = true;
+        const { resposta, dados } = await enviar('/api/admin/agradecimento/teste');
+        testeAg.disabled = false;
+        if (!resposta.ok) { mostrar(erro, (dados && dados.error) || 'Não foi possível enviar o e-mail de agradecimento.'); return; }
+        mostrar(ok, 'Agradecimento de teste enviado a ' + dados.destinatarios.join(', ') + '.');
+      });
+      enviarAg.addEventListener('click', async () => {
+        mostrar(erro, ''); mostrar(ok, '');
+        if (!confirmarAg) {  // dois cliques: o primeiro só pede a confirmação
+          confirmarAg = true;
+          enviarAg.textContent = 'Confirmar: enviar a ' + (pendentesAg === 1 ? '1 conta' : pendentesAg + ' contas');
+          return;
+        }
+        enviarAg.disabled = true; testeAg.disabled = true;
+        let total = 0, falhas = 0, motivo = '';
+        while (true) {
+          enviarAg.textContent = 'Enviando… ' + total + ' enviado' + (total === 1 ? '' : 's');
+          const { resposta, dados } = await enviar('/api/admin/agradecimento');
+          if (!resposta.ok) { motivo = (dados && dados.error) || 'Não foi possível enviar o agradecimento.'; break; }
+          total += dados.enviados; falhas = dados.falhas; pendentesAg = dados.restantes;
+          if (dados.falhas) motivo = 'Falha no envio: ' + (dados.motivo || 'erro desconhecido') + '.';
+          if (!dados.restantes || !dados.enviados) break;
+        }
+        pintarAgradecimento();
+        if (total) mostrar(ok, 'Agradecimento enviado a ' + (total === 1 ? '1 conta' : total + ' contas') + '.');
+        if (motivo) mostrar(erro, motivo + (pendentesAg ? ' Restam ' + pendentesAg + ' sem receber; tente de novo em instantes.' : ''));
+      });
       fetch('/api/admin/aviso', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(d => {
         if (!d) { estado.textContent = 'Não foi possível verificar o aviso por e-mail.'; return; }
         estadoBv.textContent = d.boas_vindas
           ? 'Boas-vindas: ligadas. Quem pede a conta recebe um e-mail explicando a aprovação, a fase de desenvolvimento e o convite a dar feedback.'
           : 'Boas-vindas: desligadas. Para enviar e-mail a quem se cadastra, verifique o domínio evidens.life na Resend e defina AVISO_CADASTRO_DE na Vercel (passo a passo em docs/deploy.md).';
         botaoBv.disabled = !d.boas_vindas;
+        pendentesAg = d.agradecimento_pendentes || 0;
+        pintarAgradecimento(d.boas_vindas);
         if (!d.configurado) {
           estado.textContent = 'Desligado. Para receber um e-mail a cada novo pedido de conta, cadastre a variável RESEND_API_KEY na Vercel (passo a passo em docs/deploy.md).';
           return;
