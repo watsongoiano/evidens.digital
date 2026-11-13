@@ -734,8 +734,11 @@ def generate_intelligent_recommendations():
         
         # Verificar HbA1C se fornecido
         hba1c = float(data.get('hba1c', 0)) if data.get('hba1c') else None
-        if hba1c and hba1c > 6.5 and not is_diabetic:
-            # HbA1C > 6.5% indica diabetes - marcar automaticamente
+        diabetes_por_hba1c = False
+        if hba1c is not None and hba1c >= 6.5 and not is_diabetic:
+            # ADA: HbA1c ≥ 6,5% é critério diagnóstico de diabetes (confirmar com 2º exame
+            # se não houver hiperglicemia inequívoca). Antes o corte era > 6,5 e 6,5 escapava.
+            diabetes_por_hba1c = True
             is_diabetic = True
             if 'diabetes_tipo_2' not in comorbidades:
                 comorbidades.append('diabetes_tipo_2')
@@ -1407,6 +1410,7 @@ def generate_intelligent_recommendations():
         response['total_recommendations'] = len(mantidas)
         response['nao_incluidas'] = nao_incluidas
         response['adiados_gestacao'] = adiados_gestacao
+        response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['proximas_gestacao'] = proximas_gestacao
         response['gestacao'] = gestacao
         response['triagem_vacinas'] = triagem

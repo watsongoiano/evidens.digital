@@ -405,3 +405,14 @@ def test_dcv_aterosclerotica_nao_vira_hipertensao(client):
     com = {r['titulo'] for r in client.post('/api/checkup-intelligent',
                                            json={**base, 'comorbidades': ['dcv_aterosclerotica']}).get_json()['recommendations']}
     assert not any('MAPA' in t for t in com)
+
+
+@pytest.mark.parametrize('hba1c, diabetico', [('6.4', False), ('6.5', True), ('8.1', True)])
+def test_hba1c_a_partir_de_6_5_conta_como_diabetes(client, hba1c, diabetico):
+    corpo = {'idade': '50', 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao', 'hba1c': hba1c}
+    r = client.post('/api/checkup-intelligent', json=corpo).get_json()
+    assert r['diabetes_por_hba1c'] is diabetico
+
+
+def test_hba1c_marca_o_chip_de_diabetes_na_tela(pagina):
+    assert "valor >= 6.5" in pagina and "chip.checked = true" in pagina
