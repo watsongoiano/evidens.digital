@@ -1531,6 +1531,13 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
     )
 
 
+@checkup_intelligent_bp.route('/catalogo')
+def catalogo_endpoint():
+    """Itens que o médico pode acrescentar a um pedido ou receita, por categoria."""
+    from src.utils.catalogo import catalogo
+    return jsonify(catalogo())
+
+
 @checkup_intelligent_bp.route('/gerar-pdf-exames-laboratoriais', methods=['POST'])
 def gerar_pdf_exames_laboratoriais_endpoint():
     """Minuta de solicitação de exames laboratoriais.
