@@ -478,3 +478,7 @@ def test_hpv_a_cada_cinco_anos_e_citologia_a_cada_tres(client):
         return next(r for r in recs if 'HPV' in r['titulo'] or 'Papanicolaou' in r['titulo'])
     assert '3 anos' in str(colo(25)) and 'Papanicolaou' in colo(25)['titulo']
     assert '5 anos' in str(colo(40)) and 'HPV' in colo(40)['titulo']
+
+
+def test_botoes_de_pdf_ficam_abaixo_das_recomendacoes(pagina):
+    assert pagina.index('id="recommendationsContent"') < pagina.index('gerarPDFExamesLaboratoriais()"') < pagina.index('id="naoIncluidasContent"')

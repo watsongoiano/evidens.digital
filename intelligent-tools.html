@@ -344,11 +344,6 @@
         <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-4">RESULTADO</p>
         <h2 id="titulo-recomendacoes" class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Recomendações <span class="font-serif italic text-teal tracking-tight">para revisar.</span></h2>
       </div>
-      <div class="flex flex-wrap gap-2">
-        <button type="button" class="btn-claro" onclick="gerarPDFExamesLaboratoriais()"><i class="fa-solid fa-vial text-[12px]"></i>PDF exames laboratoriais</button>
-        <button type="button" class="btn-claro" onclick="gerarPDFExamesImagem()"><i class="fa-solid fa-x-ray text-[12px]"></i>PDF exames de imagem</button>
-        <button type="button" class="btn-claro" onclick="gerarPDFVacinas()"><i class="fa-solid fa-syringe text-[12px]"></i>PDF vacinas</button>
-      </div>
     </div>
 
     <div id="avisoUso" class="aviso aviso-info mt-8">
@@ -361,6 +356,14 @@
     <div id="orientacoesContent"></div>
     <p class="text-[12px] text-ink/50 mt-6 flex flex-wrap gap-x-5 gap-y-1"><span><span class="inline-block w-2 h-2 rounded-full bg-teal align-middle mr-1"></span>prioridade alta</span><span><span class="inline-block w-2 h-2 rounded-full bg-aqua align-middle mr-1"></span>média</span><span><span class="inline-block w-2 h-2 rounded-full bg-ink/20 align-middle mr-1"></span>baixa</span><span><span class="rec-grau align-middle mr-1">A</span>grau de evidência</span></p>
     <div id="recommendationsContent"></div>
+    <div id="acoesPdf" class="mt-10 pt-8 border-t border-ink/10">
+      <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-4">GERAR DOCUMENTOS</p>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" class="btn-claro" onclick="gerarPDFExamesLaboratoriais()"><i class="fa-solid fa-vial text-[12px]"></i>PDF exames laboratoriais</button>
+        <button type="button" class="btn-claro" onclick="gerarPDFExamesImagem()"><i class="fa-solid fa-x-ray text-[12px]"></i>PDF exames de imagem</button>
+        <button type="button" class="btn-claro" onclick="gerarPDFVacinas()"><i class="fa-solid fa-syringe text-[12px]"></i>PDF vacinas</button>
+      </div>
+    </div>
     <div id="naoIncluidasContent"></div>
   </section>
 </main>
