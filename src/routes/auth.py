@@ -126,12 +126,14 @@ def cadastro():
     except contas.DadosInvalidos as e:
         return jsonify({'error': 'Confira os dados informados.', 'erros': e.erros}), 400
     if novo and notificacoes.configurado():
-        # Aviso por e-mail ao administrador; falha no envio não impede o cadastro.
+        # E-mails do cadastro (aviso ao administrador e boas-vindas); falha no envio não impede o cadastro.
         try:
-            notificacoes.avisar_novo_cadastro(novo, contas.listar(), _url_do_admin(),
-                                              pedidos_na_ultima_hora=contas.criados_desde(time.time() - 3600))
+            na_ultima_hora = contas.criados_desde(time.time() - 3600)
+            notificacoes.avisar_novo_cadastro(novo, contas.listar(), _url_do_site() + '/admin',
+                                              pedidos_na_ultima_hora=na_ultima_hora)
+            notificacoes.enviar_boas_vindas(novo, _url_do_site(), pedidos_na_ultima_hora=na_ultima_hora)
         except Exception as erro:
-            print(f'⚠️ Aviso de novo cadastro falhou: {type(erro).__name__}')
+            print(f'⚠️ E-mail de cadastro falhou: {type(erro).__name__}')
     # Mesma resposta para e-mail novo e e-mail já cadastrado.
     return jsonify({'ok': True, 'mensagem': 'Cadastro recebido. Você poderá entrar assim que a conta for aprovada.'}), 202
 
@@ -194,10 +196,13 @@ def configurar():
     return jsonify({'ok': True, 'usuario': contas.publico(u)}), 201
 
 
-def _url_do_admin():
+def _url_do_site():
     # Endereço fixo (não o cabeçalho Host do pedido), para o link do e-mail não poder ser forjado.
-    base = (os.environ.get('SITE_URL') or '').strip().rstrip('/') or 'https://evidens.life'
-    return base + '/admin'
+    return (os.environ.get('SITE_URL') or '').strip().rstrip('/') or 'https://evidens.life'
+
+
+def _url_do_admin():
+    return _url_do_site() + '/admin'
 
 
 @auth_bp.route('/admin/aviso')
@@ -205,7 +210,8 @@ def _url_do_admin():
 def admin_aviso_estado():
     """Diz se o aviso por e-mail está ligado e para quem vai (sem expor a chave)."""
     return jsonify({'configurado': notificacoes.configurado(),
-                    'destinatarios': notificacoes.destinatarios(contas.listar())})
+                    'destinatarios': notificacoes.destinatarios(contas.listar()),
+                    'boas_vindas': notificacoes.boas_vindas_ligadas()})
 
 
 @auth_bp.route('/admin/aviso/teste', methods=['POST'])
@@ -220,6 +226,21 @@ def admin_aviso_teste():
     if not ok:
         return jsonify({'error': f'Não foi possível enviar o e-mail de teste: {detalhe}'}), 502
     return jsonify({'ok': True, 'destinatarios': para})
+
+
+@auth_bp.route('/admin/boas-vindas/teste', methods=['POST'])
+@exigir_administrador
+def admin_boas_vindas_teste():
+    """Envia ao próprio administrador o e-mail de boas-vindas, para conferir o texto e a entrega."""
+    u = usuario_atual()
+    if not notificacoes.boas_vindas_ligadas():
+        return jsonify({'error': 'As boas-vindas estão desligadas: falta RESEND_API_KEY ou o remetente do domínio '
+                                 '(AVISO_CADASTRO_DE).'}), 502
+    assunto, texto = notificacoes.mensagem_de_boas_vindas(u, _url_do_site())
+    ok, detalhe = notificacoes.enviar([u['email']], assunto, texto)
+    if not ok:
+        return jsonify({'error': f'Não foi possível enviar o e-mail de boas-vindas: {detalhe}'}), 502
+    return jsonify({'ok': True, 'destinatarios': [u['email']]})
 
 
 @auth_bp.route('/admin/usuarios')

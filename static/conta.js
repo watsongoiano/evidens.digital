@@ -153,8 +153,22 @@
     if (aviso) {
       const estado = aviso.querySelector('[data-aviso-estado]');
       const botao = aviso.querySelector('[data-aviso-teste]');
+      const estadoBv = aviso.querySelector('[data-boas-vindas-estado]');
+      const botaoBv = aviso.querySelector('[data-boas-vindas-teste]');
+      botaoBv.addEventListener('click', async () => {
+        mostrar(erro, ''); mostrar(ok, '');
+        botaoBv.disabled = true;
+        const { resposta, dados } = await enviar('/api/admin/boas-vindas/teste');
+        botaoBv.disabled = false;
+        if (!resposta.ok) { mostrar(erro, (dados && dados.error) || 'Não foi possível enviar o e-mail de boas-vindas.'); return; }
+        mostrar(ok, 'Boas-vindas de teste enviadas a ' + dados.destinatarios.join(', ') + '.');
+      });
       fetch('/api/admin/aviso', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(d => {
         if (!d) { estado.textContent = 'Não foi possível verificar o aviso por e-mail.'; return; }
+        estadoBv.textContent = d.boas_vindas
+          ? 'Boas-vindas: ligadas. Quem pede a conta recebe um e-mail explicando a aprovação, a fase de desenvolvimento e o convite a dar feedback.'
+          : 'Boas-vindas: desligadas. Para enviar e-mail a quem se cadastra, verifique o domínio evidens.life na Resend e defina AVISO_CADASTRO_DE na Vercel (passo a passo em docs/deploy.md).';
+        botaoBv.disabled = !d.boas_vindas;
         if (!d.configurado) {
           estado.textContent = 'Desligado. Para receber um e-mail a cada novo pedido de conta, cadastre a variável RESEND_API_KEY na Vercel (passo a passo em docs/deploy.md).';
           return;

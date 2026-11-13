@@ -28,7 +28,8 @@ Variáveis de ambiente na Vercel:
 | `SETUP_TOKEN` | Código de instalação, usado uma única vez em `/configurar` para criar o administrador. Pode ser apagado depois. |
 | `RESEND_API_KEY` | Opcional. Liga o aviso por e-mail ao administrador a cada novo pedido de conta (ver abaixo). |
 | `AVISO_CADASTRO_PARA` | Opcional. Destinatários do aviso, separados por vírgula. Padrão: e-mail dos administradores. |
-| `AVISO_CADASTRO_DE` | Opcional. Remetente do aviso. Padrão: `Evidēns <onboarding@resend.dev>`. |
+| `AVISO_CADASTRO_DE` | Opcional. Remetente dos e-mails. Padrão: `Evidēns <onboarding@resend.dev>`. Com um remetente do domínio verificado, liga também as boas-vindas. |
+| `EMAIL_CONTATO` | Opcional. E-mail de contato mostrado no texto das boas-vindas e usado como resposta (reply-to). |
 | `SITE_URL` | Opcional. Endereço usado no link do e-mail. Padrão: `https://evidens.life`. |
 
 Sem banco ou sem chave, a home continua no ar e o check-up responde 503 ("área de acesso ainda não configurada").
@@ -89,3 +90,16 @@ A cada pedido de abertura de conta, o administrador recebe um e-mail com nome, p
 Com o remetente padrão (`onboarding@resend.dev`), a Resend só entrega ao e-mail do dono da conta Resend. Para avisar outros endereços, verifique o domínio `evidens.life` na Resend (registros DNS na GoDaddy) e defina `AVISO_CADASTRO_DE`, por exemplo `Evidēns <avisos@evidens.life>`.
 
 Uma falha no envio não impede o cadastro: fica registrada no log da função e o pedido continua aparecendo em `/admin`.
+
+## E-mail de boas-vindas
+
+Quem pede a conta recebe um e-mail que apresenta a ferramenta (cerca de 30% dos exames laboratoriais são provavelmente desnecessários e proporção parecida dos necessários deixa de ser pedida; Zhi et al., PLOS ONE 2013), diz o que acontece agora (conferência do cadastro e liberação do acesso), que a ferramenta está em fase de desenvolvimento e que feedbacks são bem-vindos, com o link da página de contato e, se `EMAIL_CONTATO` estiver definido, o e-mail de contato.
+
+O remetente padrão da Resend só entrega ao dono da conta Resend, então as boas-vindas ficam desligadas até existir um remetente do próprio domínio:
+
+1. Na Resend, em *Domains*, adicione `evidens.life`. A Resend mostra os registros DNS a criar (TXT de DKIM e SPF e um MX do subdomínio de envio).
+2. Na GoDaddy, em *DNS* do domínio, crie esses registros exatamente como mostrados e aguarde a Resend marcar o domínio como verificado.
+3. Na Vercel, cadastre `AVISO_CADASTRO_DE`, por exemplo `Evidēns <contato@evidens.life>` (Production), e refaça o deploy.
+4. Em `/admin`, use "Enviar boas-vindas de teste para mim".
+
+Com isso o aviso ao administrador também passa a sair do domínio e pode ir a qualquer endereço. As boas-vindas respeitam o mesmo limite de 10 e-mails por hora e só vão para contas recém-criadas (um e-mail já cadastrado não recebe nada).
