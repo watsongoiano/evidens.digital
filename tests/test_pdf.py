@@ -1,15 +1,18 @@
 """Perigos P-08 e P-09 e a segunda linha de defesa de P-02 a P-04 nos PDFs.
 
-O Gotenberg não é chamado: a função que fala com ele é substituída por uma que
-guarda o HTML recebido.
+Os PDFs são gerados de verdade (fpdf2) e lidos de volta com pypdf.
 """
-import urllib.request
+import io
 
 import pytest
+from pypdf import PdfReader
 
-from src.utils import pdf_service_gotenberg
+from src.utils import pdf_minutas
 
-PDF_FALSO = b'%PDF-1.4\n% teste\n'
+
+def _texto_do_pdf(dados):
+    assert dados.startswith(b'%PDF')
+    return '\n'.join(p.extract_text() for p in PdfReader(io.BytesIO(dados)).pages)
 
 HOMEM = {'nome': 'Paciente de Teste', 'idade': '40', 'sexo': 'masculino', 'imunossupressao': 'nao'}
 MULHER_LIBERADA = {
@@ -26,15 +29,18 @@ FEBRE_AMARELA = {'titulo': 'Febre Amarela (Stamaril®)', 'categoria': 'vacina'}
 
 @pytest.fixture()
 def html_enviado(monkeypatch):
-    """Substitui a chamada ao Gotenberg e devolve a lista de HTMLs que seriam enviados."""
-    enviados = []
+    """Guarda o texto de cada PDF gerado (lista vazia quando nenhum PDF foi gerado)."""
+    gerados = []
+    for nome in ('gerar_pdf_exames_laboratoriais', 'gerar_pdf_exames_imagem', 'gerar_pdf_vacinas'):
+        original = getattr(pdf_minutas, nome)
 
-    def falso(html):
-        enviados.append(html)
-        return PDF_FALSO
+        def registrar(dados_paciente, itens, _original=original):
+            pdf = _original(dados_paciente, itens)
+            gerados.append(_texto_do_pdf(pdf))
+            return pdf
 
-    monkeypatch.setattr(pdf_service_gotenberg, 'gerar_pdf_via_gotenberg', falso)
-    return enviados
+        monkeypatch.setattr(pdf_minutas, nome, registrar)
+    return gerados
 
 
 def _pedir(client, rota, dados_paciente, recomendacoes):
@@ -53,7 +59,7 @@ def test_gera_pdf_da_categoria_pedida(client, html_enviado, rota, item):
 
     assert resposta.status_code == 200
     assert resposta.mimetype == 'application/pdf'
-    assert resposta.data == PDF_FALSO
+    assert resposta.data.startswith(b'%PDF')
     html = html_enviado[0]
     assert item['titulo'].split(' (')[0].upper() in html.upper()
     outros = [i for i in (EXAME, IMAGEM, INFLUENZA) if i is not item]
@@ -73,6 +79,7 @@ def test_minuta_traz_campo_de_assinatura_e_nao_declara_assinatura_digital(client
     assert 'Documento sem assinatura digital' in html
     assert 'assinado digitalmente' not in html.lower()
     assert 'CRM' not in html
+    assert 'assinatura e carimbo do médico' in html.lower()
 
 
 def test_sexo_ausente_nao_e_impresso_como_masculino(client, html_enviado):
@@ -81,26 +88,40 @@ def test_sexo_ausente_nao_e_impresso_como_masculino(client, html_enviado):
     assert 'Masculino' not in html_enviado[0]
 
 
-# --- P-08: o que vem do navegador não vira HTML -----------------------------
+# --- P-08: o que vem do navegador é impresso como texto, nunca interpretado ---
 
-def test_nome_e_titulos_sao_escapados(client, html_enviado):
+def test_nome_e_titulos_viram_texto_simples(client, html_enviado):
     paciente = {**HOMEM, 'nome': '<img src=x onerror=alert(1)>'}
     itens = [{'titulo': "<iframe src='http://169.254.169.254/latest/meta-data/'></iframe>", 'categoria': 'laboratorio'}]
 
     resposta = _pedir(client, '/api/gerar-pdf-exames-laboratoriais', paciente, itens)
 
     assert resposta.status_code == 200
-    html = html_enviado[0]
-    assert '<img' not in html
-    assert '<iframe' not in html
-    assert '&lt;img src=x onerror=alert(1)&gt;' in html
-    assert '&lt;iframe' in html
+    texto = html_enviado[0]
+    assert '<img src=x onerror=alert(1)>' in texto          # impresso tal qual
+    assert '<iframe' in texto
+    assert b'/JavaScript' not in resposta.data and b'/JS' not in resposta.data and b'/URI' not in resposta.data
 
 
-def test_titulo_de_vacina_e_escapado(client, html_enviado):
-    itens = [{'titulo': 'Influenza <script>alert(1)</script>', 'categoria': 'vacina'}]
-    _pedir(client, '/api/gerar-pdf-vacinas', HOMEM, itens)
-    assert '<script' not in html_enviado[0].lower()
+def test_caracteres_de_controle_nao_quebram_o_pdf(client, html_enviado):
+    itens = [{'titulo': 'Creatinina\x00\x07, soro\u2028x', 'categoria': 'laboratorio'}]
+    assert _pedir(client, '/api/gerar-pdf-exames-laboratoriais', HOMEM, itens).status_code == 200
+    assert 'Creatinina' in html_enviado[0]
+
+
+def test_acentos_e_simbolos_sao_preservados(client, html_enviado):
+    itens = [{'titulo': 'Tríplice Viral – SCR (Priorix® ou M-M-R® II) ≥ 18 anos', 'categoria': 'vacina'}]
+    _pedir(client, '/api/gerar-pdf-vacinas', MULHER_LIBERADA, itens)
+    assert 'TRÍPLICE VIRAL – SCR (PRIORIX® OU M-M-R® II) ≥ 18 ANOS' in html_enviado[0]
+
+
+def test_lista_longa_ganha_mais_paginas_com_assinatura_na_ultima(client):
+    itens = [{'titulo': f'Exame número {i} com um nome razoavelmente comprido para ocupar a linha', 'categoria': 'laboratorio'} for i in range(60)]
+    resposta = _pedir(client, '/api/gerar-pdf-exames-laboratoriais', HOMEM, itens)
+    paginas = PdfReader(io.BytesIO(resposta.data)).pages
+    assert len(paginas) >= 2
+    assert 'Assinatura e Carimbo do Médico' in paginas[-1].extract_text()
+    assert 'Exame número 59' in paginas[-1].extract_text() or 'Exame número 59' in paginas[-2].extract_text()
 
 
 @pytest.mark.parametrize('dados_paciente, recomendacoes', [
@@ -185,19 +206,19 @@ def test_vacinas_inativadas_nao_dependem_da_triagem(client, html_enviado):
     assert resposta.status_code == 200
 
 
-# --- Falha do serviço de PDF -------------------------------------------------
+# --- Falha na geração ------------------------------------------------------------
 
-def test_falha_do_gotenberg_nao_expoe_detalhes(client, monkeypatch):
-    def quebra(html):
-        raise Exception('Erro de conexão ao gerar PDF via Gotenberg: http://servico-interno.railway.internal:3000')
+def test_falha_na_geracao_nao_expoe_detalhes(client, monkeypatch):
+    def quebra(dados_paciente, itens):
+        raise Exception('Erro interno: /var/task/assets/fonts/DejaVuSans.ttf')
 
-    monkeypatch.setattr(pdf_service_gotenberg, 'gerar_pdf_via_gotenberg', quebra)
+    monkeypatch.setattr(pdf_minutas, 'gerar_pdf_exames_laboratoriais', quebra)
     resposta = _pedir(client, '/api/gerar-pdf-exames-laboratoriais', HOMEM, [EXAME])
 
     assert resposta.status_code == 502
     dados = resposta.get_json()
     assert dados['codigo'] == 'falha_na_geracao'
-    assert 'railway' not in dados['error']
+    assert 'DejaVu' not in dados['error'] and '/var/task' not in dados['error']
     assert 'Gotenberg' not in dados['error']
 
 
@@ -212,39 +233,3 @@ class _RespostaFalsa:
 
     def read(self):
         return PDF_FALSO
-
-
-@pytest.fixture()
-def requisicoes(monkeypatch):
-    feitas = []
-
-    def falso_urlopen(requisicao, timeout=None):
-        feitas.append(requisicao)
-        return _RespostaFalsa()
-
-    monkeypatch.setattr(urllib.request, 'urlopen', falso_urlopen)
-    return feitas
-
-
-def test_delimitador_multipart_muda_a_cada_requisicao(requisicoes, monkeypatch):
-    monkeypatch.delenv('GOTENBERG_API_BASIC_AUTH_USERNAME', raising=False)
-    monkeypatch.delenv('GOTENBERG_API_BASIC_AUTH_PASSWORD', raising=False)
-
-    pdf_service_gotenberg.gerar_pdf_via_gotenberg('<p>a</p>')
-    pdf_service_gotenberg.gerar_pdf_via_gotenberg('<p>b</p>')
-
-    tipos = [r.get_header('Content-type') for r in requisicoes]
-    assert tipos[0] != tipos[1]
-    for requisicao, tipo in zip(requisicoes, tipos):
-        delimitador = tipo.split('boundary=')[1]
-        assert requisicao.data.count(delimitador.encode()) == 2
-        assert requisicao.get_header('Authorization') is None
-
-
-def test_autenticacao_basica_e_enviada_quando_configurada(requisicoes, monkeypatch):
-    monkeypatch.setenv('GOTENBERG_API_BASIC_AUTH_USERNAME', 'evidens')
-    monkeypatch.setenv('GOTENBERG_API_BASIC_AUTH_PASSWORD', 'segredo')
-
-    pdf_service_gotenberg.gerar_pdf_via_gotenberg('<p>a</p>')
-
-    assert requisicoes[0].get_header('Authorization') == 'Basic ZXZpZGVuczpzZWdyZWRv'

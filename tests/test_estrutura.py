@@ -92,8 +92,7 @@ def test_modulos_essenciais_sao_alcancaveis():
         'src/routes/checkup_intelligent.py',
         'src/utils/validacao.py',
         'src/utils/seguranca_vacinas.py',
-        'src/utils/pdf_service_gotenberg.py',
-        'src/utils/pdf_service_gotenberg_simple.py',
+        'src/utils/pdf_minutas.py',
     ):
         assert esperado in alcancaveis
 
