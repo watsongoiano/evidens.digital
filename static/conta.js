@@ -68,6 +68,13 @@
     });
   });
 
+  // Quem acabou de se cadastrar chega ao login com o aviso de que a conta aguarda aprovação.
+  const login = document.querySelector('form[data-form="login"]');
+  if (login && new URLSearchParams(window.location.search).get('cadastro') === 'recebido') {
+    mostrar(login.querySelector('[data-ok]'),
+      'Cadastro recebido. Assim que o responsável técnico conferir o seu registro e aprovar a conta, entre aqui com o e-mail e a senha que você cadastrou.');
+  }
+
   document.querySelectorAll('[data-sair]').forEach(botao => botao.addEventListener('click', async () => {
     try { await enviar('/api/auth/logout'); } finally { window.location.href = '/'; }
   }));
