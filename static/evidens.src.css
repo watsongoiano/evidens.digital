@@ -52,19 +52,33 @@ html.lenis, html.lenis body { height: auto; }
   .secao-num { @apply font-mono text-[11px] tracking-[0.18em] text-teal; }
   .secao-nota { @apply text-[14px] text-ink/55 leading-relaxed mb-6; }
   .grade { @apply grid gap-4 sm:grid-cols-2; }
-  .campo label, .campo-rotulo { @apply block text-[12px] tracking-[0.12em] uppercase text-ink/55 mb-2; }
+  .campo > label, .campo-rotulo { @apply block font-mono text-[11px] tracking-[0.14em] uppercase text-ink/50 mb-2; }
   .campo input[type="text"], .campo input[type="number"], .campo input[type="email"], .campo input[type="password"], .campo select, .campo textarea {
     @apply w-full rounded-xl border border-ink/15 bg-paper px-4 h-12 text-[15px] text-ink transition;
   }
   .campo textarea { @apply h-auto py-3 leading-relaxed; }
   .campo input:focus, .campo select:focus, .campo textarea:focus { @apply outline-none border-teal ring-2 ring-teal/20 bg-white; }
-  .opcoes { @apply grid gap-2 sm:grid-cols-2 lg:grid-cols-3; }
-  .opcao { @apply flex items-center gap-3 rounded-xl border border-ink/10 bg-paper px-4 py-3 text-[14px] cursor-pointer transition; }
-  .opcao:hover { @apply border-teal/40; }
-  .opcao input { @apply w-4 h-4 accent-teal shrink-0; }
-  .opcao:has(input:checked) { @apply border-teal bg-mist/60; }
+  /* Chips, no mesmo desenho da demonstração da home: pílula com borda; marcada = teal com ✓. */
+  .opcoes { @apply flex flex-wrap gap-2; }
+  .opcao { @apply relative inline-flex items-center rounded-full border border-ink/15 bg-white px-3.5 h-9 text-[13px] text-ink/65 cursor-pointer select-none transition; }
+  .opcao:hover { @apply border-teal/50 text-ink; }
+  .opcao input { @apply absolute opacity-0 w-0 h-0 pointer-events-none; }
+  .opcao:has(input:focus-visible) { @apply ring-2 ring-teal/30; }
+  .opcao::before { content: ''; @apply inline-block w-0 h-3 overflow-hidden transition-all; }
+  .opcao:has(input:checked) { @apply bg-teal border-teal text-white; }
+  .opcao:has(input:checked)::before {
+    content: '';
+    @apply w-2.5 mr-1.5 border-white;
+    border-width: 0 0 2px 2px; height: 6px; transform: translateY(-2px) rotate(-45deg);
+  }
   .bloco-condicional { @apply mt-4 rounded-2xl bg-mist/50 border border-teal/15 p-5; }
 
+  .risco-cartao { @apply mt-8 rounded-[22px] bg-white border border-ink/10 p-6 sm:p-7; }
+  .risco-ponto { @apply inline-block w-2.5 h-2.5 rounded-full align-middle mr-2; }
+  .risco-tabela { @apply w-full text-[13px]; }
+  .risco-tabela th { @apply text-left font-mono text-[10px] tracking-[0.14em] uppercase text-ink/45 font-normal pb-2; }
+  .risco-tabela td { @apply py-1.5 border-t border-ink/5; }
+  .risco-tabela th:not(:first-child), .risco-tabela td:not(:first-child) { @apply text-right tabular-nums; }
   .aviso { @apply rounded-2xl px-5 py-4 text-[14px] leading-relaxed; }
   .aviso-erro { @apply bg-[#FBEAE8] text-[#7B241C] border border-[#E5B7B1]; }
   .aviso-atencao { @apply bg-sand text-ink border border-[#E6DCC0]; }
