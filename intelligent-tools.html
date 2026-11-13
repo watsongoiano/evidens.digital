@@ -187,15 +187,14 @@
     <section class="secao" aria-labelledby="s-habitos">
       <h2 id="s-habitos" class="secao-titulo"><span class="secao-num">07</span>Hábitos de vida</h2>
       <div class="grade mt-4">
-        <div class="campo">
-          <label for="tabagismo">Tabagismo</label>
-          <select id="tabagismo" name="tabagismo" required>
-            <option value="" selected disabled>Selecione...</option>
-            <option value="nunca">Nunca fumou</option>
-            <option value="atual">Fumante atual</option>
-            <option value="ex">Ex-fumante</option>
-          </select>
-        </div>
+        <fieldset class="campo sm:col-span-2">
+          <legend class="campo-rotulo">Tabagismo</legend>
+          <div class="opcoes" id="tabagismo">
+            <label class="opcao" for="tabagismo_nunca"><input type="radio" id="tabagismo_nunca" name="tabagismo" value="nunca" required>Nunca fumou</label>
+            <label class="opcao" for="tabagismo_ex"><input type="radio" id="tabagismo_ex" name="tabagismo" value="ex">Ex-fumante</label>
+            <label class="opcao" for="tabagismo_atual"><input type="radio" id="tabagismo_atual" name="tabagismo" value="atual">Fumante</label>
+          </div>
+        </fieldset>
         <div class="campo">
           <label for="alcoolismo">Consumo de álcool</label>
           <select id="alcoolismo" name="alcoolismo">
@@ -793,22 +792,23 @@
         });
 
         // Listener para tabagismo - mostrar campos condicionais
-        document.getElementById('tabagismo').addEventListener('change', function() {
+        document.getElementById('tabagismo').addEventListener('change', function(ev) {
+            const tabagismo = ev.target.value;
             const macosAnoField = document.getElementById('macos_ano_field');
             const anosParouField = document.getElementById('anos_parou_fumar_field');
 
-            if (this.value === 'nunca') {
+            if (tabagismo === 'nunca') {
                 // Ocultar ambos os campos
                 macosAnoField.style.display = 'none';
                 anosParouField.style.display = 'none';
                 document.getElementById('macos_ano').value = '';
                 document.getElementById('anos_parou_fumar').value = '';
-            } else if (this.value === 'atual') {
+            } else if (tabagismo === 'atual') {
                 // Mostrar apenas maços-ano
                 macosAnoField.style.display = 'block';
                 anosParouField.style.display = 'none';
                 document.getElementById('anos_parou_fumar').value = '';
-            } else if (this.value === 'ex') {
+            } else if (tabagismo === 'ex') {
                 // Mostrar ambos os campos
                 macosAnoField.style.display = 'block';
                 anosParouField.style.display = 'block';

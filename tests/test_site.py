@@ -154,10 +154,18 @@ def test_triagem_tem_tres_valores_e_comeca_em_nao_informado(pagina, campo, opcoe
 
 
 def test_tabagismo_exige_escolha_explicita(pagina):
-    marcacao, valores = _select(pagina, 'tabagismo')
-    assert 'required' in marcacao.split('>')[0]
-    assert valores == ['', 'nunca', 'atual', 'ex']
-    assert '<option value="" selected disabled>' in marcacao
+    # Chips (botões de opção) sem valor pré-marcado; o primeiro leva "required",
+    # o que obriga a escolher um do grupo.
+    radios = re.findall(r'<input[^>]*type="radio"[^>]*name="tabagismo"[^>]*>', pagina)
+    assert [re.search(r'value="([^"]*)"', r).group(1) for r in radios] == ['nunca', 'ex', 'atual']
+    assert all('checked' not in r for r in radios)
+    assert any('required' in r for r in radios)
+
+
+def test_opcoes_sao_chips_como_na_home(pagina):
+    css = (RAIZ / 'static' / 'evidens.src.css').read_text(encoding='utf-8')
+    assert '.opcao:has(input:checked) { @apply bg-teal border-teal text-white; }' in css
+    assert 'rounded-full' in css.split('.opcao {')[1].split('\n')[0]
 
 
 def test_nome_do_paciente_e_opcional_e_nao_vai_com_as_recomendacoes(pagina):
