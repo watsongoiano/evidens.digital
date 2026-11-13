@@ -110,3 +110,14 @@ def test_pa_com_um_componente_so_classifica_o_que_e_certo(pas, pad, categoria):
     assert c['categoria'] == categoria
     if categoria != 'estagio2':
         assert c.get('incompleta') is True
+
+
+def test_betabloqueador_conta_como_tratamento_so_com_hipertensao():
+    """Atenolol isolado não marca hipertensão (IC, FA); com hipertensão, vale como anti-hipertensivo no PREVENT."""
+    from src.utils import coerencia, medicamentos
+    classes = medicamentos.classes_de(['atenolol'])
+    com, med, _ = coerencia.inferir({'comorbidades': [], 'medicacoes': list(classes)})
+    assert 'hipertensao' not in com and 'anti_hipertensivos' not in med
+    com, med, inf = coerencia.inferir({'comorbidades': ['hipertensao'], 'medicacoes': list(classes)})
+    assert 'anti_hipertensivos' in med
+    assert any(i['valor'] == 'anti_hipertensivos' for i in inf)

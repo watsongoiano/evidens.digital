@@ -54,13 +54,13 @@ COMORBIDADES = {
 # princípio ativo (src/utils/medicamentos.py), que é trocado pela classe antes das regras.
 MEDICACOES = {
     'ieca_bra': {'rotulo': 'IECA ou BRA', 'marca': ['anti_hipertensivos']},
-    'arni': {'rotulo': 'sacubitril/valsartana'},
+    'arni': {'rotulo': 'sacubitril/valsartana', 'reduz_pa': True},
     'tiazidico': {'rotulo': 'Diurético tiazídico', 'marca': ['anti_hipertensivos']},
     'bcc': {'rotulo': 'Bloqueador de canal de cálcio', 'marca': ['anti_hipertensivos']},
     'anti_hipertensivo_outro': {'rotulo': 'Outro anti-hipertensivo', 'marca': ['anti_hipertensivos']},
-    'betabloqueador': {'rotulo': 'Betabloqueador'},
-    'espironolactona': {'rotulo': 'Espironolactona / eplerenona'},
-    'diuretico_alca': {'rotulo': 'Diurético de alça'},
+    'betabloqueador': {'rotulo': 'Betabloqueador', 'reduz_pa': True},
+    'espironolactona': {'rotulo': 'Espironolactona / eplerenona', 'reduz_pa': True},
+    'diuretico_alca': {'rotulo': 'Diurético de alça', 'reduz_pa': True},
     'estatina': {'rotulo': 'Estatina', 'marca': ['estatinas']},
     'outro_hipolipemiante': {'rotulo': 'Ezetimiba, fibrato ou iPCSK9', 'marca': ['dislipidemia']},
     'metformina': {'rotulo': 'Metformina'},
