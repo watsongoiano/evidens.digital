@@ -123,13 +123,19 @@ GRUPOS = [
         'Donepezila', 'Rivastigmina', 'Galantamina', 'Memantina', 'Metilfenidato', 'Lisdexanfetamina',
     ]),
     ('Corticoides sistêmicos', ['corticoide_cronico'], 'corticoide', [
-        'Prednisona', 'Prednisolona', 'Dexametasona', 'Hidrocortisona', 'Fludrocortisona',
+        'Prednisona', 'Prednisolona', 'Metilprednisolona', 'Deflazacorte', 'Dexametasona', 'Hidrocortisona',
     ]),
     ('Imunossupressores e imunobiológicos', ['imunossupressor'], 'imunossupressor imunobiologico biologico', [
-        'Metotrexato', 'Azatioprina', 'Micofenolato', 'Ciclosporina', 'Tacrolimo', 'Sirolimo', 'Everolimo',
-        'Leflunomida', 'Tofacitinibe', 'Upadacitinibe', 'Adalimumabe', 'Etanercepte', 'Infliximabe', 'Golimumabe',
-        'Tocilizumabe', 'Rituximabe', 'Ustequinumabe', 'Risanquizumabe', 'Guselcumabe', 'Natalizumabe', 'Ocrelizumabe',
-        'Fingolimode',
+        ('Metotrexato', ['imunossupressor', 'metotrexato']), ('Azatioprina', ['imunossupressor', 'azatioprina']),
+        ('Leflunomida', ['imunossupressor', 'leflunomida']),
+        'Micofenolato', ('Ciclosporina', ['imunossupressor', 'inibidor_calcineurina']),
+        ('Tacrolimo', ['imunossupressor', 'inibidor_calcineurina']), 'Sirolimo', 'Everolimo',
+        ('Tofacitinibe', ['imunossupressor', 'biologico']), ('Upadacitinibe', ['imunossupressor', 'biologico']),
+        ('Adalimumabe', ['imunossupressor', 'biologico']), ('Etanercepte', ['imunossupressor', 'biologico']),
+        ('Infliximabe', ['imunossupressor', 'biologico']), ('Golimumabe', ['imunossupressor', 'biologico']),
+        ('Tocilizumabe', ['imunossupressor', 'biologico']), ('Rituximabe', ['imunossupressor', 'biologico']),
+        ('Ustequinumabe', ['imunossupressor', 'biologico']), ('Risanquizumabe', ['imunossupressor', 'biologico']),
+        ('Guselcumabe', ['imunossupressor', 'biologico']), 'Natalizumabe', 'Ocrelizumabe', 'Fingolimode',
     ]),
     ('Reumatologia e gota', ['reumato_outro'], 'reumatismo gota', [
         ('Hidroxicloroquina', ['hidroxicloroquina']), 'Sulfassalazina', 'Mesalazina', 'Alopurinol', 'Colchicina',
@@ -145,7 +151,7 @@ GRUPOS = [
     ]),
     ('Hormônios e oncologia hormonal', ['hormonio'], 'hormonio anticoncepcional reposicao', [
         'Anticoncepcional combinado', 'Anticoncepcional só com progestagênio', 'Terapia hormonal da menopausa',
-        'Tibolona', 'Testosterona', 'Tamoxifeno',
+        'Tibolona', 'Testosterona', 'Tamoxifeno', 'Fludrocortisona',
         ('Anastrozol', ['inibidor_aromatase']), ('Letrozol', ['inibidor_aromatase']),
         ('Exemestano', ['inibidor_aromatase']),
     ]),
@@ -187,11 +193,15 @@ MEDICAMENTOS = _montar()
 assert all(k in MEDICAMENTOS for k in MAIS_USADOS)
 
 
-def classes_de(medicacoes):
-    """Troca cada princípio ativo pelas suas classes; chaves de classe (e as antigas) passam direto."""
+def classes_de(medicacoes, excluir=None):
+    """Troca cada princípio ativo pelas suas classes; chaves de classe (e as antigas) passam direto.
+
+    ``excluir`` (``{medicamento: {classes}}``) tira uma classe só da contribuição daquele medicamento.
+    """
+    excluir = excluir or {}
     saida = []
     for chave in medicacoes:
         for c in (MEDICAMENTOS[chave]['classes'] if chave in MEDICAMENTOS else [chave]):
-            if c not in saida:
+            if c not in saida and c not in excluir.get(chave, ()):
                 saida.append(c)
     return saida

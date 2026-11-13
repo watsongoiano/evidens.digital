@@ -107,6 +107,11 @@ _FONTES_DIRETAS = [
     ('eau 2024', 'https://uroweb.org/guidelines/prostate-cancer'),
     ('svs 2018', 'https://doi.org/10.1016/j.jvs.2017.10.044'),
     ('ada/apa 2004', 'https://doi.org/10.2337/diacare.27.2.596'),
+    ('ms 2019', 'https://bvsms.saude.gov.br/bvs/publicacoes/manual_recomendacoes_controle_tuberculose_brasil_2_ed.pdf'),
+    ('asbmr 2016', 'https://doi.org/10.1002/jbmr.2708'),
+    ('bsr 2017', 'https://doi.org/10.1093/rheumatology/kew479'),
+    ('kdigo 2009', 'https://kdigo.org/guidelines/transplant-recipient/'),
+    ('aasld 2018', 'https://doi.org/10.1002/hep.29800'),
 ]
 
 

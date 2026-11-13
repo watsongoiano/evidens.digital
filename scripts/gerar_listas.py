@@ -11,7 +11,9 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ))
-from src.utils import condicoes, medicamentos  # noqa: E402
+import json  # noqa: E402
+
+from src.utils import condicoes, doses, medicamentos  # noqa: E402
 
 PAGINA = RAIZ / 'intelligent-tools.html'
 # O que a tela marca quando o item é escolhido (as caixas de classe saíram da tela).
@@ -32,8 +34,12 @@ def _imuno(classes):
     return any(condicoes.MEDICACOES.get(c, {}).get('imunossupressao') for c in classes)
 
 
-def _atributos(marca=(), imuno=False):
-    return (f' data-marca="{" ".join(marca)}"' if marca else '') + (' data-imuno="1"' if imuno else '')
+def _atributos(marca=(), imuno=False, chave=None):
+    detalhe = ''
+    if chave in doses.POR_MEDICAMENTO:
+        tipo, parametro = doses.POR_MEDICAMENTO[chave]
+        detalhe = f' data-detalhe="{tipo}"' + (f' data-parametro="{round(parametro, 4):g}"' if parametro else '')
+    return (f' data-marca="{" ".join(marca)}"' if marca else '') + (' data-imuno="1"' if imuno else '') + detalhe
 
 
 def _opcao(valor, rotulo, busca, extra='', alvo=None):
@@ -77,7 +83,7 @@ def blocos(pagina):
         rotulo = m['rotulo'].split(' (')[0]
         chips.append(f'        <label class="opcao" for="lista_medicacoes_{chave}"><input type="checkbox" id="lista_medicacoes_{chave}" '
                      f'name="medicacoes" value="{chave}" data-rotulo="{html.escape(rotulo)}"'
-                     f'{_atributos(_marcas(m["classes"]), _imuno(m["classes"]))}>{html.escape(rotulo)}</label>')
+                     f'{_atributos(_marcas(m["classes"]), _imuno(m["classes"]), chave)}>{html.escape(rotulo)}</label>')
     linhas, grupo = [], None
     for chave, m in medicamentos.MEDICAMENTOS.items():
         if chave in medicamentos.MAIS_USADOS:
@@ -85,7 +91,7 @@ def blocos(pagina):
         if m['grupo'] != grupo:
             grupo = m['grupo']
             linhas.append(f'            <li class="combo-grupo" role="presentation">{html.escape(grupo)}</li>')
-        linhas.append(_opcao(chave, m['rotulo'], m['busca'], _atributos(_marcas(m['classes']), _imuno(m['classes']))))
+        linhas.append(_opcao(chave, m['rotulo'], m['busca'], _atributos(_marcas(m['classes']), _imuno(m['classes']), chave)))
 
     return {
         'comorbidades': _combo('lista_comorbidades', 'comorbidades', 'Outras comorbidades', 'hipotireoidismo, asma, gota…',
@@ -94,7 +100,12 @@ def blocos(pagina):
         'medicacoes': '      <div class="opcoes mt-4">\n' + '\n'.join(chips) + '\n      </div>\n'
                       + _combo('lista_medicacoes', 'medicacoes', 'Outras medicações', 'anlodipino, rosuvastatina, bombinha…',
                                'Busca por princípio ativo ou classe. A medicação define monitorização laboratorial, vacinas e '
-                               'coerência com as comorbidades.', linhas),
+                               'coerência com as comorbidades.', linhas)
+                      + '      <div id="medicacoes-detalhes" class="bloco-condicional" hidden>\n'
+                        '        <p class="campo-rotulo">Dose e duração</p>\n'
+                        '        <div id="medicacoes-detalhes-linhas" class="flex flex-col gap-4"></div>\n'
+                        '      </div>\n'
+                      + f'      <script type="application/json" id="detalhes-medicacao">{json.dumps(doses.DETALHES, ensure_ascii=False)}</script>\n',
         'familia': _combo('lista_familia', 'historia_familiar', 'Outras condições em parente de 1º grau',
                           'BRCA, Lynch, hipercolesterolemia familiar…', 'Síndromes hereditárias trazem o rastreamento específico; as demais mudam idade de início ou indicação.',
                           simples(condicoes.FAMILIA)),
