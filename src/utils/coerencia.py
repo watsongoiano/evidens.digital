@@ -67,15 +67,25 @@ def achados_no_texto(texto):
 
 
 def classificar_pa(pas, pad):
-    """Categoria da PA de consultório pela diretriz AHA/ACC 2025 (mesmas faixas de 2017)."""
-    if not pas and not pad:
+    """Categoria da PA de consultório pela diretriz AHA/ACC 2025 (mesmas faixas de 2017).
+
+    Com só um dos componentes, a categoria vale apenas se aquele valor já a define
+    (ex.: PAS 145 é estágio 2 qualquer que seja a PAD); senão volta "incompleta".
+    """
+    tem_pas, tem_pad = pas not in (None, ''), pad not in (None, '')
+    if not tem_pas and not tem_pad:
         return None
-    pas, pad = float(pas or 0), float(pad or 0)
-    if pas >= 140 or pad >= 90:
+    s_ = float(pas) if tem_pas else None
+    d_ = float(pad) if tem_pad else None
+    if (s_ is not None and s_ >= 140) or (d_ is not None and d_ >= 90):
         return {'categoria': 'estagio2', 'rotulo': 'HAS estágio 2'}
-    if pas >= 130 or pad >= 80:
-        return {'categoria': 'estagio1', 'rotulo': 'HAS estágio 1'}
-    if pas >= 120:
+    if (s_ is not None and s_ >= 130) or (d_ is not None and d_ >= 80):
+        if tem_pas and tem_pad:
+            return {'categoria': 'estagio1', 'rotulo': 'HAS estágio 1'}
+        return {'categoria': 'estagio1', 'rotulo': 'HAS estágio 1 ou 2 (falta um componente)', 'incompleta': True}
+    if not (tem_pas and tem_pad):
+        return {'categoria': 'incompleta', 'rotulo': 'Informe PAS e PAD para classificar', 'incompleta': True}
+    if s_ >= 120:
         return {'categoria': 'elevada', 'rotulo': 'PA elevada'}
     return {'categoria': 'normal', 'rotulo': 'PA normal'}
 
@@ -109,6 +119,7 @@ def inferir(data, egfr=None, gestante=False):
     pa = classificar_pa(data.get('pas'), data.get('pad'))
     if pa:
         # Fora da gestação, corte AHA/ACC 2025 (≥ 130/80). Na gestação, ≥ 140/90.
+        # (estágio 1 com um componente faltando pode ser 2 na gestação; só marca o que é certo)
         limiar = pa['categoria'] == 'estagio2' or (pa['categoria'] == 'estagio1' and not gestante)
         if limiar:
             marcar(comorbidades, 'comorbidades', 'hipertensao',

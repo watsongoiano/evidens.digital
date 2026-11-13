@@ -98,3 +98,15 @@ def test_api_devolve_classificacao_da_pa_e_pede_mapa(client):
     r = client.post('/api/checkup-intelligent', json=corpo).get_json()
     assert r['pa_classificacao']['categoria'] == 'estagio1'
     assert any(t['titulo'].startswith('MAPA') for t in r['recommendations'])
+
+
+@pytest.mark.parametrize('pas, pad, categoria', [
+    (118, None, 'incompleta'), (None, 76, 'incompleta'),
+    (134, None, 'estagio1'), (None, 84, 'estagio1'),
+    (145, None, 'estagio2'), (None, 95, 'estagio2'),
+])
+def test_pa_com_um_componente_so_classifica_o_que_e_certo(pas, pad, categoria):
+    c = coerencia.classificar_pa(pas, pad)
+    assert c['categoria'] == categoria
+    if categoria != 'estagio2':
+        assert c.get('incompleta') is True
