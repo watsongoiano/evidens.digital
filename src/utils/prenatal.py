@@ -99,15 +99,18 @@ def _janelas(g, idade, hipertensa, diabetica):
                  'Datação, número de fetos, rastreamento de aneuploidias e anomalias; avaliação de risco de pré-eclâmpsia (Doppler de artérias uterinas). Rastreio bioquímico ou DNA fetal livre opcionais.',
                  'Pré-natal | 11-13+6 semanas'),
         ]),
-        (colo_inicio, 25, f'{colo_inicio}-24 semanas', [
+        (20, 25, '20-24 semanas', [
             _rec('Ultrassonografia morfológica de 2º trimestre', 'imagem',
                  'Rastreamento de anomalias fetais.', 'Pré-natal | 20-24 semanas'),
-            _rec('Ultrassonografia transvaginal para medida do colo uterino', 'imagem',
-                 'Rastreio de colo curto (≤ 25 mm). Com parto prematuro anterior, medir a partir de 16 semanas.',
-                 f'Pré-natal | {colo_inicio}-24 semanas', prioridade='media', grau='B'),
         ] + ([_rec('Toxoplasmose IgG e IgM, soro', 'laboratorio',
                    'Repetir a cada trimestre enquanto suscetível (IgG negativa).', 'Pré-natal | Suscetível: a cada trimestre')]
              if toxo_repetir else [])),
+        # Colo uterino tem janela própria: com parto prematuro anterior começa em 16 semanas.
+        (colo_inicio, 25, f'{colo_inicio}-24 semanas', [
+            _rec('Ultrassonografia transvaginal para medida do colo uterino', 'imagem',
+                 'Rastreio de colo curto (≤ 25 mm). Com parto prematuro anterior, medir a partir de 16 semanas.',
+                 f'Pré-natal | {colo_inicio}-24 semanas', prioridade='media', grau='B'),
+        ]),
         (24, 29, '24-28 semanas', ([] if diabetica else [
             _rec('TOTG-75g gestacional (jejum, 1 h e 2 h), soro', 'laboratorio',
                  'Rastreio de diabetes gestacional para todas sem diagnóstico prévio. Critérios IADPSG/OMS: jejum ≥ 92, 1 h ≥ 180 ou 2 h ≥ 153 mg/dL (um valor basta).',
@@ -193,19 +196,18 @@ def exames(g, idade, hipertensa=False, diabetica=False):
     recs = []
     ig = g['ig']
     if g['primeira_consulta'] or ig is None:
-        recs += _primeira_consulta(g, idade, hipertensa, diabetica)
+        recs += [{**r, 'quando_pdf': 'Primeira consulta de pré-natal.'} for r in _primeira_consulta(g, idade, hipertensa, diabetica)]
     if ig is not None:
         janelas = _janelas(g, idade, hipertensa, diabetica)
-        proxima_marcada = False
+        futuras = [inicio for inicio, _, _, _ in janelas if inicio > ig]
+        proximo_inicio = min(futuras) if futuras else None
         for inicio, fim, nome, itens in janelas:
-            atual = inicio <= ig < fim
-            proxima = not proxima_marcada and ig < inicio
-            if proxima:
-                proxima_marcada = True
-                itens = [{**r, 'subtitulo': r['subtitulo'] + f' | Deixar pedido para {nome}', 'prioridade': 'media'} for r in itens]
-            if atual or proxima:
-                recs += itens
-    recs += _risco_pre_eclampsia(g, hipertensa, diabetica)
+            if inicio <= ig < fim:
+                recs += [{**r, 'quando_pdf': f'Realizar com {nome} de gestação (janela atual).'} for r in itens]
+            elif inicio == proximo_inicio:
+                recs += [{**r, 'subtitulo': r['subtitulo'] + f' | Deixar pedido para {nome}', 'prioridade': 'media',
+                          'quando_pdf': f'Pedido antecipado: realizar com {nome} de gestação, não agora.'} for r in itens]
+    recs += [{**r, 'quando_pdf': 'Basal: alto risco de pré-eclâmpsia.'} for r in _risco_pre_eclampsia(g, hipertensa, diabetica)]
     vistos, unicos = set(), []
     for r in recs:
         if r['titulo'] in vistos:

@@ -120,3 +120,35 @@ def test_nao_gestante_ignora_subcampos(client):
     r = client.post('/api/checkup-intelligent', json={**CASO_DA_HOME, 'gestante': 'nao', 'idade_gestacional': '60'})
     assert r.status_code == 200
     assert r.get_json()['gestacao'] is None
+
+
+def test_colo_tem_janela_propria_com_prematuro_previo():
+    g = _g(idade_gestacional='15', gestacao_condicoes=['prematuro_previo'])
+    recs = {r['titulo']: r for r in prenatal.exames(g, 30)}
+    assert 'Ultrassonografia transvaginal para medida do colo uterino' in recs
+    assert 'Ultrassonografia morfológica de 2º trimestre' not in recs   # continua em 20-24
+    g = _g(idade_gestacional='17', gestacao_condicoes=['prematuro_previo'])
+    recs = {r['titulo']: r for r in prenatal.exames(g, 30)}
+    assert 'janela atual' in recs['Ultrassonografia transvaginal para medida do colo uterino']['quando_pdf']
+    morf = recs['Ultrassonografia morfológica de 2º trimestre']
+    assert 'Pedido antecipado' in morf['quando_pdf'] and '16-24' not in morf['subtitulo']
+
+
+def test_janela_gestacional_vai_para_o_pdf(client):
+    from pypdf import PdfReader
+    import io
+    recs = prenatal.exames(_g(idade_gestacional='8', primeira_consulta='nao'), 30)
+    imagem = [r for r in recs if r['categoria'] == 'imagem']
+    corpo = {'dados_paciente': {'nome': 'Teste', 'idade': 30, 'sexo': 'feminino'}, 'recomendacoes': imagem}
+    resp = client.post('/api/gerar-pdf-exames-imagem', json=corpo)
+    assert resp.status_code == 200
+    texto = ' '.join(p.extract_text() for p in PdfReader(io.BytesIO(resp.data)).pages)
+    texto = ' '.join(texto.split())
+    assert 'Pedido antecipado: realizar com 11-13+6 semanas de gestação' in texto
+    assert 'Realizar com 7-9 semanas de gestação (janela atual)' in texto
+
+
+def test_pdf_recusa_janela_gestacional_longa_demais(client):
+    corpo = {'dados_paciente': {'nome': 'T'}, 'recomendacoes': [
+        {'titulo': 'Hemograma completo', 'categoria': 'laboratorio', 'quando_pdf': 'x' * 500}]}
+    assert client.post('/api/gerar-pdf-exames-laboratoriais', json=corpo).status_code == 400

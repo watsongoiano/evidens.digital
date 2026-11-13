@@ -1440,6 +1440,9 @@ def _ler_pedido_de_pdf(categoria):
         titulo = rec.get('titulo')
         if not isinstance(titulo, str) or not titulo.strip() or len(titulo) > MAX_TAMANHO_TITULO:
             raise PedidoDePdfInvalido('Item de recomendação com título inválido')
+        quando = rec.get('quando_pdf')
+        if quando is not None and (not isinstance(quando, str) or len(quando) > 160):
+            raise PedidoDePdfInvalido('Item de recomendação com janela gestacional inválida')
         itens.append(rec)
     return dados_paciente, itens
 
