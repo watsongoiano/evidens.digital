@@ -228,15 +228,14 @@
     <section class="secao" aria-labelledby="s-habitos">
       <h2 id="s-habitos" class="secao-titulo"><span class="secao-num">07</span>Hábitos de vida</h2>
       <div class="grade mt-4">
-        <div class="campo">
-          <label for="tabagismo">Tabagismo</label>
-          <select id="tabagismo" name="tabagismo" required>
-            <option value="" selected disabled>Selecione...</option>
-            <option value="nunca">Nunca fumou</option>
-            <option value="atual">Fumante atual</option>
-            <option value="ex">Ex-fumante</option>
-          </select>
-        </div>
+        <fieldset class="campo sm:col-span-2">
+          <legend class="campo-rotulo">Tabagismo</legend>
+          <div class="opcoes" id="tabagismo">
+            <label class="opcao" for="tabagismo_nunca"><input type="radio" id="tabagismo_nunca" name="tabagismo" value="nunca" required>Nunca fumou</label>
+            <label class="opcao" for="tabagismo_ex"><input type="radio" id="tabagismo_ex" name="tabagismo" value="ex">Ex-fumante</label>
+            <label class="opcao" for="tabagismo_atual"><input type="radio" id="tabagismo_atual" name="tabagismo" value="atual">Fumante</label>
+          </div>
+        </fieldset>
         <div class="campo">
           <label for="alcoolismo">Consumo de álcool</label>
           <select id="alcoolismo" name="alcoolismo">
@@ -293,9 +292,10 @@
     <div id="avisoUso" class="aviso aviso-info mt-8">
       <p class="mb-1"><strong class="text-ink font-medium">Sugestões para avaliação do médico — não constituem prescrição.</strong> Revise e individualize cada item antes de solicitar ou prescrever.</p>
       <p class="mb-1">Os PDFs são minutas sem assinatura digital: imprima, assine e carimbe.</p>
-      <p>O cálculo de risco cardiovascular está temporariamente desativado, em validação.</p>
+      <p>Risco cardiovascular pelas equações PREVENT (AHA 2024, com o erratum de 2026), sem o índice de privação social, que só existe para os EUA.</p>
     </div>
 
+    <div id="riscoContent"></div>
     <p class="text-[12px] text-ink/50 mt-6 flex flex-wrap gap-x-5 gap-y-1"><span><span class="inline-block w-2 h-2 rounded-full bg-teal align-middle mr-1"></span>prioridade alta</span><span><span class="inline-block w-2 h-2 rounded-full bg-aqua align-middle mr-1"></span>média</span><span><span class="inline-block w-2 h-2 rounded-full bg-ink/20 align-middle mr-1"></span>baixa</span><span><span class="rec-grau align-middle mr-1">A</span>grau de evidência</span></p>
     <div id="recommendationsContent"></div>
     <div id="naoIncluidasContent"></div>
@@ -414,6 +414,7 @@
             currentPatientData = {};
             document.getElementById('recommendationsContent').innerHTML = '';
             document.getElementById('naoIncluidasContent').innerHTML = '';
+            document.getElementById('riscoContent').innerHTML = '';
             recommendationsDiv.style.display = 'none';
         }
 
@@ -475,6 +476,7 @@
                 };
 
                 displayRecommendations(currentRecommendations, (result.nao_incluidas || []).concat(result.adiados_gestacao || [], result.proximas_gestacao || []));
+                exibirRisco(result.risco_cardiovascular);
 
             } catch (error) {
                 if (revisaoDoEnvio !== revisaoDoFormulario) {
@@ -507,6 +509,41 @@
             media: { texto: 'Prioridade média', classe: 'bg-aqua/60 text-ink', ponto: 'bg-aqua' },
             baixa: { texto: 'Prioridade baixa', classe: 'bg-ink/10 text-ink/70', ponto: 'bg-ink/20' }
         };
+
+        const COR_CATEGORIA = { baixo: 'bg-teal', limitrofe: 'bg-[#C9A227]', intermediario: 'bg-[#D98B2B]', alto: 'bg-[#B53A2E]' };
+        const pct = v => (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+
+        function exibirRisco(risco) {
+            const alvo = document.getElementById('riscoContent');
+            if (!risco) { alvo.innerHTML = ''; return; }
+            if (risco.status !== 'calculado') {
+                alvo.innerHTML = `<div class="risco-cartao"><p class="campo-rotulo">Risco cardiovascular · PREVENT</p>
+                    <p class="text-[14px] text-ink/65">${escapeHtml(risco.motivo || 'Não calculado.')}</p></div>`;
+                return;
+            }
+            const d = risco.dez_anos, t = risco.trinta_anos;
+            const sbc = risco.categoria_sbc_2025, acc = risco.categoria_acc_aha_2026;
+            const linha = (rotulo, chave) => `<tr><td>${rotulo}</td><td>${pct(d[chave])}</td><td>${t ? pct(t[chave]) : '—'}</td></tr>`;
+            const modelo = { base: 'base', hba1c: 'com HbA1c', uacr: 'com RAC', full: 'com HbA1c e RAC' }[risco.modelo] || risco.modelo;
+            alvo.innerHTML = `<div class="risco-cartao">
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                  <p class="campo-rotulo !mb-0">PREVENT · ${escapeHtml(modelo)}</p>
+                  <p class="font-mono text-[11px] text-ink/45">TFG ${risco.egfr} · IMC ${String(risco.imc).replace('.', ',')}</p>
+                </div>
+                <div class="flex flex-wrap items-end gap-x-8 gap-y-3 mt-3">
+                  <div><p class="text-[40px] font-light leading-none">${pct(d.dcva)}</p><p class="text-[13px] text-ink/55 mt-1">DCVA em 10 anos</p></div>
+                  <div class="flex flex-col gap-1.5 text-[13px]">
+                    <span><span class="risco-ponto ${COR_CATEGORIA[sbc.categoria]}"></span>SBC 2025: <strong class="font-medium">${sbc.rotulo}</strong> · meta LDL ${sbc.meta_ldl}${sbc.reclassificado_por ? ` <span class="text-ink/50">(${escapeHtml(sbc.reclassificado_por)})</span>` : ''}</span>
+                    <span><span class="risco-ponto ${COR_CATEGORIA[acc.categoria]}"></span>ACC/AHA 2026: <strong class="font-medium">${acc.rotulo}</strong></span>
+                  </div>
+                </div>
+                <table class="risco-tabela mt-4"><thead><tr><th>Desfecho</th><th>10 anos</th><th>30 anos</th></tr></thead><tbody>
+                  ${linha('DCV total', 'dcv_total')}${linha('DCVA (IAM, AVC, morte coronária)', 'dcva')}${linha('Insuficiência cardíaca', 'ic')}${linha('Doença coronária', 'dac')}${linha('AVC', 'avc')}
+                </tbody></table>
+                ${t ? '' : '<p class="text-[12px] text-ink/45 mt-2">Risco em 30 anos só de 30 a 59 anos.</p>'}
+                <p class="text-[12px] text-ink/55 mt-3">${escapeHtml(risco.observacao)}</p>
+              </div>`;
+        }
 
         function displayRecommendations(recomendacoes, naoIncluidas) {
             const container = document.getElementById('recommendationsContent');
@@ -836,22 +873,23 @@
         });
 
         // Listener para tabagismo - mostrar campos condicionais
-        document.getElementById('tabagismo').addEventListener('change', function() {
+        document.getElementById('tabagismo').addEventListener('change', function(ev) {
+            const tabagismo = ev.target.value;
             const macosAnoField = document.getElementById('macos_ano_field');
             const anosParouField = document.getElementById('anos_parou_fumar_field');
 
-            if (this.value === 'nunca') {
+            if (tabagismo === 'nunca') {
                 // Ocultar ambos os campos
                 macosAnoField.style.display = 'none';
                 anosParouField.style.display = 'none';
                 document.getElementById('macos_ano').value = '';
                 document.getElementById('anos_parou_fumar').value = '';
-            } else if (this.value === 'atual') {
+            } else if (tabagismo === 'atual') {
                 // Mostrar apenas maços-ano
                 macosAnoField.style.display = 'block';
                 anosParouField.style.display = 'none';
                 document.getElementById('anos_parou_fumar').value = '';
-            } else if (this.value === 'ex') {
+            } else if (tabagismo === 'ex') {
                 // Mostrar ambos os campos
                 macosAnoField.style.display = 'block';
                 anosParouField.style.display = 'block';
