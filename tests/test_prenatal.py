@@ -182,3 +182,104 @@ def test_vacinas_da_gestacao_so_na_janela(client, ig, dtpa_agora, vsr_agora):
     depois = ' '.join(x['titulo'] for x in r['proximas_gestacao'])
     assert ('dTpa' in agora) is dtpa_agora and ('dTpa' in depois) is (not dtpa_agora)
     assert ('Abrysvo' in agora) is vsr_agora and ('Abrysvo' in depois) is (not vsr_agora)
+
+
+# ---------------------------------------------------------------------------
+# TOTG fora da janela, exames equivalentes, HIV e fontes clicáveis
+# ---------------------------------------------------------------------------
+def _pedido_api(client, **extra):
+    dados = dict(idade=30, sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[],
+                 imunossupressao='nao', gestante='sim', lactante='nao', idade_gestacional=35, primeira_consulta='nao')
+    dados.update(extra)
+    resposta = client.post('/api/checkup-intelligent', json=dados)
+    assert resposta.status_code == 200, resposta.get_json()
+    return resposta.get_json()
+
+
+def _titulos_api(r):
+    return [x['titulo'] for x in r['recommendations']]
+
+
+def test_totg_e_pedido_depois_de_28_semanas_se_nao_consta_como_feito(client):
+    r = _pedido_api(client, idade_gestacional=35)
+    totg = next(x for x in r['recommendations'] if x['titulo'].startswith('TOTG-75g gestacional'))
+    assert 'fazer agora' in totg['subtitulo'] and 'ainda não realizado' in totg['quando_pdf']
+
+
+def test_totg_informado_como_feito_nao_e_pedido_de_novo(client):
+    r = _pedido_api(client, idade_gestacional=35, totg_feito='sim')
+    assert not any(t.startswith('TOTG-75g') for t in _titulos_api(r))
+    assert any(p['estado'] == 'etapa_anterior' and p['titulo'].startswith('TOTG-75g') for p in r['proximas_gestacao'])
+
+
+def test_totg_na_janela_e_antes_dela(client):
+    assert any(t.startswith('TOTG-75g gestacional') for t in _titulos_api(_pedido_api(client, idade_gestacional=26)))
+    cedo = _pedido_api(client, idade_gestacional=12)
+    assert not any(t.startswith('TOTG-75g gestacional') for t in _titulos_api(cedo))
+    assert any(p['titulo'].startswith('TOTG-75g') and p['estado'] == 'proxima_janela' for p in cedo['proximas_gestacao'])
+
+
+def test_totg_nao_se_pede_a_diabetica(client):
+    r = _pedido_api(client, idade_gestacional=30, comorbidades=['diabetes'])
+    assert not any(t.startswith('TOTG-75g gestacional') for t in _titulos_api(r))
+
+
+def test_primeira_consulta_tardia_pede_iniciais_totg_e_ultrassonografia(client):
+    r = _pedido_api(client, idade_gestacional=26, primeira_consulta='sim')
+    t = _titulos_api(r)
+    for esperado in ('Rubéola IgG, soro', 'Citomegalovírus IgG e IgM, soro', 'Anti-HCV IgG, soro',
+                     'TOTG-75g gestacional (jejum, 1 h e 2 h), soro', 'Ultrassonografia obstétrica'):
+        assert esperado in t, esperado
+
+
+def test_seguimento_avisa_que_os_exames_iniciais_foram_considerados_feitos(client):
+    r = _pedido_api(client, idade_gestacional=35, primeira_consulta='nao')
+    aviso = next(p for p in r['proximas_gestacao'] if p['estado'] == 'etapa_anterior' and 'iniciais' in p['titulo'])
+    assert 'rubéola' in aviso['motivo'] and 'Primeira consulta' in aviso['motivo']
+    assert 'Rubéola IgG, soro' not in _titulos_api(r)
+
+
+def test_gestante_nao_recebe_o_mesmo_exame_com_dois_nomes(client):
+    t = [x.lower() for x in _titulos_api(_pedido_api(client, idade=25, idade_gestacional=30, primeira_consulta='sim'))]
+    assert 'hiv 1/2 (anticorpos e antígeno p24), soro' in t and 'anti-hiv 1 e 2, soro' not in t
+    assert t.count('anti-hcv igg, soro') == 1
+
+
+def test_gestante_com_hiv_nao_repete_rastreio_de_hiv_nem_exames_equivalentes(client):
+    r = _pedido_api(client, idade_gestacional=30, primeira_consulta='sim', comorbidades=['hiv'], cd4='500')
+    t = [x.lower() for x in _titulos_api(r)]
+    for fora in ('hiv 1/2 (anticorpos e antígeno p24), soro', 'anti-hiv 1 e 2, soro', 'vdrl, soro', 'antígeno hbs, soro',
+                 'anticorpos anti-hcv, soro', 'hemograma completo com plaquetas'):
+        assert fora not in t, fora
+    assert 'carga viral do hiv (hiv rna)' in t and 'sífilis: teste treponêmico ou vdrl, soro' in t
+
+
+@pytest.mark.parametrize('gestante', ['nao', 'sim'])
+def test_beta_hcg_nao_e_pedido_a_mulher_com_hiv(client, gestante):
+    extra = dict(idade_gestacional=20, primeira_consulta='sim') if gestante == 'sim' else {}
+    dados = dict(idade=30, sexo='feminino', tabagismo='nunca', comorbidades=['hiv'], cd4='500', historia_familiar=[],
+                 imunossupressao='nao', gestante=gestante, lactante='nao', **extra)
+    r = client.post('/api/checkup-intelligent', json=dados).get_json()
+    assert not any('hcg' in x['titulo'].lower() for x in r['recommendations'])
+    assert 'anti-hiv 1 e 2, soro' not in [x['titulo'].lower() for x in r['recommendations']]
+
+
+def test_fontes_do_pre_natal_sao_clicaveis(client):
+    r = _pedido_api(client, idade_gestacional=35, primeira_consulta='sim', gestacao_condicoes=['pe_previa'])
+    pn = [x for x in r['recommendations'] if (x.get('subtitulo') or '').startswith('Pré-natal')]
+    assert len(pn) > 10
+    for x in pn:
+        assert x['referencia_html'].count('<a href="https://') == len(x['referencias']), (x['titulo'], x['referencia_html'])
+    html = ' '.join(x['referencia_html'] for x in pn)
+    for dominio in ('medicalsuite.einstein.br', 'bvsms.saude.gov.br', 'acog.org', 'uspreventiveservicestaskforce.org'):
+        assert dominio in html, dominio
+
+
+def test_fontes_das_listas_e_das_sindromes_sao_clicaveis(client):
+    dados = dict(idade=45, sexo='feminino', tabagismo='nunca', comorbidades=['cirurgia_bariatrica', 'masld'],
+                 medicacoes=['varfarina', 'apixabana', 'quetiapina', 'enalapril'],
+                 historia_familiar=['brca', 'lynch', 'nem2', 'hemocromatose', 'cardiomiopatia_hipertrofica'],
+                 imunossupressao='nao', gestante='nao', lactante='nao')
+    r = client.post('/api/checkup-intelligent', json=dados).get_json()
+    sem_link = [(x['titulo'], x.get('referencia')) for x in r['recommendations'] if '<a href="http' not in (x.get('referencia_html') or '')]
+    assert not sem_link, sem_link

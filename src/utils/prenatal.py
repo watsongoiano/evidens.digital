@@ -72,6 +72,9 @@ def normalizar(entrada):
     if toxo not in ('suscetivel', 'imune', 'desconhecido'):
         erros.append({'campo': 'toxoplasmose', 'mensagem': 'Toxoplasmose: valor inválido.'})
         toxo = 'desconhecido'
+    totg = str(entrada.get('totg_feito') or 'desconhecido').lower()
+    if totg not in ('sim', 'nao', 'não', 'desconhecido'):
+        erros.append({'campo': 'totg_feito', 'mensagem': 'TOTG-75g já realizado: valor inválido.'})
     condicoes = entrada.get('gestacao_condicoes') or []
     if isinstance(condicoes, str):
         condicoes = [condicoes]
@@ -80,7 +83,8 @@ def normalizar(entrada):
         erros.append({'campo': 'gestacao_condicoes', 'mensagem': 'Condição da gestação inválida.'})
     if erros:
         raise GestacaoInvalida(erros)
-    return {'ig': ig, 'primeira_consulta': primeira, 'rh': rh, 'toxo': toxo, 'condicoes': sorted(set(condicoes))}
+    return {'ig': ig, 'primeira_consulta': primeira, 'rh': rh, 'toxo': toxo, 'totg_feito': totg == 'sim',
+            'condicoes': sorted(set(condicoes))}
 
 
 def _rec(titulo, categoria, descricao, subtitulo, prioridade='alta', grau='A', referencia=REF):
@@ -89,7 +93,7 @@ def _rec(titulo, categoria, descricao, subtitulo, prioridade='alta', grau='A', r
 
 
 # Janelas (semana inicial, semana final EXCLUSIVA, nome): 20-24 semanas vale até 24+6 → (20, 25).
-def _janelas(g, idade, hipertensa, diabetica):
+def _janelas(g, idade, hipertensa, diabetica, hiv=False):
     toxo_repetir = g['toxo'] != 'imune'
     rh_neg = g['rh'] == 'negativo'
     colo_inicio = 16 if 'prematuro_previo' in g['condicoes'] else 20
@@ -115,18 +119,16 @@ def _janelas(g, idade, hipertensa, diabetica):
                  'Rastreio de colo curto (≤ 25 mm). Com parto prematuro anterior, medir a partir de 16 semanas.',
                  f'Pré-natal | {colo_inicio}-24 semanas', prioridade='media', grau='B'),
         ]),
-        (24, 29, '24-28 semanas', ([] if diabetica else [
-            _rec('TOTG-75g gestacional (jejum, 1 h e 2 h), soro', 'laboratorio',
-                 'Rastreio de diabetes gestacional para todas sem diagnóstico prévio. Critérios IADPSG/OMS: jejum ≥ 92, 1 h ≥ 180 ou 2 h ≥ 153 mg/dL (um valor basta).',
-                 'Pré-natal | 24-28 semanas'),
-        ]) + ([_rec('Coombs indireto, soro', 'laboratorio',
-                    'Gestante Rh negativo: repetir com 28 semanas; se negativo, imunoglobulina anti-D com 28 semanas e até 72 h após o parto (se RN Rh positivo).',
-                    'Pré-natal | Rh negativo: 28 semanas')] if rh_neg else [])),
+        (24, 29, '24-28 semanas', ([_rec('Coombs indireto, soro', 'laboratorio',
+                                         'Gestante Rh negativo: repetir com 28 semanas; se negativo, imunoglobulina anti-D com 28 semanas e até 72 h após o parto (se RN Rh positivo).',
+                                         'Pré-natal | Rh negativo: 28 semanas')] if rh_neg else [])),
         (28, 37, '28-36 semanas', [
             _rec('Hemograma completo', 'laboratorio', 'Rastreio de anemia no 3º trimestre.', 'Pré-natal | 28-36 semanas'),
             _rec('Urocultura com antibiograma', 'laboratorio', 'Bacteriúria assintomática.', 'Pré-natal | 28-36 semanas'),
             _rec('Sífilis: teste treponêmico ou VDRL, soro', 'laboratorio', 'Repetir no 3º trimestre.', 'Pré-natal | 28-36 semanas'),
+        ] + ([] if hiv else [
             _rec('HIV 1/2 (anticorpos e antígeno p24), soro', 'laboratorio', 'Repetir no 3º trimestre.', 'Pré-natal | 28-36 semanas'),
+        ]) + [
             _rec('HBsAg, soro', 'laboratorio', 'Repetir no 3º trimestre (Einstein/MS).', 'Pré-natal | 28-36 semanas', prioridade='media'),
             _rec('Ultrassonografia obstétrica com Doppler', 'imagem', 'Crescimento e vitalidade fetal (protocolo Einstein).',
                  'Pré-natal | 28-36 semanas', prioridade='media', grau='B'),
@@ -142,14 +144,57 @@ def _janelas(g, idade, hipertensa, diabetica):
     return janelas
 
 
-def _primeira_consulta(g, idade, hipertensa, diabetica):
+REF_DMG = 'Consenso brasileiro de DMG 2017 / ' + REF
+
+
+def _totg(g, diabetica):
+    """TOTG-75g: de 24 a 28 semanas; depois disso, pedido enquanto não constar como já realizado.
+
+    Devolve ``(inicio, item)`` ou ``None``. Quem começa o pré-natal depois de 28 semanas, ou não fez o
+    exame na janela, faz o TOTG de imediato (OPAS/MS/FEBRASGO/SBD 2017).
+    """
+    if diabetica or g.get('totg_feito'):
+        return None
+    atrasado = g['ig'] is not None and g['ig'] >= 29
+    item = _rec('TOTG-75g gestacional (jejum, 1 h e 2 h), soro', 'laboratorio',
+                'Rastreio de diabetes gestacional para todas sem diagnóstico prévio. Critérios IADPSG/OMS: jejum ≥ 92, '
+                '1 h ≥ 180 ou 2 h ≥ 153 mg/dL (um valor basta).'
+                + (' Fora da janela de 24-28 semanas: se ainda não foi feito, fazer de imediato.' if atrasado else ''),
+                'Pré-natal | Não realizado com 24-28 semanas: fazer agora' if atrasado else 'Pré-natal | 24-28 semanas',
+                referencia=REF_DMG if atrasado else REF)
+    item['quando_pdf'] = ('TOTG-75g ainda não realizado nesta gestação: fazer agora.' if atrasado
+                          else 'Realizar com 24-28 semanas de gestação.')
+    return 24, item
+
+
+# Exames gerais que medem o mesmo que um exame do pré-natal: na gestação fica só o do pré-natal.
+EQUIVALENTES = {
+    'hiv 1/2 (anticorpos e antígeno p24), soro': ['anti-hiv 1 e 2, soro'],
+    'anti-hcv igg, soro': ['anticorpos anti-hcv, soro'],
+    'hbsag, soro': ['antígeno hbs, soro'],
+    'sífilis: teste treponêmico ou vdrl, soro': ['vdrl, soro'],
+    'hemograma completo': ['hemograma completo com plaquetas', 'hemograma completo, sangue total'],
+    'eas - elementos anormais e sedimentoscopia': ['eas - elementos anormais e sedimentoscopia, urina'],
+    'tgo e tgp, soro': ['aspartato aminotransferase, soro', 'alanina aminotransferase, soro'],
+}
+
+
+def sem_equivalentes(recomendacoes, exames_pn):
+    """Tira do check-up geral o exame que o pré-natal já pede com outro nome."""
+    fora = {t for r in exames_pn for t in EQUIVALENTES.get(r['titulo'].lower(), [])}
+    return [r for r in recomendacoes if (r.get('titulo') or '').strip().lower() not in fora]
+
+
+def _primeira_consulta(g, idade, hipertensa, diabetica, hiv=False):
     recs = [
         _rec('Hemograma completo', 'laboratorio', 'Rastreio de anemia.', 'Pré-natal | 1ª consulta'),
         _rec('Glicemia de jejum, soro', 'laboratorio',
              'Diabetes prévio se ≥ 126 mg/dL; diabetes gestacional se 92-125 mg/dL (IADPSG).', 'Pré-natal | 1ª consulta'),
         _rec('EAS - Elementos Anormais e Sedimentoscopia', 'laboratorio', 'Urina tipo I.', 'Pré-natal | 1ª consulta'),
         _rec('Urocultura com antibiograma', 'laboratorio', 'Bacteriúria assintomática.', 'Pré-natal | 1ª consulta'),
+    ] + ([] if hiv else [
         _rec('HIV 1/2 (anticorpos e antígeno p24), soro', 'laboratorio', 'Transmissão vertical.', 'Pré-natal | 1ª consulta'),
+    ]) + [
         _rec('Sífilis: teste treponêmico ou VDRL, soro', 'laboratorio', 'Transmissão vertical.', 'Pré-natal | 1ª consulta'),
         _rec('HBsAg, soro', 'laboratorio', 'Transmissão vertical.', 'Pré-natal | 1ª consulta'),
         _rec('Anti-HCV IgG, soro', 'laboratorio', 'Rastreio universal na gestação.', 'Pré-natal | 1ª consulta'),
@@ -195,30 +240,61 @@ def _risco_pre_eclampsia(g, hipertensa, diabetica):
     ]
 
 
-def exames(g, idade, hipertensa=False, diabetica=False):
+def exames(g, idade, hipertensa=False, diabetica=False, hiv=False):
     """Exames do pré-natal para fazer AGORA (1ª consulta + janela atual + basais de risco)."""
-    return programacao(g, idade, hipertensa, diabetica)[0]
+    return programacao(g, idade, hipertensa, diabetica, hiv)[0]
 
 
-def programacao(g, idade, hipertensa=False, diabetica=False):
+INICIAIS = ('tipagem ABO/Rh, hemograma, glicemia de jejum, urina tipo I e urocultura, HIV, sífilis, HBsAg, anti-HCV, '
+            'toxoplasmose, rubéola e citomegalovírus')
+
+
+def programacao(g, idade, hipertensa=False, diabetica=False, hiv=False):
     """Devolve ``(agora, proximas)``.
 
     ``agora`` vai para a lista e para os PDFs. ``proximas`` são os exames das janelas
-    seguintes: aparecem só como informação ("Próximas etapas do pré-natal"), nunca no PDF.
+    seguintes e os avisos de etapas anteriores: aparecem só como informação, nunca no PDF.
     """
     agora, proximas = [], []
     ig = g['ig']
     if g['primeira_consulta']:
         agora += [{**r, 'quando_pdf': 'Primeira consulta de pré-natal.'}
-                  for r in _primeira_consulta(g, idade, hipertensa, diabetica)]
+                  for r in _primeira_consulta(g, idade, hipertensa, diabetica, hiv)]
+    else:
+        proximas.append({'titulo': 'Exames iniciais do pré-natal (1ª consulta)', 'categoria': 'laboratorio',
+                         'estado': 'etapa_anterior', 'referencia': REF, 'semana': -1,
+                         'motivo': f'Considerados já feitos: {INICIAIS}. Se algum ficou faltando, responda "Sim" em '
+                                   '"Primeira consulta de pré-natal?" ou acrescente o exame ao gerar o PDF.'})
+    janelas = _janelas(g, idade, hipertensa, diabetica, hiv)
+    com_imagem = False
     if ig is not None:
-        for inicio, fim, nome, itens in _janelas(g, idade, hipertensa, diabetica):
+        for inicio, fim, nome, itens in janelas:
             if inicio <= ig < fim:
                 agora += [{**r, 'quando_pdf': f'Realizar com {nome} de gestação.'} for r in itens]
+                com_imagem = com_imagem or any(r['categoria'] == 'imagem' and 'colo' not in r['titulo'] for r in itens)
             elif inicio > ig:
                 proximas += [{'titulo': r['titulo'], 'categoria': r['categoria'], 'estado': 'proxima_janela',
                               'motivo': f'Pedir com {nome} de gestação. {r["descricao"]}',
                               'referencia': r['referencia'], 'semana': inicio} for r in itens]
+    totg = _totg(g, diabetica)
+    if totg and ig is not None:
+        inicio, item = totg
+        if ig >= inicio:
+            agora.append(item)
+        else:
+            proximas.append({'titulo': item['titulo'], 'categoria': item['categoria'], 'estado': 'proxima_janela',
+                             'motivo': f'Pedir com 24-28 semanas de gestação. {item["descricao"]}',
+                             'referencia': item['referencia'], 'semana': inicio})
+    elif g.get('totg_feito') and ig is not None and ig >= 24:
+        proximas.append({'titulo': 'TOTG-75g gestacional (jejum, 1 h e 2 h), soro', 'categoria': 'laboratorio',
+                         'estado': 'etapa_anterior', 'referencia': REF, 'semana': -1,
+                         'motivo': 'Informado como já realizado nesta gestação.'})
+    # Início tardio do pré-natal fora das janelas de ultrassonografia: uma ultrassonografia obstétrica agora.
+    if g['primeira_consulta'] and ig is not None and ig >= 14 and not com_imagem:
+        agora.append({**_rec('Ultrassonografia obstétrica', 'imagem',
+                             'Início do pré-natal fora das janelas de ultrassonografia: datação, vitalidade e avaliação fetal.',
+                             'Pré-natal | 1ª consulta após 14 semanas', grau='B'),
+                      'quando_pdf': 'Primeira consulta de pré-natal.'})
     agora += [{**r, 'quando_pdf': 'Basal: alto risco de pré-eclâmpsia.'}
               for r in _risco_pre_eclampsia(g, hipertensa, diabetica)]
     vistos, unicos = set(), []

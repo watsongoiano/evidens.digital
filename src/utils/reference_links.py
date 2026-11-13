@@ -71,7 +71,65 @@ def _uspstf_url_by_title(title_lc: str) -> str:
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/ovarian-cancer-screening'
     return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics'
 
+# Fontes citadas pelo pré-natal, pelas listas e pelas síndromes hereditárias: (trecho do rótulo, URL).
+# A ordem importa: o primeiro trecho contido no rótulo vence.
+_FONTES_DIRETAS = [
+    ('einstein pré-natal', 'https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf'),
+    ('ms 2012-2016', 'https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf'),
+    ('williams 26e', 'https://www.mhprofessional.com/williams-obstetrics-26e-9781260462746-usa'),
+    ('consenso brasileiro de dmg', 'https://iris.paho.org/handle/10665.2/34278'),
+    ('acog pb 222', 'https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia'),
+    ('acog 2025', 'https://www.acog.org/clinical/clinical-guidance/practice-advisory/articles/2023/09/maternal-respiratory-syncytial-virus-vaccination'),
+    ('pcdt-ist', 'https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts'),
+    ('nccn', 'https://www.nccn.org/guidelines/category_2'),
+    ('acs 2007', 'https://doi.org/10.3322/canjclin.57.2.75'),
+    ('kratz 2017', 'https://doi.org/10.1158/1078-0432.CCR-17-0408'),
+    ('igclc 2020', 'https://doi.org/10.1016/S1470-2045(20)30219-9'),
+    ('usmstf 2017', 'https://doi.org/10.1038/ajg.2017.174'),
+    ('acg', 'https://gi.org/clinical-guidelines/'),
+    ('easl 2022', 'https://doi.org/10.1016/j.jhep.2022.03.033'),
+    ('endocrine society 2012', 'https://doi.org/10.1210/jc.2012-1230'),
+    ('aha/acc 2024', 'https://doi.org/10.1161/CIR.0000000000001250'),
+    ('aha/acc/hfsa 2022', 'https://doi.org/10.1161/CIR.0000000000001063'),
+    ('acc/aha 2022', 'https://doi.org/10.1161/CIR.0000000000001106'),
+    ('aha/asa 2015', 'https://doi.org/10.1161/STR.0000000000000070'),
+    ('hrs/ehra/aphrs 2013', 'https://doi.org/10.1016/j.hrthm.2013.05.014'),
+    ('hrs 2007', 'https://doi.org/10.1016/j.hrthm.2007.07.020'),
+    ('ats/ers 2003', 'https://doi.org/10.1164/rccm.168.7.818'),
+    ('ehra 2021', 'https://doi.org/10.1093/europace/euab065'),
+    ('chest 2012', 'https://doi.org/10.1378/chest.11-2292'),
+    ('asco 2019', 'https://doi.org/10.1200/JCO.19.01696'),
+    ('asmbs 2019', 'https://doi.org/10.1016/j.soard.2019.10.025'),
+    ('kdigo 2025', 'https://kdigo.org/guidelines/adpkd/'),
+    ('nice cg185', 'https://www.nice.org.uk/guidance/cg185'),
+    ('bhof 2022', 'https://doi.org/10.1007/s00198-021-05900-y'),
+    ('aua/suo 2023', 'https://www.auanet.org/guidelines-and-quality/guidelines/early-detection-of-prostate-cancer-guidelines'),
+    ('eau 2024', 'https://uroweb.org/guidelines/prostate-cancer'),
+    ('svs 2018', 'https://doi.org/10.1016/j.jvs.2017.10.044'),
+    ('ada/apa 2004', 'https://doi.org/10.2337/diacare.27.2.596'),
+]
+
+
+def _fonte_direta(token_lc: str, title_lc: str) -> str:
+    if token_lc.startswith('aasld'):
+        # carcinoma hepatocelular (ultrassonografia na cirrose) ou esteatose (FIB-4)
+        return ('https://doi.org/10.1097/HEP.0000000000000466' if 'ultrassonografia' in title_lc
+                else 'https://doi.org/10.1097/HEP.0000000000000323')
+    if token_lc.startswith('acr') and _contains_any(title_lc, ['mamografia', 'mama']):
+        return 'https://doi.org/10.1016/j.jacr.2023.04.002'  # American College of Radiology, não o de Reumatologia
+    if token_lc.startswith('uspstf') and _contains_any(title_lc, ['proteína/creatinina']):
+        return ('https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/'
+                'low-dose-aspirin-use-for-the-prevention-of-morbidity-and-mortality-from-preeclampsia-preventive-medication')
+    for trecho, url in _FONTES_DIRETAS:
+        if trecho in token_lc:
+            return url
+    return ''
+
+
 def _resolve_url_by_org(token_lc: str, title_lc: str) -> str:
+    direta = _fonte_direta(token_lc, title_lc)
+    if direta:
+        return direta
     # Tratar ACC/AHA como um caso especial
     if 'acc' in token_lc and 'aha' in token_lc:
         if '2019' in token_lc:
