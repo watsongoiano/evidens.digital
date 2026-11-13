@@ -157,7 +157,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para de
 
 **Junior Pagedown**
 - GitHub: [@juniorpagedown](https://github.com/juniorpagedown)
-- Website: [evidens.digital](https://evidens.digital)
+- Website: [evidens.life](https://evidens.life)
 
 ## 🆘 Suporte
 
@@ -167,4 +167,4 @@ Para suporte, abra uma [issue](https://github.com/watsongoiano/evidens.digital/i
 
 ⭐ **Se este projeto foi útil, considere dar uma estrela!**
 
-🚀 **Deploy agora:** [evidens.digital](https://evidens.digital)
+🚀 **Deploy agora:** [evidens.life](https://evidens.life)
