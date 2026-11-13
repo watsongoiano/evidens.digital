@@ -61,19 +61,17 @@
   "dTpa (Adacel® ou Boostrix®)",
   "Febre Amarela (Stamaril®)",
   "Gardasil 9® (Vacina HPV 9-Valente)",
-  "Hepatite A (Havrix® ou Vaqta®)",
   "Hepatite B (Engerix-B® ou Euvax B®)",
-  "Hepatites A e B Combinada (Twinrix®)",
+  "Hepatites A e B (Twinrix® ou vacinas isoladas)",
   "Herpes Zóster (Shingrix®)",
-  "Influenza Tetravalente (Efluelda®)",
-  "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+  "Influenza (trivalente ou quadrivalente)",
+  "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
   "Meningocócica ACWY (Menactra® ou Menveo®)",
-  "Meningocócica B (Bexsero® ou Trumenba®)",
-  "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
-  "Pneumocócica 23V (Pneumovax 23®)",
+  "Meningocócica B (Bexsero®)",
+  "Pneumocócica conjugada 20-valente (Prevenar 20®)",
   "RSV - Vírus Sincicial Respiratório (Abrysvo®)",
-  "RSV - Vírus Sincicial Respiratório (Arexvy®)",
   "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
-  "Varicela (Varilrix® ou Varivax®)"
+  "Varicela (Varilrix® ou Varivax®)",
+  "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
  ]
 }

@@ -282,16 +282,16 @@ def test_caso_de_exemplo_da_home_e_a_saida_real_do_motor(client):
     por_tipo = {}
     for rec in recs:
         por_tipo[rec['categoria']] = por_tipo.get(rec['categoria'], 0) + 1
-    assert (len(recs), por_tipo['laboratorio'], por_tipo['imagem'], por_tipo['vacina']) == (30, 12, 4, 14)
+    assert (len(recs), por_tipo['laboratorio'], por_tipo['imagem'], por_tipo['vacina']) == (27, 12, 4, 11)
     assert r['nao_incluidas'] == []
     html = client.get('/').get_data(as_text=True)
-    for trecho in ('4 de 30', '30 recomendações<br>', 'px-3 py-1">12</span>', 'px-3 py-1">4</span>', 'px-3 py-1">14</span>'):
+    for trecho in ('4 de 27', '27 recomendações<br>', 'px-3 py-1">12</span>', 'px-3 py-1">4</span>', 'px-3 py-1">11</span>'):
         assert trecho in html, trecho
     # As quatro linhas da tabela de conduta: item, fonte e grau de evidência como o motor devolve.
     def achar(pedaco):
         return next(rec for rec in recs if pedaco in rec['titulo'])
     for pedaco, fonte, grau in (('Colonoscopia', 'USPSTF 2021', 'B'), ('Glicose, soro', 'ADA 2024', 'A'),
-                                ('Razão albumina/creatinina', 'SBC 2025', 'A'), ('Herpes Zóster', 'SBIm 2024', 'A')):
+                                ('Razão albumina/creatinina', 'SBC 2025', 'A'), ('Herpes Zóster', 'SBIm 2026/2027', 'A')):
         rec = achar(pedaco)
         assert fonte in rec['referencia'] and rec['grau_evidencia'] == grau, pedaco
 

@@ -16,9 +16,10 @@ LINHA_ASSINATURA = 'Assinatura e Carimbo do Médico'
 
 # Posologia impressa na receita, por termo encontrado no título da vacina.
 VACINAS_ADMINISTRACAO = {
+    "efluelda": "Aplicar uma dose (0,7 ml), INTRAMUSCULAR, anualmente.",
     "influenza": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR, anualmente.",
-    "gardasil": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR, no intervalo 0, 2 e 6 meses.",
-    "hpv": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR, no intervalo 0, 2 e 6 meses.",
+    "gardasil": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR. Até 19 anos: 2 doses (0 e 6 meses); a partir de 20 anos: 3 doses (0, 2 e 6 meses).",
+    "hpv": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR. Até 19 anos: 2 doses (0 e 6 meses); a partir de 20 anos: 3 doses (0, 2 e 6 meses).",
     "twinrix": "Aplicar uma dose (1,0 ml), INTRAMUSCULAR, no intervalo 0, 1 e 6 meses.",
     "hepatite b": "Aplicar uma dose (1,0 ml), INTRAMUSCULAR, no intervalo 0, 1 e 6 meses.",
     "hepatite a": "Aplicar uma dose (1,0 ml), INTRAMUSCULAR, no intervalo 0 e 6 meses.",
@@ -37,9 +38,9 @@ VACINAS_ADMINISTRACAO = {
     "dengue": "Aplicar uma dose (0,5 ml), SUBCUTÂNEA, no intervalo 0 e 3 meses.",
     "covid": "Aplicar conforme esquema vacinal vigente e orientação do Ministério da Saúde.",
     "varicela": "Aplicar uma dose (0,5 ml), SUBCUTÂNEA, no intervalo 0 e 1-2 meses.",
-    "pneumoc": "Aplicar conforme esquema vacinal (VPC seguida de VPP23 após 2 meses, quando indicado).",
-    "herpes z": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR, no intervalo 0 e 2-6 meses.",
-    "zóster": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR, no intervalo 0 e 2-6 meses.",
+    "pneumoc": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR, dose única (VPC20).",
+    "herpes z": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR, no intervalo 0 e 2 meses.",
+    "zóster": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR, no intervalo 0 e 2 meses.",
     "rsv": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR, dose única.",
     "vsr": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR, dose única.",
     " dt": "Aplicar uma dose (0,5 ml), INTRAMUSCULAR, com reforço a cada 10 anos.",

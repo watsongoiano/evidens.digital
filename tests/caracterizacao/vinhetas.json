@@ -21,18 +21,17 @@
         "Eletrocardiograma de repouso"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Influenza (trivalente ou quadrivalente)",
         "Gardasil 9® (Vacina HPV 9-Valente)",
-        "Hepatite B (Engerix-B® ou Euvax B®)",
         "dTpa (Adacel® ou Boostrix®)",
+        "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Varicela (Varilrix® ou Varivax®)",
         "Febre Amarela (Stamaril®)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "Meningocócica B (Bexsero®)",
         "Dengue (Qdenga®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
-        "Varicela (Varilrix® ou Varivax®)",
-        "Hepatites A e B Combinada (Twinrix®)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
       ]
     },
     "nao_incluidas": [],
@@ -63,18 +62,17 @@
         "Eletrocardiograma de repouso"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Influenza (trivalente ou quadrivalente)",
         "Gardasil 9® (Vacina HPV 9-Valente)",
-        "Hepatite B (Engerix-B® ou Euvax B®)",
         "dTpa (Adacel® ou Boostrix®)",
+        "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Varicela (Varilrix® ou Varivax®)",
         "Febre Amarela (Stamaril®)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "Meningocócica B (Bexsero®)",
         "Dengue (Qdenga®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
-        "Varicela (Varilrix® ou Varivax®)",
-        "Hepatites A e B Combinada (Twinrix®)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
       ]
     },
     "nao_incluidas": [],
@@ -102,13 +100,12 @@
         "Eletrocardiograma de repouso"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
-        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "Influenza (trivalente ou quadrivalente)",
         "dTpa (Adacel® ou Boostrix®)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
-        "Hepatites A e B Combinada (Twinrix®)"
+        "Meningocócica B (Bexsero®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
       ]
     },
     "nao_incluidas": [
@@ -121,15 +118,15 @@
         "dados_insuficientes"
       ],
       [
+        "Varicela (Varilrix® ou Varivax®)",
+        "dados_insuficientes"
+      ],
+      [
         "Febre Amarela (Stamaril®)",
         "dados_insuficientes"
       ],
       [
         "Dengue (Qdenga®)",
-        "dados_insuficientes"
-      ],
-      [
-        "Varicela (Varilrix® ou Varivax®)",
         "dados_insuficientes"
       ]
     ],
@@ -160,14 +157,13 @@
         "Eletrocardiograma de repouso"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
-        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "Influenza (trivalente ou quadrivalente)",
         "dTpa (Adacel® ou Boostrix®)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "Meningocócica B (Bexsero®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
-        "RSV - Vírus Sincicial Respiratório (Abrysvo®)",
-        "Hepatites A e B Combinada (Twinrix®)"
+        "RSV - Vírus Sincicial Respiratório (Abrysvo®)"
       ]
     },
     "nao_incluidas": [
@@ -180,15 +176,15 @@
         "contraindicada"
       ],
       [
+        "Varicela (Varilrix® ou Varivax®)",
+        "contraindicada"
+      ],
+      [
         "Febre Amarela (Stamaril®)",
         "contraindicada"
       ],
       [
         "Dengue (Qdenga®)",
-        "contraindicada"
-      ],
-      [
-        "Varicela (Varilrix® ou Varivax®)",
         "contraindicada"
       ]
     ],
@@ -218,18 +214,17 @@
         "Colonoscopia de Rastreio com ou sem biópsia"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Influenza (trivalente ou quadrivalente)",
         "Gardasil 9® (Vacina HPV 9-Valente)",
-        "Hepatite B (Engerix-B® ou Euvax B®)",
         "dTpa (Adacel® ou Boostrix®)",
+        "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Varicela (Varilrix® ou Varivax®)",
         "Febre Amarela (Stamaril®)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "Meningocócica B (Bexsero®)",
         "Dengue (Qdenga®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
-        "Varicela (Varilrix® ou Varivax®)",
-        "Hepatites A e B Combinada (Twinrix®)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
       ]
     },
     "nao_incluidas": [],
@@ -261,20 +256,18 @@
         "Colonoscopia de Rastreio com ou sem biópsia"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
-        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "Influenza (trivalente ou quadrivalente)",
         "dTpa (Adacel® ou Boostrix®)",
+        "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Varicela (Varilrix® ou Varivax®)",
         "Febre Amarela (Stamaril®)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
+        "Meningocócica B (Bexsero®)",
         "Dengue (Qdenga®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
-        "Pneumocócica 23V (Pneumovax 23®)",
-        "RSV - Vírus Sincicial Respiratório (Arexvy®)",
-        "Hepatites A e B Combinada (Twinrix®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)"
       ]
     },
     "nao_incluidas": [],
@@ -316,20 +309,17 @@
         "Tomografia computadorizada de tórax de baixa dose (LDCT)"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
-        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "Influenza (trivalente ou quadrivalente)",
         "dTpa (Adacel® ou Boostrix®)",
+        "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Varicela (Varilrix® ou Varivax®)",
         "Febre Amarela (Stamaril®)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Dengue (Qdenga®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
-        "Pneumocócica 23V (Pneumovax 23®)",
-        "RSV - Vírus Sincicial Respiratório (Arexvy®)",
-        "Hepatites A e B Combinada (Twinrix®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)"
       ]
     },
     "nao_incluidas": [],
@@ -382,16 +372,14 @@
         "Fundoscopia (Exame de fundo de olho)"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
         "dTpa (Adacel® ou Boostrix®)",
-        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
         "Dengue (Qdenga®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
-        "Pneumocócica 23V (Pneumovax 23®)",
-        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
       ]
     },
     "nao_incluidas": [
@@ -437,20 +425,17 @@
         "Colonoscopia de Rastreio com ou sem biópsia"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
-        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "Influenza (trivalente ou quadrivalente)",
         "dTpa (Adacel® ou Boostrix®)",
+        "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Varicela (Varilrix® ou Varivax®)",
         "Febre Amarela (Stamaril®)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Dengue (Qdenga®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
-        "Pneumocócica 23V (Pneumovax 23®)",
-        "RSV - Vírus Sincicial Respiratório (Arexvy®)",
-        "Hepatites A e B Combinada (Twinrix®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)"
       ]
     },
     "nao_incluidas": [],
@@ -495,15 +480,13 @@
         "Fundoscopia (Exame de fundo de olho)"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
         "dTpa (Adacel® ou Boostrix®)",
-        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
-        "Pneumocócica 23V (Pneumovax 23®)",
-        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
       ]
     },
     "nao_incluidas": [
@@ -539,15 +522,13 @@
         "Colonoscopia de Rastreio com ou sem biópsia"
       ],
       "vacina": [
-        "Influenza Tetravalente (Efluelda®)",
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
         "dTpa (Adacel® ou Boostrix®)",
-        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
-        "Pneumocócica 23V (Pneumovax 23®)",
-        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
       ]
     },
     "nao_incluidas": [
@@ -595,15 +576,13 @@
         "Radiografia de tórax"
       ],
       "vacina": [
-        "Influenza Tetravalente (Efluelda®)",
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
         "dTpa (Adacel® ou Boostrix®)",
-        "Tríplice Viral - SCR (Priorix® ou M-M-R® II)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
-        "Pneumocócica 23V (Pneumovax 23®)",
-        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
       ]
     },
     "nao_incluidas": [
@@ -638,14 +617,13 @@
         "Colonoscopia de Rastreio com ou sem biópsia"
       ],
       "vacina": [
-        "Influenza Tetravalente (Efluelda®)",
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
         "dTpa (Adacel® ou Boostrix®)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
-        "Pneumocócica 23V (Pneumovax 23®)",
-        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
       ]
     },
     "nao_incluidas": [
@@ -678,14 +656,13 @@
         "Eletrocardiograma de repouso"
       ],
       "vacina": [
-        "Influenza Tetravalente (Efluelda®)",
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
         "dTpa (Adacel® ou Boostrix®)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica 20V (Prevenar 20®) ou 15V (Vaxneuvance®)",
-        "Pneumocócica 23V (Pneumovax 23®)",
-        "RSV - Vírus Sincicial Respiratório (Arexvy®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
       ]
     },
     "nao_incluidas": [
@@ -734,14 +711,13 @@
         "Eletrocardiograma de repouso"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Influenza (trivalente ou quadrivalente)",
         "Gardasil 9® (Vacina HPV 9-Valente)",
-        "Hepatite B (Engerix-B® ou Euvax B®)",
         "dTpa (Adacel® ou Boostrix®)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
-        "Hepatites A e B Combinada (Twinrix®)"
+        "Meningocócica B (Bexsero®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
       ]
     },
     "nao_incluidas": [
@@ -750,15 +726,15 @@
         "contraindicada"
       ],
       [
+        "Varicela (Varilrix® ou Varivax®)",
+        "contraindicada"
+      ],
+      [
         "Febre Amarela (Stamaril®)",
         "contraindicada"
       ],
       [
         "Dengue (Qdenga®)",
-        "contraindicada"
-      ],
-      [
-        "Varicela (Varilrix® ou Varivax®)",
         "contraindicada"
       ]
     ],
@@ -802,14 +778,13 @@
         "Eletrocardiograma de repouso"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Influenza (trivalente ou quadrivalente)",
         "Gardasil 9® (Vacina HPV 9-Valente)",
-        "Hepatite B (Engerix-B® ou Euvax B®)",
         "dTpa (Adacel® ou Boostrix®)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
-        "Hepatites A e B Combinada (Twinrix®)"
+        "Meningocócica B (Bexsero®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
       ]
     },
     "nao_incluidas": [
@@ -818,15 +793,15 @@
         "precaucao"
       ],
       [
+        "Varicela (Varilrix® ou Varivax®)",
+        "precaucao"
+      ],
+      [
         "Febre Amarela (Stamaril®)",
         "precaucao"
       ],
       [
         "Dengue (Qdenga®)",
-        "precaucao"
-      ],
-      [
-        "Varicela (Varilrix® ou Varivax®)",
         "precaucao"
       ]
     ],
@@ -853,14 +828,13 @@
         "Eletrocardiograma de repouso"
       ],
       "vacina": [
-        "Influenza Tetravalente (Fluarix®, Vaxigrip® ou similar)",
+        "Influenza (trivalente ou quadrivalente)",
         "Gardasil 9® (Vacina HPV 9-Valente)",
-        "Hepatite B (Engerix-B® ou Euvax B®)",
         "dTpa (Adacel® ou Boostrix®)",
-        "Hepatite A (Havrix® ou Vaqta®)",
+        "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
-        "Hepatites A e B Combinada (Twinrix®)"
+        "Meningocócica B (Bexsero®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
       ]
     },
     "nao_incluidas": [
@@ -869,15 +843,15 @@
         "contraindicada"
       ],
       [
+        "Varicela (Varilrix® ou Varivax®)",
+        "contraindicada"
+      ],
+      [
         "Febre Amarela (Stamaril®)",
         "contraindicada"
       ],
       [
         "Dengue (Qdenga®)",
-        "contraindicada"
-      ],
-      [
-        "Varicela (Varilrix® ou Varivax®)",
         "contraindicada"
       ]
     ],
