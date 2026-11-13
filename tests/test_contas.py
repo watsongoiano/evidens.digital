@@ -208,3 +208,9 @@ def test_chave_de_sessao_padrao_nao_vale_fora_dos_testes(app, monkeypatch):
     monkeypatch.setitem(app.config, 'SECRET_KEY', auth.CHAVE_PADRAO)
     monkeypatch.setitem(app.config, 'TESTING', False)
     assert app.test_client().post('/api/auth/login', json=dict(email='a@b.test', senha='x')).status_code == 503
+
+
+def test_banco_nao_aceita_um_segundo_administrador(contas, administrador):
+    """Mesmo sem a conferência da rota (duas instalações simultâneas), o banco recusa."""
+    assert contas.criar('segundo@exemplo.test', 'Segundo Admin', 'CRM-GO 2', 'medico', SENHA_DE_TESTE, administrador=True) is None
+    assert sum(1 for u in contas.listar() if u['administrador']) == 1

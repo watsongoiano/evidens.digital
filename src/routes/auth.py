@@ -168,7 +168,7 @@ def configurar():
     except contas.DadosInvalidos as e:
         return jsonify({'error': 'Confira os dados informados.', 'erros': e.erros}), 400
     if u is None:
-        return jsonify({'error': 'Já existe uma conta com este e-mail.'}), 409
+        return jsonify({'error': 'Já existe uma conta com este e-mail, ou o administrador acabou de ser criado.'}), 409
     _abrir_sessao(u)
     return jsonify({'ok': True, 'usuario': contas.publico(u)}), 201
 

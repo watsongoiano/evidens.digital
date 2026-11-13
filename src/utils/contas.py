@@ -79,6 +79,9 @@ _ESQUEMA = [
         quando BIGINT NOT NULL
     )""",
     "CREATE INDEX IF NOT EXISTS tentativas_login_quando ON tentativas_login (quando)",
+    # No máximo um administrador: a regra fica no banco, para que duas instalações
+    # simultâneas com o código certo não criem duas contas privilegiadas.
+    "CREATE UNIQUE INDEX IF NOT EXISTS um_so_administrador ON usuarios (administrador) WHERE administrador = 1",
 ]
 
 
@@ -177,12 +180,18 @@ def criar(email, nome, registro, perfil, senha, administrador=False):
     with _conexao() as executar:
         if executar(_SELECT + 'WHERE email = ?', (email,)).fetchone():
             return None
-        executar(
-            'INSERT INTO usuarios (email, nome, registro, perfil, senha_hash, situacao, administrador, criado_em, decidido_em) '
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            (email, nome, registro, perfil, generate_password_hash(senha),
-             'aprovado' if administrador else 'pendente', 1 if administrador else 0,
-             agora, agora if administrador else None))
+        try:
+            executar(
+                'INSERT INTO usuarios (email, nome, registro, perfil, senha_hash, situacao, administrador, criado_em, decidido_em) '
+                'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                (email, nome, registro, perfil, generate_password_hash(senha),
+                 'aprovado' if administrador else 'pendente', 1 if administrador else 0,
+                 agora, agora if administrador else None))
+        except Exception as erro:
+            # Outra requisição criou o mesmo e-mail (ou o administrador) no intervalo.
+            if 'unique' in str(erro).lower() or 'IntegrityError' in type(erro).__name__ or 'UniqueViolation' in type(erro).__name__:
+                return None
+            raise
         return _usuario(executar(_SELECT + 'WHERE email = ?', (email,)).fetchone())
 
 
