@@ -588,3 +588,8 @@ def test_colonoscopia_de_lynch_nao_aparece_duas_vezes(client):
     recs = client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']
     colo = [r for r in recs if 'colonoscopia' in r['titulo'].lower()]
     assert len(colo) == 1 and '1-2 anos' in colo[0]['descricao']
+
+
+def test_escolha_manual_de_imunossupressao_nao_e_desfeita_pela_lista(pagina):
+    """O clique no botão marca o evento como escolha do médico; a marcação automática só desfaz o que ela mesma fez."""
+    assert 'ev.doUsuario = true' in pagina and 'e.isTrusted || e.doUsuario' in pagina

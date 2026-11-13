@@ -1423,7 +1423,8 @@
                 else if (!precisa && imunoAuto) { campo.value = 'desconhecido'; imunoAuto = false; campo.dispatchEvent(new Event('change', { bubbles: true })); }
                 document.getElementById('imuno-aviso').hidden = !(precisa && campo.value === 'sim');
             }
-            document.getElementById('imunossupressao').addEventListener('change', e => { if (e.isTrusted) imunoAuto = false; });
+            // resposta dada pelo médico (clique no botão) deixa de ser automática e não é desfeita
+            document.getElementById('imunossupressao').addEventListener('change', e => { if (e.isTrusted || e.doUsuario) imunoAuto = false; });
             // Caixas fixas (mais usados, comorbidades e família): qualquer mudança refaz a conferência.
             checkupForm.addEventListener('change', e => {
                 if (e.target.matches('input[type="checkbox"][name="medicacoes"], input[type="checkbox"][name="comorbidades"]')) { conferirImuno(); conferir(); }
@@ -1562,8 +1563,11 @@
                     b.type = 'button'; b.className = 'opcao'; b.setAttribute('role', 'radio'); b.dataset.valor = o.value; b.textContent = o.textContent;
                     b.addEventListener('click', () => {
                         sel.value = (opcional && sel.value === o.value) ? '' : o.value;
-                        sel.dispatchEvent(new Event('input', { bubbles: true }));
-                        sel.dispatchEvent(new Event('change', { bubbles: true }));
+                        ['input', 'change'].forEach(tipo => {
+                            const ev = new Event(tipo, { bubbles: true });
+                            ev.doUsuario = true; // escolha do médico, não atualização automática
+                            sel.dispatchEvent(ev);
+                        });
                     });
                     b.addEventListener('keydown', e => {
                         const passo = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
