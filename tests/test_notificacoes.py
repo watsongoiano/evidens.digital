@@ -99,7 +99,7 @@ def test_nome_com_quebra_de_linha_nao_forja_campos_no_email():
 
 def test_painel_mostra_o_estado_e_envia_teste(admin, administrador, resend):
     estado = admin.get('/api/admin/aviso').get_json()
-    assert estado == {'configurado': True, 'destinatarios': [administrador['email']]}
+    assert estado == {'configurado': True, 'destinatarios': [administrador['email']], 'boas_vindas': False}
     r = admin.post('/api/admin/aviso/teste', json={})
     assert r.status_code == 200 and r.get_json()['destinatarios'] == [administrador['email']]
     assert 'teste' in resend[-1]['corpo']['subject']
@@ -135,3 +135,56 @@ def test_contagem_de_cadastros_recentes(contas):
     contas.criar('recente@exemplo.test', 'Pessoa Recente', 'CRM-GO 77', 'medico', SENHA_DE_TESTE)
     assert contas.criados_desde(time.time() - 3600) == antes + 1
     assert contas.criados_desde(time.time() + 60) == 0
+
+
+# ---------------------------------------------------------------------------
+# Boas-vindas a quem pede a conta
+# ---------------------------------------------------------------------------
+def test_boas_vindas_desligadas_sem_remetente_do_dominio(anonimo, administrador, resend):
+    """Com o remetente padrão da Resend só sai o aviso ao administrador."""
+    assert not notificacoes.boas_vindas_ligadas()
+    _cadastrar(anonimo, 'bv0@exemplo.test')
+    assert [e['corpo']['to'] for e in resend] == [[administrador['email']]]
+
+
+def test_boas_vindas_vao_para_quem_se_cadastrou(anonimo, administrador, resend, monkeypatch):
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    monkeypatch.setenv('EMAIL_RESPOSTA', 'retorno@exemplo.test')
+    assert _cadastrar(anonimo, 'bv1@exemplo.test', nome='Maria Nova Silva').status_code == 202
+    assert len(resend) == 2
+    bv = next(e['corpo'] for e in resend if e['corpo']['to'] == ['bv1@exemplo.test'])
+    assert bv['subject'] == 'Bem-vindo(a) ao Evidēns' and bv['from'] == 'Evidēns <contato@exemplo.test>'
+    assert bv['reply_to'] == 'retorno@exemplo.test'
+    for trecho in ('Olá, Maria.', 'fase de desenvolvimento', 'feedback', 'https://evidens.life/login',
+                   'https://evidens.life/contact', 'responsável técnico confere'):
+        assert trecho in bv['text'], trecho
+    assert SENHA_DE_TESTE not in bv['text'] and administrador['email'] not in bv['text']
+
+
+def test_email_ja_cadastrado_nao_recebe_boas_vindas(anonimo, administrador, resend, monkeypatch):
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    _cadastrar(anonimo, 'bv2@exemplo.test')
+    antes = len(resend)
+    _cadastrar(anonimo, 'bv2@exemplo.test')
+    assert len(resend) == antes
+
+
+def test_boas_vindas_respeitam_o_limite_por_hora(anonimo, administrador, resend, contas, monkeypatch):
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    monkeypatch.setattr(contas, 'criados_desde', lambda instante: notificacoes.LIMITE_POR_HORA + 3)
+    _cadastrar(anonimo, 'bv3@exemplo.test')
+    assert resend == []
+
+
+def test_painel_informa_e_testa_as_boas_vindas(admin, administrador, resend, monkeypatch):
+    assert admin.get('/api/admin/aviso').get_json()['boas_vindas'] is False
+    assert admin.post('/api/admin/boas-vindas/teste', json={}).status_code == 502
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    assert admin.get('/api/admin/aviso').get_json()['boas_vindas'] is True
+    r = admin.post('/api/admin/boas-vindas/teste', json={})
+    assert r.status_code == 200 and r.get_json()['destinatarios'] == [administrador['email']]
+    assert resend[-1]['corpo']['subject'] == 'Bem-vindo(a) ao Evidēns'
+
+
+def test_teste_de_boas_vindas_e_restrito_ao_administrador(client):
+    assert client.post('/api/admin/boas-vindas/teste', json={}).status_code == 403
