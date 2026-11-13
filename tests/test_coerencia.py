@@ -74,3 +74,27 @@ def test_api_estatina_no_texto_entra_no_prevent_e_volta_nas_inferencias(client):
 def test_api_termos_para_a_tela(client):
     termos = client.get('/api/coerencia').get_json()['termos']
     assert termos == coerencia.TERMOS
+
+
+@pytest.mark.parametrize('pas, pad, categoria, has', [
+    (118, 76, 'normal', False), (125, 78, 'elevada', False), (128, 82, 'estagio1', True),
+    (134, 70, 'estagio1', True), (138, 92, 'estagio2', True), (150, 85, 'estagio2', True),
+])
+def test_pa_pela_aha_2025(pas, pad, categoria, has):
+    assert coerencia.classificar_pa(pas, pad)['categoria'] == categoria
+    com, _, inf = coerencia.inferir({'pas': pas, 'pad': pad})
+    assert ('hipertensao' in com) is has
+    if has:
+        assert 'MRPA ou MAPA' in inf[0]['motivo']
+
+
+def test_pa_na_gestacao_usa_140_90():
+    assert 'hipertensao' not in coerencia.inferir({'pas': 134, 'pad': 84}, gestante=True)[0]
+    assert 'hipertensao' in coerencia.inferir({'pas': 142, 'pad': 84}, gestante=True)[0]
+
+
+def test_api_devolve_classificacao_da_pa_e_pede_mapa(client):
+    corpo = {'idade': '45', 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao', 'pas': '132', 'pad': '78'}
+    r = client.post('/api/checkup-intelligent', json=corpo).get_json()
+    assert r['pa_classificacao']['categoria'] == 'estagio1'
+    assert any(t['titulo'].startswith('MAPA') for t in r['recommendations'])
