@@ -1,7 +1,9 @@
+import re
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 from src.utils.analytics import analytics
 from src.utils.reference_links import build_reference_links, build_reference_html
+from src.utils import coerencia
 from src.utils import prenatal
 from src.utils import prevent
 from src.utils.seguranca_vacinas import aplicar_triagem_vacinas
@@ -649,6 +651,14 @@ def generate_intelligent_recommendations():
         
         # Campo de texto de medicações contínuas
         medicacoes_continuo = (data.get('medicacoes_continuo', '') or '').lower()
+
+        # Coerência entre campos: estatina → dislipidemia, anti-hipertensivo → HAS,
+        # HbA1c ≥ 6,5 → diabetes, IMC ≥ 30 → obesidade, TFG < 60 → DRC (src/utils/coerencia.py).
+        egfr_inferencia = None
+        if data.get('creatinina'):
+            egfr_inferencia = prevent.egfr_ckd_epi_2021(float(data['creatinina']), data['idade'], data['sexo'])
+        comorbidades, medicacoes_checkboxes, inferencias = coerencia.inferir(
+            {**data, 'comorbidades': comorbidades, 'medicacoes': medicacoes_checkboxes}, egfr=egfr_inferencia)
         
         # Verificar se tem hipertensão nas comorbidades
         if 'hipertensao' in comorbidades or 'hipertensão' in comorbidades:
@@ -667,16 +677,6 @@ def generate_intelligent_recommendations():
         # Verificar se marcou checkbox de anti-hipertensivos
         if 'anti_hipertensivos' in medicacoes_checkboxes:
             has_hypertension = True
-        
-        # Verificar se usa medicações anti-hipertensivas no campo de texto
-        anti_htn_keywords = ['losartan', 'enalapril', 'captopril', 'valsartan', 'anlodipino', 
-                             'hidroclorotiazida', 'atenolol', 'propranolol', 'carvedilol',
-                             'metoprolol', 'bisoprolol', 'espironolactona', 'furosemida',
-                             'anti-hipertensiv', 'antihipertensiv']
-        for keyword in anti_htn_keywords:
-            if keyword in medicacoes_continuo:
-                has_hypertension = True
-                break
         
         # Extrair dados de tabagismo e DPOC
         tabagismo = data['tabagismo']
@@ -734,7 +734,7 @@ def generate_intelligent_recommendations():
         
         # Verificar HbA1C se fornecido
         hba1c = float(data.get('hba1c', 0)) if data.get('hba1c') else None
-        diabetes_por_hba1c = False
+        diabetes_por_hba1c = any(i['valor'] == 'diabetes' and 'HbA1c' in i['motivo'] for i in inferencias)
         if hba1c is not None and hba1c >= 6.5 and not is_diabetic:
             # ADA: HbA1c ≥ 6,5% é critério diagnóstico de diabetes (confirmar com 2º exame
             # se não houver hiperglicemia inequívoca). Antes o corte era > 6,5 e 6,5 escapava.
@@ -897,7 +897,8 @@ def generate_intelligent_recommendations():
             })
             
             # Potássio sérico (se em uso de IECA/BRA/diuréticos)
-            usa_ieca_bra = any(keyword in medicacoes_continuo_lower for keyword in ['enalapril', 'captopril', 'losartan', 'valsartan', 'ieca', 'bra'])
+            # Palavra inteira: "bra" por substring casava com "brasil", "cobra" etc.
+            usa_ieca_bra = bool(re.search(r'\b(enalapril|captopril|ramipril|lisinopril|losartan[a]?|valsartan[a]?|olmesartana|candesartana|telmisartana|ieca|bra)\b', medicacoes_continuo_lower))
             usa_diuretico = any(keyword in medicacoes_continuo_lower for keyword in ['hidroclorotiazida', 'furosemida', 'espironolactona', 'diurético', 'diuretico'])
             
             if usa_ieca_bra or usa_diuretico:
@@ -1334,7 +1335,6 @@ def generate_intelligent_recommendations():
         # Deduplicar por título antes de responder (deduplicação inteligente)
         try:
             from collections import defaultdict
-            import re
             
             # Agrupar exames similares
             grupos = defaultdict(list)
@@ -1411,6 +1411,7 @@ def generate_intelligent_recommendations():
         response['nao_incluidas'] = nao_incluidas
         response['adiados_gestacao'] = adiados_gestacao
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
+        response['inferencias'] = inferencias
         response['proximas_gestacao'] = proximas_gestacao
         response['gestacao'] = gestacao
         response['triagem_vacinas'] = triagem
@@ -1571,6 +1572,12 @@ def catalogo_endpoint():
     """Itens que o médico pode acrescentar a um pedido ou receita, por categoria."""
     from src.utils.catalogo import catalogo
     return jsonify(catalogo())
+
+
+@checkup_intelligent_bp.route('/coerencia')
+def coerencia_endpoint():
+    """Termos usados pela tela para marcar caixas a partir do texto (mesma lista do servidor)."""
+    return jsonify({'termos': coerencia.TERMOS})
 
 
 @checkup_intelligent_bp.route('/gerar-pdf-exames-laboratoriais', methods=['POST'])

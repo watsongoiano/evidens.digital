@@ -415,4 +415,18 @@ def test_hba1c_a_partir_de_6_5_conta_como_diabetes(client, hba1c, diabetico):
 
 
 def test_hba1c_marca_o_chip_de_diabetes_na_tela(pagina):
-    assert "valor >= 6.5" in pagina and "chip.checked = true" in pagina
+    assert "hb >= 6.5" in pagina and "fetch('/api/coerencia'" in pagina
+
+
+def test_exames_laboratoriais_so_aparecem_se_houver(pagina):
+    bloco = pagina.split('id="exames-bloco"')[1].split('</section>')[0]
+    for campo in ('colesterol', 'hdl', 'creatinina', 'hba1c'):
+        assert f'id="{campo}"' in bloco
+    assert 'id="exames-bloco" class="bloco-condicional" hidden' in pagina
+    assert 'name="tem_exames" value="sim"' in pagina and 'name="tem_exames" value="nao"' in pagina
+
+
+def test_campo_tem_exames_e_aceito_pela_api(client):
+    r = client.post('/api/checkup-intelligent', json={'idade': '40', 'sexo': 'feminino', 'tabagismo': 'nunca',
+                                                      'imunossupressao': 'nao', 'tem_exames': 'nao'})
+    assert r.status_code == 200

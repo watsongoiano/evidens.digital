@@ -74,16 +74,30 @@
         <div class="campo"><label for="altura">Altura (cm)</label><input type="number" id="altura" name="altura" placeholder="Ex: 170" inputmode="numeric"></div>
         <div class="campo"><label for="pas">Pressão sistólica (mmHg)</label><input type="number" id="pas" name="pas" placeholder="Ex: 140" inputmode="numeric"></div>
         <div class="campo"><label for="pad">Pressão diastólica (mmHg)</label><input type="number" id="pad" name="pad" placeholder="Ex: 90" inputmode="numeric"></div>
-        <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200" inputmode="numeric"></div>
-        <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" placeholder="Ex: 45" inputmode="numeric"></div>
-        <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
-        <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5%: "Diabetes tipo 2" marcado automaticamente (ADA). Confirme com um segundo exame se não houver hiperglicemia inequívoca.</p></div>
+      </div>
+      <fieldset class="campo mt-5">
+        <legend class="campo-rotulo">Tem exames laboratoriais recentes?</legend>
+        <div class="opcoes" id="tem_exames">
+          <label class="opcao" for="tem_exames_sim"><input type="radio" id="tem_exames_sim" name="tem_exames" value="sim">Sim</label>
+          <label class="opcao" for="tem_exames_nao"><input type="radio" id="tem_exames_nao" name="tem_exames" value="nao">Não</label>
+        </div>
+      </fieldset>
+      <div id="exames-bloco" class="bloco-condicional" hidden>
+        <p class="campo-rotulo text-teal-dark">Exames laboratoriais</p>
+        <p class="text-[13px] text-ink/55 -mt-1 mb-4">Preencha só os que tiver. Colesterol total, HDL e creatinina permitem calcular o PREVENT; HbA1c refina o cálculo.</p>
+        <div class="grade">
+          <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200" inputmode="numeric"></div>
+          <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" placeholder="Ex: 45" inputmode="numeric"></div>
+          <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
+          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5%: "Diabetes tipo 2" marcado automaticamente (ADA). Confirme com um segundo exame se não houver hiperglicemia inequívoca.</p></div>
+        </div>
       </div>
     </section>
 
     <section class="secao" aria-labelledby="s-comorbidades">
       <h2 id="s-comorbidades" class="secao-titulo"><span class="secao-num">03</span>Comorbidades e História Prévia</h2>
       <p class="secao-nota">Marque as que se aplicam.</p>
+      <p id="coerencia-aviso" class="aviso aviso-info mb-4 text-[13px]" hidden></p>
       <div class="opcoes">
         <label class="opcao" for="diabetes"><input type="checkbox" id="diabetes" name="comorbidades" value="diabetes">Diabetes tipo 2</label>
         <label class="opcao" for="hipertensao"><input type="checkbox" id="hipertensao" name="comorbidades" value="hipertensao">Hipertensão</label>
@@ -916,26 +930,75 @@
             }
         });
 
-        // HbA1c ≥ 6,5% marca "Diabetes tipo 2" (ADA). Só desmarca se foi a própria regra que marcou.
+        // Coerência entre campos (mesmas regras de src/utils/coerencia.py): um dado marca a caixa
+        // que ele implica. Só desmarca o que a própria regra marcou; marcação manual é preservada.
         (function () {
-            const campo = document.getElementById('hba1c');
-            const chip = document.getElementById('diabetes');
-            const aviso = document.getElementById('hba1c-aviso');
-            let marcadoPelaHba1c = false;
-            function conferir() {
-                const valor = parseFloat(String(campo.value).replace(',', '.'));
-                if (!isNaN(valor) && valor >= 6.5) {
-                    if (!chip.checked) { chip.checked = true; marcadoPelaHba1c = true; }
-                    aviso.hidden = !marcadoPelaHba1c;
-                } else {
-                    if (marcadoPelaHba1c) { chip.checked = false; marcadoPelaHba1c = false; }
-                    aviso.hidden = true;
-                }
+            let termos = null;
+            fetch('/api/coerencia', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null)
+                .then(j => { termos = j && j.termos; conferir(); }).catch(() => {});
+            const auto = new Map();   // id da caixa -> motivo
+            const recusados = new Set(); // caixas automáticas que o médico desmarcou
+            const sem = t => (t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+            function noTexto(classe) {
+                if (!termos) return false;
+                const t = ' ' + sem(document.getElementById('medicacoes_continuo').value).split(/[^a-z0-9-]+/).join(' ') + ' ';
+                return (termos[classe] || []).some(p => t.includes(' ' + p + ' '));
             }
-            campo.addEventListener('input', conferir);
-            campo.addEventListener('change', conferir);
-            chip.addEventListener('change', () => { marcadoPelaHba1c = false; aviso.hidden = true; });
+            const num = id => { const v = parseFloat(String(document.getElementById(id)?.value || '').replace(',', '.')); return isNaN(v) ? null : v; };
+            function regras() {
+                const marcado = id => document.getElementById(id).checked;
+                const r = {};
+                if (noTexto('estatinas')) r.estatinas = 'estatina citada em "Outras medicações"';
+                if (noTexto('anti_hipertensivos')) r.anti_hipertensivos = 'anti-hipertensivo citado em "Outras medicações"';
+                if (marcado('estatinas') || r.estatinas || noTexto('outros_hipolipemiantes')) r.dislipidemia = 'uso de hipolipemiante';
+                if (marcado('anti_hipertensivos') || r.anti_hipertensivos) r.hipertensao = 'uso de anti-hipertensivo';
+                if (marcado('has_resistente')) r.hipertensao = 'HAS resistente marcada';
+                if (noTexto('antidiabeticos')) r.diabetes = 'antidiabético citado em "Outras medicações"';
+                const hb = num('hba1c'); if (hb !== null && hb >= 6.5) r.diabetes = 'HbA1c ≥ 6,5% (ADA; confirmar com 2º exame)';
+                const peso = num('peso'), alt = num('altura');
+                if (peso && alt && peso / Math.pow(alt / 100, 2) >= 30) r.obesidade = 'IMC ≥ 30 kg/m²';
+                return r;
+            }
+            function conferir() {
+                // duas passadas: estatina vinda do texto também implica dislipidemia
+                for (let passo = 0; passo < 2; passo++) {
+                    const r = regras();
+                    auto.forEach((motivo, id) => { if (!r[id]) { document.getElementById(id).checked = false; auto.delete(id); } });
+                    recusados.forEach(id => { if (!r[id]) recusados.delete(id); });
+                    Object.entries(r).forEach(([id, motivo]) => {
+                        if (recusados.has(id)) return;
+                        const caixa = document.getElementById(id);
+                        if (caixa && !caixa.checked) { caixa.checked = true; auto.set(id, motivo); }
+                        else if (auto.has(id)) auto.set(id, motivo);
+                    });
+                }
+                const aviso = document.getElementById('coerencia-aviso');
+                aviso.hidden = auto.size === 0;
+                aviso.innerHTML = 'Marcado automaticamente: ' + [...auto].map(([id, m]) =>
+                    `<strong class="font-medium">${escapeHtml(document.querySelector('label[for="' + id + '"]').textContent.trim())}</strong> (${escapeHtml(m)})`).join('; ') + '. Desmarque se não se aplicar.';
+                document.getElementById('hba1c-aviso').hidden = !(auto.has('diabetes') && (num('hba1c') || 0) >= 6.5);
+            }
+            ['medicacoes_continuo', 'hba1c', 'peso', 'altura'].forEach(id => {
+                document.getElementById(id).addEventListener('input', conferir);
+                document.getElementById(id).addEventListener('change', conferir);
+            });
+            ['estatinas', 'anti_hipertensivos', 'has_resistente'].forEach(id => document.getElementById(id).addEventListener('change', conferir));
+            // quem desmarca à mão uma caixa automática fica com a decisão
+            ['dislipidemia', 'hipertensao', 'diabetes', 'obesidade', 'estatinas', 'anti_hipertensivos'].forEach(id =>
+                document.getElementById(id).addEventListener('change', e => {
+                    if (auto.has(id) && !e.target.checked) { auto.delete(id); recusados.add(id); conferir(); }
+                }));
         })();
+
+        // Exames laboratoriais só aparecem se o paciente tiver exames; "Não" limpa os valores.
+        document.getElementById('tem_exames').addEventListener('change', e => {
+            const tem = e.target.value === 'sim';
+            const bloco = document.getElementById('exames-bloco');
+            bloco.hidden = !tem;
+            if (!tem) {
+                bloco.querySelectorAll('input').forEach(i => { i.value = ''; i.dispatchEvent(new Event('input', { bubbles: true })); });
+            }
+        });
 
         // Dados da gestação aparecem só para gestante
         function atualizarBlocoGestacao() {
