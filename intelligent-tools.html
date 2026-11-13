@@ -158,6 +158,14 @@
               </select>
             </div>
             <div class="campo">
+              <label for="totg_feito">TOTG-75g já feito nesta gestação?</label>
+              <select id="totg_feito" name="totg_feito">
+                <option value="desconhecido">Não informado</option>
+                <option value="nao">Não</option>
+                <option value="sim">Sim</option>
+              </select>
+            </div>
+            <div class="campo">
               <label for="fator_rh">Fator Rh materno</label>
               <select id="fator_rh" name="fator_rh">
                 <option value="desconhecido">Não sabido</option>
@@ -1070,7 +1078,8 @@
             precaucao: { texto: 'Precaução', classe: 'bg-[#D35400] text-white', borda: 'border-[#EDC9A8]' },
             dados_insuficientes: { texto: 'Dados insuficientes', classe: 'bg-ink/15 text-ink', borda: 'border-ink/15' },
             adiado_gestacao: { texto: 'Adiado na gestação', classe: 'bg-sand text-ink', borda: 'border-[#E6DCC0]' },
-            proxima_janela: { texto: 'Próxima etapa', classe: 'bg-mist text-teal-dark', borda: 'border-teal/20' }
+            proxima_janela: { texto: 'Próxima etapa', classe: 'bg-mist text-teal-dark', borda: 'border-teal/20' },
+            etapa_anterior: { texto: 'Etapa anterior', classe: 'bg-ink/10 text-ink', borda: 'border-ink/15' }
         };
 
         function displayNaoIncluidas(itens) {

@@ -1197,20 +1197,7 @@ def generate_intelligent_recommendations():
                 'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
                 'grau_evidencia': 'A'
             })
-            
 
-            # Teste de gravidez (se aplicável)
-            if sex == 'feminino' and 15 <= age <= 49:
-                recommendations.append({
-                    'titulo': 'Teste de gravidez (Beta-hCG)',
-                    'descricao': 'Teste de gravidez quando possibilidade de gestação. TARV deve ser iniciada o mais rápido possível em gestantes para prevenir transmissão perinatal do HIV.',
-                    'subtitulo': 'Mulheres HIV+ em idade fértil | Conforme indicação',
-                    'categoria': 'laboratorio',
-                    'prioridade': 'alta',
-                    'referencia': '<a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH 2024</a>',
-                    'grau_evidencia': 'A'
-                })
-        
         # ========== DPOC MANAGEMENT (GOLD COPD 2023) ==========
         
         is_dpoc = 'dpoc' in comorbidades
@@ -1308,19 +1295,6 @@ def generate_intelligent_recommendations():
         
         # Nenhum dado do paciente é gravado: a consulta é calculada e descartada.
 
-        # Enriquecer recomendações com links (referencia_html)
-        try:
-            for rec in recommendations:
-                titulo = rec.get('titulo', '')
-                ref_str = rec.get('referencia', '')
-                links = build_reference_links(titulo, ref_str)
-                if links:
-                    rec['referencias'] = links
-                    rec['referencia_html'] = build_reference_html(links)
-        except Exception as _e:
-            # Não bloquear resposta por erro de link
-            pass
-
         # Registrar analytics
         analytics.track_recommendation()
         
@@ -1333,11 +1307,31 @@ def generate_intelligent_recommendations():
         adiados_gestacao, proximas_gestacao = [], []
         if gestacao is not None:
             exames_pn, proximas_gestacao = prenatal.programacao(gestacao, age, hipertensa=has_hypertension,
-                                                                diabetica=is_diabetic)
+                                                                diabetica=is_diabetic, hiv='hiv' in comorbidades)
             titulos_pn = {r['titulo'].lower() for r in exames_pn}
             recommendations = [r for r in recommendations if (r.get('titulo') or '').lower() not in titulos_pn]
             recommendations, adiados_gestacao = prenatal.adiar(recommendations, diabetica=is_diabetic)
+            recommendations = prenatal.sem_equivalentes(recommendations, exames_pn)
             recommendations = exames_pn + recommendations
+
+        # Rastreio de HIV não se pede a quem já vive com HIV
+        if 'hiv' in comorbidades:
+            recommendations = [r for r in recommendations if (r.get('titulo') or '').lower() != 'anti-hiv 1 e 2, soro']
+
+        # Enriquecer recomendações com links (referencia_html). Fica depois das listas e do pré-natal,
+        # para que os itens acrescentados por eles também tenham a fonte clicável.
+        try:
+            for rec in recommendations:
+                titulo = rec.get('titulo', '')
+                ref_str = rec.get('referencia', '')
+                links = build_reference_links(titulo, ref_str)
+                if links:
+                    rec['referencias'] = links
+                    rec['referencia_html'] = build_reference_html(links)
+        except Exception as _e:
+            # Não bloquear resposta por erro de link
+            pass
+
 
         # Preparar outras recomendações (FRAX, calculadoras, etc.)
         outras_recomendacoes = []
