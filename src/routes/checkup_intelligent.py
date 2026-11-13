@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 from src.utils.analytics import analytics
 from src.utils.reference_links import build_reference_links, build_reference_html
+from src.utils import prevent
 from src.utils.seguranca_vacinas import aplicar_triagem_vacinas
 from src.utils.validacao import EntradaInvalida, SIM, ler_numero, normalizar_triagem, validar_entrada
 
@@ -576,6 +577,52 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     
     return recommendations
 
+def calcular_risco_cardiovascular(data, comorbidades, medicacoes, is_diabetic, is_pregnant):
+    """PREVENT em 10/30 anos com as categorias SBC 2025 e ACC/AHA 2026, ou o motivo de não calcular."""
+    if is_pregnant:
+        return {'status': 'nao_aplicavel', 'motivo': 'PREVENT não é validado na gestação.'}
+    if 'cardiopatia' in comorbidades:
+        return {'status': 'nao_aplicavel',
+                'motivo': 'Com cardiopatia/DCV estabelecida o paciente já é de prevenção secundária; '
+                          'o PREVENT só se aplica a quem não tem DCV conhecida.'}
+    idade, sexo = data['idade'], data['sexo']
+    faltando = [rotulo for chave, rotulo in (('colesterol', 'colesterol total'), ('hdl', 'HDL'),
+                                              ('pas', 'pressão sistólica'), ('peso', 'peso'),
+                                              ('altura', 'altura'), ('creatinina', 'creatinina'))
+                if not data.get(chave)]
+    if not 30 <= idade <= 79:
+        return {'status': 'nao_aplicavel', 'motivo': 'PREVENT vale de 30 a 79 anos.'}
+    if faltando:
+        return {'status': 'incompleto', 'faltando': faltando,
+                'motivo': 'Para calcular o PREVENT faltam: ' + ', '.join(faltando) + '.'}
+    egfr = prevent.egfr_ckd_epi_2021(float(data['creatinina']), idade, sexo)
+    imc_valor = round(prevent.imc(float(data['peso']), float(data['altura'])), 1)
+    hba1c = float(data['hba1c']) if data.get('hba1c') else None
+    try:
+        r = prevent.estimar(
+            idade=idade, sexo=sexo, colesterol_total=float(data['colesterol']), hdl=float(data['hdl']),
+            pas=float(data['pas']), diabetes=is_diabetic, fumante=data.get('tabagismo') == 'atual',
+            imc_valor=imc_valor, egfr=egfr, anti_hipertensivo='anti_hipertensivos' in medicacoes,
+            estatina='estatinas' in medicacoes, hba1c=hba1c)
+    except prevent.EntradaForaDaFaixa as exc:
+        return {'status': 'fora_da_faixa', 'problemas': exc.problemas,
+                'motivo': 'Valores fora da faixa em que o PREVENT foi derivado: ' + '; '.join(exc.problemas) + '.'}
+    dcva = r['dez_anos']['dcva']
+    return {
+        'status': 'calculado',
+        'modelo': r['modelo'],
+        'egfr': egfr,
+        'imc': imc_valor,
+        'dez_anos': r['dez_anos'],
+        'trinta_anos': r['trinta_anos'],
+        'categoria_sbc_2025': prevent.categoria_sbc_2025(dcva, is_diabetic, idade, sexo),
+        'categoria_acc_aha_2026': prevent.categoria_acc_aha_2026(dcva),
+        'observacao': 'Categoria SBC pelo escore e pela idade no DM2. Agravantes (história familiar '
+                      'precoce, Lp(a), PCR-us, doenças inflamatórias, fatores femininos), '
+                      'estratificadores do DM2, LDL ≥ 190 e CAC podem reclassificar para cima.',
+    }
+
+
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
 def generate_intelligent_recommendations():
     try:
@@ -599,10 +646,8 @@ def generate_intelligent_recommendations():
         sbp_value = data.get('pas') or 0
         dbp_value = data.get('pad') or 0
 
-        # O cálculo de risco cardiovascular está desativado. A implementação anterior não
-        # correspondia às equações PREVENT publicadas e o resultado variava entre tela e
-        # servidor. Ele volta quando houver implementação única, validada contra os vetores
-        # de teste oficiais (ver docs/registro-de-perigos.md, P-06).
+        # Risco cardiovascular: src/utils/prevent.py (implementação única, validada nos
+        # testes contra os vetores do preventr). Calculado no fim, em calcular_risco_cardiovascular.
         
         # Detectar hipertensão automaticamente
         has_hypertension = False
@@ -1294,13 +1339,8 @@ def generate_intelligent_recommendations():
         response = {
             'success': True,
             # Mantidos por compatibilidade com clientes antigos; sempre vazios.
-            'prevent_risk': None,
-            'risk_classification': None,
-            'risco_cardiovascular': {
-                'status': 'desativado',
-                'motivo': 'Cálculo de risco cardiovascular desativado até a validação de uma '
-                          'implementação única das equações PREVENT.',
-            },
+            'risco_cardiovascular': calcular_risco_cardiovascular(
+                data, comorbidades, medicacoes_checkboxes, is_diabetic, is_pregnant),
             'recommendations': recommendations,
             'outras_recomendacoes': outras_recomendacoes,
             'total_recommendations': len(recommendations)
