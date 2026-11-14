@@ -50,7 +50,7 @@ SEM_INTERVALO = {
     'basal', 'basal e periódico', 'periódico', 'durante o uso', 'antes do tratamento',
     'antes ou no início do tratamento', 'até 6 meses do início', 'avaliação inicial',
     'avaliação inicial ou falha virológica', 'avaliação de fratura', 'reavaliação',
-    'para confirmar o diagnóstico', 'rastreio em cascata', 'conforme uso de medicações',
+    'para confirmar o diagnóstico', 'rastreio em cascata', 'conforme uso de medicações', 'após teste de hpv positivo',
     # a critério clínico
     'conforme necessidade', 'conforme indicação clínica', 'fator de risco', 'adulto em risco',
     'alvo < 6 mg/dl', 'não solicitar se >500 em 2 exames consecutivos com intervalo de 6 meses',

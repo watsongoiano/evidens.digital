@@ -148,6 +148,11 @@ def _casos_do_motor():
               dict(idade=200, sexo='feminino', tabagismo='nunca', pas='20', pad='300', peso='1', altura='10', hba1c='40', colesterol='5', hdl='500', creatinina='40'),
               dict(idade=30, sexo='feminino', tabagismo='nunca', gestante='sim'), dict(idade=30, sexo='feminino', tabagismo='atual'),
               dict(idade=30, sexo='feminino', tabagismo='ex', macos_ano='-3'), dict(idade=30, sexo='feminino', tabagismo='nunca', gestante='sim', idade_gestacional='60')]
+    # colo do útero: cada desfecho do último teste de DNA-HPV, nas idades de corte, com e sem imunossupressão
+    from src.utils import colo_utero
+    for idade, imuno, resultado in itertools.product((22, 27, 40, 62, 70), ('nao', 'sim'), (None,) + colo_utero.RESULTADOS):
+        casos.append(dict(base, idade=idade, sexo='feminino', tabagismo='nunca', imunossupressao=imuno,
+                          **({'hpv_resultado': resultado} if resultado else {})))
     # exames já realizados: em dia, vencido, uma vez na vida, sem intervalo e "junto da HbA1c"
     hoje = date.today()
     recente, antigo = (hoje - timedelta(days=20)).isoformat(), (hoje - timedelta(days=4000)).isoformat()

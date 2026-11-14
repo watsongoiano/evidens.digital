@@ -236,8 +236,8 @@ def _primeira_consulta(g, idade, hipertensa, diabetica, hiv=False):
                      'Clamídia: rastreio na primeira consulta para todas. Gonococo: para menores de 25 anos ou com fator de '
                      'risco. Repetir no 3º trimestre se menor de 25 anos ou com risco.',
                      'Pré-natal | 1ª consulta', grau='B', referencia='Williams 26e / USPSTF 2021'))
-    # Papanicolaou (ponto da 1ª consulta na Tab. 10-1): vem do rastreio de colo do check-up geral, que na
-    # gestação segue na lista (citologia de 21 a 29 anos; teste de HPV a partir de 30).
+    # Rastreio do colo (ponto da 1ª consulta na Tab. 10-1): vem do check-up geral (src/utils/colo_utero.py), que
+    # na gestação segue na lista: teste de DNA-HPV a partir dos 25 anos; a coleta é segura na gestação (MS 2025, rec. 31).
     if not diabetica and ('dmg_previo' in g['condicoes']):
         recs.append(_rec('Hemoglobina glicada (HbA1c), soro', 'laboratorio',
                          'Fator de risco para diabetes: rastrear diabetes não diagnosticado antes de 15 semanas.',

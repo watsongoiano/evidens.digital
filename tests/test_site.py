@@ -301,6 +301,12 @@ def _varredura(client):
         for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
             itens[rec['titulo']] = rec['categoria']
             refs.add(rec.get('referencia') or '')
+    # Colo do útero: último teste de DNA-HPV com HPV 16/18 (colposcopia)
+    dados = dict(idade=40, sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[], imunossupressao='nao',
+                 gestante='nao', lactante='nao', hpv_resultado='hpv_16_18')
+    for rec in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
+        itens[rec['titulo']] = rec['categoria']
+        refs.add(rec.get('referencia') or '')
     # Gestação: todas as janelas do pré-natal, com Rh negativo, toxoplasmose suscetível e risco
     for idade, ig in itertools.product((22, 35), (8, 12, 15, 22, 26, 32, 36)):
         dados = dict(idade=idade, sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[],
@@ -557,14 +563,15 @@ def test_itens_das_listas_acionam_exames(client, dados, titulo):
     assert any(titulo.lower() in r['titulo'].lower() for r in recs), [r['titulo'] for r in recs]
 
 
-def test_hpv_a_cada_cinco_anos_e_citologia_a_cada_tres(client):
+def test_hpv_a_cada_cinco_anos_dos_25_aos_64(client):
     base = dict(sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[], imunossupressao='nao',
                 gestante='nao', lactante='nao')
     def colo(idade):
         recs = client.post('/api/checkup-intelligent', json=dict(base, idade=idade)).get_json()['recommendations']
-        return next(r for r in recs if 'HPV' in r['titulo'] or 'Papanicolaou' in r['titulo'])
-    assert '3 anos' in str(colo(25)) and 'Papanicolaou' in colo(25)['titulo']
-    assert '5 anos' in str(colo(40)) and 'HPV' in colo(40)['titulo']
+        return next((r for r in recs if r['titulo'].startswith('Pesquisa do Papilomavírus') or 'Papanicolaou' in r['titulo']), None)
+    for idade in (25, 40, 64):
+        assert '5 anos' in colo(idade)['subtitulo'] and 'HPV' in colo(idade)['titulo'], idade
+    assert colo(22) is None and colo(65) is None
 
 
 def test_botoes_de_pdf_ficam_abaixo_das_recomendacoes(pagina):

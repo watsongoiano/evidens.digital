@@ -25,6 +25,10 @@ IDADE_MAXIMA_TRIAGEM_GESTACAO = 55
 
 SEXOS = ('masculino', 'feminino')
 
+# Mesmos valores de src/utils/colo_utero.RESULTADOS.
+RESULTADOS_HPV = ('nao_detectado', 'hpv_16_18', 'outros_citologia_negativa', 'outros_citologia_alterada',
+                  'colposcopia_negativa')
+
 TABAGISMO = {
     'nunca': 'nunca',
     'nunca_fumou': 'nunca',
@@ -238,6 +242,17 @@ def validar_entrada(bruto):
         dados['medicacoes_continuo'] = medicacoes_continuo
     else:
         erro('medicacoes_continuo', 'Medicações de uso contínuo: texto inválido ou longo demais.')
+
+    # Resultado do último teste de DNA-HPV (opcional; só para o sexo feminino).
+    hpv = entrada.get('hpv_resultado')
+    hpv = hpv.strip().lower() if isinstance(hpv, str) else hpv
+    if not _vazio(hpv) and hpv != DESCONHECIDO:
+        if hpv not in RESULTADOS_HPV:
+            erro('hpv_resultado', 'Último teste de DNA-HPV: resposta inválida.')
+        elif sexo == 'masculino':
+            erro('hpv_resultado', 'Último teste de DNA-HPV: não se aplica ao sexo masculino.')
+        else:
+            dados['hpv_resultado'] = hpv
 
     atividade = entrada.get('atividade_fisica')
     if isinstance(atividade, str) and len(atividade) <= 40:

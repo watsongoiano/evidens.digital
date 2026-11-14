@@ -129,6 +129,7 @@ DESCRICOES = {
     '40314120': 'HIV - carga viral PCR',
     '40314146': 'HIV, genotipagem',
     '40314154': 'HPV (vírus do papiloma humano) + subtipagem quando necessário, PCR',
+    '41301102': 'Colposcopia (cérvice uterina e vagina)',
     # Citopatologia
     '40601137': 'Procedimento diagnóstico em citopatologia cérvico-vaginal oncótica',
     # Métodos gráficos, endoscopia e provas funcionais
@@ -237,6 +238,7 @@ CODIGOS = {
     'Parasitológico de fezes (3 amostras)': ['40303128'],
     'Paratormônio (PTH), soro': ['40305465'],
     'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular': ['40314154'],
+    'Colposcopia (cérvice uterina e vagina)': ['41301102'],
     'Potássio, soro': ['40302318'],
     'Prolactina, soro': ['40316416'],
     'Prova tuberculínica (PPD) ou IGRA': ['40307638'],

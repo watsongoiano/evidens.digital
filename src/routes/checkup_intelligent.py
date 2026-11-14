@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 from src.utils.reference_links import build_reference_links, build_reference_html
 from src.utils import coerencia
+from src.utils import colo_utero
 from src.utils import condicoes
 from src.utils import prenatal
 from src.utils import prevent
@@ -246,29 +247,8 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
                 'grau_evidencia': 'B'
             })
         
-        # Colo do útero: citologia a cada 3 anos dos 21 aos 29; dos 30 aos 65, teste de HPV
-        # de alto risco a cada 5 anos (USPSTF 2018). No Brasil, o MS adota DNA-HPV dos 25 aos 64.
-        if 21 <= age <= 29:
-            _add_rec({
-                'titulo': 'Citologia cervicovaginal (Papanicolaou)',
-                'descricao': 'Citologia a cada 3 anos dos 21 aos 29 anos (USPSTF). No Brasil, o MS recomenda o teste de DNA-HPV a cada 5 anos a partir dos 25 anos, onde disponível.',
-                'subtitulo': 'Mulheres 21-29 anos | A cada 3 anos',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': 'USPSTF 2018 / MS 2024',
-                'grau_evidencia': 'A'
-            })
-        elif 30 <= age <= 65:
-            _add_rec({
-                'titulo': 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular',
-                'descricao': 'Teste de HPV de alto risco a cada 5 anos dos 30 aos 65 anos. Alternativas: citologia isolada a cada 3 anos ou coteste a cada 5 anos.',
-                'subtitulo': 'Mulheres 30-65 anos | A cada 5 anos',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': 'USPSTF 2018 / MS 2024',
-                'grau_evidencia': 'A'
-            })
-    
+        # Colo do útero: regras em src/utils/colo_utero.py (dependem de imunossupressão e do último resultado).
+
     if sex == 'masculino' and age >= 50:
         _add_rec({
             'titulo': 'PSA total, soro',
@@ -753,6 +733,14 @@ def generate_intelligent_recommendations():
                                                          has_dpoc=has_dpoc,
                                                          has_cardiopatia_cronica=has_dcv_aterosclerotica or has_ic)
         recommendations.extend(age_sex_recs)
+
+        # Colo do útero: teste de DNA-HPV e colposcopia (MS 2025, SBOC 2026, ACOG 2026).
+        orientacoes_colo = []
+        if sex == 'feminino':
+            recs_colo, orientacoes_colo = colo_utero.recomendar(
+                age, imunossuprimida='hiv' in comorbidades or triagem.get('imunossupressao') == SIM,
+                resultado=data.get('hpv_resultado'))
+            recommendations.extend(recs_colo)
         
         # Rastreamento de câncer de pulmão (LDCT) - USPSTF 2021
         # tabagismo e macos_ano já extraídos acima
@@ -1503,7 +1491,7 @@ def generate_intelligent_recommendations():
         response['adiados_gestacao'] = adiados_gestacao
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['inferencias'] = inferencias
-        response['orientacoes'] = orientacoes_doses + orientacoes
+        response['orientacoes'] = orientacoes_doses + orientacoes + orientacoes_colo
         aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
         if aviso_exames:
             response['orientacoes'] = response['orientacoes'] + [aviso_exames]
