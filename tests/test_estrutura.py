@@ -16,6 +16,7 @@ FERRAMENTAS = {
     'scripts/gerar_catalogo.py',   # gera src/data/catalogo_motor.json
     'scripts/gerar_listas.py',     # regera as listas com busca de intelligent-tools.html
     'scripts/generate_favicon.py',
+    'scripts/extrair_textos.py',   # lista os textos das páginas sem tradução para o inglês
 }
 
 IGNORAR = {'.git', 'tests', '__pycache__', '.venv', 'venv', 'node_modules'}

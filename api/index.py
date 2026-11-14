@@ -5,6 +5,7 @@ Sistema de Check-up Médico Inteligente
 from datetime import timedelta
 
 from flask import Flask, request, jsonify, redirect, send_from_directory
+import json
 import os
 import sys
 from pathlib import Path
@@ -18,6 +19,7 @@ from src.routes.checkup_intelligent import checkup_intelligent_bp
 from src.utils.analytics import analytics
 from src.routes import auth
 from src.routes.auth import auth_bp, exigir_administrador, usuario_atual
+from src.utils import i18n
 
 # Criar aplicação Flask
 # Sem a pasta estática automática do Flask: tudo o que é publicado passa pela
@@ -146,6 +148,8 @@ ARQUIVOS_PUBLICOS = frozenset({
     'index.html',
     'contact.html',
     'static/conta.js',
+    'static/i18n.js',
+    'static/i18n/en.json',
     'favicon.ico',
     'favicon.png',
     'favicon.svg',
@@ -158,6 +162,36 @@ ARQUIVOS_PUBLICOS = frozenset({
     'src/static/styles/base.css',
     'src/static/styles/components.css',
 })
+
+
+# Campos das respostas da API que carregam frases para a pessoa ler. Só eles são traduzidos:
+# identificadores (categoria, prioridade), dados digitados e links ficam como estão.
+CAMPOS_DE_TEXTO = frozenset({'error', 'erros', 'mensagem'})
+
+
+@app.after_request
+def responder_no_idioma(resposta):
+    """Em inglês (cookie do seletor ou ?lang=en), traduz as frases das respostas da API."""
+    idioma = i18n.idioma_do_pedido(request)
+    if idioma == 'pt' or not request.path.startswith('/api/') or request.path.startswith(('/api/admin', '/api/analytics')):
+        return resposta
+    if resposta.mimetype != 'application/json' or resposta.direct_passthrough:
+        return resposta
+    dados = resposta.get_json(silent=True)
+    if not isinstance(dados, (dict, list)):
+        return resposta
+
+    def percorrer(valor, traduzir=False):
+        if isinstance(valor, str):
+            return i18n.traduzir(valor, idioma) if traduzir else valor
+        if isinstance(valor, list):
+            return [percorrer(v, traduzir) for v in valor]
+        if isinstance(valor, dict):
+            return {k: percorrer(v, traduzir or k in CAMPOS_DE_TEXTO) for k, v in valor.items()}
+        return valor
+
+    resposta.set_data(json.dumps(percorrer(dados), ensure_ascii=False))
+    return resposta
 
 
 @app.route('/<path:filename>')
