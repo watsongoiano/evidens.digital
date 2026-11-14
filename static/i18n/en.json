@@ -1717,7 +1717,8 @@
   "Sim, manter": "Yes, keep them",
   "Limpar": "Clear",
   "Os dados do paciente mudaram depois que o plano foi informado. Confira o plano e a carteira antes de gerar a guia.": "The patient data changed after the health plan was entered. Check the plan and the member ID before generating the form.",
-  "São deste paciente": "They belong to this patient"
+  "São deste paciente": "They belong to this patient",
+  "Obs.:": "Note:"
  },
  "padroes": [
   [

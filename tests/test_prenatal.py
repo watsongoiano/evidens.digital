@@ -1,7 +1,9 @@
 """Rotina de pré-natal pela idade gestacional (Einstein v.3, MS 2012/2016, Williams 26e)."""
+import re
+
 import pytest
 
-from src.utils import prenatal
+from src.utils import pdf_minutas, prenatal
 
 
 def _g(**kw):
@@ -170,7 +172,7 @@ def test_nenhum_exame_da_lista_e_de_janela_futura():
         g = _g(idade_gestacional=str(ig), fator_rh='negativo', toxoplasmose='suscetivel',
                gestacao_condicoes=['prematuro_previo'])
         for r in prenatal.exames(g, 30):
-            assert 'antecipado' not in r['quando_pdf'].lower()
+            assert 'antecipado' not in r.get('quando_pdf', '').lower()
             assert 'Deixar pedido' not in r['subtitulo']
 
 
@@ -228,7 +230,7 @@ def _titulos_api(r):
 def test_totg_e_pedido_depois_de_28_semanas_se_nao_consta_como_feito(client):
     r = _pedido_api(client, idade_gestacional=35)
     totg = next(x for x in r['recommendations'] if x['titulo'].startswith('TOTG-75g gestacional'))
-    assert 'fazer agora' in totg['subtitulo'] and 'ainda não realizado' in totg['quando_pdf']
+    assert 'fazer agora' in totg['subtitulo'] and 'quando_pdf' not in totg   # o atraso fica na tela, não no pedido
 
 
 def test_totg_informado_como_feito_nao_e_pedido_de_novo(client):
@@ -308,3 +310,33 @@ def test_fontes_das_listas_e_das_sindromes_sao_clicaveis(client):
     r = client.post('/api/checkup-intelligent', json=dados).get_json()
     sem_link = [(x['titulo'], x.get('referencia')) for x in r['recommendations'] if '<a href="http' not in (x.get('referencia_html') or '')]
     assert not sem_link, sem_link
+
+
+def test_pedido_so_leva_a_janela_gestacional_como_observacao():
+    """No receituário, só a instrução de quando fazer o exame ("Realizar com 35-37 semanas de gestação.").
+    "Primeira consulta de pré-natal", "Basal: alto risco de pré-eclâmpsia" e o aviso de TOTG atrasado são
+    o motivo do pedido: ficam na tela, não no papel."""
+    vistas = set()
+    for ig in range(5, 41):
+        for primeira in ('sim', 'nao'):
+            g = _g(idade_gestacional=str(ig), primeira_consulta=primeira, fator_rh='negativo', toxoplasmose='suscetivel',
+                   gestacao_condicoes=['prematuro_previo', 'pe_previa', 'gemelar'])
+            for r in prenatal.exames(g, 30, hipertensa=True):
+                if 'quando_pdf' in r:
+                    vistas.add(r['quando_pdf'])
+    assert vistas and all(re.fullmatch(r'Realizar com .+ de gestação\.', q) for q in vistas), vistas
+
+
+def test_observacao_sai_em_italico_com_obs_no_pdf():
+    from pypdf import PdfReader
+    import io
+    itens = [{'titulo': 'Cultura para estreptococo do grupo B (swab vaginal e retal)', 'categoria': 'laboratorio',
+              'quando_pdf': 'Realizar com 35-37 semanas de gestação.'},
+             {'titulo': 'Hemograma completo', 'categoria': 'laboratorio'}]
+    pdf = pdf_minutas.gerar_pdf_exames_laboratoriais({'nome': 'Paciente', 'sexo': 'feminino', 'idade': 30}, itens)
+    texto = PdfReader(io.BytesIO(pdf)).pages[0].extract_text()
+    assert 'Obs.: Realizar com 35-37 semanas de gestação.' in texto
+    assert texto.count('Obs.:') == 1
+    assert b'DejaVuSans-Oblique' in pdf or b'DejaVu-Oblique' in pdf or b'Oblique' in pdf
+    pdf_en = pdf_minutas.gerar_pdf_exames_laboratoriais({'nome': 'Paciente', 'sexo': 'feminino', 'idade': 30}, itens, idioma='en')
+    assert 'Note: ' in PdfReader(io.BytesIO(pdf_en)).pages[0].extract_text()
