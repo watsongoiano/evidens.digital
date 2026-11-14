@@ -154,6 +154,7 @@ ARQUIVOS_PUBLICOS = frozenset({
     'favicon.png',
     'favicon.svg',
     'apple-touch-icon.png',
+    'og-image.png',
     'new_logo.png',
     'evidenscheck.png',
     'evidenscheck.svg',
