@@ -1602,6 +1602,41 @@ def _conferir_triagem_das_vacinas(dados_paciente, vacinas):
 from src.utils.pdf_minutas import ESQUEMAS_DE_RISCO  # noqa: E402
 
 
+def _ler_guia_do_plano(usuario):
+    """Dados da guia SP/SADT pedida junto com o PDF, ou None se o médico não pediu guia.
+
+    Corpo: {guia: {credenciamento_id, carteira, indicacao}}. O credenciamento tem de ser do
+    próprio usuário (médico ou residente). O número da carteira e a indicação clínica só
+    passam por aqui para entrar no PDF: não são gravados.
+    """
+    corpo = request.get_json(silent=True) or {}
+    pedido = corpo.get('guia')
+    if pedido is None:
+        return None
+    from src.utils import contas, pdf_minutas
+    if not isinstance(pedido, dict):
+        raise PedidoDePdfInvalido('Guia do plano em formato inválido')
+    if not contas.pode_ter_credenciamento(usuario):
+        raise PedidoDePdfInvalido('A guia do plano de saúde é só para médicos e residentes com plano cadastrado.',
+                                  codigo='guia_indisponivel')
+    cid = pedido.get('credenciamento_id')
+    if isinstance(cid, bool) or not isinstance(cid, int):
+        raise PedidoDePdfInvalido('Escolha o plano de saúde da guia.')
+    credenciamento = contas.credenciamento_de(usuario['id'], cid)
+    if not credenciamento:
+        raise PedidoDePdfInvalido('Plano de saúde não encontrado no seu cadastro. Confira em Minha conta.',
+                                  codigo='guia_indisponivel')
+    carteira = pedido.get('carteira')
+    carteira = ' '.join(carteira.split()) if isinstance(carteira, str) else ''
+    if len(carteira) > 30:
+        raise PedidoDePdfInvalido('Número da carteira longo demais')
+    indicacao = pedido.get('indicacao')
+    if indicacao is not None and (not isinstance(indicacao, str) or len(indicacao) > 300):
+        raise PedidoDePdfInvalido('Indicação clínica inválida ou longa demais')
+    return {'credenciamento': credenciamento, 'carteira': carteira,
+            'indicacao': pdf_minutas.indicacao_clinica(indicacao)}
+
+
 def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferir=None):
     import io
     from flask import send_file
@@ -1619,9 +1654,19 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
     try:
         from src.routes.auth import usuario_atual
         from src.utils import i18n
+        usuario = usuario_atual()
+        extras = {}
+        if categoria in ('laboratorio', 'imagem'):
+            guia = _ler_guia_do_plano(usuario)
+            if guia:
+                extras['guia'] = guia
+    except PedidoDePdfInvalido as exc:
+        return jsonify({'error': exc.mensagem, 'codigo': exc.codigo}), 400
+
+    try:
         pdf_bytes = getattr(pdf_minutas, nome_gerador)(
-            dados_paciente, itens, responsavel=pdf_minutas.responsavel_de(usuario_atual()),
-            idioma=i18n.idioma_do_pedido(request))
+            dados_paciente, itens, responsavel=pdf_minutas.responsavel_de(usuario),
+            idioma=i18n.idioma_do_pedido(request), **extras)
     except Exception as exc:
         # O detalhe fica só no log do servidor; a resposta não expõe a infraestrutura.
         print(f"❌ Erro ao gerar PDF ({categoria}): {exc}")

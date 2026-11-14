@@ -179,6 +179,42 @@ def senha():
     return jsonify({'ok': True})
 
 
+# ── Credenciamentos em planos de saúde (dados da guia SP/SADT; nenhuma senha de operadora) ──
+
+MSG_SO_QUEM_ASSINA = 'O credenciamento em planos de saúde é só para médicos e residentes.'
+
+
+@auth_bp.route('/auth/credenciamentos')
+@exigir_login
+def credenciamentos():
+    u = usuario_atual()
+    if not contas.pode_ter_credenciamento(u):
+        return jsonify({'credenciamentos': [], 'disponivel': False})
+    return jsonify({'credenciamentos': contas.credenciamentos_de(u['id']), 'disponivel': True})
+
+
+@auth_bp.route('/auth/credenciamentos', methods=['POST'])
+@exigir_login
+def credenciamentos_criar():
+    u = usuario_atual()
+    if not contas.pode_ter_credenciamento(u):
+        return jsonify({'error': MSG_SO_QUEM_ASSINA}), 403
+    try:
+        novo = contas.criar_credenciamento(u['id'], _corpo())
+    except contas.DadosInvalidos as e:
+        return jsonify({'error': 'Confira os dados informados.', 'erros': e.erros}), 400
+    return jsonify({'ok': True, 'credenciamento': novo, 'mensagem': 'Plano salvo.'}), 201
+
+
+@auth_bp.route('/auth/credenciamentos/<int:cid>/excluir', methods=['POST'])
+@exigir_login
+def credenciamentos_excluir(cid):
+    u = usuario_atual()
+    if not contas.excluir_credenciamento(u['id'], cid):
+        return jsonify({'error': 'Plano não encontrado.'}), 404
+    return jsonify({'ok': True})
+
+
 @auth_bp.route('/auth/configurar', methods=['POST'])
 def configurar():
     """Cria o primeiro administrador. Só funciona com o código de instalação e enquanto não houver administrador."""

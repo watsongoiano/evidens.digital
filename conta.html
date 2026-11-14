@@ -37,6 +37,25 @@
   <h1 class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Olá, <span data-nome class="font-serif italic text-teal tracking-tight">colega.</span></h1>
   <p class="text-[16px] text-ink/65 leading-relaxed mt-5"><span data-resumo></span></p>
   <p data-so-admin class="mt-6" style="display: none;"><a href="/admin" class="btn-claro"><i class="fa-solid fa-user-check text-[12px]"></i>Aprovar cadastros</a> <a href="/analytics" class="btn-claro ml-2"><i class="fa-solid fa-chart-simple text-[12px]"></i>Painel de uso</a></p>
+  <section data-planos style="display: none;">
+    <h2 class="text-[22px] font-light tracking-tight mt-12">Planos de saúde</h2>
+    <p class="text-[15px] text-ink/65 leading-relaxed mt-3">Cadastre os planos em que você é credenciado. Ao gerar um pedido de exames, a guia SP/SADT do plano sai junto, já preenchida com estes dados e com os códigos TUSS. Nenhuma senha de operadora é pedida ou guardada aqui.</p>
+    <div data-lista-planos class="mt-5 flex flex-col gap-3"></div>
+    <form data-form="credenciamento" class="secao mt-5 flex flex-col gap-5" novalidate>
+      <div class="grade">
+        <div class="campo"><label for="operadora">Plano de saúde (operadora)</label><input type="text" id="operadora" name="operadora" list="operadoras" required maxlength="80" autocomplete="off" placeholder="Ex: Unimed Goiânia"><datalist id="operadoras"><option value="Amil"><option value="Bradesco Saúde"><option value="CASSI"><option value="GEAP Saúde"><option value="Hapvida"><option value="Ipasgo Saúde"><option value="Postal Saúde"><option value="Saúde Caixa"><option value="SulAmérica"><option value="Unimed Goiânia"></datalist></div>
+        <div class="campo"><label for="registro_ans">Registro ANS da operadora (6 dígitos, opcional)</label><input type="text" id="registro_ans" name="registro_ans" inputmode="numeric" maxlength="7" autocomplete="off"></div>
+        <div class="campo"><label for="codigo_prestador">Seu código na operadora (ou CPF/CNPJ do contrato)</label><input type="text" id="codigo_prestador" name="codigo_prestador" required maxlength="20" autocomplete="off"></div>
+        <div class="campo"><label for="cbo">Código CBO (6 dígitos, opcional)</label><input type="text" id="cbo" name="cbo" inputmode="numeric" maxlength="7" autocomplete="off" placeholder="Ex: 225125"></div>
+        <div class="campo sm:col-span-2"><label for="nome_contratado">Nome do contratado (clínica ou o seu nome, como está no contrato)</label><input type="text" id="nome_contratado" name="nome_contratado" required maxlength="120" autocomplete="off"></div>
+      </div>
+      <div data-erro role="alert" class="aviso aviso-erro" style="display: none;"></div>
+      <div data-ok role="status" class="aviso aviso-info" style="display: none;"></div>
+      <div class="flex flex-wrap items-center gap-4">
+        <button type="submit" class="btn-escuro">Salvar plano <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button>
+      </div>
+    </form>
+  </section>
   <h2 class="text-[22px] font-light tracking-tight mt-12">Trocar a senha</h2>
   <form data-form="senha"  class="secao mt-5 flex flex-col gap-5" novalidate>
     <div class="grade">
