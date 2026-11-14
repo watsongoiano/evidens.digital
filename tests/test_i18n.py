@@ -3,6 +3,7 @@
 As páginas são escritas em português; static/i18n/en.json guarda o par em inglês de cada texto.
 Estes testes falham quando alguém acrescenta ou muda um texto e esquece o par.
 """
+from datetime import date, timedelta
 import itertools
 import json
 import re
@@ -147,6 +148,18 @@ def _casos_do_motor():
               dict(idade=200, sexo='feminino', tabagismo='nunca', pas='20', pad='300', peso='1', altura='10', hba1c='40', colesterol='5', hdl='500', creatinina='40'),
               dict(idade=30, sexo='feminino', tabagismo='nunca', gestante='sim'), dict(idade=30, sexo='feminino', tabagismo='atual'),
               dict(idade=30, sexo='feminino', tabagismo='ex', macos_ano='-3'), dict(idade=30, sexo='feminino', tabagismo='nunca', gestante='sim', idade_gestacional='60')]
+    # exames já realizados: em dia, vencido, uma vez na vida, sem intervalo e "junto da HbA1c"
+    hoje = date.today()
+    recente, antigo = (hoje - timedelta(days=20)).isoformat(), (hoje - timedelta(days=4000)).isoformat()
+    anteriores = [{'exame': e, 'data': d} for e, d in (
+        ('Hemoglobina glicada (HbA1c), soro', recente), ('Glicose, soro', recente), ('Creatinina, soro', antigo),
+        ('Lipoproteína(a) - Lp(a), soro', antigo), ('MAPA de 24 horas', recente), ('Exame fora da lista', recente))]
+    casos.append(dict(base, idade=65, sexo='feminino', tabagismo='nunca', comorbidades=['diabetes', 'hipertensao'],
+                      exames_anteriores=anteriores))
+    casos.append(dict(base, idade=65, sexo='feminino', tabagismo='nunca',
+                      exames_anteriores=[{'exame': 'Hemograma completo', 'data': '2999-01-01'}, {'exame': '', 'data': recente},
+                                         {'exame': 'Creatinina, soro', 'data': 'ontem'}]))
+    casos.append(dict(base, idade=65, sexo='feminino', tabagismo='nunca', exames_anteriores='x'))
     return casos
 
 

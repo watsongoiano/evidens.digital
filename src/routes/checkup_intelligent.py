@@ -618,6 +618,17 @@ def generate_intelligent_recommendations():
                 'erros': exc.erros,
             }), 400
 
+        # Exames que o paciente já fez (opcional): o que estiver em dia não é pedido de novo.
+        from src.utils import periodicidade
+        exames_anteriores, erros_exames = periodicidade.ler_exames_anteriores(
+            (request.get_json(silent=True) or {}).get('exames_anteriores'))
+        if erros_exames:
+            return jsonify({
+                'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in erros_exames),
+                'codigo': 'entrada_invalida',
+                'erros': erros_exames,
+            }), 400
+
         # Dados do paciente (já normalizados)
         age = data['idade']
         sex = data['sexo']
@@ -1468,6 +1479,10 @@ def generate_intelligent_recommendations():
         if gestacao is not None:
             mantidas, vacinas_futuras = prenatal.vacinas_fora_da_janela(mantidas, gestacao['ig'])
             proximas_gestacao = sorted(proximas_gestacao + vacinas_futuras, key=lambda x: x['semana'])
+        # Periodicidade: exame já feito e ainda dentro do intervalo da própria regra sai do pedido
+        # e aparece em "não incluídos", com a data e a data a partir da qual volta a ser indicado.
+        mantidas, em_dia = periodicidade.aplicar(mantidas, exames_anteriores, sex)
+        nao_incluidas = nao_incluidas + em_dia
         response['recommendations'] = mantidas
         response['total_recommendations'] = len(mantidas)
         response['nao_incluidas'] = nao_incluidas
@@ -1475,6 +1490,9 @@ def generate_intelligent_recommendations():
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['inferencias'] = inferencias
         response['orientacoes'] = orientacoes_doses + orientacoes
+        aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
+        if aviso_exames:
+            response['orientacoes'] = response['orientacoes'] + [aviso_exames]
         response['pa_classificacao'] = pa_classificacao
         response['proximas_gestacao'] = proximas_gestacao
         response['gestacao'] = gestacao
@@ -1690,6 +1708,13 @@ def catalogo_endpoint():
     """Itens que o médico pode acrescentar a um pedido ou receita, por categoria."""
     from src.utils.catalogo import catalogo
     return jsonify(catalogo())
+
+
+@checkup_intelligent_bp.route('/exames-conhecidos')
+def exames_conhecidos_endpoint():
+    """Nomes de exame para a seção "Exames já realizados" do formulário."""
+    from src.utils import periodicidade
+    return jsonify({'exames': periodicidade.exames_conhecidos()})
 
 
 @checkup_intelligent_bp.route('/coerencia')
