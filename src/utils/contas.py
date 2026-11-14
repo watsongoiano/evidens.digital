@@ -103,6 +103,15 @@ _ESQUEMA = [
         criado_em BIGINT NOT NULL
     )""",
     "CREATE INDEX IF NOT EXISTS credenciamentos_usuario ON credenciamentos (usuario_id)",
+    # Uso do sistema (painel /analytics): quem fez o quê e quando. Nenhum dado de paciente.
+    """CREATE TABLE IF NOT EXISTS eventos_uso (
+        id {pk},
+        usuario_id BIGINT,
+        tipo TEXT NOT NULL,
+        criado_em BIGINT NOT NULL
+    )""",
+    "CREATE INDEX IF NOT EXISTS eventos_uso_criado_em ON eventos_uso (criado_em)",
+    "CREATE INDEX IF NOT EXISTS eventos_uso_usuario ON eventos_uso (usuario_id)",
 ]
 
 
