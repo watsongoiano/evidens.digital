@@ -394,15 +394,16 @@ def test_paginas_do_administrador_respondem_e_nao_tem_referencia_quebrada(admin,
 
 
 @pytest.mark.parametrize('pagina', ['index.html', 'intelligent-tools.html', 'login.html', 'cadastro.html',
-                                    'conta.html', 'configurar.html', 'admin.html'])
+                                    'conta.html', 'configurar.html', 'admin.html', 'analytics.html', 'termos.html',
+                                    'contact.html'])
 def test_logo_do_cabecalho_e_a_mesma_palavra_do_rodape(pagina):
     """Cabeçalho mantém o ícone de pontos e usa a palavra "evidēns" no mesmo tamanho do rodapé (28 px)."""
     html = (RAIZ / pagina).read_text(encoding='utf-8')
     cabecalho = html.split('</header>')[0]
     assert 'grid-cols-3 gap-[3px]' in cabecalho
-    assert 'text-[28px] font-medium tracking-tight leading-none">evidēns' in cabecalho
+    assert 'text-[28px] font-medium tracking-tight leading-none">evidēns<sup class="marca-r">®</sup>' in cabecalho
     rodape = (RAIZ / 'index.html').read_text(encoding='utf-8').split('<footer')[1]
-    assert 'text-[28px] font-medium tracking-tight">evidēns' in rodape
+    assert 'text-[28px] font-medium tracking-tight">evidēns<sup class="marca-r">®</sup>' in rodape
 
 
 def test_imagem_de_compartilhamento_e_quadrada_cheia_sem_transparencia(anonimo):
