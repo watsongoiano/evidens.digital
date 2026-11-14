@@ -612,7 +612,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                     f'Transplantado em uso de {MEDICACOES[classe]["rotulo"].lower()}: nível de vale (C0, antes da dose), com '
                     'alvo definido pela equipe de transplante. Repetir também após mudança de medicação que interage e '
                     'na piora da função renal.', f'Transplante em uso de {MEDICACOES[classe]["rotulo"].lower()} | '
-                    'A cada 1-3 meses', 'KDIGO 2009 (transplante renal), 5.1', 'B', 'alta')
+                    'A cada 1-3 meses', 'KDIGO 2009 (transplante renal)', 'B', 'alta')
     if 'amiodarona' in med:
         for titulo in ('Hormônio Tireoestimulante (TSH), soro', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro'):
             add(titulo, 'laboratorio', 'Toxicidade tireoidiana e hepática da amiodarona.', 'Em uso de amiodarona | A cada 6 meses',

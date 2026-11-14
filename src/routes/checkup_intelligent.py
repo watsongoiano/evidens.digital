@@ -1507,6 +1507,12 @@ def generate_intelligent_recommendations():
         aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
         if aviso_exames:
             response['orientacoes'] = response['orientacoes'] + [aviso_exames]
+        # Orientações também levam a fonte clicável.
+        for o in response['orientacoes']:
+            links = build_reference_links(o.get('titulo', ''), o.get('referencia', ''))
+            if links:
+                o['referencias'] = links
+                o['referencia_html'] = build_reference_html(links)
         response['pa_classificacao'] = pa_classificacao
         response['proximas_gestacao'] = proximas_gestacao
         response['gestacao'] = gestacao

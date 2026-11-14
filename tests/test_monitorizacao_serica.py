@@ -59,3 +59,23 @@ def test_niveis_novos_tem_codigo_tuss():
     assert tuss.CODIGOS['Tacrolimo, sangue total (nível de vale)'] == ['40302458']
     assert tuss.CODIGOS['Ciclosporina, sangue total (nível de vale)'] == ['40301486']
     assert tuss.CODIGOS[LITIO] == ['40302229']
+
+
+def test_orientacoes_trazem_a_fonte_clicavel(client):
+    """Toda orientação com referência traz um link para cada fonte citada (como as recomendações)."""
+    from test_i18n import _casos_do_motor
+    sem_link = {}
+    for dados in _casos_do_motor()[::7]:
+        for o in client.post('/api/checkup-intelligent', json=dados).get_json().get('orientacoes', []):
+            if not o.get('referencia'):
+                continue
+            for link in o.get('referencias', []):
+                if not link['url'].startswith('https://'):
+                    sem_link[link['label']] = o['titulo']
+            assert o.get('referencia_html', '').count('<a href="https://') == len(o['referencias']), o['titulo']
+    assert not sem_link, sem_link
+
+
+def test_tela_mostra_o_link_da_orientacao():
+    from conftest import RAIZ
+    assert 'o.referencia_html ||' in (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
