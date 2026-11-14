@@ -114,3 +114,14 @@ html.lenis, html.lenis body { height: auto; }
   .selo { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] tracking-[0.14em] font-medium uppercase; }
   .referencia-links a { @apply text-teal-dark underline decoration-teal/30 underline-offset-2 hover:decoration-teal; }
 }
+
+/* Termos de Uso: texto corrido com listas e links legíveis. */
+@layer components {
+  .termos p { @apply mt-4; }
+  .termos ul { @apply mt-4 ml-5 list-disc flex flex-col gap-2; }
+  .termos a { @apply text-teal-dark underline underline-offset-2; }
+  .termos strong { @apply font-medium text-ink; }
+}
+@layer components {
+  .btn-escuro:disabled, .btn-claro:disabled { @apply opacity-40 cursor-not-allowed; }
+}

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termos de Uso e Privacidade — Evidēns</title>
+<meta name="description" content="Termos de Uso e Política de Privacidade da Evidēns, ferramenta de apoio ao check-up preventivo para médicos.">
+<link rel="icon" href="/favicon.ico?v=2" sizes="32x32">
+<link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="/static/evidens.css">
+<script defer src="/static/termos.js"></script>
+</head>
+<body class="bg-paper text-ink font-sans min-h-screen flex flex-col">
+
+
+<header class="px-4 sm:px-6 lg:px-[6%] pt-4 lg:pt-6">
+  <div class="max-w-[1240px] mx-auto bg-white h-[60px] pl-5 pr-2.5 lg:pl-6 flex items-center justify-between rounded-[3px] border border-ink/5">
+    <a href="/" class="flex items-center gap-2.5" aria-label="Evidēns — início">
+      <span class="grid grid-cols-3 gap-[3px]" aria-hidden="true">
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i>
+      </span>
+      <span class="text-[28px] font-medium tracking-tight leading-none">evidēns</span>
+    </a>
+    <nav class="flex items-center gap-2 lg:gap-6 text-[13px] uppercase tracking-[0.12em] text-ink/75"><a href="/" class="hidden sm:inline hover:text-teal transition">Início</a><a href="/intelligent-tools" class="inline-flex items-center bg-ink text-white font-medium rounded-[3px] px-4 h-10 hover:bg-teal transition">Check-up</a></nav>
+  </div>
+</header>
+
+<main class="flex-1 w-full max-w-[760px] mx-auto px-4 sm:px-6 pt-14 lg:pt-20 pb-24">
+  <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">TERMOS DE USO E PRIVACIDADE</p>
+  <h1 class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Como a Evidēns funciona e <span class="font-serif italic text-teal tracking-tight">o que cabe a cada um.</span></h1>
+  <p class="text-[14px] text-ink/55 mt-5">Versão de <time data-versao datetime="2026-11-14">14 de novembro de 2026</time>.</p>
+  <p class="text-[13px] text-ink/50 mt-1" lang="en">This document is available in Portuguese only; the Portuguese text governs.</p>
+
+  <div data-aceite class="recommendation-card mt-8" hidden>
+    <p class="text-[15px] leading-relaxed"><strong>Para continuar usando a Evidēns, leia e aceite estes Termos.</strong> <span data-aceite-motivo>Eles são novos ou foram atualizados desde o seu último acesso.</span></p>
+    <label class="flex items-start gap-3 mt-4 text-[15px]"><input type="checkbox" data-aceite-caixa class="mt-1 w-4 h-4 accent-teal"> Li e aceito os Termos de Uso e a Política de Privacidade.</label>
+    <div data-erro role="alert" class="aviso aviso-erro mt-4" style="display: none;"></div>
+    <div class="flex flex-wrap gap-3 mt-5">
+      <button type="button" class="btn-escuro" data-aceitar disabled>Aceitar e continuar</button>
+      <button type="button" class="btn-claro" data-sair>Sair</button>
+    </div>
+  </div>
+
+  <nav aria-label="Seções" class="mt-10 text-[14px] text-ink/65">
+    <ol class="grid sm:grid-cols-2 gap-x-6 gap-y-1 list-decimal ml-5">
+      <li><a href="#s1" class="hover:text-teal">Quem somos</a></li>
+      <li><a href="#s2" class="hover:text-teal">O que a Evidēns faz</a></li>
+      <li><a href="#s3" class="hover:text-teal">Quem pode usar</a></li>
+      <li><a href="#s4" class="hover:text-teal">Responsabilidade do profissional</a></li>
+      <li><a href="#s5" class="hover:text-teal">Limitações</a></li>
+      <li><a href="#s6" class="hover:text-teal">Uso proibido</a></li>
+      <li><a href="#s7" class="hover:text-teal">Dados dos pacientes</a></li>
+      <li><a href="#s8" class="hover:text-teal">Seus dados pessoais</a></li>
+      <li><a href="#s9" class="hover:text-teal">Propriedade intelectual</a></li>
+      <li><a href="#s10" class="hover:text-teal">Responsabilidade</a></li>
+      <li><a href="#s11" class="hover:text-teal">Mudanças nestes Termos</a></li>
+      <li><a href="#s12" class="hover:text-teal">Lei aplicável e foro</a></li>
+    </ol>
+  </nav>
+
+  <div class="termos text-[16px] leading-relaxed text-ink/80">
+  <section id="s1" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">1. Quem somos</h2>
+    <p>A Evidēns (evidens.life) é mantida pelo <strong>Dr. Rodolfo Cambraia Frota</strong>, médico, CRM-GO 26.815, pessoa física com atuação em Goiânia (GO), que também é o responsável técnico e o controlador dos dados pessoais descritos na seção 8.</p>
+    <p>Contato para dúvidas, solicitações sobre dados pessoais e comunicações sobre este documento: <a href="mailto:rodolfo.cambraiafrota@einstein.br">rodolfo.cambraiafrota@einstein.br</a>.</p>
+  </section>
+  <section id="s2" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">2. O que a Evidēns faz</h2>
+    <p>A Evidēns é uma ferramenta de <strong>apoio à decisão</strong> para o check-up preventivo. A partir dos dados que o profissional informa (idade, sexo, condições clínicas, medicamentos e histórico), ela sugere exames de rastreamento, vacinas e cuidados preventivos, cada um com a diretriz ou referência de origem, e gera minutas de pedidos de exames, receitas de vacinas e guias de plano de saúde para o profissional revisar e assinar.</p>
+    <p>As sugestões são produzidas por regras programadas a partir de diretrizes publicadas. Não há modelo de inteligência artificial generativa formulando recomendações. Ainda assim, por ser um algoritmo de apoio à decisão clínica, a Evidēns se enquadra no conceito de sistema de inteligência artificial da Resolução CFM nº 2.454/2026, e o uso deve observar essa norma (seção 4).</p>
+  </section>
+  <section id="s3" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">3. Quem pode usar</h2>
+    <ul>
+      <li>Médicos com inscrição ativa em Conselho Regional de Medicina, médicos residentes e estudantes de medicina.</li>
+      <li>Toda conta é conferida e aprovada pelo responsável técnico antes do primeiro acesso, e pode ser recusada, suspensa ou bloqueada se os dados informados não forem confirmados ou se estes Termos forem descumpridos.</li>
+      <li>Estudantes usam a Evidēns para fins de formação. Documentos gerados em atendimento real só têm validade com a assinatura de um médico responsável, nos termos da Lei nº 12.842/2013 (Lei do Ato Médico).</li>
+      <li>A conta é pessoal e intransferível. Você é responsável por manter a senha em sigilo e por tudo o que for feito com o seu acesso. Avise-nos imediatamente se suspeitar de uso indevido.</li>
+    </ul>
+  </section>
+  <section id="s4" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">4. Responsabilidade do profissional</h2>
+    <p>A Evidēns <strong>não substitui o julgamento clínico</strong>. A decisão sobre o que solicitar, prescrever ou contraindicar é sempre do médico que atende o paciente. Ao usar a ferramenta, você se compromete a:</p>
+    <ul>
+      <li>revisar cada sugestão diante do quadro clínico, das preferências do paciente e da evidência disponível, antes de qualquer pedido ou prescrição;</li>
+      <li>conferir e corrigir as minutas e guias antes de assinar: dados do paciente, exames, códigos, doses, intervalos e indicações;</li>
+      <li>não usar a ferramenta para pacientes sintomáticos ou em investigação diagnóstica, para os quais as recomendações de rastreamento não se aplicam;</li>
+      <li>observar o Código de Ética Médica (Resolução CFM nº 2.217/2018) e a Resolução CFM nº 2.454/2026, inclusive: usar a ferramenta apenas como apoio, avaliar criticamente as sugestões, registrar no prontuário o uso de sistema de apoio à decisão e informar o paciente, de forma clara, quando ele tiver papel relevante no cuidado, respeitando eventual recusa;</li>
+      <li>informar dados verdadeiros no cadastro e nos credenciamentos de planos de saúde.</li>
+    </ul>
+  </section>
+  <section id="s5" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">5. Limitações</h2>
+    <ul>
+      <li>As recomendações refletem as diretrizes e referências indicadas em cada item, na versão em que foram incorporadas. Diretrizes mudam, divergem entre si e podem não contemplar situações particulares.</li>
+      <li>A ferramenta pode conter erros, omissões ou falhas de funcionamento, apesar dos testes realizados. Se encontrar algum, escreva para o contato da seção 1.</li>
+      <li>A Evidēns não garante que um plano de saúde autorizará os exames solicitados, nem que os códigos TUSS e o formato da guia atendem às exigências específicas de cada operadora.</li>
+      <li>O serviço pode ser interrompido para manutenção, por falhas de terceiros (hospedagem, banco de dados, e-mail) ou encerrado, sem garantia de disponibilidade contínua.</li>
+    </ul>
+  </section>
+  <section id="s6" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">6. Uso proibido</h2>
+    <ul>
+      <li>ceder, compartilhar ou vender o acesso;</li>
+      <li>tentar acessar contas, dados ou áreas que não sejam suas, testar vulnerabilidades sem autorização ou sobrecarregar o serviço;</li>
+      <li>copiar ou extrair o conteúdo da ferramenta de forma automatizada para criar produto concorrente;</li>
+      <li>usar a ferramenta para fins ilícitos ou contrários à ética médica, inclusive em publicidade que contrarie as normas do CFM.</li>
+    </ul>
+  </section>
+  <section id="s7" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">7. Dados dos pacientes</h2>
+    <p>Os dados do paciente que você digita (nome, idade, sexo, condições clínicas, medicamentos e demais informações do check-up) são usados apenas para gerar as sugestões e os documentos daquele atendimento. Eles <strong>não são gravados</strong> no banco de dados nem associados à sua conta: o processamento ocorre na memória do servidor durante a requisição e o conteúdo é descartado ao final.</p>
+    <p>Em relação a esses dados, o médico que atende é o controlador e a Evidēns atua como operadora, tratando-os apenas conforme a finalidade descrita acima (Lei nº 13.709/2018, art. 5º, VI e VII). Por serem dados de saúde, o tratamento pelo profissional se apoia, em regra, na tutela da saúde realizada por profissional de saúde (art. 11, II, "f"). Informe apenas o necessário para o check-up.</p>
+    <p>Os PDFs gerados são baixados no seu dispositivo; a guarda, o envio e o descarte desses documentos são de sua responsabilidade, com o sigilo exigido pela ética médica.</p>
+  </section>
+  <section id="s8" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">8. Seus dados pessoais (Política de Privacidade)</h2>
+    <p><strong>O que guardamos sobre você</strong>, e para quê:</p>
+    <ul>
+      <li><strong>Cadastro:</strong> nome, e-mail, registro profissional (CRM ou matrícula e faculdade), perfil e senha. A senha é guardada apenas em forma irreversível (hash). Finalidade: conferir quem você é, liberar e manter o acesso.</li>
+      <li><strong>Planos de saúde que você cadastrar:</strong> operadora, registro ANS, código de prestador, nome do contratado e CBO. Finalidade: preencher as guias. Não guardamos senhas de portais de operadoras.</li>
+      <li><strong>Registro de uso:</strong> o tipo de ação (entrada na conta, check-up gerado, pedido de exames, receita de vacinas, guia) e o horário, ligados à sua conta, sem nenhum dado do paciente. Finalidade: segurança, estatísticas de uso e melhoria do serviço.</li>
+      <li><strong>Segurança do acesso:</strong> e-mail e endereço IP de tentativas de login malsucedidas, usados para bloquear tentativas repetidas e apagados automaticamente depois de alguns minutos.</li>
+      <li><strong>Aceite destes Termos:</strong> versão aceita e data.</li>
+      <li><strong>Cookies:</strong> um cookie de sessão, necessário para manter você conectado (expira em 12 horas), e um cookie com o idioma escolhido. Não usamos cookies de publicidade.</li>
+    </ul>
+    <p><strong>Bases legais</strong> (Lei nº 13.709/2018, art. 7º): execução do serviço que você solicitou ao se cadastrar (inciso V) e legítimo interesse na segurança e na melhoria do serviço (inciso IX).</p>
+    <p><strong>Com quem os dados são compartilhados.</strong> Não vendemos nem cedemos dados. Usamos fornecedores que tratam dados em nosso nome, alguns com servidores fora do Brasil (transferência internacional, art. 33 da LGPD):</p>
+    <ul>
+      <li>Vercel: hospedagem do site e estatística agregada de visitas (Vercel Web Analytics);</li>
+      <li>Neon: banco de dados das contas;</li>
+      <li>Resend: envio de e-mails do cadastro (aviso de pedido de conta e de aprovação);</li>
+      <li>Google Fonts e Cloudflare (cdnjs): entrega de fontes e ícones, que recebem o endereço IP do seu navegador ao carregar a página.</li>
+    </ul>
+    <p><strong>Por quanto tempo.</strong> Enquanto a conta existir. Se você pedir a exclusão, apagamos o cadastro, os planos de saúde e o registro de uso associados, salvo o que for necessário guardar por obrigação legal ou para o exercício regular de direitos (art. 16 da LGPD).</p>
+    <p><strong>Seus direitos</strong> (art. 18 da LGPD): confirmar se tratamos seus dados, acessá-los, corrigi-los, pedir a exclusão, a portabilidade, informações sobre compartilhamento e revogar consentimento quando ele for a base do tratamento. Faça o pedido pelo contato da seção 1; respondemos no prazo legal. Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).</p>
+    <p><strong>Segurança.</strong> Conexão criptografada (HTTPS), senha em hash, cookie de sessão protegido, bloqueio de tentativas repetidas e acesso administrativo restrito. Nenhum sistema é totalmente imune a incidentes; se ocorrer um incidente que possa trazer risco relevante, você e a ANPD serão comunicados, conforme o art. 48 da LGPD.</p>
+    <p><strong>Canal de atendimento ao titular.</strong> O contato da seção 1 é o canal para exercer seus direitos e para comunicações da ANPD (art. 41 da LGPD e Resolução CD/ANPD nº 2/2022).</p>
+  </section>
+  <section id="s9" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">9. Propriedade intelectual</h2>
+    <p>O software, os textos, a organização das recomendações e a identidade visual da Evidēns pertencem ao seu mantenedor. As diretrizes e referências citadas pertencem aos respectivos autores e são indicadas para consulta. Os documentos gerados para os seus pacientes podem ser usados livremente no atendimento.</p>
+  </section>
+  <section id="s10" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">10. Responsabilidade</h2>
+    <p>A Evidēns é fornecida como ferramenta de apoio, no estado em que se encontra. Na extensão permitida pela lei, o mantenedor não responde por decisões clínicas tomadas pelo profissional, por danos decorrentes de uso em desacordo com estes Termos, nem por indisponibilidade causada por terceiros. Nada nestes Termos exclui responsabilidade que a lei não permita excluir.</p>
+  </section>
+  <section id="s11" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">11. Mudanças nestes Termos</h2>
+    <p>Estes Termos podem ser atualizados, por exemplo quando a ferramenta ganhar novas funções ou a legislação mudar. A data da versão fica no topo da página. Quando houver mudança, pediremos um novo aceite no seu próximo acesso; sem ele, o uso fica suspenso até o aceite. Você pode encerrar a conta a qualquer momento pelo contato da seção 1.</p>
+  </section>
+  <section id="s12" class="mt-12">
+    <h2 class="text-[22px] font-medium tracking-tight">12. Lei aplicável e foro</h2>
+    <p>Estes Termos seguem a legislação brasileira. Fica eleito o foro da comarca de Goiânia (GO), ressalvado o direito de o usuário, quando a lei assim lhe garantir, propor ação no foro do seu domicílio.</p>
+  </section>
+  </div>
+</main>
+
+<footer class="max-w-[1100px] w-full mx-auto px-4 sm:px-6 pb-10">
+  <div class="flex flex-col md:flex-row md:justify-between gap-3 pt-8 border-t border-ink/10 text-[12px] text-ink/50">
+    <p>Responsável técnico: Dr. Rodolfo Cambraia Frota · CRM-GO 26815</p>
+    <p>© 2026 Evidēns · <a href="/contact" class="hover:text-teal">Contato</a> · <a href="/termos" class="hover:text-teal">Termos de Uso</a></p>
+  </div>
+</footer>
+</body>
+</html>

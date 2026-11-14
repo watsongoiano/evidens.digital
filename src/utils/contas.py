@@ -103,6 +103,11 @@ _ESQUEMA = [
         criado_em BIGINT NOT NULL
     )""",
     "CREATE INDEX IF NOT EXISTS credenciamentos_usuario ON credenciamentos (usuario_id)",
+    # Aceite dos Termos de Uso: uma linha por versão aceita (prova de quando e de qual texto).
+    """CREATE TABLE IF NOT EXISTS aceites_termos (
+        id {pk}, usuario_id BIGINT NOT NULL, versao TEXT NOT NULL, aceito_em BIGINT NOT NULL
+    )""",
+    "CREATE INDEX IF NOT EXISTS aceites_termos_usuario ON aceites_termos (usuario_id)",
 ]
 
 
@@ -449,3 +454,20 @@ def criar_credenciamento(uid, dados):
 def excluir_credenciamento(uid, cid):
     with _conexao() as executar:
         return executar('DELETE FROM credenciamentos WHERE id = ? AND usuario_id = ?', (cid, uid)).rowcount > 0
+
+
+# --- Termos de Uso -----------------------------------------------------------
+
+def registrar_aceite(uid, versao):
+    """Guarda o aceite de uma versão dos Termos (só uma vez por versão)."""
+    with _conexao() as executar:
+        if executar('SELECT 1 FROM aceites_termos WHERE usuario_id = ? AND versao = ?', (uid, versao)).fetchone():
+            return
+        executar('INSERT INTO aceites_termos (usuario_id, versao, aceito_em) VALUES (?, ?, ?)',
+                 (uid, versao, int(time.time())))
+
+
+def aceitou(uid, versao):
+    with _conexao() as executar:
+        return executar('SELECT 1 FROM aceites_termos WHERE usuario_id = ? AND versao = ?',
+                        (uid, versao)).fetchone() is not None

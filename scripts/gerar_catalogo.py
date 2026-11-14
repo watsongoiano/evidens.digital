@@ -32,11 +32,12 @@ spec.loader.exec_module(modulo)
 app = modulo.app
 app.config.update(TESTING=True)
 
-from src.utils import contas  # noqa: E402
+from src.utils import contas, termos  # noqa: E402
 
 usuario = contas.criar('catalogo@exemplo.test', 'Gerador do catálogo', 'CRM-GO 0', 'medico', 'senha-do-gerador-1')
 if usuario:
     contas.definir_situacao(usuario['id'], 'aprovado')
+    contas.registrar_aceite(usuario['id'], termos.VERSAO)
 cliente = app.test_client()
 cliente.post('/api/auth/login', json={'email': 'catalogo@exemplo.test', 'senha': 'senha-do-gerador-1'})
 

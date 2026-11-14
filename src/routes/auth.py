@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 
 from flask import Blueprint, current_app, g, jsonify, request, session
 
-from src.utils import contas, notificacoes
+from src.utils import contas, notificacoes, termos
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -47,6 +47,22 @@ def _abrir_sessao(u):
     g.usuario = u
 
 
+def termos_pendentes(u=None):
+    """True se a conta da sessão ainda não aceitou a versão em vigor dos Termos de Uso."""
+    u = u or usuario_atual()
+    if u is None:
+        return False
+    if 'termos_pendentes' not in g:
+        g.termos_pendentes = not contas.aceitou(u['id'], termos.VERSAO)
+    return g.termos_pendentes
+
+
+def resposta_termos_pendentes():
+    resposta = jsonify({'error': termos.MSG_PENDENTE, 'termos': '/termos?aceitar=1'})
+    resposta.headers[termos.CABECALHO] = 'pendente'
+    return resposta, 403
+
+
 def exigir_login(funcao):
     @wraps(funcao)
     def protegida(*args, **kwargs):
@@ -54,6 +70,8 @@ def exigir_login(funcao):
             return jsonify({'error': MSG_INDISPONIVEL}), 503
         if usuario_atual() is None:
             return jsonify({'error': MSG_LOGIN, 'login': '/login'}), 401
+        if termos_pendentes():
+            return resposta_termos_pendentes()
         return funcao(*args, **kwargs)
     return protegida
 
@@ -68,6 +86,8 @@ def exigir_administrador(funcao):
             return jsonify({'error': MSG_LOGIN, 'login': '/login'}), 401
         if not u['administrador']:
             return jsonify({'error': 'Acesso restrito ao administrador.'}), 403
+        if termos_pendentes(u):
+            return resposta_termos_pendentes()
         return funcao(*args, **kwargs)
     return protegida
 
@@ -113,18 +133,38 @@ def saude():
 @auth_bp.route('/auth/eu')
 def eu():
     u = usuario_atual()
-    return jsonify({'usuario': contas.publico(u) if u else None})
+    if not u:
+        return jsonify({'usuario': None})
+    return jsonify({'usuario': contas.publico(u), 'termos_pendentes': termos_pendentes(u), 'termos_versao': termos.VERSAO})
+
+
+@auth_bp.route('/auth/termos/aceitar', methods=['POST'])
+def aceitar_termos():
+    """Aceite da versão em vigor. Só pede sessão: é justamente o que libera o resto."""
+    u = usuario_atual()
+    if u is None:
+        return jsonify({'error': MSG_LOGIN, 'login': '/login'}), 401
+    if _corpo().get('versao') != termos.VERSAO:
+        return jsonify({'error': 'Os Termos foram atualizados. Recarregue a página e leia a versão atual.'}), 409
+    contas.registrar_aceite(u['id'], termos.VERSAO)
+    g.termos_pendentes = False
+    return jsonify({'ok': True, 'versao': termos.VERSAO})
 
 
 @auth_bp.route('/auth/cadastro', methods=['POST'])
 def cadastro():
     d = _corpo()
+    if d.get('aceite_termos') not in (True, 'on', 'true', '1', 1):
+        return jsonify({'error': 'Confira os dados informados.',
+                        'erros': ['Para criar a conta, leia e aceite os Termos de Uso.']}), 400
     try:
         perfil = _texto(d, 'perfil')
         registro = contas.montar_registro(perfil, _texto(d, 'registro'), _texto(d, 'crm_uf'), _texto(d, 'crm_numero'))
         novo = contas.criar(_texto(d, 'email'), _texto(d, 'nome'), registro, perfil, _texto(d, 'senha'))
     except contas.DadosInvalidos as e:
         return jsonify({'error': 'Confira os dados informados.', 'erros': e.erros}), 400
+    if novo:
+        contas.registrar_aceite(novo['id'], termos.VERSAO)
     if novo and notificacoes.configurado():
         # E-mails do cadastro (aviso ao administrador e boas-vindas); falha no envio não impede o cadastro.
         try:
@@ -155,7 +195,7 @@ def login():
     if u['situacao'] != 'aprovado':
         return jsonify({'error': 'Esta conta está bloqueada. Fale com o responsável técnico.'}), 403
     _abrir_sessao(u)
-    return jsonify({'ok': True, 'usuario': contas.publico(u)})
+    return jsonify({'ok': True, 'usuario': contas.publico(u), 'termos_pendentes': termos_pendentes(u)})
 
 
 @auth_bp.route('/auth/logout', methods=['POST'])
@@ -224,6 +264,9 @@ def configurar():
         return jsonify({'error': 'Código de instalação inválido.'}), 403
     if contas.existe_administrador():
         return jsonify({'error': 'O administrador já foi criado.'}), 409
+    if d.get('aceite_termos') not in (True, 'on', 'true', '1', 1):
+        return jsonify({'error': 'Confira os dados informados.',
+                        'erros': ['Para criar a conta, leia e aceite os Termos de Uso.']}), 400
     try:
         registro = contas.montar_registro('medico', _texto(d, 'registro'), _texto(d, 'crm_uf'), _texto(d, 'crm_numero'))
         u = contas.criar(_texto(d, 'email'), _texto(d, 'nome'), registro, 'medico', _texto(d, 'senha'), administrador=True)
@@ -231,6 +274,7 @@ def configurar():
         return jsonify({'error': 'Confira os dados informados.', 'erros': e.erros}), 400
     if u is None:
         return jsonify({'error': 'Já existe uma conta com este e-mail, ou o administrador acabou de ser criado.'}), 409
+    contas.registrar_aceite(u['id'], termos.VERSAO)
     _abrir_sessao(u)
     return jsonify({'ok': True, 'usuario': contas.publico(u)}), 201
 

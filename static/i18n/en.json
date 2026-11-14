@@ -1718,7 +1718,11 @@
   "Limpar": "Clear",
   "Os dados do paciente mudaram depois que o plano foi informado. Confira o plano e a carteira antes de gerar a guia.": "The patient data changed after the health plan was entered. Check the plan and the member ID before generating the form.",
   "São deste paciente": "They belong to this patient",
-  "Obs.:": "Note:"
+  "Obs.:": "Note:",
+  "Termos de Uso": "Terms of Use",
+  "Li e aceito os": "I have read and accept the",
+  "Termos de Uso e a Política de Privacidade": "Terms of Use and Privacy Policy (in Portuguese)",
+  "Guardamos nome, e-mail, registro profissional e perfil, para conferir e liberar o acesso. A senha é armazenada de forma irreversível. Dados de pacientes não são gravados. Detalhes nos": "We keep your name, e-mail, professional license and profile, to check and release access. The password is stored irreversibly. Patient data is not saved. Details in the"
  },
  "padroes": [
   [
