@@ -64,6 +64,24 @@
             <option value="feminino">Feminino</option>
           </select>
         </div>
+        <div id="planoDoPaciente" class="sm:col-span-2" style="display: none;">
+          <div id="planoCampos" class="grade">
+            <div class="campo">
+              <label for="pacientePlano">Plano de saúde do paciente</label>
+              <select id="pacientePlano" data-plano><option value="">Particular (sem plano)</option></select>
+            </div>
+            <div class="campo" data-plano-campo style="display: none;">
+              <label for="pacienteCarteira">Número da carteira</label>
+              <input type="text" id="pacienteCarteira" data-plano maxlength="30" autocomplete="off" inputmode="numeric">
+            </div>
+          </div>
+          <p data-plano-campo class="text-[13px] text-ink/55 mt-3" style="display: none;">A guia SP/SADT deste plano sai junto com os pedidos de exames, já preenchida. O número da carteira não é guardado nem enviado para calcular as recomendações.</p>
+          <div id="planoConfirmar" role="alert" class="aviso aviso-info mt-3" style="display: none;">
+            <p>Os dados do paciente mudaram. O plano e a carteira ainda são deste paciente?</p>
+            <p class="flex flex-wrap gap-3 mt-3"><button type="button" id="planoManter" class="btn-claro">Sim, manter</button><button type="button" id="planoLimpar" class="btn-claro">Limpar</button></p>
+          </div>
+          <p id="planoConvite" class="text-[13px] text-ink/55" style="display: none;">Atende por plano de saúde? <a href="/conta" class="text-teal underline underline-offset-2">Cadastre o seu credenciamento</a> e a guia do plano sai junto com o pedido, já preenchida.</p>
+        </div>
       </div>
     </section>
 
@@ -793,6 +811,10 @@
         <div class="campo sm:col-span-2" data-guia-campo style="display: none;"><label for="guiaIndicacao">Indicação clínica</label><textarea id="guiaIndicacao" rows="2" maxlength="150" autocomplete="off"></textarea></div>
       </div>
       <p data-guia-campo class="text-[13px] text-ink/55 mt-3" style="display: none;">A guia SP/SADT sai no mesmo PDF, logo depois do pedido, com os seus dados no plano e os códigos TUSS. O número da carteira não é guardado.</p>
+      <div id="guiaConfirmar" role="alert" class="aviso aviso-info mt-3" style="display: none;">
+        <p>Os dados do paciente mudaram depois que o plano foi informado. Confira o plano e a carteira antes de gerar a guia.</p>
+        <p class="flex flex-wrap gap-3 mt-3"><button type="button" id="guiaManter" class="btn-claro">São deste paciente</button><button type="button" id="guiaLimpar" class="btn-claro">Limpar</button></p>
+      </div>
     </div>
     <p id="guiaConvite" class="text-[13px] text-ink/55 mt-6 pt-5 border-t border-ink/10" style="display: none;">Atende por plano de saúde? <a href="/conta" class="text-teal underline underline-offset-2">Cadastre o seu credenciamento</a> e a guia do plano sai junto com o pedido, já preenchida.</p>
 
@@ -958,7 +980,6 @@
         function limparResultados() {
             currentRecommendations = [];
             limparAcrescimos();
-            limparGuia();
             currentPatientData = {};
             document.getElementById('recommendationsContent').innerHTML = '';
             document.getElementById('naoIncluidasContent').innerHTML = '';
@@ -1041,8 +1062,19 @@
         // Qualquer alteração nos dados clínicos invalida o resultado exibido: as recomendações
         // e os PDFs têm de corresponder ao que está no formulário.
         let revisaoDoFormulario = 0;
+        // Nome, plano e carteira não mudam as recomendações. Mas nome novo com resultado na tela
+        // pode ser outro paciente: o plano e a carteira passam a pedir confirmação.
+        function semEfeitoNasRecomendacoes(evento) {
+            const campo = evento && evento.target;
+            if (!campo || !(campo.id === 'nome_paciente' || campo.hasAttribute('data-plano'))) return false;
+            if (campo.id === 'nome_paciente' && evento.type === 'change' && recommendationsDiv.style.display === 'block') {
+                pedirConfirmacaoDoPlano();
+            }
+            return true;
+        }
+
         function invalidarResultados(evento) {
-            if (evento && evento.target && evento.target.id === 'nome_paciente') {
+            if (semEfeitoNasRecomendacoes(evento)) {
                 return;
             }
             // Invalida também qualquer resposta ainda pendente (ver o envio do formulário).
@@ -1050,6 +1082,9 @@
             if (recommendationsDiv.style.display === 'block') {
                 limparResultados();
                 staleNotice.style.display = 'block';
+                // Os dados clínicos mudaram depois de um resultado: pode ser outro paciente.
+                // O plano e a carteira ficam, mas só voltam a valer depois de confirmados.
+                pedirConfirmacaoDoPlano();
             }
         }
         checkupForm.addEventListener('input', invalidarResultados);
@@ -1234,16 +1269,83 @@
 
         // ── Guia do plano de saúde (SP/SADT) junto com o pedido de exames ──
         let planosDoMedico = null;        // null = ainda não carregado
-        let planoEscolhido = '';          // vale para os próximos pedidos deste atendimento
+        // O plano e a carteira ficam na identificação do paciente (seção 01) e são espelhados no diálogo do PDF.
+        // Não vão para o cálculo das recomendações nem são guardados.
+        let planoAConfirmar = false;      // os dados clínicos mudaram depois de um resultado: confirmar antes da guia
 
-        // O plano e a carteira valem para os documentos do mesmo paciente (laboratório e imagem).
-        // Qualquer mudança no formulário apaga os resultados e, com eles, o plano e a carteira:
-        // a guia do próximo paciente nunca sai com a carteira do anterior.
+        const campoPlano = () => document.getElementById('pacientePlano');
+        const campoCarteira = () => document.getElementById('pacienteCarteira');
+
+        function mostrarCamposDoPlano() {
+            const comPlano = !!campoPlano().value;
+            document.querySelectorAll('[data-plano-campo]').forEach(el => { el.style.display = comPlano ? '' : 'none'; });
+            const pendente = planoAConfirmar && comPlano;
+            document.getElementById('planoConfirmar').style.display = pendente ? '' : 'none';
+            document.getElementById('guiaConfirmar').style.display = pendente ? '' : 'none';
+        }
+
+        function pedirConfirmacaoDoPlano() {
+            if (campoPlano().value || campoCarteira().value) planoAConfirmar = true;
+            document.getElementById('guiaIndicacao').value = '';     // a sugestão é refeita com os dados novos
+            mostrarCamposDoPlano();
+        }
+
+        function confirmarPlano() {
+            planoAConfirmar = false;
+            mostrarCamposDoPlano();
+        }
+
         function limparGuia() {
-            planoEscolhido = '';
+            planoAConfirmar = false;
+            campoPlano().value = '';
+            campoCarteira().value = '';
             document.getElementById('guiaPlano').value = '';
             document.getElementById('guiaCarteira').value = '';
             document.getElementById('guiaIndicacao').value = '';
+            mostrarCamposDoPlano();
+            mostrarCamposDaGuia();
+        }
+
+        // Quem mexe no plano ou na carteira está informando os dados deste paciente: vale como confirmação.
+        function planoEditado(origem) {
+            if (origem === 'dialogo') {
+                campoPlano().value = document.getElementById('guiaPlano').value;
+                campoCarteira().value = document.getElementById('guiaCarteira').value;
+            } else {
+                document.getElementById('guiaPlano').value = campoPlano().value;
+                document.getElementById('guiaCarteira').value = campoCarteira().value;
+            }
+            if (!campoPlano().value) { campoCarteira().value = ''; document.getElementById('guiaCarteira').value = ''; }
+            planoAConfirmar = false;
+            mostrarCamposDoPlano();
+            mostrarCamposDaGuia();
+        }
+
+        function preencherPlanos(seletor, lista) {
+            const atual = seletor.value;
+            while (seletor.options.length > 1) seletor.remove(1);
+            lista.forEach(plano => {
+                const o = document.createElement('option'); o.value = String(plano.id); o.textContent = plano.operadora;
+                seletor.appendChild(o);
+            });
+            seletor.value = lista.some(p => String(p.id) === atual) ? atual : '';
+        }
+
+        // Mostra o bloco do plano na identificação para quem assina pedidos (médico e residente).
+        async function prepararPlanoDoPaciente() {
+            aplicarPlanosNaIdentificacao(await carregarPlanos());
+        }
+
+        // Também chamada pelo diálogo do PDF: se a primeira carga falhou e a do diálogo deu certo,
+        // a identificação precisa das mesmas opções, senão o espelho entre os dois seletores se perde.
+        function aplicarPlanosNaIdentificacao(planos) {
+            if (!planos.disponivel) return;
+            document.getElementById('planoDoPaciente').style.display = '';
+            const temPlanos = planos.lista.length > 0;
+            document.getElementById('planoCampos').style.display = temPlanos ? '' : 'none';
+            document.getElementById('planoConvite').style.display = temPlanos ? 'none' : '';
+            if (temPlanos) preencherPlanos(campoPlano(), planos.lista);
+            mostrarCamposDoPlano();
         }
 
         async function carregarPlanos() {
@@ -1292,16 +1394,16 @@
             const planos = await carregarPlanos();
             if (!planos.disponivel) return;
             if (!planos.lista.length) { convite.style.display = ''; return; }
+            // O diálogo espelha o que está na identificação do paciente.
+            aplicarPlanosNaIdentificacao(planos);
             const seletor = document.getElementById('guiaPlano');
-            while (seletor.options.length > 1) seletor.remove(1);
-            planos.lista.forEach(plano => {
-                const o = document.createElement('option'); o.value = String(plano.id); o.textContent = plano.operadora;
-                seletor.appendChild(o);
-            });
-            seletor.value = planos.lista.some(p => String(p.id) === planoEscolhido) ? planoEscolhido : '';
-            document.getElementById('guiaIndicacao').value = indicacaoSugerida();
+            preencherPlanos(seletor, planos.lista);
+            seletor.value = campoPlano().value;
+            document.getElementById('guiaCarteira').value = campoCarteira().value;
+            if (!document.getElementById('guiaIndicacao').value) document.getElementById('guiaIndicacao').value = indicacaoSugerida();
             painel.style.display = '';
             mostrarCamposDaGuia();
+            mostrarCamposDoPlano();
         }
 
         function guiaDoDialogo() {
@@ -1455,10 +1557,13 @@
             if (typeof dialogo.showModal === 'function') dialogo.showModal(); else dialogo.setAttribute('open', '');
         }
 
-        document.getElementById('guiaPlano').addEventListener('change', evento => {
-            planoEscolhido = evento.target.value;
-            mostrarCamposDaGuia();
-        });
+        document.getElementById('guiaPlano').addEventListener('change', () => planoEditado('dialogo'));
+        document.getElementById('guiaCarteira').addEventListener('input', () => planoEditado('dialogo'));
+        campoPlano().addEventListener('change', () => planoEditado('formulario'));
+        campoCarteira().addEventListener('input', () => planoEditado('formulario'));
+        ['planoManter', 'guiaManter'].forEach(id => document.getElementById(id).addEventListener('click', confirmarPlano));
+        ['planoLimpar', 'guiaLimpar'].forEach(id => document.getElementById(id).addEventListener('click', limparGuia));
+        prepararPlanoDoPaciente();
 
         function fecharDialogo() {
             document.getElementById('acrescimoBusca').value = '';
@@ -1479,6 +1584,12 @@
             if (painelAberto && document.getElementById('acrescimoBusca').value.trim()) adicionarDoCampo();
             const categoria = categoriaDoDialogo;
             const guia = categoria === 'vacina' ? null : guiaDoDialogo();
+            if (guia && planoAConfirmar) {
+                // A guia não sai com plano e carteira que podem ser de outro paciente.
+                document.getElementById('guiaConfirmar').scrollIntoView({ block: 'nearest' });
+                document.getElementById('guiaManter').focus();
+                return;
+            }
             fecharDialogo();
             const doc = DOCUMENTOS[categoria];
             const itens = itensDaCategoria(categoria);
@@ -1892,7 +2003,8 @@
         // do valor: o envio, as regras e os campos condicionais não mudam.
         (function () {
             const grupos = [];
-            checkupForm.querySelectorAll('select').forEach(sel => {
+            // O plano de saúde fica como lista suspensa: as opções vêm do cadastro do médico e podem ser muitas.
+            checkupForm.querySelectorAll('select:not([data-plano])').forEach(sel => {
                 const rotulo = checkupForm.querySelector('label[for="' + sel.id + '"]');
                 const grupo = document.createElement('div');
                 grupo.className = 'opcoes'; grupo.setAttribute('role', 'radiogroup'); grupo.id = sel.id + '-botoes';

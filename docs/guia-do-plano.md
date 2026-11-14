@@ -10,10 +10,15 @@ e ainda não existe.
    credenciado: nome da operadora, registro ANS (opcional), o seu código na operadora (ou
    CPF/CNPJ do contrato), o nome do contratado (clínica ou o próprio nome) e o CBO (opcional).
    Estudante não tem essa seção. **Nenhuma senha de operadora é pedida nem guardada.**
-2. **Ao gerar o PDF de exames** (laboratório ou imagem), o diálogo mostra "Guia do plano de
-   saúde" para quem tem plano cadastrado. Escolhido o plano, pede o número da carteira do
-   paciente e a indicação clínica, que já vem sugerida ("Check-up — 65 anos, diabetes tipo 2,
-   hipertensão") e pode ser reescrita. Sem plano escolhido, o PDF sai como sempre.
+2. **Na identificação do paciente** (seção 01 do check-up), quem tem plano cadastrado escolhe
+   o plano do paciente e informa o número da carteira. Sem plano escolhido ("Particular"), o
+   PDF sai como sempre. Plano e carteira não entram no cálculo das recomendações.
+   **Ao gerar o PDF de exames** (laboratório ou imagem), o diálogo repete o plano e a
+   carteira, que ainda podem ser corrigidos ali, e traz a indicação clínica sugerida
+   ("Check-up — 65 anos, diabetes tipo 2, hipertensão"), que pode ser reescrita.
+   **Troca de paciente:** se os dados clínicos ou o nome mudam depois de um resultado, o plano
+   e a carteira continuam na tela, mas pedem confirmação ("ainda são deste paciente?"). A
+   guia não sai enquanto o médico não confirmar, corrigir ou limpar.
 3. **O PDF** traz o pedido carimbável na primeira página e, em seguida, a guia SP/SADT
    (paisagem), com cinco procedimentos por guia, como no formulário impresso do padrão.
 
