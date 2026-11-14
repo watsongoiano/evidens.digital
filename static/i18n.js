@@ -90,7 +90,7 @@
     if (!n || !textos) return null;
     if (Object.prototype.hasOwnProperty.call(textos, n)) return textos[n];
     if (!temLetras(n)) { var num = numero(n); return num === n ? null : num; }
-    if (manter[n] || neutro(n)) return null;
+    if (manter[n] || neutro(n) || produzidos[n]) return null;  // o que a própria tradução produziu já está em inglês
     var parcial = null, sobras = [];
     for (var i = 0; i < padroes.length; i++) {
       var m = padroes[i][0].exec(n);

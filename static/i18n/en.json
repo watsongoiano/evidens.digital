@@ -125,7 +125,6 @@
   "Abrir o check-up": "Open the check-up",
   "APOIO À DECISÃO": "DECISION SUPPORT",
   "— Sugestões para o médico revisar. A conduta é sempre sua.": "— Suggestions for the physician to review. The decision is always yours.",
-  "114 recomendações mapeadas": "114 recommendations mapped",
   "Fonte em cada item": "Source on every item",
   "Dados do paciente não são gravados": "Patient data is not saved",
   "Triagem de segurança nas vacinas": "Safety screening for vaccines",
@@ -255,7 +254,6 @@
   "O Evidēns substitui o julgamento médico?": "Does Evidēns replace medical judgment?",
   "Não. Ele organiza o que as diretrizes recomendam para aquele perfil. Cada item é uma sugestão para você revisar e individualizar; a conduta e a assinatura são suas.": "No. It organizes what the guidelines recommend for that profile. Each item is a suggestion for you to review and individualize; the decision and the signature are yours.",
   "O que tem na plataforma?": "What is in the platform?",
-  "114 recomendações": "114 recommendations",
   "para o check-up do adulto: rastreamento, exames laboratoriais, exames de imagem e vacinas, ajustadas por idade, sexo, comorbidades, hábitos, história familiar e gestação. Cada item traz a fonte e a periodicidade. A partir da lista, a plataforma gera as minutas em PDF dos pedidos de exames e da receita de vacinas.": "for the adult check-up: screening, laboratory tests, imaging tests and vaccines, adjusted for age, sex, comorbidities, habits, family history and pregnancy. Each item brings its source and interval. From the list, the platform generates PDF drafts of the test orders and the vaccine prescription.",
   "Quais diretrizes estão por trás das recomendações?": "Which guidelines are behind the recommendations?",
   "Ministério da Saúde": "Brazilian Ministry of Health",
@@ -762,7 +760,6 @@
   "Coombs indireto, soro": "Indirect Coombs test, serum",
   "Creatinina, soro": "Creatinine, serum",
   "Cultura para estreptococo do grupo B (swab vaginal e retal)": "Group B streptococcus culture (vaginal and rectal swab)",
-  "Cálcio, soro": "Calcium, serum",
   "Dengue (Qdenga®)": "Dengue (Qdenga®)",
   "Densitometria óssea (DEXA)": "Bone densitometry (DXA)",
   "Doppler de artérias renais": "Renal artery Doppler",
@@ -771,7 +768,6 @@
   "Ecocardiograma transtorácico": "Transthoracic echocardiogram",
   "Eletrocardiograma de repouso": "Resting electrocardiogram",
   "Endoscopia digestiva alta": "Upper GI endoscopy",
-  "Espirometria": "Spirometry",
   "Febre Amarela (Stamaril®)": "Yellow fever (Stamaril®)",
   "Ferritina, soro": "Ferritin, serum",
   "Fundoscopia (Exame de fundo de olho)": "Fundoscopy (dilated eye exam)",
@@ -900,7 +896,6 @@
   "Colonoscopia a cada 10 anos (45-75 anos)": "Colonoscopy every 10 years (45-75 years)",
   "Conferir vacinas disponíveis e grupos contemplados pelo PNI (gov.br/saude).": "Check the vaccines available and the groups covered by the Brazilian national program (PNI, gov.br/saude).",
   "Confirmação diagnóstica de hipertensão arterial, investigação de hipertensão do avental branco e hipertensão mascarada": "Diagnostic confirmation of hypertension, investigation of white-coat hypertension and masked hypertension",
-  "Corticoide sistêmico por 3 meses ou mais: manter vitamina D adequada (prevenção de osteoporose induzida).": "Systemic corticosteroid for 3 months or more: keep vitamin D adequate (prevention of steroid-induced osteoporosis).",
   "Corticoide ≥ 2,5 mg/dia de prednisona por ≥ 3 meses: avaliar risco de fratura (densitometria e FRAX) nos primeiros 6 meses e reavaliar a cada 1-2 anos.": "Corticosteroid ≥ 2.5 mg/day of prednisone for ≥ 3 months: assess fracture risk (densitometry and FRAX) within the first 6 months and reassess every 1-2 years.",
   "Crescimento e vitalidade fetal (protocolo Einstein).": "Fetal growth and well-being (Einstein protocol).",
   "Datação da gestação, número e localização dos embriões, viabilidade.": "Pregnancy dating, number and location of embryos, viability.",
@@ -1270,7 +1265,6 @@
   "Pesar o risco antes de prescrever estrogênio (anticoncepcional combinado, terapia hormonal). Pesquisa de trombofilia não é rotina em assintomáticos.": "Weigh the risk before prescribing estrogen (combined contraceptive, hormone therapy). Thrombophilia testing is not routine in asymptomatic people.",
   "Pesquisar e tratar Helicobacter pylori; endoscopia conforme sintomas e risco individual.": "Test for and treat Helicobacter pylori; endoscopy according to symptoms and individual risk.",
   "Sem a dose, foi tratado como imunossupressor. Até 0,4 mg/kg/semana (ou 20 mg/semana, sem o peso) conta como imunossupressão de baixo grau.": "Without the dose, it was treated as immunosuppressive. Up to 0.4 mg/kg/week (or 20 mg/week, without the weight) counts as low-level immunosuppression.",
-  "Sem dose e duração, o uso foi tratado como crônico (≥ 3 meses). Com os dois, a ferramenta diz se há imunossupressão (vacinas de vírus vivo), se cabe densitometria e rastreio de tuberculose latente.": "Without dose and duration, use was treated as chronic (≥ 3 months). With both, the tool tells whether there is immunosuppression (live-virus vaccines), and whether densitometry and latent tuberculosis screening apply.",
   "Sem dose e peso, foi tratada como imunossupressora. Até 3 mg/kg/dia conta como imunossupressão de baixo grau.": "Without dose and weight, it was treated as immunosuppressive. Up to 3 mg/kg/day counts as low-level immunosuppression.",
   "HAS resistente marcada": "Resistant hypertension checked",
   "HbA1c ≥ 6,5% (ADA; confirmar com 2º exame)": "HbA1c ≥ 6.5% (ADA; confirm with a 2nd test)",
@@ -1558,7 +1552,6 @@
   "Bilirrubinas totais e frações, soro": "Total and fractionated bilirubin, serum",
   "Citomegalovírus IgG e IgM": "Cytomegalovirus IgG and IgM",
   "Coagulograma (TP/INR e TTPa)": "Coagulation panel (PT/INR and aPTT)",
-  "Cálcio total, soro": "Total calcium, serum",
   "Eletroforese de proteínas, soro": "Protein electrophoresis, serum",
   "Estradiol, soro": "Estradiol, serum",
   "FAN (fator antinuclear)": "ANA (antinuclear antibody)",
@@ -1593,7 +1586,6 @@
   "Doppler arterial de membros inferiores": "Lower-limb arterial Doppler",
   "Doppler de carótidas e vertebrais": "Carotid and vertebral Doppler",
   "Escore de cálcio coronariano (TC)": "Coronary artery calcium score (CT)",
-  "Espirometria com prova broncodilatadora": "Spirometry with bronchodilator testing",
   "Holter de 24 horas": "24-hour Holter monitoring",
   "Mamografia bilateral": "Bilateral mammography",
   "MAPA de 24 horas": "24-hour ABPM",
@@ -1609,7 +1601,37 @@
   "dT (dupla adulto)": "Td (adult tetanus-diphtheria)",
   "Hepatite B dose dobrada (imunossuprimidos e renais crônicos)": "Hepatitis B double dose (immunosuppressed and chronic kidney disease)",
   "Poliomielite inativada (VIP)": "Inactivated poliovirus (IPV)",
-  "Raiva (pré-exposição)": "Rabies (pre-exposure)"
+  "Raiva (pré-exposição)": "Rabies (pre-exposure)",
+  "120 recomendações mapeadas": "120 recommendations mapped",
+  "120 recomendações": "120 recommendations",
+  "Albumina, soro": "Albumin, serum",
+  "Avaliação oftalmológica com tonometria e fundoscopia": "Eye exam with tonometry and fundoscopy",
+  "Cálcio iônico, soro": "Ionized calcium, serum",
+  "Espirometria, com broncodilatador": "Spirometry, with bronchodilator",
+  "Radiografia de coluna torácica e lombar (perfil)": "Thoracic and lumbar spine X-ray (lateral)",
+  "Controle glicêmico no diabetes: pelo menos 2 vezes ao ano em quem está na meta e a cada 3 meses após mudança de tratamento ou fora da meta.": "Glycemic control in diabetes: at least twice a year in those at target and every 3 months after a change in treatment or when off target.",
+  "Glicemia de jejum no acompanhamento do diabetes, junto da HbA1c.": "Fasting glucose in diabetes follow-up, together with HbA1c.",
+  "Diabéticos | A cada 3-6 meses": "People with diabetes | Every 3-6 months",
+  "Junto da HbA1c": "Together with HbA1c",
+  "Basal e periódico": "Baseline and periodic",
+  "Durante o uso": "During use",
+  "Até 6 meses do início": "Within 6 months of starting",
+  "Avaliação de fratura": "Fracture assessment",
+  "Corticoide em dose imunossupressora: avaliação laboratorial basal (hemograma, albumina e painel metabólico: função renal, eletrólitos, cálcio e perfil hepático).": "Corticosteroid at an immunosuppressive dose: baseline laboratory assessment (complete blood count, albumin and metabolic panel: kidney function, electrolytes, calcium and liver panel).",
+  "Corticoide por mais de 3 meses a partir dos 40 anos: imagem da coluna para fratura vertebral, que muda a classificação de risco mesmo com densitometria normal.": "Corticosteroid for more than 3 months from age 40: spinal imaging for vertebral fracture, which changes the risk category even with normal densitometry.",
+  "Corticoide sistêmico: glicemia e HbA1c antes de iniciar e de rotina durante o uso (hiperglicemia e diabetes induzidos por corticoide).": "Systemic corticosteroid: glucose and HbA1c before starting and routinely during use (steroid-induced hyperglycemia and diabetes).",
+  "Corticoide sistêmico: acompanhar a pressão arterial de rotina durante o uso (hipertensão induzida por corticoide).": "Systemic corticosteroid: monitor blood pressure routinely during use (steroid-induced hypertension).",
+  "Corticoide sistêmico: exame oftalmológico periódico para catarata e glaucoma.": "Systemic corticosteroid: periodic eye exam for cataract and glaucoma.",
+  "Corticoide sistêmico: manter vitamina D adequada (prevenção de osteoporose induzida por corticoide).": "Systemic corticosteroid: keep vitamin D adequate (prevention of steroid-induced osteoporosis).",
+  "Corticoide sistêmico: perfil lipídico basal e de rotina durante o uso.": "Systemic corticosteroid: lipid panel at baseline and routinely during use.",
+  "Corticoide ≥ 2,5 mg/dia de prednisona por mais de 3 meses: densitometria nos primeiros 6 meses de uso, em qualquer idade adulta, repetida a cada 2-3 anos (a cada 1-3 anos a partir dos 40 anos sem tratamento para osteoporose). Calcular o FRAX a partir dos 40 anos.": "Corticosteroid ≥ 2.5 mg/day of prednisone for more than 3 months: densitometry within the first 6 months of use, at any adult age, repeated every 2-3 years (every 1-3 years from age 40 without osteoporosis treatment). Calculate FRAX from age 40.",
+  "Dose única para adultos imunossuprimidos, incluído o uso de corticoide em dose imunossupressora.": "Single dose for immunosuppressed adults, including use of a corticosteroid at an immunosuppressive dose.",
+  "Doença cardiovascular aterosclerótica": "Atherosclerotic cardiovascular disease",
+  "HbA1c de 5,7 a 6,4% (ADA)": "HbA1c from 5.7 to 6.4% (ADA)",
+  "Metimazol": "Methimazole",
+  "Sem dose e duração, o uso foi tratado como crônico (≥ 3 meses). Com os dois, a ferramenta diz se há imunossupressão (vacinas de vírus vivo e avaliação laboratorial basal), se cabe densitometria e rastreio de tuberculose latente.": "Without dose and duration, use was treated as chronic (≥ 3 months). With both, the tool tells whether there is immunosuppression (live-virus vaccines and baseline laboratory assessment), and whether densitometry and latent tuberculosis screening apply.",
+  "corticoide em dose imunossupressora": "a corticosteroid at an immunosuppressive dose",
+  "corticoide em dose imunossupressora e imunobiológico ou inibidor de jak": "a corticosteroid at an immunosuppressive dose and a biologic or JAK inhibitor"
  },
  "padroes": [
   [
@@ -1699,14 +1721,6 @@
   [
    "^(.+ semanas): abaixo dos limiares de imunossupressão \\(20 mg/dia por 2 semanas\\) e de risco de fratura \\(2,5 mg/dia por 3 meses\\)\\. Não muda as vacinas nem indica densitometria\\.$",
    "$1: below the thresholds for immunosuppression (20 mg/day for 2 weeks) and fracture risk (2.5 mg/day for 3 months). It does not change the vaccines or call for densitometry."
-  ],
-  [
-   "^(.+ semanas)\\. A partir de 20 mg/dia por 14 dias ou mais há imunossupressão: vacinas de vírus vivo atenuado ficam contraindicadas e só voltam 4 semanas depois de suspender; as inativadas seguem indicadas\\.$",
-   "$1. From 20 mg/day for 14 days or more there is immunosuppression: live attenuated vaccines are contraindicated and may resume only 4 weeks after stopping; inactivated vaccines remain indicated."
-  ],
-  [
-   "^(.+ semanas)\\. Além da avaliação de fratura \\(densitometria e FRAX\\): garantir cálcio e vitamina D, acompanhar glicemia e pressão arterial, exame oftalmológico periódico \\(catarata e glaucoma\\) e, na suspensão, redução gradual pelo risco de insuficiência adrenal\\.$",
-   "$1. Beyond fracture assessment (densitometry and FRAX): ensure calcium and vitamin D, monitor glucose and blood pressure, periodic eye exam (cataract and glaucoma) and, on stopping, taper because of the risk of adrenal insufficiency."
   ],
   [
    "^([\\d,]+) mg/dia \\(([\\d,]+) mg/kg/dia; limite de baixo grau: 3 mg/kg/dia\\)\\. Vacinas de vírus vivo podem ser consideradas caso a caso\\.$",
@@ -1863,6 +1877,18 @@
   [
    "^(.+): valor não numérico\\.$",
    "$1: non-numeric value."
+  ],
+  [
+   "^Rastreamento de tuberculose latente em uso de (.+); com resultado positivo e doença ativa afastada, tratar\\.$",
+   "Latent tuberculosis screening on $1; with a positive result and active disease ruled out, treat."
+  ],
+  [
+   "^(.+ semanas)\\. A partir de 20 mg/dia por 14 dias ou mais há imunossupressão: vacinas de vírus vivo atenuado \\(tríplice viral, varicela, febre amarela, dengue\\) ficam contraindicadas e só voltam 4 semanas depois de suspender\\. Manter em dia as inativadas: influenza, COVID-19, pneumocócica, herpes-zóster recombinante, HPV, VSR, dTpa, hepatites A e B nos não vacinados e meningocócicas quando indicadas\\. Durante o uso: avaliação laboratorial basal, glicemia e HbA1c, perfil lipídico, pressão arterial \\(MAPA\\) e exame oftalmológico; densitometria se o uso passar de 3 meses\\.$",
+   "$1. From 20 mg/day for 14 days or more there is immunosuppression: live attenuated vaccines (MMR, varicella, yellow fever, dengue) are contraindicated and may resume only 4 weeks after stopping. Keep the inactivated ones up to date: influenza, COVID-19, pneumococcal, recombinant zoster, HPV, RSV, Tdap, hepatitis A and B in the unvaccinated, and meningococcal when indicated. During use: baseline laboratory assessment, glucose and HbA1c, lipid panel, blood pressure (ABPM) and eye exam; densitometry if use goes beyond 3 months."
+  ],
+  [
+   "^(.+ semanas)\\. Além da avaliação de fratura \\(densitometria, imagem da coluna e FRAX\\): cálcio 800-1\\.000 mg/dia e vitamina D 600-800 UI/dia \\(a ACR 2022 fala em 1\\.000-1\\.200 mg de cálcio\\), acompanhar glicemia, lipídios e pressão arterial, exame oftalmológico periódico \\(catarata e glaucoma\\) e, na suspensão, redução gradual pelo risco de insuficiência adrenal\\.$",
+   "$1. Beyond fracture assessment (densitometry, spinal imaging and FRAX): calcium 800-1,000 mg/day and vitamin D 600-800 IU/day (ACR 2022 says 1,000-1,200 mg of calcium), monitor glucose, lipids and blood pressure, periodic eye exam (cataract and glaucoma) and, on stopping, taper because of the risk of adrenal insufficiency."
   ]
  ],
  "manter": [
@@ -2002,6 +2028,8 @@
   "PREVENT",
   "File not found",
   "Endpoint not found",
-  "Internal server error"
+  "Internal server error",
+  "CGH 2025 (Feuerstein)",
+  "Drugs Aging 2024 (Sparling)"
  ]
 }
