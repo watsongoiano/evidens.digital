@@ -623,5 +623,19 @@ def test_home_mostra_a_evidencia_com_fonte_em_cada_numero():
         assert f'href="{fonte}" target="_blank" rel="noopener"' in painel, fonte
     # os números do painel são os do artigo, não os arredondados da matéria
     assert '20,6% de excesso e 44,8% de subutilização' in painel and 'US$ 75,7 a 101,2 bilhões' in painel
-    # o painel vem depois da abertura da seção e antes dos três números da base
-    assert home.index('A interface não precisa.') < i < home.index('01 — Reunir')
+    # quatro colunas só em tela larga: em 1024 px o número do custo não cabia no cartão
+    assert 'sm:grid-cols-2 xl:grid-cols-4' in painel and 'lg:grid-cols-4' not in painel
+    # o painel vem antes dos três números da base
+    assert home.index('id="abordagem"') < i < home.index('01 — Reunir')
+    # o painel abre a seção: rótulo "Por que o Evidēns", sem a abertura antiga, e o fecho em destaque
+    assert 'POR QUE O EVIDĒNS' in painel and 'O QUE A EVIDÊNCIA MOSTRA' not in home
+    assert 'A interface não precisa.' not in home
+    assert 'id="evidencia-fecho" class="font-serif italic text-aqua' in painel
+    assert 'o que pedir, para quem e com qual referência.' in painel
+
+
+def test_home_fala_em_mais_de_quatro_mil_paginas():
+    import pathlib
+    home = pathlib.Path(__file__).resolve().parents[1].joinpath('index.html').read_text(encoding='utf-8')
+    assert home.count('4 mil páginas') == 3 and home.count('4.000') == 2
+    assert '2 mil' not in home and '2.000' not in home
