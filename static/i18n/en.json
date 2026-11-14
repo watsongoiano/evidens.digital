@@ -1377,7 +1377,68 @@
   "Extremo": "Extreme",
   "Adultos com DPOC e doença cardiovascular crônica": "Adults with COPD and chronic cardiovascular disease",
   "Comorbidade de risco (DPOC, doença cardiovascular crônica)": "Risk comorbidity (COPD, chronic cardiovascular disease)",
-  "Avaliação de função renal. Intervalo de 3-6 meses em caso de uso de medicamentos nefrotóxicos (TFGe abaixo de 60 mL/min/1.73m² ou risco aumentado para doença renal).": "Kidney function assessment. Interval of 3-6 months when nephrotoxic drugs are used (eGFR below 60 mL/min/1.73 m² or increased risk of kidney disease)."
+  "Avaliação de função renal. Intervalo de 3-6 meses em caso de uso de medicamentos nefrotóxicos (TFGe abaixo de 60 mL/min/1.73m² ou risco aumentado para doença renal).": "Kidney function assessment. Interval of 3-6 months when nephrotoxic drugs are used (eGFR below 60 mL/min/1.73 m² or increased risk of kidney disease).",
+  "Revise os dados informados:": "Please review the information provided:",
+  "Erro ao gerar recomendações:": "Error generating recommendations:",
+  "Gere as recomendações primeiro!": "Generate the recommendations first!",
+  "Nenhuma vacina foi recomendada!": "No vaccine was recommended!",
+  "Nenhum item desta categoria para imprimir.": "No item in this category to print.",
+  "Prioridade alta": "High priority",
+  "Prioridade média": "Medium priority",
+  "Prioridade baixa": "Low priority",
+  "Orientações · não entram nos PDFs": "Guidance · not included in the PDFs",
+  "Risco cardiovascular · PREVENT": "Cardiovascular risk · PREVENT",
+  "Não calculado.": "Not calculated.",
+  "com HbA1c": "with HbA1c",
+  "com RAC": "with UACR",
+  "com HbA1c e RAC": "with HbA1c and UACR",
+  "DCVA em 10 anos": "10-year ASCVD",
+  "Desfecho": "Outcome",
+  "10 anos": "10 years",
+  "30 anos": "30 years",
+  "DCV total": "Total CVD",
+  "DCVA (IAM, AVC, morte coronária)": "ASCVD (MI, stroke, coronary death)",
+  "Doença coronária": "Coronary heart disease",
+  "AVC": "Stroke",
+  "Risco em 30 anos só de 30 a 59 anos.": "30-year risk only from 30 to 59 years.",
+  "Nenhuma recomendação específica para este perfil.": "No specific recommendation for this profile.",
+  "Exames Laboratoriais": "Laboratory Tests",
+  "Exames de Imagem": "Imaging Tests",
+  "Rastreamento": "Screening",
+  "Outras": "Other",
+  "Recomendação": "Recommendation",
+  "Retirar esta recomendação": "Remove this recommendation",
+  "Contraindicada": "Contraindicated",
+  "Precaução": "Precaution",
+  "Dados insuficientes": "Insufficient data",
+  "Adiado na gestação": "Postponed in pregnancy",
+  "Próxima etapa": "Next step",
+  "Etapa anterior": "Previous step",
+  "Não incluída": "Not included",
+  "Vacinas não incluídas automaticamente": "Vaccines not included automatically",
+  "Itens não incluídos automaticamente": "Items not included automatically",
+  "Estes itens não entram nos PDFs. A decisão cabe ao médico.": "These items are not included in the PDFs. The decision is the physician's.",
+  "Deseja acrescentar algum exame laboratorial?": "Would you like to add a laboratory test?",
+  "Deseja acrescentar algum exame de imagem?": "Would you like to add an imaging test?",
+  "Deseja acrescentar alguma vacina?": "Would you like to add a vaccine?",
+  "Nenhum item acrescentado ainda.": "No item added yet.",
+  "Marcado automaticamente:": "Checked automatically:",
+  ". Desmarque se não se aplicar.": ". Uncheck if it does not apply.",
+  "Dose (mg/dia)": "Dose (mg/day)",
+  "Dose (mg/semana)": "Dose (mg/week)",
+  "Há quantas semanas": "For how many weeks",
+  "Há quantos anos": "For how many years",
+  "Define imunossupressão (≥ 20 mg/dia de prednisona por ≥ 2 semanas) e risco de fratura (≥ 2,5 mg/dia por ≥ 3 meses).": "Defines immunosuppression (≥ 20 mg/day of prednisone for ≥ 2 weeks) and fracture risk (≥ 2.5 mg/day for ≥ 3 months).",
+  "Até 0,4 mg/kg/semana conta como imunossupressão de baixo grau.": "Up to 0.4 mg/kg/week counts as low-level immunosuppression.",
+  "Até 3 mg/kg/dia conta como imunossupressão de baixo grau (informe o peso).": "Up to 3 mg/kg/day counts as low-level immunosuppression (enter the weight).",
+  "Retinopatia: risco maior acima de 5 mg/kg/dia e depois de 5 anos.": "Retinopathy: higher risk above 5 mg/kg/day and after 5 years.",
+  "Reavaliar pausa após 5 anos (oral) ou 3 anos (zoledrônico).": "Reassess a drug holiday after 5 years (oral) or 3 years (zoledronic acid).",
+  "obesidade": "obesity",
+  "história familiar de DCV prematura": "family history of premature CVD",
+  "exames laboratoriais": "laboratory tests",
+  "exames de imagem": "imaging tests",
+  "vacinas": "vaccines",
+  "Rastreamento de diabetes. Alguns antirretrovirais podem aumentar risco de hiperglicemia.": "Diabetes screening. Some antiretrovirals may increase the risk of hyperglycemia."
  },
  "padroes": [
   [
@@ -1561,6 +1622,54 @@
    "Yearly from age %1"
   ],
   [
+   "^Erro ao gerar PDF de (.+):$",
+   "Error generating the PDF of $1:"
+  ],
+  [
+   "^Erro HTTP: (\\d+)$",
+   "HTTP error: %1"
+  ],
+  [
+   "^Grau de evidência (.+)$",
+   "Grade of evidence %1"
+  ],
+  [
+   "^TFG (\\d+)$",
+   "eGFR %1"
+  ],
+  [
+   "^IMC ([\\d,]+)$",
+   "BMI %1"
+  ],
+  [
+   "^· meta LDL (.+)$",
+   "· LDL goal %1"
+  ],
+  [
+   "^(.+): não marcam? \"(.+)\" sozinhos?, porque também se usam? em outras indicações\\. Marque a caixa se for o caso\\.$",
+   "$1: \"$2\" is not checked automatically, because of other indications for use. Check the box if it applies."
+  ],
+  [
+   "^PA (\\d+)/– mmHg: informe a diastólica para classificar a pressão\\.$",
+   "BP %1/– mmHg: enter the diastolic pressure to classify the blood pressure."
+  ],
+  [
+   "^PA (\\d+)/(\\d+) mmHg: elevada pela AHA/ACC 2025 \\(120-129 e < 80\\)\\. Não é hipertensão; a caixa não é marcada\\.$",
+   "BP %1/%2 mmHg: elevated by AHA/ACC 2025 (120-129 and < 80). It is not hypertension; the box is not checked."
+  ],
+  [
+   "^PA (\\d+)/(\\d+) mmHg na gestação: hipertensão só a partir de 140/90; a caixa não é marcada\\.$",
+   "BP %1/%2 mmHg in pregnancy: hypertension only from 140/90; the box is not checked."
+  ],
+  [
+   "^\\((.+)\\)$",
+   "($1)"
+  ],
+  [
+   "^(.+?) · (.+)$",
+   "$1 · $2"
+  ],
+  [
    "^(.+?) / (.+)$",
    "$1 / $2"
   ]
@@ -1685,6 +1794,7 @@
   "MS Brasil PCDT HIV 2024",
   "GOLD COPD 2023",
   "NIH/CDC HIV Guidelines",
-  "HDL"
+  "HDL",
+  "base"
  ]
 }

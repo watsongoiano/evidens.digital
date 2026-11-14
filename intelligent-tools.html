@@ -787,6 +787,8 @@
 </footer>
 
     <script>
+        // Em inglês, os avisos do navegador (alert) usam o mesmo dicionário das páginas.
+        const T = t => (window.evidensIdioma ? window.evidensIdioma.traduzir(t) : t);
         // Sessão encerrada (ou conta bloqueada) no meio do uso: volta para o login.
         (function () {
             const buscar = window.fetch.bind(window);
@@ -937,7 +939,7 @@
                     return;
                 }
                 console.error('Erro:', error);
-                alert('Erro ao gerar recomendações: ' + error.message);
+                alert(T('Erro ao gerar recomendações:') + ' ' + T(error.message));
             }
         });
 
@@ -1136,7 +1138,7 @@
         async function baixarPdf(endpoint, itens, prefixoArquivo, descricao) {
             try {
                 if (!currentRecommendations || currentRecommendations.length === 0) {
-                    alert('Gere as recomendações primeiro!');
+                    alert(T('Gere as recomendações primeiro!'));
                     return;
                 }
 
@@ -1175,7 +1177,7 @@
 
             } catch (error) {
                 console.error('Erro:', error);
-                alert(`Erro ao gerar PDF de ${descricao}: ` + error.message);
+                alert(T(`Erro ao gerar PDF de ${descricao}:`) + ' ' + T(error.message));
             }
         }
 
@@ -1245,7 +1247,7 @@
 
         async function abrirDialogoDePdf(categoria) {
             if (!currentRecommendations || currentRecommendations.length === 0) {
-                alert('Gere as recomendações primeiro!');
+                alert(T('Gere as recomendações primeiro!'));
                 return;
             }
             categoriaDoDialogo = categoria;
@@ -1287,7 +1289,7 @@
             const doc = DOCUMENTOS[categoria];
             const itens = itensDaCategoria(categoria);
             if (!itens.length) {
-                alert(categoria === 'vacina' ? 'Nenhuma vacina foi recomendada!' : 'Nenhum item desta categoria para imprimir.');
+                alert(T(categoria === 'vacina' ? 'Nenhuma vacina foi recomendada!' : 'Nenhum item desta categoria para imprimir.'));
                 return;
             }
             baixarPdf(doc.endpoint, itens, doc.arquivo, doc.descricao);
@@ -1440,11 +1442,18 @@
                 });
                 const aviso = document.getElementById('coerencia-aviso');
                 aviso.hidden = auto.size === 0;
-                aviso.innerHTML = 'Marcado automaticamente: ' + [...auto].map(([id, m]) =>
-                    `<strong class="font-medium">${escapeHtml(ROTULO_CAIXA(id))}</strong> (${escapeHtml(m)})`).join('; ') + '. Desmarque se não se aplicar.';
+                aviso.textContent = '';
+                aviso.append('Marcado automaticamente: ');
+                [...auto].forEach(([id, m], i) => {
+                    const forte = document.createElement('strong'); forte.className = 'font-medium'; forte.textContent = ROTULO_CAIXA(id);
+                    const motivo = document.createElement('span'); motivo.textContent = m;
+                    aviso.append(i ? '; ' : '', forte, ' (', motivo, ')');
+                });
+                aviso.append('. Desmarque se não se aplicar.');
                 const dica = document.getElementById('coerencia-dica'), frases = dicas();
                 dica.hidden = frases.length === 0;
-                dica.textContent = frases.join(' ');
+                dica.textContent = '';
+                frases.forEach((frase, i) => { const f = document.createElement('span'); f.textContent = frase; dica.append(i ? ' ' : '', f); });
                 document.getElementById('hba1c-aviso').hidden = !(auto.has('diabetes') && (num('hba1c') || 0) >= 6.5);
             }
             ['hba1c', 'peso', 'altura', 'pas', 'pad', 'gestante'].forEach(id => {
