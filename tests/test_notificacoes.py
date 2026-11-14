@@ -292,3 +292,55 @@ def test_falha_nas_boas_vindas_devolve_a_conta_a_fila_do_agradecimento(anonimo, 
     monkeypatch.setattr(notificacoes, 'enviar', lambda *a, **k: (False, 'HTTP 500'))
     _cadastrar(anonimo, 'bv-falhou@exemplo.test')
     assert 'bv-falhou@exemplo.test' in [u['email'] for u in contas.sem_email()]
+
+
+# ---------------------------------------------------------------------------
+# Aviso de conta aprovada
+# ---------------------------------------------------------------------------
+def test_aprovar_avisa_a_pessoa_uma_vez(admin, antigos, resend, monkeypatch):
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    monkeypatch.setenv('EMAIL_CONTATO', 'retorno@exemplo.test')
+    pendente = antigos['pendente']
+    r = admin.post(f"/api/admin/usuarios/{pendente['id']}/aprovar").get_json()
+    assert r['usuario']['situacao'] == 'aprovado' and r['aviso'] == {'enviado': True, 'motivo': None}
+    assert len(resend) == 1
+    corpo = resend[0]['corpo']
+    assert corpo['to'] == [pendente['email']] and corpo['subject'] == 'Sua conta no Evidēns foi aprovada'
+    assert corpo['reply_to'] == 'retorno@exemplo.test'
+    for trecho in ('Olá, Pendente.', 'foi aprovada e o acesso já está liberado', 'https://evidens.life/login',
+                   'senha temporária', 'fase de desenvolvimento', 'https://evidens.life/contact'):
+        assert trecho in corpo['text'], trecho
+    assert SENHA_DE_TESTE not in corpo['text']
+    # aprovar de novo quem já está aprovado não envia nada
+    r = admin.post(f"/api/admin/usuarios/{pendente['id']}/aprovar").get_json()
+    assert r['aviso'] is None and len(resend) == 1
+
+
+def test_reativar_conta_bloqueada_avisa_com_outro_texto(admin, antigos, resend, monkeypatch):
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    bloqueada = antigos['bloqueada']
+    r = admin.post(f"/api/admin/usuarios/{bloqueada['id']}/aprovar").get_json()
+    assert r['aviso']['enviado'] is True
+    corpo = resend[0]['corpo']
+    assert corpo['subject'] == 'Sua conta no Evidēns foi reativada' and 'reativada e o acesso está liberado de novo' in corpo['text']
+
+
+def test_aprovacao_vale_mesmo_sem_o_email_sair(admin, antigos, resend, contas, monkeypatch):
+    pendente = antigos['pendente']
+    # sem remetente do domínio: aprova e diz por que o aviso não saiu
+    r = admin.post(f"/api/admin/usuarios/{pendente['id']}/aprovar").get_json()
+    assert r['usuario']['situacao'] == 'aprovado' and r['aviso']['enviado'] is False
+    assert 'AVISO_CADASTRO_DE' in r['aviso']['motivo'] and resend == []
+    # com o envio ligado mas falhando: a conta fica aprovada assim mesmo
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    monkeypatch.setattr(notificacoes, 'enviar', lambda *a, **k: (False, 'HTTP 500'))
+    bloqueada = antigos['bloqueada']
+    r = admin.post(f"/api/admin/usuarios/{bloqueada['id']}/aprovar").get_json()
+    assert r['aviso'] == {'enviado': False, 'motivo': 'HTTP 500'}
+    assert contas.por_id(bloqueada['id'])['situacao'] == 'aprovado'
+
+
+def test_recusar_ou_bloquear_nao_envia_email(admin, antigos, resend, monkeypatch):
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    r = admin.post(f"/api/admin/usuarios/{antigos['pendente']['id']}/bloquear").get_json()
+    assert r['usuario']['situacao'] == 'bloqueado' and 'aviso' not in r and resend == []

@@ -1,4 +1,4 @@
-"""E-mails do cadastro: aviso ao administrador e boas-vindas a quem pediu a conta.
+"""E-mails do cadastro: aviso ao administrador, boas-vindas a quem pediu a conta e aviso de aprovação.
 
 Usa a API HTTP da Resend (https://resend.com), que funciona em ambiente serverless
 sem dependência extra. Configuração por variáveis de ambiente:
@@ -149,6 +149,27 @@ def mensagem_de_agradecimento(usuario, url_site):
     return 'Obrigado por testar o Evidēns', corpo
 
 
+def mensagem_de_aprovacao(usuario, url_site, reativada=False):
+    """Aviso de que o acesso foi liberado: conta aprovada ou, se estava bloqueada, reativada."""
+    primeiro_nome = _primeiro_nome(usuario)
+    if reativada:
+        assunto = 'Sua conta no Evidēns foi reativada'
+        abertura = 'A sua conta no Evidēns foi reativada e o acesso está liberado de novo!'
+    else:
+        assunto = 'Sua conta no Evidēns foi aprovada'
+        abertura = 'Boa notícia: a sua conta no Evidēns foi aprovada e o acesso já está liberado!'
+    corpo = '\n'.join([
+        f'Olá, {primeiro_nome}.' if primeiro_nome else 'Olá.',
+        '',
+        abertura,
+        '',
+        f'É só entrar em {url_site}/login com o e-mail e a senha que você cadastrou. Se não lembrar a senha, '
+        'escreva para nós que geramos uma senha temporária.',
+        '',
+    ] + _fecho(url_site))
+    return assunto, corpo
+
+
 def enviar(para, assunto, texto, responder_para=None):
     """Envia pela Resend. Devolve ``(ok, detalhe)``; nunca levanta exceção."""
     chave = (os.environ.get('RESEND_API_KEY') or '').strip()
@@ -224,4 +245,12 @@ def enviar_agradecimento(usuario, url_site):
     if not boas_vindas_ligadas():
         return False, 'envio a terceiros desligado (falta RESEND_API_KEY ou AVISO_CADASTRO_DE)'
     assunto, texto = mensagem_de_agradecimento(usuario, url_site)
+    return enviar([usuario['email']], assunto, texto, responder_para=email_de_contato() or None)
+
+
+def enviar_aprovacao(usuario, url_site, reativada=False):
+    """Avisa a pessoa de que a conta foi aprovada (ou reativada). Devolve ``(ok, detalhe)``."""
+    if not boas_vindas_ligadas():
+        return False, 'envio a terceiros desligado (falta RESEND_API_KEY ou AVISO_CADASTRO_DE)'
+    assunto, texto = mensagem_de_aprovacao(usuario, url_site, reativada=reativada)
     return enviar([usuario['email']], assunto, texto, responder_para=email_de_contato() or None)

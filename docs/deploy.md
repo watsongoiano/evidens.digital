@@ -104,6 +104,14 @@ O remetente padrão da Resend só entrega ao dono da conta Resend, então as boa
 
 Com isso o aviso ao administrador também passa a sair do domínio e pode ir a qualquer endereço. As boas-vindas respeitam o mesmo limite de 10 e-mails por hora e só vão para contas recém-criadas (um e-mail já cadastrado não recebe nada).
 
+## Aviso de conta aprovada
+
+Ao clicar em "Aprovar" (ou "Reativar") em `/admin`, a pessoa recebe um e-mail dizendo que o acesso foi liberado, com o link de login. O painel informa na hora se o aviso foi enviado.
+
+- Depende das boas-vindas ligadas (domínio verificado e `AVISO_CADASTRO_DE`). Sem isso a conta é aprovada do mesmo jeito e o painel avisa que o e-mail não saiu.
+- Sai uma vez por liberação: aprovar uma conta que já estava aprovada não envia nada.
+- Recusar ou bloquear não envia e-mail.
+
 ## Agradecimento a quem já tinha conta
 
 As contas criadas antes de existir o e-mail de boas-vindas não receberam nada. Em `/admin`, a seção de e-mail mostra quantas são e tem dois botões: "Enviar agradecimento de teste para mim" (para ler o texto) e "Enviar agradecimento a N contas" (pede confirmação no segundo clique).
