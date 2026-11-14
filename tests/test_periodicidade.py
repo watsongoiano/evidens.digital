@@ -212,3 +212,38 @@ def test_lista_de_exames_conhecidos_nao_repete_o_mesmo_exame(client, anonimo):
     assert sum('hemograma' in t.lower() for t in exames) == 1
     conhecidos = {P.chaves(t) for t in exames}
     assert P.chaves('Hemoglobina glicada (HbA1c), soro') in conhecidos and P.chaves('Densitometria óssea (DEXA)') in conhecidos
+
+
+def test_exame_pedido_por_duas_regras_usa_o_menor_intervalo_das_duas(client):
+    """Diabetes pede TGO/TGP anual; HIV, a cada 3-12 meses. A resposta une as duas e mostra um subtítulo só,
+    mas o intervalo que vale é o menor: feito há 6 meses, já venceu pelo HIV."""
+    ast, alt = 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro'
+    hiv = dict(idade=50, sexo='masculino', comorbidades=['diabetes', 'hiv'])
+    pedidos, em_dia = _pedir(client, [_feito('TGO e TGP, soro', '2026-05-01')], **hiv)
+    assert ast in pedidos and alt in pedidos and ast not in em_dia and alt not in em_dia
+    assert pedidos[alt]['ultimo_exame'] == 'Feito em 01/05/2026. Periodicidade: A cada 3-12 meses. Intervalo vencido desde 01/08/2026.'
+    pedidos, em_dia = _pedir(client, [_feito('TGO e TGP, soro', '2026-10-01')], **hiv)
+    assert em_dia[alt]['motivo'] == 'Feito em 01/10/2026. Periodicidade: A cada 3-12 meses. Próximo a partir de 01/01/2027.'
+    # só diabetes: o mesmo exame de maio continua em dia (anual)
+    pedidos, em_dia = _pedir(client, [_feito('TGO e TGP, soro', '2026-05-01')], idade=50, sexo='masculino', comorbidades=['diabetes'])
+    assert ast in em_dia and alt in em_dia
+
+
+def test_campo_interno_das_regras_unidas_nao_sai_na_resposta(client):
+    hiv = dict(BASE, idade=50, sexo='masculino', comorbidades=['diabetes', 'hiv'])
+    for corpo in (hiv, dict(hiv, exames_anteriores=[_feito('TGO e TGP, soro', '2026-05-01')])):
+        dados = client.post('/api/checkup-intelligent', json=corpo).get_json()
+        assert all('_subtitulos' not in r for r in dados['recommendations'])
+        assert all('_subtitulos' not in i for i in dados['nao_incluidas'])
+
+
+def test_regra_unida_sem_subtitulo_impede_o_adiamento():
+    assert P.intervalo('Diabéticos | Anual', ['HIV+ | A cada 3-12 meses'])['n'] == 3
+    assert P.intervalo('Diabéticos | Anual', ['']) is None
+    assert P.intervalo('Diabéticos | Anual', ['Em uso de corticoide | Basal']) is None
+
+
+def test_nenhuma_resposta_do_motor_leva_o_campo_interno(client):
+    for dados in _casos_do_motor():
+        resposta = client.post('/api/checkup-intelligent', json=dados)
+        assert '_subtitulos' not in resposta.get_data(as_text=True), dados

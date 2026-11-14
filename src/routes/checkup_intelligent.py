@@ -35,6 +35,11 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         existing_titles = [(r.get('titulo') or '').strip().lower() for r in recommendations]
         if title in existing_titles:
             print(f"Recomendação duplicada ignorada: {title}")
+            # A regra repetida não entra de novo, mas a periodicidade dela continua valendo
+            # (src/utils/periodicidade.py usa o menor intervalo entre as regras do mesmo exame).
+            existente = recommendations[existing_titles.index(title)]
+            if (rec.get('subtitulo') or '') != (existente.get('subtitulo') or ''):
+                existente.setdefault('_subtitulos', []).append(rec.get('subtitulo') or '')
             return
             
         # Garantir que campos obrigatórios estão presentes
@@ -1448,6 +1453,14 @@ def generate_intelligent_recommendations():
                     
                     if refs:
                         melhor['referencia'] = ' | '.join(refs)
+
+                    # O subtítulo mostrado é o de uma das regras, mas a periodicidade tem de considerar
+                    # todas: o exame anual do diabético pode ser trimestral pelo HIV. Campo interno,
+                    # retirado antes de responder (src/utils/periodicidade.py).
+                    unidos = list(melhor.get('_subtitulos') or [])
+                    for r in recs_sorted[1:]:
+                        unidos += [r.get('subtitulo') or ''] + list(r.get('_subtitulos') or [])
+                    melhor['_subtitulos'] = unidos
                     
                     # Unir descrições se diferentes
                     descricoes = list(set([r.get('descricao', '') for r in recs if r.get('descricao')]))
@@ -1498,6 +1511,11 @@ def generate_intelligent_recommendations():
         response['gestacao'] = gestacao
         response['triagem_vacinas'] = triagem
 
+        # `_subtitulos` é campo interno da conferência de periodicidade: não sai na resposta.
+        for lista in ('recommendations', 'nao_incluidas', 'adiados_gestacao', 'proximas_gestacao'):
+            for item in response.get(lista) or []:
+                if isinstance(item, dict):
+                    item.pop('_subtitulos', None)
         return jsonify(response)
         
     except Exception as e:

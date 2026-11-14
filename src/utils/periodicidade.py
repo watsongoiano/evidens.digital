@@ -115,19 +115,26 @@ def _em_dias(intervalo):
     return n * {'semanas': 7, 'meses': 30.44, 'anos': 365.25}[unidade]
 
 
-def intervalo(subtitulo):
+def intervalo(subtitulo, outros=()):
     """Intervalo que vale para a recomendação inteira.
+
+    `outros` são os subtítulos das demais regras que pediram o mesmo exame e foram unidas a esta
+    na resposta (o diabético que também vive com HIV): todas as indicações contam.
 
     Devolve {'tipo': 'intervalo', 'unidade', 'n', 'texto'}, {'tipo': UMA_VEZ, 'texto'},
     {'tipo': JUNTO_DA_HBA1C, 'texto'} ou None (alguma indicação não tem intervalo: não adiar).
     """
     achados = []
-    for _grupo, trechos in indicacoes(subtitulo):
-        da_indicacao = [(intervalo_do_trecho(t), t) for t in trechos]
-        da_indicacao = [(i, t) for i, t in da_indicacao if i is not None]
-        if not da_indicacao:
+    for texto in [subtitulo, *outros]:
+        da_regra = indicacoes(texto)
+        if not da_regra:          # regra sem subtítulo: não se sabe o intervalo dela
             return None
-        achados.extend(da_indicacao)
+        for _grupo, trechos in da_regra:
+            da_indicacao = [(intervalo_do_trecho(t), t) for t in trechos]
+            da_indicacao = [(i, t) for i, t in da_indicacao if i is not None]
+            if not da_indicacao:
+                return None
+            achados.extend(da_indicacao)
     if not achados:
         return None
     com_prazo = [(i, t) for i, t in achados if isinstance(i, tuple)]
@@ -246,7 +253,7 @@ def aplicar(recomendacoes, exames_anteriores, sexo=None, hoje_=None):
         if feito is None:
             mantidas.append(rec)
             continue
-        regra = intervalo(rec.get('subtitulo'))
+        regra = intervalo(rec.get('subtitulo'), rec.get('_subtitulos') or ())
         if regra is None:
             mantidas.append(dict(rec, ultimo_exame=f'Feito em {_br(feito)}. Esta indicação não tem intervalo definido '
                                                    'na referência: avalie se o resultado ainda serve.'))
