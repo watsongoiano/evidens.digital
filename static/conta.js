@@ -31,6 +31,7 @@
     cadastro: '/api/auth/cadastro',
     configurar: '/api/auth/configurar',
     senha: '/api/auth/senha',
+    credenciamento: '/api/auth/credenciamentos',
   };
 
   document.querySelectorAll('form[data-form]').forEach(form => {
@@ -60,6 +61,7 @@
         }
         form.reset();
         mostrar(ok, r.mensagem || 'Pronto.');
+        form.dispatchEvent(new CustomEvent('salvo'));
       } catch (e) {
         mostrar(erro, 'Sem conexão com o servidor. Tente de novo.');
       } finally {
@@ -89,7 +91,60 @@
       const resumo = document.querySelector('[data-resumo]');
       if (resumo) resumo.textContent = `${perfis[usuario.perfil] || ''} · ${usuario.registro} · ${usuario.email}`;
       if (usuario.administrador) document.querySelectorAll('[data-so-admin]').forEach(el => { el.style.display = 'block'; });
+      if (usuario.perfil === 'medico' || usuario.perfil === 'residente') abrirPlanos(usuario);
     }).catch(() => {});
+  }
+
+  // Planos de saúde em que o médico é credenciado (dados da guia SP/SADT)
+  function abrirPlanos(usuario) {
+    const secao = document.querySelector('[data-planos]');
+    if (!secao) return;
+    secao.style.display = 'block';
+    const lista = secao.querySelector('[data-lista-planos]');
+    const form = secao.querySelector('form');
+    const erro = form.querySelector('[data-erro]');
+    const contratado = form.querySelector('[name="nome_contratado"]');
+    const sugerirNome = () => { if (!contratado.value) contratado.value = usuario.nome; };
+    sugerirNome();
+
+    function linha(plano) {
+      const div = document.createElement('div');
+      div.className = 'recommendation-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3';
+      const info = document.createElement('div');
+      const h = document.createElement('h5'); h.textContent = plano.operadora;
+      const p = document.createElement('p'); p.className = 'text-[14px] text-ink/60 mt-1';
+      const partes = [plano.codigo_prestador, plano.nome_contratado];
+      if (plano.registro_ans) partes.push(`ANS ${plano.registro_ans}`);
+      if (plano.cbo) partes.push(`CBO ${plano.cbo}`);
+      p.textContent = partes.join(' · ');
+      info.append(h, p);
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-claro shrink-0'; b.textContent = 'Remover';
+      b.addEventListener('click', async () => {
+        b.disabled = true;
+        try {
+          const { resposta, dados } = await enviar(`/api/auth/credenciamentos/${plano.id}/excluir`);
+          if (!resposta.ok) { mostrar(erro, dados.error || 'Não foi possível remover. Tente de novo.'); return; }
+          carregar();
+        } catch (e) {
+          mostrar(erro, 'Sem conexão com o servidor. Tente de novo.');
+        } finally {
+          b.disabled = false;
+        }
+      });
+      div.append(info, b);
+      return div;
+    }
+
+    async function carregar() {
+      try {
+        const r = await fetch('/api/auth/credenciamentos', { credentials: 'same-origin' });
+        const { credenciamentos } = await r.json();
+        lista.replaceChildren(...(credenciamentos || []).map(linha));
+      } catch (e) { /* a lista fica como está */ }
+    }
+
+    form.addEventListener('salvo', () => { sugerirNome(); carregar(); });
+    carregar();
   }
 
   // Painel de aprovação

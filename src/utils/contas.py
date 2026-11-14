@@ -90,6 +90,19 @@ _ESQUEMA = [
     # No máximo um administrador: a regra fica no banco, para que duas instalações
     # simultâneas com o código certo não criem duas contas privilegiadas.
     "CREATE UNIQUE INDEX IF NOT EXISTS um_so_administrador ON usuarios (administrador) WHERE administrador = 1",
+    # Credenciamento do médico em cada plano de saúde (dados que vão na guia SP/SADT).
+    # Nenhuma senha de operadora é guardada aqui.
+    """CREATE TABLE IF NOT EXISTS credenciamentos (
+        id {pk},
+        usuario_id BIGINT NOT NULL,
+        operadora TEXT NOT NULL,
+        registro_ans TEXT NOT NULL DEFAULT '',
+        codigo_prestador TEXT NOT NULL,
+        nome_contratado TEXT NOT NULL,
+        cbo TEXT NOT NULL DEFAULT '',
+        criado_em BIGINT NOT NULL
+    )""",
+    "CREATE INDEX IF NOT EXISTS credenciamentos_usuario ON credenciamentos (usuario_id)",
 ]
 
 
@@ -358,3 +371,81 @@ def gerar_senha_temporaria(uid):
     temporaria = secrets.token_urlsafe(12)
     u = trocar_senha(uid, temporaria)
     return (u, temporaria) if u else (None, None)
+
+
+# ── Credenciamentos em planos de saúde ──────────────────────────────────────
+
+MAX_CREDENCIAMENTOS = 20
+_COLUNAS_CRED = ('id', 'operadora', 'registro_ans', 'codigo_prestador', 'nome_contratado', 'cbo', 'criado_em')
+_SELECT_CRED = 'SELECT ' + ', '.join(_COLUNAS_CRED) + ' FROM credenciamentos '
+
+
+def pode_ter_credenciamento(usuario):
+    """Só quem assina pedidos (médico e residente) é credenciado em plano de saúde."""
+    return bool(usuario) and usuario.get('perfil') in ('medico', 'residente')
+
+
+def _limpo(valor, maximo):
+    s = valor if isinstance(valor, str) else ''
+    s = ' '.join(''.join(c if c.isprintable() else ' ' for c in s).split())
+    return s[:maximo]
+
+
+def validar_credenciamento(dados):
+    """Devolve os campos normalizados ou levanta `DadosInvalidos` com a lista do que corrigir."""
+    dados = dados if isinstance(dados, dict) else {}
+    operadora = _limpo(dados.get('operadora'), 80)
+    registro_ans = re.sub(r'\D', '', _limpo(dados.get('registro_ans'), 20))
+    codigo = _limpo(dados.get('codigo_prestador'), 20)
+    contratado = _limpo(dados.get('nome_contratado'), 120)
+    cbo = re.sub(r'\D', '', _limpo(dados.get('cbo'), 20))
+    erros = []
+    if len(operadora) < 2:
+        erros.append('Informe o nome do plano de saúde.')
+    if registro_ans and len(registro_ans) != 6:
+        erros.append('O registro ANS da operadora tem 6 dígitos.')
+    if not codigo:
+        erros.append('Informe o seu código na operadora (ou o CPF/CNPJ do contrato).')
+    if len(contratado) < 2:
+        erros.append('Informe o nome do contratado (clínica ou o seu nome, como está no contrato).')
+    if cbo and len(cbo) != 6:
+        erros.append('O código CBO tem 6 dígitos.')
+    if erros:
+        raise DadosInvalidos(erros)
+    return {'operadora': operadora, 'registro_ans': registro_ans, 'codigo_prestador': codigo,
+            'nome_contratado': contratado, 'cbo': cbo}
+
+
+def _credenciamento(linha):
+    return dict(zip(_COLUNAS_CRED, linha)) if linha else None
+
+
+def credenciamentos_de(uid):
+    with _conexao() as executar:
+        linhas = executar(_SELECT_CRED + 'WHERE usuario_id = ? ORDER BY operadora, id', (uid,)).fetchall()
+    return [_credenciamento(linha) for linha in linhas]
+
+
+def credenciamento_de(uid, cid):
+    """O credenciamento `cid`, só se for do usuário `uid`."""
+    with _conexao() as executar:
+        return _credenciamento(executar(_SELECT_CRED + 'WHERE id = ? AND usuario_id = ?', (cid, uid)).fetchone())
+
+
+def criar_credenciamento(uid, dados):
+    campos = validar_credenciamento(dados)
+    with _conexao() as executar:
+        total = executar('SELECT COUNT(*) FROM credenciamentos WHERE usuario_id = ?', (uid,)).fetchone()[0]
+        if total >= MAX_CREDENCIAMENTOS:
+            raise DadosInvalidos([f'O limite é de {MAX_CREDENCIAMENTOS} planos por conta.'])
+        executar('INSERT INTO credenciamentos (usuario_id, operadora, registro_ans, codigo_prestador, nome_contratado, cbo, criado_em) '
+                 'VALUES (?, ?, ?, ?, ?, ?, ?)',
+                 (uid, campos['operadora'], campos['registro_ans'], campos['codigo_prestador'],
+                  campos['nome_contratado'], campos['cbo'], int(time.time())))
+        linha = executar(_SELECT_CRED + 'WHERE usuario_id = ? ORDER BY id DESC', (uid,)).fetchone()
+    return _credenciamento(linha)
+
+
+def excluir_credenciamento(uid, cid):
+    with _conexao() as executar:
+        return executar('DELETE FROM credenciamentos WHERE id = ? AND usuario_id = ?', (cid, uid)).rowcount > 0

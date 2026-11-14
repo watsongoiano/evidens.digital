@@ -1661,7 +1661,40 @@
   "Indicado quando glicemia de jejum ou HbA1c estão na faixa de pré-diabetes: confirma ou afasta diabetes (SBD 2024). No rastreamento de rotina bastam glicemia de jejum e HbA1c (ADA 2026). A SBD prefere a glicemia de 1 h: <155 mg/dL normal, 155-208 pré-diabetes, ≥209 diabetes; em 2 h: <140 normal, 140-199 pré-diabetes, ≥200 diabetes. Não se pede a quem já tem diabetes.": "Indicated when fasting glucose or HbA1c are in the prediabetes range: it confirms or rules out diabetes (SBD 2024). For routine screening, fasting glucose and HbA1c are enough (ADA 2026). SBD prefers the 1-hour glucose: <155 mg/dL normal, 155-208 prediabetes, ≥209 diabetes; at 2 hours: <140 normal, 140-199 prediabetes, ≥200 diabetes. Not ordered for those who already have diabetes.",
   "HbA1c ≥ 6,5%: critério de diabetes (ADA). Confirme com um segundo exame se não houver hiperglicemia inequívoca e marque o tipo de diabetes.": "HbA1c ≥ 6.5%: diabetes criterion (ADA). Confirm with a second test if there is no unequivocal hyperglycemia, and check the type of diabetes.",
   "HbA1c ≥ 6,5%: informe o tipo de diabetes": "HbA1c ≥ 6.5%: enter the type of diabetes",
-  "HbA1c ≥ 6,5% é critério de diabetes (confirmar com um segundo exame se não houver hiperglicemia inequívoca), mas não define o tipo. As recomendações foram montadas como para uma pessoa com diabetes. Marque o tipo para refinar (por exemplo, TSH no tipo 1).": "HbA1c ≥ 6.5% is a criterion for diabetes (confirm with a second test if there is no unequivocal hyperglycemia), but it does not define the type. The recommendations were built as for a person with diabetes. Check the type to refine them (for example, TSH in type 1)."
+  "HbA1c ≥ 6,5% é critério de diabetes (confirmar com um segundo exame se não houver hiperglicemia inequívoca), mas não define o tipo. As recomendações foram montadas como para uma pessoa com diabetes. Marque o tipo para refinar (por exemplo, TSH no tipo 1).": "HbA1c ≥ 6.5% is a criterion for diabetes (confirm with a second test if there is no unequivocal hyperglycemia), but it does not define the type. The recommendations were built as for a person with diabetes. Check the type to refine them (for example, TSH in type 1).",
+  "GUIA DO PLANO DE SAÚDE": "HEALTH PLAN AUTHORIZATION FORM",
+  "Plano do paciente": "Patient's health plan",
+  "Particular (sem guia)": "Private pay (no plan form)",
+  "Número da carteira": "Member ID number",
+  "Indicação clínica": "Clinical indication",
+  "A guia SP/SADT sai no mesmo PDF, logo depois do pedido, com os seus dados no plano e os códigos TUSS. O número da carteira não é guardado.": "The SP/SADT form (Brazilian health plan standard) comes in the same PDF, right after the order, with your provider details and the TUSS codes. The member ID number is not stored.",
+  "Atende por plano de saúde?": "Do you see patients through health plans?",
+  "Cadastre o seu credenciamento": "Add your provider enrollment",
+  "e a guia do plano sai junto com o pedido, já preenchida.": "and the plan form comes with the order, already filled in.",
+  "Planos de saúde": "Health plans",
+  "Cadastre os planos em que você é credenciado. Ao gerar um pedido de exames, a guia SP/SADT do plano sai junto, já preenchida com estes dados e com os códigos TUSS. Nenhuma senha de operadora é pedida ou guardada aqui.": "Add the health plans you are enrolled with as a provider. When you generate a test order, the plan's SP/SADT form comes with it, already filled in with these details and the TUSS codes. No health plan password is requested or stored here.",
+  "Plano de saúde (operadora)": "Health plan (insurer)",
+  "Registro ANS da operadora (6 dígitos, opcional)": "Insurer's ANS registration (6 digits, optional)",
+  "Seu código na operadora (ou CPF/CNPJ do contrato)": "Your provider code with the insurer (or the contract's CPF/CNPJ)",
+  "Código CBO (6 dígitos, opcional)": "CBO occupation code (6 digits, optional)",
+  "Nome do contratado (clínica ou o seu nome, como está no contrato)": "Contracted provider name (clinic or your own name, as in the contract)",
+  "Salvar plano": "Save plan",
+  "Remover": "Remove",
+  "Plano salvo.": "Plan saved.",
+  "Plano não encontrado.": "Plan not found.",
+  "Não foi possível remover. Tente de novo.": "Could not remove it. Please try again.",
+  "O credenciamento em planos de saúde é só para médicos e residentes.": "Health plan enrollment is for physicians and residents only.",
+  "Informe o nome do plano de saúde.": "Enter the health plan's name.",
+  "O registro ANS da operadora tem 6 dígitos.": "The insurer's ANS registration has 6 digits.",
+  "Informe o seu código na operadora (ou o CPF/CNPJ do contrato).": "Enter your provider code with the insurer (or the contract's CPF/CNPJ).",
+  "Informe o nome do contratado (clínica ou o seu nome, como está no contrato).": "Enter the contracted provider name (clinic or your own name, as in the contract).",
+  "O código CBO tem 6 dígitos.": "The CBO code has 6 digits.",
+  "A guia do plano de saúde é só para médicos e residentes com plano cadastrado.": "The health plan form is only for physicians and residents with a plan on file.",
+  "Escolha o plano de saúde da guia.": "Choose the health plan for the form.",
+  "Plano de saúde não encontrado no seu cadastro. Confira em Minha conta.": "Health plan not found in your account. Check it under My account.",
+  "Guia do plano em formato inválido": "Health plan form in an invalid format",
+  "Número da carteira longo demais": "Member ID number is too long",
+  "Indicação clínica inválida ou longa demais": "Clinical indication is invalid or too long"
  },
  "padroes": [
   [
@@ -1919,6 +1952,10 @@
   [
    "^(.+ semanas): abaixo dos limiares de imunossupressão \\(20 mg/dia por 2 semanas\\) e de risco de fratura \\(2,5 mg/dia por 3 meses\\)\\. Não muda as vacinas nem indica densitometria; a avaliação laboratorial e a monitorização do corticoide \\(glicemia, lipídios, pressão, olhos\\) seguem indicadas\\.$",
    "$1: below the thresholds for immunosuppression (20 mg/day for 2 weeks) and fracture risk (2.5 mg/day for 3 months). It does not change the vaccines or call for densitometry; laboratory assessment and corticosteroid monitoring (glucose, lipids, blood pressure, eyes) remain indicated."
+  ],
+  [
+   "^O limite é de (\\d+) planos por conta\\.$",
+   "The limit is %1 plans per account."
   ]
  ],
  "manter": [
@@ -2063,6 +2100,8 @@
   "Drugs Aging 2024 (Sparling)",
   "SBD 2024",
   "ADA 2026",
-  "Evidēns."
+  "Evidēns.",
+  "Ex: Unimed Goiânia",
+  "Ex: 225125"
  ]
 }

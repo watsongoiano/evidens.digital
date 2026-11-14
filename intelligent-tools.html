@@ -777,6 +777,17 @@
       <div id="acrescimoItens" class="flex flex-wrap gap-2 mt-4"></div>
     </div>
 
+    <div id="guiaPainel" class="mt-6 pt-5 border-t border-ink/10" style="display: none;">
+      <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-3">GUIA DO PLANO DE SAÚDE</p>
+      <div class="grade">
+        <div class="campo sm:col-span-2"><label for="guiaPlano">Plano do paciente</label><select id="guiaPlano"><option value="">Particular (sem guia)</option></select></div>
+        <div class="campo sm:col-span-2" data-guia-campo style="display: none;"><label for="guiaCarteira">Número da carteira</label><input type="text" id="guiaCarteira" maxlength="30" autocomplete="off" inputmode="numeric"></div>
+        <div class="campo sm:col-span-2" data-guia-campo style="display: none;"><label for="guiaIndicacao">Indicação clínica</label><textarea id="guiaIndicacao" rows="2" maxlength="150" autocomplete="off"></textarea></div>
+      </div>
+      <p data-guia-campo class="text-[13px] text-ink/55 mt-3" style="display: none;">A guia SP/SADT sai no mesmo PDF, logo depois do pedido, com os seus dados no plano e os códigos TUSS. O número da carteira não é guardado.</p>
+    </div>
+    <p id="guiaConvite" class="text-[13px] text-ink/55 mt-6 pt-5 border-t border-ink/10" style="display: none;">Atende por plano de saúde? <a href="/conta" class="text-teal underline underline-offset-2">Cadastre o seu credenciamento</a> e a guia do plano sai junto com o pedido, já preenchida.</p>
+
     <div class="flex flex-wrap items-center gap-3 mt-6">
       <button type="button" id="acrescimoSim" class="btn-claro">Sim, acrescentar</button>
       <button type="button" id="acrescimoGerar" class="btn-escuro">Gerar o PDF <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button>
@@ -1141,7 +1152,80 @@
             };
         }
 
-        async function baixarPdf(endpoint, itens, prefixoArquivo, descricao) {
+        // ── Guia do plano de saúde (SP/SADT) junto com o pedido de exames ──
+        let planosDoMedico = null;        // null = ainda não carregado
+        let planoEscolhido = '';          // vale para os próximos pedidos deste atendimento
+
+        async function carregarPlanos() {
+            if (planosDoMedico) return planosDoMedico;
+            try {
+                const r = await fetch('/api/auth/credenciamentos', { credentials: 'same-origin' });
+                const dados = r.ok ? await r.json() : {};
+                planosDoMedico = { disponivel: !!dados.disponivel, lista: dados.credenciamentos || [] };
+            } catch (e) {
+                return { disponivel: false, lista: [] };   // sem rede: tenta de novo no próximo diálogo
+            }
+            return planosDoMedico;
+        }
+
+        // "Check-up — 65 anos, diabetes tipo 2, hipertensão": o médico pode reescrever antes de gerar.
+        function indicacaoSugerida() {
+            const data = lerFormulario();
+            const partes = [];
+            if (data.idade) partes.push(`${data.idade} anos`);
+            if (document.documentElement.lang.toLowerCase().startsWith('pt')) {
+                if (data.gestante === 'sim') partes.push('gestante');
+                checkupForm.querySelectorAll('input[name="comorbidades"]:checked').forEach(caixa => {
+                    const rotulo = caixa.closest('label');
+                    if (rotulo) partes.push(rotulo.textContent.trim().replace(/^[A-ZÀ-Ý](?=[a-zà-ÿ])/, c => c.toLowerCase()));
+                });
+            }
+            let texto = 'Check-up';
+            partes.forEach((parte, i) => {
+                const proximo = texto + (i ? ', ' : ' — ') + parte;
+                if (proximo.length <= 150) texto = proximo;
+            });
+            return texto;
+        }
+
+        function mostrarCamposDaGuia() {
+            const comGuia = !!document.getElementById('guiaPlano').value;
+            document.querySelectorAll('[data-guia-campo]').forEach(el => { el.style.display = comGuia ? '' : 'none'; });
+        }
+
+        async function prepararGuia(categoria) {
+            const painel = document.getElementById('guiaPainel');
+            const convite = document.getElementById('guiaConvite');
+            painel.style.display = 'none';
+            convite.style.display = 'none';
+            if (categoria === 'vacina') return;
+            const planos = await carregarPlanos();
+            if (!planos.disponivel) return;
+            if (!planos.lista.length) { convite.style.display = ''; return; }
+            const seletor = document.getElementById('guiaPlano');
+            while (seletor.options.length > 1) seletor.remove(1);
+            planos.lista.forEach(plano => {
+                const o = document.createElement('option'); o.value = String(plano.id); o.textContent = plano.operadora;
+                seletor.appendChild(o);
+            });
+            seletor.value = planos.lista.some(p => String(p.id) === planoEscolhido) ? planoEscolhido : '';
+            document.getElementById('guiaIndicacao').value = indicacaoSugerida();
+            painel.style.display = '';
+            mostrarCamposDaGuia();
+        }
+
+        function guiaDoDialogo() {
+            const painel = document.getElementById('guiaPainel');
+            const plano = document.getElementById('guiaPlano').value;
+            if (painel.style.display === 'none' || !plano) return null;
+            return {
+                credenciamento_id: Number(plano),
+                carteira: document.getElementById('guiaCarteira').value.trim(),
+                indicacao: document.getElementById('guiaIndicacao').value.trim()
+            };
+        }
+
+        async function baixarPdf(endpoint, itens, prefixoArquivo, descricao, guia) {
             try {
                 if (!currentRecommendations || currentRecommendations.length === 0) {
                     alert(T('Gere as recomendações primeiro!'));
@@ -1153,10 +1237,10 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
+                    body: JSON.stringify(Object.assign({
                         dados_paciente: dadosDoPacienteParaPdf(),
                         recomendacoes: itens
-                    })
+                    }, guia ? { guia } : {}))
                 });
 
                 if (!response.ok) {
@@ -1276,9 +1360,15 @@
                 const o = document.createElement('option'); o.value = T(t); datalist.appendChild(o);
                 tituloOriginal[o.value.toLowerCase()] = t;
             });
+            await prepararGuia(categoria);
             const dialogo = document.getElementById('dialogoAcrescimo');
             if (typeof dialogo.showModal === 'function') dialogo.showModal(); else dialogo.setAttribute('open', '');
         }
+
+        document.getElementById('guiaPlano').addEventListener('change', evento => {
+            planoEscolhido = evento.target.value;
+            mostrarCamposDaGuia();
+        });
 
         function fecharDialogo() {
             document.getElementById('acrescimoBusca').value = '';
@@ -1298,6 +1388,7 @@
             const painelAberto = document.getElementById('acrescimoPainel').style.display !== 'none';
             if (painelAberto && document.getElementById('acrescimoBusca').value.trim()) adicionarDoCampo();
             const categoria = categoriaDoDialogo;
+            const guia = categoria === 'vacina' ? null : guiaDoDialogo();
             fecharDialogo();
             const doc = DOCUMENTOS[categoria];
             const itens = itensDaCategoria(categoria);
@@ -1305,7 +1396,7 @@
                 alert(T(categoria === 'vacina' ? 'Nenhuma vacina foi recomendada!' : 'Nenhum item desta categoria para imprimir.'));
                 return;
             }
-            baixarPdf(doc.endpoint, itens, doc.arquivo, doc.descricao);
+            baixarPdf(doc.endpoint, itens, doc.arquivo, doc.descricao, guia);
         });
 
         function gerarPDFExamesLaboratoriais() { return abrirDialogoDePdf('laboratorio'); }
