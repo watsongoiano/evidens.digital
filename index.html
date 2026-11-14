@@ -114,12 +114,23 @@
       <span class="w-px h-10 bg-white/15 overflow-hidden"><span class="cue-line block w-px h-10 bg-white/80"></span></span>
     </div>
   </div>
-  <div id="hero-markers" class="max-w-[1360px] mx-auto px-6 lg:px-10 py-6 flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px] text-ink/60">
-    <span class="lg:order-last lg:ml-auto text-[12px] text-ink/45"><b class="font-medium text-ink/70">APOIO À DECISÃO</b> — Sugestões para o médico revisar. A conduta é sempre sua.</span>
-    <span class="flex items-center gap-2"><i class="fa-regular fa-gem text-teal text-[11px]"></i>120 recomendações mapeadas</span>
-    <span class="flex items-center gap-2"><i class="fa-regular fa-gem text-teal text-[11px]"></i>Fonte em cada item</span>
-    <span class="flex items-center gap-2"><i class="fa-regular fa-gem text-teal text-[11px]"></i>Dados do paciente não são gravados</span>
-    <span class="flex items-center gap-2"><i class="fa-regular fa-gem text-teal text-[11px]"></i>Triagem de segurança nas vacinas</span>
+  <div id="hero-markers" class="max-w-[1360px] mx-auto px-6 lg:px-10 py-10 lg:py-12 grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-9 text-center">
+    <div>
+      <p class="text-[40px] lg:text-[52px] font-light tracking-tightest leading-none">120</p>
+      <p class="text-[13px] lg:text-[14px] text-ink/60 leading-snug mt-3 max-w-[230px] mx-auto">recomendações mapeadas, com a fonte em cada item</p>
+    </div>
+    <div>
+      <p class="text-[40px] lg:text-[52px] font-light tracking-tightest leading-none">900<span class="text-teal">+</span></p>
+      <p class="text-[13px] lg:text-[14px] text-ink/60 leading-snug mt-3 max-w-[230px] mx-auto">exames com código TUSS, prontos para a guia do plano de saúde</p>
+    </div>
+    <div>
+      <p class="text-[40px] lg:text-[52px] font-light tracking-tightest leading-none">Zero</p>
+      <p class="text-[13px] lg:text-[14px] text-ink/60 leading-snug mt-3 max-w-[230px] mx-auto">dados do paciente gravados</p>
+    </div>
+    <div>
+      <p class="text-[40px] lg:text-[52px] font-light tracking-tightest leading-none"><span class="font-serif italic text-teal">Triagem</span></p>
+      <p class="text-[13px] lg:text-[14px] text-ink/60 leading-snug mt-3 max-w-[230px] mx-auto">de segurança nas vacinas, antes de indicar</p>
+    </div>
   </div>
 </section>
 
@@ -698,8 +709,8 @@ document.addEventListener('DOMContentLoaded', function () {
     '#check .grid > div:first-child > *', '#check .grid > div:last-child',
     '#cuidado .grid > div:first-child > *',
     '#faq > div:first-child > div > *', '#faq details',
-    '#cta-main > *', '#footer > div > div', '#footer > div:last-child > p'
-  ];
+    '#cta-main > *', '#footer > div > div'
+  ];   // a última linha do rodapé (aviso, © e idioma) não entra: no fim da página ela nunca cruzava a faixa do observador e ficava invisível
   const rv = [];
   groups.forEach(sel => document.querySelectorAll(sel).forEach(el => {
     if (el.classList.contains('rv')) return;
@@ -717,6 +728,13 @@ document.addEventListener('DOMContentLoaded', function () {
       if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
     }), { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
     rv.forEach(el => io.observe(el));
+    // Rede de segurança: chegou ao fim da página, nada pode continuar escondido.
+    const mostrarTudoNoFim = () => {
+      if (window.innerHeight + window.scrollY < document.documentElement.scrollHeight - 4) return;
+      rv.forEach(el => el.classList.add('in'));
+      window.removeEventListener('scroll', mostrarTudoNoFim);
+    };
+    window.addEventListener('scroll', mostrarTudoNoFim, { passive: true });
   }
 
   // Panels scale up as they enter (entrada suave), hero parallax, header hide/show

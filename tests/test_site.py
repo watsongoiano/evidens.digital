@@ -321,7 +321,9 @@ def _varredura(client):
 def test_numeros_da_home_correspondem_ao_motor(client):
     html = client.get('/').get_data(as_text=True)
     itens, refs = _varredura(client)
-    assert html.count(f'{len(itens)} recomendações') == 2  # faixa do hero e FAQ
+    assert html.count(f'{len(itens)} recomendações') == 1  # FAQ
+    faixa = html[html.index('id="hero-markers"'):html.index('</section>', html.index('id="hero-markers"'))]
+    assert f'leading-none">{len(itens)}</p>' in faixa and 'recomendações mapeadas, com a fonte em cada item' in faixa
     # A home fala em "mais de 40 sociedades": a grade lista 47, todas citadas pelo motor
     # (ver test_home_so_lista_instituicoes_que_o_motor_cita).
     assert '>40<span class="text-teal">+</span>' in html and html.count('mais de 40 sociedades e órgãos de saúde') == 2
@@ -693,3 +695,30 @@ def test_icone_de_reserva_sem_fundo_escuro(client):
     for pagina in ('index.html', 'intelligent-tools.html', 'login.html', 'cadastro.html', 'conta.html', 'admin.html', 'contact.html', 'configurar.html'):
         html = pathlib.Path(__file__).resolve().parents[1].joinpath(pagina).read_text(encoding='utf-8')
         assert 'href="/favicon.ico?v=2"' in html and 'href="/favicon.svg?v=2"' in html, pagina
+
+
+def test_faixa_do_hero_diz_o_que_o_sistema_entrega(client):
+    """Os destaques da home são centralizados e cada número sai do próprio sistema."""
+    from src.utils import catalogo, tuss
+    html = client.get('/').get_data(as_text=True)
+    faixa = html[html.index('id="hero-markers"'):html.index('</section>', html.index('id="hero-markers"'))]
+    assert 'text-center' in faixa.split('>')[0] and faixa.count('mx-auto">') == 4
+    assert 'APOIO À DECISÃO' not in html and 'A conduta é sempre sua' not in html
+    # "900+ exames com código TUSS": exames de laboratório e imagem do catálogo que saem com código na guia
+    cat = catalogo.catalogo()
+    com_codigo = [t for c in ('laboratorio', 'imagem') for t in cat[c]
+                  if all(linha['codigo'] for linha in tuss.linhas_da_guia(t, 'feminino'))]
+    assert len(com_codigo) >= 900 and '>900<span class="text-teal">+</span>' in faixa
+    for trecho in ('exames com código TUSS, prontos para a guia do plano de saúde', 'dados do paciente gravados',
+                   'de segurança nas vacinas, antes de indicar'):
+        assert trecho in faixa, trecho
+
+
+def test_ultima_linha_do_rodape_da_home_nao_depende_da_animacao_de_entrada():
+    """O seletor de idioma fica na última linha do rodapé. Com a animação de entrada ela começava invisível e,
+    por estar no fim da página, nunca cruzava a faixa do observador: o seletor não aparecia."""
+    pagina_inicial = (RAIZ / 'index.html').read_text(encoding='utf-8')
+    assert '<span data-idioma></span>' in pagina_inicial
+    grupos = pagina_inicial[pagina_inicial.index('const groups = ['):pagina_inicial.index('const rv = [];')]
+    assert "#footer > div:last-child" not in grupos.split('];')[0]
+    assert 'mostrarTudoNoFim' in pagina_inicial
