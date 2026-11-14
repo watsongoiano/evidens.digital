@@ -693,7 +693,8 @@ def generate_intelligent_recommendations():
         medicacoes_checkboxes += [c for c in sorted(mais) if c not in medicacoes_checkboxes]
         comorbidades, medicacoes_checkboxes, inferencias = coerencia.inferir(
             {**data, 'comorbidades': comorbidades, 'medicacoes': medicacoes_checkboxes}, egfr=egfr_inferencia,
-            gestante=is_pregnant, recusados=_lista_curta((request.get_json(silent=True) or {}).get('inferencias_recusadas')))
+            gestante=is_pregnant, recusados=_lista_curta((request.get_json(silent=True) or {}).get('inferencias_recusadas')),
+            escolhidas=escolhidas)
         familia = data.get('historia_familiar') or []
         familia = [k for k, v in familia.items() if v] if isinstance(familia, dict) else list(familia)
         # Itens que implicam imunossupressão valem como "Sim" na triagem de vacinas.
@@ -784,6 +785,19 @@ def generate_intelligent_recommendations():
             if 'diabetes_tipo_2' not in comorbidades:
                 comorbidades.append('diabetes_tipo_2')
         
+        if is_diabetic:
+            # Quem já tem diabetes não faz rastreamento: o TOTG sai (não se pede curva glicêmica a diabético)
+            # e glicemia e HbA1c passam a ser acompanhamento do controle, não rastreio.
+            recommendations = [r for r in recommendations if not (r.get('titulo') or '').startswith('TOTG-75g')]
+            for rec in recommendations:
+                if rec.get('titulo') == 'Hemoglobina glicada (HbA1c), soro':
+                    rec.update({'descricao': 'Controle glicêmico no diabetes: pelo menos 2 vezes ao ano em quem está na meta e a cada '
+                                             '3 meses após mudança de tratamento ou fora da meta.',
+                                'subtitulo': 'Diabéticos | A cada 3-6 meses', 'referencia': 'ADA 2025', 'grau_evidencia': 'A'})
+                elif rec.get('titulo') == 'Glicose, soro':
+                    rec.update({'descricao': 'Glicemia de jejum no acompanhamento do diabetes, junto da HbA1c.',
+                                'subtitulo': 'Diabéticos | Junto da HbA1c', 'referencia': 'ADA 2025', 'grau_evidencia': 'B'})
+
         # SCREENING DE DIABETES (ADA 2024 Criteria)
         should_screen_diabetes = False
         
@@ -956,7 +970,7 @@ def generate_intelligent_recommendations():
             
             # Cálcio, vitamina D e fósforo (para pacientes apropriados)
             recommendations.append({
-                'titulo': 'Cálcio, soro',
+                'titulo': 'Cálcio iônico, soro',
                 'descricao': 'Avaliação do metabolismo ósseo e risco de osteoporose em pacientes diabéticos.',
                 'subtitulo': 'Diabéticos | Anual',
                 'categoria': 'laboratorio',
@@ -1217,7 +1231,7 @@ def generate_intelligent_recommendations():
         if is_dpoc:
             # Espirometria - exame fundamental para diagnóstico e monitoramento
             recommendations.append({
-                'titulo': 'Espirometria',
+                'titulo': 'Espirometria, com broncodilatador',
                 'descricao': 'Exame essencial para confirmar o diagnóstico de DPOC, avaliar gravidade da obstrução do fluxo aéreo e monitorar progressão da doença. Deve ser realizada após broncodilatador.',
                 'subtitulo': 'DPOC | Anual ou conforme sintomas',
                 'categoria': 'imagem',

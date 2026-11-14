@@ -76,7 +76,9 @@ def _uspstf_url_by_title(title_lc: str) -> str:
 _FONTES_DIRETAS = [
     ('einstein pré-natal', 'https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf'),
     ('ms 2012-2016', 'https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf'),
-    ('williams 26e', 'https://www.mhprofessional.com/williams-obstetrics-26e-9781260462746-usa'),
+    ('williams 26e', 'https://www.mheducation.com/highered/mhp/product/williams-obstetrics-27e.html?viewOption=student'),
+    ('cgh 2025 (feuerstein)', 'https://doi.org/10.1016/j.cgh.2025.05.019'),
+    ('drugs aging 2024 (sparling)', 'https://doi.org/10.1007/s40266-024-01143-8'),
     ('consenso brasileiro de dmg', 'https://iris.paho.org/handle/10665.2/34278'),
     ('acog pb 222', 'https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia'),
     ('acog 2025', 'https://www.acog.org/clinical/clinical-guidance/practice-advisory/articles/2023/09/maternal-respiratory-syncytial-virus-vaccination'),
