@@ -126,3 +126,8 @@ html.lenis, html.lenis body { height: auto; }
 @layer components {
   .btn-escuro:disabled, .btn-claro:disabled { @apply opacity-40 cursor-not-allowed; }
 }
+
+/* Logo: símbolo de marca registrada junto do nome, sem mudar a altura da linha. */
+@layer components {
+  .marca-r { @apply font-normal align-super; font-size: 0.38em; line-height: 0; margin-left: 0.08em; }
+}
