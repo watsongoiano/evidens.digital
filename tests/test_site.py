@@ -322,12 +322,9 @@ def test_numeros_da_home_correspondem_ao_motor(client):
     html = client.get('/').get_data(as_text=True)
     itens, refs = _varredura(client)
     assert html.count(f'{len(itens)} recomendações') == 2  # faixa do hero e FAQ
-    # 15 sociedades e órgãos citados na home; todos precisam aparecer nas referências do motor.
-    fontes = ['SBIm', 'SBC', 'MS', 'USPSTF', 'CDC', 'NIH', 'AHA', 'ACC', 'ADA', 'ACOG', 'ESC', 'EAS', 'EACS', 'KDIGO', 'GOLD']
-    assert len(fontes) == 15
-    for fonte in fontes:
-        assert fonte in refs, fonte
-    assert '15<span' in html and '15 sociedades e órgãos de saúde' in html
+    # A home fala em "mais de 40 sociedades": a grade lista 47, todas citadas pelo motor
+    # (ver test_home_so_lista_instituicoes_que_o_motor_cita).
+    assert '>40<span class="text-teal">+</span>' in html and html.count('mais de 40 sociedades e órgãos de saúde') == 2
 
 
 def test_caso_de_exemplo_da_home_e_a_saida_real_do_motor(client):
@@ -354,14 +351,22 @@ def test_caso_de_exemplo_da_home_e_a_saida_real_do_motor(client):
 
 
 def test_home_so_lista_instituicoes_que_o_motor_cita(client):
+    """Cada sigla da grade 'Baseado em diretrizes de' aparece nas referências que o motor devolve."""
     import re as _re
     html = client.get('/').get_data(as_text=True)
     bloco = html[html.index('id="referencias"'):html.index('id="visao"')]
-    siglas = _re.findall(r'<p class="text-\[17px\] font-medium tracking-tight">([^<]+)</p>', bloco)
+    nacionais = _re.findall(r'leading-tight">([^<]+)</p>', bloco.split('id="ref-list"', 1)[1].split('</ul>', 1)[0])
+    internacionais = _re.findall(r'leading-tight">([^<]+)</p>', bloco.split('id="ref-list-int"', 1)[1].split('</ul>', 1)[0])
+    siglas = nacionais + internacionais
+    assert (len(nacionais), len(internacionais)) == (5, 42) and len(set(siglas)) == 47
+    assert '47 instituições de referência' in bloco
+    assert 'text-ink/40">5</p>' in bloco and 'text-ink/40">42</p>' in bloco
     _, refs = _varredura(client)
-    assert len(siglas) == 15 and '15 instituições de referência' in bloco
-    for sigla in siglas:
-        assert sigla in refs, sigla
+    # coautoras do consenso brasileiro de diabetes gestacional (OPAS, MS, FEBRASGO e SBD)
+    pelo_consenso = {'SBD', 'FEBRASGO', 'OPAS'}
+    assert 'Consenso brasileiro de DMG' in refs
+    faltando = [sigla for sigla in siglas if sigla not in pelo_consenso and sigla not in refs]
+    assert not faltando, f'instituições na home que o motor não cita: {faltando}'
 
 
 @pytest.mark.parametrize('pagina', PAGINAS_DO_ADMIN)
@@ -634,8 +639,27 @@ def test_home_mostra_a_evidencia_com_fonte_em_cada_numero():
     assert 'o que pedir, para quem e com qual referência.' in painel
 
 
-def test_home_fala_em_mais_de_quatro_mil_paginas():
+def test_home_fala_em_mais_de_sete_mil_paginas_e_quarenta_sociedades():
+    """Os números da home acompanham a base: ver docs/base-de-evidencia.md."""
     import pathlib
     home = pathlib.Path(__file__).resolve().parents[1].joinpath('index.html').read_text(encoding='utf-8')
-    assert home.count('4 mil páginas') == 3 and home.count('4.000') == 2
-    assert '2 mil' not in home and '2.000' not in home
+    assert home.count('7 mil páginas') == 3 and home.count('7.000') == 2
+    assert home.count('mais de 40 sociedades') == 2 and '>40<span class="text-teal">+</span>' in home
+    for antigo in ('2 mil', '2.000', '4 mil', '4.000', '15 sociedades', '15 instituições'):
+        assert antigo not in home, antigo
+
+
+def test_icone_de_reserva_sem_fundo_escuro(client):
+    """O .ico (usado quando o navegador não lê o SVG) é a letra em teal sobre fundo transparente:
+    com o fundo escuro antigo ele sumia nas abas do modo escuro."""
+    import io
+    Image = pytest.importorskip('PIL.Image')
+    ico = Image.open(io.BytesIO(client.get('/favicon.ico?v=2').data)).convert('RGBA')
+    pixels = list(ico.get_flattened_data() if hasattr(ico, 'get_flattened_data') else ico.getdata())
+    opacos = [p for p in pixels if p[3] > 200]
+    assert len(opacos) < 0.5 * len(pixels)                       # a maior parte é transparente
+    assert all(p[2] > p[0] + 60 for p in opacos)                 # o que aparece é teal, não o azul-petróleo escuro
+    import pathlib
+    for pagina in ('index.html', 'intelligent-tools.html', 'login.html', 'cadastro.html', 'conta.html', 'admin.html', 'contact.html', 'configurar.html'):
+        html = pathlib.Path(__file__).resolve().parents[1].joinpath(pagina).read_text(encoding='utf-8')
+        assert 'href="/favicon.ico?v=2"' in html and 'href="/favicon.svg?v=2"' in html, pagina
