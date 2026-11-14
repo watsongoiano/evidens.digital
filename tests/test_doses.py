@@ -47,15 +47,34 @@ def test_prednisona_20mg_por_2_semanas_e_imunossupressora(client):
     assert 'influenza, COVID-19, pneumocócica' in ' '.join(o['descricao'] for o in r['orientacoes'])
 
 
-def test_corticoide_cronico_em_dose_baixa_monitora_sem_painel_basal(client):
-    """5 mg por 6 meses: osso, glicemia, lipídios, pressão e olhos; o painel basal é da dose imunossupressora."""
-    r = _pedir(client, idade=32, medicacoes=['prednisona'], dose__prednisona=5, duracao__prednisona=26)
-    titulos = set(_titulos(r))
-    assert {'Densitometria óssea (DEXA)', 'Glicose, soro', 'Hemoglobina glicada (HbA1c), soro', 'Colesterol total e frações, soro',
-            'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)', 'Avaliação oftalmológica com tonometria e fundoscopia',
-            '25-hidroxivitamina D, soro'} <= titulos   # densitometria em qualquer idade adulta
-    assert not {'Albumina, soro', 'Prova tuberculínica (PPD) ou IGRA', 'Fosfatase alcalina, soro',
-                'Radiografia de coluna torácica e lombar (perfil)'} & titulos   # imagem da coluna só a partir dos 40
+PAINEL_DO_CORTICOIDE = {
+    'Prova tuberculínica (PPD) ou IGRA', 'Hemograma completo com plaquetas', 'Albumina, soro', 'Creatinina, soro', 'Ureia, soro',
+    'Sódio, soro', 'Potássio, soro', 'Cálcio iônico, soro', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro',
+    'Fosfatase alcalina, soro', 'Bilirrubinas totais e frações, soro', 'Glicose, soro', 'Hemoglobina glicada (HbA1c), soro',
+    'Colesterol total e frações, soro', '25-hidroxivitamina D, soro', 'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)',
+    'Avaliação oftalmológica com tonometria e fundoscopia'}
+
+
+@pytest.mark.parametrize('dose, semanas', [(5, 2), (5, 26), (2, 52), (40, 16), (None, None)],
+                         ids=['baixa-curta', 'baixa-cronica', 'muito-baixa', 'imunossupressora', 'sem-dose'])
+def test_work_up_do_corticoide_vale_a_partir_da_dose_baixa(client, dose, semanas):
+    """Qualquer corticoide sistêmico em uso recebe a avaliação basal e a monitorização inteiras."""
+    extra = {} if dose is None else dict(dose__prednisona=dose, duracao__prednisona=semanas)
+    r = _pedir(client, idade=32, medicacoes=['prednisona'], **extra)
+    assert PAINEL_DO_CORTICOIDE <= set(_titulos(r)), PAINEL_DO_CORTICOIDE - set(_titulos(r))
+
+
+def test_dose_e_duracao_so_mudam_osso_e_vacinas(client):
+    # dose baixa por pouco tempo: sem densitometria, sem VSR e sem marcar imunossupressão
+    r = _pedir(client, idade=52, imunossupressao='nao', medicacoes=['prednisona'], dose__prednisona=5, duracao__prednisona=2)
+    assert not {'Densitometria óssea (DEXA)', 'Radiografia de coluna torácica e lombar (perfil)',
+                'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)'} & set(_titulos(r))
+    assert r['triagem_vacinas']['imunossupressao'] == 'nao' and any('Febre Amarela' in t for t in _titulos(r))
+    tb = next(x for x in r['recommendations'] if x['titulo'] == 'Prova tuberculínica (PPD) ou IGRA')
+    assert tb['subtitulo'].startswith('Corticoide sistêmico') and 'corticoide sistêmico' in tb['descricao']
+    # 3 meses ou mais: densitometria em qualquer idade adulta; imagem da coluna a partir dos 40
+    jovem = _pedir(client, idade=32, medicacoes=['prednisona'], dose__prednisona=5, duracao__prednisona=26)
+    assert 'Densitometria óssea (DEXA)' in _titulos(jovem) and 'Radiografia de coluna torácica e lombar (perfil)' not in _titulos(jovem)
     assert 'Radiografia de coluna torácica e lombar (perfil)' in _titulos(
         _pedir(client, idade=52, medicacoes=['prednisona'], dose__prednisona=5, duracao__prednisona=26))
 
@@ -65,7 +84,7 @@ def test_prednisona_5mg_por_6_meses_indica_densitometria_sem_imunossupressao(cli
     t = _titulos(r)
     assert 'Densitometria óssea (DEXA)' in t and 'Hemoglobina glicada (HbA1c), soro' in t
     assert r['triagem_vacinas']['imunossupressao'] != 'sim'
-    assert 'Prova tuberculínica (PPD) ou IGRA' not in t
+    assert 'Prova tuberculínica (PPD) ou IGRA' in t   # avaliação basal vale em qualquer dose
 
 
 def test_prednisona_20mg_por_2_meses_rastreia_tuberculose_latente(client):
@@ -74,7 +93,7 @@ def test_prednisona_20mg_por_2_meses_rastreia_tuberculose_latente(client):
     assert 'dose alta por 4 semanas' in _orientacoes(r)
 
 
-def test_curso_curto_em_dose_baixa_nao_muda_nada(client):
+def test_curso_curto_em_dose_baixa_nao_muda_vacinas_nem_osso(client):
     r = _pedir(client, medicacoes=['prednisona'], dose__prednisona=10, duracao__prednisona=1)
     assert 'Densitometria óssea (DEXA)' not in _titulos(r)
     assert r['triagem_vacinas']['imunossupressao'] != 'sim'
