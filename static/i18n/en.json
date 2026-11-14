@@ -212,7 +212,6 @@
   "Pedido de laboratório": "Laboratory order",
   "Pedido de imagem": "Imaging order",
   "PACIENTE · H · 52 ANOS · HAS · DISLIPIDEMIA": "PATIENT · M · 52 YEARS · HTN · DYSLIPIDEMIA",
-  "4 de 27": "4 of 27",
   "DOMÍNIO": "DOMAIN",
   "RECOMENDAÇÃO": "RECOMMENDATION",
   "NÍVEL": "LEVEL",
@@ -230,7 +229,6 @@
   "Uma plataforma feita para organizar e levar à beira do leito, de forma concisa, o que há de mais novo em evidência científica mundial.": "A platform built to organize and bring to the bedside, concisely, the latest scientific evidence from around the world.",
   "H · 52 ANOS · HAS · DISLIPIDEMIA": "M · 52 YEARS · HTN · DYSLIPIDEMIA",
   "RESULTADO · CASO FICTÍCIO": "RESULT · FICTIONAL CASE",
-  "27 recomendações": "27 recommendations",
   "para revisar.": "to review.",
   "Exames laboratoriais": "Laboratory tests",
   "Glicemia, lipídios, Lp(a), função renal, PSA…": "Glucose, lipids, Lp(a), kidney function, PSA…",
@@ -1000,7 +998,6 @@
   "Rastreamento de pré-diabetes e diabetes tipo 2. Valores de referência: <5,7% normal, 5,7-6,4% pré-diabetes, ≥6,5% diabetes. Reflete controle glicêmico dos últimos 2-3 meses.": "Screening for prediabetes and type 2 diabetes. Reference values: <5.7% normal, 5.7-6.4% prediabetes, ≥6.5% diabetes. Reflects glycemic control over the past 2-3 months.",
   "Rastreamento de retinopatia diabética. Realizar exame oftalmológico completo com dilatação pupilar anualmente. A retinopatia diabética é a principal causa de cegueira em adultos.": "Diabetic retinopathy screening. Perform a complete dilated eye exam yearly. Diabetic retinopathy is the leading cause of blindness in adults.",
   "Rastreamento de sífilis. Considerar maior frequência de triagem em caso de risco ou exposição. Pessoas não imunizadas (anti-HBs negativo) não necessitam nova triagem para HIV.": "Syphilis screening. Consider more frequent screening with risk or exposure. Non-immune people (anti-HBs negative) do not need further HIV screening.",
-  "Rastreamento de tuberculose latente em uso de corticoide ≥ 15 mg/dia por ≥ 1 mês; com resultado positivo e doença ativa afastada, tratar.": "Latent tuberculosis screening on a corticosteroid ≥ 15 mg/day for ≥ 1 month; with a positive result and active disease ruled out, treat.",
   "Rastreamento de tuberculose latente em uso de imunobiológico ou inibidor de jak; com resultado positivo e doença ativa afastada, tratar.": "Latent tuberculosis screening on a biologic or JAK inhibitor; with a positive result and active disease ruled out, treat.",
   "Rastreio de anemia no 3º trimestre.": "Anemia screening in the 3rd trimester.",
   "Rastreio de anemia.": "Anemia screening.",
@@ -1024,7 +1021,6 @@
   "Síndrome de Cowden na família: ressonância magnética de mamas anual a partir de 30 anos, alternada ou associada à mamografia.": "Cowden syndrome in the family: yearly breast MRI from age 30, alternating with or added to mammography.",
   "Síndrome de Lynch na família: colonoscopia a cada 1-2 anos, a partir de 20 anos.": "Lynch syndrome in the family: colonoscopy every 1-2 years, from age 20.",
   "Síndrome de Lynch: endoscopia digestiva alta com biópsias e pesquisa de H. pylori a cada 2-4 anos, a partir de 30-40 anos.": "Lynch syndrome: upper GI endoscopy with biopsies and H. pylori testing every 2-4 years, from age 30-40.",
-  "Teste confirmatório para diabetes gestacional e rastreamento de diabetes tipo 2 quando glicemia de jejum e HbA1c são inconclusivos. Valores 2h pós-carga: <140 mg/dL normal, 140-199 mg/dL pré-diabetes, ≥200 mg/dL diabetes.": "Confirmatory test for gestational diabetes and screening for type 2 diabetes when fasting glucose and HbA1c are inconclusive. 2 h post-load values: <140 mg/dL normal, 140-199 mg/dL prediabetes, ≥200 mg/dL diabetes.",
   "Teste de HPV de alto risco a cada 5 anos dos 30 aos 65 anos. Alternativas: citologia isolada a cada 3 anos ou coteste a cada 5 anos.": "High-risk HPV test every 5 years from 30 to 65 years. Alternatives: cytology alone every 3 years or co-testing every 5 years.",
   "Teste de resistência genotípica (PR/RT +/- gene integrase). Indicado antes do início da TARV e em caso de falha virológica. Essencial para escolha do esquema terapêutico adequado.": "Genotypic resistance test (PR/RT +/- integrase gene). Indicated before starting ART and in virologic failure. Essential for choosing the appropriate regimen.",
   "Teste para detecção de Hepatite C": "Test to detect hepatitis C",
@@ -1617,7 +1613,6 @@
   "Durante o uso": "During use",
   "Até 6 meses do início": "Within 6 months of starting",
   "Avaliação de fratura": "Fracture assessment",
-  "Corticoide em dose imunossupressora: avaliação laboratorial basal (hemograma, albumina e painel metabólico: função renal, eletrólitos, cálcio e perfil hepático).": "Corticosteroid at an immunosuppressive dose: baseline laboratory assessment (complete blood count, albumin and metabolic panel: kidney function, electrolytes, calcium and liver panel).",
   "Corticoide por mais de 3 meses a partir dos 40 anos: imagem da coluna para fratura vertebral, que muda a classificação de risco mesmo com densitometria normal.": "Corticosteroid for more than 3 months from age 40: spinal imaging for vertebral fracture, which changes the risk category even with normal densitometry.",
   "Corticoide sistêmico: glicemia e HbA1c antes de iniciar e de rotina durante o uso (hiperglicemia e diabetes induzidos por corticoide).": "Systemic corticosteroid: glucose and HbA1c before starting and routinely during use (steroid-induced hyperglycemia and diabetes).",
   "Corticoide sistêmico: acompanhar a pressão arterial de rotina durante o uso (hipertensão induzida por corticoide).": "Systemic corticosteroid: monitor blood pressure routinely during use (steroid-induced hypertension).",
@@ -1629,9 +1624,15 @@
   "Doença cardiovascular aterosclerótica": "Atherosclerotic cardiovascular disease",
   "HbA1c de 5,7 a 6,4% (ADA)": "HbA1c from 5.7 to 6.4% (ADA)",
   "Metimazol": "Methimazole",
-  "Sem dose e duração, o uso foi tratado como crônico (≥ 3 meses). Com os dois, a ferramenta diz se há imunossupressão (vacinas de vírus vivo e avaliação laboratorial basal), se cabe densitometria e rastreio de tuberculose latente.": "Without dose and duration, use was treated as chronic (≥ 3 months). With both, the tool tells whether there is immunosuppression (live-virus vaccines and baseline laboratory assessment), and whether densitometry and latent tuberculosis screening apply.",
-  "corticoide em dose imunossupressora": "a corticosteroid at an immunosuppressive dose",
-  "corticoide em dose imunossupressora e imunobiológico ou inibidor de jak": "a corticosteroid at an immunosuppressive dose and a biologic or JAK inhibitor"
+  "4 de 26": "4 of 26",
+  "26 recomendações": "26 recommendations",
+  "Corticoide sistêmico": "Systemic corticosteroid",
+  "corticoide sistêmico": "a systemic corticosteroid",
+  "corticoide sistêmico e imunobiológico ou inibidor de jak": "a systemic corticosteroid and a biologic or JAK inhibitor",
+  "Corticoide sistêmico: avaliação laboratorial basal (hemograma, albumina e painel metabólico: função renal, eletrólitos, cálcio e perfil hepático).": "Systemic corticosteroid: baseline laboratory assessment (complete blood count, albumin and metabolic panel: kidney function, electrolytes, calcium and liver panel).",
+  "Glicemia ou HbA1c limítrofes (pré-diabetes) | Para confirmar o diagnóstico": "Borderline glucose or HbA1c (prediabetes) | To confirm the diagnosis",
+  "Indicado quando glicemia de jejum ou HbA1c estão na faixa de pré-diabetes ou são discordantes: confirma ou afasta diabetes. Valores 2h pós-carga: <140 mg/dL normal, 140-199 mg/dL pré-diabetes, ≥200 mg/dL diabetes. Não se pede a quem já tem diabetes.": "Indicated when fasting glucose or HbA1c are in the prediabetes range or are discordant: it confirms or rules out diabetes. 2-hour post-load values: <140 mg/dL normal, 140-199 mg/dL prediabetes, ≥200 mg/dL diabetes. Not ordered for those who already have diabetes.",
+  "Sem dose e duração, o uso foi tratado como crônico (≥ 3 meses). Com os dois, a ferramenta diz se há imunossupressão (vacinas de vírus vivo) e se cabe densitometria. A avaliação laboratorial e a monitorização do corticoide valem em qualquer dose.": "Without dose and duration, use was treated as chronic (≥ 3 months). With both, the tool tells whether there is immunosuppression (live-virus vaccines) and whether densitometry applies. Laboratory assessment and corticosteroid monitoring apply at any dose."
  },
  "padroes": [
   [
@@ -1717,10 +1718,6 @@
   [
    "^(.+?) ([\\d,]+) mg/dia de prednisona \\(equivalente\\) há ([\\d,]+) semanas$",
    "$1 %2 mg/day of prednisone (equivalent) for %3 weeks"
-  ],
-  [
-   "^(.+ semanas): abaixo dos limiares de imunossupressão \\(20 mg/dia por 2 semanas\\) e de risco de fratura \\(2,5 mg/dia por 3 meses\\)\\. Não muda as vacinas nem indica densitometria\\.$",
-   "$1: below the thresholds for immunosuppression (20 mg/day for 2 weeks) and fracture risk (2.5 mg/day for 3 months). It does not change the vaccines or call for densitometry."
   ],
   [
    "^([\\d,]+) mg/dia \\(([\\d,]+) mg/kg/dia; limite de baixo grau: 3 mg/kg/dia\\)\\. Vacinas de vírus vivo podem ser consideradas caso a caso\\.$",
@@ -1889,6 +1886,10 @@
   [
    "^(.+ semanas)\\. Além da avaliação de fratura \\(densitometria, imagem da coluna e FRAX\\): cálcio 800-1\\.000 mg/dia e vitamina D 600-800 UI/dia \\(a ACR 2022 fala em 1\\.000-1\\.200 mg de cálcio\\), acompanhar glicemia, lipídios e pressão arterial, exame oftalmológico periódico \\(catarata e glaucoma\\) e, na suspensão, redução gradual pelo risco de insuficiência adrenal\\.$",
    "$1. Beyond fracture assessment (densitometry, spinal imaging and FRAX): calcium 800-1,000 mg/day and vitamin D 600-800 IU/day (ACR 2022 says 1,000-1,200 mg of calcium), monitor glucose, lipids and blood pressure, periodic eye exam (cataract and glaucoma) and, on stopping, taper because of the risk of adrenal insufficiency."
+  ],
+  [
+   "^(.+ semanas): abaixo dos limiares de imunossupressão \\(20 mg/dia por 2 semanas\\) e de risco de fratura \\(2,5 mg/dia por 3 meses\\)\\. Não muda as vacinas nem indica densitometria; a avaliação laboratorial e a monitorização do corticoide \\(glicemia, lipídios, pressão, olhos\\) seguem indicadas\\.$",
+   "$1: below the thresholds for immunosuppression (20 mg/day for 2 weeks) and fracture risk (2.5 mg/day for 3 months). It does not change the vaccines or call for densitometry; laboratory assessment and corticosteroid monitoring (glucose, lipids, blood pressure, eyes) remain indicated."
   ]
  ],
  "manter": [
