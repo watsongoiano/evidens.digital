@@ -59,7 +59,7 @@ GRUPOS = [
     ]),
     ('Insuficiência cardíaca, arritmia e angina', ['cardio_outro'], 'coracao', [
         ('Sacubitril + valsartana|entresto', ['arni']), ('Amiodarona', ['amiodarona']),
-        'Digoxina', 'Ivabradina', 'Propafenona', 'Sotalol', 'Mononitrato de isossorbida', 'Dinitrato de isossorbida',
+        ('Digoxina', ['cardio_outro', 'digoxina']), 'Ivabradina', 'Propafenona', 'Sotalol', 'Mononitrato de isossorbida', 'Dinitrato de isossorbida',
         'Trimetazidina', 'Ranolazina',
     ]),
     ('Antiagregantes', ['antiagregante'], 'antiplaquetario', [
@@ -116,8 +116,9 @@ GRUPOS = [
         ('Levomepromazina', ['antipsicotico_tipico']), ('Lítio|carbolitium', ['litio']),
     ]),
     ('Anticonvulsivantes', ['anticonvulsivante'], 'epilepsia convulsao', [
-        'Ácido valproico / divalproato', 'Carbamazepina', 'Oxcarbazepina', 'Lamotrigina', 'Levetiracetam', 'Fenitoína',
-        'Fenobarbital', 'Topiramato', 'Lacosamida', 'Clobazam', 'Gabapentina', 'Pregabalina',
+        ('Ácido valproico / divalproato', ['anticonvulsivante', 'valproato']),
+        ('Carbamazepina', ['anticonvulsivante', 'carbamazepina']), 'Oxcarbazepina', 'Lamotrigina', 'Levetiracetam',
+        ('Fenitoína', ['anticonvulsivante', 'fenitoina']), ('Fenobarbital', ['anticonvulsivante', 'fenobarbital']), 'Topiramato', 'Lacosamida', 'Clobazam', 'Gabapentina', 'Pregabalina',
     ]),
     ('Parkinson, demência e TDAH', ['neuro_outro'], 'parkinson alzheimer demencia tdah', [
         'Levodopa + benserazida', 'Levodopa + carbidopa', 'Pramipexol', 'Rasagilina', 'Amantadina', 'Biperideno',
@@ -129,8 +130,8 @@ GRUPOS = [
     ('Imunossupressores e imunobiológicos', ['imunossupressor'], 'imunossupressor imunobiologico biologico', [
         ('Metotrexato', ['imunossupressor', 'metotrexato']), ('Azatioprina', ['imunossupressor', 'azatioprina']),
         ('Leflunomida', ['imunossupressor', 'leflunomida']),
-        'Micofenolato', ('Ciclosporina', ['imunossupressor', 'inibidor_calcineurina']),
-        ('Tacrolimo', ['imunossupressor', 'inibidor_calcineurina']), 'Sirolimo', 'Everolimo',
+        'Micofenolato', ('Ciclosporina', ['imunossupressor', 'inibidor_calcineurina', 'ciclosporina']),
+        ('Tacrolimo', ['imunossupressor', 'inibidor_calcineurina', 'tacrolimo']), 'Sirolimo', 'Everolimo',
         ('Tofacitinibe', ['imunossupressor', 'biologico']), ('Upadacitinibe', ['imunossupressor', 'biologico']),
         ('Adalimumabe', ['imunossupressor', 'biologico']), ('Etanercepte', ['imunossupressor', 'biologico']),
         ('Infliximabe', ['imunossupressor', 'biologico']), ('Golimumabe', ['imunossupressor', 'biologico']),

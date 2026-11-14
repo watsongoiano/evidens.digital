@@ -1722,7 +1722,28 @@
   "Termos de Uso": "Terms of Use",
   "Li e aceito os": "I have read and accept the",
   "Termos de Uso e a Política de Privacidade": "Terms of Use and Privacy Policy (in Portuguese)",
-  "Guardamos nome, e-mail, registro profissional e perfil, para conferir e liberar o acesso. A senha é armazenada de forma irreversível. Dados de pacientes não são gravados. Detalhes nos": "We keep your name, e-mail, professional license and profile, to check and release access. The password is stored irreversibly. Patient data is not saved. Details in the"
+  "Guardamos nome, e-mail, registro profissional e perfil, para conferir e liberar o acesso. A senha é armazenada de forma irreversível. Dados de pacientes não são gravados. Detalhes nos": "We keep your name, e-mail, professional license and profile, to check and release access. The password is stored irreversibly. Patient data is not saved. Details in the",
+  "AHA/ACC/HFSA 2022 / DIG (Rathore, JAMA 2003)": "AHA/ACC/HFSA 2022 / DIG (Rathore, JAMA 2003)",
+  "Anticonvulsivantes: nível sérico só com indicação": "Antiseizure drugs: serum levels only when indicated",
+  "Digoxina: nível sérico não é rotineiro": "Digoxin: serum level is not routine",
+  "Dosar a digoxinemia (no vale, pelo menos 6 h após a dose) se houver suspeita de toxicidade, piora da função renal, início de fármaco que interage (amiodarona, verapamil, diltiazem, claritromicina) ou ajuste de dose. Na insuficiência cardíaca, manter 0,5-0,9 ng/mL: concentrações ≥ 1,0 ng/mL associaram-se a maior mortalidade. Conferir potássio e função renal, que alteram o risco de toxicidade.": "Measure serum digoxin (trough, at least 6 h after the dose) if toxicity is suspected, renal function worsens, an interacting drug is started (amiodarone, verapamil, diltiazem, clarithromycin) or the dose changes. In heart failure, keep 0.5-0.9 ng/mL: concentrations ≥ 1.0 ng/mL were associated with higher mortality. Check potassium and renal function, which change the risk of toxicity.",
+  "Litemia com coleta 12 horas após a última dose (aceitável de 10 a 14 h, sempre no mesmo intervalo). Alvo de manutenção em geral de 0,6 a 0,8 mmol/L. A cada 3 meses: 65 anos ou mais, ou uso de IECA/BRA ou diurético (risco maior de intoxicação). Antecipar se houver sinais de toxicidade, desidratação, piora da função renal, início de fármaco que interage ou última litemia ≥ 0,8 mmol/L.": "Serum lithium drawn 12 hours after the last dose (10 to 14 h is acceptable, always at the same interval). Usual maintenance target 0.6 to 0.8 mmol/L. Every 3 months: age 65 or older, or use of ACE inhibitor/ARB or diuretic (higher risk of toxicity). Bring forward if there are signs of toxicity, dehydration, worsening renal function, a new interacting drug or a last level ≥ 0.8 mmol/L.",
+  "Litemia com coleta 12 horas após a última dose (aceitável de 10 a 14 h, sempre no mesmo intervalo). Alvo de manutenção em geral de 0,6 a 0,8 mmol/L. A cada 6 meses após o primeiro ano; a cada 3 meses no primeiro ano de uso. Antecipar se houver sinais de toxicidade, desidratação, piora da função renal, início de fármaco que interage ou última litemia ≥ 0,8 mmol/L.": "Serum lithium drawn 12 hours after the last dose (10 to 14 h is acceptable, always at the same interval). Usual maintenance target 0.6 to 0.8 mmol/L. Every 6 months after the first year; every 3 months in the first year of use. Bring forward if there are signs of toxicity, dehydration, worsening renal function, a new interacting drug or a last level ≥ 0.8 mmol/L.",
+  "Lítio: TSH a cada 6 meses (hipotireoidismo induzido pelo lítio).": "Lithium: TSH every 6 months (lithium-induced hypothyroidism).",
+  "Lítio: cálcio a cada 6 meses (hiperparatireoidismo e hipercalcemia associados ao lítio).": "Lithium: calcium every 6 months (lithium-associated hyperparathyroidism and hypercalcaemia).",
+  "Lítio: creatinina com TFG estimada a cada 6 meses; mais vezes se a TFG cair.": "Lithium: creatinine with estimated GFR every 6 months; more often if GFR falls.",
+  "Lítio: frequência da litemia": "Lithium: how often to check serum levels",
+  "Lítio: sódio a cada 6 meses (hiponatremia eleva a litemia).": "Lithium: sodium every 6 months (hyponatraemia raises lithium levels).",
+  "Lítio: ureia e eletrólitos a cada 6 meses.": "Lithium: urea and electrolytes every 6 months.",
+  "Primeiro ano de uso: litemia a cada 3 meses (antes disso, 1 semana após o início e após cada ajuste de dose até estabilizar). Depois, a cada 6 meses, ou a cada 3 meses em idosos, com IECA/BRA, diuréticos ou AINE, com última litemia ≥ 0,8 mmol/L, má adesão ou mau controle. Peso ou IMC a cada 6 meses. ECG no início se houver doença ou risco cardiovascular.": "First year of use: serum lithium every 3 months (before that, 1 week after starting and after each dose change until stable). Then every 6 months, or every 3 months in older people, with ACE inhibitors/ARBs, diuretics or NSAIDs, with a last level ≥ 0.8 mmol/L, poor adherence or poor symptom control. Weight or BMI every 6 months. ECG at the start if there is cardiovascular disease or risk.",
+  "Valproato, carbamazepina, fenitoína e fenobarbital: a dosagem sérica de rotina não é recomendada. Dosar se houver suspeita de má adesão ou de toxicidade, ajuste de dose de fenitoína, interação farmacocinética ou situações especiais (gestação, insuficiência renal ou hepática). Indicar na requisição o horário da última dose.": "Valproate, carbamazepine, phenytoin and phenobarbital: routine serum levels are not recommended. Measure them if poor adherence or toxicity is suspected, to adjust phenytoin dose, for pharmacokinetic interactions or in special situations (pregnancy, renal or hepatic failure). Write the time of the last dose on the request.",
+  "Transplantado em uso de tacrolimo: nível de vale (C0, antes da dose), com alvo definido pela equipe de transplante. Repetir também após mudança de medicação que interage e na piora da função renal.": "Transplant recipient on tacrolimus: trough level (C0, before the dose), with the target set by the transplant team. Also repeat after a change in interacting medication and when renal function worsens.",
+  "Transplantado em uso de ciclosporina: nível de vale (C0, antes da dose), com alvo definido pela equipe de transplante. Repetir também após mudança de medicação que interage e na piora da função renal.": "Transplant recipient on cyclosporine: trough level (C0, before the dose), with the target set by the transplant team. Also repeat after a change in interacting medication and when renal function worsens.",
+  "Transplante em uso de tacrolimo": "Transplant on tacrolimus",
+  "Transplante em uso de ciclosporina": "Transplant on cyclosporine",
+  "Tacrolimo, sangue total (nível de vale)": "Tacrolimus, whole blood (trough level)",
+  "Ciclosporina, sangue total (nível de vale)": "Cyclosporine, whole blood (trough level)",
+  "KDIGO 2009 (transplante renal), 5.1": "KDIGO 2009 (kidney transplant), 5.1"
  },
  "padroes": [
   [
@@ -2171,6 +2192,8 @@
   "Evidēns.",
   "Ex: Unimed Goiânia",
   "Ex: 225125",
-  "Zero"
+  "Zero",
+  "NICE CG185 (2023)",
+  "NICE NG217 (2022)"
  ]
 }

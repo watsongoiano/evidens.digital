@@ -102,10 +102,17 @@ MEDICACOES = {
     'azatioprina': {'rotulo': 'Azatioprina'},
     'leflunomida': {'rotulo': 'Leflunomida'},
     'inibidor_calcineurina': {'rotulo': 'Ciclosporina ou tacrolimo'},
+    'tacrolimo': {'rotulo': 'Tacrolimo'},
+    'ciclosporina': {'rotulo': 'Ciclosporina'},
     'biologico': {'rotulo': 'Imunobiológico ou inibidor de JAK'},
     'bisfosfonato_longo': {'rotulo': 'Bisfosfonato por 5 anos ou mais'},
     'litio': {'rotulo': 'Lítio'},
     'amiodarona': {'rotulo': 'Amiodarona'},
+    'digoxina': {'rotulo': 'Digoxina'},
+    'valproato': {'rotulo': 'Ácido valproico / divalproato'},
+    'carbamazepina': {'rotulo': 'Carbamazepina'},
+    'fenitoina': {'rotulo': 'Fenitoína'},
+    'fenobarbital': {'rotulo': 'Fenobarbital'},
     'varfarina': {'rotulo': 'Varfarina'},
     'doac': {'rotulo': 'Anticoagulante oral direto'},
     'antipsicotico_atipico': {'rotulo': 'Antipsicótico de 2ª geração'},
@@ -560,9 +567,52 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Bisfosfonato por 5 anos (oral) ou 3 anos (ácido zoledrônico): densitometria para decidir entre pausa e continuidade.',
             'Bisfosfonato por tempo prolongado | Reavaliação', 'ASBMR 2016', 'B')
     if 'litio' in med:
-        for titulo, texto in (('Lítio, soro', 'Litemia'), ('Hormônio Tireoestimulante (TSH), soro', 'Função tireoidiana'),
-                              ('Creatinina, soro', 'Função renal'), ('Cálcio iônico, soro', 'Hiperparatireoidismo associado ao lítio')):
-            add(titulo, 'laboratorio', f'{texto} em uso de lítio.', 'Em uso de lítio | A cada 6 meses', 'NICE CG185', 'B')
+        # NICE CG185 (2014, atualizada em 2023), 1.10: litemia a cada 3 meses no 1º ano e depois a cada 6 meses;
+        # a cada 3 meses em idosos, com fármaco que interage (IECA/BRA, diuréticos, AINE), com última litemia
+        # ≥ 0,8 mmol/L, má adesão ou mau controle. Peso, ureia e eletrólitos com cálcio, TFG e TSH a cada 6 meses.
+        frequente = idade >= 65 or bool({'ieca_bra', 'tiazidico', 'diuretico_alca'} & med)
+        add('Lítio, soro', 'laboratorio',
+            'Litemia com coleta 12 horas após a última dose (aceitável de 10 a 14 h, sempre no mesmo intervalo). Alvo de '
+            'manutenção em geral de 0,6 a 0,8 mmol/L. ' + (
+                'A cada 3 meses: 65 anos ou mais, ou uso de IECA/BRA ou diurético (risco maior de intoxicação). ' if frequente
+                else 'A cada 6 meses após o primeiro ano; a cada 3 meses no primeiro ano de uso. ') +
+            'Antecipar se houver sinais de toxicidade, desidratação, piora da função renal, início de fármaco que '
+            'interage ou última litemia ≥ 0,8 mmol/L.',
+            'Em uso de lítio | ' + ('A cada 3 meses' if frequente else 'A cada 6 meses'), 'NICE CG185 (2023)', 'B', 'alta')
+        for titulo, texto in (
+                ('Hormônio Tireoestimulante (TSH), soro', 'Lítio: TSH a cada 6 meses (hipotireoidismo induzido pelo lítio).'),
+                ('Creatinina, soro', 'Lítio: creatinina com TFG estimada a cada 6 meses; mais vezes se a TFG cair.'),
+                ('Ureia, soro', 'Lítio: ureia e eletrólitos a cada 6 meses.'),
+                ('Sódio, soro', 'Lítio: sódio a cada 6 meses (hiponatremia eleva a litemia).'),
+                ('Cálcio iônico, soro', 'Lítio: cálcio a cada 6 meses (hiperparatireoidismo e hipercalcemia associados ao lítio).')):
+            add(titulo, 'laboratorio', texto, 'Em uso de lítio | A cada 6 meses', 'NICE CG185 (2023)', 'B')
+        orientar('Lítio: frequência da litemia',
+                 'Primeiro ano de uso: litemia a cada 3 meses (antes disso, 1 semana após o início e após cada ajuste de '
+                 'dose até estabilizar). Depois, a cada 6 meses, ou a cada 3 meses em idosos, com IECA/BRA, diuréticos ou '
+                 'AINE, com última litemia ≥ 0,8 mmol/L, má adesão ou mau controle. Peso ou IMC a cada 6 meses. ECG no '
+                 'início se houver doença ou risco cardiovascular.', 'NICE CG185 (2023)')
+    if 'digoxina' in med:
+        orientar('Digoxina: nível sérico não é rotineiro',
+                 'Dosar a digoxinemia (no vale, pelo menos 6 h após a dose) se houver suspeita de toxicidade, piora da função '
+                 'renal, início de fármaco que interage (amiodarona, verapamil, diltiazem, claritromicina) ou ajuste de dose. '
+                 'Na insuficiência cardíaca, manter 0,5-0,9 ng/mL: concentrações ≥ 1,0 ng/mL associaram-se a maior '
+                 'mortalidade. Conferir potássio e função renal, que alteram o risco de toxicidade.',
+                 'AHA/ACC/HFSA 2022 / DIG (Rathore, JAMA 2003)')
+    if {'valproato', 'carbamazepina', 'fenitoina', 'fenobarbital'} & med:
+        orientar('Anticonvulsivantes: nível sérico só com indicação',
+                 'Valproato, carbamazepina, fenitoína e fenobarbital: a dosagem sérica de rotina não é recomendada. Dosar se houver suspeita '
+                 'de má adesão ou de toxicidade, ajuste de dose de fenitoína, interação farmacocinética ou situações '
+                 'especiais (gestação, insuficiência renal ou hepática). Indicar na requisição o horário da última dose.',
+                 'NICE NG217 (2022)')
+    if 'transplante' in com:
+        for classe, titulo in (('tacrolimo', 'Tacrolimo, sangue total (nível de vale)'),
+                               ('ciclosporina', 'Ciclosporina, sangue total (nível de vale)')):
+            if classe in med:
+                add(titulo, 'laboratorio',
+                    f'Transplantado em uso de {MEDICACOES[classe]["rotulo"].lower()}: nível de vale (C0, antes da dose), com '
+                    'alvo definido pela equipe de transplante. Repetir também após mudança de medicação que interage e '
+                    'na piora da função renal.', f'Transplante em uso de {MEDICACOES[classe]["rotulo"].lower()} | '
+                    'A cada 1-3 meses', 'KDIGO 2009 (transplante renal), 5.1', 'B', 'alta')
     if 'amiodarona' in med:
         for titulo in ('Hormônio Tireoestimulante (TSH), soro', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro'):
             add(titulo, 'laboratorio', 'Toxicidade tireoidiana e hepática da amiodarona.', 'Em uso de amiodarona | A cada 6 meses',
