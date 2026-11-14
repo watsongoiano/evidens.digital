@@ -214,3 +214,22 @@ def test_metformina_nao_marca_diabetes(remedio):
     assert not {'diabetes', 'diabetes_tipo_1'} & set(com), (remedio, com)
     com, _, _ = coerencia.inferir({'comorbidades': ['pre_diabetes'], 'medicacoes': medicamentos.classes_de([remedio])})
     assert 'pre_diabetes' in com and 'diabetes' not in com
+
+
+@pytest.mark.parametrize('texto', ['metformina 850 2x/dia', 'Glifage XR 500', 'metformin 1 g'])
+def test_metformina_no_texto_livre_entra_como_medicacao_sem_marcar_diabetes(texto):
+    com, med, inf = _inf(medicacoes_continuo=texto)
+    assert 'metformina' in med and 'diabetes' not in com
+    assert not any(i['valor'] == 'metformina' for i in inf)      # não aparece como caixa marcada na tela
+
+
+def test_metformina_no_texto_livre_mantem_a_vitamina_b12_sem_diabetes(client):
+    """Tirar a marcação automática de diabetes não pode tirar a monitorização de B12 de quem usa metformina."""
+    base = dict(idade=45, sexo='feminino', tabagismo='nunca', imunossupressao='nao', gestante='nao', lactante='nao',
+                comorbidades=[], historia_familiar=[], medicacoes=[])
+    for corpo in (dict(base, medicacoes_continuo='metformina 850 2x/dia'), dict(base, medicacoes=['metformina']),
+                  dict(base, comorbidades=['pre_diabetes'], medicacoes_continuo='glifage 500')):
+        dados = client.post('/api/checkup-intelligent', json=corpo).get_json()
+        titulos = [r['titulo'] for r in dados['recommendations']]
+        assert titulos.count('Vitamina B12, soro') == 1, corpo
+        assert 'diabetes' not in (dados.get('comorbidades_consideradas') or [])
