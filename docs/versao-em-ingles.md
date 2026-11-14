@@ -5,7 +5,7 @@ As páginas e o motor continuam escritos em português. A versão em inglês sai
 
 ## Como o idioma é escolhido
 
-- Seletor no cabeçalho de cada página (`<span data-idioma></span>`): BR/PT ou US/EN. A escolha fica no
+- Seletor no rodapé de cada página (`<span data-idioma></span>`): BR/PT ou US/EN. A escolha fica no
   navegador (localStorage) e num cookie (`evidens_idioma`), que o servidor lê.
 - `?lang=en` ou `?lang=pt` no endereço força o idioma.
 - Sem escolha, português.

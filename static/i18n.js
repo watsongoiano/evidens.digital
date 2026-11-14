@@ -7,7 +7,7 @@
  * - A escolha fica no navegador (localStorage e cookie "evidens_idioma") e vale para todas as páginas.
  * - ?lang=en ou ?lang=pt no endereço força o idioma (bom para compartilhar um link).
  * - Um elemento com data-i18n-manter nunca é traduzido (nomes próprios, dados digitados).
- * - Um elemento com data-idioma recebe o seletor (globo + BR/PT ou US/EN).
+ * - Um elemento com data-idioma recebe o seletor (globo + BR/PT ou US/EN); fica no rodapé das páginas.
  */
 (function () {
   'use strict';
@@ -234,6 +234,7 @@
     '.idioma-botao svg:first-child{color:#0E97B5}',
     '.idioma-menu{position:absolute;top:calc(100% + 6px);right:0;z-index:60;min-width:190px;margin:0;padding:6px;list-style:none;background:#fff;border:1px solid rgba(20,41,47,.1);border-radius:12px;box-shadow:0 14px 40px -12px rgba(20,41,47,.35)}',
     '.idioma-menu[hidden]{display:none}',
+    '.idioma-menu.a-esquerda{right:auto;left:0}.idioma-menu.para-cima{top:auto;bottom:calc(100% + 6px)}',
     '.idioma-opcao{display:flex;align-items:baseline;gap:10px;width:100%;padding:9px 10px;border:0;border-radius:8px;background:none;color:#14292F;font:inherit;font-size:14px;text-align:left;cursor:pointer}',
     '.idioma-opcao:hover{background:#DCEBEE}',
     '.idioma-opcao b{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;font-weight:500;letter-spacing:.14em;color:rgba(20,41,47,.55)}',
@@ -278,7 +279,14 @@
       ev.stopPropagation();
       var abrir = menu.hidden;
       menu.hidden = !abrir; botao.setAttribute('aria-expanded', String(abrir));
-      if (abrir) menu.querySelector('[aria-checked="true"]').focus();
+      if (abrir) {
+        // o menu abre para baixo, alinhado à direita do botão; sem espaço, alinha à esquerda ou abre para cima
+        menu.classList.remove('a-esquerda', 'para-cima');
+        var r = menu.getBoundingClientRect(), tela = document.documentElement;
+        if (r.left < 8) menu.classList.add('a-esquerda');
+        if (r.bottom > Math.max(window.innerHeight, 0) - 8 || r.bottom + window.scrollY > tela.scrollHeight - 8) menu.classList.add('para-cima');
+        menu.querySelector('[aria-checked="true"]').focus({ preventScroll: true });
+      }
     });
     document.addEventListener('click', function (ev) { if (!caixa.contains(ev.target)) fechar(); });
     caixa.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { fechar(); botao.focus(); } });
