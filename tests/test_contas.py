@@ -47,7 +47,7 @@ def test_paginas_publicas_abrem_sem_login(anonimo, rota):
 
 
 def test_painel_de_uso_e_lista_de_usuarios_sao_so_do_administrador(anonimo, client, admin):
-    for rota in ('/api/analytics/stats', '/api/analytics/full', '/api/admin/usuarios'):
+    for rota in ('/api/analytics/stats', '/api/admin/usuarios'):
         assert anonimo.get(rota).status_code == 401, rota
         assert client.get(rota).status_code == 403, rota
         assert admin.get(rota).status_code == 200, rota

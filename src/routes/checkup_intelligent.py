@@ -1,7 +1,6 @@
 import re
 from flask import Blueprint, request, jsonify
 from datetime import datetime
-from src.utils.analytics import analytics
 from src.utils.reference_links import build_reference_links, build_reference_html
 from src.utils import coerencia
 from src.utils import condicoes
@@ -1342,8 +1341,10 @@ def generate_intelligent_recommendations():
         
         # Nenhum dado do paciente é gravado: a consulta é calculada e descartada.
 
-        # Registrar analytics
-        analytics.track_recommendation()
+        # Uso do sistema (painel /analytics): quem gerou o check-up, sem dado do paciente
+        from src.routes.auth import usuario_atual
+        from src.utils import uso
+        uso.registrar('checkup', usuario_atual())
         
         # Listas de comorbidades, medicações e história familiar (src/utils/condicoes.py)
         orientacoes = condicoes.aplicar(recommendations, age, sex, comorbidades, medicacoes_checkboxes, familia,
@@ -1713,6 +1714,10 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
             'codigo': 'falha_na_geracao',
         }), 502
 
+    from src.utils import uso
+    uso.registrar(uso.POR_CATEGORIA_DE_PDF.get(categoria), usuario)
+    if extras.get('guia'):
+        uso.registrar('guia_plano', usuario)
     return send_file(
         io.BytesIO(pdf_bytes),
         mimetype='application/pdf',
