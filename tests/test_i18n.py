@@ -174,9 +174,13 @@ def test_tudo_o_que_o_motor_devolve_tem_traducao(client):
 
 
 def test_todo_item_do_catalogo_de_acrescimo_tem_traducao():
+    from src.utils import tuss
     from src.utils.catalogo import catalogo
 
-    faltando = [t for itens in catalogo().values() for t in itens if not i18n.coberto(t)]
+    # Os nomes da tabela TUSS de laboratório ficam em português também no site em inglês: é a
+    # terminologia brasileira dos planos de saúde, e é com esse nome que o exame sai na guia.
+    da_tuss = set(tuss.DA_TABELA.values())
+    faltando = [t for itens in catalogo().values() for t in itens if not i18n.coberto(t) and t not in da_tuss]
     assert not faltando, f'itens do catálogo sem par em inglês: {faltando[:8]}'
     # dois itens não podem virar o mesmo nome: a tela precisa voltar do inglês para o título original
     for categoria, itens in catalogo().items():

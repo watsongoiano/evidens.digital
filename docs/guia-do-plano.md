@@ -51,21 +51,36 @@ Um teste impede que um exame novo entre no motor ou no catálogo sem código nem
 
 ### Como os códigos foram conferidos
 
-A tabela oficial vigente é a da ANS (consulta pública das terminologias do padrão TISS),
-que não pôde ser baixada daqui. Cada código foi localizado, com a descrição
-correspondente, em tabelas TUSS publicadas por terceiros:
+- **Laboratório, códigos 40301010 a 40314030:** planilha TUSS_LABORATORIO do responsável
+  clínico (correlação THM, LPM e CBHPM com a TUSS), guardada em
+  `src/data/tuss_laboratorio.json` com 859 exames. Dos 68 códigos dessa faixa usados pelo
+  Evidēns, 67 conferem com ela; a exceção é o sangue oculto imunológico (40303250), que é
+  mais novo que a planilha e foi conferido na tabela da Unimed BH.
+- **Hormônios (40316...), biologia molecular depois de 40314030, imagem e métodos:** a
+  planilha não cobre. Foram localizados, com a descrição, numa lista TUSS pública de 2017 e
+  em tabelas publicadas por operadoras e órgãos públicos (Unimed Assis, Unimed BH, Unimed
+  Curitiba, TRF5, TRE-PA, Fundação Copel).
+- A planilha traz duas descrições para o código 40310434 ("Antígenos bacterianos / vários
+  materiais" e "Leishmania, pesquisa"); ficou a segunda, que confere com a lista de 2017.
 
-- lista TUSS de 2017 de um repositório público (4.146 termos), usada para conferir 121 dos
-  123 códigos;
-- tabelas publicadas por operadoras e órgãos públicos para os dois restantes e para a
-  redação atual das descrições ("pesquisa e/ou dosagem"): Unimed Assis (exames simples),
-  Unimed BH (códigos de patologia), Unimed Curitiba (exames sem autorização prévia),
-  TRF5 (exames periódicos, 2023), TRE-PA e Fundação Copel.
+A tabela oficial vigente é a da ANS (consulta pública das terminologias do padrão TISS), que
+não pôde ser baixada daqui. Operadoras podem exigir código próprio para alguns itens; a
+escolha entre códigos próximos (teste ergométrico convencional × computadorizado,
+antibiograma manual × automatizado, mamografia digital) segue o mais comum e pode precisar de
+ajuste por plano. **Antes de usar com um plano, vale conferir uma guia impressa com a tabela
+dele.**
 
-Limites conhecidos: operadoras podem exigir código próprio para alguns itens; a escolha
-entre códigos próximos (teste ergométrico convencional × computadorizado, antibiograma
-manual × automatizado, mamografia digital) segue o mais comum e pode precisar de ajuste por
-plano. **Antes de usar com um plano, vale conferir uma guia impressa com a tabela dele.**
+### Exames da tabela no catálogo
+
+Os exames da planilha entram no catálogo do que o médico pode acrescentar ao pedido de
+laboratório, com o nome da própria TUSS (`src/utils/catalogo.py`). Regras:
+
+- o exame que já estava no catálogo com o nome do Evidēns não entra de novo ("Creatinina" da
+  TUSS é a "Creatinina, soro" que já existe);
+- o cálcio total (40301400) fica de fora: o cálcio dos pedidos é sempre o iônico;
+- no site em inglês esses nomes continuam em português, porque é com eles que o exame sai
+  na guia do plano;
+- o nome da TUSS também é reconhecido em "Exames já realizados".
 
 ## Limites desta etapa
 

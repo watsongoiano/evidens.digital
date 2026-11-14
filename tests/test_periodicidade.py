@@ -209,7 +209,7 @@ def test_lista_de_exames_conhecidos_nao_repete_o_mesmo_exame(client, anonimo):
     assert anonimo.get('/api/exames-conhecidos').status_code == 401
     exames = client.get('/api/exames-conhecidos').get_json()['exames']
     assert len(exames) > 100 and len({P.chaves(t) for t in exames}) == len(exames)
-    assert sum('hemograma' in t.lower() for t in exames) == 1
+    assert sum(t.lower().startswith('hemograma') for t in exames) == 1          # os três nomes do motor viram um
     conhecidos = {P.chaves(t) for t in exames}
     assert P.chaves('Hemoglobina glicada (HbA1c), soro') in conhecidos and P.chaves('Densitometria óssea (DEXA)') in conhecidos
 

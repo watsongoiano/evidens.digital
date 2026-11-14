@@ -4,9 +4,12 @@ A guia SP/SADT do padrão TISS pede, para cada exame solicitado, a tabela (22),
 o código de oito dígitos e a descrição da TUSS. Este arquivo liga cada título
 de exame do motor e do catálogo ao(s) código(s) correspondente(s).
 
-Como foi conferido: cada código abaixo foi localizado, com a descrição
-correspondente, em tabelas TUSS publicadas por operadoras e órgãos públicos
-(lista em `docs/guia-do-plano.md`). A tabela oficial vigente é a da ANS
+Como foi conferido: os códigos de laboratório de 40301010 a 40314030 foram
+conferidos na planilha TUSS_LABORATORIO do responsável clínico, guardada em
+`src/data/tuss_laboratorio.json` (859 exames). Os demais (hormônios 40316...,
+biologia molecular depois de 40314030, imagem e métodos) foram localizados,
+com a descrição correspondente, em tabelas TUSS publicadas por operadoras e
+órgãos públicos (lista em `docs/guia-do-plano.md`). A tabela oficial vigente é a da ANS
 (consulta pública de terminologias); operadoras podem usar código próprio para
 alguns itens. Por isso a regra aqui é conservadora:
 
@@ -20,10 +23,13 @@ alguns itens. Por isso a regra aqui é conservadora:
 Um teste garante que todo título de laboratório e de imagem do motor e do
 catálogo esteja em `CODIGOS` ou em `SEM_CODIGO`.
 """
+import json
 import re
 import unicodedata
+from pathlib import Path
 
 TABELA = '22'
+ARQUIVO_DA_TABELA = Path(__file__).resolve().parents[1] / 'data' / 'tuss_laboratorio.json'
 
 # Descrições da TUSS 22 usadas na guia (uma por código).
 DESCRICOES = {
@@ -93,6 +99,7 @@ DESCRICOES = {
     '40306666': 'Citomegalovírus IgG - pesquisa e/ou dosagem',
     '40306674': 'Citomegalovírus IgM - pesquisa e/ou dosagem',
     '40306852': 'Fator antinúcleo (FAN) - pesquisa e/ou dosagem',
+    '40306860': 'Fator reumatoide, quantitativo',
     '40306950': 'Hepatite B - HBcAc - IgG (anti-core IgG ou Acoreg) - pesquisa e/ou dosagem',
     '40306992': 'Hepatite B - HBsAc (anti-antígeno de superfície) - pesquisa e/ou dosagem',
     '40307018': 'Hepatite B - HBsAg (AU, antígeno Austrália) - pesquisa e/ou dosagem',
@@ -107,6 +114,7 @@ DESCRICOES = {
     '40307832': 'Toxoplasmose IgM - pesquisa e/ou dosagem',
     '40308391': 'Proteína C reativa, quantitativa - pesquisa e/ou dosagem',
     '40308553': 'Anti-transglutaminase tecidual - IgA',
+    '40308804': 'Anticorpos anti peptídeo cíclico citrulinado - IgG',
     # Microbiologia
     '40310124': 'Cultura bacteriana (em diversos materiais biológicos)',
     '40310213': 'Cultura, urina com contagem de colônias',
@@ -269,6 +277,7 @@ CODIGOS = {
     'Beta-hCG, soro': ['40305767'],
     'Eletroforese de proteínas, soro': ['40301761'],
     'FAN (fator antinuclear)': ['40306852'],
+    'Fator reumatoide e anti-CCP': ['40306860', '40308804'],
     # ── Imagem e métodos (motor)
     'Angiorressonância de crânio': ['41101324'],
     'Colonoscopia de Rastreio com ou sem biópsia': ['40201082'],
@@ -320,15 +329,13 @@ CODIGOS = {
 # Exames que saem na guia sem código, com o motivo (nada de código inventado).
 SEM_CODIGO = {
     'Clamídia e gonococo, PCR (urina ou swab)':
-        'são dois testes moleculares; só o de clamídia tem código conferido (40314243)',
+        'são dois testes moleculares; só o de clamídia tem código conferido (40310396, Chlamydia - PCR)',
     'Relação proteína/creatinina, urina':
         'sem código específico conferido; operadoras usam "componente urinário" (40311180) ou tabela própria',
     'TOTG-75g gestacional (jejum, 1 h e 2 h), soro':
         'são 3 dosagens; a TUSS conferida traz o teste com 2 dosagens (40302709) e a curva de 4 (40301680)',
     'Ácido fólico, soro':
         'a TUSS conferida só traz a dosagem nos eritrócitos (40301087)',
-    'Fator reumatoide e anti-CCP':
-        'o código do anti-CCP não foi conferido',
     'Avaliação oftalmológica com tonometria e fundoscopia':
         'é consulta com o oftalmologista, não exame com código próprio',
     'Avaliação oftalmológica (fundo de olho)':
@@ -351,6 +358,26 @@ def _chave(titulo):
 _POR_CHAVE = {_chave(t): v for t, v in CODIGOS.items()}
 
 
+def _ler_tabela():
+    try:
+        return [tuple(par) for par in json.loads(ARQUIVO_DA_TABELA.read_text(encoding='utf-8'))['exames']]
+    except FileNotFoundError:
+        return []
+
+
+# Tabela de laboratório (código, descrição). O nome da tabela também identifica o exame: quem
+# acrescenta "Ácido úrico" pelo nome da TUSS recebe o mesmo código de "Ácido úrico, soro".
+TABELA_DE_LABORATORIO = _ler_tabela()
+DA_TABELA = dict(TABELA_DE_LABORATORIO)
+for _codigo, _nome in TABELA_DE_LABORATORIO:
+    _POR_CHAVE.setdefault(_chave(_nome), [_codigo])
+
+
+def descricao(codigo):
+    """Descrição do código na guia: a escrita aqui, ou a da tabela de laboratório."""
+    return DESCRICOES.get(codigo) or DA_TABELA[codigo]
+
+
 def linhas_da_guia(titulo, sexo=None):
     """Linhas da guia para um exame: [{'codigo', 'descricao', 'quantidade'}].
 
@@ -369,5 +396,5 @@ def linhas_da_guia(titulo, sexo=None):
             item = item.get(sexo if sexo in item else None)
             if not item:
                 return [{'codigo': '', 'descricao': str(titulo or '').strip(), 'quantidade': 1}]
-        linhas.append({'codigo': item, 'descricao': DESCRICOES[item], 'quantidade': quantidade})
+        linhas.append({'codigo': item, 'descricao': descricao(item), 'quantidade': quantidade})
     return linhas
