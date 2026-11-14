@@ -158,7 +158,7 @@ def test_boas_vindas_vao_para_quem_se_cadastrou(anonimo, administrador, resend, 
     assert bv['reply_to'] == 'retorno@exemplo.test'
     for trecho in ('Olá, Maria.', 'fase de desenvolvimento', 'feedback', 'https://evidens.life/login',
                    'https://evidens.life/contact ou pelo e-mail retorno@exemplo.test', 'conferir o cadastro',
-                   'cerca de 30% dos exames laboratoriais', 'PLOS ONE, 2013',
+                   'cerca de 21% dos exames laboratoriais', 'cerca de 45% dos exames indicados', 'PLOS ONE, 2013',
                    'https://hms.harvard.edu/news/unnecessary-testing', 'Criador e responsável técnico'):
         assert trecho in bv['text'], trecho
     assert SENHA_DE_TESTE not in bv['text'] and administrador['email'] not in bv['text']
@@ -227,7 +227,7 @@ def test_agradecimento_vai_uma_vez_a_aprovados_e_pendentes(admin, antigos, resen
     aprovada, pendente = por_destino[antigos['aprovada']['email']], por_destino[antigos['pendente']['email']]
     assert aprovada['subject'] == 'Obrigado por testar o Evidēns'
     for trecho in ('Olá, Aprovada.', 'Muito obrigado por já ter criado a sua conta', 'já está liberada',
-                   'cerca de 30% dos exames laboratoriais', 'fase de desenvolvimento', 'https://evidens.life/contact'):
+                   'cerca de 21% dos exames laboratoriais', 'fase de desenvolvimento', 'https://evidens.life/contact'):
         assert trecho in aprovada['text'], trecho
     assert 'em conferência pela nossa equipe' in pendente['text'] and 'já está liberada' not in pendente['text']
     # segundo clique: ninguém recebe de novo

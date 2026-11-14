@@ -79,12 +79,12 @@ def _primeiro_nome(usuario):
 
 
 def _apresentacao():
-    # Números de Zhi M et al., PLOS ONE 2013 (revisão de 15 anos de literatura; resumo em
-    # hms.harvard.edu/news/unnecessary-testing).
-    return ('você sabia que cerca de 30% dos exames laboratoriais pedidos são provavelmente '
-            'desnecessários, e que uma proporção parecida de exames necessários deixa de ser pedida? Foi o que mostrou '
-            'uma revisão de 15 anos de literatura, com 1,6 milhão de resultados, feita por pesquisadores ligados à '
-            'Harvard Medical School (Zhi et al., PLOS ONE, 2013: https://hms.harvard.edu/news/unnecessary-testing). '
+    # Números do artigo (Zhi M et al., PLOS ONE 2013, metanálise de 15 anos): 20,6% de excesso e
+    # 44,8% de subutilização. A matéria de Harvard arredonda os dois para "cerca de 30%".
+    return ('você sabia que cerca de 21% dos exames laboratoriais pedidos são desnecessários, e que cerca de 45% '
+            'dos exames indicados deixam de ser pedidos? Foi o que mostrou uma metanálise de 15 anos de literatura, '
+            'feita por pesquisadores ligados à Harvard Medical School (Zhi et al., PLOS ONE, 2013; resumo em '
+            'https://hms.harvard.edu/news/unnecessary-testing). '
             'O Evidēns nasceu para ajudar nos dois lados: é uma ferramenta de apoio ao check-up baseada em evidências '
             'científicas, que indica o que pedir, para quem e com qual referência.')
 

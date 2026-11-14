@@ -608,3 +608,20 @@ def test_tela_explica_o_que_nao_marcou_e_recusa_vale_por_fonte(pagina):
     for chave, caixa in (('atenolol', 'hipertensao'), ('metformina', 'diabetes'), ('losartana', 'hipertensao')):
         item = re.search(r'id="lista_medicacoes_%s"[^>]*>' % chave, pagina).group(0)
         assert f'data-marca="{caixa}"' in item, item
+
+
+def test_home_mostra_a_evidencia_com_fonte_em_cada_numero():
+    """Painel 'O que a evidência mostra': quatro números, cada um com a sua fonte clicável."""
+    import pathlib
+    home = pathlib.Path(__file__).resolve().parents[1].joinpath('index.html').read_text(encoding='utf-8')
+    i = home.index('id="evidencia"'); painel = home[i:home.index('id="stats"')]
+    assert 'É pedir os certos.' in painel
+    for numero in ('21<span', '45<span', '76–101', '−36<span'):
+        assert numero in painel, numero
+    for fonte in ('https://doi.org/10.1371/journal.pone.0078962', 'https://doi.org/10.1001/jama.2019.13978',
+                  'https://www.thelancet.com/journals/lanprc/article/PIIS3050-5143(26)00035-X/fulltext'):
+        assert f'href="{fonte}" target="_blank" rel="noopener"' in painel, fonte
+    # os números do painel são os do artigo, não os arredondados da matéria
+    assert '20,6% de excesso e 44,8% de subutilização' in painel and 'US$ 75,7 a 101,2 bilhões' in painel
+    # o painel vem depois da abertura da seção e antes dos três números da base
+    assert home.index('A interface não precisa.') < i < home.index('01 — Reunir')
