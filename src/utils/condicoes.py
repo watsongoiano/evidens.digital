@@ -61,6 +61,8 @@ COMORBIDADES = {
     'hpb': {'rotulo': 'Hiperplasia prostática benigna', 'busca': 'prostata'},
     'sop': {'rotulo': 'Síndrome dos ovários policísticos', 'busca': 'sop'},
     'endometriose': {'rotulo': 'Endometriose'},
+    # Muda o rastreio do colo do útero (src/utils/colo_utero.py). Sem ela na lista, a paciente é tratada como não histerectomizada.
+    'histerectomia_total': {'rotulo': 'Histerectomia total por doença benigna', 'busca': 'utero retirada histerectomizada'},
     'drge': {'rotulo': 'Doença do refluxo gastroesofágico', 'busca': 'refluxo drge'},
     'doenca_celiaca': {'rotulo': 'Doença celíaca', 'busca': 'gluten'},
     'osteoartrite': {'rotulo': 'Osteoartrite', 'busca': 'artrose'},

@@ -563,15 +563,16 @@ def test_itens_das_listas_acionam_exames(client, dados, titulo):
     assert any(titulo.lower() in r['titulo'].lower() for r in recs), [r['titulo'] for r in recs]
 
 
-def test_hpv_a_cada_cinco_anos_dos_25_aos_64(client):
+def test_hpv_a_cada_cinco_anos_e_citologia_a_cada_tres(client):
     base = dict(sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[], imunossupressao='nao',
                 gestante='nao', lactante='nao')
     def colo(idade):
         recs = client.post('/api/checkup-intelligent', json=dict(base, idade=idade)).get_json()['recommendations']
         return next((r for r in recs if r['titulo'].startswith('Pesquisa do Papilomavírus') or 'Papanicolaou' in r['titulo']), None)
-    for idade in (25, 40, 64):
+    assert '3 anos' in colo(22)['subtitulo'] and 'Papanicolaou' in colo(22)['titulo']
+    for idade in (25, 40, 65):
         assert '5 anos' in colo(idade)['subtitulo'] and 'HPV' in colo(idade)['titulo'], idade
-    assert colo(22) is None and colo(65) is None
+    assert colo(20) is None and colo(66) is None
 
 
 def test_botoes_de_pdf_ficam_abaixo_das_recomendacoes(pagina):

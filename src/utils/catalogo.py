@@ -58,8 +58,6 @@ EXTRAS = {
         'VDRL / teste treponêmico',
         'Tipagem sanguínea ABO e fator Rh',
         'Coagulograma (TP/INR e TTPa)',
-        # onde o teste de DNA-HPV não estiver disponível, ou por opção antes dos 25 anos (ACOG)
-        'Citologia cervicovaginal (Papanicolaou)',
         'Toxoplasmose IgG e IgM',
         'Rubéola IgG',
         'Citomegalovírus IgG e IgM',

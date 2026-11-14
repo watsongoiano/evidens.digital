@@ -153,6 +153,8 @@ def _casos_do_motor():
     for idade, imuno, resultado in itertools.product((22, 27, 40, 62, 70), ('nao', 'sim'), (None,) + colo_utero.RESULTADOS):
         casos.append(dict(base, idade=idade, sexo='feminino', tabagismo='nunca', imunossupressao=imuno,
                           **({'hpv_resultado': resultado} if resultado else {})))
+    for idade, imuno in itertools.product((23, 40, 70), ('nao', 'sim')):
+        casos.append(dict(base, idade=idade, sexo='feminino', tabagismo='nunca', imunossupressao=imuno, comorbidades=['histerectomia_total']))
     # exames já realizados: em dia, vencido, uma vez na vida, sem intervalo e "junto da HbA1c"
     hoje = date.today()
     recente, antigo = (hoje - timedelta(days=20)).isoformat(), (hoje - timedelta(days=4000)).isoformat()

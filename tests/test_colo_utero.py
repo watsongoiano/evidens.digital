@@ -8,7 +8,8 @@ import pytest
 
 from src.utils import colo_utero as C
 
-HPV, COLPO = C.HPV, C.COLPOSCOPIA
+HPV, COLPO, CITO = C.HPV, C.COLPOSCOPIA, C.CITOLOGIA
+DIVERGENCIA = 'Colo do útero: as diretrizes divergem antes dos 30 anos'
 
 
 def _resposta(client, **dados):
@@ -21,34 +22,71 @@ def _resposta(client, **dados):
 
 def _colo(client, **dados):
     d = _resposta(client, **dados)
-    recs = {x['titulo']: x for x in d['recommendations'] if x['titulo'] in (HPV, COLPO)}
+    recs = {x['titulo']: x for x in d['recommendations'] if x['titulo'] in (HPV, COLPO, CITO)}
     return recs, {o['titulo']: o for o in d.get('orientacoes', [])}
 
 
 # --- Risco habitual -----------------------------------------------------------------------------
 
-@pytest.mark.parametrize('idade', [25, 29, 30, 45, 64])
-def test_risco_habitual_teste_de_hpv_a_cada_5_anos_dos_25_aos_64(client, idade):
-    recs, _ = _colo(client, idade=idade)
-    assert list(recs) == [HPV] and recs[HPV]['subtitulo'] == 'Mulheres 25-64 anos | A cada 5 anos'
+@pytest.mark.parametrize('idade', [25, 29, 30, 45, 64, 65])
+def test_risco_habitual_teste_de_hpv_a_cada_5_anos_dos_25_aos_65(client, idade):
+    recs, orient = _colo(client, idade=idade)
+    assert list(recs) == [HPV] and recs[HPV]['subtitulo'] == 'Mulheres 25-65 anos | A cada 5 anos'
     assert 'MS 2025' in recs[HPV]['referencia'] and 'SBOC 2026' in recs[HPV]['referencia']
-    # A ACOG só apoia o teste primário a partir dos 30 anos.
+    # A ACOG só apoia o teste primário a partir dos 30 anos; dos 25 aos 29 a divergência vai para as orientações.
     assert ('ACOG 2026' in recs[HPV]['referencia']) == (idade >= 30)
+    assert (DIVERGENCIA in orient) == (idade < 30)
+    if idade < 30:
+        assert 'Foi pedido o teste de DNA-HPV (MS e SBOC)' in orient[DIVERGENCIA]['descricao']
 
 
-@pytest.mark.parametrize('idade', [18, 21, 24])
-def test_antes_dos_25_nao_se_pede_nada_nem_com_teste_positivo(client, idade):
-    for resultado in (None, 'hpv_16_18'):
+@pytest.mark.parametrize('idade', [21, 24])
+def test_dos_21_aos_24_citologia_a_cada_3_anos_pela_acog_com_a_divergencia_explicada(client, idade):
+    for resultado in (None, 'hpv_16_18'):   # teste de HPV feito antes dos 25 não é considerado (MS, rec. 11)
         recs, orient = _colo(client, idade=idade, **({'hpv_resultado': resultado} if resultado else {}))
-        assert recs == {}
-        assert ('Colo do útero: rastreamento a partir dos 25 anos' in orient) == (idade >= 21)
+        assert list(recs) == [CITO] and recs[CITO]['subtitulo'] == 'Mulheres 21-24 anos | A cada 3 anos'
+        assert recs[CITO]['referencia'] == 'ACOG 2026'
+        texto = orient[DIVERGENCIA]['descricao']
+        for trecho in ('MS 2025 e SBOC 2026: não rastrear antes dos 25 anos', 'ACOG 2026: citologia isolada a cada 3 anos',
+                       'Foi mantida a citologia a cada 3 anos (ACOG)'):
+            assert trecho in texto, trecho
+        assert all(f in orient[DIVERGENCIA]['referencia'] for f in ('MS 2025', 'SBOC 2026', 'ACOG 2026'))
 
 
-def test_depois_dos_64_orienta_quando_encerrar(client):
+@pytest.mark.parametrize('idade', [18, 20])
+def test_antes_dos_21_nao_se_pede_nada(client, idade):
+    recs, orient = _colo(client, idade=idade)
+    assert recs == {} and not any(t.startswith('Colo do útero') for t in orient)
+
+
+def test_depois_dos_65_orienta_quando_encerrar(client):
     recs, orient = _colo(client, idade=66)
     assert recs == {} and 'Colo do útero: quando encerrar o rastreamento' in orient
     recs, _ = _colo(client, idade=62)
     assert 'Depois dos 60 anos, um teste negativo encerra' in recs[HPV]['descricao']
+
+
+# --- Histerectomia ------------------------------------------------------------------------------
+
+@pytest.mark.parametrize('dados', [dict(idade=23), dict(idade=40), dict(idade=70), dict(idade=40, comorbidades_extra=['hiv']),
+                                   dict(idade=40, hpv_resultado='nao_detectado')])
+def test_histerectomia_total_por_doenca_benigna_dispensa_o_rastreamento(client, dados):
+    com = ['histerectomia_total'] + dados.pop('comorbidades_extra', [])
+    recs, orient = _colo(client, comorbidades=com, **dados)
+    assert recs == {}
+    o = orient['Colo do útero: rastreamento dispensado após histerectomia total']
+    assert 'lesão precursora ou câncer' in o['descricao'] and 'MS 2025' in o['referencia']
+    assert ('ACOG' in o['referencia']) == ('hiv' not in com)
+
+
+def test_sem_histerectomia_marcada_a_paciente_e_rastreada(client):
+    recs, orient = _colo(client, idade=40)
+    assert list(recs) == [HPV] and not any('histerectomia' in t for t in orient)
+
+
+def test_resultado_positivo_segue_o_fluxo_mesmo_com_histerectomia(client):
+    recs, _ = _colo(client, comorbidades=['histerectomia_total'], hpv_resultado='hpv_16_18')
+    assert list(recs) == [COLPO]
 
 
 @pytest.mark.parametrize('resultado, exame, trecho', [
@@ -70,7 +108,7 @@ def test_persistencia_por_24_meses_esta_descrita(client):
     assert 'persistente por 24 meses: colposcopia' in recs[HPV]['descricao']
 
 
-def test_resultado_positivo_vale_tambem_depois_dos_64(client):
+def test_resultado_positivo_vale_tambem_depois_dos_65(client):
     recs, _ = _colo(client, idade=70, hpv_resultado='hpv_16_18')
     assert list(recs) == [COLPO]
 
@@ -134,9 +172,10 @@ def test_codigos_tuss_e_fontes_clicaveis(client):
     from src.utils import tuss
     assert tuss.CODIGOS[COLPO] == ['41301102'] and tuss.CODIGOS[HPV] == ['40314154']
     d = _resposta(client, idade=22)
-    for item in d['orientacoes'] + _resposta(client, hpv_resultado='hpv_16_18')['recommendations'] + _resposta(client)['recommendations']:
-        if item['titulo'] in (HPV, COLPO) or item['titulo'].startswith('Colo do útero'):
-            assert item['referencia_html'].count('<a href="https://') == len(item['referencias']) >= 2, item['titulo']
+    for item in (d['orientacoes'] + d['recommendations'] + _resposta(client, hpv_resultado='hpv_16_18')['recommendations']
+                 + _resposta(client)['recommendations'] + _resposta(client, comorbidades=['histerectomia_total'])['orientacoes']):
+        if item['titulo'] in (HPV, COLPO, CITO) or item['titulo'].startswith('Colo do útero'):
+            assert item['referencia_html'].count('<a href="https://') == len(item['referencias']) >= 1, item['titulo']
     html = _colo(client)[0][HPV]['referencia_html']
     assert 'portaria-conjunta-saes-sectics-no-13' in html and '10.1097/AOG.0000000000006257' in html and 'sboc.org.br' in html
 

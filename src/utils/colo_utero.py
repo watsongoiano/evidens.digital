@@ -1,4 +1,4 @@
-"""Rastreamento do câncer do colo do útero: teste de DNA-HPV oncogênico e colposcopia.
+"""Rastreamento do câncer do colo do útero: teste de DNA-HPV oncogênico, citologia e colposcopia.
 
 Fontes (lidas na íntegra para estas regras)
 - MS 2025: Diretrizes Brasileiras para o Rastreamento do Câncer do Colo do Útero, Parte I (Portaria
@@ -7,22 +7,27 @@ Fontes (lidas na íntegra para estas regras)
 - ACOG 2026: Committee Statement nº 28, Screening for Cervical Cancer (risco habitual).
 
 Resumo aplicado
-- Risco habitual: teste de DNA-HPV a cada 5 anos dos 25 aos 64 anos (MS, SBOC; ACOG: 30-65). Antes
-  dos 25 não se rastreia (MS e SBOC, recomendação forte); a ACOG mantém citologia trienal dos 21 aos
-  29, e isso aparece como orientação, sem pedido automático.
+- 21 a 24 anos, risco habitual: citologia a cada 3 anos (ACOG). MS e SBOC não rastreiam antes dos 25;
+  a divergência aparece nas orientações (decisão do responsável técnico, 14/11/2026).
+- 25 a 65 anos, risco habitual: teste de DNA-HPV a cada 5 anos (MS e SBOC a partir dos 25; ACOG a
+  partir dos 30, com citologia dos 25 aos 29: também vai para as orientações). O limite de 65 anos é o
+  da ACOG; o MS convida até os 64 e encerra com teste negativo depois dos 60.
 - HIV ou imunossupressão: a cada 3 anos, desde o início da atividade sexual, sem idade para encerrar.
+- Histerectomia total por doença benigna (comorbidade marcada): rastreamento dispensado. Sem a
+  marcação, a paciente é tratada como não histerectomizada.
 - Resultado do último teste (campo opcional do formulário) decide o passo seguinte:
     HPV 16/18 ..................................... colposcopia
     outros tipos + citologia reflexa ASC-US ou mais  colposcopia
     outros tipos + citologia reflexa negativa ...... repetir o teste em 12 meses
     colposcopia sem doença ......................... repetir o teste em 12 meses
     imunossuprimida com qualquer tipo detectado .... colposcopia (não depende da citologia)
-- A partir dos 65 anos (risco habitual, sem resultado positivo a seguir): não se pede; a orientação
+- Depois dos 65 anos (risco habitual, sem resultado positivo a seguir): não se pede; a orientação
   diz quando encerrar.
 """
 
 HPV = 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular'
 COLPOSCOPIA = 'Colposcopia (cérvice uterina e vagina)'
+CITOLOGIA = 'Citologia cervicovaginal (Papanicolaou)'
 
 NAO_DETECTADO = 'nao_detectado'
 HPV_16_18 = 'hpv_16_18'
@@ -36,8 +41,10 @@ SBOC = 'SBOC 2026'
 ACOG = 'ACOG 2026'
 BRASIL = f'{MS} / {SBOC}'
 
-IDADE_INICIO = 25
-IDADE_FIM = 64
+IDADE_CITOLOGIA = 21   # ACOG: citologia dos 21 aos 29; aqui, até o teste de HPV começar
+IDADE_INICIO = 25      # MS e SBOC: teste de DNA-HPV
+IDADE_FIM = 65         # ACOG; o MS convida até os 64
+HISTERECTOMIA = 'histerectomia_total'
 
 
 def _rec(titulo, categoria, descricao, subtitulo, referencia, grau='A'):
@@ -50,10 +57,39 @@ def _colposcopia(motivo, descricao):
                 f'{motivo} | Após teste de HPV positivo', BRASIL)
 
 
-def recomendar(idade, imunossuprimida=False, resultado=None):
+def _divergencia(idade):
+    """Antes dos 30 anos as diretrizes brasileiras e a ACOG recomendam condutas diferentes."""
+    if idade < IDADE_INICIO:
+        feito = ('Foi mantida a citologia a cada 3 anos (ACOG). Pelo MS e pela SBOC o rastreamento começaria aos 25 anos, '
+                 'com teste de DNA-HPV: retire o item se preferir segui-los.')
+    else:
+        feito = ('Foi pedido o teste de DNA-HPV (MS e SBOC). Pela ACOG seria citologia a cada 3 anos até os 29: para '
+                 'segui-la, troque o item pela citologia no catálogo.')
+    return {
+        'titulo': 'Colo do útero: as diretrizes divergem antes dos 30 anos',
+        'descricao': 'MS 2025 e SBOC 2026: não rastrear antes dos 25 anos, com teste de HPV ou com citologia (a infecção '
+                     'costuma ser transitória e o rastreamento traz mais colposcopias e tratamentos do que benefício); a partir '
+                     'dos 25, teste de DNA-HPV a cada 5 anos, sem citologia junto. ACOG 2026: citologia isolada a cada 3 anos '
+                     'dos 21 aos 29 anos e teste de HPV a cada 5 anos só a partir dos 30. ' + feito,
+        'referencia': f'{BRASIL} / {ACOG}'}
+
+
+def recomendar(idade, imunossuprimida=False, resultado=None, histerectomizada=False):
     """Devolve (recomendações, orientações) para uma mulher adulta. `resultado`: um de RESULTADOS ou None."""
     resultado = resultado if resultado in RESULTADOS else None
     recs, orient = [], []
+
+    # Histerectomia total por doença benigna: sem colo, sem rastreamento (um resultado positivo informado segue o fluxo).
+    if histerectomizada and resultado in (None, NAO_DETECTADO):
+        if idade >= (0 if imunossuprimida else IDADE_CITOLOGIA):
+            orient.append({
+                'titulo': 'Colo do útero: rastreamento dispensado após histerectomia total',
+                'descricao': 'Histerectomia total por doença benigna, sem lesão de alto grau prévia e com exames anteriores '
+                             'normais: o rastreamento pode ser encerrado. Se a histerectomia foi por lesão precursora ou câncer '
+                             'do colo, manter o rastreamento (coleta vaginal) por pelo menos 25 anos; na dúvida sobre o motivo, '
+                             'manter.',
+                'referencia': MS if imunossuprimida else f'{MS} / {ACOG}'})
+        return recs, orient
 
     if imunossuprimida:
         if resultado in (HPV_16_18, OUTROS_CITOLOGIA_NEGATIVA, OUTROS_CITOLOGIA_ALTERADA):
@@ -72,16 +108,14 @@ def recomendar(idade, imunossuprimida=False, resultado=None):
                              'Mulheres com HIV ou imunossupressão | A cada 3 anos', BRASIL, 'B'))
         return recs, orient
 
-    # Risco habitual. Teste feito antes dos 25 anos não é considerado (MS, recomendação 11).
+    # Risco habitual. Teste de HPV feito antes dos 25 anos não é considerado (MS, recomendação 11).
     if idade < IDADE_INICIO:
-        if idade >= 21:
-            orient.append({
-                'titulo': 'Colo do útero: rastreamento a partir dos 25 anos',
-                'descricao': 'MS e SBOC não recomendam rastrear antes dos 25 anos, com teste de HPV ou citologia: nessa idade a '
-                             'infecção costuma ser transitória, e um teste feito por engano não deve ser considerado. A ACOG mantém '
-                             'citologia a cada 3 anos dos 21 aos 29 anos; se optar por ela, acrescente o exame pelo catálogo. Com '
-                             'HIV ou imunossupressão, o rastreamento começa com o início da atividade sexual.',
-                'referencia': f'{BRASIL} / {ACOG}'})
+        if idade >= IDADE_CITOLOGIA:
+            recs.append(_rec(CITOLOGIA, 'laboratorio',
+                             'Citologia isolada a cada 3 anos dos 21 aos 29 anos (ACOG). MS e SBOC não recomendam rastrear antes '
+                             'dos 25 anos: veja a orientação sobre a divergência.',
+                             'Mulheres 21-24 anos | A cada 3 anos', ACOG, 'B'))
+            orient.append(_divergencia(idade))
         return recs, orient
 
     if resultado == HPV_16_18:
@@ -104,19 +138,20 @@ def recomendar(idade, imunossuprimida=False, resultado=None):
                          'Colposcopia sem doença após HPV detectado | A cada 1 ano', BRASIL, 'B'))
     elif idade <= IDADE_FIM:
         com_acog = idade >= 30
-        descricao = ('Teste de DNA-HPV oncogênico com genotipagem a cada 5 anos, dos 25 aos 64 anos, sem citologia junto '
+        descricao = ('Teste de DNA-HPV oncogênico com genotipagem a cada 5 anos, dos 25 aos 65 anos, sem citologia junto '
                      '(coteste não é recomendado). HPV 16/18: colposcopia. Outros tipos: citologia reflexa na mesma amostra. '
                      'Onde o teste não estiver disponível: citologia a cada 3 anos, após dois exames anuais negativos.')
         if idade > 60:
             descricao += ' Depois dos 60 anos, um teste negativo encerra o rastreamento.'
-        recs.append(_rec(HPV, 'laboratorio', descricao, 'Mulheres 25-64 anos | A cada 5 anos',
+        recs.append(_rec(HPV, 'laboratorio', descricao, 'Mulheres 25-65 anos | A cada 5 anos',
                          f'{BRASIL} / {ACOG}' if com_acog else BRASIL, 'A' if com_acog else 'B'))
+        if not com_acog:
+            orient.append(_divergencia(idade))
     else:
         orient.append({
             'titulo': 'Colo do útero: quando encerrar o rastreamento',
             'descricao': 'Encerrar se o último teste de DNA-HPV, feito depois dos 60 anos, foi negativo (ACOG: depois dos 65 anos, '
                          'com rastreamento prévio adequado). Quem nunca fez o teste faz um; negativo, encerra. Com NIC2, NIC3 ou '
-                         'adenocarcinoma in situ tratados, manter o rastreamento por 25 anos após o tratamento. Não se aplica após '
-                         'histerectomia total por doença benigna.',
+                         'adenocarcinoma in situ tratados, manter o rastreamento por 25 anos após o tratamento.',
             'referencia': f'{MS} / {ACOG}'})
     return recs, orient

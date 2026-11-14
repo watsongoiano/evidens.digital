@@ -739,7 +739,7 @@ def generate_intelligent_recommendations():
         if sex == 'feminino':
             recs_colo, orientacoes_colo = colo_utero.recomendar(
                 age, imunossuprimida='hiv' in comorbidades or triagem.get('imunossupressao') == SIM,
-                resultado=data.get('hpv_resultado'))
+                resultado=data.get('hpv_resultado'), histerectomizada=colo_utero.HISTERECTOMIA in comorbidades)
             recommendations.extend(recs_colo)
         
         # Rastreamento de câncer de pulmão (LDCT) - USPSTF 2021
