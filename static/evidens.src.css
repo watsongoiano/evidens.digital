@@ -119,6 +119,7 @@ html.lenis, html.lenis body { height: auto; }
 @layer components {
   .termos p { @apply mt-4; }
   .termos ul { @apply mt-4 ml-5 list-disc flex flex-col gap-2; }
+  ul.termos { @apply mt-2 ml-5 list-disc flex flex-col gap-2; }
   .termos a { @apply text-teal-dark underline underline-offset-2; }
   .termos strong { @apply font-medium text-ink; }
 }
