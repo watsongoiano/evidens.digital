@@ -14,7 +14,21 @@ from __future__ import annotations
 
 ORDEM_PRIORIDADE = {'baixa': 0, 'media': 1, 'alta': 2}
 
+# Tipos de diabetes pela classificação da ADA (Standards of Care 2026, seção 2): tipo 1, tipo 2,
+# tipos específicos por outras causas (monogênico, doença do pâncreas exócrino, induzido por
+# medicamento ou pós-transplante) e gestacional. O tipo 2 é caixa fixa na tela (valor "diabetes");
+# o tipo 1 também; os demais ficam na lista. O gestacional não é diabetes fora da gestação: o
+# histórico entra como fator de risco e o da gestação atual, nos dados do pré-natal.
+TIPOS_DE_DIABETES = ('diabetes', 'diabetes_tipo_2', 'diabetes_tipo_1', 'diabetes_monogenico', 'diabetes_pancreatico',
+                     'diabetes_medicamentoso')
+
 COMORBIDADES = {
+    'diabetes_monogenico': {'rotulo': 'Diabetes monogênico (MODY, neonatal)', 'busca': 'mody tipo de diabetes'},
+    'diabetes_pancreatico': {'rotulo': 'Diabetes por doença do pâncreas (pancreatite, fibrose cística)',
+                             'busca': 'tipo 3c pancreatogenico pancreatectomia tipo de diabetes'},
+    'diabetes_medicamentoso': {'rotulo': 'Diabetes induzido por medicamento ou pós-transplante',
+                               'busca': 'corticoide antirretroviral nodat ptdm tipo de diabetes'},
+    'diabetes_gestacional_previo': {'rotulo': 'Diabetes gestacional em gestação anterior', 'busca': 'dmg previo historia'},
     'pre_diabetes': {'rotulo': 'Pré-diabetes', 'busca': 'glicemia de jejum alterada intolerancia'},
     'hipotireoidismo': {'rotulo': 'Hipotireoidismo', 'busca': 'tireoide hashimoto'},
     'hipertireoidismo': {'rotulo': 'Hipertireoidismo', 'busca': 'tireoide graves'},
@@ -69,7 +83,8 @@ MEDICACOES = {
     'estatina': {'rotulo': 'Estatina', 'marca': ['estatinas']},
     'outro_hipolipemiante': {'rotulo': 'Ezetimiba, fibrato ou iPCSK9', 'marca': ['dislipidemia']},
     'metformina': {'rotulo': 'Metformina', 'marca': ['diabetes']},
-    'insulina': {'rotulo': 'Insulina', 'marca': ['diabetes']},
+    # Insulina se usa no tipo 1, no tipo 2, no gestacional e nos outros tipos: indica diabetes, mas não marca um tipo.
+    'insulina': {'rotulo': 'Insulina'},
     'sulfonilureia': {'rotulo': 'Sulfonilureia', 'marca': ['diabetes']},
     'idpp4_pioglitazona': {'rotulo': 'iDPP-4, pioglitazona ou acarbose', 'marca': ['diabetes']},
     'isglt2': {'rotulo': 'iSGLT2', 'talvez': ['diabetes']},
@@ -553,6 +568,17 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                 'HRS 2007 (Goldschlager)', 'B')
 
     # ---------------- Comorbidades ----------------
+    diabetico = bool(set(TIPOS_DE_DIABETES) & com)
+    if 'insulina' in med and not diabetico:
+        orientar('Insulina em uso: informe o tipo de diabetes',
+                 'A insulina é usada no diabetes tipo 1, no tipo 2, no gestacional e em outros tipos; por isso não marca um tipo '
+                 'sozinha. As recomendações foram montadas como para uma pessoa com diabetes. Marque o tipo para refinar '
+                 '(por exemplo, TSH no tipo 1).', 'ADA 2026')
+    if 'diabetes_gestacional_previo' in com and sexo == 'feminino' and not gestante and not diabetico and 'insulina' not in med:
+        for titulo in ('Glicose, soro', 'Hemoglobina glicada (HbA1c), soro'):
+            add(titulo, 'laboratorio',
+                'Diabetes gestacional em gestação anterior: rastrear pré-diabetes e diabetes por toda a vida, pelo menos a cada 3 anos.',
+                'Diabetes gestacional prévio | Pelo menos a cada 3 anos', 'ADA 2026', 'B', 'alta')
     if 'pre_diabetes' in com:
         add('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'Pré-diabetes: reavaliar a glicemia ao menos uma vez por ano.',
             'Pré-diabetes | Anual', 'ADA 2025', 'B')

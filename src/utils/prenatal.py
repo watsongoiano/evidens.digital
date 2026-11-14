@@ -31,6 +31,7 @@ CONDICOES = {
     'gemelar': 'Gestação gemelar',
     'pe_previa': 'Pré-eclâmpsia em gestação anterior',
     'dmg_previo': 'Diabetes gestacional em gestação anterior',
+    'dmg_atual': 'Diabetes gestacional já diagnosticado nesta gestação',
     'prematuro_previo': 'Parto prematuro anterior',
 }
 
@@ -169,7 +170,7 @@ def _totg(g, diabetica):
     Devolve ``(inicio, item)`` ou ``None``. Quem começa o pré-natal depois de 28 semanas, ou não fez o
     exame na janela, faz o TOTG de imediato (OPAS/MS/FEBRASGO/SBD 2017).
     """
-    if diabetica or g.get('totg_feito'):
+    if diabetica or g.get('totg_feito') or 'dmg_atual' in g['condicoes']:  # já diagnosticada: não se repete o TOTG
         return None
     atrasado = g['ig'] is not None and g['ig'] >= 29
     item = _rec('TOTG-75g gestacional (jejum, 1 h e 2 h), soro', 'laboratorio',

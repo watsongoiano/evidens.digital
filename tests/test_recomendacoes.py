@@ -52,9 +52,10 @@ def _recs(client, **dados):
 
 
 @pytest.mark.parametrize('dados', [
-    dict(comorbidades=['diabetes']), dict(hba1c='7.4'), dict(medicacoes=['insulina_nph']),
+    dict(comorbidades=['diabetes']), dict(hba1c='7.4'), dict(medicacoes=['insulina_nph']), dict(comorbidades=['diabetes_tipo_1']),
+    dict(comorbidades=['diabetes_monogenico']), dict(comorbidades=['diabetes_pancreatico']), dict(comorbidades=['diabetes_medicamentoso']),
     dict(medicacoes=['glibenclamida']), dict(medicacoes_continuo='gliclazida 30 mg'),
-], ids=['caixa', 'hba1c', 'insulina', 'sulfonilureia', 'texto'])
+], ids=['caixa', 'hba1c', 'insulina', 'tipo1', 'monogenico', 'pancreatico', 'medicamentoso', 'sulfonilureia', 'texto'])
 def test_diabetico_nao_recebe_totg_e_a_glicemia_vira_acompanhamento(client, dados):
     recs = _recs(client, **dados)
     assert not any(t.startswith('TOTG') for t in recs), 'TOTG pedido a quem já é diabético'
@@ -100,3 +101,49 @@ def test_referencia_do_williams_abre_a_pagina_do_livro(client):
     assert williams and williams[0]['url'].startswith('https://www.mheducation.com/highered/mhp/product/williams-obstetrics-')
     novas = build_reference_links('Albumina, soro', 'CGH 2025 (Feuerstein) / Drugs Aging 2024 (Sparling)')
     assert [link['url'] for link in novas] == ['https://doi.org/10.1016/j.cgh.2025.05.019', 'https://doi.org/10.1007/s40266-024-01143-8']
+
+
+def _resposta(client, **dados):
+    base = dict(idade=40, sexo='feminino', tabagismo='nunca', imunossupressao='nao', gestante='nao', lactante='nao',
+                comorbidades=[], medicacoes=[], historia_familiar=[])
+    return client.post('/api/checkup-intelligent', json=dict(base, **dados)).get_json()
+
+
+def test_tsh_do_diabetico_e_so_do_tipo_1(client):
+    tsh = 'Hormônio Tireoestimulante (TSH), soro'
+    tipo1 = {r['titulo']: r for r in _resposta(client, comorbidades=['diabetes_tipo_1'])['recommendations']}
+    assert tipo1[tsh]['subtitulo'].startswith('Diabetes tipo 1') and 'dc26-S004' in tipo1[tsh]['referencia_html']
+    for outro in ('diabetes', 'diabetes_monogenico', 'diabetes_pancreatico', 'diabetes_medicamentoso'):
+        assert tsh not in [r['titulo'] for r in _resposta(client, comorbidades=[outro])['recommendations']], outro
+
+
+def test_insulina_sem_tipo_e_tratada_como_diabetes_e_pede_o_tipo(client):
+    r = _resposta(client, medicacoes=['insulina_glargina'])
+    titulos = [x['titulo'] for x in r['recommendations']]
+    assert 'Relação albumina/creatinina urinária (uACR)' in titulos and not any(t.startswith('TOTG') for t in titulos)
+    assert not [i for i in r['inferencias'] if i['valor'].startswith('diabetes')]     # nenhum tipo marcado
+    assert any(o['titulo'] == 'Insulina em uso: informe o tipo de diabetes' for o in r['orientacoes'])
+    # com o tipo marcado, a orientação some
+    com_tipo = _resposta(client, medicacoes=['insulina_glargina'], comorbidades=['diabetes_tipo_1'])
+    assert not any('informe o tipo' in o['titulo'] for o in com_tipo['orientacoes'])
+
+
+def test_diabetes_gestacional_previo_rastreia_por_toda_a_vida(client):
+    """ADA 2026: quem teve diabetes gestacional é rastreada pelo menos a cada 3 anos, em qualquer idade."""
+    r = {x['titulo']: x for x in _resposta(client, idade=27, comorbidades=['diabetes_gestacional_previo'])['recommendations']}
+    for exame in ('Glicose, soro', 'Hemoglobina glicada (HbA1c), soro'):
+        assert 'Diabetes gestacional prévio | Pelo menos a cada 3 anos' in r[exame]['subtitulo'], exame
+    assert not any(t.startswith('TOTG') for t in r)   # não é diabetes nem pré-diabetes
+
+
+def test_dmg_ja_diagnosticado_nesta_gestacao_nao_repete_o_totg(client):
+    gestante = dict(idade=30, gestante='sim', idade_gestacional=26, primeira_consulta='nao')
+    com = [x['titulo'] for x in _resposta(client, **gestante)['recommendations']]
+    sem = [x['titulo'] for x in _resposta(client, gestacao_condicoes=['dmg_atual'], **gestante)['recommendations']]
+    assert any(t.startswith('TOTG-75g gestacional') for t in com) and not any(t.startswith('TOTG') for t in sem)
+
+
+def test_totg_cita_a_sbd_e_a_ada(client):
+    totg = next(x for x in _resposta(client, hba1c='6.0')['recommendations'] if x['titulo'].startswith('TOTG-75g'))
+    assert totg['referencia'] == 'SBD 2024 / ADA 2026' and '155-208' in totg['descricao']
+    assert '10.29327/5412848.2024-1' in totg['referencia_html'] and 'dc26-S002' in totg['referencia_html']

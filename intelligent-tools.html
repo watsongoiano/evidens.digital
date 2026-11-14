@@ -102,6 +102,7 @@
       <p id="coerencia-dica" class="text-[12px] text-ink/55 leading-relaxed mb-4" hidden></p>
       <div class="opcoes">
         <label class="opcao" for="diabetes"><input type="checkbox" id="diabetes" name="comorbidades" value="diabetes">Diabetes tipo 2</label>
+        <label class="opcao" for="diabetes_tipo_1"><input type="checkbox" id="diabetes_tipo_1" name="comorbidades" value="diabetes_tipo_1">Diabetes tipo 1</label>
         <label class="opcao" for="hipertensao"><input type="checkbox" id="hipertensao" name="comorbidades" value="hipertensao">Hipertensão</label>
         <label class="opcao" for="has_resistente"><input type="checkbox" id="has_resistente" name="comorbidades" value="has_resistente">HAS resistente</label>
         <label class="opcao" for="dislipidemia"><input type="checkbox" id="dislipidemia" name="comorbidades" value="dislipidemia">Dislipidemia</label>
@@ -189,6 +190,7 @@
             <label class="opcao" for="gc_gemelar"><input type="checkbox" id="gc_gemelar" name="gestacao_condicoes" value="gemelar">Gestação gemelar</label>
             <label class="opcao" for="gc_pe_previa"><input type="checkbox" id="gc_pe_previa" name="gestacao_condicoes" value="pe_previa">Pré-eclâmpsia prévia</label>
             <label class="opcao" for="gc_dmg_previo"><input type="checkbox" id="gc_dmg_previo" name="gestacao_condicoes" value="dmg_previo">DMG prévio</label>
+            <label class="opcao" for="gc_dmg_atual"><input type="checkbox" id="gc_dmg_atual" name="gestacao_condicoes" value="dmg_atual">DMG nesta gestação</label>
             <label class="opcao" for="gc_prematuro_previo"><input type="checkbox" id="gc_prematuro_previo" name="gestacao_condicoes" value="prematuro_previo">Parto prematuro prévio</label>
           </div>
         </div>
@@ -200,6 +202,10 @@
         <div class="relative">
           <input type="text" id="lista_comorbidades-busca" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="lista_comorbidades-opcoes" aria-describedby="lista_comorbidades-dica" autocomplete="off" placeholder="Digite para buscar: hipotireoidismo, asma, gota…">
           <ul id="lista_comorbidades-opcoes" role="listbox" class="combo-lista" hidden>
+            <li role="option" data-valor="diabetes_monogenico" data-busca="diabetes monogenico (mody, neonatal) mody tipo de diabetes ">Diabetes monogênico (MODY, neonatal)</li>
+            <li role="option" data-valor="diabetes_pancreatico" data-busca="diabetes por doenca do pancreas (pancreatite, fibrose cistica) tipo 3c pancreatogenico pancreatectomia tipo de diabetes ">Diabetes por doença do pâncreas (pancreatite, fibrose cística)</li>
+            <li role="option" data-valor="diabetes_medicamentoso" data-busca="diabetes induzido por medicamento ou pos-transplante corticoide antirretroviral nodat ptdm tipo de diabetes ">Diabetes induzido por medicamento ou pós-transplante</li>
+            <li role="option" data-valor="diabetes_gestacional_previo" data-busca="diabetes gestacional em gestacao anterior dmg previo historia ">Diabetes gestacional em gestação anterior</li>
             <li role="option" data-valor="pre_diabetes" data-busca="pre-diabetes glicemia de jejum alterada intolerancia ">Pré-diabetes</li>
             <li role="option" data-valor="hipotireoidismo" data-busca="hipotireoidismo tireoide hashimoto ">Hipotireoidismo</li>
             <li role="option" data-valor="hipertireoidismo" data-busca="hipertireoidismo tireoide graves ">Hipertireoidismo</li>
@@ -386,18 +392,18 @@
             <li role="option" data-valor="dapagliflozina_metformina" data-busca="dapagliflozina + metformina antidiabeticos diabetes " data-marca="diabetes">Dapagliflozina + metformina</li>
             <li role="option" data-valor="empagliflozina_linagliptina" data-busca="empagliflozina + linagliptina antidiabeticos diabetes " data-marca="diabetes">Empagliflozina + linagliptina</li>
             <li class="combo-grupo" role="presentation">Insulinas</li>
-            <li role="option" data-valor="insulina_nph" data-busca="insulina nph insulinas diabetes insulina " data-marca="diabetes">Insulina NPH</li>
-            <li role="option" data-valor="insulina_regular" data-busca="insulina regular insulinas diabetes insulina " data-marca="diabetes">Insulina regular</li>
-            <li role="option" data-valor="insulina_glargina" data-busca="insulina glargina insulinas diabetes insulina " data-marca="diabetes">Insulina glargina</li>
-            <li role="option" data-valor="insulina_degludeca" data-busca="insulina degludeca insulinas diabetes insulina " data-marca="diabetes">Insulina degludeca</li>
-            <li role="option" data-valor="insulina_detemir" data-busca="insulina detemir insulinas diabetes insulina " data-marca="diabetes">Insulina detemir</li>
-            <li role="option" data-valor="insulina_icodeca" data-busca="insulina icodeca insulinas diabetes insulina " data-marca="diabetes">Insulina icodeca</li>
-            <li role="option" data-valor="insulina_asparte" data-busca="insulina asparte insulinas diabetes insulina " data-marca="diabetes">Insulina asparte</li>
-            <li role="option" data-valor="insulina_lispro" data-busca="insulina lispro insulinas diabetes insulina " data-marca="diabetes">Insulina lispro</li>
-            <li role="option" data-valor="insulina_glulisina" data-busca="insulina glulisina insulinas diabetes insulina " data-marca="diabetes">Insulina glulisina</li>
-            <li role="option" data-valor="insulina_bifasica" data-busca="insulina bifasica insulinas diabetes insulina " data-marca="diabetes">Insulina bifásica</li>
-            <li role="option" data-valor="insulina_glargina_lixisenatida" data-busca="insulina glargina + lixisenatida insulinas diabetes insulina " data-marca="diabetes">Insulina glargina + lixisenatida</li>
-            <li role="option" data-valor="insulina_degludeca_liraglutida" data-busca="insulina degludeca + liraglutida insulinas diabetes insulina " data-marca="diabetes">Insulina degludeca + liraglutida</li>
+            <li role="option" data-valor="insulina_nph" data-busca="insulina nph insulinas diabetes insulina ">Insulina NPH</li>
+            <li role="option" data-valor="insulina_regular" data-busca="insulina regular insulinas diabetes insulina ">Insulina regular</li>
+            <li role="option" data-valor="insulina_glargina" data-busca="insulina glargina insulinas diabetes insulina ">Insulina glargina</li>
+            <li role="option" data-valor="insulina_degludeca" data-busca="insulina degludeca insulinas diabetes insulina ">Insulina degludeca</li>
+            <li role="option" data-valor="insulina_detemir" data-busca="insulina detemir insulinas diabetes insulina ">Insulina detemir</li>
+            <li role="option" data-valor="insulina_icodeca" data-busca="insulina icodeca insulinas diabetes insulina ">Insulina icodeca</li>
+            <li role="option" data-valor="insulina_asparte" data-busca="insulina asparte insulinas diabetes insulina ">Insulina asparte</li>
+            <li role="option" data-valor="insulina_lispro" data-busca="insulina lispro insulinas diabetes insulina ">Insulina lispro</li>
+            <li role="option" data-valor="insulina_glulisina" data-busca="insulina glulisina insulinas diabetes insulina ">Insulina glulisina</li>
+            <li role="option" data-valor="insulina_bifasica" data-busca="insulina bifasica insulinas diabetes insulina ">Insulina bifásica</li>
+            <li role="option" data-valor="insulina_glargina_lixisenatida" data-busca="insulina glargina + lixisenatida insulinas diabetes insulina " data-talvez="diabetes">Insulina glargina + lixisenatida</li>
+            <li role="option" data-valor="insulina_degludeca_liraglutida" data-busca="insulina degludeca + liraglutida insulinas diabetes insulina " data-talvez="diabetes">Insulina degludeca + liraglutida</li>
             <li class="combo-grupo" role="presentation">Tireoide</li>
             <li role="option" data-valor="metimazol_tiamazol" data-busca="metimazol (tiamazol) tireoide tireoide tapazol" data-marca="hipertireoidismo">Metimazol (tiamazol)</li>
             <li role="option" data-valor="propiltiouracila" data-busca="propiltiouracila tireoide tireoide " data-marca="hipertireoidismo">Propiltiouracila</li>
@@ -1404,6 +1410,9 @@
             const caixaDe = v => document.getElementById(v) || document.getElementById(LISTA + '_' + v);
             const marcada = v => { const c = caixaDe(v); return !!(c && c.checked); };
             const ROTULO_CAIXA = v => { const c = caixaDe(v); return (c ? document.querySelector('label[for="' + c.id + '"]') : opcaoDe(v)).textContent.trim(); };
+            // Classificação da ADA 2026: além do tipo 2 (caixa "diabetes"), tipo 1 e tipos específicos
+            const OUTROS_TIPOS_DE_DIABETES = ['diabetes_tipo_1', 'diabetes_monogenico', 'diabetes_pancreatico', 'diabetes_medicamentoso'];
+            const usaInsulina = () => !!document.querySelector('input[name="medicacoes"][value^="insulina_"]:checked');
             let conferindo = false;  // mudança feita pela própria conferência (não é decisão do médico)
             function marcarCaixa(v) {
                 const c = caixaDe(v);
@@ -1431,9 +1440,12 @@
                 if (est2 || (est1 && !gest)) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg = HAS estágio ${est2 ? 2 : 1} (AHA/ACC 2025); confirmar com MRPA ou MAPA`);
                 if (document.getElementById('has_resistente').checked) pedir('hipertensao', 'has_resistente', 'HAS resistente marcada');
                 const hb = num('hba1c'); if (hb !== null && hb >= 6.5) pedir('diabetes', 'hba1c', 'HbA1c ≥ 6,5% (ADA; confirmar com 2º exame)');
+                // Antidiabético ou HbA1c ≥ 6,5% não dizem o tipo: com outro tipo de diabetes marcado, o tipo 2 não entra.
+                const outroTipo = OUTROS_TIPOS_DE_DIABETES.some(marcada);
+                if (outroTipo) delete r.diabetes;
                 // 5,7 a 6,4% em quem não tem diabetes é pré-diabetes (no diabético tratado, é só bom controle)
                 // (caixa de diabetes marcada à mão, ou pedida agora por outra regra; a automática de uma rodada anterior não conta)
-                const diabetico = (r.diabetes && !recusados.has('diabetes')) || (document.getElementById('diabetes').checked && !auto.has('diabetes'));
+                const diabetico = outroTipo || usaInsulina() || (r.diabetes && !recusados.has('diabetes')) || (document.getElementById('diabetes').checked && !auto.has('diabetes'));
                 if (hb !== null && hb >= 5.7 && hb < 6.5 && !diabetico) pedir('pre_diabetes', 'hba1c', 'HbA1c de 5,7 a 6,4% (ADA)');
                 const peso = num('peso'), alt = num('altura');
                 if (peso && alt && peso / Math.pow(alt / 100, 2) >= 30) pedir('obesidade', 'imc', 'IMC ≥ 30 kg/m²');
@@ -1448,6 +1460,10 @@
                 }));
                 Object.entries(porCaixa).forEach(([id, nomes]) => frases.push(
                     `${nomes.join(', ')}: não marca${nomes.length > 1 ? 'm' : ''} "${ROTULO_CAIXA(id)}" sozinho${nomes.length > 1 ? 's' : ''}, porque também se usa${nomes.length > 1 ? 'm' : ''} em outras indicações. Marque a caixa se for o caso.`));
+                // insulina indica diabetes, mas não o tipo
+                if (usaInsulina() && !marcada('diabetes') && !OUTROS_TIPOS_DE_DIABETES.some(marcada)) {
+                    frases.push('Insulina: indica diabetes, mas não o tipo (tipo 1, tipo 2, gestacional e outros a usam). Marque o tipo de diabetes.');
+                }
                 const pas = num('pas'), pad = num('pad');
                 if (pas !== null && pas >= 120 && pas < 130 && !document.getElementById('hipertensao').checked) {
                     // sem a diastólica não dá para classificar: 125/95 já é estágio 2
