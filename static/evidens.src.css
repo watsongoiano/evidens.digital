@@ -53,7 +53,7 @@ html.lenis, html.lenis body { height: auto; }
   .secao-nota { @apply text-[14px] text-ink/55 leading-relaxed mb-6; }
   .grade { @apply grid gap-4 sm:grid-cols-2; }
   .campo > label, .campo-rotulo { @apply block font-mono text-[11px] tracking-[0.14em] uppercase text-ink/50 mb-2; }
-  .campo input[type="text"], .campo input[type="number"], .campo input[type="email"], .campo input[type="password"], .campo select, .campo textarea {
+  .campo input[type="text"], .campo input[type="number"], .campo input[type="email"], .campo input[type="password"], .campo input[type="date"], .campo select, .campo textarea {
     @apply w-full rounded-xl border border-ink/15 bg-paper px-4 h-12 text-[15px] text-ink transition;
   }
   .campo textarea { @apply h-auto py-3 leading-relaxed; }

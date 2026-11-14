@@ -717,6 +717,14 @@
       </div>
     </section>
 
+    <section class="secao" aria-labelledby="s-exames">
+      <h2 id="s-exames" class="secao-titulo"><span class="secao-num">08</span>Exames já realizados</h2>
+      <p class="secao-nota">Opcional. Informe o exame e a data em que foi feito: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. As datas não são guardadas.</p>
+      <div id="examesAnteriores" class="flex flex-col gap-4"></div>
+      <datalist id="examesConhecidos"></datalist>
+      <button type="button" id="adicionarExameAnterior" class="btn-claro mt-4"><i class="fa-solid fa-plus text-[11px]"></i> Adicionar exame</button>
+    </section>
+
     <div id="formErrors" role="alert" class="aviso aviso-erro" style="display: none;"></div>
 
     <div class="flex flex-wrap items-center gap-4 pt-2">
@@ -851,8 +859,77 @@
                     data[key] = value;
                 }
             }
+            const anteriores = examesAnterioresDoFormulario();
+            if (anteriores.length) data.exames_anteriores = anteriores;
             return data;
         }
+
+        // ── Exames já realizados: nome e data, para o motor conferir a periodicidade ──
+        const nomeDoExame = {};       // nome mostrado (traduzido em inglês) → título em português
+        let linhasDeExame = 0;
+
+        function examesAnterioresDoFormulario() {
+            return Array.from(document.querySelectorAll('#examesAnteriores .exame-anterior')).map(linha => {
+                const digitado = linha.querySelector('[data-exame-anterior]').value.trim();
+                return { exame: nomeDoExame[digitado.toLowerCase()] || digitado, data: linha.querySelector('[data-data-anterior]').value };
+            }).filter(item => item.exame || item.data);
+        }
+
+        function hojeNoFormato() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function adicionarExameAnterior(exame, data) {
+            const n = ++linhasDeExame;
+            const linha = document.createElement('div');
+            linha.className = 'exame-anterior flex flex-wrap items-end gap-3';
+            // Campos montados nó a nó: nenhum texto é interpretado como HTML.
+            const campo = (classe, rotulo, entrada) => {
+                const div = document.createElement('div'); div.className = 'campo ' + classe;
+                const label = document.createElement('label'); label.htmlFor = entrada.id; label.textContent = T(rotulo);
+                div.append(label, entrada);
+                return div;
+            };
+            const nome = document.createElement('input');
+            Object.assign(nome, { type: 'text', id: `exameAnterior${n}`, maxLength: 300, autocomplete: 'off' });
+            nome.setAttribute('list', 'examesConhecidos'); nome.setAttribute('data-exame-anterior', '');
+            const quando = document.createElement('input');
+            Object.assign(quando, { type: 'date', id: `dataAnterior${n}`, max: hojeNoFormato() });
+            quando.setAttribute('data-data-anterior', '');
+            const retirar = document.createElement('button');
+            retirar.type = 'button'; retirar.className = 'btn-claro shrink-0'; retirar.setAttribute('aria-label', T('Retirar este exame'));
+            const icone = document.createElement('i'); icone.className = 'fa-solid fa-xmark';
+            const texto = document.createElement('span'); texto.className = 'sm:hidden'; texto.textContent = T('Retirar');
+            retirar.append(icone, texto);
+            linha.append(campo('basis-full sm:basis-0 sm:flex-1', 'Exame', nome), campo('flex-1 sm:flex-none sm:w-44', 'Feito em', quando), retirar);
+            if (exame) linha.querySelector('[data-exame-anterior]').value = exame;
+            if (data) linha.querySelector('[data-data-anterior]').value = data;
+            linha.querySelector('button').addEventListener('click', () => {
+                linha.remove();
+                checkupForm.dispatchEvent(new Event('change', { bubbles: true }));   // os resultados deixam de valer
+            });
+            document.getElementById('examesAnteriores').appendChild(linha);
+            return linha;
+        }
+
+        async function carregarExamesConhecidos() {
+            const lista = document.getElementById('examesConhecidos');
+            if (lista.options.length) return;
+            try {
+                const r = await fetch('/api/exames-conhecidos', { credentials: 'same-origin' });
+                const { exames } = r.ok ? await r.json() : {};
+                (exames || []).forEach(t => {
+                    const o = document.createElement('option'); o.value = T(t); lista.appendChild(o);
+                    nomeDoExame[o.value.toLowerCase()] = t;
+                });
+            } catch (e) { /* sem a lista, o médico ainda pode digitar o nome */ }
+        }
+
+        document.getElementById('adicionarExameAnterior').addEventListener('click', () => {
+            carregarExamesConhecidos();
+            adicionarExameAnterior().querySelector('[data-exame-anterior]').focus();
+        });
 
         function mostrarErros(mensagens) {
             formErrors.innerHTML = '';
@@ -1086,6 +1163,7 @@
                             <div class="min-w-0">
                                 <h5 class="rec-titulo">${escapeHtml(titulo)}</h5>
                                 ${(subtitulo || referencia_html) ? `<p class="rec-sub">${subtitulo ? escapeHtml(subtitulo) : ''}${subtitulo && referencia_html ? '<span class="text-ink/30 mx-1.5">·</span>' : ''}${referencia_html ? `<span class="referencia-links">${referencia_html}</span>` : ''}</p>` : ''}
+                                ${rec.ultimo_exame ? `<p class="text-[13px] text-teal-dark mt-1.5"><i class="fa-regular fa-calendar-check mr-1.5"></i>${escapeHtml(rec.ultimo_exame)}</p>` : ''}
                             </div>
                             ${grau ? `<span class="rec-grau" title="Grau de evidência ${escapeHtml(grau)}">${escapeHtml(grau)}</span>` : '<span></span>'}
                             <button type="button" onclick="removeRecommendation(this)" aria-label="Retirar esta recomendação" class="rec-remover"><i class="fa-solid fa-xmark"></i></button>
@@ -1108,7 +1186,8 @@
             dados_insuficientes: { texto: 'Dados insuficientes', classe: 'bg-ink/15 text-ink', borda: 'border-ink/15' },
             adiado_gestacao: { texto: 'Adiado na gestação', classe: 'bg-sand text-ink', borda: 'border-[#E6DCC0]' },
             proxima_janela: { texto: 'Próxima etapa', classe: 'bg-mist text-teal-dark', borda: 'border-teal/20' },
-            etapa_anterior: { texto: 'Etapa anterior', classe: 'bg-ink/10 text-ink', borda: 'border-ink/15' }
+            etapa_anterior: { texto: 'Etapa anterior', classe: 'bg-ink/10 text-ink', borda: 'border-ink/15' },
+            em_dia: { texto: 'Em dia', classe: 'bg-mist text-teal-dark', borda: 'border-teal/20' }
         };
 
         function displayNaoIncluidas(itens) {

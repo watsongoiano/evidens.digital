@@ -35,6 +35,11 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         existing_titles = [(r.get('titulo') or '').strip().lower() for r in recommendations]
         if title in existing_titles:
             print(f"Recomendação duplicada ignorada: {title}")
+            # A regra repetida não entra de novo, mas a periodicidade dela continua valendo
+            # (src/utils/periodicidade.py usa o menor intervalo entre as regras do mesmo exame).
+            existente = recommendations[existing_titles.index(title)]
+            if (rec.get('subtitulo') or '') != (existente.get('subtitulo') or ''):
+                existente.setdefault('_subtitulos', []).append(rec.get('subtitulo') or '')
             return
             
         # Garantir que campos obrigatórios estão presentes
@@ -616,6 +621,17 @@ def generate_intelligent_recommendations():
                 'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in exc.erros),
                 'codigo': 'entrada_invalida',
                 'erros': exc.erros,
+            }), 400
+
+        # Exames que o paciente já fez (opcional): o que estiver em dia não é pedido de novo.
+        from src.utils import periodicidade
+        exames_anteriores, erros_exames = periodicidade.ler_exames_anteriores(
+            (request.get_json(silent=True) or {}).get('exames_anteriores'))
+        if erros_exames:
+            return jsonify({
+                'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in erros_exames),
+                'codigo': 'entrada_invalida',
+                'erros': erros_exames,
             }), 400
 
         # Dados do paciente (já normalizados)
@@ -1437,6 +1453,14 @@ def generate_intelligent_recommendations():
                     
                     if refs:
                         melhor['referencia'] = ' | '.join(refs)
+
+                    # O subtítulo mostrado é o de uma das regras, mas a periodicidade tem de considerar
+                    # todas: o exame anual do diabético pode ser trimestral pelo HIV. Campo interno,
+                    # retirado antes de responder (src/utils/periodicidade.py).
+                    unidos = list(melhor.get('_subtitulos') or [])
+                    for r in recs_sorted[1:]:
+                        unidos += [r.get('subtitulo') or ''] + list(r.get('_subtitulos') or [])
+                    melhor['_subtitulos'] = unidos
                     
                     # Unir descrições se diferentes
                     descricoes = list(set([r.get('descricao', '') for r in recs if r.get('descricao')]))
@@ -1468,6 +1492,10 @@ def generate_intelligent_recommendations():
         if gestacao is not None:
             mantidas, vacinas_futuras = prenatal.vacinas_fora_da_janela(mantidas, gestacao['ig'])
             proximas_gestacao = sorted(proximas_gestacao + vacinas_futuras, key=lambda x: x['semana'])
+        # Periodicidade: exame já feito e ainda dentro do intervalo da própria regra sai do pedido
+        # e aparece em "não incluídos", com a data e a data a partir da qual volta a ser indicado.
+        mantidas, em_dia = periodicidade.aplicar(mantidas, exames_anteriores, sex)
+        nao_incluidas = nao_incluidas + em_dia
         response['recommendations'] = mantidas
         response['total_recommendations'] = len(mantidas)
         response['nao_incluidas'] = nao_incluidas
@@ -1475,11 +1503,19 @@ def generate_intelligent_recommendations():
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['inferencias'] = inferencias
         response['orientacoes'] = orientacoes_doses + orientacoes
+        aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
+        if aviso_exames:
+            response['orientacoes'] = response['orientacoes'] + [aviso_exames]
         response['pa_classificacao'] = pa_classificacao
         response['proximas_gestacao'] = proximas_gestacao
         response['gestacao'] = gestacao
         response['triagem_vacinas'] = triagem
 
+        # `_subtitulos` é campo interno da conferência de periodicidade: não sai na resposta.
+        for lista in ('recommendations', 'nao_incluidas', 'adiados_gestacao', 'proximas_gestacao'):
+            for item in response.get(lista) or []:
+                if isinstance(item, dict):
+                    item.pop('_subtitulos', None)
         return jsonify(response)
         
     except Exception as e:
@@ -1690,6 +1726,13 @@ def catalogo_endpoint():
     """Itens que o médico pode acrescentar a um pedido ou receita, por categoria."""
     from src.utils.catalogo import catalogo
     return jsonify(catalogo())
+
+
+@checkup_intelligent_bp.route('/exames-conhecidos')
+def exames_conhecidos_endpoint():
+    """Nomes de exame para a seção "Exames já realizados" do formulário."""
+    from src.utils import periodicidade
+    return jsonify({'exames': periodicidade.exames_conhecidos()})
 
 
 @checkup_intelligent_bp.route('/coerencia')

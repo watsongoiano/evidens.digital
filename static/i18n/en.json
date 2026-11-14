@@ -1694,7 +1694,17 @@
   "Plano de saúde não encontrado no seu cadastro. Confira em Minha conta.": "Health plan not found in your account. Check it under My account.",
   "Guia do plano em formato inválido": "Health plan form in an invalid format",
   "Número da carteira longo demais": "Member ID number is too long",
-  "Indicação clínica inválida ou longa demais": "Clinical indication is invalid or too long"
+  "Indicação clínica inválida ou longa demais": "Clinical indication is invalid or too long",
+  "Exames já realizados": "Tests already done",
+  "Opcional. Informe o exame e a data em que foi feito: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. As datas não são guardadas.": "Optional. Enter the test and the date it was done: whatever is still within the guideline interval is not ordered again. Dates are not stored.",
+  "Adicionar exame": "Add test",
+  "Exame": "Test",
+  "Feito em": "Done on",
+  "Retirar este exame": "Remove this test",
+  "Em dia": "Up to date",
+  "Exames já realizados em formato inválido.": "Tests already done in an invalid format.",
+  "Informe o nome de cada exame já realizado.": "Enter the name of each test already done.",
+  "Exame já realizado não reconhecido": "Test already done not recognized"
  },
  "padroes": [
   [
@@ -1956,6 +1966,46 @@
   [
    "^O limite é de (\\d+) planos por conta\\.$",
    "The limit is %1 plans per account."
+  ],
+  [
+   "^Informe no máximo (\\d+) exames já realizados\\.$",
+   "Enter at most %1 tests already done."
+  ],
+  [
+   "^Informe a data em que o exame foi feito: (.+)\\.$",
+   "Enter the date the test was done: %1."
+  ],
+  [
+   "^A data do exame não pode estar no futuro: (.+)\\.$",
+   "The test date cannot be in the future: %1."
+  ],
+  [
+   "^Confira a data do exame: (.+)\\.$",
+   "Check the test date: %1."
+  ],
+  [
+   "^Feito em (\\d{2})/(\\d{2})/(\\d{4})\\. Periodicidade: (.+?)\\. Próximo a partir de (\\d{2})/(\\d{2})/(\\d{4})\\.$",
+   "Done on %3-%2-%1. Interval: $4. Next due from %7-%6-%5."
+  ],
+  [
+   "^Feito em (\\d{2})/(\\d{2})/(\\d{4})\\. Periodicidade: (.+?)\\. Intervalo vencido desde (\\d{2})/(\\d{2})/(\\d{4})\\.$",
+   "Done on %3-%2-%1. Interval: $4. Overdue since %7-%6-%5."
+  ],
+  [
+   "^Feito em (\\d{2})/(\\d{2})/(\\d{4})\\. Indicação de uma única vez \\((.+?)\\): não precisa repetir\\.$",
+   "Done on %3-%2-%1. One-time indication ($4): no need to repeat."
+  ],
+  [
+   "^Feito em (\\d{2})/(\\d{2})/(\\d{4})\\. Esta indicação não tem intervalo definido na referência: avalie se o resultado ainda serve\\.$",
+   "Done on %3-%2-%1. The reference sets no interval for this indication: consider whether the result is still valid."
+  ],
+  [
+   "^Feito em (\\d{2})/(\\d{2})/(\\d{4})\\. Acompanha a HbA1c, que está em dia\\.$",
+   "Done on %3-%2-%1. Ordered together with HbA1c, which is up to date."
+  ],
+  [
+   "^A periodicidade não foi conferida para: (.+)\\. Escolha o nome do exame na lista de sugestões para que ele entre na conferência\\.$",
+   "The interval was not checked for: %1. Choose the test name from the suggestion list so that it is included in the check."
   ]
  ],
  "manter": [
