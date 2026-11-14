@@ -354,7 +354,6 @@
       "laboratorio": [
         "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
-        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
@@ -370,7 +369,7 @@
         "Hormônio Tireoestimulante (TSH), soro",
         "Vitamina B12, soro",
         "Hemograma completo com plaquetas",
-        "Cálcio, soro",
+        "Cálcio iônico, soro",
         "25-hidroxivitamina D, soro",
         "Fósforo, soro"
       ],
@@ -469,7 +468,6 @@
       "laboratorio": [
         "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
-        "TOTG-75g (Teste Oral de Tolerância à Glicose), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
@@ -480,7 +478,7 @@
         "Relação albumina/creatinina urinária (uACR)",
         "Hormônio Tireoestimulante (TSH), soro",
         "Hemograma completo com plaquetas",
-        "Cálcio, soro",
+        "Cálcio iônico, soro",
         "25-hidroxivitamina D, soro",
         "Fósforo, soro"
       ],
@@ -582,7 +580,7 @@
         "Colonoscopia de Rastreio com ou sem biópsia",
         "Ultrassonografia com Doppler de Aorta Abdominal",
         "Tomografia computadorizada de tórax de baixa dose (LDCT)",
-        "Espirometria",
+        "Espirometria, com broncodilatador",
         "Teste de caminhada de 6 minutos",
         "Radiografia de tórax"
       ],

@@ -45,7 +45,16 @@ ROTULOS = {
     'dislipidemia': 'Dislipidemia', 'hipertensao': 'Hipertensão', 'diabetes': 'Diabetes tipo 2',
     'obesidade': 'Obesidade', 'doenca_renal': 'Doença renal crônica',
     'estatinas': 'Estatinas', 'anti_hipertensivos': 'Anti-hipertensivos',
+    'insuficiencia_cardiaca': 'Insuficiência cardíaca', 'dcv_aterosclerotica': 'Doença cardiovascular aterosclerótica',
+    'dpoc': 'DPOC', 'hiv': 'HIV',
 }
+DIABETES = ('diabetes', 'diabetes_tipo_2')
+
+
+def rotulo_de(valor):
+    """Nome da caixa: as fixas da tela estão em ROTULOS; as da lista com busca, em condicoes.COMORBIDADES."""
+    from src.utils.condicoes import COMORBIDADES
+    return ROTULOS.get(valor) or COMORBIDADES[valor]['rotulo']
 
 
 def _normalizar(texto):
@@ -90,8 +99,11 @@ def classificar_pa(pas, pad):
     return {'categoria': 'normal', 'rotulo': 'PA normal'}
 
 
-def inferir(data, egfr=None, gestante=False, recusados=()):
+def inferir(data, egfr=None, gestante=False, recusados=(), escolhidas=()):
     """Completa comorbidades e medicações a partir dos outros campos.
+
+    ``escolhidas`` são os medicamentos como vieram da tela (princípio ativo), antes de virarem classe:
+    o que só se usa numa doença marca a doença (``medicamentos.MARCA``).
 
     Devolve ``(comorbidades, medicacoes, inferencias)``; cada inferência tem
     ``campo``, ``valor``, ``rotulo`` e ``motivo``. Nunca desmarca nada.
@@ -104,7 +116,7 @@ def inferir(data, egfr=None, gestante=False, recusados=()):
         # "recusados": caixas automáticas que o médico desmarcou na tela.
         if valor not in lista and valor not in recusados:
             lista.append(valor)
-            inferencias.append({'campo': campo, 'valor': valor, 'rotulo': ROTULOS[valor], 'motivo': motivo})
+            inferencias.append({'campo': campo, 'valor': valor, 'rotulo': rotulo_de(valor), 'motivo': motivo})
 
     texto = achados_no_texto(data.get('medicacoes_continuo') or '')
     # Itens da lista suspensa de medicações (src/utils/condicoes.py)
@@ -114,6 +126,10 @@ def inferir(data, egfr=None, gestante=False, recusados=()):
             destino = medicacoes if alvo in ('estatinas', 'anti_hipertensivos') else comorbidades
             marcar(destino, 'medicacoes' if destino is medicacoes else 'comorbidades', alvo,
                    f"uso de {MEDICACOES[chave]['rotulo']}")
+    from src.utils.medicamentos import MARCA, MEDICAMENTOS
+    for chave in escolhidas:
+        for alvo in MARCA.get(chave, []):
+            marcar(comorbidades, 'comorbidades', alvo, f"uso de {MEDICAMENTOS[chave]['rotulo'].split(' (')[0]}")
     if 'estatinas' in texto:
         marcar(medicacoes, 'medicacoes', 'estatinas', 'estatina citada em "Outras medicações"')
     if 'anti_hipertensivos' in texto:
@@ -148,6 +164,9 @@ def inferir(data, egfr=None, gestante=False, recusados=()):
     hba1c = data.get('hba1c')
     if hba1c is not None and float(hba1c) >= 6.5 and 'diabetes_tipo_2' not in comorbidades:
         marcar(comorbidades, 'comorbidades', 'diabetes', 'HbA1c ≥ 6,5% (ADA; confirmar com 2º exame)')
+    # 5,7 a 6,4% em quem não tem diabetes é pré-diabetes (no diabético tratado, é só bom controle)
+    if hba1c is not None and 5.7 <= float(hba1c) < 6.5 and not set(DIABETES) & set(comorbidades):
+        marcar(comorbidades, 'comorbidades', 'pre_diabetes', 'HbA1c de 5,7 a 6,4% (ADA)')
     peso, altura = data.get('peso'), data.get('altura')
     if peso and altura and float(peso) / (float(altura) / 100) ** 2 >= 30:
         marcar(comorbidades, 'comorbidades', 'obesidade', 'IMC ≥ 30 kg/m²')

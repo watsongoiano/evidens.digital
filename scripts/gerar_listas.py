@@ -20,23 +20,25 @@ PAGINA = RAIZ / 'intelligent-tools.html'
 MARCA_NA_TELA = {'estatinas': 'dislipidemia', 'anti_hipertensivos': 'hipertensao'}
 
 
-def _marcas(classes):
+def _marcas(classes, chave=None):
+    """Comorbidades que o item marca: pela classe (anti-hipertensivo, estatina...) e pelo próprio
+    medicamento, quando só se usa numa doença (medicamentos.MARCA)."""
     alvos = []
     for c in classes:
         for m in condicoes.MEDICACOES.get(c, {}).get('marca', []):
             m = MARCA_NA_TELA.get(m, m)
             if m not in alvos:
                 alvos.append(m)
-    return alvos
+    return alvos + [m for m in medicamentos.MARCA.get(chave, []) if m not in alvos]
 
 
 def _imuno(classes):
     return any(condicoes.MEDICACOES.get(c, {}).get('imunossupressao') for c in classes)
 
 
-def _talvez(classes):
+def _talvez(classes, chave=None):
     """Caixas que o item não marca sozinho (outras indicações), descontadas as que ele já marca."""
-    ja = _marcas(classes)
+    ja = _marcas(classes, chave)
     alvos = []
     for c in classes:
         for m in condicoes.MEDICACOES.get(c, {}).get('talvez', []):
@@ -95,7 +97,7 @@ def blocos(pagina):
         rotulo = m['rotulo'].split(' (')[0]
         chips.append(f'        <label class="opcao" for="lista_medicacoes_{chave}"><input type="checkbox" id="lista_medicacoes_{chave}" '
                      f'name="medicacoes" value="{chave}" data-rotulo="{html.escape(rotulo)}"'
-                     f'{_atributos(_marcas(m["classes"]), _imuno(m["classes"]), chave, _talvez(m["classes"]))}>{html.escape(rotulo)}</label>')
+                     f'{_atributos(_marcas(m["classes"], chave), _imuno(m["classes"]), chave, _talvez(m["classes"], chave))}>{html.escape(rotulo)}</label>')
     linhas, grupo = [], None
     for chave, m in medicamentos.MEDICAMENTOS.items():
         if chave in medicamentos.MAIS_USADOS:
@@ -104,7 +106,7 @@ def blocos(pagina):
             grupo = m['grupo']
             linhas.append(f'            <li class="combo-grupo" role="presentation">{html.escape(grupo)}</li>')
         linhas.append(_opcao(chave, m['rotulo'], m['busca'],
-                             _atributos(_marcas(m['classes']), _imuno(m['classes']), chave, _talvez(m['classes']))))
+                             _atributos(_marcas(m['classes'], chave), _imuno(m['classes']), chave, _talvez(m['classes'], chave))))
 
     return {
         'comorbidades': _combo('lista_comorbidades', 'comorbidades', 'Outras comorbidades', 'hipotireoidismo, asma, gota…',

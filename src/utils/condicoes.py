@@ -143,6 +143,8 @@ PNEUMO = 'Pneumocócica conjugada 20-valente (Prevenar 20®)'
 ZOSTER = 'Herpes Zóster (Shingrix®)'
 VSR = 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)'
 SBIM = 'SBIm 2026/2027'
+CGH_CORTICOIDE = 'CGH 2025 (Feuerstein)'
+SPARLING = 'Drugs Aging 2024 (Sparling)'
 
 
 def imunossupressao_implicada(comorbidades, medicacoes):
@@ -339,14 +341,14 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  CASCATA + ' Mulheres: orientar sobre sangramento uterino anormal e considerar rastreamento de endométrio a partir de 35 anos.',
                  'NCCN 2025')
     if 'nem1' in fam:
-        for titulo in ('Cálcio, soro', 'Paratormônio (PTH), soro', 'Prolactina, soro'):
+        for titulo in ('Cálcio iônico, soro', 'Paratormônio (PTH), soro', 'Prolactina, soro'):
             add(titulo, 'laboratorio', 'NEM1: cálcio, PTH e prolactina anuais.', f'NEM1 na família | {QUEM} | Anual',
                 'Endocrine Society 2012', 'B')
         orientar('Neoplasia endócrina múltipla tipo 1 na família',
                  CASCATA + ' No portador: gastrina e imagem pancreática anuais; ressonância de hipófise a cada 3-5 anos.',
                  'Endocrine Society 2012')
     if 'nem2' in fam:
-        for titulo in ('Calcitonina, soro', 'Metanefrinas, plasma ou urina de 24h', 'Cálcio, soro'):
+        for titulo in ('Calcitonina, soro', 'Metanefrinas, plasma ou urina de 24h', 'Cálcio iônico, soro'):
             add(titulo, 'laboratorio', 'NEM2 / carcinoma medular de tireoide familiar: calcitonina, metanefrinas e cálcio anuais.',
                 f'NEM2 na família | {QUEM} | Anual', 'ATA 2015', 'B', 'alta')
         add('Ultrassonografia de tireoide', 'imagem', 'NEM2 / carcinoma medular de tireoide familiar: ultrassonografia cervical.',
@@ -465,22 +467,58 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Hormônio Tireoestimulante (TSH), soro', 'laboratorio',
             'Hipotireoidismo em reposição: TSH anual com dose estável (6-8 semanas após ajuste).',
             'Hipotireoidismo / levotiroxina | Anual', 'ATA 2014', 'B')
-    if 'corticoide_cronico' in med and idade >= 40:
-        add('Densitometria óssea (DEXA)', 'imagem',
-            'Corticoide ≥ 2,5 mg/dia de prednisona por ≥ 3 meses: avaliar risco de fratura (densitometria e FRAX) '
-            'nos primeiros 6 meses e reavaliar a cada 1-2 anos.', 'Corticoide sistêmico ≥ 3 meses', 'ACR 2022', 'B', 'alta')
-    if 'corticoide_cronico' in med:
-        add('Hemoglobina glicada (HbA1c), soro', 'laboratorio',
-            'Corticoide sistêmico por 3 meses ou mais: rastrear hiperglicemia induzida por corticoide.',
-            'Corticoide sistêmico ≥ 3 meses | Anual', 'ADA 2025', 'B')
+    # Corticoide sistêmico. "Crônico": ≥ 2,5 mg/dia de prednisona por ≥ 3 meses (ou dose e duração não
+    # informadas). "Imunossupressor": ≥ 20 mg/dia por ≥ 2 semanas (src/utils/doses.py).
+    # Fontes: Feuerstein et al., Clin Gastroenterol Hepatol 2025;23:2068-82 (monitorização durante o uso);
+    # Sparling & Butler, Drugs Aging 2024;41:795-808 (avaliação basal antes do corticoide oral); ACR 2022 (osso).
+    cronico, imunossupressor = 'corticoide_cronico' in med, 'corticoide_imunossupressor' in med
+    if cronico or imunossupressor:
+        quem = 'Corticoide em dose imunossupressora' if imunossupressor else 'Corticoide sistêmico ≥ 3 meses'
+        for titulo in ('Glicose, soro', 'Hemoglobina glicada (HbA1c), soro'):
+            add(titulo, 'laboratorio',
+                'Corticoide sistêmico: glicemia e HbA1c antes de iniciar e de rotina durante o uso (hiperglicemia e diabetes '
+                'induzidos por corticoide).', f'{quem} | Basal e periódico', CGH_CORTICOIDE + ' / ' + SPARLING, 'B', 'alta')
+        add('Colesterol total e frações, soro', 'laboratorio',
+            'Corticoide sistêmico: perfil lipídico basal e de rotina durante o uso.', f'{quem} | Basal e periódico',
+            CGH_CORTICOIDE + ' / ' + SPARLING, 'B')
+        add('MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)', 'imagem',
+            'Corticoide sistêmico: acompanhar a pressão arterial de rotina durante o uso (hipertensão induzida por corticoide).',
+            f'{quem} | Durante o uso', CGH_CORTICOIDE, 'B')
+        add('Avaliação oftalmológica com tonometria e fundoscopia', 'imagem',
+            'Corticoide sistêmico: exame oftalmológico periódico para catarata e glaucoma.', f'{quem} | Periódico',
+            CGH_CORTICOIDE + ' / ' + SPARLING, 'B')
         add('25-hidroxivitamina D, soro', 'laboratorio',
-            'Corticoide sistêmico por 3 meses ou mais: manter vitamina D adequada (prevenção de osteoporose induzida).',
-            'Corticoide sistêmico ≥ 3 meses', 'ACR 2022', 'B', 'baixa')
-    if 'rastreio_tb_latente' in med or 'biologico' in med:
-        motivo = ' e '.join(MEDICACOES[k]['rotulo'].lower() for k in ('rastreio_tb_latente', 'biologico') if k in med)
+            'Corticoide sistêmico: manter vitamina D adequada (prevenção de osteoporose induzida por corticoide).',
+            f'{quem} | Basal', 'ACR 2022 / ' + SPARLING, 'B')
+    if cronico:
+        add('Densitometria óssea (DEXA)', 'imagem',
+            'Corticoide ≥ 2,5 mg/dia de prednisona por mais de 3 meses: densitometria nos primeiros 6 meses de uso, em qualquer '
+            'idade adulta, repetida a cada 2-3 anos (a cada 1-3 anos a partir dos 40 anos sem tratamento para osteoporose). '
+            'Calcular o FRAX a partir dos 40 anos.', 'Corticoide sistêmico ≥ 3 meses | Até 6 meses do início',
+            'ACR 2022 / ' + CGH_CORTICOIDE, 'B', 'alta')
+        if idade >= 40:
+            add('Radiografia de coluna torácica e lombar (perfil)', 'imagem',
+                'Corticoide por mais de 3 meses a partir dos 40 anos: imagem da coluna para fratura vertebral, que muda a '
+                'classificação de risco mesmo com densitometria normal.', 'Corticoide sistêmico ≥ 3 meses | Avaliação de fratura',
+                'ACR 2022 / ' + SPARLING, 'B')
+    if imunossupressor:
+        painel = ('Hemograma completo com plaquetas', 'Albumina, soro', 'Creatinina, soro', 'Ureia, soro', 'Sódio, soro',
+                  'Potássio, soro', 'Cálcio iônico, soro', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro',
+                  'Fosfatase alcalina, soro', 'Bilirrubinas totais e frações, soro')
+        for titulo in painel:
+            add(titulo, 'laboratorio',
+                'Corticoide em dose imunossupressora: avaliação laboratorial basal (hemograma, albumina e painel metabólico: '
+                'função renal, eletrólitos, cálcio e perfil hepático).', 'Corticoide em dose imunossupressora | Basal',
+                SPARLING, 'C')
+        if 18 <= idade < 60 and not gestante:
+            add(VSR, 'vacina', 'Dose única para adultos imunossuprimidos, incluído o uso de corticoide em dose imunossupressora.',
+                'Corticoide em dose imunossupressora | Dose única', SBIM + ' / ' + CGH_CORTICOIDE, 'B')
+    if {'rastreio_tb_latente', 'biologico', 'corticoide_imunossupressor'} & med:
+        motivo = ' e '.join(MEDICACOES[k]['rotulo'].lower() for k in ('corticoide_imunossupressor', 'rastreio_tb_latente', 'biologico')
+                            if k in med and not (k == 'rastreio_tb_latente' and imunossupressor))
         add('Prova tuberculínica (PPD) ou IGRA', 'laboratorio',
             f'Rastreamento de tuberculose latente em uso de {motivo}; com resultado positivo e doença ativa afastada, tratar.',
-            'Imunossupressão | Antes ou no início do tratamento', 'MS 2019 (Manual de Tuberculose) / ACR 2022', 'A', 'alta')
+            'Imunossupressão | Antes ou no início do tratamento', 'MS 2019 (Manual de Tuberculose) / ACR 2022' + (' / ' + SPARLING if imunossupressor else ''), 'A', 'alta')
     if 'biologico' in med:
         for titulo in ('Antígeno HBs, soro', 'Anticorpos anti-HBc total, soro'):
             add(titulo, 'laboratorio', 'Imunobiológico ou inibidor de JAK: rastrear hepatite B antes do tratamento '
@@ -503,7 +541,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Bisfosfonato por tempo prolongado | Reavaliação', 'ASBMR 2016', 'B')
     if 'litio' in med:
         for titulo, texto in (('Lítio, soro', 'Litemia'), ('Hormônio Tireoestimulante (TSH), soro', 'Função tireoidiana'),
-                              ('Creatinina, soro', 'Função renal'), ('Cálcio, soro', 'Hiperparatireoidismo associado ao lítio')):
+                              ('Creatinina, soro', 'Função renal'), ('Cálcio iônico, soro', 'Hiperparatireoidismo associado ao lítio')):
             add(titulo, 'laboratorio', f'{texto} em uso de lítio.', 'Em uso de lítio | A cada 6 meses', 'NICE CG185', 'B')
     if 'amiodarona' in med:
         for titulo in ('Hormônio Tireoestimulante (TSH), soro', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro'):

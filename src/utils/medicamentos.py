@@ -162,6 +162,32 @@ GRUPOS = [
     ]),
 ]
 
+# Medicamento de uso contínuo que, na prática, só se prescreve para uma doença: escolher o medicamento
+# marca a comorbidade (a tela e src/utils/coerencia.py usam a mesma tabela). Ficam de fora os que têm
+# outra indicação comum: metotrexato e azatioprina (oncologia, transplante), rituximabe (linfoma),
+# pramipexol (pernas inquietas), amantadina, valproato, carbamazepina, lamotrigina e topiramato (humor,
+# enxaqueca, dor), gabapentina e pregabalina (dor), alopurinol e colchicina (não só gota), clopidogrel e
+# AAS (prevenção primária e outras), anticoagulantes, amiodarona e digoxina (várias indicações),
+# doxazosina (hipertensão), finasterida (alopecia), denosumabe e ácido zoledrônico (oncologia),
+# tenofovir + entricitabina e cabotegravir (PrEP), inalatórios usados em asma e em DPOC.
+IMPLICA = {
+    'insuficiencia_cardiaca': ['Sacubitril + valsartana'],
+    'hipotireoidismo': ['Levotiroxina'],
+    'hipertireoidismo': ['Metimazol (tiamazol)', 'Propiltiouracila'],
+    'parkinson': ['Levodopa + benserazida', 'Levodopa + carbidopa', 'Rasagilina'],
+    'demencia': ['Donepezila', 'Rivastigmina', 'Galantamina', 'Memantina'],
+    'epilepsia': ['Levetiracetam', 'Fenitoína', 'Fenobarbital', 'Lacosamida'],
+    'osteoporose': ['Alendronato', 'Risedronato', 'Ibandronato', 'Teriparatida'],
+    'hpb': ['Tansulosina', 'Silodosina', 'Dutasterida', 'Dutasterida + tansulosina'],
+    'dpoc': ['Umeclidínio + vilanterol', 'Indacaterol + glicopirrônio', 'Tiotrópio + olodaterol'],
+    'dcv_aterosclerotica': ['Ticagrelor', 'Prasugrel'],
+    'hiv': ['Tenofovir + lamivudina + dolutegravir', 'Dolutegravir', 'Bictegravir + entricitabina + tenofovir alafenamida',
+            'Darunavir + ritonavir'],
+    'doenca_autoimune': ['Hidroxicloroquina', 'Sulfassalazina', 'Mesalazina', 'Leflunomida', 'Tofacitinibe', 'Upadacitinibe',
+                         'Adalimumabe', 'Etanercepte', 'Infliximabe', 'Golimumabe', 'Tocilizumabe', 'Ustequinumabe',
+                         'Risanquizumabe', 'Guselcumabe'],
+}
+
 # Os mais usados de forma contínua no Brasil ficam como botões na tela (PNAUM 2014; PróGenéricos/IQVIA 2025).
 MAIS_USADOS = ('losartana', 'hidroclorotiazida', 'enalapril', 'anlodipino', 'atenolol', 'sinvastatina',
                'atorvastatina', 'metformina', 'glibenclamida', 'aas_acido_acetilsalicilico', 'levotiroxina', 'omeprazol')
@@ -192,6 +218,12 @@ def _montar():
 
 MEDICAMENTOS = _montar()
 assert all(k in MEDICAMENTOS for k in MAIS_USADOS)
+# medicamento (chave) -> comorbidades que ele marca
+MARCA = {}
+for _comorbidade, _rotulos in IMPLICA.items():
+    for _rotulo in _rotulos:
+        assert chave_de(_rotulo) in MEDICAMENTOS, _rotulo
+        MARCA.setdefault(chave_de(_rotulo), []).append(_comorbidade)
 
 
 def classes_de(medicacoes, excluir=None):

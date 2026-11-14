@@ -11,7 +11,7 @@ A home do Evidēns diz "mais de 7 mil páginas" e "mais de 40 sociedades". Este 
 
 ## Resultado
 
-- **64 documentos ou famílias de documentos. cerca de 7.187 páginas** (5.859 sem o Williams).
+- **66 documentos ou famílias de documentos. cerca de 7.216 páginas** (5.888 sem o Williams).
 - **47 instituições** na grade da home (5 nacionais e 42 internacionais). O teste `test_home_so_lista_instituicoes_que_o_motor_cita` falha se a home listar alguma que o motor não cita.
 
 Ao acrescentar ou retirar uma fonte do motor, atualize esta tabela e, se o total mudar de faixa, os números da home.
@@ -120,4 +120,6 @@ Ao acrescentar ou retirar uma fonte do motor, atualize esta tabela e, se o total
 | ACR 2021 | Artrite reumatoide | 16 |
 | ACR 2022 | Vacinação em doenças reumáticas | 16 |
 | ACR 2023 | Osteoporose induzida por corticoide | 15 |
-| | **Subtotal** | **527** |
+| CGH 2025 (Feuerstein) | Corticoide na doença inflamatória intestinal: uso e complicações (revisão; Clin Gastroenterol Hepatol 23:2068-82) | 15 |
+| Drugs Aging 2024 (Sparling) | Corticoide oral no idoso: como reduzir efeitos adversos (revisão; Drugs Aging 41:795-808) | 14 |
+| | **Subtotal** | **556** |

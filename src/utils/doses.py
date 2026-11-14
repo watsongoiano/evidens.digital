@@ -113,7 +113,8 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
         if len(completos) < len(corticoides):
             orientar('Corticoide sistêmico: informe dose e duração',
                      'Sem dose e duração, o uso foi tratado como crônico (≥ 3 meses). Com os dois, a ferramenta diz se há '
-                     'imunossupressão (vacinas de vírus vivo), se cabe densitometria e rastreio de tuberculose latente.',
+                     'imunossupressão (vacinas de vírus vivo e avaliação laboratorial basal), se cabe densitometria e rastreio '
+                     'de tuberculose latente.',
                      'ACR 2022 / SBIm 2026/2027')
         else:
             equivalente = {m: detalhes[m]['dose'] * POR_MEDICAMENTO[m][1] for m in corticoides}
@@ -135,8 +136,12 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
                 acrescentar.add('corticoide_imunossupressor')
                 orientar('Corticoide em dose imunossupressora',
                          f'{resumo}. A partir de 20 mg/dia por 14 dias ou mais há imunossupressão: vacinas de vírus vivo '
-                         'atenuado ficam contraindicadas e só voltam 4 semanas depois de suspender; as inativadas seguem indicadas.',
-                         'SBIm 2026/2027 / CDC/ACIP 2025')
+                         'atenuado (tríplice viral, varicela, febre amarela, dengue) ficam contraindicadas e só voltam 4 semanas '
+                         'depois de suspender. Manter em dia as inativadas: influenza, COVID-19, pneumocócica, herpes-zóster '
+                         'recombinante, HPV, VSR, dTpa, hepatites A e B nos não vacinados e meningocócicas quando indicadas. '
+                         'Durante o uso: avaliação laboratorial basal, glicemia e HbA1c, perfil lipídico, pressão arterial '
+                         '(MAPA) e exame oftalmológico; densitometria se o uso passar de 3 meses.',
+                         'SBIm 2026/2027 / CDC/ACIP 2025 / CGH 2025 (Feuerstein) / Drugs Aging 2024 (Sparling)')
             if tb_latente:
                 acrescentar.add('rastreio_tb_latente')
             if dose_alta_prolongada:
@@ -146,9 +151,10 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
                          'manter dose alta (área endêmica).', 'ATS 2011 / MS 2019')
             if cronico:
                 orientar('Corticoide por 3 meses ou mais',
-                         f'{resumo}. Além da avaliação de fratura (densitometria e FRAX): garantir cálcio e vitamina D, '
-                         'acompanhar glicemia e pressão arterial, exame oftalmológico periódico (catarata e glaucoma) e, na '
-                         'suspensão, redução gradual pelo risco de insuficiência adrenal.', 'ACR 2022')
+                         f'{resumo}. Além da avaliação de fratura (densitometria, imagem da coluna e FRAX): cálcio '
+                         '800-1.000 mg/dia e vitamina D 600-800 UI/dia (a ACR 2022 fala em 1.000-1.200 mg de cálcio), acompanhar '
+                         'glicemia, lipídios e pressão arterial, exame oftalmológico periódico (catarata e glaucoma) e, na '
+                         'suspensão, redução gradual pelo risco de insuficiência adrenal.', 'ACR 2022 / CGH 2025 (Feuerstein)')
             elif not imunossupressor:
                 orientar('Corticoide sistêmico em dose ou tempo baixos',
                          f'{resumo}: abaixo dos limiares de imunossupressão (20 mg/dia por 2 semanas) e de risco de fratura '

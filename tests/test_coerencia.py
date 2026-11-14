@@ -52,8 +52,43 @@ def test_hba1c_imc_tfg_e_has_resistente():
     com, _, _ = coerencia.inferir({'hba1c': 6.5, 'peso': 95, 'altura': 170,
                                    'comorbidades': ['has_resistente']}, egfr=52)
     assert {'diabetes', 'obesidade', 'doenca_renal', 'hipertensao'} <= set(com)
-    com, _, inf = coerencia.inferir({'hba1c': 6.4, 'peso': 80, 'altura': 170}, egfr=75)
+    com, _, inf = coerencia.inferir({'hba1c': 5.6, 'peso': 80, 'altura': 170}, egfr=75)
     assert com == [] and inf == []
+
+
+def test_hba1c_na_faixa_de_pre_diabetes_marca_pre_diabetes():
+    for valor in (5.7, 6.0, 6.4):
+        com, _, inf = coerencia.inferir({'hba1c': valor})
+        assert com == ['pre_diabetes'] and inf[0]['rotulo'] == 'Pré-diabetes' and '5,7 a 6,4%' in inf[0]['motivo']
+    # no diabético (marcado, ou reconhecido pela medicação), 6,0% é bom controle, não pré-diabetes
+    assert coerencia.inferir({'hba1c': 6.0, 'comorbidades': ['diabetes']})[0] == ['diabetes']
+    com, _, _ = coerencia.inferir({'hba1c': 6.0, 'medicacoes': ['insulina']})
+    assert 'diabetes' in com and 'pre_diabetes' not in com
+    # quem desmarcou a caixa na tela fica com a decisão
+    assert coerencia.inferir({'hba1c': 6.0}, recusados=['pre_diabetes'])[0] == []
+
+
+def test_medicamento_que_so_se_usa_numa_doenca_marca_a_doenca():
+    from src.utils import medicamentos
+    esperado = {'sacubitril_valsartana': 'insuficiencia_cardiaca', 'levotiroxina': 'hipotireoidismo',
+                'metimazol_tiamazol': 'hipertireoidismo', 'propiltiouracila': 'hipertireoidismo',
+                'levodopa_benserazida': 'parkinson', 'levodopa_carbidopa': 'parkinson', 'donepezila': 'demencia',
+                'levetiracetam': 'epilepsia', 'alendronato': 'osteoporose', 'tansulosina': 'hpb',
+                'umeclidinio_vilanterol': 'dpoc', 'ticagrelor': 'dcv_aterosclerotica',
+                'tenofovir_lamivudina_dolutegravir': 'hiv', 'adalimumabe': 'doenca_autoimune'}
+    for medicamento, doenca in esperado.items():
+        com, _, inf = coerencia.inferir({}, escolhidas=[medicamento])
+        assert com == [doenca], medicamento
+        assert inf[0]['motivo'].startswith('uso de ') and inf[0]['rotulo'] == coerencia.rotulo_de(doenca)
+    # todo alvo é uma comorbidade que a tela conhece (caixa fixa ou item da lista)
+    for alvos in medicamentos.MARCA.values():
+        for alvo in alvos:
+            assert coerencia.rotulo_de(alvo)
+    # os que têm outra indicação comum não marcam nada sozinhos
+    for medicamento in ('metotrexato', 'pramipexol', 'alopurinol', 'clopidogrel', 'tenofovir_entricitabina', 'pregabalina'):
+        assert coerencia.inferir({}, escolhidas=[medicamento])[0] == [], medicamento
+    # desmarcar na tela vale
+    assert coerencia.inferir({}, escolhidas=['levotiroxina'], recusados=['hipotireoidismo'])[0] == []
 
 
 def test_nao_duplica_o_que_ja_esta_marcado():
