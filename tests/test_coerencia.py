@@ -51,7 +51,8 @@ def test_sem_falso_positivo_por_pedaco_de_palavra():
 def test_hba1c_imc_tfg_e_has_resistente():
     com, _, _ = coerencia.inferir({'hba1c': 6.5, 'peso': 95, 'altura': 170,
                                    'comorbidades': ['has_resistente']}, egfr=52)
-    assert {'diabetes', 'obesidade', 'doenca_renal', 'hipertensao'} <= set(com)
+    assert {'obesidade', 'doenca_renal', 'hipertensao'} <= set(com)
+    assert not {'diabetes', 'diabetes_tipo_1'} & set(com)   # HbA1c ≥ 6,5% não diz o tipo: nenhuma caixa de diabetes
     com, _, inf = coerencia.inferir({'hba1c': 5.6, 'peso': 80, 'altura': 170}, egfr=75)
     assert com == [] and inf == []
 

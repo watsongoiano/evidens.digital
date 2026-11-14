@@ -431,8 +431,20 @@ def test_hba1c_a_partir_de_6_5_conta_como_diabetes(client, hba1c, diabetico):
     assert r['diabetes_por_hba1c'] is diabetico
 
 
-def test_hba1c_marca_o_chip_de_diabetes_na_tela(pagina):
-    assert "hb >= 6.5" in pagina and "input[data-marca]:checked" in pagina
+def test_hba1c_alta_pede_o_tipo_de_diabetes_sem_marcar_caixa(client, pagina):
+    """HbA1c ≥ 6,5% é critério de diabetes, mas não diz o tipo: nem a tela nem o servidor marcam "tipo 2"."""
+    assert "pedir('diabetes', 'hba1c'" not in pagina and 'marque o tipo de diabetes' in pagina
+    corpo = {'idade': '50', 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao', 'hba1c': '7.2'}
+    r = client.post('/api/checkup-intelligent', json=corpo).get_json()
+    assert not [i for i in r['inferencias'] if i['valor'].startswith('diabetes')]
+    assert any(o['titulo'] == 'HbA1c ≥ 6,5%: informe o tipo de diabetes' for o in r['orientacoes'])
+    titulos = [x['titulo'] for x in r['recommendations']]
+    assert 'Relação albumina/creatinina urinária (uACR)' in titulos and not any(t.startswith('TOTG') for t in titulos)
+    assert 'Hormônio Tireoestimulante (TSH), soro' not in titulos      # TSH é do tipo 1 (ADA)
+    # com o tipo marcado, vale o tipo e a orientação some
+    r1 = client.post('/api/checkup-intelligent', json={**corpo, 'comorbidades': ['diabetes_tipo_1']}).get_json()
+    assert r1['diabetes_por_hba1c'] is False and not any('informe o tipo' in o['titulo'] for o in r1['orientacoes'])
+    assert 'Hormônio Tireoestimulante (TSH), soro' in [x['titulo'] for x in r1['recommendations']]
 
 
 def test_exames_laboratoriais_so_aparecem_se_houver(pagina):

@@ -568,13 +568,19 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                 'HRS 2007 (Goldschlager)', 'B')
 
     # ---------------- Comorbidades ----------------
-    diabetico = bool(set(TIPOS_DE_DIABETES) & com)
-    if 'insulina' in med and not diabetico:
+    com_tipo = bool(set(TIPOS_DE_DIABETES) & com)
+    diabetico = com_tipo or 'diabetes_sem_tipo' in com or 'insulina' in med
+    if 'diabetes_sem_tipo' in com:
+        orientar('HbA1c ≥ 6,5%: informe o tipo de diabetes',
+                 'HbA1c ≥ 6,5% é critério de diabetes (confirmar com um segundo exame se não houver hiperglicemia inequívoca), '
+                 'mas não define o tipo. As recomendações foram montadas como para uma pessoa com diabetes. Marque o tipo '
+                 'para refinar (por exemplo, TSH no tipo 1).', 'ADA 2026')
+    if 'insulina' in med and not com_tipo:
         orientar('Insulina em uso: informe o tipo de diabetes',
                  'A insulina é usada no diabetes tipo 1, no tipo 2, no gestacional e em outros tipos; por isso não marca um tipo '
                  'sozinha. As recomendações foram montadas como para uma pessoa com diabetes. Marque o tipo para refinar '
                  '(por exemplo, TSH no tipo 1).', 'ADA 2026')
-    if 'diabetes_gestacional_previo' in com and sexo == 'feminino' and not gestante and not diabetico and 'insulina' not in med:
+    if 'diabetes_gestacional_previo' in com and sexo == 'feminino' and not gestante and not diabetico:
         for titulo in ('Glicose, soro', 'Hemoglobina glicada (HbA1c), soro'):
             add(titulo, 'laboratorio',
                 'Diabetes gestacional em gestação anterior: rastrear pré-diabetes e diabetes por toda a vida, pelo menos a cada 3 anos.',

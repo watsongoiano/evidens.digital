@@ -90,7 +90,7 @@
           <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200" inputmode="numeric"></div>
           <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" placeholder="Ex: 45" inputmode="numeric"></div>
           <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
-          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5%: "Diabetes tipo 2" marcado automaticamente (ADA). Confirme com um segundo exame se não houver hiperglicemia inequívoca.</p></div>
+          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5%: critério de diabetes (ADA). Confirme com um segundo exame se não houver hiperglicemia inequívoca e marque o tipo de diabetes.</p></div>
         </div>
       </div>
     </section>
@@ -1439,13 +1439,14 @@
                 const est2 = pas >= 140 || pad >= 90, est1 = pas >= 130 || pad >= 80;
                 if (est2 || (est1 && !gest)) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg = HAS estágio ${est2 ? 2 : 1} (AHA/ACC 2025); confirmar com MRPA ou MAPA`);
                 if (document.getElementById('has_resistente').checked) pedir('hipertensao', 'has_resistente', 'HAS resistente marcada');
-                const hb = num('hba1c'); if (hb !== null && hb >= 6.5) pedir('diabetes', 'hba1c', 'HbA1c ≥ 6,5% (ADA; confirmar com 2º exame)');
-                // Antidiabético ou HbA1c ≥ 6,5% não dizem o tipo: com outro tipo de diabetes marcado, o tipo 2 não entra.
+                // HbA1c ≥ 6,5% é critério de diabetes, mas não diz o tipo: não marca caixa (o aviso sob o campo pede o tipo).
+                const hb = num('hba1c');
+                // Antidiabético também não diz o tipo: com outro tipo de diabetes marcado, o tipo 2 não entra.
                 const outroTipo = OUTROS_TIPOS_DE_DIABETES.some(marcada);
                 if (outroTipo) delete r.diabetes;
                 // 5,7 a 6,4% em quem não tem diabetes é pré-diabetes (no diabético tratado, é só bom controle)
                 // (caixa de diabetes marcada à mão, ou pedida agora por outra regra; a automática de uma rodada anterior não conta)
-                const diabetico = outroTipo || usaInsulina() || (r.diabetes && !recusados.has('diabetes')) || (document.getElementById('diabetes').checked && !auto.has('diabetes'));
+                const diabetico = outroTipo || usaInsulina() || (hb !== null && hb >= 6.5) || (r.diabetes && !recusados.has('diabetes')) || (document.getElementById('diabetes').checked && !auto.has('diabetes'));
                 if (hb !== null && hb >= 5.7 && hb < 6.5 && !diabetico) pedir('pre_diabetes', 'hba1c', 'HbA1c de 5,7 a 6,4% (ADA)');
                 const peso = num('peso'), alt = num('altura');
                 if (peso && alt && peso / Math.pow(alt / 100, 2) >= 30) pedir('obesidade', 'imc', 'IMC ≥ 30 kg/m²');
@@ -1504,7 +1505,7 @@
                 dica.hidden = frases.length === 0;
                 dica.textContent = '';
                 frases.forEach((frase, i) => { const f = document.createElement('span'); f.textContent = frase; dica.append(i ? ' ' : '', f); });
-                document.getElementById('hba1c-aviso').hidden = !(auto.has('diabetes') && (num('hba1c') || 0) >= 6.5);
+                document.getElementById('hba1c-aviso').hidden = !((num('hba1c') || 0) >= 6.5 && !marcada('diabetes') && !OUTROS_TIPOS_DE_DIABETES.some(marcada));
             }
             ['hba1c', 'peso', 'altura', 'pas', 'pad', 'gestante'].forEach(id => {
                 document.getElementById(id).addEventListener('input', conferir);

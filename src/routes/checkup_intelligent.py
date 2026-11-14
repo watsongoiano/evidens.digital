@@ -777,14 +777,14 @@ def generate_intelligent_recommendations():
         
         # Verificar HbA1C se fornecido
         hba1c = float(data.get('hba1c', 0)) if data.get('hba1c') else None
-        diabetes_por_hba1c = any(i['valor'] == 'diabetes' and 'HbA1c' in i['motivo'] for i in inferencias)
-        if hba1c is not None and hba1c >= 6.5 and not is_diabetic:
-            # ADA: HbA1c ≥ 6,5% é critério diagnóstico de diabetes (confirmar com 2º exame
-            # se não houver hiperglicemia inequívoca). Antes o corte era > 6,5 e 6,5 escapava.
+        diabetes_por_hba1c = False
+        if hba1c is not None and hba1c >= 6.5 and not set(condicoes.TIPOS_DE_DIABETES) & set(comorbidades):
+            # ADA: HbA1c ≥ 6,5% é critério diagnóstico de diabetes (confirmar com 2º exame se não houver
+            # hiperglicemia inequívoca), mas não diz o tipo: o paciente é tratado como diabético sem marcar
+            # tipo 1, tipo 2 ou outro. "diabetes_sem_tipo" é só um marcador interno, não existe na tela.
             diabetes_por_hba1c = True
             is_diabetic = True
-            if 'diabetes_tipo_2' not in comorbidades:
-                comorbidades.append('diabetes_tipo_2')
+            comorbidades.append('diabetes_sem_tipo')
         
         # TOTG só com indicação: glicemia ou HbA1c limítrofes (pré-diabetes marcado ou HbA1c de 5,7 a 6,4%),
         # para confirmar o diagnóstico. Não entra no check-up de rotina e nunca em quem já tem diabetes

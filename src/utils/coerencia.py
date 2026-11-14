@@ -1,7 +1,7 @@
 """Coerência entre campos do formulário.
 
 Um dado implica outro: estatina implica dislipidemia, anti-hipertensivo implica
-hipertensão, HbA1c ≥ 6,5% implica diabetes, IMC ≥ 30 implica obesidade etc. Sem
+hipertensão, IMC ≥ 30 implica obesidade etc. (HbA1c ≥ 6,5% indica diabetes sem dizer o tipo) Sem
 isso, o médico marca "sinvastatina" no texto e o motor (e o PREVENT) tratam o
 paciente como se não usasse estatina.
 
@@ -165,8 +165,8 @@ def inferir(data, egfr=None, gestante=False, recusados=(), escolhidas=()):
     if 'antidiabeticos' in texto:
         marcar(comorbidades, 'comorbidades', 'diabetes', 'antidiabético citado em "Outras medicações"')
     hba1c = data.get('hba1c')
-    if hba1c is not None and float(hba1c) >= 6.5:
-        marcar(comorbidades, 'comorbidades', 'diabetes', 'HbA1c ≥ 6,5% (ADA; confirmar com 2º exame)')
+    # HbA1c ≥ 6,5% é critério de diabetes, mas não diz o tipo: não marca caixa nenhuma (o motor trata o
+    # paciente como diabético e pede o tipo; ver a rota do check-up).
     # 5,7 a 6,4% em quem não tem diabetes é pré-diabetes (no diabético tratado, é só bom controle)
     if hba1c is not None and 5.7 <= float(hba1c) < 6.5 and not set(DIABETES) & set(comorbidades) and 'insulina' not in medicacoes:
         marcar(comorbidades, 'comorbidades', 'pre_diabetes', 'HbA1c de 5,7 a 6,4% (ADA)')
