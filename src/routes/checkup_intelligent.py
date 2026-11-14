@@ -69,8 +69,8 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     
     _add_rec({
         'titulo': 'TOTG-75g (Teste Oral de Tolerância à Glicose), soro',
-        'descricao': 'Teste confirmatório para diabetes gestacional e rastreamento de diabetes tipo 2 quando glicemia de jejum e HbA1c são inconclusivos. Valores 2h pós-carga: <140 mg/dL normal, 140-199 mg/dL pré-diabetes, ≥200 mg/dL diabetes.',
-        'subtitulo': 'Adultos ≥35 anos com glicemia/HbA1c limítrofes | Conforme indicação',
+        'descricao': 'Indicado quando glicemia de jejum ou HbA1c estão na faixa de pré-diabetes ou são discordantes: confirma ou afasta diabetes. Valores 2h pós-carga: <140 mg/dL normal, 140-199 mg/dL pré-diabetes, ≥200 mg/dL diabetes. Não se pede a quem já tem diabetes.',
+        'subtitulo': 'Glicemia ou HbA1c limítrofes (pré-diabetes) | Para confirmar o diagnóstico',
         'categoria': 'laboratorio',
         'prioridade': 'media',
         'referencia': 'ADA 2024',
@@ -785,10 +785,13 @@ def generate_intelligent_recommendations():
             if 'diabetes_tipo_2' not in comorbidades:
                 comorbidades.append('diabetes_tipo_2')
         
-        if is_diabetic:
-            # Quem já tem diabetes não faz rastreamento: o TOTG sai (não se pede curva glicêmica a diabético)
-            # e glicemia e HbA1c passam a ser acompanhamento do controle, não rastreio.
+        # TOTG só com indicação: glicemia ou HbA1c limítrofes (pré-diabetes marcado ou HbA1c de 5,7 a 6,4%),
+        # para confirmar o diagnóstico. Não entra no check-up de rotina e nunca em quem já tem diabetes
+        # (tipo 1, tipo 2, em uso de insulina ou antidiabético). O TOTG da gestação é o do pré-natal.
+        if is_diabetic or 'pre_diabetes' not in comorbidades:
             recommendations = [r for r in recommendations if not (r.get('titulo') or '').startswith('TOTG-75g')]
+        if is_diabetic:
+            # Quem já tem diabetes não faz rastreamento: glicemia e HbA1c passam a ser acompanhamento do controle.
             for rec in recommendations:
                 if rec.get('titulo') == 'Hemoglobina glicada (HbA1c), soro':
                     rec.update({'descricao': 'Controle glicêmico no diabetes: pelo menos 2 vezes ao ano em quem está na meta e a cada '

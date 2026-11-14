@@ -336,10 +336,10 @@ def test_caso_de_exemplo_da_home_e_a_saida_real_do_motor(client):
     por_tipo = {}
     for rec in recs:
         por_tipo[rec['categoria']] = por_tipo.get(rec['categoria'], 0) + 1
-    assert (len(recs), por_tipo['laboratorio'], por_tipo['imagem'], por_tipo['vacina']) == (27, 12, 4, 11)
+    assert (len(recs), por_tipo['laboratorio'], por_tipo['imagem'], por_tipo['vacina']) == (26, 11, 4, 11)
     assert r['nao_incluidas'] == []
     html = client.get('/').get_data(as_text=True)
-    for trecho in ('4 de 27', '27 recomendações<br>', 'px-3 py-1">12</span>', 'px-3 py-1">4</span>', 'px-3 py-1">11</span>'):
+    for trecho in ('4 de 26', '26 recomendações<br>', 'px-3 py-1">4</span>', 'px-3 py-1">11</span>'):
         assert trecho in html, trecho
     # As quatro linhas da tabela de conduta: item, fonte e grau de evidência como o motor devolve.
     def achar(pedaco):

@@ -113,8 +113,8 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
         if len(completos) < len(corticoides):
             orientar('Corticoide sistêmico: informe dose e duração',
                      'Sem dose e duração, o uso foi tratado como crônico (≥ 3 meses). Com os dois, a ferramenta diz se há '
-                     'imunossupressão (vacinas de vírus vivo e avaliação laboratorial basal), se cabe densitometria e rastreio '
-                     'de tuberculose latente.',
+                     'imunossupressão (vacinas de vírus vivo) e se cabe densitometria. A avaliação laboratorial e a '
+                     'monitorização do corticoide valem em qualquer dose.',
                      'ACR 2022 / SBIm 2026/2027')
         else:
             equivalente = {m: detalhes[m]['dose'] * POR_MEDICAMENTO[m][1] for m in corticoides}
@@ -158,7 +158,9 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
             elif not imunossupressor:
                 orientar('Corticoide sistêmico em dose ou tempo baixos',
                          f'{resumo}: abaixo dos limiares de imunossupressão (20 mg/dia por 2 semanas) e de risco de fratura '
-                         '(2,5 mg/dia por 3 meses). Não muda as vacinas nem indica densitometria.', 'ACR 2022 / SBIm 2026/2027')
+                         '(2,5 mg/dia por 3 meses). Não muda as vacinas nem indica densitometria; a avaliação laboratorial e a '
+                         'monitorização do corticoide (glicemia, lipídios, pressão, olhos) seguem indicadas.',
+                         'ACR 2022 / SBIm 2026/2027 / CGH 2025 (Feuerstein)')
 
     if 'metotrexato' in medicacoes:
         dose = detalhes.get('metotrexato', {}).get('dose')

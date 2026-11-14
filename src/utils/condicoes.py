@@ -76,6 +76,7 @@ MEDICACOES = {
     'aglp1': {'rotulo': 'Agonista de GLP-1', 'talvez': ['diabetes']},
     'levotiroxina': {'rotulo': 'Levotiroxina'},
     'antitireoidiano': {'rotulo': 'Antitireoidiano'},
+    'corticoide_sistemico': {'rotulo': 'Corticoide sistêmico'},
     'corticoide_cronico': {'rotulo': 'Corticoide sistêmico ≥ 3 meses'},
     'imunossupressor': {'rotulo': 'Imunossupressor ou imunobiológico', 'imunossupressao': True},
     # Definidas pela dose e pela duração (src/utils/doses.py)
@@ -467,13 +468,17 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Hormônio Tireoestimulante (TSH), soro', 'laboratorio',
             'Hipotireoidismo em reposição: TSH anual com dose estável (6-8 semanas após ajuste).',
             'Hipotireoidismo / levotiroxina | Anual', 'ATA 2014', 'B')
-    # Corticoide sistêmico. "Crônico": ≥ 2,5 mg/dia de prednisona por ≥ 3 meses (ou dose e duração não
-    # informadas). "Imunossupressor": ≥ 20 mg/dia por ≥ 2 semanas (src/utils/doses.py).
+    # Corticoide sistêmico em uso, a partir da dose baixa: avaliação basal e monitorização valem para todos.
+    # A dose e a duração (src/utils/doses.py) só mudam o que depende delas: densitometria e imagem da coluna
+    # a partir de 3 meses de uso (≥ 2,5 mg/dia de prednisona) e, na dose imunossupressora (≥ 20 mg/dia por
+    # ≥ 2 semanas), vacinas de vírus vivo fora e VSR indicada.
     # Fontes: Feuerstein et al., Clin Gastroenterol Hepatol 2025;23:2068-82 (monitorização durante o uso);
     # Sparling & Butler, Drugs Aging 2024;41:795-808 (avaliação basal antes do corticoide oral); ACR 2022 (osso).
     cronico, imunossupressor = 'corticoide_cronico' in med, 'corticoide_imunossupressor' in med
-    if cronico or imunossupressor:
-        quem = 'Corticoide em dose imunossupressora' if imunossupressor else 'Corticoide sistêmico ≥ 3 meses'
+    corticoide = cronico or imunossupressor or 'corticoide_sistemico' in med
+    if corticoide:
+        quem = ('Corticoide em dose imunossupressora' if imunossupressor else
+                'Corticoide sistêmico ≥ 3 meses' if cronico else 'Corticoide sistêmico')
         for titulo in ('Glicose, soro', 'Hemoglobina glicada (HbA1c), soro'):
             add(titulo, 'laboratorio',
                 'Corticoide sistêmico: glicemia e HbA1c antes de iniciar e de rotina durante o uso (hiperglicemia e diabetes '
@@ -490,6 +495,13 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('25-hidroxivitamina D, soro', 'laboratorio',
             'Corticoide sistêmico: manter vitamina D adequada (prevenção de osteoporose induzida por corticoide).',
             f'{quem} | Basal', 'ACR 2022 / ' + SPARLING, 'B')
+        painel = ('Hemograma completo com plaquetas', 'Albumina, soro', 'Creatinina, soro', 'Ureia, soro', 'Sódio, soro',
+                  'Potássio, soro', 'Cálcio iônico, soro', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro',
+                  'Fosfatase alcalina, soro', 'Bilirrubinas totais e frações, soro')
+        for titulo in painel:
+            add(titulo, 'laboratorio',
+                'Corticoide sistêmico: avaliação laboratorial basal (hemograma, albumina e painel metabólico: função renal, '
+                'eletrólitos, cálcio e perfil hepático).', f'{quem} | Basal', SPARLING, 'C')
     if cronico:
         add('Densitometria óssea (DEXA)', 'imagem',
             'Corticoide ≥ 2,5 mg/dia de prednisona por mais de 3 meses: densitometria nos primeiros 6 meses de uso, em qualquer '
@@ -501,24 +513,16 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                 'Corticoide por mais de 3 meses a partir dos 40 anos: imagem da coluna para fratura vertebral, que muda a '
                 'classificação de risco mesmo com densitometria normal.', 'Corticoide sistêmico ≥ 3 meses | Avaliação de fratura',
                 'ACR 2022 / ' + SPARLING, 'B')
-    if imunossupressor:
-        painel = ('Hemograma completo com plaquetas', 'Albumina, soro', 'Creatinina, soro', 'Ureia, soro', 'Sódio, soro',
-                  'Potássio, soro', 'Cálcio iônico, soro', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro',
-                  'Fosfatase alcalina, soro', 'Bilirrubinas totais e frações, soro')
-        for titulo in painel:
-            add(titulo, 'laboratorio',
-                'Corticoide em dose imunossupressora: avaliação laboratorial basal (hemograma, albumina e painel metabólico: '
-                'função renal, eletrólitos, cálcio e perfil hepático).', 'Corticoide em dose imunossupressora | Basal',
-                SPARLING, 'C')
-        if 18 <= idade < 60 and not gestante:
-            add(VSR, 'vacina', 'Dose única para adultos imunossuprimidos, incluído o uso de corticoide em dose imunossupressora.',
-                'Corticoide em dose imunossupressora | Dose única', SBIM + ' / ' + CGH_CORTICOIDE, 'B')
-    if {'rastreio_tb_latente', 'biologico', 'corticoide_imunossupressor'} & med:
-        motivo = ' e '.join(MEDICACOES[k]['rotulo'].lower() for k in ('corticoide_imunossupressor', 'rastreio_tb_latente', 'biologico')
-                            if k in med and not (k == 'rastreio_tb_latente' and imunossupressor))
+    if imunossupressor and 18 <= idade < 60 and not gestante:
+        add(VSR, 'vacina', 'Dose única para adultos imunossuprimidos, incluído o uso de corticoide em dose imunossupressora.',
+            'Corticoide em dose imunossupressora | Dose única', SBIM + ' / ' + CGH_CORTICOIDE, 'B')
+    if corticoide or 'biologico' in med:
+        motivo = ' e '.join(x for x, sim in (('corticoide sistêmico', corticoide),
+                                             (MEDICACOES['biologico']['rotulo'].lower(), 'biologico' in med)) if sim)
+        imunossuprime = imunossupressor or 'rastreio_tb_latente' in med or 'biologico' in med
         add('Prova tuberculínica (PPD) ou IGRA', 'laboratorio',
             f'Rastreamento de tuberculose latente em uso de {motivo}; com resultado positivo e doença ativa afastada, tratar.',
-            'Imunossupressão | Antes ou no início do tratamento', 'MS 2019 (Manual de Tuberculose) / ACR 2022' + (' / ' + SPARLING if imunossupressor else ''), 'A', 'alta')
+            ('Imunossupressão' if imunossuprime else 'Corticoide sistêmico') + ' | Antes ou no início do tratamento', 'MS 2019 (Manual de Tuberculose) / ACR 2022' + (' / ' + SPARLING if corticoide else ''), 'A', 'alta')
     if 'biologico' in med:
         for titulo in ('Antígeno HBs, soro', 'Anticorpos anti-HBc total, soro'):
             add(titulo, 'laboratorio', 'Imunobiológico ou inibidor de JAK: rastrear hepatite B antes do tratamento '

@@ -63,9 +63,19 @@ def test_diabetico_nao_recebe_totg_e_a_glicemia_vira_acompanhamento(client, dado
     assert recs['Glicose, soro']['subtitulo'].startswith('Diabéticos')
 
 
-def test_quem_nao_e_diabetico_continua_com_o_totg_como_exame_de_duvida(client):
-    assert any(t.startswith('TOTG-75g') for t in _recs(client))
-    assert any(t.startswith('TOTG-75g') for t in _recs(client, hba1c='6.0'))  # pré-diabetes
+def test_totg_so_com_indicacao(client):
+    """TOTG confirma o diagnóstico quando glicemia ou HbA1c estão limítrofes; não é exame de rotina."""
+    tem_totg = lambda **dados: any(t.startswith('TOTG-75g') for t in _recs(client, **dados))  # noqa: E731
+    # check-up de rotina, em qualquer idade e sexo, com ou sem fator de risco: sem TOTG
+    for dados in (dict(), dict(idade=25), dict(idade=70, sexo='feminino', gestante='nao', lactante='nao'), dict(hba1c='5.2'),
+                  dict(comorbidades=['hipertensao', 'obesidade']), dict(historia_familiar=['diabetes']), dict(comorbidades=['sop'])):
+        assert not tem_totg(**dados), dados
+    # indicação: pré-diabetes marcado ou HbA1c de 5,7 a 6,4%
+    assert tem_totg(comorbidades=['pre_diabetes']) and tem_totg(hba1c='5.7') and tem_totg(hba1c='6.4')
+    totg = next(r for t, r in _recs(client, hba1c='6.0').items() if t.startswith('TOTG-75g'))
+    assert 'limítrofes' in totg['subtitulo'] and 'confirma' in totg['descricao']
+    # pré-diabetes marcado em quem já é diabético: sem TOTG
+    assert not tem_totg(comorbidades=['pre_diabetes', 'diabetes']) and not tem_totg(comorbidades=['pre_diabetes'], hba1c='7.0')
 
 
 def test_calcio_e_sempre_o_ionico_e_a_espirometria_e_com_broncodilatador(client):

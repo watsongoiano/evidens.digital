@@ -123,7 +123,7 @@ GRUPOS = [
         'Levodopa + benserazida', 'Levodopa + carbidopa', 'Pramipexol', 'Rasagilina', 'Amantadina', 'Biperideno',
         'Donepezila', 'Rivastigmina', 'Galantamina', 'Memantina', 'Metilfenidato', 'Lisdexanfetamina',
     ]),
-    ('Corticoides sistêmicos', ['corticoide_cronico'], 'corticoide', [
+    ('Corticoides sistêmicos', ['corticoide_sistemico', 'corticoide_cronico'], 'corticoide', [
         'Prednisona', 'Prednisolona', 'Metilprednisolona', 'Deflazacorte', 'Dexametasona', 'Hidrocortisona',
     ]),
     ('Imunossupressores e imunobiológicos', ['imunossupressor'], 'imunossupressor imunobiologico biologico', [
