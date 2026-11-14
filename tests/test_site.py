@@ -21,6 +21,7 @@ PAGINAS_DO_ADMIN = ['/admin', '/analytics']
 @pytest.mark.parametrize('rota', PAGINAS + [
     '/index.html',
     '/static/conta.js',
+    '/static/analytics.js',
     '/favicon.ico',
     '/favicon.png',
     '/src/static/styles/base.css',
@@ -93,9 +94,15 @@ def test_toda_rota_de_api_chamada_pelas_paginas_existe(app, client, pagina):
 
 
 def test_painel_de_analytics_recebe_os_campos_que_exibe(admin):
+    from src.utils import uso
     dados = admin.get('/api/analytics/stats').get_json()
-    for periodo in ('total', 'today', 'this_month'):
-        assert set(dados[periodo]) >= {'visits', 'recommendations', 'exam_requests', 'vaccine_prescriptions'}
+    assert set(dados['periodos']) == {'hoje', 'sete_dias', 'mes', 'total'}
+    for valores in dados['periodos'].values():
+        assert set(valores) == set(uso.TIPOS)
+    assert len(dados['serie']) == 30 and isinstance(dados['usuarios'], list)
+    script = (RAIZ / 'static' / 'analytics.js').read_text(encoding='utf-8')
+    for campo in ('periodos', 'serie', 'usuarios', 'ultimos_30_dias', 'ultima_atividade', 'gerado_em', 'tipos'):
+        assert campo in script, campo
 
 
 # --- P-06: risco cardiovascular pelo PREVENT ---------------------------------

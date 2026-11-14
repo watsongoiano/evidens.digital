@@ -1,165 +1,85 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics - Evidens.digital</title>
-    <link rel="stylesheet" href="src/static/styles/tokens.css" />
-    <link rel="stylesheet" href="src/static/styles/base.css" />
-    <link rel="stylesheet" href="src/static/styles/components.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uso do sistema — Evidēns</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico?v=2" sizes="32x32">
+<link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="/static/evidens.css">
+<script defer src="/static/conta.js"></script>
+<script defer src="/static/analytics.js"></script>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Analytics do Sistema</h1>
-            <p>Estatísticas essenciais de uso</p>
-        </div>
-        
-        <div id="loading" class="loading">
-            <p>Carregando estatísticas...</p>
-        </div>
-        
-        <div id="stats-content" style="display: none;">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Total de Visitas</h3>
-                    <div class="number" id="total-visits">0</div>
-                    <div class="label">Acessos ao site</div>
-                </div>
-                
-                <div class="stat-card">
-                    <h3>Recomendações Geradas</h3>
-                    <div class="number" id="total-recommendations">0</div>
-                    <div class="label">Check-ups realizados</div>
-                </div>
-                
-                <div class="stat-card">
-                    <h3>Solicitações de Exames</h3>
-                    <div class="number" id="total-exams">0</div>
-                    <div class="label">Documentos gerados</div>
-                </div>
-                
-                <div class="stat-card">
-                    <h3>Receitas de Vacinas</h3>
-                    <div class="number" id="total-vaccines">0</div>
-                    <div class="label">Prescrições geradas</div>
-                </div>
-            </div>
-            
-            <div class="period-stats">
-                <h2>📈 Estatísticas por Período</h2>
-                <div class="period-grid">
-                    <div class="period-card">
-                        <h4>🗓️ Hoje</h4>
-                        <div class="period-stat">
-                            <span>Visitas:</span>
-                            <span class="value" id="today-visits">0</span>
-                        </div>
-                        <div class="period-stat">
-                            <span>Recomendações:</span>
-                            <span class="value" id="today-recommendations">0</span>
-                        </div>
-                        <div class="period-stat">
-                            <span>Exames:</span>
-                            <span class="value" id="today-exams">0</span>
-                        </div>
-                        <div class="period-stat">
-                            <span>Vacinas:</span>
-                            <span class="value" id="today-vaccines">0</span>
-                        </div>
-                    </div>
-                    
-                    <div class="period-card">
-                        <h4>📅 Este Mês</h4>
-                        <div class="period-stat">
-                            <span>Visitas:</span>
-                            <span class="value" id="month-visits">0</span>
-                        </div>
-                        <div class="period-stat">
-                            <span>Recomendações:</span>
-                            <span class="value" id="month-recommendations">0</span>
-                        </div>
-                        <div class="period-stat">
-                            <span>Exames:</span>
-                            <span class="value" id="month-exams">0</span>
-                        </div>
-                        <div class="period-stat">
-                            <span>Vacinas:</span>
-                            <span class="value" id="month-vaccines">0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <button class="refresh-btn" onclick="loadStats()">🔄 Atualizar Estatísticas</button>
-            
-            <div class="last-updated" id="last-updated"></div>
-        </div>
-    </div>
+<body class="bg-paper text-ink font-sans min-h-screen flex flex-col">
 
-    <script>
-        async function loadStats() {
-            try {
-                document.getElementById('loading').style.display = 'block';
-                document.getElementById('stats-content').style.display = 'none';
-                
-                const response = await fetch('/api/analytics/stats');
-                const data = await response.json();
-                
-                // Estatísticas totais
-                document.getElementById('total-visits').textContent = data.total.visits.toLocaleString();
-                document.getElementById('total-recommendations').textContent = data.total.recommendations.toLocaleString();
-                document.getElementById('total-exams').textContent = data.total.exam_requests.toLocaleString();
-                document.getElementById('total-vaccines').textContent = data.total.vaccine_prescriptions.toLocaleString();
-                
-                // Estatísticas de hoje
-                document.getElementById('today-visits').textContent = data.today.visits.toLocaleString();
-                document.getElementById('today-recommendations').textContent = data.today.recommendations.toLocaleString();
-                document.getElementById('today-exams').textContent = data.today.exam_requests.toLocaleString();
-                document.getElementById('today-vaccines').textContent = data.today.vaccine_prescriptions.toLocaleString();
-                
-                // Estatísticas do mês
-                document.getElementById('month-visits').textContent = data.this_month.visits.toLocaleString();
-                document.getElementById('month-recommendations').textContent = data.this_month.recommendations.toLocaleString();
-                document.getElementById('month-exams').textContent = data.this_month.exam_requests.toLocaleString();
-                document.getElementById('month-vaccines').textContent = data.this_month.vaccine_prescriptions.toLocaleString();
-                
-                // Última atualização
-                if (data.last_updated) {
-                    const lastUpdated = new Date(data.last_updated).toLocaleString('pt-BR');
-                    document.getElementById('last-updated').textContent = `Última atualização: ${lastUpdated}`;
-                }
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('stats-content').style.display = 'block';
-                
-            } catch (error) {
-                console.error('Erro ao carregar estatísticas:', error);
-                document.getElementById('loading').innerHTML = '<p style="color: red;">Erro ao carregar estatísticas. Tente novamente.</p>';
-            }
-        }
-        
-        // Carregar estatísticas ao abrir a página
-        loadStats();
-        
-        // Atualizar automaticamente a cada 30 segundos
-        setInterval(loadStats, 30000);
-    </script>
+<header class="px-4 sm:px-6 lg:px-[6%] pt-4 lg:pt-6">
+  <div class="max-w-[1240px] mx-auto bg-white h-[60px] pl-5 pr-2.5 lg:pl-6 flex items-center justify-between rounded-[3px] border border-ink/5">
+    <a href="/" class="flex items-center gap-2.5" aria-label="Evidēns — início">
+      <span class="grid grid-cols-3 gap-[3px]" aria-hidden="true">
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i>
+      </span>
+      <span class="text-[28px] font-medium tracking-tight leading-none">evidēns</span>
+    </a>
+    <nav class="flex items-center gap-2 lg:gap-6 text-[13px] uppercase tracking-[0.12em] text-ink/75"><a href="/intelligent-tools" class="hover:text-teal transition">Check-up</a><a href="/conta" class="hidden sm:inline hover:text-teal transition">Conta</a><button type="button" data-sair class="inline-flex items-center bg-ink text-white font-medium uppercase tracking-[0.12em] rounded-[3px] px-4 h-10 hover:bg-teal transition">Sair</button></nav>
+  </div>
+</header>
 
-<footer class="footer">
-    <div style="max-width: 1200px; margin: 0 auto;">
-        <p>&copy; 2025 Evidēns Digital. Todos os direitos reservados.</p>
-        <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 1.5rem; margin-top: 1.5rem;">
-            <p style="margin: 0.5rem 0; font-size: 0.95rem;"><strong>Desenvolvido por:</strong> Dr. Rodolfo Cambraia Frota | CRM-GO: 26.815</p>
-            <p style="margin: 0.5rem 0; font-size: 0.9rem;">
-                📧 <a href="mailto:drrodolfofrota@outlook.com" style="color: inherit; text-decoration: none; border-bottom: 1px solid currentColor;">drrodolfofrota@outlook.com</a> 
-                | 
-                📱 <a href="https://wa.me/5511932255885" style="color: inherit; text-decoration: none; border-bottom: 1px solid currentColor;">+55 11 93225-5885</a>
-            </p>
-        </div>
+<main class="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 pt-14 lg:pt-20 pb-24">
+  <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">ADMINISTRAÇÃO</p>
+  <h1 class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Uso do sistema <span class="font-serif italic text-teal tracking-tight">por médico.</span></h1>
+  <p class="text-[16px] text-ink/65 leading-relaxed mt-5">Quem usou, quanto e quando. Contam check-ups gerados, pedidos de exames, receitas de vacinas e guias do plano. Nenhum dado de paciente é gravado.</p>
+  <div data-erro role="alert" class="aviso aviso-erro mt-8" style="display: none;"></div>
+
+  <section class="mt-10">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <h2 class="categoria-titulo !mb-0">Resumo</h2>
+      <div class="opcoes" role="radiogroup" aria-label="Período" data-periodos>
+        <button type="button" class="opcao" role="radio" data-periodo="hoje">Hoje</button>
+        <button type="button" class="opcao" role="radio" data-periodo="sete_dias">7 dias</button>
+        <button type="button" class="opcao" role="radio" data-periodo="mes" aria-checked="true">Este mês</button>
+        <button type="button" class="opcao" role="radio" data-periodo="total">Total</button>
+      </div>
     </div>
+    <div data-cartoes class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6"></div>
+  </section>
+
+  <section class="mt-12">
+    <h2 class="categoria-titulo">Últimos 30 dias</h2>
+    <div class="recommendation-card"><div data-grafico class="flex items-end gap-[3px] h-[140px]" role="img"></div>
+      <div class="flex justify-between text-[11px] text-ink/45 mt-2"><span data-grafico-inicio></span><span data-grafico-fim></span></div>
+      <p class="text-[12px] text-ink/50 mt-3">Check-ups gerados por dia.</p></div>
+  </section>
+
+  <section class="mt-12">
+    <h2 class="categoria-titulo">Por médico <span data-contagem class="text-ink/30"></span></h2>
+    <div class="overflow-x-auto rounded-[14px] border border-ink/10 bg-white">
+      <table class="w-full text-[14px] min-w-[860px]">
+        <thead class="text-[11px] uppercase tracking-[0.12em] text-ink/50 text-left border-b border-ink/10">
+          <tr><th class="px-4 py-3 font-medium">Médico</th><th class="px-3 py-3 font-medium text-right">Check-ups</th><th class="px-3 py-3 font-medium text-right">Laboratório</th><th class="px-3 py-3 font-medium text-right">Imagem</th><th class="px-3 py-3 font-medium text-right">Vacinas</th><th class="px-3 py-3 font-medium text-right">Guias</th><th class="px-3 py-3 font-medium text-right">Entradas</th><th class="px-4 py-3 font-medium">Última atividade</th></tr>
+        </thead>
+        <tbody data-usuarios></tbody>
+      </table>
+    </div>
+    <p class="text-[12px] text-ink/50 mt-3">Números do período escolhido acima ("Hoje" e "7 dias" mostram os últimos 30 dias por médico). Visitas à página inicial não têm médico e aparecem só no resumo.</p>
+  </section>
+
+  <p data-atualizado class="text-[12px] text-ink/45 mt-10"></p>
+  <button type="button" class="btn-claro mt-3" data-atualizar>Atualizar</button>
+</main>
+
+<footer class="max-w-[1100px] w-full mx-auto px-4 sm:px-6 pb-10">
+  <div class="flex flex-col md:flex-row md:justify-between gap-3 pt-8 border-t border-ink/10 text-[12px] text-ink/50">
+    <p>Responsável técnico: Dr. Rodolfo Cambraia Frota · CRM-GO 26815</p>
+    <p>© 2026 Evidēns · <a href="/contact" class="hover:text-teal">Contato</a></p>
+  </div>
 </footer>
-
 </body>
 </html>
-
