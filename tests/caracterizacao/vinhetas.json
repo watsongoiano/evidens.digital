@@ -708,7 +708,8 @@
         "Anticorpos anti-HBs, soro",
         "Anticorpos anti-HAV IgG, soro",
         "Toxoplasmose IgG, soro",
-        "Sorologia para HTLV 1 e 2, soro"
+        "Sorologia para HTLV 1 e 2, soro",
+        "Antígeno criptocócico (LF-CrAg), soro"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -784,7 +785,8 @@
         "Anticorpos anti-HBs, soro",
         "Anticorpos anti-HAV IgG, soro",
         "Toxoplasmose IgG, soro",
-        "Sorologia para HTLV 1 e 2, soro"
+        "Sorologia para HTLV 1 e 2, soro",
+        "Prova tuberculínica (PPD) ou IGRA"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",

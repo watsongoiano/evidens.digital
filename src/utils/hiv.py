@@ -32,8 +32,9 @@ def _rec(titulo, descricao, subtitulo, referencia, grau='A', categoria='laborato
 
 
 def _inteiro(valor):
+    """A validação entrega números como float (150.0); texto também é aceito."""
     try:
-        return int(str(valor).strip()) if valor is not None and str(valor).strip() else None
+        return int(float(str(valor).strip().replace(',', '.'))) if valor is not None and str(valor).strip() else None
     except (TypeError, ValueError):
         return None
 

@@ -105,3 +105,15 @@ def test_toda_periodicidade_classificada_codigo_tuss_e_referencia_com_link():
         for item in recs + orient:
             links = build_reference_links(item['titulo'], item['referencia'])
             assert links and all(l.get('url') for l in links), item
+
+
+def test_valores_que_passam_pela_validacao_chegam_ao_motor(client):
+    """A validação converte CD4 e carga viral em float: 150.0 tem de valer como 150."""
+    corpo = dict(idade=40, sexo='masculino', tabagismo='nunca', comorbidades=['hiv'], cd4='150', carga_viral='800',
+                 em_tarv='sim', supressao_viral='nao', imunossupressao='nao')
+    r = client.post('/api/checkup-intelligent', json=corpo)
+    assert r.status_code == 200, r.get_json()
+    recs = {x['titulo']: x for x in r.get_json()['recommendations']}
+    assert CRAG in recs and GENO in recs
+    assert _freq(recs[CD4]) == 'A cada 6 meses'
+    assert recs[CD4]['descricao'].startswith('CD4 atual: 150 células/mm³.')
