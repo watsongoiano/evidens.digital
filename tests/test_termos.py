@@ -23,15 +23,35 @@ def _conta_sem_aceite(app, contas):
     return cliente, u
 
 
-def test_pagina_dos_termos_e_publica_e_traz_a_versao_em_vigor(anonimo):
+def test_pagina_dos_termos_e_publica_e_oferece_o_pdf(anonimo):
     r = anonimo.get('/termos')
     assert r.status_code == 200
     html = r.get_data(as_text=True)
-    assert f'datetime="{termos.VERSAO}"' in html
-    for trecho in ('Rodolfo Cambraia Frota', 'CRM-GO 26.815', 'não substitui o julgamento clínico',
-                   'Resolução CFM nº 2.454/2026', 'não são gravados', 'art. 18', 'Goiânia'):
+    assert f'data-versao="{termos.VERSAO}"' in html and f'datetime="{termos.DATA}"' in html
+    assert f'href="/{termos.ARQUIVO}" download' in html and 'data-imprimir' in html
+    for trecho in ('Rodolfo Cambraia Frota', 'CRM-GO 26.815', 'não substitui consulta nem julgamento médico',
+                   'Resolução CFM nº 2.454/2026', 'Goiânia'):
         assert trecho in html, trecho
+    # Referências legais com link clicável.
+    for url in ('https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm',
+                'https://sistemas.cfm.org.br/normas/arquivos/resolucoes/BR/2026/2454_2026.pdf'):
+        assert f'href="{url}"' in html
     assert anonimo.get('/static/termos.js').status_code == 200
+
+
+def test_pdf_dos_termos_e_servido_e_tem_a_pagina_de_assinatura(anonimo):
+    from io import BytesIO
+    from pypdf import PdfReader
+    r = anonimo.get('/' + termos.ARQUIVO)
+    assert r.status_code == 200 and r.mimetype == 'application/pdf'
+    pdf = PdfReader(BytesIO(r.data))
+    texto = ' '.join(p.extract_text() for p in pdf.pages)
+    assert 'Termos de Uso' in texto and 'VERSÃO 2.0' in texto
+    assert 'Declaração de leitura e aceite' in pdf.pages[-1].extract_text()
+    assert 'Assinatura' in pdf.pages[-1].extract_text()
+    links = {a.get_object()['/A'].get('/URI') for p in pdf.pages for a in (p.get('/Annots') or [])
+             if '/A' in a.get_object()}
+    assert 'https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm' in links
 
 
 def test_paginas_linkam_os_termos():
@@ -98,7 +118,8 @@ def test_aceite_exige_sessao(anonimo):
 
 def test_versao_do_modulo_e_a_da_pagina():
     html = (RAIZ / 'termos.html').read_text(encoding='utf-8')
-    assert re.search(r'data-versao datetime="(\d{4}-\d{2}-\d{2})"', html).group(1) == termos.VERSAO
+    assert re.search(r'data-versao="([^"]+)"', html).group(1) == termos.VERSAO
+    assert (RAIZ / termos.ARQUIVO).is_file() and termos.VERSAO in termos.ARQUIVO
 
 
 def test_checkup_leva_aos_termos_quando_a_api_pede_aceite():

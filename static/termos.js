@@ -5,12 +5,26 @@
   const params = new URLSearchParams(window.location.search);
   const destino = DESTINOS[params.get('destino')] || '/intelligent-tools';
   const caixa = document.querySelector('[data-aceite]');
-  if (!caixa) return;
   const marcar = caixa.querySelector('[data-aceite-caixa]');
   const botao = caixa.querySelector('[data-aceitar]');
   const erro = caixa.querySelector('[data-erro]');
-  const versao = document.querySelector('[data-versao]').getAttribute('datetime');
+  const versao = document.querySelector('[data-versao]').dataset.versao;
+  // Imprimir: o PDF numa moldura escondida, que abre o diálogo de impressão do navegador
+  // (em navegadores que não deixam, abre o PDF em outra aba para imprimir de lá).
+  const imprimir = document.querySelector('[data-imprimir]');
+  const pdf = document.querySelector('[data-baixar]');
+  if (imprimir && pdf) imprimir.addEventListener('click', () => {
+    const moldura = document.createElement('iframe');
+    moldura.style.cssText = 'position:fixed;width:0;height:0;border:0;right:0;bottom:0';
+    moldura.src = pdf.getAttribute('href');
+    moldura.onload = () => {
+      try { moldura.contentWindow.focus(); moldura.contentWindow.print(); }
+      catch (e) { window.open(pdf.getAttribute('href'), '_blank', 'noopener'); }
+    };
+    document.body.appendChild(moldura);
+  });
 
+  if (!caixa) return;
   function falha(texto) { erro.textContent = texto; erro.style.display = 'block'; }
 
   fetch('/api/auth/eu', { credentials: 'same-origin' }).then(r => r.json()).then(d => {

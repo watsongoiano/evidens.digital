@@ -162,6 +162,7 @@ ARQUIVOS_PUBLICOS = frozenset({
     'contact.html',
     'static/conta.js',
     'static/termos.js',
+    'static/termos/evidens-termos-de-uso-v2.0.pdf',
     'static/analytics.js',
     'static/i18n.js',
     'static/i18n/en.json',
