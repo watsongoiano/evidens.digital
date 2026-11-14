@@ -390,6 +390,24 @@ def test_logo_do_cabecalho_e_a_mesma_palavra_do_rodape(pagina):
     assert 'text-[28px] font-medium tracking-tight">evidēns' in rodape
 
 
+def test_imagem_de_compartilhamento_e_quadrada_cheia_sem_transparencia(anonimo):
+    """WhatsApp e afins pintam de branco o que for transparente: canto arredondado vira borda branca.
+    A imagem do link e o ícone de tela inicial são quadrados cheios, na cor de fundo da marca."""
+    import io
+    from PIL import Image
+    pagina = (RAIZ / 'index.html').read_text(encoding='utf-8')
+    assert '<meta property="og:image" content="https://evidens.life/og-image.png">' in pagina
+    assert '<meta property="og:title" content="Evidēns — check-up baseado em evidência">' in pagina
+    for caminho, lado in (('/og-image.png', 512), ('/apple-touch-icon.png', 180)):
+        resposta = anonimo.get(caminho)            # o robô do WhatsApp não tem login
+        assert resposta.status_code == 200 and resposta.mimetype == 'image/png', caminho
+        imagem = Image.open(io.BytesIO(resposta.data))
+        assert imagem.size == (lado, lado), caminho
+        assert imagem.mode == 'RGB', f'{caminho}: sem canal de transparência'
+        cantos = [imagem.getpixel(p) for p in ((0, 0), (lado - 1, 0), (0, lado - 1), (lado - 1, lado - 1))]
+        assert cantos == [(20, 41, 47)] * 4, caminho
+
+
 def test_icone_da_aba_e_servido(client):
     for caminho in ('/favicon.ico', '/favicon.png', '/favicon.svg', '/apple-touch-icon.png'):
         assert client.get(caminho).status_code == 200, caminho
