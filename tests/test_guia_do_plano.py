@@ -221,3 +221,37 @@ def test_vacinas_nao_levam_guia(app, contas):
         'recomendacoes': [vacina], 'guia': {'credenciamento_id': cid}})
     assert resposta.status_code == 200
     assert all('SP/SADT' not in pagina for pagina in _paginas(resposta.data))
+
+
+def test_valores_no_limite_saem_inteiros_na_guia(app, contas):
+    """Carteira, indicação, nomes e descrições no tamanho máximo aceito não perdem caracteres."""
+    cliente, _ = _conta(app, contas)
+    plano = dict(operadora='Operadora de Nome Bem Comprido de Autogestão em Saúde do Centro-Oeste Brasileiro S.A.'[:80],
+                 registro_ans='123456', codigo_prestador='12345678901234567890',
+                 nome_contratado=('Clínica de Medicina Interna e Check-up Baseado em Evidências ' * 3)[:120].strip(), cbo='225125')
+    cid = cliente.post('/api/auth/credenciamentos', json=plano).get_json()['credenciamento']['id']
+    carteira = '123456789012345678901234567890'
+    indicacao = ('Check-up — 65 anos, diabetes tipo 2, hipertensão, dislipidemia, doença renal crônica, '
+                 'insuficiência cardíaca, DPOC, obesidade, hipotireoidismo e osteoporose em seguimento')[:150]
+    paciente = dict(PACIENTE, nome=('Maria Aparecida ' * 10)[:150].strip())
+    itens = [{'titulo': 'Urocultura com antibiograma', 'categoria': 'laboratorio'},
+             {'titulo': 'Exame digitado à mão com um nome muito comprido ' * 6, 'categoria': 'laboratorio'}]
+    resposta = cliente.post('/api/gerar-pdf-exames-laboratoriais', json={
+        'dados_paciente': paciente, 'recomendacoes': itens,
+        'guia': {'credenciamento_id': cid, 'carteira': carteira, 'indicacao': indicacao}})
+    assert resposta.status_code == 200
+    texto = ' '.join(' '.join(_paginas(resposta.data)[1:]).split())
+    esperados = [carteira, indicacao, paciente['nome'], plano['codigo_prestador'], plano['nome_contratado'],
+                 plano['operadora'], tuss.DESCRICOES['40310418'], itens[1]['titulo'].strip()]
+    for esperado in esperados:
+        assert ' '.join(esperado.split()) in texto, esperado
+    assert '…' not in texto
+
+
+def test_so_o_que_nao_cabe_em_letra_legivel_e_abreviado_e_avisa():
+    pdf = pdf_minutas._Minuta('SOLICITAÇÃO DE EXAMES LABORATORIAIS')
+    pdf.em_guia = True
+    pdf.add_page(orientation='L')
+    pdf_minutas._encaixar(pdf, 10, 10, 20, 5, 'W' * 300)
+    texto = ''.join(_paginas(pdf.bytes())[0].split())
+    assert texto.endswith('…') and len(texto) < 300

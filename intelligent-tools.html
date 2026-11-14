@@ -881,6 +881,7 @@
         function limparResultados() {
             currentRecommendations = [];
             limparAcrescimos();
+            limparGuia();
             currentPatientData = {};
             document.getElementById('recommendationsContent').innerHTML = '';
             document.getElementById('naoIncluidasContent').innerHTML = '';
@@ -1155,6 +1156,16 @@
         // ── Guia do plano de saúde (SP/SADT) junto com o pedido de exames ──
         let planosDoMedico = null;        // null = ainda não carregado
         let planoEscolhido = '';          // vale para os próximos pedidos deste atendimento
+
+        // O plano e a carteira valem para os documentos do mesmo paciente (laboratório e imagem).
+        // Qualquer mudança no formulário apaga os resultados e, com eles, o plano e a carteira:
+        // a guia do próximo paciente nunca sai com a carteira do anterior.
+        function limparGuia() {
+            planoEscolhido = '';
+            document.getElementById('guiaPlano').value = '';
+            document.getElementById('guiaCarteira').value = '';
+            document.getElementById('guiaIndicacao').value = '';
+        }
 
         async function carregarPlanos() {
             if (planosDoMedico) return planosDoMedico;

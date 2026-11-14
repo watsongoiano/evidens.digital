@@ -227,6 +227,36 @@ def _numero_do_crm(crm):
     return (partes.group(1), partes.group(2)) if partes else ('', '')
 
 
+def _encaixar(pdf, x, y, largura, altura, valor, tamanho=9, estilo=''):
+    """Escreve o valor INTEIRO dentro da caixa: diminui a letra e, se preciso, quebra em linhas.
+
+    Nada é cortado em silêncio (um número de carteira sem os últimos dígitos seria outro número).
+    Só um valor que não cabe nem na menor letra legível é abreviado, e aí termina em "…".
+    """
+    valor = _texto(valor, 300).strip()
+    pdf.set_text_color(20, 41, 47)
+    linhas, altura_da_linha = [valor], altura
+    while True:
+        pdf.set_font('DejaVu', estilo, tamanho)
+        altura_da_linha = tamanho * 0.3528 * 1.15
+        cabem = max(1, int(altura / altura_da_linha))
+        if pdf.get_string_width(valor) <= largura:
+            linhas = [valor]
+            break
+        linhas = pdf.multi_cell(largura, altura_da_linha, valor, dry_run=True, output='LINES')
+        if len(linhas) <= cabem:
+            break
+        if tamanho <= 4:
+            linhas = linhas[:cabem]
+            linhas[-1] = linhas[-1][:-1].rstrip() + '…'
+            break
+        tamanho -= 0.5
+    topo = y + max(0, (altura - altura_da_linha * len(linhas)) / 2)
+    for n, linha in enumerate(linhas):
+        pdf.set_xy(x, topo + n * altura_da_linha)
+        pdf.cell(largura, altura_da_linha, linha)
+
+
 def _campo(pdf, x, y, largura, altura, rotulo, valor='', tamanho=9):
     pdf.set_draw_color(20, 41, 47)
     pdf.rect(x, y, largura, altura)
@@ -235,13 +265,7 @@ def _campo(pdf, x, y, largura, altura, rotulo, valor='', tamanho=9):
     pdf.set_text_color(70, 80, 84)
     pdf.cell(largura - 1.6, 2.6, rotulo)
     if valor:
-        pdf.set_font('DejaVu', '', tamanho)
-        pdf.set_text_color(20, 41, 47)
-        valor = _texto(valor, 200)
-        while pdf.get_string_width(valor) > largura - 2.4 and len(valor) > 4:
-            valor = valor[:-2]
-        pdf.set_xy(x + 1.2, y + 3.4)
-        pdf.cell(largura - 2.4, altura - 4.2, valor)
+        _encaixar(pdf, x + 1.2, y + 3.2, largura - 2.4, altura - 3.6, valor, tamanho)
 
 
 def _faixa(pdf, y, texto):
@@ -257,10 +281,8 @@ def _pagina_da_guia(pdf, dados_paciente, guia, linhas, parte, partes):
     pdf.add_page(orientation='L')
     cred, resp = guia['credenciamento'], guia.get('responsavel') or {}
     uf, numero = _numero_do_crm(resp.get('crm'))
-    pdf.set_xy(10, 9)
-    pdf.set_font('DejaVu', 'B', 11)
+    _encaixar(pdf, 10, 8, 58, 9, cred['operadora'], 11, estilo='B')
     pdf.set_text_color(20, 41, 47)
-    pdf.cell(60, 7, _texto(cred['operadora'], 40))
     pdf.set_font('DejaVu', 'B', 8.5)
     pdf.set_xy(70, 9)
     pdf.cell(160, 7, 'GUIA DE SERVIÇO PROFISSIONAL / SERVIÇO AUXILIAR DE DIAGNÓSTICO E TERAPIA - SP/SADT', align='C')
@@ -311,12 +333,7 @@ def _pagina_da_guia(pdf, dados_paciente, guia, linhas, parte, partes):
         for (x, largura, _), valor in zip(colunas, valores):
             pdf.rect(x, y, largura, 7)
             if valor:
-                pdf.set_font('DejaVu', '', 8)
-                valor = _texto(valor, 200)
-                while pdf.get_string_width(valor) > largura - 2.4 and len(valor) > 4:
-                    valor = valor[:-2]
-                pdf.set_xy(x + 1.2, y + 1.2)
-                pdf.cell(largura - 2.4, 4.6, valor)
+                _encaixar(pdf, x + 1.2, y + 0.4, largura - 2.4, 6.2, valor, 8)
         y += 7
     y = _faixa(pdf, y + 1, 'Dados do Contratado Executante')
     _campo(pdf, 10, y, 62, 9, '29 - Código na Operadora')
