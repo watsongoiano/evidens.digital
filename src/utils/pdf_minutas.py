@@ -25,7 +25,7 @@ TITULOS = {'laboratorio': 'SOLICITAÇÃO DE EXAMES LABORATORIAIS', 'imagem': 'SO
            'vacina': 'RECEITA DE VACINAS'}
 # Textos fixos das minutas (os testes conferem que cada um tem par em inglês).
 FIXOS = ('Solicito:', 'Prescrevo:', 'Data de emissão', 'Paciente', 'Sexo', 'Idade', 'anos', 'Página', 'Feminino', 'Masculino',
-         'Não informado', 'Não informada', 'Minuta preparada por', 'estudante de medicina', 'Vacina')
+         'Não informado', 'Não informada', 'Minuta preparada por', 'estudante de medicina', 'Vacina', 'Obs.:')
 MESES_EN = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
 
 
@@ -133,6 +133,7 @@ class _Minuta(FPDF):
         self.set_auto_page_break(auto=True, margin=42)   # espaço para assinatura e rodapé
         self.add_font('DejaVu', '', str(FONTES / 'DejaVuSans.ttf'))
         self.add_font('DejaVu', 'B', str(FONTES / 'DejaVuSans-Bold.ttf'))
+        self.add_font('DejaVu', 'I', str(FONTES / 'DejaVuSans-Oblique.ttf'))
         self.set_title(titulo)
         self.set_author('Evidēns')
 
@@ -389,11 +390,12 @@ def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='
         pdf.multi_cell(0, 6.2, f'{n}. {_texto(pdf.t(exame.get("titulo")))}')
         quando = exame.get('quando_pdf')
         if isinstance(quando, str) and quando.strip():
-            # Pré-natal: a janela gestacional vai no pedido, para exame antecipado não parecer imediato.
-            pdf.set_font('DejaVu', '', 9)
+            # Pré-natal: só a orientação de quando fazer o exame vai no pedido ("Realizar com 35-37 semanas"),
+            # em itálico e precedida de "Obs.:". O motor não manda mais o motivo do pedido ("Primeira consulta").
+            pdf.set_font('DejaVu', 'I', 9)
             pdf.set_text_color(90, 100, 103)
             pdf.set_x(30)
-            pdf.multi_cell(0, 5, _texto(pdf.t(quando[:160])))
+            pdf.multi_cell(0, 5, _texto(pdf.t('Obs.:') + ' ' + pdf.t(quando.strip()[:160])))
             pdf.set_text_color(20, 41, 47)
     pdf.assinatura()
     if guia:

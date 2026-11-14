@@ -179,8 +179,9 @@ def _totg(g, diabetica):
                 + (' Fora da janela de 24-28 semanas: se ainda não foi feito, fazer de imediato.' if atrasado else ''),
                 'Pré-natal | Não realizado com 24-28 semanas: fazer agora' if atrasado else 'Pré-natal | 24-28 semanas',
                 referencia=REF_DMG if atrasado else REF)
-    item['quando_pdf'] = ('TOTG-75g ainda não realizado nesta gestação: fazer agora.' if atrasado
-                          else 'Realizar com 24-28 semanas de gestação.')
+    # No pedido, só a janela (instrução para quem colhe). O atraso é motivo do pedido: fica na tela.
+    if not atrasado:
+        item['quando_pdf'] = 'Realizar com 24-28 semanas de gestação.'
     return 24, item
 
 
@@ -278,8 +279,8 @@ def programacao(g, idade, hipertensa=False, diabetica=False, hiv=False):
     agora, proximas = [], []
     ig = g['ig']
     if g['primeira_consulta']:
-        agora += [{**r, 'quando_pdf': 'Primeira consulta de pré-natal.'}
-                  for r in _primeira_consulta(g, idade, hipertensa, diabetica, hiv)]
+        # Sem observação no pedido: ser da primeira consulta é o motivo, não uma instrução para quem faz o exame.
+        agora += _primeira_consulta(g, idade, hipertensa, diabetica, hiv)
     else:
         proximas.append({'titulo': 'Exames iniciais do pré-natal (1ª consulta)', 'categoria': 'laboratorio',
                          'estado': 'etapa_anterior', 'referencia': REF, 'semana': -1,
@@ -313,10 +314,8 @@ def programacao(g, idade, hipertensa=False, diabetica=False, hiv=False):
     if g['primeira_consulta'] and ig is not None and ig >= 14 and not com_imagem:
         agora.append({**_rec('Ultrassonografia obstétrica', 'imagem',
                              'Início do pré-natal fora das janelas de ultrassonografia: datação, vitalidade e avaliação fetal.',
-                             'Pré-natal | 1ª consulta após 14 semanas', grau='B'),
-                      'quando_pdf': 'Primeira consulta de pré-natal.'})
-    agora += [{**r, 'quando_pdf': 'Basal: alto risco de pré-eclâmpsia.'}
-              for r in _risco_pre_eclampsia(g, hipertensa, diabetica)]
+                             'Pré-natal | 1ª consulta após 14 semanas', grau='B')})
+    agora += _risco_pre_eclampsia(g, hipertensa, diabetica)        # sem observação no pedido: é o motivo, não uma instrução
     vistos, unicos = set(), []
     for r in agora:
         if r['titulo'] not in vistos:
