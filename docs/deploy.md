@@ -93,7 +93,7 @@ Uma falha no envio não impede o cadastro: fica registrada no log da função e 
 
 ## E-mail de boas-vindas
 
-Quem pede a conta recebe um e-mail que apresenta a ferramenta (cerca de 30% dos exames laboratoriais são provavelmente desnecessários e proporção parecida dos necessários deixa de ser pedida; Zhi et al., PLOS ONE 2013), diz o que acontece agora (conferência do cadastro e liberação do acesso), que a ferramenta está em fase de desenvolvimento e que feedbacks são bem-vindos, com o link da página de contato e, se `EMAIL_CONTATO` estiver definido, o e-mail de contato.
+Quem pede a conta recebe um e-mail que apresenta a ferramenta (cerca de 21% dos exames laboratoriais pedidos são desnecessários e cerca de 45% dos indicados deixam de ser pedidos; Zhi et al., PLOS ONE 2013), diz o que acontece agora (conferência do cadastro e liberação do acesso), que a ferramenta está em fase de desenvolvimento e que feedbacks são bem-vindos, com o link da página de contato e, se `EMAIL_CONTATO` estiver definido, o e-mail de contato.
 
 O remetente padrão da Resend só entrega ao dono da conta Resend, então as boas-vindas ficam desligadas até existir um remetente do próprio domínio:
 

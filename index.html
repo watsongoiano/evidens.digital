@@ -92,7 +92,7 @@
         <span class="ln [--d:.38s]"><span>pouco tempo de consulta,</span></span>
         <span class="ln [--d:.51s]"><span>uma <em class="italic text-aqua">conduta clara.</em></span></span>
       </h1>
-      <p class="h-fade [--d:.8s] text-white/80 text-[15px] lg:text-[17px] leading-[1.7] max-w-[680px] mt-7">O Evidēns condensa mais de 2 mil páginas de diretrizes, de 15 sociedades e órgãos de saúde, num só algoritmo. Numa tela, ele mostra <strong class="text-white font-semibold">o que rastrear, quais exames pedir e quais vacinas indicar</strong> — cada item com a sua fonte.</p>
+      <p class="h-fade [--d:.8s] text-white/80 text-[15px] lg:text-[17px] leading-[1.7] max-w-[680px] mt-7">O Evidēns condensa mais de 4 mil páginas de diretrizes, de 15 sociedades e órgãos de saúde, num só algoritmo. Numa tela, ele mostra <strong class="text-white font-semibold">o que rastrear, quais exames pedir e quais vacinas indicar</strong> — cada item com a sua fonte.</p>
       <div class="h-fade [--d:1s] flex flex-wrap justify-center gap-3 mt-8">
         <a href="/intelligent-tools" class="inline-flex items-center gap-2 bg-white text-ink text-[15px] font-medium rounded-full pl-6 pr-5 h-12 hover:bg-aqua transition">Abrir o check-up <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></a>
         <a href="#metodo" class="inline-flex items-center gap-2 border border-white/40 text-white text-[15px] rounded-full px-6 h-12 hover:bg-white/10 transition">Como funciona <i class="fa-solid fa-arrow-down text-[11px]"></i></a>
@@ -114,17 +114,56 @@
 </section>
 
 <!-- Statement + stats -->
-<section id="abordagem" class="max-w-[1360px] mx-auto px-6 lg:px-10 pt-24 lg:pt-32 pb-24">
-  <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-8">POR QUE O EVIDĒNS</p>
-  <h2 class="font-light text-[40px] sm:text-[56px] lg:text-[80px] leading-[1] tracking-tightest max-w-[1100px]">A complexidade faz parte da medicina. <span class="font-serif italic text-teal tracking-tight">A interface não precisa.</span></h2>
-  <div class="grid lg:grid-cols-12 gap-10 mt-14">
-    <p class="lg:col-span-5 lg:col-start-8 text-[18px] leading-relaxed text-ink/65">O Evidēns nasce para reduzir ruídos entre o conhecimento científico e a prática clínica — com uma experiência tão simples quanto o cuidado deveria ser.</p>
+<section id="abordagem" class="max-w-[1360px] mx-auto px-6 lg:px-10 pt-16 lg:pt-24 pb-24">
+  <!-- Evidence -->
+  <div id="evidencia" class="rounded-[24px] bg-ink text-white p-6 sm:p-10 lg:p-12">
+    <div class="grid lg:grid-cols-12 gap-6 lg:gap-10 lg:items-end">
+      <div class="lg:col-span-7">
+        <p class="flex items-center gap-2 font-mono text-[11px] tracking-[0.2em] text-aqua mb-5"><span class="w-1.5 h-1.5 rounded-full bg-aqua"></span>POR QUE O EVIDĒNS</p>
+        <h2 class="font-light text-[30px] lg:text-[44px] leading-[1.05] tracking-tightest">O problema não é pedir mais ou menos exames. <span class="font-serif italic text-aqua tracking-tight">É pedir os certos.</span></h2>
+      </div>
+      <p class="lg:col-span-5 text-[15px] text-white/60 leading-relaxed">Exame demais gera custo, falso-positivo e cascata de cuidado. Exame de menos deixa passar o que importa.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-px mt-10 rounded-[16px] overflow-hidden bg-white/10">
+      <div class="bg-ink p-6 xl:p-7">
+        <p class="font-mono text-[10px] tracking-[0.18em] text-aqua/80">EXCESSO · PLOS ONE <sup>1</sup></p>
+        <p class="flex items-end h-[56px] xl:h-[64px] text-[56px] xl:text-[64px] font-light tracking-tightest leading-none mt-6">21<span class="text-aqua">%</span></p>
+        <p class="text-[14px] text-white/70 leading-snug mt-4">dos exames laboratoriais pedidos são desnecessários.</p>
+      </div>
+      <div class="bg-ink p-6 xl:p-7">
+        <p class="font-mono text-[10px] tracking-[0.18em] text-aqua/80">FALTA · PLOS ONE <sup>1</sup></p>
+        <p class="flex items-end h-[56px] xl:h-[64px] text-[56px] xl:text-[64px] font-light tracking-tightest leading-none mt-6">45<span class="text-aqua">%</span></p>
+        <p class="text-[14px] text-white/70 leading-snug mt-4">dos exames indicados deixam de ser pedidos.</p>
+      </div>
+      <div class="bg-ink p-6 xl:p-7">
+        <p class="font-mono text-[10px] tracking-[0.18em] text-aqua/80">CUSTO · JAMA <sup>2</sup></p>
+        <p class="flex items-end h-[56px] xl:h-[64px] text-[40px] sm:text-[48px] font-light tracking-tightest leading-none mt-6 whitespace-nowrap"><span class="text-[16px] sm:text-[20px] text-aqua tracking-tight mr-1 mb-[3px]">US$</span>76–101<span class="text-[16px] sm:text-[20px] text-aqua tracking-tight ml-1 mb-[3px]">bi</span></p>
+        <p class="text-[14px] text-white/70 leading-snug mt-4">por ano, nos EUA, em sobretratamento e cuidado de baixo valor.</p>
+      </div>
+      <div class="bg-teal p-6 xl:p-7">
+        <p class="font-mono text-[10px] tracking-[0.18em] text-white/85">INTERVENÇÃO · LANCET <sup>3</sup></p>
+        <p class="flex items-end h-[56px] xl:h-[64px] text-[56px] xl:text-[64px] font-light tracking-tightest leading-none mt-6">−36<span class="text-ink/70">%</span></p>
+        <p class="text-[14px] text-white leading-snug mt-4">nos pedidos de exames de uso excessivo quando o médico recebe retorno individualizado.</p>
+      </div>
+    </div>
+
+    <div class="mt-10 lg:mt-12">
+      <p class="text-[15px] lg:text-[17px] text-white/60">O Evidēns leva a diretriz para a hora do pedido:</p>
+      <p id="evidencia-fecho" class="font-serif italic text-aqua text-[30px] sm:text-[36px] lg:text-[44px] leading-[1.1] tracking-tight mt-2">o que pedir, para quem e com qual referência.</p>
+    </div>
+
+    <p id="evidencia-fontes" class="mt-8 pt-6 border-t border-white/10 text-[11px] text-white/45 leading-relaxed">
+      <sup>1</sup> Zhi M et al. Metanálise de 15 anos: 20,6% de excesso e 44,8% de subutilização. <a href="https://doi.org/10.1371/journal.pone.0078962" target="_blank" rel="noopener" class="underline hover:text-white">PLOS ONE, 2013</a> ·
+      <sup>2</sup> Shrank WH et al. US$ 75,7 a 101,2 bilhões por ano, inclui exames, procedimentos e tratamentos. <a href="https://doi.org/10.1001/jama.2019.13978" target="_blank" rel="noopener" class="underline hover:text-white">JAMA, 2019</a> ·
+      <sup>3</sup> O’Connor DA et al. Ensaio randomizado com 5.964 médicos de família entre os que mais pediam, na Austrália. <a href="https://www.thelancet.com/journals/lanprc/article/PIIS3050-5143(26)00035-X/fulltext" target="_blank" rel="noopener" class="underline hover:text-white">The Lancet Primary Care, 2026</a>
+    </p>
   </div>
 
   <div id="stats" class="grid sm:grid-cols-3 border-t border-ink/10 mt-20">
     <div id="stat-1" class="pt-8 pb-4 sm:pr-8 sm:border-r border-ink/10">
       <p class="text-[13px] text-ink/50">01 — Reunir</p>
-      <p class="text-[64px] lg:text-[80px] font-light tracking-tightest leading-none mt-6">2.000<span class="text-teal">+</span><span class="text-[28px] ml-2 text-teal tracking-tight">páginas</span></p>
+      <p class="text-[64px] lg:text-[80px] font-light tracking-tightest leading-none mt-6">4.000<span class="text-teal">+</span><span class="text-[28px] ml-2 text-teal tracking-tight">páginas</span></p>
       <p class="text-[15px] text-ink/65 mt-4 max-w-[280px]">De diretrizes e documentos de referência, reunidas numa única base.</p>
     </div>
     <div id="stat-2" class="pt-8 pb-4 sm:px-8 sm:border-r border-ink/10">
@@ -233,7 +272,7 @@
           </svg>
           <div class="absolute inset-x-0 top-0 flex items-center justify-between">
             <span class="font-mono text-[10px] tracking-[0.18em] text-teal">DIRETRIZES · SOCIEDADES MÉDICAS</span>
-            <span class="bg-white/85 backdrop-blur rounded-full px-3 py-1 text-[12px] font-medium">2.000+ páginas</span>
+            <span class="bg-white/85 backdrop-blur rounded-full px-3 py-1 text-[12px] font-medium">4.000+ páginas</span>
           </div>
           <div class="absolute left-[20%] top-[77.5%] -translate-x-1/2 w-[31%] max-w-[150px] bg-white rounded-xl shadow-[0_12px_30px_-14px_rgba(20,41,47,.35)] px-3 py-2.5 text-center">
             <i class="fa-solid fa-bolt text-teal text-[12px]"></i>
@@ -252,8 +291,8 @@
 
       <div class="lg:col-span-5 lg:col-start-8">
         <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">O ALGORITMO EVIDĒNS</p>
-        <h2 class="font-light text-[40px] lg:text-[64px] leading-[1] tracking-tightest">Mais de 2 mil páginas.<br><span class="font-serif italic text-teal tracking-tight">Uma decisão clara.</span></h2>
-        <p class="text-[17px] lg:text-[18px] text-ink/65 leading-relaxed mt-7 max-w-[480px]">O Evidēns reúne mais de <strong class="text-ink font-medium">2 mil páginas de diretrizes de 15 sociedades e órgãos de saúde</strong> num algoritmo conciso, feito <em class="font-serif italic text-teal-dark text-[20px]">de médico para médicos</em>. Em vez de procurar a resposta em dezenas de fontes, você chega em poucos segundos a uma conduta baseada em evidência científica.</p>
+        <h2 class="font-light text-[40px] lg:text-[64px] leading-[1] tracking-tightest">Mais de 4 mil páginas.<br><span class="font-serif italic text-teal tracking-tight">Uma decisão clara.</span></h2>
+        <p class="text-[17px] lg:text-[18px] text-ink/65 leading-relaxed mt-7 max-w-[480px]">O Evidēns reúne mais de <strong class="text-ink font-medium">4 mil páginas de diretrizes de 15 sociedades e órgãos de saúde</strong> num algoritmo conciso, feito <em class="font-serif italic text-teal-dark text-[20px]">de médico para médicos</em>. Em vez de procurar a resposta em dezenas de fontes, você chega em poucos segundos a uma conduta baseada em evidência científica.</p>
         <a href="#metodo" class="inline-flex items-center gap-2 bg-ink text-white text-[15px] font-medium rounded-full pl-6 pr-5 h-12 mt-10 hover:bg-teal transition">Ver como funciona <i class="fa-solid fa-arrow-down text-[11px]"></i></a>
       </div>
     </div>
