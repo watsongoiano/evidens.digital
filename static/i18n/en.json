@@ -1704,7 +1704,12 @@
   "Em dia": "Up to date",
   "Exames já realizados em formato inválido.": "Tests already done in an invalid format.",
   "Informe o nome de cada exame já realizado.": "Enter the name of each test already done.",
-  "Exame já realizado não reconhecido": "Test already done not recognized"
+  "Exame já realizado não reconhecido": "Test already done not recognized",
+  "recomendações mapeadas, com a fonte em cada item": "recommendations mapped, each with its source",
+  "exames com código TUSS, prontos para a guia do plano de saúde": "tests with a TUSS code, ready for the health plan form",
+  "dados do paciente gravados": "patient data stored",
+  "Triagem": "Screening",
+  "de segurança nas vacinas, antes de indicar": "for vaccine safety, before recommending"
  },
  "padroes": [
   [
@@ -2152,6 +2157,7 @@
   "ADA 2026",
   "Evidēns.",
   "Ex: Unimed Goiânia",
-  "Ex: 225125"
+  "Ex: 225125",
+  "Zero"
  ]
 }
