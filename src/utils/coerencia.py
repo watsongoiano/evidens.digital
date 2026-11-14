@@ -37,7 +37,7 @@ TERMOS = {
     'antidiabeticos': [
         'insulina', 'glibenclamida', 'gliclazida', 'glimepirida', 'glipizida', 'sitagliptina',
         'vildagliptina', 'linagliptina', 'saxagliptina', 'alogliptina', 'pioglitazona', 'acarbose',
-        'repaglinida', 'nateglinida', 'metformina', 'glifage',
+        'repaglinida', 'nateglinida',
     ],
 }
 

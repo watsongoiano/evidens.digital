@@ -82,7 +82,8 @@ MEDICACOES = {
     'diuretico_alca': {'rotulo': 'Diurético de alça', 'reduz_pa': True, 'talvez': ['hipertensao']},
     'estatina': {'rotulo': 'Estatina', 'marca': ['estatinas']},
     'outro_hipolipemiante': {'rotulo': 'Ezetimiba, fibrato ou iPCSK9', 'marca': ['dislipidemia']},
-    'metformina': {'rotulo': 'Metformina', 'marca': ['diabetes']},
+    # Metformina também se usa em pré-diabetes, resistência insulínica e SOP: sugere diabetes, mas não marca.
+    'metformina': {'rotulo': 'Metformina', 'talvez': ['diabetes']},
     # Insulina se usa no tipo 1, no tipo 2, no gestacional e nos outros tipos: indica diabetes, mas não marca um tipo.
     'insulina': {'rotulo': 'Insulina'},
     'sulfonilureia': {'rotulo': 'Sulfonilureia', 'marca': ['diabetes']},

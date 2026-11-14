@@ -34,7 +34,7 @@ def test_outros_hipolipemiantes_marcam_dislipidemia_sem_marcar_estatina(texto):
 
 @pytest.mark.parametrize('texto, diabetes', [
     ('insulina NPH 20 UI', True), ('gliclazida MR 60', True), ('sitagliptina 100', True),
-    ('metformina 850 2x/dia', True),       # marca; o médico desmarca em pré-diabetes ou SOP
+    ('metformina 850 2x/dia', False),      # pré-diabetes, resistência insulínica, SOP
     ('dapagliflozina 10', False),          # IC/DRC
     ('semaglutida 1 mg', False),           # obesidade
 ])
@@ -164,8 +164,8 @@ def test_betabloqueador_de_ic_conta_como_tratamento_so_com_hipertensao():
 @pytest.mark.parametrize('remedio, caixa', [
     ('atenolol', 'hipertensao'), ('metoprolol', 'hipertensao'), ('nebivolol', 'hipertensao'), ('losartana', 'hipertensao'),
     ('hidroclorotiazida', 'hipertensao'), ('anlodipino', 'hipertensao'), ('clonidina', 'hipertensao'),
-    ('metformina', 'diabetes'), ('glibenclamida', 'diabetes'), ('sitagliptina', 'diabetes'),
-    ('dapagliflozina_metformina', 'diabetes'), ('sinvastatina', 'dislipidemia'), ('ezetimiba', 'dislipidemia'),
+    ('glibenclamida', 'diabetes'), ('sitagliptina', 'diabetes'), ('sitagliptina_metformina', 'diabetes'),
+    ('sinvastatina', 'dislipidemia'), ('ezetimiba', 'dislipidemia'),
 ])
 def test_medicacao_marca_a_comorbidade_que_implica(remedio, caixa):
     from src.utils import coerencia, medicamentos
@@ -204,3 +204,13 @@ def test_com_outro_tipo_marcado_nada_marca_o_tipo_2(tipo):
     assert com == [tipo] and inf == []
     assert coerencia.inferir({'comorbidades': [tipo], 'hba1c': 6.0})[0] == [tipo]   # e não é pré-diabetes
     assert coerencia.rotulo_de(tipo)
+
+
+@pytest.mark.parametrize('remedio', ['metformina', 'dapagliflozina_metformina'])
+def test_metformina_nao_marca_diabetes(remedio):
+    """Metformina também se usa em pré-diabetes e resistência insulínica: não marca "Diabetes tipo 2"."""
+    from src.utils import coerencia, medicamentos
+    com, _, _ = coerencia.inferir({'comorbidades': [], 'medicacoes': medicamentos.classes_de([remedio])})
+    assert not {'diabetes', 'diabetes_tipo_1'} & set(com), (remedio, com)
+    com, _, _ = coerencia.inferir({'comorbidades': ['pre_diabetes'], 'medicacoes': medicamentos.classes_de([remedio])})
+    assert 'pre_diabetes' in com and 'diabetes' not in com
