@@ -39,3 +39,54 @@ def test_cada_recomendacao_tem_os_campos_que_a_tela_e_os_pdfs_usam(client, perfi
 
     titulos = [rec['titulo'] for rec in dados['recommendations']]
     assert len(titulos) == len(set(titulos)), 'título repetido na mesma resposta'
+
+
+# --- Correções de novembro de 2026 ---------------------------------------------------------------
+
+def _recs(client, **dados):
+    base = dict(idade=52, sexo='masculino', tabagismo='nunca', imunossupressao='nao', comorbidades=[], medicacoes=[],
+                historia_familiar=[])
+    resposta = client.post('/api/checkup-intelligent', json=dict(base, **dados))
+    assert resposta.status_code == 200, resposta.get_json()
+    return {r['titulo']: r for r in resposta.get_json()['recommendations']}
+
+
+@pytest.mark.parametrize('dados', [
+    dict(comorbidades=['diabetes']), dict(hba1c='7.4'), dict(medicacoes=['insulina_nph']),
+    dict(medicacoes=['glibenclamida']), dict(medicacoes_continuo='gliclazida 30 mg'),
+], ids=['caixa', 'hba1c', 'insulina', 'sulfonilureia', 'texto'])
+def test_diabetico_nao_recebe_totg_e_a_glicemia_vira_acompanhamento(client, dados):
+    recs = _recs(client, **dados)
+    assert not any(t.startswith('TOTG') for t in recs), 'TOTG pedido a quem já é diabético'
+    assert recs['Hemoglobina glicada (HbA1c), soro']['subtitulo'].startswith('Diabéticos | A cada 3-6 meses')
+    assert 'Rastreamento' not in recs['Hemoglobina glicada (HbA1c), soro']['descricao']
+    assert recs['Glicose, soro']['subtitulo'].startswith('Diabéticos')
+
+
+def test_quem_nao_e_diabetico_continua_com_o_totg_como_exame_de_duvida(client):
+    assert any(t.startswith('TOTG-75g') for t in _recs(client))
+    assert any(t.startswith('TOTG-75g') for t in _recs(client, hba1c='6.0'))  # pré-diabetes
+
+
+def test_calcio_e_sempre_o_ionico_e_a_espirometria_e_com_broncodilatador(client):
+    from src.utils.catalogo import catalogo
+
+    pedidos = {}
+    for dados in (dict(comorbidades=['diabetes']), dict(medicacoes=['litio']), dict(historia_familiar=['nem1']),
+                  dict(historia_familiar=['nem2']), dict(comorbidades=['dpoc'], tabagismo='ex', macos_ano=30, anos_parou_fumar=2),
+                  dict(medicacoes=['prednisona'], dose__prednisona=40, duracao__prednisona=4)):
+        pedidos.update(_recs(client, **dados))
+    todos = list(pedidos) + [t for itens in catalogo().values() for t in itens]
+    assert 'Cálcio iônico, soro' in pedidos and 'Espirometria, com broncodilatador' in pedidos
+    assert not [t for t in todos if t.lower().startswith('cálcio') and 'iônico' not in t]
+    assert [t for t in todos if 'spirometria' in t] == ['Espirometria, com broncodilatador'] * 2  # motor e catálogo
+
+
+def test_referencia_do_williams_abre_a_pagina_do_livro(client):
+    from src.utils.reference_links import build_reference_links
+
+    links = build_reference_links('Hemograma completo', 'Einstein Pré-Natal v.3 (2024) / MS 2012-2016 / Williams 26e')
+    williams = [link for link in links if 'Williams' in link['label']]
+    assert williams and williams[0]['url'].startswith('https://www.mheducation.com/highered/mhp/product/williams-obstetrics-')
+    novas = build_reference_links('Albumina, soro', 'CGH 2025 (Feuerstein) / Drugs Aging 2024 (Sparling)')
+    assert [link['url'] for link in novas] == ['https://doi.org/10.1016/j.cgh.2025.05.019', 'https://doi.org/10.1007/s40266-024-01143-8']

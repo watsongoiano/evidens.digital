@@ -33,7 +33,31 @@ def test_prednisona_20mg_por_2_semanas_e_imunossupressora(client):
     assert r['triagem_vacinas']['imunossupressao'] == 'sim'
     assert 'dose imunossupressora' in _orientacoes(r)
     assert 'Densitometria óssea (DEXA)' not in _titulos(r)          # ainda não chegou a 3 meses
-    assert 'Prova tuberculínica (PPD) ou IGRA' not in _titulos(r)   # ainda não chegou a 1 mês
+    assert 'Radiografia de coluna torácica e lombar (perfil)' not in _titulos(r)
+    # Avaliação basal da dose imunossupressora (Sparling & Butler 2024) e monitorização durante o uso (Feuerstein 2025)
+    basal = {'Prova tuberculínica (PPD) ou IGRA', 'Hemograma completo com plaquetas', 'Albumina, soro', 'Creatinina, soro',
+             'Ureia, soro', 'Sódio, soro', 'Potássio, soro', 'Cálcio iônico, soro', 'Aspartato aminotransferase, soro',
+             'Alanina aminotransferase, soro', 'Fosfatase alcalina, soro', 'Bilirrubinas totais e frações, soro',
+             'Glicose, soro', 'Hemoglobina glicada (HbA1c), soro', 'Colesterol total e frações, soro', '25-hidroxivitamina D, soro',
+             'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)', 'Avaliação oftalmológica com tonometria e fundoscopia',
+             'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)'}
+    assert basal <= set(_titulos(r)), basal - set(_titulos(r))
+    for viva in ('Tríplice Viral', 'Varicela', 'Febre Amarela', 'Dengue'):
+        assert not any(viva in t for t in _titulos(r)), viva
+    assert 'influenza, COVID-19, pneumocócica' in ' '.join(o['descricao'] for o in r['orientacoes'])
+
+
+def test_corticoide_cronico_em_dose_baixa_monitora_sem_painel_basal(client):
+    """5 mg por 6 meses: osso, glicemia, lipídios, pressão e olhos; o painel basal é da dose imunossupressora."""
+    r = _pedir(client, idade=32, medicacoes=['prednisona'], dose__prednisona=5, duracao__prednisona=26)
+    titulos = set(_titulos(r))
+    assert {'Densitometria óssea (DEXA)', 'Glicose, soro', 'Hemoglobina glicada (HbA1c), soro', 'Colesterol total e frações, soro',
+            'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)', 'Avaliação oftalmológica com tonometria e fundoscopia',
+            '25-hidroxivitamina D, soro'} <= titulos   # densitometria em qualquer idade adulta
+    assert not {'Albumina, soro', 'Prova tuberculínica (PPD) ou IGRA', 'Fosfatase alcalina, soro',
+                'Radiografia de coluna torácica e lombar (perfil)'} & titulos   # imagem da coluna só a partir dos 40
+    assert 'Radiografia de coluna torácica e lombar (perfil)' in _titulos(
+        _pedir(client, idade=52, medicacoes=['prednisona'], dose__prednisona=5, duracao__prednisona=26))
 
 
 def test_prednisona_5mg_por_6_meses_indica_densitometria_sem_imunossupressao(client):
