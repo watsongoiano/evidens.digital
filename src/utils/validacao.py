@@ -81,7 +81,7 @@ CAMPOS_NUMERICOS = {
 }
 
 CAMPOS_LISTA = ('comorbidades', 'medicacoes')
-CAMPOS_SIM_NAO_OPCIONAIS = ('em_tarv', 'supressao_viral')
+CAMPOS_SIM_NAO_OPCIONAIS = ('em_tarv', 'supressao_viral', 'exames_hiv_previos')
 TAMANHO_MAXIMO_TEXTO = 2000
 ITENS_MAXIMOS_LISTA = 50
 
@@ -266,6 +266,22 @@ def validar_entrada(bruto):
             erro(campo, f'{campo}: resposta inválida.')
         elif resposta != DESCONHECIDO:
             dados[campo] = resposta
+
+    # HIV: o médico diz se há CD4 e carga viral anteriores. Com "sim", ao menos um valor é obrigatório;
+    # com "não", o que vier nesses campos é descartado (o motor pede os dois como avaliação inicial).
+    if 'hiv' in (dados.get('comorbidades') or []):
+        previos = dados.get('exames_hiv_previos')
+        if previos is None and ('cd4' in dados or 'carga_viral' in dados):
+            previos = dados['exames_hiv_previos'] = SIM   # quem preenche um resultado já respondeu
+        if previos is None:
+            erro('exames_hiv_previos', 'HIV: informe se há CD4 e carga viral anteriores.')
+        elif previos == SIM:
+            # Basta um dos dois: o que faltar é pedido como avaliação inicial.
+            if 'cd4' not in dados and 'carga_viral' not in dados and not any(e['campo'] in ('cd4', 'carga_viral') for e in erros):
+                erro('cd4', 'HIV: informe o CD4 e/ou a carga viral mais recentes (ou responda que não há exames anteriores).')
+        elif previos == NAO:
+            for campo in ('cd4', 'carga_viral', 'supressao_viral'):
+                dados.pop(campo, None)
 
     # Triagem de segurança para vacinas atenuadas: três valores.
     triagem, erros_triagem = normalizar_triagem(entrada, sexo, idade)

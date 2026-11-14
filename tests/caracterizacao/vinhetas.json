@@ -691,19 +691,28 @@
         "Anti-HCV IgG, soro",
         "Contagem de linfócitos T CD4+",
         "Carga Viral do HIV (HIV RNA)",
-        "Genotipagem do HIV (Teste de Resistência)",
         "Hemograma completo com plaquetas",
         "EAS - Elementos Anormais e Sedimentoscopia, urina",
+        "Sódio, soro",
+        "Potássio, soro",
+        "Ureia, soro",
         "Aspartato aminotransferase, soro",
         "Alanina aminotransferase, soro",
-        "VDRL, soro",
+        "Fosfatase alcalina, soro",
+        "Bilirrubinas totais e frações, soro",
+        "Sífilis: teste treponêmico ou VDRL, soro",
+        "Clamídia e gonococo, PCR (urina ou swab)",
         "Anticorpos anti-HCV, soro",
         "Antígeno HBs, soro",
+        "Anticorpos anti-HBc total, soro",
         "Anticorpos anti-HBs, soro",
-        "Anticorpos anti-HBc total, soro"
+        "Anticorpos anti-HAV IgG, soro",
+        "Toxoplasmose IgG, soro",
+        "Sorologia para HTLV 1 e 2, soro"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso"
+        "Eletrocardiograma de repouso",
+        "Radiografia de tórax"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -760,16 +769,26 @@
         "Carga Viral do HIV (HIV RNA)",
         "Hemograma completo com plaquetas",
         "EAS - Elementos Anormais e Sedimentoscopia, urina",
+        "Sódio, soro",
+        "Potássio, soro",
+        "Ureia, soro",
         "Aspartato aminotransferase, soro",
         "Alanina aminotransferase, soro",
-        "VDRL, soro",
+        "Fosfatase alcalina, soro",
+        "Bilirrubinas totais e frações, soro",
+        "Sífilis: teste treponêmico ou VDRL, soro",
+        "Clamídia e gonococo, PCR (urina ou swab)",
         "Anticorpos anti-HCV, soro",
         "Antígeno HBs, soro",
+        "Anticorpos anti-HBc total, soro",
         "Anticorpos anti-HBs, soro",
-        "Anticorpos anti-HBc total, soro"
+        "Anticorpos anti-HAV IgG, soro",
+        "Toxoplasmose IgG, soro",
+        "Sorologia para HTLV 1 e 2, soro"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso"
+        "Eletrocardiograma de repouso",
+        "Radiografia de tórax"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",

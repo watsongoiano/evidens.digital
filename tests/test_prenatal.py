@@ -285,8 +285,9 @@ def test_gestante_com_hiv_nao_repete_rastreio_de_hiv_nem_exames_equivalentes(cli
 
 @pytest.mark.parametrize('gestante', ['nao', 'sim'])
 def test_beta_hcg_nao_e_pedido_a_mulher_com_hiv(client, gestante):
+    # Em TARV: o teste de gravidez antes de iniciar a TARV (HIVMA/IDSA 2024) é de tests/test_hiv.py.
     extra = dict(idade_gestacional=20, primeira_consulta='sim') if gestante == 'sim' else {}
-    dados = dict(idade=30, sexo='feminino', tabagismo='nunca', comorbidades=['hiv'], cd4='500', historia_familiar=[],
+    dados = dict(idade=30, sexo='feminino', tabagismo='nunca', comorbidades=['hiv'], cd4='500', em_tarv='sim', historia_familiar=[],
                  imunossupressao='nao', gestante=gestante, lactante='nao', **extra)
     r = client.post('/api/checkup-intelligent', json=dados).get_json()
     assert not any('hcg' in x['titulo'].lower() for x in r['recommendations'])

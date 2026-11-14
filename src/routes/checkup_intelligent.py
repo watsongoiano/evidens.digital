@@ -4,6 +4,7 @@ from datetime import datetime
 from src.utils.reference_links import build_reference_links, build_reference_html
 from src.utils import coerencia
 from src.utils import colo_utero
+from src.utils import hiv
 from src.utils import condicoes
 from src.utils import prenatal
 from src.utils import prevent
@@ -1031,206 +1032,20 @@ def generate_intelligent_recommendations():
                     'grau_evidencia': 'C'
                 })
         
-        # ========== HIV MANAGEMENT (EACS 2024, NIH 2024, MS Brasil 2024) ==========
-        
-        # Verificar se é HIV positivo
+        # ========== HIV: src/utils/hiv.py (MS 2024 PCDT HIV / HIVMA/IDSA 2024) ==========
         is_hiv_positive = 'hiv' in comorbidades
-        
+        orientacoes_hiv = []
         if is_hiv_positive:
-            # Coletar dados HIV (aceitar tanto formato direto quanto hiv_data)
-            hiv_data = data.get('hiv_data', {})
-            try:
-                cd4_value = hiv_data.get('cd4') or data.get('cd4')
-                cd4 = int(cd4_value) if cd4_value and str(cd4_value).strip() else None
-            except (ValueError, TypeError):
-                cd4 = None
-            
-            try:
-                carga_viral_value = hiv_data.get('carga_viral') or data.get('carga_viral')
-                carga_viral = int(carga_viral_value) if carga_viral_value and str(carga_viral_value).strip() else None
-            except (ValueError, TypeError):
-                carga_viral = None
-            em_tarv = (hiv_data.get('em_tarv') == 'sim') or (data.get('em_tarv') == 'sim')
-            supressao_viral = (hiv_data.get('supressao_viral') == 'sim') or (data.get('supressao_viral') == 'sim')
-            
-            # EXAMES LABORATORIAIS PARA HIV+
-            
-            # CD4 Count - Frequência baseada em valor e TARV
-            frequencia_cd4 = 'A cada 6 meses'
-            if cd4 and cd4 < 350:
-                frequencia_cd4 = 'A cada 6 meses'
-            elif cd4 and 350 <= cd4 <= 500 and em_tarv:
-                frequencia_cd4 = 'Anualmente'
-            elif cd4 and cd4 > 500 and em_tarv:
-                # Se 2 exames consecutivos > 500, pode não solicitar
-                frequencia_cd4 = 'Não solicitar se >500 em 2 exames consecutivos com intervalo de 6 meses'
-            elif not em_tarv:
-                frequencia_cd4 = 'A cada 6 meses'
-            
-            recommendations.append({
-                'titulo': 'Contagem de linfócitos T CD4+',
-                'descricao': f'Monitoramento imunológico de pacientes HIV+. CD4 atual: {cd4 if cd4 else "não informado"} células/mm³. Essencial para avaliar urgência de início de TARV e necessidade de profilaxia de infecções oportunistas.',
-                'subtitulo': f'HIV+ | {frequencia_cd4}',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            
-            # Carga viral HIV
-            frequencia_cv = 'A cada 3-6 meses'
-            if em_tarv and supressao_viral:
-                frequencia_cv = 'A cada 6 meses'
-            elif em_tarv and not supressao_viral:
-                frequencia_cv = 'Após 8 semanas do início ou mudança de TARV'
-            
-            recommendations.append({
-                'titulo': 'Carga Viral do HIV (HIV RNA)',
-                'descricao': f'Monitoramento virológico. Carga viral atual: {carga_viral if carga_viral else "não informada"} cópias/mL. Objetivo: <50 cópias/mL (indetectável). Confirma eficácia da TARV e adesão ao tratamento.',
-                'subtitulo': f'HIV+ | {frequencia_cv}',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            
-            # Glicemia de jejumste de resistência)
-            if not em_tarv or (carga_viral and carga_viral > 1000):
-                recommendations.append({
-                    'titulo': 'Genotipagem do HIV (Teste de Resistência)',
-                    'descricao': 'Teste de resistência genotípica (PR/RT +/- gene integrase). Indicado antes do início da TARV e em caso de falha virológica. Essencial para escolha do esquema terapêutico adequado.',
-                    'subtitulo': 'HIV+ | Avaliação inicial ou falha virológica',
-                    'categoria': 'laboratorio',
-                    'prioridade': 'alta',
-                    'referencia': '<a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH 2024</a>',
-                    'grau_evidencia': 'A'
-                })
-            
-            # Hemograma completo
-            recommendations.append({
-                'titulo': 'Hemograma completo com plaquetas',
-                'descricao': 'Monitoramento de citopenias relacionadas ao HIV ou TARV. Repetir em 2-8 semanas em caso de início ou troca de TARV com zidovudina ou outros medicamentos mielotóxicos.',
-                'subtitulo': 'HIV+ | A cada 6-12 meses',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            
-            # Creatinina e TFGe
-            recommendations.append({
-                'titulo': 'Creatinina, soro',
-                'descricao': 'Avaliação de função renal. Intervalo de 3-6 meses em caso de uso de medicamentos nefrotóxicos (TFGe abaixo de 60 mL/min/1.73m² ou risco aumentado para doença renal).',
-                'subtitulo': 'HIV+ | Anual (ou 3-6 meses se nefrotóxicos)',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            
-            # Exame básico de urina
-            recommendations.append({
-                'titulo': 'EAS - Elementos Anormais e Sedimentoscopia, urina',
-                'descricao': 'Rastreamento de alterações renais. Intervalo de 3-6 meses em caso de uso de medicamentos nefrotóxicos, proteinúria ou risco aumentado para doença renal.',
-                'subtitulo': 'HIV+ | Anual',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            
-            # Perfil lipídico
-            recommendations.append({
-                'titulo': 'Colesterol total e frações, soro',
-                'descricao': 'Avaliação de dislipidemia. Intervalo de 6-12 meses em caso de alteração na última análise. HIV e TARV podem aumentar risco cardiovascular.',
-                'subtitulo': 'HIV+ | Anual',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            
-            # Hemograma de jejum
-            recommendations.append({
-                'titulo': 'Glicose, soro',
-                'descricao': 'Rastreamento de diabetes. Alguns antirretrovirais podem aumentar risco de hiperglicemia.',
-                'subtitulo': 'HIV+ | Anual',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            
-            # Transaminases (TGO/AST e TGP/ALT)
-            recommendations.append({
-                'titulo': 'Aspartato aminotransferase, soro',
-                'descricao': 'Avaliação de função hepática. Intervalos mais frequentes em caso de uso de medicamentos hepatotóxicos, doença hepática ou HCV/HBV.',
-                'subtitulo': 'HIV+ | A cada 3-12 meses',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            recommendations.append({
-                'titulo': 'Alanina aminotransferase, soro',
-                'descricao': 'Avaliação de função hepática. Intervalos mais frequentes em caso de uso de medicamentos hepatotóxicos, doença hepática ou HCV/HBV.',
-                'subtitulo': 'HIV+ | A cada 3-12 meses',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            
-            # Teste de sífilis
-            recommendations.append({
-                'titulo': 'VDRL, soro',
-                'descricao': 'Rastreamento de sífilis. Considerar maior frequência de triagem em caso de risco ou exposição. Pessoas não imunizadas (anti-HBs negativo) não necessitam nova triagem para HIV.',
-                'subtitulo': 'HIV+ | Semestral ou conforme indicação',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            
-            # Anti-HCV
-            recommendations.append({
-                'titulo': 'Anticorpos anti-HCV, soro',
-                'descricao': 'Rastreamento de hepatite C. Solicitar carga viral de HCV em caso de anti-HCV positivo ou suspeita de infecção aguda.',
-                'subtitulo': 'HIV+ | Anual ou conforme indicação',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            
-            # Triagem HBV (HBsAg, anti-HBs, anti-HBc total)
-            recommendations.append({
-                'titulo': 'Antígeno HBs, soro',
-                'descricao': 'Rastreamento de hepatite B (HBsAg). Vacinar pessoas não imunizadas (anti-HBs negativo). Pessoas imunizadas não necessitam nova triagem para HBV.',
-                'subtitulo': 'HIV+ | Avaliação inicial',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            recommendations.append({
-                'titulo': 'Anticorpos anti-HBs, soro',
-                'descricao': 'Rastreamento de hepatite B (anti-HBs). Vacinar pessoas não imunizadas (anti-HBs negativo). Pessoas imunizadas não necessitam nova triagem para HBV.',
-                'subtitulo': 'HIV+ | Avaliação inicial',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
-            recommendations.append({
-                'titulo': 'Anticorpos anti-HBc total, soro',
-                'descricao': 'Rastreamento de hepatite B. Vacinar pessoas não imunizadas (anti-HBs negativo). Pessoas imunizadas não necessitam nova triagem para HBV.',
-                'subtitulo': 'HIV+ | Avaliação inicial',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
-                'grau_evidencia': 'A'
-            })
+            hiv_data = data.get('hiv_data') or {}
+            meds_texto = (medicacoes_continuo + ' ' + ' '.join(str(m) for m in medicacoes_checkboxes)).lower()
+            recs_hiv, orientacoes_hiv = hiv.recomendar(
+                age, sex, cd4=hiv_data.get('cd4') or data.get('cd4'),
+                carga_viral=hiv_data.get('carga_viral') or data.get('carga_viral'),
+                em_tarv='sim' in (hiv_data.get('em_tarv'), data.get('em_tarv')),
+                supressao_viral='sim' in (hiv_data.get('supressao_viral'), data.get('supressao_viral')),
+                gestante=is_pregnant, tenofovir='tenofovir' in meds_texto,
+                risco_renal=any(c in comorbidades for c in ('diabetes', 'hipertensao', 'doenca_renal')))
+            recommendations.extend(recs_hiv)
 
         # ========== DPOC MANAGEMENT (GOLD COPD 2023) ==========
         
@@ -1383,7 +1198,7 @@ def generate_intelligent_recommendations():
                 'tipo': 'calculadora',
                 'prioridade': 'media',
                 'link': 'https://www.fraxplus.org/pt/calculation-tool',
-                'referencia': '<a href="https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts/pcdt_hiv_modulo_1_2024.pdf" target="_blank">MS Brasil PCDT HIV 2024</a> | <a href="https://www.eacsociety.org/media/guidelines-11.1_final_09-10.pdf" target="_blank">EACS 11.1</a> | <a href="https://clinicalinfo.hiv.gov/en/guidelines/hiv-clinical-guidelines-adult-and-adolescent-arv/tests-initial-assessment-follow-up" target="_blank">NIH/CDC HIV Guidelines</a>',
+                'referencia': 'MS 2024 (PCDT HIV)',
                 'grau_evidencia': 'B'
             })
         
@@ -1491,7 +1306,7 @@ def generate_intelligent_recommendations():
         response['adiados_gestacao'] = adiados_gestacao
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['inferencias'] = inferencias
-        response['orientacoes'] = orientacoes_doses + orientacoes + orientacoes_colo
+        response['orientacoes'] = orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_hiv
         aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
         if aviso_exames:
             response['orientacoes'] = response['orientacoes'] + [aviso_exames]

@@ -128,7 +128,7 @@ def _casos_do_motor():
             ('48', '170', '185', '125', '330', '25', '3.5', '11'), ('70', '170', '125', '', '', '', '', ''))]
         extras = exames + [dict(e, comorbidades=['diabetes']) for e in exames[:4]] + [
             dict(comorbidades=['hiv'], cd4='150', carga_viral='5000', em_tarv='nao', supressao_viral='nao'),
-            dict(comorbidades=['hiv'], cd4='650', carga_viral='0', em_tarv='sim', supressao_viral='sim'), dict(comorbidades=['hiv']),
+            dict(comorbidades=['hiv'], cd4='650', carga_viral='0', em_tarv='sim', supressao_viral='sim'), dict(comorbidades=['hiv'], exames_hiv_previos='nao'), dict(comorbidades=['hiv']),
             dict(imunossupressao='sim'), dict(imunossupressao='nao_informado'), dict(lactante='menos_6m'), dict(lactante='6m_ou_mais'),
             dict(lactante='nao_informado'), dict(alcoolismo='sim', doses_semana='30', anos_consumo_alcool='15'), dict(alcoolismo='sim', doses_semana='4'),
             dict(comorbidades=['diabetes', 'hipertensao', 'doenca_renal', 'dcv_aterosclerotica', 'dpoc', 'obesidade', 'dislipidemia', 'has_resistente']),
