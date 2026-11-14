@@ -69,11 +69,11 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     
     _add_rec({
         'titulo': 'TOTG-75g (Teste Oral de Tolerância à Glicose), soro',
-        'descricao': 'Indicado quando glicemia de jejum ou HbA1c estão na faixa de pré-diabetes ou são discordantes: confirma ou afasta diabetes. Valores 2h pós-carga: <140 mg/dL normal, 140-199 mg/dL pré-diabetes, ≥200 mg/dL diabetes. Não se pede a quem já tem diabetes.',
+        'descricao': 'Indicado quando glicemia de jejum ou HbA1c estão na faixa de pré-diabetes: confirma ou afasta diabetes (SBD 2024). No rastreamento de rotina bastam glicemia de jejum e HbA1c (ADA 2026). A SBD prefere a glicemia de 1 h: <155 mg/dL normal, 155-208 pré-diabetes, ≥209 diabetes; em 2 h: <140 normal, 140-199 pré-diabetes, ≥200 diabetes. Não se pede a quem já tem diabetes.',
         'subtitulo': 'Glicemia ou HbA1c limítrofes (pré-diabetes) | Para confirmar o diagnóstico',
         'categoria': 'laboratorio',
         'prioridade': 'media',
-        'referencia': 'ADA 2024',
+        'referencia': 'SBD 2024 / ADA 2026',
         'grau_evidencia': 'A'
     })
     
@@ -772,18 +772,19 @@ def generate_intelligent_recommendations():
             imc = weight / (altura_m ** 2)
         
         # Verificar se já é diabético
-        is_diabetic = 'diabetes_tipo_2' in comorbidades or 'diabetes' in comorbidades
+        # Qualquer tipo de diabetes (ADA 2026); insulina em uso indica diabetes mesmo sem o tipo marcado.
+        is_diabetic = bool(set(condicoes.TIPOS_DE_DIABETES) & set(comorbidades)) or 'insulina' in medicacoes_checkboxes
         
         # Verificar HbA1C se fornecido
         hba1c = float(data.get('hba1c', 0)) if data.get('hba1c') else None
-        diabetes_por_hba1c = any(i['valor'] == 'diabetes' and 'HbA1c' in i['motivo'] for i in inferencias)
-        if hba1c is not None and hba1c >= 6.5 and not is_diabetic:
-            # ADA: HbA1c ≥ 6,5% é critério diagnóstico de diabetes (confirmar com 2º exame
-            # se não houver hiperglicemia inequívoca). Antes o corte era > 6,5 e 6,5 escapava.
+        diabetes_por_hba1c = False
+        if hba1c is not None and hba1c >= 6.5 and not set(condicoes.TIPOS_DE_DIABETES) & set(comorbidades):
+            # ADA: HbA1c ≥ 6,5% é critério diagnóstico de diabetes (confirmar com 2º exame se não houver
+            # hiperglicemia inequívoca), mas não diz o tipo: o paciente é tratado como diabético sem marcar
+            # tipo 1, tipo 2 ou outro. "diabetes_sem_tipo" é só um marcador interno, não existe na tela.
             diabetes_por_hba1c = True
             is_diabetic = True
-            if 'diabetes_tipo_2' not in comorbidades:
-                comorbidades.append('diabetes_tipo_2')
+            comorbidades.append('diabetes_sem_tipo')
         
         # TOTG só com indicação: glicemia ou HbA1c limítrofes (pré-diabetes marcado ou HbA1c de 5,7 a 6,4%),
         # para confirmar o diagnóstico. Não entra no check-up de rotina e nunca em quem já tem diabetes
@@ -920,16 +921,17 @@ def generate_intelligent_recommendations():
                     'grau_evidencia': 'A'
                 })
             
-            # TSH (para diabetes tipo 1, mas pode ser útil para tipo 2 também)
-            recommendations.append({
-                'titulo': 'Hormônio Tireoestimulante (TSH), soro',
-                'descricao': 'Rastreamento de disfunção tireoidiana em pacientes diabéticos, especialmente tipo 1. Diabetes e doenças tireoidianas frequentemente coexistem.',
-                'subtitulo': 'Diabéticos tipo 1 | A cada 1-2 anos',
-                'categoria': 'laboratorio',
-                'prioridade': 'media',
-                'referencia': 'ADA 2024',
-                'grau_evidencia': 'E'
-            })
+            # TSH: só no diabetes tipo 1 (doença tireoidiana autoimune associada); não é rotina nos outros tipos.
+            if 'diabetes_tipo_1' in comorbidades:
+                recommendations.append({
+                    'titulo': 'Hormônio Tireoestimulante (TSH), soro',
+                    'descricao': 'Diabetes tipo 1: rastrear doença tireoidiana autoimune na avaliação inicial e periodicamente.',
+                    'subtitulo': 'Diabetes tipo 1 | A cada 1-2 anos',
+                    'categoria': 'laboratorio',
+                    'prioridade': 'media',
+                    'referencia': 'ADA 2026 (seção 4)',
+                    'grau_evidencia': 'E'
+                })
             
             # Vitamina B12 (se em uso de metformina)
             medicacoes_continuo_lower = medicacoes_continuo.lower()
@@ -1335,6 +1337,8 @@ def generate_intelligent_recommendations():
         # não se aplicam na gestação saem da lista e aparecem como "adiados".
         adiados_gestacao, proximas_gestacao = [], []
         if gestacao is not None:
+            if 'diabetes_gestacional_previo' in comorbidades and 'dmg_previo' not in gestacao['condicoes']:
+                gestacao['condicoes'].append('dmg_previo')  # mesma informação, marcada na lista de comorbidades
             exames_pn, proximas_gestacao = prenatal.programacao(gestacao, age, hipertensa=has_hypertension,
                                                                 diabetica=is_diabetic, hiv='hiv' in comorbidades)
             titulos_pn = {r['titulo'].lower() for r in exames_pn}

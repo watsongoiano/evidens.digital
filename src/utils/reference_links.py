@@ -77,6 +77,9 @@ _FONTES_DIRETAS = [
     ('einstein pré-natal', 'https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf'),
     ('ms 2012-2016', 'https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf'),
     ('williams 26e', 'https://www.mheducation.com/highered/mhp/product/williams-obstetrics-27e.html?viewOption=student'),
+    ('sbd 2024', 'https://doi.org/10.29327/5412848.2024-1'),
+    ('ada 2026 (seção 4)', 'https://doi.org/10.2337/dc26-S004'),  # avaliação médica e comorbidades
+    ('ada 2026', 'https://doi.org/10.2337/dc26-S002'),  # diagnóstico e classificação
     ('cgh 2025 (feuerstein)', 'https://doi.org/10.1016/j.cgh.2025.05.019'),
     ('drugs aging 2024 (sparling)', 'https://doi.org/10.1007/s40266-024-01143-8'),
     ('consenso brasileiro de dmg', 'https://iris.paho.org/handle/10665.2/34278'),

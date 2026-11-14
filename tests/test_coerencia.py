@@ -51,7 +51,8 @@ def test_sem_falso_positivo_por_pedaco_de_palavra():
 def test_hba1c_imc_tfg_e_has_resistente():
     com, _, _ = coerencia.inferir({'hba1c': 6.5, 'peso': 95, 'altura': 170,
                                    'comorbidades': ['has_resistente']}, egfr=52)
-    assert {'diabetes', 'obesidade', 'doenca_renal', 'hipertensao'} <= set(com)
+    assert {'obesidade', 'doenca_renal', 'hipertensao'} <= set(com)
+    assert not {'diabetes', 'diabetes_tipo_1'} & set(com)   # HbA1c ≥ 6,5% não diz o tipo: nenhuma caixa de diabetes
     com, _, inf = coerencia.inferir({'hba1c': 5.6, 'peso': 80, 'altura': 170}, egfr=75)
     assert com == [] and inf == []
 
@@ -62,8 +63,10 @@ def test_hba1c_na_faixa_de_pre_diabetes_marca_pre_diabetes():
         assert com == ['pre_diabetes'] and inf[0]['rotulo'] == 'Pré-diabetes' and '5,7 a 6,4%' in inf[0]['motivo']
     # no diabético (marcado, ou reconhecido pela medicação), 6,0% é bom controle, não pré-diabetes
     assert coerencia.inferir({'hba1c': 6.0, 'comorbidades': ['diabetes']})[0] == ['diabetes']
-    com, _, _ = coerencia.inferir({'hba1c': 6.0, 'medicacoes': ['insulina']})
+    com, _, _ = coerencia.inferir({'hba1c': 6.0, 'medicacoes': ['sulfonilureia']})
     assert 'diabetes' in com and 'pre_diabetes' not in com
+    # insulina indica diabetes, mas não o tipo: nem tipo 2, nem pré-diabetes
+    assert coerencia.inferir({'hba1c': 6.0, 'medicacoes': ['insulina']})[0] == []
     # quem desmarcou a caixa na tela fica com a decisão
     assert coerencia.inferir({'hba1c': 6.0}, recusados=['pre_diabetes'])[0] == []
 
@@ -161,7 +164,7 @@ def test_betabloqueador_de_ic_conta_como_tratamento_so_com_hipertensao():
 @pytest.mark.parametrize('remedio, caixa', [
     ('atenolol', 'hipertensao'), ('metoprolol', 'hipertensao'), ('nebivolol', 'hipertensao'), ('losartana', 'hipertensao'),
     ('hidroclorotiazida', 'hipertensao'), ('anlodipino', 'hipertensao'), ('clonidina', 'hipertensao'),
-    ('metformina', 'diabetes'), ('glibenclamida', 'diabetes'), ('sitagliptina', 'diabetes'), ('insulina_nph', 'diabetes'),
+    ('metformina', 'diabetes'), ('glibenclamida', 'diabetes'), ('sitagliptina', 'diabetes'),
     ('dapagliflozina_metformina', 'diabetes'), ('sinvastatina', 'dislipidemia'), ('ezetimiba', 'dislipidemia'),
 ])
 def test_medicacao_marca_a_comorbidade_que_implica(remedio, caixa):
@@ -183,3 +186,21 @@ def test_medicacao_com_outras_indicacoes_nao_marca_sozinha_mas_a_tela_avisa(reme
     import re
     item = re.search(r'data-valor="%s"[^>]*>' % remedio, pagina).group(0)
     assert f'data-talvez="{caixa}"' in item, item
+
+
+# --- Tipos de diabetes (classificação da ADA 2026) -----------------------------------------------
+
+def test_insulina_nao_marca_tipo_de_diabetes():
+    from src.utils import medicamentos
+    for remedio in ('insulina_nph', 'insulina_glargina', 'insulina_asparte'):
+        com, _, inf = coerencia.inferir({'comorbidades': [], 'medicacoes': medicamentos.classes_de([remedio])})
+        assert com == [] and inf == [], remedio
+
+
+@pytest.mark.parametrize('tipo', ['diabetes_tipo_1', 'diabetes_monogenico', 'diabetes_pancreatico', 'diabetes_medicamentoso'])
+def test_com_outro_tipo_marcado_nada_marca_o_tipo_2(tipo):
+    """Antidiabético e HbA1c ≥ 6,5% não dizem o tipo: não acrescentam "tipo 2" a quem já tem outro tipo."""
+    com, _, inf = coerencia.inferir({'comorbidades': [tipo], 'medicacoes': ['metformina', 'sulfonilureia'], 'hba1c': 8.2})
+    assert com == [tipo] and inf == []
+    assert coerencia.inferir({'comorbidades': [tipo], 'hba1c': 6.0})[0] == [tipo]   # e não é pré-diabetes
+    assert coerencia.rotulo_de(tipo)

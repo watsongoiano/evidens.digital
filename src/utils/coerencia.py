@@ -1,7 +1,7 @@
 """Coerência entre campos do formulário.
 
 Um dado implica outro: estatina implica dislipidemia, anti-hipertensivo implica
-hipertensão, HbA1c ≥ 6,5% implica diabetes, IMC ≥ 30 implica obesidade etc. Sem
+hipertensão, IMC ≥ 30 implica obesidade etc. (HbA1c ≥ 6,5% indica diabetes sem dizer o tipo) Sem
 isso, o médico marca "sinvastatina" no texto e o motor (e o PREVENT) tratam o
 paciente como se não usasse estatina.
 
@@ -46,9 +46,9 @@ ROTULOS = {
     'obesidade': 'Obesidade', 'doenca_renal': 'Doença renal crônica',
     'estatinas': 'Estatinas', 'anti_hipertensivos': 'Anti-hipertensivos',
     'insuficiencia_cardiaca': 'Insuficiência cardíaca', 'dcv_aterosclerotica': 'Doença cardiovascular aterosclerótica',
-    'dpoc': 'DPOC', 'hiv': 'HIV',
+    'dpoc': 'DPOC', 'hiv': 'HIV', 'diabetes_tipo_1': 'Diabetes tipo 1',
 }
-DIABETES = ('diabetes', 'diabetes_tipo_2')
+from src.utils.condicoes import TIPOS_DE_DIABETES as DIABETES  # noqa: E402  (tipo 1, tipo 2 e tipos específicos)
 
 
 def rotulo_de(valor):
@@ -114,6 +114,9 @@ def inferir(data, egfr=None, gestante=False, recusados=(), escolhidas=()):
 
     def marcar(lista, campo, valor, motivo):
         # "recusados": caixas automáticas que o médico desmarcou na tela.
+        # Antidiabético ou HbA1c ≥ 6,5% não dizem o tipo: se outro tipo de diabetes já está marcado, o tipo 2 não entra.
+        if valor == 'diabetes' and set(DIABETES) & set(comorbidades):
+            return
         if valor not in lista and valor not in recusados:
             lista.append(valor)
             inferencias.append({'campo': campo, 'valor': valor, 'rotulo': rotulo_de(valor), 'motivo': motivo})
@@ -162,10 +165,10 @@ def inferir(data, egfr=None, gestante=False, recusados=(), escolhidas=()):
     if 'antidiabeticos' in texto:
         marcar(comorbidades, 'comorbidades', 'diabetes', 'antidiabético citado em "Outras medicações"')
     hba1c = data.get('hba1c')
-    if hba1c is not None and float(hba1c) >= 6.5 and 'diabetes_tipo_2' not in comorbidades:
-        marcar(comorbidades, 'comorbidades', 'diabetes', 'HbA1c ≥ 6,5% (ADA; confirmar com 2º exame)')
+    # HbA1c ≥ 6,5% é critério de diabetes, mas não diz o tipo: não marca caixa nenhuma (o motor trata o
+    # paciente como diabético e pede o tipo; ver a rota do check-up).
     # 5,7 a 6,4% em quem não tem diabetes é pré-diabetes (no diabético tratado, é só bom controle)
-    if hba1c is not None and 5.7 <= float(hba1c) < 6.5 and not set(DIABETES) & set(comorbidades):
+    if hba1c is not None and 5.7 <= float(hba1c) < 6.5 and not set(DIABETES) & set(comorbidades) and 'insulina' not in medicacoes:
         marcar(comorbidades, 'comorbidades', 'pre_diabetes', 'HbA1c de 5,7 a 6,4% (ADA)')
     peso, altura = data.get('peso'), data.get('altura')
     if peso and altura and float(peso) / (float(altura) / 100) ** 2 >= 30:
