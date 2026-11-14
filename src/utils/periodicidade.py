@@ -292,6 +292,8 @@ def exames_conhecidos():
 
 def nao_reconhecidos(exames_anteriores):
     """Nomes informados que não correspondem a nenhum exame conhecido (não têm como ser conferidos)."""
+    if not exames_anteriores:
+        return []
     from src.utils.catalogo import catalogo
     cat = catalogo()
     conhecidos = set(tuss._POR_CHAVE) | {tuss._chave(t) for c in ('laboratorio', 'imagem') for t in cat.get(c, [])}

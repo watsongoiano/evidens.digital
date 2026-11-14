@@ -6,8 +6,14 @@ Duas fontes, unidas na resposta de `/api/catalogo`:
   `scripts/gerar_catalogo.py` em `src/data/catalogo_motor.json` e conferidos
   por teste, para não divergirem do motor;
 - a lista `EXTRAS` abaixo, com pedidos frequentes no check-up que o motor não
-  recomenda sozinho. Qualquer item pode ainda ser digitado em texto livre.
+  recomenda sozinho;
+- a tabela TUSS de laboratório (`src/data/tuss_laboratorio.json`), com o nome
+  da própria TUSS. O exame que já está no catálogo com outro nome não entra
+  duas vezes: "Creatinina" (TUSS) é a "Creatinina, soro" que já existe.
+
+Qualquer item pode ainda ser digitado em texto livre.
 """
+import functools
 import json
 from pathlib import Path
 
@@ -106,6 +112,33 @@ def _do_motor():
         return {}
 
 
+# Código da tabela que não entra no catálogo. O cálcio total fica de fora por decisão clínica do
+# projeto: o cálcio dos pedidos é sempre o iônico.
+FORA_DO_CATALOGO = {'40301400'}
+
+
+@functools.lru_cache(maxsize=4)
+def _da_tabela_tuss(ja_no_catalogo):
+    """Nomes da tabela TUSS de laboratório cujo exame ainda não está no catálogo.
+
+    `ja_no_catalogo` é uma tupla (a conta é a mesma a cada pedido, e fica guardada).
+    """
+    from src.utils import tuss
+    cobertos, nomes_vistos = set(), set()
+    for titulo in ja_no_catalogo:
+        nomes_vistos.add(tuss._chave(titulo))
+        linhas = tuss.linhas_da_guia(titulo)
+        if len(linhas) == 1 and linhas[0]['codigo']:       # exame simples: o código já está representado
+            cobertos.add(linhas[0]['codigo'])
+    novos = []
+    for codigo, nome in tuss.TABELA_DE_LABORATORIO:
+        if codigo in cobertos or codigo in FORA_DO_CATALOGO or tuss._chave(nome) in nomes_vistos:
+            continue
+        nomes_vistos.add(tuss._chave(nome))
+        novos.append(nome)
+    return tuple(novos)
+
+
 def catalogo():
     """{categoria: [títulos em ordem alfabética, sem repetição]}"""
     motor = _do_motor()
@@ -117,6 +150,8 @@ def catalogo():
             if chave and chave not in vistos:
                 vistos.add(chave)
                 lista.append(titulo.strip())
+        if categoria == 'laboratorio':
+            lista += _da_tabela_tuss(tuple(lista))
         saida[categoria] = sorted(lista, key=lambda t: t.lower())
     return saida
 
