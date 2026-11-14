@@ -293,3 +293,11 @@ def test_troca_de_paciente_pede_confirmacao_do_plano_antes_da_guia():
     # editar o plano ou a carteira vale como confirmação; "Limpar" zera os dois
     assert re.search(r'function planoEditado\(origem\) \{.*?planoAConfirmar = false;', tela, re.S)
     assert "['planoLimpar', 'guiaLimpar'].forEach(id => document.getElementById(id).addEventListener('click', limparGuia));" in tela
+
+
+def test_dialogo_preenche_tambem_a_identificacao_se_a_primeira_carga_falhou():
+    """Se a lista de planos só carregou no diálogo, o seletor da identificação tem de ganhar as mesmas opções:
+    sem elas, escolher o plano no diálogo deixava a identificação vazia e a carteira era apagada a cada tecla."""
+    tela = _tela()
+    guia = re.search(r'async function prepararGuia\(categoria\) \{(.*?)\n        \}', tela, re.S).group(1)
+    assert guia.index('aplicarPlanosNaIdentificacao(planos)') < guia.index("preencherPlanos(seletor, planos.lista)")

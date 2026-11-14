@@ -1333,7 +1333,12 @@
 
         // Mostra o bloco do plano na identificação para quem assina pedidos (médico e residente).
         async function prepararPlanoDoPaciente() {
-            const planos = await carregarPlanos();
+            aplicarPlanosNaIdentificacao(await carregarPlanos());
+        }
+
+        // Também chamada pelo diálogo do PDF: se a primeira carga falhou e a do diálogo deu certo,
+        // a identificação precisa das mesmas opções, senão o espelho entre os dois seletores se perde.
+        function aplicarPlanosNaIdentificacao(planos) {
             if (!planos.disponivel) return;
             document.getElementById('planoDoPaciente').style.display = '';
             const temPlanos = planos.lista.length > 0;
@@ -1390,6 +1395,7 @@
             if (!planos.disponivel) return;
             if (!planos.lista.length) { convite.style.display = ''; return; }
             // O diálogo espelha o que está na identificação do paciente.
+            aplicarPlanosNaIdentificacao(planos);
             const seletor = document.getElementById('guiaPlano');
             preencherPlanos(seletor, planos.lista);
             seletor.value = campoPlano().value;
