@@ -190,6 +190,14 @@ def titulos_do_motor(app):
         for rec in cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
             if rec.get('categoria') in encontrados:
                 encontrados[rec['categoria']].add(rec['titulo'])
+    # Colo do útero: os desfechos do último teste de DNA-HPV (colposcopia, repetição em 1 ano)
+    from src.utils import colo_utero
+    for resultado, imuno in itertools.product(colo_utero.RESULTADOS, ('nao', 'sim')):
+        dados = dict(idade=40, sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[],
+                     imunossupressao=imuno, gestante='nao', lactante='nao', hpv_resultado=resultado)
+        for rec in cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
+            if rec.get('categoria') in encontrados:
+                encontrados[rec['categoria']].add(rec['titulo'])
     # Listas suspensas (comorbidades, medicações e família): cada item sozinho, em idades e sexos distintos
     from src.utils import condicoes
     for idade, sexo in itertools.product((30, 47, 68), ('masculino', 'feminino')):

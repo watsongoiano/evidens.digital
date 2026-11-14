@@ -251,6 +251,7 @@
             <li role="option" data-valor="hpb" data-busca="hiperplasia prostatica benigna prostata ">Hiperplasia prostática benigna</li>
             <li role="option" data-valor="sop" data-busca="sindrome dos ovarios policisticos sop ">Síndrome dos ovários policísticos</li>
             <li role="option" data-valor="endometriose" data-busca="endometriose  ">Endometriose</li>
+            <li role="option" data-valor="histerectomia_total" data-busca="histerectomia total por doenca benigna utero retirada histerectomizada ">Histerectomia total por doença benigna</li>
             <li role="option" data-valor="drge" data-busca="doenca do refluxo gastroesofagico refluxo drge ">Doença do refluxo gastroesofágico</li>
             <li role="option" data-valor="doenca_celiaca" data-busca="doenca celiaca gluten ">Doença celíaca</li>
             <li role="option" data-valor="osteoartrite" data-busca="osteoartrite artrose ">Osteoartrite</li>
@@ -741,6 +742,18 @@
       <div id="examesAnteriores" class="flex flex-col gap-4"></div>
       <datalist id="examesConhecidos"></datalist>
       <button type="button" id="adicionarExameAnterior" class="btn-claro mt-4"><i class="fa-solid fa-plus text-[11px]"></i> Adicionar exame</button>
+      <div class="campo mt-6" id="hpv-item" style="display: none;">
+        <label for="hpv_resultado">Último teste de DNA-HPV (colo do útero)</label>
+        <select id="hpv_resultado" name="hpv_resultado">
+          <option value="">Não fez ou não sabe</option>
+          <option value="nao_detectado">Não detectado</option>
+          <option value="hpv_16_18">HPV 16 ou 18</option>
+          <option value="outros_citologia_negativa">Outros tipos, citologia negativa</option>
+          <option value="outros_citologia_alterada">Outros tipos, citologia ASC-US ou mais</option>
+          <option value="colposcopia_negativa">Colposcopia sem doença</option>
+        </select>
+        <p class="text-[12px] text-ink/55 mt-1.5">Opcional. Define o passo seguinte: novo teste em 5 anos, em 1 ano, ou colposcopia. Para adiar o pedido pela data, informe também a data do teste acima.</p>
+      </div>
     </section>
 
     <div id="formErrors" role="alert" class="aviso aviso-erro" style="display: none;"></div>
@@ -1998,6 +2011,9 @@
                     document.getElementById(campo).value = 'desconhecido';
                 }
             });
+            // Resultado do último teste de HPV: só para o sexo feminino.
+            document.getElementById('hpv-item').style.display = feminino ? 'block' : 'none';
+            if (!feminino) document.getElementById('hpv_resultado').value = '';
             atualizarBlocoGestacao();
         });
 
@@ -2063,6 +2079,7 @@
             // Ocultar perguntas de gestação e amamentação inicialmente
             document.getElementById('gestante-item').style.display = 'none';
             document.getElementById('lactante-item').style.display = 'none';
+            document.getElementById('hpv-item').style.display = 'none';
         });
     </script>
 </body>

@@ -94,11 +94,13 @@ def test_pontos_da_tabela_10_1_do_williams():
     assert 'Cultura para estreptococo do grupo B (swab vaginal e retal)' in _titulos(_g(idade_gestacional='36'), idade=30)
 
 
-def test_papanicolaou_da_primeira_consulta_vem_do_rastreio_de_colo(client):
+def test_rastreio_de_colo_da_primeira_consulta_vem_do_check_up_geral(client):
+    """Gestante a partir dos 25 anos: teste de DNA-HPV (coleta segura na gestação, MS 2025 rec. 31)."""
     dados = dict(idade=27, sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[], imunossupressao='nao',
                  gestante='sim', lactante='nao', idade_gestacional=10, primeira_consulta='sim')
     t = [x['titulo'] for x in client.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']]
-    assert 'Citologia cervicovaginal (Papanicolaou)' in t
+    assert 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular' in t
+    assert 'Citologia cervicovaginal (Papanicolaou)' not in t
 
 
 @pytest.mark.parametrize('campo, valor', [('idade_gestacional', '50'), ('fator_rh', 'x'),
