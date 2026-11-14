@@ -37,7 +37,7 @@ def resend(monkeypatch, contas):
 
 
 def _cadastrar(anonimo, email, **extra):
-    dados = dict(email=email, nome='Pessoa Nova', perfil='medico', crm_uf='GO', crm_numero='4321', senha=SENHA_DE_TESTE)
+    dados = dict(email=email, nome='Pessoa Nova', perfil='medico', crm_uf='GO', crm_numero='4321', senha=SENHA_DE_TESTE, aceite_termos=True)
     dados.update(extra)
     return anonimo.post('/api/auth/cadastro', json=dados)
 

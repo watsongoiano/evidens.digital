@@ -829,7 +829,7 @@
 <footer class="max-w-[1100px] mx-auto px-4 sm:px-6 pb-10">
   <div class="flex flex-col md:flex-row md:justify-between gap-3 pt-8 border-t border-ink/10 text-[12px] text-ink/50">
     <p>Desenvolvido por Dr. Rodolfo Cambraia Frota · CRM-GO 26.815</p>
-    <p class="flex items-center gap-4 md:justify-end">© 2026 Evidēns · <a href="/contact" class="hover:text-teal">Contato</a> <span data-idioma></span></p>
+    <p class="flex items-center gap-4 md:justify-end">© 2026 Evidēns · <a href="/contact" class="hover:text-teal">Contato</a> · <a href="/termos" class="hover:text-teal">Termos de Uso</a> <span data-idioma></span></p>
   </div>
 </footer>
 
@@ -843,6 +843,8 @@
                 const resposta = await buscar(...args);
                 if (resposta.status === 401) {
                     window.location.href = '/login?destino=check-up';
+                } else if (resposta.status === 403 && resposta.headers.get('X-Evidens-Termos')) {
+                    window.location.href = '/termos?aceitar=1&destino=check-up';
                 }
                 return resposta;
             };

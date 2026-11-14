@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pytest
 
-from conftest import SENHA_DE_TESTE
+from conftest import SENHA_DE_TESTE, aceitar_termos
 from src.utils import uso
 
 _seq = itertools.count(1)
@@ -17,6 +17,7 @@ def _medico(app, contas):
     n = next(_seq)
     u = contas.criar(f'uso{n}@exemplo.test', f'Dr. Uso {n}', f'CRM-GO 7{n:04d}', 'medico', SENHA_DE_TESTE)
     contas.definir_situacao(u['id'], 'aprovado')
+    aceitar_termos(contas, u)
     cliente = app.test_client()
     assert cliente.post('/api/auth/login', json={'email': u['email'], 'senha': SENHA_DE_TESTE}).status_code == 200
     return cliente, u

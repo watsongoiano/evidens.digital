@@ -43,7 +43,14 @@ def contas(app):
 @pytest.fixture(scope='session')
 def medica_aprovada(contas):
     u = contas.criar('medica@exemplo.test', 'Médica de Teste', 'CRM-GO 00000', 'medico', SENHA_DE_TESTE)
+    aceitar_termos(contas, u)
     return contas.definir_situacao(u['id'], 'aprovado')
+
+
+def aceitar_termos(contas, u):
+    """Contas criadas direto no banco (sem passar pelo cadastro) aceitam a versão em vigor dos Termos."""
+    from src.utils import termos
+    contas.registrar_aceite(u['id'], termos.VERSAO)
 
 
 def _entrar(cliente, email, senha=SENHA_DE_TESTE):
@@ -66,7 +73,9 @@ def client(app, medica_aprovada):
 
 @pytest.fixture(scope='session')
 def administrador(contas):
-    return contas.criar('admin@exemplo.test', 'Administrador de Teste', 'CRM-GO 11111', 'medico', SENHA_DE_TESTE, administrador=True)
+    u = contas.criar('admin@exemplo.test', 'Administrador de Teste', 'CRM-GO 11111', 'medico', SENHA_DE_TESTE, administrador=True)
+    aceitar_termos(contas, u)
+    return u
 
 
 @pytest.fixture()

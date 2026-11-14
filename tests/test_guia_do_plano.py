@@ -6,7 +6,7 @@ import re
 import pytest
 from pypdf import PdfReader
 
-from conftest import SENHA_DE_TESTE
+from conftest import SENHA_DE_TESTE, aceitar_termos
 from src.utils import catalogo, pdf_minutas, tuss
 
 _seq = itertools.count(1)
@@ -28,6 +28,7 @@ def _conta(app, contas, perfil='medico'):
     registro = 'CRM-GO 4321' + str(n) if perfil != 'estudante' else '2023001 · UFG'
     u = contas.criar(f'plano{n}@exemplo.test', f'Dra. Plano {n}', registro, perfil, SENHA_DE_TESTE)
     contas.definir_situacao(u['id'], 'aprovado')
+    aceitar_termos(contas, u)
     cliente = app.test_client()
     assert cliente.post('/api/auth/login', json={'email': u['email'], 'senha': SENHA_DE_TESTE}).status_code == 200
     return cliente, u

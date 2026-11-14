@@ -12,7 +12,7 @@ PACIENTE = dict(idade=52, sexo='masculino', tabagismo='nunca')
 def _novo(anonimo, **extra):
     """Envia um cadastro novo e devolve (e-mail, resposta)."""
     email = f'pessoa{next(_seq)}@exemplo.test'
-    dados = dict(email=email, nome='Pessoa de Teste', registro='CRM-GO 22222', perfil='medico', senha=SENHA_DE_TESTE)
+    dados = dict(email=email, nome='Pessoa de Teste', registro='CRM-GO 22222', perfil='medico', senha=SENHA_DE_TESTE, aceite_termos=True)
     dados.update(extra)
     return dados['email'], anonimo.post('/api/auth/cadastro', json=dados)
 
@@ -70,7 +70,7 @@ def test_cadastro_fica_pendente_e_so_entra_depois_de_aprovado(anonimo, admin, co
 
 def test_cadastro_repetido_responde_igual_e_nao_troca_a_senha(anonimo, contas):
     email, primeira = _novo(anonimo)
-    segunda = anonimo.post('/api/auth/cadastro', json=dict(email=email.upper(), nome='Outra Pessoa', registro='CRM-SP 1',
+    segunda = anonimo.post('/api/auth/cadastro', json=dict(aceite_termos=True, email=email.upper(), nome='Outra Pessoa', registro='CRM-SP 1',
                                                              perfil='medico', senha='outra-senha-bem-longa'))
     assert (segunda.status_code, segunda.get_json()) == (primeira.status_code, primeira.get_json())
     u = contas.por_id(_id(contas, email))
@@ -182,7 +182,7 @@ def test_instalacao_exige_o_codigo_e_so_vale_sem_administrador(anonimo, administ
 def test_instalacao_cria_o_administrador_em_banco_vazio(app, tmp_path, monkeypatch):
     monkeypatch.setenv('DATABASE_URL', f"sqlite:///{tmp_path / 'vazio.sqlite'}")
     cliente = app.test_client()
-    dados = dict(nome='Responsável Técnico', email='rt@exemplo.test', registro='CRM-GO 1', senha=SENHA_DE_TESTE)
+    dados = dict(nome='Responsável Técnico', email='rt@exemplo.test', registro='CRM-GO 1', senha=SENHA_DE_TESTE, aceite_termos=True)
     monkeypatch.setenv('SETUP_TOKEN', '')
     assert cliente.post('/api/auth/configurar', json=dict(dados, codigo='')).status_code == 403   # sem código definido, nunca
     monkeypatch.setenv('SETUP_TOKEN', 'codigo-novo')
@@ -223,7 +223,7 @@ def test_rota_de_saude_do_banco(anonimo, monkeypatch):
 
 
 def test_crm_em_dois_campos_vira_registro_padronizado(anonimo, contas):
-    r = anonimo.post('/api/auth/cadastro', json=dict(email='doiscampos@exemplo.test', nome='Pessoa de Teste', perfil='medico',
+    r = anonimo.post('/api/auth/cadastro', json=dict(aceite_termos=True, email='doiscampos@exemplo.test', nome='Pessoa de Teste', perfil='medico',
                                                      crm_uf='go', crm_numero='26.815', senha=SENHA_DE_TESTE))
     assert r.status_code == 202
     assert next(u for u in contas.listar() if u['email'] == 'doiscampos@exemplo.test')['registro'] == 'CRM-GO 26815'
@@ -232,13 +232,13 @@ def test_crm_em_dois_campos_vira_registro_padronizado(anonimo, contas):
 @pytest.mark.parametrize('campos', [dict(crm_uf='XX', crm_numero='123'), dict(crm_uf='GO', crm_numero='abc'),
                                     dict(crm_uf='', crm_numero='')])
 def test_crm_invalido_e_recusado(anonimo, campos):
-    r = anonimo.post('/api/auth/cadastro', json=dict(email='ruim@exemplo.test', nome='Pessoa de Teste', perfil='residente',
+    r = anonimo.post('/api/auth/cadastro', json=dict(aceite_termos=True, email='ruim@exemplo.test', nome='Pessoa de Teste', perfil='residente',
                                                      senha=SENHA_DE_TESTE, **campos))
     assert r.status_code == 400
 
 
 def test_estudante_informa_matricula(anonimo, contas):
-    r = anonimo.post('/api/auth/cadastro', json=dict(email='aluna@exemplo.test', nome='Aluna de Teste', perfil='estudante',
+    r = anonimo.post('/api/auth/cadastro', json=dict(aceite_termos=True, email='aluna@exemplo.test', nome='Aluna de Teste', perfil='estudante',
                                                      registro='2023001 · UFG', senha=SENHA_DE_TESTE))
     assert r.status_code == 202
     assert next(u for u in contas.listar() if u['email'] == 'aluna@exemplo.test')['registro'] == '2023001 · UFG'

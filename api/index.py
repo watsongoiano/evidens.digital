@@ -53,6 +53,8 @@ def _checkup_exige_login():
         return jsonify({'error': auth.MSG_INDISPONIVEL}), 503
     if usuario_atual() is None:
         return jsonify({'error': auth.MSG_LOGIN, 'login': '/login'}), 401
+    if auth.termos_pendentes():
+        return auth.resposta_termos_pendentes()
 
 
 # Registrar blueprints
@@ -80,6 +82,8 @@ def intelligent_tools():
     u = usuario_atual()
     if u is None:
         return redirect('/login?destino=check-up')
+    if auth.termos_pendentes():
+        return redirect('/termos?aceitar=1')
     uso.registrar('acesso', u)
     return _pagina('intelligent-tools.html', privada=True)
 
@@ -105,6 +109,8 @@ def configurar_page():
 def conta_page():
     if usuario_atual() is None:
         return redirect('/login')
+    if auth.termos_pendentes():
+        return redirect('/termos?aceitar=1&destino=conta')
     return _pagina('conta.html', privada=True)
 
 
@@ -115,7 +121,14 @@ def admin_page():
         return redirect('/login')
     if not u['administrador']:
         return redirect('/intelligent-tools')
+    if auth.termos_pendentes(u):
+        return redirect('/termos?aceitar=1&destino=admin')
     return _pagina('admin.html', privada=True)
+
+@app.route('/termos')
+def termos_page():
+    """Termos de Uso e Política de Privacidade (públicos; o aceite aparece para quem está com ele pendente)."""
+    return _pagina('termos.html')
 
 @app.route('/contact')
 def contact_page():
@@ -130,6 +143,8 @@ def analytics_page():
         return redirect('/login')
     if not u['administrador']:
         return redirect('/intelligent-tools')
+    if auth.termos_pendentes(u):
+        return redirect('/termos?aceitar=1&destino=analytics')
     return _pagina('analytics.html', privada=True)
 
 @app.route('/api/analytics/stats')
@@ -146,6 +161,7 @@ ARQUIVOS_PUBLICOS = frozenset({
     'index.html',
     'contact.html',
     'static/conta.js',
+    'static/termos.js',
     'static/analytics.js',
     'static/i18n.js',
     'static/i18n/en.json',
