@@ -1598,8 +1598,8 @@
   "Hepatite B dose dobrada (imunossuprimidos e renais crônicos)": "Hepatitis B double dose (immunosuppressed and chronic kidney disease)",
   "Poliomielite inativada (VIP)": "Inactivated poliovirus (IPV)",
   "Raiva (pré-exposição)": "Rabies (pre-exposure)",
-  "121 recomendações mapeadas": "121 recommendations mapped",
-  "121 recomendações": "121 recommendations",
+  "125 recomendações mapeadas": "125 recommendations mapped",
+  "125 recomendações": "125 recommendations",
   "Albumina, soro": "Albumin, serum",
   "Avaliação oftalmológica com tonometria e fundoscopia": "Eye exam with tonometry and fundoscopy",
   "Cálcio iônico, soro": "Ionized calcium, serum",
@@ -1780,7 +1780,55 @@
   "Mulheres 25-65 anos": "Women aged 25-65",
   "Teste de DNA-HPV oncogênico com genotipagem a cada 5 anos, dos 25 aos 65 anos, sem citologia junto (coteste não é recomendado). HPV 16/18: colposcopia. Outros tipos: citologia reflexa na mesma amostra. Onde o teste não estiver disponível: citologia a cada 3 anos, após dois exames anuais negativos.": "Oncogenic HPV DNA test with genotyping every 5 years, from 25 to 65, without cytology at the same time (co-testing is not recommended). HPV 16/18: colposcopy. Other types: reflex cytology on the same sample. Where the test is not available: cytology every 3 years, after two negative annual exams.",
   "Teste de DNA-HPV oncogênico com genotipagem a cada 5 anos, dos 25 aos 65 anos, sem citologia junto (coteste não é recomendado). HPV 16/18: colposcopia. Outros tipos: citologia reflexa na mesma amostra. Onde o teste não estiver disponível: citologia a cada 3 anos, após dois exames anuais negativos. Depois dos 60 anos, um teste negativo encerra o rastreamento.": "Oncogenic HPV DNA test with genotyping every 5 years, from 25 to 65, without cytology at the same time (co-testing is not recommended). HPV 16/18: colposcopy. Other types: reflex cytology on the same sample. Where the test is not available: cytology every 3 years, after two negative annual exams. After age 60, a negative test ends screening.",
-  "Histerectomia total por doença benigna": "Total hysterectomy for benign disease"
+  "Histerectomia total por doença benigna": "Total hysterectomy for benign disease",
+  "Em TARV, assintomático e com carga viral indetectável: abaixo de 350 a cada 6 meses; 350-500 anual; acima de 500 em 2 exames com 6 meses de intervalo, não é mais necessário. Sem TARV, evento clínico ou falha virológica: a cada 6 meses. Em profilaxia ou com infecção oportunista: a cada 3 meses.": "On ART, asymptomatic and with undetectable viral load: below 350 every 6 months; 350-500 yearly; above 500 in 2 tests 6 months apart, no longer needed. Off ART, clinical event or virologic failure: every 6 months. On prophylaxis or with an opportunistic infection: every 3 months.",
+  "Supressão viral com estabilidade clínica e imunológica: a cada 6 meses. Início ou troca da TARV: 8 semanas depois. Carga viral detectável: repetir em 4 semanas para confirmar a falha.": "Viral suppression with clinical and immunologic stability: every 6 months. ART start or change: 8 weeks later. Detectable viral load: repeat in 4 weeks to confirm failure.",
+  "Falha virológica confirmada (duas cargas virais detectáveis, a última acima de 500 cópias/mL): pedir a genotipagem o quanto antes. Abaixo de 500 cópias/mL o teste não é liberado no SUS.": "Confirmed virologic failure (two detectable viral loads, the last above 500 copies/mL): order genotyping as soon as possible. Below 500 copies/mL the test is not released in the Brazilian public system (SUS).",
+  "Genotipagem pré-tratamento indicada na gestação (MS 2024, Quadro 4).": "Pretreatment genotyping indicated in pregnancy (MS 2024, Box 4).",
+  "HIV: genotipagem antes da TARV": "HIV: genotyping before ART",
+  "Pelo MS a genotipagem pré-tratamento é só para quem se infectou com parceria em TARV, gestantes, crianças e adolescentes, uso de PrEP no período provável da infecção e coinfecção TB-HIV; acrescente-a pelo catálogo nesses casos. A HIVMA/IDSA pede genotipagem basal para todos que nunca usaram TARV.": "Per the Brazilian Ministry of Health, pretreatment genotyping is only for people infected by a partner on ART, pregnant people, children and adolescents, PrEP use around the likely time of infection and TB-HIV coinfection; add it from the catalog in these cases. HIVMA/IDSA recommends baseline genotyping for everyone who has never taken ART.",
+  "Pré-TARV e a cada 6-12 meses. Com zidovudina ou outro mielotóxico: a cada 3-6 meses e repetir 2-8 semanas após iniciar ou trocar.": "Before ART and every 6-12 months. With zidovudine or another myelotoxic drug: every 3-6 months, and repeat 2-8 weeks after starting or switching.",
+  "Creatinina com TFGe: pré-TARV e anual; a cada 3-6 meses com tenofovir ou outro nefrotóxico, TFGe abaixo de 60 mL/min ou risco de doença renal (diabetes, hipertensão).": "Creatinine with eGFR: before ART and yearly; every 3-6 months with tenofovir or another nephrotoxic drug, eGFR below 60 mL/min or kidney disease risk (diabetes, hypertension).",
+  "Pré-TARV e anual; a cada 3-6 meses com tenofovir ou outro nefrotóxico, TFGe abaixo de 60 mL/min, proteinúria ou risco de doença renal.": "Before ART and yearly; every 3-6 months with tenofovir or another nephrotoxic drug, eGFR below 60 mL/min, proteinuria or kidney disease risk.",
+  "Painel bioquímico (eletrólitos, ureia e creatinina): 1-2 meses após iniciar ou trocar a TARV e depois a cada 6 meses; sem TARV, a cada 6-12 meses.": "Chemistry panel (electrolytes, urea and creatinine): 1-2 months after starting or switching ART and then every 6 months; off ART, every 6-12 months.",
+  "AST, ALT, fosfatase alcalina e bilirrubinas: pré-TARV e a cada 3-12 meses; mais frequente com hepatotóxicos, doença hepática ou coinfecção HBV/HCV.": "AST, ALT, alkaline phosphatase and bilirubin: before ART and every 3-12 months; more often with hepatotoxic drugs, liver disease or HBV/HCV coinfection.",
+  "Pré-TARV e anual; a cada 6 meses se a última análise estava alterada. A HIVMA/IDSA aceita a cada 5 anos se normal e pede uma dosagem 1-3 meses após iniciar a TARV.": "Before ART and yearly; every 6 months if the last result was abnormal. HIVMA/IDSA accepts every 5 years if normal and asks for one measurement 1-3 months after starting ART.",
+  "Glicemia de jejum pré-TARV e anual; entre 100 e 125 mg/dL, considerar TOTG. A HbA1c não deve ser usada para diagnosticar diabetes na PVHA (subestima a glicemia em TARV).": "Fasting glucose before ART and yearly; between 100 and 125 mg/dL, consider an OGTT. HbA1c should not be used to diagnose diabetes in people with HIV (it underestimates glycemia on ART).",
+  "Teste imunológico para sífilis pré-TARV e semestral; mais frequente se houver risco ou exposição. A HIVMA/IDSA pede ao menos anual, a cada 3-6 meses com risco.": "Syphilis immunologic test before ART and every 6 months; more often with risk or exposure. HIVMA/IDSA asks for at least yearly, every 3-6 months with risk.",
+  "Teste molecular em todos os locais de exposição sexual (urina ou swab vaginal, swab retal e de orofaringe). Na entrada e ao menos anual; a cada 3-6 meses conforme as práticas sexuais.": "Molecular test at every site of sexual exposure (urine or vaginal swab, rectal and oropharyngeal swab). At entry and at least yearly; every 3-6 months depending on sexual practices.",
+  "Trichomonas vaginalis, PCR (swab vaginal)": "Trichomonas vaginalis, PCR (vaginal swab)",
+  "Quem tem relação vaginal receptiva: teste molecular em swab vaginal ou endocervical, ao menos anual.": "People who have receptive vaginal sex: molecular test on a vaginal or endocervical swab, at least yearly.",
+  "Pré-TARV e anual ou conforme risco ou exposição. Anti-HCV reagente ou suspeita de infecção aguda: pedir a carga viral do HCV (HCV-RNA). Com CD4 baixo o anticorpo pode falhar: considerar o HCV-RNA.": "Before ART and yearly, or according to risk or exposure. Reactive anti-HCV or suspected acute infection: order HCV viral load (HCV RNA). With low CD4 the antibody may miss infection: consider HCV RNA.",
+  "Triagem de hepatite B na avaliação inicial. HBsAg reagente: carga viral do HBV. Vacinar quem não é imune; com anti-HBs reagente não é preciso repetir. Repetir a sorologia antes de trocar para esquema sem tenofovir.": "Hepatitis B screening at the initial evaluation. Reactive HBsAg: HBV viral load. Vaccinate non-immune people; with reactive anti-HBs there is no need to repeat. Repeat serology before switching to a regimen without tenofovir.",
+  "Anticorpos anti-HAV IgG, soro": "Anti-HAV IgG antibodies, serum",
+  "Imunidade para hepatite A na avaliação inicial; não reagente: vacinar.": "Hepatitis A immunity at the initial evaluation; non-reactive: vaccinate.",
+  "Toxoplasmose IgG, soro": "Toxoplasmosis IgG, serum",
+  "IgG para toxoplasmose na avaliação inicial (orienta a profilaxia com CD4 baixo).": "Toxoplasma IgG at the initial evaluation (guides prophylaxis when CD4 is low).",
+  "Sorologia para HTLV 1 e 2, soro": "HTLV-1 and HTLV-2 serology, serum",
+  "Na avaliação inicial. Coinfecção com HTLV pode superestimar o CD4 absoluto.": "At the initial evaluation. HTLV coinfection may overestimate the absolute CD4 count.",
+  "Pré-TARV com CD4 acima de 350; anual se o exame anterior foi PT abaixo de 5 mm ou IGRA negativo. PT de 5 mm ou mais ou IGRA positivo: afastar TB ativa (sintomas e radiografia de tórax) e tratar a infecção latente.": "Before ART with CD4 above 350; yearly if the previous test was TST below 5 mm or negative IGRA. TST of 5 mm or more or positive IGRA: rule out active TB (symptoms and chest X-ray) and treat latent infection.",
+  "HIV com CD4 até 350: infecção latente por tuberculose": "HIV with CD4 up to 350: latent tuberculosis infection",
+  "Com CD4 abaixo de 350 o MS não pede prova tuberculínica nem IGRA: avaliar os critérios de tratamento preventivo da tuberculose (TPT) direto, depois de afastar TB ativa (rastreio de sintomas em toda consulta e radiografia de tórax).": "With CD4 below 350 the Brazilian Ministry of Health does not require a TST or IGRA: assess the criteria for tuberculosis preventive treatment (TPT) directly, after ruling out active TB (symptom screening at every visit and chest X-ray).",
+  "Na abordagem inicial; também para afastar TB ativa antes do tratamento da infecção latente.": "At the initial evaluation; also to rule out active TB before treating latent infection.",
+  "Antígeno criptocócico (LF-CrAg), soro": "Cryptococcal antigen (LF-CrAg), serum",
+  "Rastreio de doença criptocócica mesmo sem sintomas, com CD4 abaixo de 200 e sem meningite criptocócica prévia (MS; a HIVMA/IDSA usa CD4 abaixo de 100). Reagente: avaliar punção lombar.": "Screening for cryptococcal disease even without symptoms, with CD4 below 200 and no prior cryptococcal meningitis (MS; HIVMA/IDSA uses CD4 below 100). Reactive: assess for lumbar puncture.",
+  "Pessoa com potencial de engravidar: teste de gravidez antes de iniciar a TARV.": "Person of childbearing potential: pregnancy test before starting ART.",
+  "HIV: o que mais o seguimento pede": "HIV: what else follow-up requires",
+  "Teste de gravidez antes de iniciar ou trocar a TARV em quem pode engravidar (HIVMA/IDSA). Sorologia para doença de Chagas e leishmaniose conforme a epidemiologia (MS). Escore de risco cardiovascular anual e a cada troca de TARV (MS). Consultas: 7-15 dias após iniciar ou trocar a TARV; mensal ou bimestral até a adaptação; até 6 meses com supressão viral e sem sintomas (MS).": "Pregnancy test before starting or switching ART in people who can become pregnant (HIVMA/IDSA). Chagas disease and leishmaniasis serology according to epidemiology (MS). Cardiovascular risk score yearly and at every ART switch (MS). Visits: 7-15 days after starting or switching ART; monthly or every 2 months until adaptation; up to every 6 months with viral suppression and no symptoms (MS).",
+  "HIV: rastreio de câncer anal": "HIV: anal cancer screening",
+  "MS: toque retal anual em quem tem relação anal receptiva, antecedente de HPV ou histologia vulvar ou cervical alterada; anuscopia se alterado. HIVMA/IDSA: onde houver anuscopia de alta resolução, citologia anal com pesquisa de HPV para homens que fazem sexo com homens e mulheres trans acima de 35 anos e para as demais PVHA acima de 45; LSIL ou pior: anuscopia de alta resolução. Toque retal anual em todos.": "MS: yearly digital rectal exam in people with receptive anal sex, prior HPV or abnormal vulvar or cervical histology; anoscopy if abnormal. HIVMA/IDSA: where high-resolution anoscopy is available, anal cytology with HPV testing for men who have sex with men and transgender women over 35 and for all other people with HIV over 45; LSIL or worse: high-resolution anoscopy. Yearly digital rectal exam for everyone.",
+  "Antes de iniciar a TARV": "Before starting ART",
+  "HIV+ gestante": "HIV+ pregnant",
+  "HIV+ com tenofovir, nefrotóxico ou risco renal": "HIV+ on tenofovir, a nephrotoxic drug or with kidney risk",
+  "HIV+ em TARV com carga viral >500": "HIV+ on ART with viral load >500",
+  "HIV+ com CD4 <200": "HIV+ with CD4 <200",
+  "Com o CD4 em mãos: abaixo de 200, pedir LF-CrAg (antígeno criptocócico) mesmo sem sintomas; até 350, avaliar o tratamento preventivo da tuberculose (TPT) sem prova tuberculínica, depois de afastar TB ativa; acima de 350, prova tuberculínica ou IGRA. O CD4 também define as profilaxias de infecções oportunistas e a periodicidade do próprio CD4; a carga viral, a do seguimento.": "Once the CD4 is available: below 200, order LF-CrAg (cryptococcal antigen) even without symptoms; up to 350, assess tuberculosis preventive treatment (TPT) without a tuberculin skin test, after ruling out active TB; above 350, tuberculin skin test or IGRA. The CD4 also defines opportunistic infection prophylaxis and the CD4 interval itself; the viral load defines the follow-up interval.",
+  "HIV sem CD4 anterior: o que depende do resultado": "HIV without a previous CD4: what depends on the result",
+  "HIV: informe se há CD4 e carga viral anteriores.": "HIV: state whether there are previous CD4 and viral load results.",
+  "HIV: informe o CD4 e/ou a carga viral mais recentes (ou responda que não há exames anteriores).": "HIV: enter the most recent CD4 and/or viral load (or answer that there are no previous results).",
+  "Sem CD4 anterior: pedir agora.": "No previous CD4: order now.",
+  "Sem carga viral anterior: pedir agora.": "No previous viral load: order now.",
+  "Tem CD4 e carga viral anteriores?": "Are there previous CD4 and viral load results?"
  },
  "padroes": [
   [
@@ -2082,6 +2130,14 @@
   [
    "^A periodicidade não foi conferida para: (.+)\\. Escolha o nome do exame na lista de sugestões para que ele entre na conferência\\.$",
    "The interval was not checked for: %1. Choose the test name from the suggestion list so that it is included in the check."
+  ],
+  [
+   "^CD4 atual: (\\d+) células/mm³\\.$",
+   "Current CD4: %1 cells/mm³."
+  ],
+  [
+   "^Carga viral atual: (\\d+) cópias/mL\\.$",
+   "Current viral load: %1 copies/mL."
   ]
  ],
  "manter": [
@@ -2103,10 +2159,10 @@
   "American Diabetes Association",
   "American College of Obstetricians and Gynecologists",
   "Centers for Disease Control and Prevention",
-  "National Institutes of Health",
+  "Infectious Diseases Society of America",
   "European Society of Cardiology",
   "European Atherosclerosis Society",
-  "European AIDS Clinical Society",
+  "HIV Medicine Association",
   "Kidney Disease: Improving Global Outcomes",
   "Global Initiative for Chronic Obstructive Lung Disease",
   "National Comprehensive Cancer Network",
@@ -2235,6 +2291,10 @@
   "DIG (Rathore, JAMA 2003)",
   "MS 2025 (DNA-HPV)",
   "SBOC 2026",
-  "ACOG 2026"
+  "ACOG 2026",
+  "MS 2024 (PCDT HIV)",
+  "HIVMA/IDSA 2024",
+  "HIVMA",
+  "IDSA"
  ]
 }

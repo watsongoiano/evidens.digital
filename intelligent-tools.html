@@ -134,9 +134,17 @@
 
       <div id="hiv_fields" class="bloco-condicional" style="display: none;">
         <p class="campo-rotulo text-teal-dark">Dados do HIV</p>
+        <div class="campo sm:max-w-[420px] mb-4">
+          <label for="exames_hiv_previos">Tem CD4 e carga viral anteriores?</label>
+          <select id="exames_hiv_previos" name="exames_hiv_previos">
+            <option value="">Selecione...</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+        </div>
         <div class="grade">
-          <div class="campo"><label for="cd4">CD4 (células/mm³)</label><input type="number" id="cd4" name="cd4" placeholder="Ex: 350" inputmode="numeric"></div>
-          <div class="campo"><label for="carga_viral">Carga viral (cópias/mL)</label><input type="number" id="carga_viral" name="carga_viral" placeholder="Ex: 50" inputmode="numeric"></div>
+          <div class="campo hiv-previo"><label for="cd4">CD4 (células/mm³)</label><input type="number" id="cd4" name="cd4" placeholder="Ex: 350" inputmode="numeric"></div>
+          <div class="campo hiv-previo"><label for="carga_viral">Carga viral (cópias/mL)</label><input type="number" id="carga_viral" name="carga_viral" placeholder="Ex: 50" inputmode="numeric"></div>
           <div class="campo">
             <label for="em_tarv">Em uso de TARV?</label>
             <select id="em_tarv" name="em_tarv">
@@ -145,7 +153,7 @@
               <option value="nao">Não</option>
             </select>
           </div>
-          <div class="campo">
+          <div class="campo hiv-previo">
             <label for="supressao_viral">Supressão viral?</label>
             <select id="supressao_viral" name="supressao_viral">
               <option value="">Selecione...</option>
@@ -1644,20 +1652,24 @@
             }
         }
 
-        // Listener para checkbox HIV
-        document.getElementById('hiv').addEventListener('change', function() {
-            const hivFields = document.getElementById('hiv_fields');
-            if (this.checked) {
-                hivFields.style.display = 'block';
-            } else {
-                hivFields.style.display = 'none';
-                // Limpar campos quando desmarcado
-                document.getElementById('cd4').value = '';
-                document.getElementById('carga_viral').value = '';
-                document.getElementById('em_tarv').value = '';
-                document.getElementById('supressao_viral').value = '';
+        // HIV: o médico precisa dizer se há CD4 e carga viral anteriores (o servidor confere). Com "sim", ao menos um
+        // dos dois; com "não", os campos somem e o motor pede os dois como avaliação inicial.
+        function atualizarBlocoHiv() {
+            const hiv = document.getElementById('hiv').checked;
+            const previos = document.getElementById('exames_hiv_previos');
+            document.getElementById('hiv_fields').style.display = hiv ? 'block' : 'none';
+            previos.required = hiv;
+            if (!hiv) previos.value = '';
+            const comExames = hiv && previos.value === 'sim';
+            document.querySelectorAll('#hiv_fields .hiv-previo').forEach(c => { c.style.display = comExames ? '' : 'none'; });
+            if (!comExames) {
+                ['cd4', 'carga_viral', 'supressao_viral'].forEach(id => { document.getElementById(id).value = ''; });
             }
-        });
+            if (!hiv) document.getElementById('em_tarv').value = '';
+        }
+        document.getElementById('hiv').addEventListener('change', atualizarBlocoHiv);
+        document.getElementById('exames_hiv_previos').addEventListener('change', atualizarBlocoHiv);
+        atualizarBlocoHiv();
 
         // Listener para tabagismo - mostrar campos condicionais
         document.getElementById('tabagismo').addEventListener('change', function(ev) {

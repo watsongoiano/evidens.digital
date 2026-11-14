@@ -106,6 +106,8 @@ DESCRICOES = {
     '40306992': 'Hepatite B - HBsAc (anti-antígeno de superfície) - pesquisa e/ou dosagem',
     '40307018': 'Hepatite B - HBsAg (AU, antígeno Austrália) - pesquisa e/ou dosagem',
     '40307026': 'Hepatite C - anti-HCV - pesquisa e/ou dosagem',
+    '40306933': 'Hepatite A - HAV - IgG - pesquisa e/ou dosagem',
+    '40307212': 'HTLV1 ou HTLV2 - pesquisa de anticorpo (cada)',
     '40307182': 'HIV1 + HIV2 (determinação conjunta), pesquisa de anticorpos',
     '40307220': 'IgA - pesquisa e/ou dosagem',
     '40307433': 'Linfócitos T "helper", contagem de (IF com OKT-4) (CD-4+), citometria de fluxo',
@@ -281,6 +283,9 @@ CODIGOS = {
     'FSH e LH, soro': ['40316289', '40316335'],
     'Estradiol, soro': ['40316246'],
     'Beta-hCG, soro': ['40305767'],
+    'Anticorpos anti-HAV IgG, soro': ['40306933'],
+    'Toxoplasmose IgG, soro': ['40307824'],
+    'Sorologia para HTLV 1 e 2, soro': ['40307212'],
     'Eletroforese de proteínas, soro': ['40301761'],
     'FAN (fator antinuclear)': ['40306852'],
     'Fator reumatoide e anti-CCP': ['40306860', '40308804'],
@@ -334,6 +339,10 @@ CODIGOS = {
 
 # Exames que saem na guia sem código, com o motivo (nada de código inventado).
 SEM_CODIGO = {
+    'Trichomonas vaginalis, PCR (swab vaginal)':
+        'só a cultura tem código conferido (40310574, Trichomonas, cultura para)',
+    'Antígeno criptocócico (LF-CrAg), soro':
+        'o teste de fluxo lateral não tem código conferido; a TUSS traz a pesquisa por látex (40309053)',
     'Clamídia e gonococo, PCR (urina ou swab)':
         'são dois testes moleculares; só o de clamídia tem código conferido (40310396, Chlamydia - PCR)',
     'Relação proteína/creatinina, urina':

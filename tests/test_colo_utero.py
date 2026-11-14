@@ -14,7 +14,7 @@ DIVERGENCIA = 'Colo do útero: as diretrizes divergem antes dos 30 anos'
 
 def _resposta(client, **dados):
     base = dict(idade=40, sexo='feminino', tabagismo='nunca', imunossupressao='nao', gestante='nao', lactante='nao',
-                comorbidades=[], medicacoes=[], historia_familiar=[])
+                comorbidades=[], medicacoes=[], historia_familiar=[], exames_hiv_previos='nao')
     r = client.post('/api/checkup-intelligent', json=dict(base, **dados))
     assert r.status_code == 200, r.get_json()
     return r.get_json()

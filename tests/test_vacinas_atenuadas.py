@@ -69,7 +69,7 @@ def test_hiv_com_cd4_abaixo_de_200_nao_recebe_atenuadas(client):
 
 
 def test_hiv_sem_cd4_informado_e_dado_insuficiente(client):
-    dados = _consultar(client, idade=35, sexo='masculino', comorbidades=['hiv'], imunossupressao='nao')
+    dados = _consultar(client, idade=35, sexo='masculino', comorbidades=['hiv'], exames_hiv_previos='nao', imunossupressao='nao')
 
     assert not [t for t in _vacinas(dados) if ATENUADA.search(t)]
     assert {i['estado'] for i in dados['nao_incluidas']} == {'dados_insuficientes'}
@@ -173,6 +173,8 @@ def test_invariantes_de_seguranca_em_toda_a_grade(client):
             corpo['comorbidades'] = ['hiv']
             if hiv[1] is not None:
                 corpo['cd4'] = hiv[1]
+            else:
+                corpo['exames_hiv_previos'] = 'nao'
 
         dados = _consultar(client, **corpo)
         vacinas = _vacinas(dados)
