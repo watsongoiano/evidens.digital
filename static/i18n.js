@@ -51,22 +51,47 @@
   // siglas, números e pontuação não mudam de um idioma para o outro
   function neutro(t) { return /^[A-Z0-9][A-Z0-9 .\/()+,:;&%–—-]*$/.test(t); }
 
+  // número no formato inglês: "16,7" -> "16.7", "7.000" -> "7,000" (só em texto que é só número)
+  function numero(t) {
+    if (!/^[<>≥≤~≈±]?\s*-?\d[\d.,]*\s*%?$/.test(t.trim())) return t;
+    return t.replace(/\.(?=\d{3}(?:\D|$))/g, '§').replace(/,/g, '.').replace(/§/g, ',');
+  }
+  var SEPARADORES = ['; ', ', ', ' + '];
+
+  // devolve [texto, coberto]
+  function parte(g) {
+    var t = traduzir(g);
+    if (t !== null) return t;
+    if (!temLetras(g) || manter[normalizar(g)] || neutro(normalizar(g))) return g;
+    for (var i = 0; i < SEPARADORES.length; i++) {  // lista dentro da frase: "colesterol total, HDL, peso"
+      if (g.indexOf(SEPARADORES[i]) > -1) {
+        return g.split(SEPARADORES[i]).map(function (x) { var r = traduzir(x); return r === null ? x : r; }).join(SEPARADORES[i]);
+      }
+    }
+    return g;
+  }
+
   function traduzir(original) {
     var n = normalizar(original);
     if (!n || !textos) return null;
     if (Object.prototype.hasOwnProperty.call(textos, n)) return textos[n];
-    if (!temLetras(n) || manter[n] || neutro(n)) return null;
+    if (!temLetras(n)) { var num = numero(n); return num === n ? null : num; }
+    if (manter[n] || neutro(n)) return null;
     for (var i = 0; i < padroes.length; i++) {
-      if (padroes[i][0].test(n)) {
-        return n.replace(padroes[i][0], function () {
-          var grupos = arguments, saida = padroes[i][1];
-          // cada parte variável também passa pelo dicionário (um nome de exame dentro de uma frase)
-          return saida.replace(/\$(\d)/g, function (_, k) {
-            var parte = grupos[+k] === undefined ? '' : grupos[+k];
-            var t = Object.prototype.hasOwnProperty.call(textos, normalizar(parte)) ? textos[normalizar(parte)] : null;
-            return t === null ? parte : t;
-          });
+      var m = padroes[i][0].exec(n);
+      if (m) {
+        // $1: a parte passa de novo pelo tradutor; %1: entra como está, só com o número no formato do idioma
+        return padroes[i][1].replace(/([$%])(\d)/g, function (_, tipo, k) {
+          var g = m[+k] === undefined ? '' : m[+k];
+          return tipo === '%' ? numero(g) : parte(g);
         });
+      }
+    }
+    // duas frases conhecidas emendadas (o motor junta as descrições quando o mesmo exame tem dois motivos)
+    for (var j = 0; j < n.length; j++) {
+      if (n.charAt(j) === ' ' && Object.prototype.hasOwnProperty.call(textos, n.slice(0, j))) {
+        var resto = traduzir(n.slice(j + 1));
+        if (resto !== null) return textos[n.slice(0, j)] + ' ' + resto;
       }
     }
     faltando[n] = 1;
