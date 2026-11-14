@@ -34,8 +34,8 @@ def html_enviado(monkeypatch):
     for nome in ('gerar_pdf_exames_laboratoriais', 'gerar_pdf_exames_imagem', 'gerar_pdf_vacinas'):
         original = getattr(pdf_minutas, nome)
 
-        def registrar(dados_paciente, itens, responsavel=None, _original=original):
-            pdf = _original(dados_paciente, itens, responsavel=responsavel)
+        def registrar(dados_paciente, itens, responsavel=None, idioma='pt', _original=original):
+            pdf = _original(dados_paciente, itens, responsavel=responsavel, idioma=idioma)
             gerados.append(_texto_do_pdf(pdf))
             return pdf
 

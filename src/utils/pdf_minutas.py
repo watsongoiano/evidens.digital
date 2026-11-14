@@ -3,16 +3,36 @@
 Não há serviço externo: o PDF é montado com a biblioteca fpdf2 e as fontes
 DejaVu que acompanham o repositório (assets/fonts). O texto vindo do navegador
 (nome do paciente, títulos) é desenhado como texto, nunca interpretado.
+
+Idioma: os textos são escritos aqui em português e a versão em inglês sai do mesmo
+dicionário das páginas (static/i18n/en.json), na hora de desenhar. O pedido chega
+sempre com os títulos em português, porque a posologia e a triagem de segurança
+são decididas por eles.
 """
 from datetime import datetime
 from pathlib import Path
 
 from fpdf import FPDF
 
+from src.utils import i18n
+
 FONTES = Path(__file__).resolve().parents[2] / 'assets' / 'fonts'
 
 AVISO = 'Documento sem assinatura digital. Válido somente com assinatura e carimbo do médico.'
 LINHA_ASSINATURA = 'Assinatura e Carimbo do Médico'
+TITULOS = {'laboratorio': 'SOLICITAÇÃO DE EXAMES LABORATORIAIS', 'imagem': 'SOLICITAÇÃO DE EXAMES DE IMAGEM',
+           'vacina': 'RECEITA DE VACINAS'}
+# Textos fixos das minutas (os testes conferem que cada um tem par em inglês).
+FIXOS = ('Solicito:', 'Prescrevo:', 'Data de emissão', 'Paciente', 'Sexo', 'Idade', 'anos', 'Página', 'Feminino', 'Masculino',
+         'Não informado', 'Não informada', 'Minuta preparada por', 'estudante de medicina', 'Vacina')
+MESES_EN = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+
+
+def data_de_emissao(idioma='pt', agora=None):
+    agora = agora or datetime.now()
+    if idioma == 'en':
+        return f'{MESES_EN[agora.month - 1]} {agora.day}, {agora.year}'
+    return agora.strftime('%d/%m/%Y')
 
 # Posologia impressa na receita, por termo encontrado no título da vacina.
 VACINAS_ADMINISTRACAO = {
@@ -103,8 +123,10 @@ def responsavel_de(usuario):
 
 
 class _Minuta(FPDF):
-    def __init__(self, titulo):
+    def __init__(self, titulo, idioma='pt'):
         super().__init__(orientation='P', unit='mm', format='A4')
+        self.idioma = idioma
+        titulo = self.t(titulo)
         self.titulo = titulo
         self.set_margins(20, 18, 20)
         self.set_auto_page_break(auto=True, margin=42)   # espaço para assinatura e rodapé
@@ -112,6 +134,10 @@ class _Minuta(FPDF):
         self.add_font('DejaVu', 'B', str(FONTES / 'DejaVuSans-Bold.ttf'))
         self.set_title(titulo)
         self.set_author('Evidēns')
+
+    def t(self, texto):
+        """O texto no idioma do documento (o que não tem par, como um item digitado, sai como veio)."""
+        return i18n.traduzir(texto, self.idioma)
 
     def header(self):
         self.set_font('DejaVu', 'B', 11)
@@ -128,16 +154,20 @@ class _Minuta(FPDF):
         self.set_y(-14)
         self.set_font('DejaVu', '', 7.5)
         self.set_text_color(90, 100, 103)
-        self.cell(0, 5, f'Página {self.page_no()}/{{nb}}', align='R')
+        self.cell(0, 5, f'{self.t("Página")} {self.page_no()}/{{nb}}', align='R')
 
     def dados_do_paciente(self, dados):
         idade = dados.get('idade')
         self.set_font('DejaVu', '', 10.5)
         self.set_text_color(20, 41, 47)
-        self.cell(0, 6, f'Data de emissão: {datetime.now().strftime("%d/%m/%Y")}', new_x='LMARGIN', new_y='NEXT')
-        self.cell(0, 6, f'Paciente: {_texto(dados.get("nome") or "Não informado", 150)}', new_x='LMARGIN', new_y='NEXT')
-        self.cell(0, 6, f'Sexo: {_rotulo_sexo(dados.get("sexo"))}     Idade: {f"{_texto(idade, 10)} anos" if idade else "Não informada"}',
-                  new_x='LMARGIN', new_y='NEXT')
+        t = self.t
+        self.cell(0, 6, f'{t("Data de emissão")}: {data_de_emissao(self.idioma)}', new_x='LMARGIN', new_y='NEXT')
+        nome = dados.get('nome') or 'Não informado'
+        if nome in ('Paciente', 'Não informado'):  # só o nome genérico muda de idioma; nome de gente nunca
+            nome = t(nome)
+        self.cell(0, 6, f'{t("Paciente")}: {_texto(nome, 150)}', new_x='LMARGIN', new_y='NEXT')
+        anos = f'{_texto(idade, 10)} {t("anos")}' if idade else t('Não informada')
+        self.cell(0, 6, f'{t("Sexo")}: {t(_rotulo_sexo(dados.get("sexo")))}     {t("Idade")}: {anos}', new_x='LMARGIN', new_y='NEXT')
         self.ln(5)
 
     def assinatura(self):
@@ -159,64 +189,66 @@ class _Minuta(FPDF):
             if resp.get('crm'):
                 self.cell(0, 5, resp['crm'], align='C', new_x='LMARGIN', new_y='NEXT')
             self.set_font('DejaVu', '', 8.5)
-        self.cell(0, 5, LINHA_ASSINATURA, align='C', new_x='LMARGIN', new_y='NEXT')
+        self.cell(0, 5, self.t(LINHA_ASSINATURA), align='C', new_x='LMARGIN', new_y='NEXT')
         self.set_font('DejaVu', '', 8)
         self.set_text_color(90, 100, 103)
         if resp and resp.get('estudante'):
-            self.multi_cell(0, 4.5, f"Minuta preparada por {resp['nome']} (estudante de medicina).", align='C', new_x='LMARGIN', new_y='NEXT')
-        self.multi_cell(0, 4.5, AVISO, align='C')
+            self.multi_cell(0, 4.5, f"{self.t('Minuta preparada por')} {resp['nome']} ({self.t('estudante de medicina')}).",
+                            align='C', new_x='LMARGIN', new_y='NEXT')
+        self.multi_cell(0, 4.5, self.t(AVISO), align='C')
 
     def bytes(self):
         return bytes(self.output())
 
 
-def _pdf_de_exames(dados_paciente, exames, tipo, responsavel=None):
-    pdf = _Minuta(f'SOLICITAÇÃO DE EXAMES {tipo}')
+def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='pt'):
+    pdf = _Minuta(TITULOS[categoria], idioma)
     pdf.responsavel = responsavel
     pdf.add_page()
     pdf.dados_do_paciente(dados_paciente)
     pdf.set_font('DejaVu', 'B', 11)
-    pdf.cell(0, 7, 'Solicito:', new_x='LMARGIN', new_y='NEXT')
+    pdf.cell(0, 7, pdf.t('Solicito:'), new_x='LMARGIN', new_y='NEXT')
     pdf.set_font('DejaVu', '', 10.5)
     for n, exame in enumerate(exames, 1):
         pdf.set_x(24)
         pdf.set_font('DejaVu', '', 10.5)
-        pdf.multi_cell(0, 6.2, f'{n}. {_texto(exame.get("titulo"))}')
+        pdf.multi_cell(0, 6.2, f'{n}. {_texto(pdf.t(exame.get("titulo")))}')
         quando = exame.get('quando_pdf')
         if isinstance(quando, str) and quando.strip():
             # Pré-natal: a janela gestacional vai no pedido, para exame antecipado não parecer imediato.
             pdf.set_font('DejaVu', '', 9)
             pdf.set_text_color(90, 100, 103)
             pdf.set_x(30)
-            pdf.multi_cell(0, 5, _texto(quando[:160]))
+            pdf.multi_cell(0, 5, _texto(pdf.t(quando[:160])))
             pdf.set_text_color(20, 41, 47)
     pdf.assinatura()
     return pdf.bytes()
 
 
-def gerar_pdf_exames_laboratoriais(dados_paciente, exames, responsavel=None):
-    return _pdf_de_exames(dados_paciente, exames, 'LABORATORIAIS', responsavel)
+def gerar_pdf_exames_laboratoriais(dados_paciente, exames, responsavel=None, idioma='pt'):
+    return _pdf_de_exames(dados_paciente, exames, 'laboratorio', responsavel, idioma)
 
 
-def gerar_pdf_exames_imagem(dados_paciente, exames, responsavel=None):
-    return _pdf_de_exames(dados_paciente, exames, 'DE IMAGEM', responsavel)
+def gerar_pdf_exames_imagem(dados_paciente, exames, responsavel=None, idioma='pt'):
+    return _pdf_de_exames(dados_paciente, exames, 'imagem', responsavel, idioma)
 
 
-def gerar_pdf_vacinas(dados_paciente, vacinas, responsavel=None):
-    pdf = _Minuta('RECEITA DE VACINAS')
+def gerar_pdf_vacinas(dados_paciente, vacinas, responsavel=None, idioma='pt'):
+    pdf = _Minuta(TITULOS['vacina'], idioma)
     pdf.responsavel = responsavel
     pdf.add_page()
     pdf.dados_do_paciente(dados_paciente)
     pdf.set_font('DejaVu', 'B', 11)
-    pdf.cell(0, 7, 'Prescrevo:', new_x='LMARGIN', new_y='NEXT')
+    pdf.cell(0, 7, pdf.t('Prescrevo:'), new_x='LMARGIN', new_y='NEXT')
     for n, vacina in enumerate(vacinas, 1):
         titulo = _texto(vacina.get('titulo') or 'Vacina')
         pdf.set_font('DejaVu', 'B', 10.5)
         pdf.set_x(24)
-        pdf.multi_cell(0, 6.2, f'{n}. {titulo.upper()}')
+        pdf.multi_cell(0, 6.2, f'{n}. {_texto(pdf.t(titulo)).upper()}')
         pdf.set_font('DejaVu', '', 9.5)
         pdf.set_x(30)
-        pdf.multi_cell(0, 5.5, posologia_da_vacina(titulo, vacina.get('esquema_pdf')))
+        # a posologia é escolhida pelo título em português; só o texto impresso muda de idioma
+        pdf.multi_cell(0, 5.5, pdf.t(posologia_da_vacina(titulo, vacina.get('esquema_pdf'))))
         pdf.ln(2)
     pdf.assinatura()
     return pdf.bytes()

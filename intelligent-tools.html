@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Evidēns Check — check-up baseado em evidência</title>
 <meta name="description" content="Recomendações de rastreamento, exames e vacinas para o adulto, para avaliação do médico.">
+<script src="/static/i18n.js"></script>
 <link rel="icon" href="/favicon.ico?v=2" sizes="32x32">
 <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -21,17 +22,17 @@
 <header class="px-4 sm:px-6 lg:px-[6%] pt-4 lg:pt-6">
   <div class="max-w-[1240px] mx-auto bg-white h-[60px] pl-5 pr-2.5 lg:pl-6 flex items-center justify-between rounded-[3px] border border-ink/5">
     <a href="/" class="flex items-center gap-2.5" aria-label="Evidēns — início">
-      <span class="grid grid-cols-3 gap-[3px]" aria-hidden="true">
+      <span class="grid grid-cols-3 gap-[3px] max-[359px]:hidden" aria-hidden="true">
         <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i>
         <i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i>
         <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i>
       </span>
-      <span class="text-[28px] font-medium tracking-tight leading-none">evidēns <span class="text-teal text-[13px] font-medium">check</span></span>
+      <span class="max-sm:flex max-sm:flex-col text-[28px] font-medium tracking-tight leading-none">evidēns <span class="text-teal text-[13px] font-medium">check</span></span>
     </a>
     <nav class="flex items-center gap-2 lg:gap-6 text-[13px] uppercase tracking-[0.12em] text-ink/75">
       <a href="/" class="hidden sm:inline hover:text-teal transition">Início</a>
       <a href="/conta" class="hover:text-teal transition">Conta</a>
-      <button type="button" data-sair class="inline-flex items-center bg-ink text-white font-medium uppercase tracking-[0.12em] rounded-[3px] px-4 h-10 hover:bg-teal transition">Sair</button>
+      <button type="button" data-sair class="inline-flex items-center bg-ink text-white font-medium uppercase tracking-[0.12em] rounded-[3px] px-3 sm:px-4 h-10 whitespace-nowrap hover:bg-teal transition">Sair</button>
     </nav>
   </div>
 </header>
@@ -781,11 +782,13 @@
 <footer class="max-w-[1100px] mx-auto px-4 sm:px-6 pb-10">
   <div class="flex flex-col md:flex-row md:justify-between gap-3 pt-8 border-t border-ink/10 text-[12px] text-ink/50">
     <p>Desenvolvido por Dr. Rodolfo Cambraia Frota · CRM-GO 26.815</p>
-    <p>© 2026 Evidēns · <a href="/contact" class="hover:text-teal">Contato</a></p>
+    <p class="flex items-center gap-4 md:justify-end">© 2026 Evidēns · <a href="/contact" class="hover:text-teal">Contato</a> <span data-idioma></span></p>
   </div>
 </footer>
 
     <script>
+        // Em inglês, os avisos do navegador (alert) usam o mesmo dicionário das páginas.
+        const T = t => (window.evidensIdioma ? window.evidensIdioma.traduzir(t) : t);
         // Sessão encerrada (ou conta bloqueada) no meio do uso: volta para o login.
         (function () {
             const buscar = window.fetch.bind(window);
@@ -936,7 +939,7 @@
                     return;
                 }
                 console.error('Erro:', error);
-                alert('Erro ao gerar recomendações: ' + error.message);
+                alert(T('Erro ao gerar recomendações:') + ' ' + T(error.message));
             }
         });
 
@@ -1135,7 +1138,7 @@
         async function baixarPdf(endpoint, itens, prefixoArquivo, descricao) {
             try {
                 if (!currentRecommendations || currentRecommendations.length === 0) {
-                    alert('Gere as recomendações primeiro!');
+                    alert(T('Gere as recomendações primeiro!'));
                     return;
                 }
 
@@ -1174,7 +1177,7 @@
 
             } catch (error) {
                 console.error('Erro:', error);
-                alert(`Erro ao gerar PDF de ${descricao}: ` + error.message);
+                alert(T(`Erro ao gerar PDF de ${descricao}:`) + ' ' + T(error.message));
             }
         }
 
@@ -1185,6 +1188,9 @@
             vacina: { endpoint: '/api/gerar-pdf-vacinas', arquivo: 'prescricao_vacinas', descricao: 'vacinas', pergunta: 'Deseja acrescentar alguma vacina?' }
         };
         let catalogo = null;
+        // Em inglês o catálogo aparece traduzido, mas o item segue para o servidor com o título em português
+        // (é por ele que a posologia e a triagem das vacinas são decididas).
+        const tituloOriginal = {};
         const acrescentados = { laboratorio: [], imagem: [], vacina: [] };
         let categoriaDoDialogo = null;
 
@@ -1232,7 +1238,8 @@
 
         function adicionarDoCampo() {
             const campo = document.getElementById('acrescimoBusca');
-            const titulo = campo.value.trim().slice(0, 300);
+            const digitado = campo.value.trim().slice(0, 300);
+            const titulo = tituloOriginal[digitado.toLowerCase()] || digitado;
             if (!titulo || !categoriaDoDialogo) return;
             const lista = acrescentados[categoriaDoDialogo];
             const jaTem = itensDaCategoria(categoriaDoDialogo).some(r => (r.titulo || '').trim().toLowerCase() === titulo.toLowerCase());
@@ -1244,7 +1251,7 @@
 
         async function abrirDialogoDePdf(categoria) {
             if (!currentRecommendations || currentRecommendations.length === 0) {
-                alert('Gere as recomendações primeiro!');
+                alert(T('Gere as recomendações primeiro!'));
                 return;
             }
             categoriaDoDialogo = categoria;
@@ -1259,7 +1266,10 @@
             const datalist = document.getElementById('acrescimoLista');
             datalist.innerHTML = '';
             const cat = await carregarCatalogo();
-            (cat[categoria] || []).forEach(t => { const o = document.createElement('option'); o.value = t; datalist.appendChild(o); });
+            (cat[categoria] || []).forEach(t => {
+                const o = document.createElement('option'); o.value = T(t); datalist.appendChild(o);
+                tituloOriginal[o.value.toLowerCase()] = t;
+            });
             const dialogo = document.getElementById('dialogoAcrescimo');
             if (typeof dialogo.showModal === 'function') dialogo.showModal(); else dialogo.setAttribute('open', '');
         }
@@ -1286,7 +1296,7 @@
             const doc = DOCUMENTOS[categoria];
             const itens = itensDaCategoria(categoria);
             if (!itens.length) {
-                alert(categoria === 'vacina' ? 'Nenhuma vacina foi recomendada!' : 'Nenhum item desta categoria para imprimir.');
+                alert(T(categoria === 'vacina' ? 'Nenhuma vacina foi recomendada!' : 'Nenhum item desta categoria para imprimir.'));
                 return;
             }
             baixarPdf(doc.endpoint, itens, doc.arquivo, doc.descricao);
@@ -1466,11 +1476,18 @@
                 } finally { conferindo = false; }
                 const aviso = document.getElementById('coerencia-aviso');
                 aviso.hidden = auto.size === 0;
-                aviso.innerHTML = 'Marcado automaticamente: ' + [...auto].map(([id, m]) =>
-                    `<strong class="font-medium">${escapeHtml(ROTULO_CAIXA(id))}</strong> (${escapeHtml(m)})`).join('; ') + '. Desmarque se não se aplicar.';
+                aviso.textContent = '';
+                aviso.append('Marcado automaticamente: ');
+                [...auto].forEach(([id, m], i) => {
+                    const forte = document.createElement('strong'); forte.className = 'font-medium'; forte.textContent = ROTULO_CAIXA(id);
+                    const motivo = document.createElement('span'); motivo.textContent = m;
+                    aviso.append(i ? '; ' : '', forte, ' (', motivo, ')');
+                });
+                aviso.append('. Desmarque se não se aplicar.');
                 const dica = document.getElementById('coerencia-dica'), frases = dicas();
                 dica.hidden = frases.length === 0;
-                dica.textContent = frases.join(' ');
+                dica.textContent = '';
+                frases.forEach((frase, i) => { const f = document.createElement('span'); f.textContent = frase; dica.append(i ? ' ' : '', f); });
                 document.getElementById('hba1c-aviso').hidden = !(auto.has('diabetes') && (num('hba1c') || 0) >= 6.5);
             }
             ['hba1c', 'peso', 'altura', 'pas', 'pad', 'gestante'].forEach(id => {
@@ -1567,7 +1584,9 @@
                         if (li.classList.contains('combo-grupo')) { grupo = li; li.hidden = true; return; }
                         if (li === vazio) return;
                         const alvo = alvoDe(li);
-                        const mostra = !(alvo && alvo.checked) && termos.every(t => li.dataset.busca.includes(t));
+                        // o nome na tela entra na busca: em inglês, quem digita "thyroid" acha "Hypothyroidism"
+                        const onde = li.dataset.busca + ' ' + semAcento(li.textContent);
+                        const mostra = !(alvo && alvo.checked) && termos.every(t => onde.includes(t));
                         li.hidden = !mostra;
                         if (mostra) { algum = true; if (grupo) grupo.hidden = false; }
                     });
