@@ -255,3 +255,41 @@ def test_so_o_que_nao_cabe_em_letra_legivel_e_abreviado_e_avisa():
     pdf_minutas._encaixar(pdf, 10, 10, 20, 5, 'W' * 300)
     texto = ''.join(_paginas(pdf.bytes())[0].split())
     assert texto.endswith('…') and len(texto) < 300
+
+
+# --- Plano de saúde na identificação do paciente (tela) ------------------------
+
+def _tela():
+    from pathlib import Path
+    return (Path(__file__).resolve().parents[1] / 'intelligent-tools.html').read_text(encoding='utf-8')
+
+
+def test_plano_e_carteira_ficam_na_identificacao_e_nao_vao_para_o_motor():
+    tela = _tela()
+    secao = tela[tela.index('id="s-identificacao"'):tela.index('aria-labelledby="s-clinicos"')]
+    assert 'id="pacientePlano"' in secao and 'id="pacienteCarteira"' in secao
+    # sem atributo `name`, o FormData não leva o campo: plano e carteira não entram no cálculo das recomendações
+    for campo in re.findall(r'<(?:select|input)[^>]*data-plano[^>]*>', secao):
+        assert ' name=' not in campo, campo
+    assert len(re.findall(r'<(?:select|input)[^>]*data-plano[^>]*>', secao)) == 2
+    # a lista de planos não vira botões (as opções vêm do cadastro do médico)
+    assert "checkupForm.querySelectorAll('select:not([data-plano])')" in tela
+
+
+def test_troca_de_paciente_pede_confirmacao_do_plano_antes_da_guia():
+    tela = _tela()
+    invalidar = re.search(r'function invalidarResultados\(evento\) \{(.*?)\n        \}', tela, re.S).group(1)
+    # dado clínico mudou com resultado na tela: o plano fica, mas passa a pedir confirmação
+    assert invalidar.index('limparResultados()') < invalidar.index('pedirConfirmacaoDoPlano()')
+    # mexer no plano ou na carteira não apaga o resultado; nome novo com resultado na tela pede confirmação
+    isento = re.search(r'function semEfeitoNasRecomendacoes\(evento\) \{(.*?)\n        \}', tela, re.S).group(1)
+    assert "campo.hasAttribute('data-plano')" in isento and 'pedirConfirmacaoDoPlano()' in isento
+    # o resultado não leva mais o plano embora sozinho
+    limpar = re.search(r'function limparResultados\(\) \{(.*?)\n        \}', tela, re.S).group(1)
+    assert 'limparGuia' not in limpar
+    # a guia não sai enquanto o plano estiver por confirmar
+    gerar = tela[tela.index("document.getElementById('acrescimoGerar').addEventListener('click'"):]
+    assert gerar.index('if (guia && planoAConfirmar)') < gerar.index('fecharDialogo();') < gerar.index('baixarPdf(')
+    # editar o plano ou a carteira vale como confirmação; "Limpar" zera os dois
+    assert re.search(r'function planoEditado\(origem\) \{.*?planoAConfirmar = false;', tela, re.S)
+    assert "['planoLimpar', 'guiaLimpar'].forEach(id => document.getElementById(id).addEventListener('click', limparGuia));" in tela

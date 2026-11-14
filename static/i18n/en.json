@@ -1709,7 +1709,15 @@
   "exames com código TUSS, prontos para a guia do plano de saúde": "tests with a TUSS code, ready for the health plan form",
   "dados do paciente gravados": "patient data stored",
   "Triagem": "Screening",
-  "de segurança nas vacinas, antes de indicar": "for vaccine safety, before recommending"
+  "de segurança nas vacinas, antes de indicar": "for vaccine safety, before recommending",
+  "Plano de saúde do paciente": "Patient's health plan",
+  "Particular (sem plano)": "Private pay (no health plan)",
+  "A guia SP/SADT deste plano sai junto com os pedidos de exames, já preenchida. O número da carteira não é guardado nem enviado para calcular as recomendações.": "This plan's SP/SADT form comes with the test orders, already filled in. The member ID number is not stored or sent to compute the recommendations.",
+  "Os dados do paciente mudaram. O plano e a carteira ainda são deste paciente?": "The patient data changed. Do the health plan and member ID still belong to this patient?",
+  "Sim, manter": "Yes, keep them",
+  "Limpar": "Clear",
+  "Os dados do paciente mudaram depois que o plano foi informado. Confira o plano e a carteira antes de gerar a guia.": "The patient data changed after the health plan was entered. Check the plan and the member ID before generating the form.",
+  "São deste paciente": "They belong to this patient"
  },
  "padroes": [
   [
