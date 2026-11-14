@@ -123,6 +123,9 @@ def responsavel_de(usuario):
             'crm': None if estudante else contas.crm_de(usuario)}
 
 
+MARGEM_INFERIOR = 42      # mm reservados à assinatura e ao rodapé de cada folha
+
+
 class _Minuta(FPDF):
     def __init__(self, titulo, idioma='pt'):
         super().__init__(orientation='P', unit='mm', format='A4')
@@ -130,7 +133,7 @@ class _Minuta(FPDF):
         titulo = self.t(titulo)
         self.titulo = titulo
         self.set_margins(20, 18, 20)
-        self.set_auto_page_break(auto=True, margin=42)   # espaço para assinatura e rodapé
+        self.set_auto_page_break(auto=True, margin=MARGEM_INFERIOR)   # espaço para assinatura e rodapé
         self.add_font('DejaVu', '', str(FONTES / 'DejaVuSans.ttf'))
         self.add_font('DejaVu', 'B', str(FONTES / 'DejaVuSans-Bold.ttf'))
         self.add_font('DejaVu', 'I', str(FONTES / 'DejaVuSans-Oblique.ttf'))
@@ -376,9 +379,9 @@ def _anexar_guias(pdf, dados_paciente, exames, guia):
                         parte + 1, partes)
 
 
-def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='pt', guia=None):
-    pdf = _Minuta(TITULOS[categoria], idioma)
-    pdf.responsavel = responsavel
+def _folha_de_pedido(pdf, dados_paciente, exames, numerar=True):
+    """Uma folha de pedido: dados do paciente, "Solicito:", os exames e a assinatura."""
+    pdf.set_auto_page_break(auto=True, margin=MARGEM_INFERIOR)    # a assinatura da folha anterior desliga
     pdf.add_page()
     pdf.dados_do_paciente(dados_paciente)
     pdf.set_font('DejaVu', 'B', 11)
@@ -387,7 +390,8 @@ def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='
     for n, exame in enumerate(exames, 1):
         pdf.set_x(24)
         pdf.set_font('DejaVu', '', 10.5)
-        pdf.multi_cell(0, 6.2, f'{n}. {_texto(pdf.t(exame.get("titulo")))}')
+        titulo = _texto(pdf.t(exame.get('titulo')))
+        pdf.multi_cell(0, 6.2, f'{n}. {titulo}' if numerar else titulo)
         quando = exame.get('quando_pdf')
         if isinstance(quando, str) and quando.strip():
             # Pré-natal: só a orientação de quando fazer o exame vai no pedido ("Realizar com 35-37 semanas"),
@@ -398,6 +402,17 @@ def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='
             pdf.multi_cell(0, 5, _texto(pdf.t('Obs.:') + ' ' + pdf.t(quando.strip()[:160])))
             pdf.set_text_color(20, 41, 47)
     pdf.assinatura()
+
+
+def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='pt', guia=None):
+    pdf = _Minuta(TITULOS[categoria], idioma)
+    pdf.responsavel = responsavel
+    if categoria == 'imagem':
+        # Exames de imagem: um pedido por folha (cada serviço de imagem fica com o seu), no mesmo PDF.
+        for exame in exames:
+            _folha_de_pedido(pdf, dados_paciente, [exame], numerar=False)
+    else:
+        _folha_de_pedido(pdf, dados_paciente, exames)
     if guia:
         _anexar_guias(pdf, dados_paciente, exames, dict(guia, responsavel=responsavel))
     return pdf.bytes()

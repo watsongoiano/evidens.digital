@@ -34,7 +34,7 @@ def test_outros_hipolipemiantes_marcam_dislipidemia_sem_marcar_estatina(texto):
 
 @pytest.mark.parametrize('texto, diabetes', [
     ('insulina NPH 20 UI', True), ('gliclazida MR 60', True), ('sitagliptina 100', True),
-    ('metformina 850 2x/dia', True),       # marca; o médico desmarca em pré-diabetes ou SOP
+    ('metformina 850 2x/dia', False),      # pré-diabetes, resistência insulínica, SOP
     ('dapagliflozina 10', False),          # IC/DRC
     ('semaglutida 1 mg', False),           # obesidade
 ])
@@ -164,8 +164,8 @@ def test_betabloqueador_de_ic_conta_como_tratamento_so_com_hipertensao():
 @pytest.mark.parametrize('remedio, caixa', [
     ('atenolol', 'hipertensao'), ('metoprolol', 'hipertensao'), ('nebivolol', 'hipertensao'), ('losartana', 'hipertensao'),
     ('hidroclorotiazida', 'hipertensao'), ('anlodipino', 'hipertensao'), ('clonidina', 'hipertensao'),
-    ('metformina', 'diabetes'), ('glibenclamida', 'diabetes'), ('sitagliptina', 'diabetes'),
-    ('dapagliflozina_metformina', 'diabetes'), ('sinvastatina', 'dislipidemia'), ('ezetimiba', 'dislipidemia'),
+    ('glibenclamida', 'diabetes'), ('sitagliptina', 'diabetes'), ('sitagliptina_metformina', 'diabetes'),
+    ('sinvastatina', 'dislipidemia'), ('ezetimiba', 'dislipidemia'),
 ])
 def test_medicacao_marca_a_comorbidade_que_implica(remedio, caixa):
     from src.utils import coerencia, medicamentos
@@ -204,3 +204,32 @@ def test_com_outro_tipo_marcado_nada_marca_o_tipo_2(tipo):
     assert com == [tipo] and inf == []
     assert coerencia.inferir({'comorbidades': [tipo], 'hba1c': 6.0})[0] == [tipo]   # e não é pré-diabetes
     assert coerencia.rotulo_de(tipo)
+
+
+@pytest.mark.parametrize('remedio', ['metformina', 'dapagliflozina_metformina'])
+def test_metformina_nao_marca_diabetes(remedio):
+    """Metformina também se usa em pré-diabetes e resistência insulínica: não marca "Diabetes tipo 2"."""
+    from src.utils import coerencia, medicamentos
+    com, _, _ = coerencia.inferir({'comorbidades': [], 'medicacoes': medicamentos.classes_de([remedio])})
+    assert not {'diabetes', 'diabetes_tipo_1'} & set(com), (remedio, com)
+    com, _, _ = coerencia.inferir({'comorbidades': ['pre_diabetes'], 'medicacoes': medicamentos.classes_de([remedio])})
+    assert 'pre_diabetes' in com and 'diabetes' not in com
+
+
+@pytest.mark.parametrize('texto', ['metformina 850 2x/dia', 'Glifage XR 500', 'metformin 1 g'])
+def test_metformina_no_texto_livre_entra_como_medicacao_sem_marcar_diabetes(texto):
+    com, med, inf = _inf(medicacoes_continuo=texto)
+    assert 'metformina' in med and 'diabetes' not in com
+    assert not any(i['valor'] == 'metformina' for i in inf)      # não aparece como caixa marcada na tela
+
+
+def test_metformina_no_texto_livre_mantem_a_vitamina_b12_sem_diabetes(client):
+    """Tirar a marcação automática de diabetes não pode tirar a monitorização de B12 de quem usa metformina."""
+    base = dict(idade=45, sexo='feminino', tabagismo='nunca', imunossupressao='nao', gestante='nao', lactante='nao',
+                comorbidades=[], historia_familiar=[], medicacoes=[])
+    for corpo in (dict(base, medicacoes_continuo='metformina 850 2x/dia'), dict(base, medicacoes=['metformina']),
+                  dict(base, comorbidades=['pre_diabetes'], medicacoes_continuo='glifage 500')):
+        dados = client.post('/api/checkup-intelligent', json=corpo).get_json()
+        titulos = [r['titulo'] for r in dados['recommendations']]
+        assert titulos.count('Vitamina B12, soro') == 1, corpo
+        assert 'diabetes' not in (dados.get('comorbidades_consideradas') or [])

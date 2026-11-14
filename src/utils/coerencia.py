@@ -37,9 +37,11 @@ TERMOS = {
     'antidiabeticos': [
         'insulina', 'glibenclamida', 'gliclazida', 'glimepirida', 'glipizida', 'sitagliptina',
         'vildagliptina', 'linagliptina', 'saxagliptina', 'alogliptina', 'pioglitazona', 'acarbose',
-        'repaglinida', 'nateglinida', 'metformina', 'glifage',
+        'repaglinida', 'nateglinida',
     ],
 }
+
+METFORMINA_NO_TEXTO = ('metformina', 'metformin', 'glifage')
 
 ROTULOS = {
     'dislipidemia': 'Dislipidemia', 'hipertensao': 'Hipertensão', 'diabetes': 'Diabetes tipo 2',
@@ -122,6 +124,11 @@ def inferir(data, egfr=None, gestante=False, recusados=(), escolhidas=()):
             inferencias.append({'campo': campo, 'valor': valor, 'rotulo': rotulo_de(valor), 'motivo': motivo})
 
     texto = achados_no_texto(data.get('medicacoes_continuo') or '')
+    # Metformina citada no texto livre entra como medicação (vitamina B12 em uso de metformina), sem marcar
+    # diabetes: também se usa em pré-diabetes e resistência insulínica.
+    livre = f" {_normalizar(data.get('medicacoes_continuo') or '')} "
+    if 'metformina' not in medicacoes and any(f' {termo} ' in livre for termo in METFORMINA_NO_TEXTO):
+        medicacoes.append('metformina')
     # Itens da lista suspensa de medicações (src/utils/condicoes.py)
     from src.utils.condicoes import MEDICACOES
     for chave in list(medicacoes):

@@ -641,11 +641,14 @@ def test_tela_explica_o_que_nao_marcou_e_recusa_vale_por_fonte(pagina):
     # sem a diastólica a tela pede o dado em vez de dizer que não é hipertensão (125/95 é estágio 2)
     assert 'informe a diastólica para classificar' in pagina and 'pad === null) frases.push' in pagina
     assert 'const recusados = new Map();' in pagina and "r[id].some(x => !fontes.has(x.fonte))" in pagina
-    # os 12 botões: atenolol marca hipertensão e metformina marca diabetes
+    # os 12 botões: atenolol marca hipertensão e glibenclamida marca diabetes; metformina só sugere
+    # (também se usa em pré-diabetes e resistência insulínica)
     import re
-    for chave, caixa in (('atenolol', 'hipertensao'), ('metformina', 'diabetes'), ('losartana', 'hipertensao')):
+    for chave, caixa in (('atenolol', 'hipertensao'), ('glibenclamida', 'diabetes'), ('losartana', 'hipertensao')):
         item = re.search(r'id="lista_medicacoes_%s"[^>]*>' % chave, pagina).group(0)
         assert f'data-marca="{caixa}"' in item, item
+    metformina = re.search(r'id="lista_medicacoes_metformina"[^>]*>', pagina).group(0)
+    assert 'data-marca' not in metformina and 'data-talvez="diabetes"' in metformina
 
 
 def test_home_mostra_a_evidencia_com_fonte_em_cada_numero():

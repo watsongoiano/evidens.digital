@@ -306,3 +306,37 @@ def test_esquema_desconhecido_e_recusado(client):
     r = client.post('/api/gerar-pdf-vacinas', json={'nome_paciente': 'P', 'sexo': 'masculino', 'recomendacoes': [
         {'titulo': 'Meningocócica B (Bexsero®)', 'categoria': 'vacina', 'esquema_pdf': 'texto livre'}]})
     assert r.status_code == 400
+
+
+def test_exames_de_imagem_saem_um_por_folha_e_laboratorio_numa_folha_so():
+    """Cada serviço de imagem fica com o seu pedido: uma folha por exame, todas no mesmo PDF e assinadas."""
+    import io
+    from pypdf import PdfReader
+    from src.utils import pdf_minutas
+    paciente = {'nome': 'Maria de Teste', 'sexo': 'feminino', 'idade': 60}
+    resp = {'nome': 'Dra. Teste', 'estudante': False, 'crm': 'CRM-GO 12345'}
+    imagem = [{'titulo': t, 'categoria': 'imagem'} for t in
+              ('Mamografia Digital - Bilateral', 'Densitometria óssea (DEXA)', 'Ultrassonografia de abdome total')]
+    paginas = [p.extract_text() for p in PdfReader(io.BytesIO(
+        pdf_minutas.gerar_pdf_exames_imagem(paciente, imagem, responsavel=resp))).pages]
+    assert len(paginas) == 3
+    for pagina, exame in zip(paginas, imagem):
+        outros = [e['titulo'] for e in imagem if e is not exame]
+        assert exame['titulo'] in pagina and not any(o in pagina for o in outros)
+        assert 'Maria de Teste' in pagina and 'Solicito:' in pagina and 'Dra. Teste' in pagina and 'CRM-GO 12345' in pagina
+        assert '1. ' not in pagina                      # um exame por folha: sem numeração
+    laboratorio = [{'titulo': t, 'categoria': 'laboratorio'} for t in ('Hemograma completo', 'Creatinina, soro')]
+    paginas = PdfReader(io.BytesIO(pdf_minutas.gerar_pdf_exames_laboratoriais(paciente, laboratorio))).pages
+    assert len(paginas) == 1 and '2. Creatinina, soro' in paginas[0].extract_text()
+
+
+def test_imagem_com_guia_do_plano_tem_as_folhas_e_depois_as_guias():
+    import io
+    from pypdf import PdfReader
+    from src.utils import pdf_minutas
+    imagem = [{'titulo': t, 'categoria': 'imagem'} for t in ('Eletrocardiograma de repouso', 'Radiografia de tórax')]
+    guia = {'credenciamento': {'operadora': 'CASSI', 'registro_ans': '', 'codigo_prestador': '1', 'nome_contratado': 'X', 'cbo': ''},
+            'carteira': '123', 'indicacao': 'Check-up'}
+    paginas = [p.extract_text() for p in PdfReader(io.BytesIO(
+        pdf_minutas.gerar_pdf_exames_imagem({'nome': 'Paciente', 'sexo': 'feminino', 'idade': 60}, imagem, guia=guia))).pages]
+    assert len(paginas) == 3 and 'SP/SADT' not in paginas[0] + paginas[1] and 'SP/SADT' in paginas[2]
