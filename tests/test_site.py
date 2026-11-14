@@ -101,7 +101,7 @@ def test_painel_de_analytics_recebe_os_campos_que_exibe(admin):
         assert set(valores) == set(uso.TIPOS)
     assert len(dados['serie']) == 30 and isinstance(dados['usuarios'], list)
     script = (RAIZ / 'static' / 'analytics.js').read_text(encoding='utf-8')
-    for campo in ('periodos', 'serie', 'usuarios', 'ultimos_30_dias', 'ultima_atividade', 'gerado_em', 'tipos'):
+    for campo in ('periodos', 'serie', 'usuarios', 'ultima_atividade', 'gerado_em', 'tipos'):
         assert campo in script, campo
 
 

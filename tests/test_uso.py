@@ -37,7 +37,7 @@ def test_cada_acao_do_medico_e_contada_no_nome_dele(app, contas, admin):
     assert cliente.post('/api/gerar-pdf-exames-imagem', json={'dados_paciente': PACIENTE, 'recomendacoes': imagem}).status_code == 200
     linha = _linha(admin, u['id'])
     assert linha['nome'] == u['nome'] and linha['email'] == u['email'] and linha['perfil'] == 'medico'
-    assert linha['total'] == linha['ultimos_30_dias']
+    assert linha['total'] == linha['ultimos_30_dias'] == linha['mes'] == linha['sete_dias'] == linha['hoje']
     assert {k: v for k, v in linha['total'].items() if v} == {
         'login': 1, 'acesso': 1, 'checkup': 2, 'pdf_laboratorio': 1, 'pdf_imagem': 1}
     datetime.fromisoformat(linha['ultima_atividade'])
@@ -88,6 +88,7 @@ def test_periodos_e_serie_usam_o_horario_de_brasilia(app, contas):
     assert serie['2030-03-09'] >= 1 and serie['2030-03-10'] >= 1 and '2030-01-29' not in serie
     linha = next(l for l in dados['usuarios'] if l['id'] == u['id'])
     assert linha['total']['checkup'] == 3 and linha['ultimos_30_dias']['checkup'] == 2
+    assert linha['hoje']['checkup'] == 1 and linha['sete_dias']['checkup'] == 2 and linha['mes']['checkup'] == 2
     assert dados['periodos']['hoje']['checkup'] >= 1
 
 
@@ -116,3 +117,14 @@ def test_painel_nao_grava_nem_devolve_dado_de_paciente(app, contas, admin):
                                       ('facebookexternalhit/1.1', True), ('vercel-screenshot', True), ('curl/8.0', True)])
 def test_eh_robo(ua, robo):
     assert uso.eh_robo(ua) is robo
+
+
+def test_tabela_por_medico_usa_o_mesmo_periodo_dos_cartoes(contas):
+    """No dia 2, "Este mês" não inclui o fim do mês anterior (os últimos 30 dias incluem)."""
+    u = contas.criar('mes@exemplo.test', 'Dra. Mês', 'CRM-GO 99991', 'medico', SENHA_DE_TESTE)
+    agora = datetime(2031, 5, 2, 12, 0, tzinfo=uso.FUSO)
+    uso.registrar('pdf_vacinas', u, quando=datetime(2031, 4, 28, 10, 0, tzinfo=uso.FUSO).timestamp())
+    uso.registrar('pdf_vacinas', u, quando=datetime(2031, 5, 1, 10, 0, tzinfo=uso.FUSO).timestamp())
+    linha = next(l for l in uso.resumo(agora=agora)['usuarios'] if l['id'] == u['id'])
+    assert linha['mes']['pdf_vacinas'] == 1 and linha['ultimos_30_dias']['pdf_vacinas'] == 2
+    assert linha['sete_dias']['pdf_vacinas'] == 2 and linha['hoje']['pdf_vacinas'] == 0

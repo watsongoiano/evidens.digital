@@ -48,7 +48,7 @@
   }
 
   function tabela() {
-    const chave = periodo === 'total' ? 'total' : 'ultimos_30_dias';
+    const chave = periodo;   // cada linha traz hoje, sete_dias, mes e total
     const linhas = dados.usuarios;
     $('[data-contagem]').textContent = `(${linhas.length})`;
     if (!linhas.length) {

@@ -67,25 +67,25 @@ def resumo(agora=None, dias=30):
         for tipo, total in executar('SELECT tipo, COUNT(*) FROM eventos_uso GROUP BY tipo').fetchall():
             if tipo in TIPOS:
                 periodos['total'][tipo] = int(total)
-        recentes = executar('SELECT tipo, criado_em FROM eventos_uso WHERE criado_em >= ?',
+        recentes = executar('SELECT usuario_id, tipo, criado_em FROM eventos_uso WHERE criado_em >= ?',
                             (min(inicio_serie, inicio_mes),)).fetchall()
         por_usuario = executar('SELECT usuario_id, tipo, COUNT(*), MAX(criado_em) FROM eventos_uso '
                                'WHERE usuario_id IS NOT NULL GROUP BY usuario_id, tipo').fetchall()
-        recentes_por_usuario = executar('SELECT usuario_id, tipo, COUNT(*) FROM eventos_uso '
-                                        'WHERE usuario_id IS NOT NULL AND criado_em >= ? GROUP BY usuario_id, tipo',
-                                        (inicio_serie,)).fetchall()
     usuarios = {u['id']: u for u in contas.listar()}
     sete = hoje - 6 * 86400
-    for tipo, quando in recentes:
+    janelas = (('hoje', hoje), ('sete_dias', sete), ('mes', inicio_mes), ('ultimos_30_dias', inicio_serie))
+    por_usuario_recente = {}   # usuário -> janela -> tipo -> n
+    for uid, tipo, quando in recentes:
         if tipo not in TIPOS:
             continue
         quando = int(quando)
-        if quando >= hoje:
-            periodos['hoje'][tipo] += 1
-        if quando >= sete:
-            periodos['sete_dias'][tipo] += 1
-        if quando >= inicio_mes:
-            periodos['mes'][tipo] += 1
+        for janela, inicio in janelas:
+            if quando >= inicio:
+                if janela in periodos:
+                    periodos[janela][tipo] += 1
+                if uid is not None:
+                    contagem = por_usuario_recente.setdefault(uid, {j: vazio() for j, _ in janelas})
+                    contagem[janela][tipo] += 1
         dia = datetime.fromtimestamp(quando, FUSO).strftime('%Y-%m-%d')
         if dia in serie:
             serie[dia][tipo] += 1
@@ -97,12 +97,10 @@ def resumo(agora=None, dias=30):
         u = usuarios.get(uid)
         linha = linhas.setdefault(uid, {
             'id': uid, 'nome': u['nome'] if u else 'Conta removida', 'email': u['email'] if u else '',
-            'perfil': u['perfil'] if u else '', 'total': vazio(), 'ultimos_30_dias': vazio(), 'ultima_atividade': 0})
+            'perfil': u['perfil'] if u else '', 'total': vazio(), 'ultima_atividade': 0,
+            **por_usuario_recente.get(uid, {j: vazio() for j, _ in janelas})})
         linha['total'][tipo] = int(total)
         linha['ultima_atividade'] = max(linha['ultima_atividade'], int(ultimo))
-    for uid, tipo, total in recentes_por_usuario:
-        if uid in linhas and tipo in TIPOS:
-            linhas[uid]['ultimos_30_dias'][tipo] = int(total)
     ordem = sorted(linhas.values(), key=lambda l: (-l['ultima_atividade'], l['nome'].lower()))
     for linha in ordem:
         linha['ultima_atividade'] = datetime.fromtimestamp(linha['ultima_atividade'], FUSO).isoformat()
