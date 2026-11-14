@@ -155,6 +155,8 @@ def login():
     if u['situacao'] != 'aprovado':
         return jsonify({'error': 'Esta conta está bloqueada. Fale com o responsável técnico.'}), 403
     _abrir_sessao(u)
+    from src.utils import uso
+    uso.registrar('login', u)
     return jsonify({'ok': True, 'usuario': contas.publico(u)})
 
 

@@ -16,7 +16,7 @@ sys.path.insert(0, str(BASE_DIR))
 
 # Importar módulos do sistema
 from src.routes.checkup_intelligent import checkup_intelligent_bp
-from src.utils.analytics import analytics
+from src.utils import uso
 from src.routes import auth
 from src.routes.auth import auth_bp, exigir_administrador, usuario_atual
 from src.utils import i18n
@@ -70,13 +70,17 @@ def _pagina(arquivo, privada=False):
 @app.route('/')
 def index():
     """Página inicial."""
+    if not uso.eh_robo(request.headers.get('User-Agent')):
+        uso.registrar('visita', usuario_atual())
     return _pagina('index.html')
 
 @app.route('/intelligent-tools')
 def intelligent_tools():
     """Check-up: só para quem entrou."""
-    if usuario_atual() is None:
+    u = usuario_atual()
+    if u is None:
         return redirect('/login?destino=check-up')
+    uso.registrar('acesso', u)
     return _pagina('intelligent-tools.html', privada=True)
 
 
@@ -131,14 +135,8 @@ def analytics_page():
 @app.route('/api/analytics/stats')
 @exigir_administrador
 def get_analytics_stats():
-    """Endpoint para visualizar estatísticas de acesso"""
-    return jsonify(analytics.get_summary())
-
-@app.route('/api/analytics/full')
-@exigir_administrador
-def get_full_analytics():
-    """Endpoint para visualizar estatísticas completas"""
-    return jsonify(analytics.get_stats())
+    """Painel de uso: totais por período, série dos últimos 30 dias e uma linha por usuário."""
+    return jsonify(uso.resumo())
 
 # Arquivos que o site publica. A lista é explícita: antes, qualquer arquivo do
 # repositório com extensão .html, .js ou .json era servido, o que deixava
@@ -148,6 +146,7 @@ ARQUIVOS_PUBLICOS = frozenset({
     'index.html',
     'contact.html',
     'static/conta.js',
+    'static/analytics.js',
     'static/i18n.js',
     'static/i18n/en.json',
     'favicon.ico',
