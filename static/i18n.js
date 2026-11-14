@@ -44,12 +44,16 @@
 
   // ---------------------------------------------------------------- tradução
   var textos = null, padroes = [], manter = {};
-  var faltando = {};
+  var faltando = {}, produzidos = {};  // produzidos: o que já saiu em inglês não é procurado de novo
 
   function normalizar(t) { return String(t || '').replace(/\s+/g, ' ').trim(); }
   function temLetras(t) { return /[A-Za-zÀ-ÿ]{2,}/.test(t); }
   // siglas, números e pontuação não mudam de um idioma para o outro
-  function neutro(t) { return /^[A-Z0-9][A-Z0-9 .\/()+,:;&%–—-]*$/.test(t); }
+  // (palavra inteira em maiúsculas, como "IDADE", não entra aqui: precisa de par no dicionário)
+  function neutro(t) {
+    if (!/^[A-Z0-9][A-Z0-9 .\/()+,:;&%–—-]*$/.test(t)) return false;
+    return /\d/.test(t) || (t.match(/[A-Z]+/g) || []).every(function (p) { return p.length <= 4; });
+  }
 
   // número no formato inglês: "16,7" -> "16.7", "7.000" -> "7,000" (só em texto que é só número)
   function numero(t) {
@@ -58,44 +62,75 @@
   }
   var SEPARADORES = ['; ', ', ', ' + '];
 
-  // devolve [texto, coberto]
-  function parte(g) {
-    var t = traduzir(g);
-    if (t !== null) return t;
-    if (!temLetras(g) || manter[normalizar(g)] || neutro(normalizar(g))) return g;
-    for (var i = 0; i < SEPARADORES.length; i++) {  // lista dentro da frase: "colesterol total, HDL, peso"
-      if (g.indexOf(SEPARADORES[i]) > -1) {
-        return g.split(SEPARADORES[i]).map(function (x) { var r = traduzir(x); return r === null ? x : r; }).join(SEPARADORES[i]);
-      }
-    }
-    return g;
+  // notas: o que ficou sem par durante uma tradução; tentativas que não deram em nada são desfeitas
+  var notas = [];
+
+  // devolve [texto, coberto]; o que não muda de um idioma para o outro (sigla, número) conta como coberto
+  function tentar(x) {
+    var marca = notas.length, t = interno(x);
+    return [t === null ? x : t, notas.length === marca];
   }
 
-  function traduzir(original) {
+  function parte(g) {
+    var marca = notas.length, r = tentar(g);
+    if (r[1]) return r[0];
+    for (var i = 0; i < SEPARADORES.length; i++) {  // lista dentro da frase: "colesterol total, HDL, peso"
+      if (g.indexOf(SEPARADORES[i]) > -1) {
+        var sobras = notas.splice(marca), todos = true;
+        var lista = g.split(SEPARADORES[i]).map(function (x) { var p = tentar(x); todos = todos && p[1]; return p[0]; }).join(SEPARADORES[i]);
+        if (todos) return lista;
+        notas.length = marca; notas.push.apply(notas, sobras);
+      }
+    }
+    return r[0];
+  }
+
+  function interno(original) {
     var n = normalizar(original);
     if (!n || !textos) return null;
     if (Object.prototype.hasOwnProperty.call(textos, n)) return textos[n];
     if (!temLetras(n)) { var num = numero(n); return num === n ? null : num; }
     if (manter[n] || neutro(n)) return null;
+    var parcial = null, sobras = [];
     for (var i = 0; i < padroes.length; i++) {
       var m = padroes[i][0].exec(n);
       if (m) {
         // $1: a parte passa de novo pelo tradutor; %1: entra como está, só com o número no formato do idioma
-        return padroes[i][1].replace(/([$%])(\d)/g, function (_, tipo, k) {
+        var marca = notas.length;
+        var saida = padroes[i][1].replace(/([$%])(\d)/g, function (_, tipo, k) {
           var g = m[+k] === undefined ? '' : m[+k];
           return tipo === '%' ? numero(g) : parte(g);
         });
+        if (notas.length === marca) return saida;
+        // casou, mas sobrou parte sem par: outro padrão pode servir melhor
+        if (parcial === null) { parcial = saida; sobras = notas.slice(marca); }
+        notas.length = marca;
       }
     }
-    // duas frases conhecidas emendadas (o motor junta as descrições quando o mesmo exame tem dois motivos)
-    for (var j = 0; j < n.length; j++) {
-      if (n.charAt(j) === ' ' && Object.prototype.hasOwnProperty.call(textos, n.slice(0, j))) {
-        var resto = traduzir(n.slice(j + 1));
-        if (resto !== null) return textos[n.slice(0, j)] + ' ' + resto;
+    // frases emendadas: o motor junta as descrições quando o mesmo exame tem dois motivos, e as mensagens
+    // de erro quando há mais de um campo errado. O corte é depois de um texto conhecido ou no fim de uma frase.
+    for (var j = 1; j < n.length; j++) {
+      if (n.charAt(j) !== ' ') continue;
+      var antes = notas.length, inicio;
+      if (Object.prototype.hasOwnProperty.call(textos, n.slice(0, j))) inicio = [textos[n.slice(0, j)], true];
+      else if (n.charAt(j - 1) === '.') inicio = tentar(n.slice(0, j));
+      else continue;
+      if (inicio[1]) {
+        var resto = tentar(n.slice(j + 1));
+        if (resto[1]) return inicio[0] + ' ' + resto[0];
       }
+      notas.length = antes;
     }
-    faltando[n] = 1;
+    if (parcial !== null) { notas.push.apply(notas, sobras); return parcial; }
+    notas.push(n);
     return null;
+  }
+
+  function traduzir(original) {
+    notas = [];
+    var t = interno(original);
+    for (var i = 0; i < notas.length; i++) faltando[notas[i]] = 1;
+    return t;
   }
 
   function dentroDeManter(no) {
@@ -107,8 +142,10 @@
 
   function traduzirTexto(no) {
     var valor = no.nodeValue;
+    if (produzidos[normalizar(valor)]) return;
     var t = traduzir(valor);
     if (t === null || t === normalizar(valor)) return;
+    produzidos[normalizar(t)] = 1;
     var antes = valor.match(/^\s*/)[0], depois = valor.match(/\s*$/)[0];
     no.nodeValue = antes + t + depois;
   }
@@ -116,7 +153,10 @@
   function traduzirAtributos(el) {
     for (var i = 0; i < ATRIBUTOS.length; i++) {
       var v = el.getAttribute(ATRIBUTOS[i]);
-      if (v) { var t = traduzir(v); if (t !== null && t !== v) el.setAttribute(ATRIBUTOS[i], t); }
+      if (v && !produzidos[normalizar(v)]) {
+        var t = traduzir(v);
+        if (t !== null && t !== v) { produzidos[normalizar(t)] = 1; el.setAttribute(ATRIBUTOS[i], t); }
+      }
     }
     if (el.tagName === 'INPUT' && (el.type === 'submit' || el.type === 'button') && el.value) {
       var tv = traduzir(el.value); if (tv !== null) el.value = tv;

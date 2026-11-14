@@ -20,6 +20,12 @@ _NEUTRO = re.compile(r'^[A-Z0-9][A-Z0-9 ./()+,:;&%–—-]*$')
 _LETRAS = re.compile(r'[A-Za-zÀ-ÿ]{2,}')
 
 
+def neutro(texto):
+    """Siglas curtas, códigos e números não mudam de um idioma para o outro ("HIV", "KDIGO 2024", "GO").
+    Palavra inteira em maiúsculas ("IDADE") não entra aqui: precisa de par no dicionário."""
+    return bool(_NEUTRO.match(texto)) and (any(c.isdigit() for c in texto) or all(len(p) <= 4 for p in re.findall(r'[A-Z]+', texto)))
+
+
 def normalizar(texto):
     return ' '.join(str(texto or '').split())
 
@@ -59,8 +65,9 @@ def _traduzir(texto, d):
         return d['textos'][n], True
     if not _LETRAS.search(n):
         return numero(texto), True
-    if n in d['manter'] or _NEUTRO.match(n):
+    if n in d['manter'] or neutro(n):
         return texto, True
+    parcial = None
     for expressao, saida in d['padroes']:
         m = expressao.match(n)
         if m:
@@ -77,14 +84,27 @@ def _traduzir(texto, d):
                 parte, ok = _parte(g, d)
                 tudo = tudo and ok
                 return parte
-            return re.sub(r'([$%])(\d)', trocar, saida), tudo
-    # duas frases conhecidas emendadas (o motor junta as descrições quando o mesmo exame tem dois motivos)
+            resultado = re.sub(r'([$%])(\d)', trocar, saida)
+            if tudo:
+                return resultado, True
+            parcial = parcial or resultado  # casou, mas sobrou parte sem par: outro padrão pode servir melhor
+    # frases emendadas: o motor junta as descrições quando o mesmo exame tem dois motivos, e as mensagens
+    # de erro quando há mais de um campo errado. O corte é depois de um texto conhecido ou no fim de uma frase.
     for i, c in enumerate(n):
-        if c == ' ' and n[:i] in d['textos']:
-            resto, ok = _traduzir(n[i + 1:], d)
-            if ok:
-                return d['textos'][n[:i]] + ' ' + resto, True
-    return texto, False
+        if c != ' ':
+            continue
+        if n[:i] in d['textos']:
+            inicio = d['textos'][n[:i]]
+        elif n[i - 1] == '.':
+            inicio, ok = _traduzir(n[:i], d)
+            if not ok:
+                continue
+        else:
+            continue
+        resto, ok = _traduzir(n[i + 1:], d)
+        if ok:
+            return inicio + ' ' + resto, True
+    return (parcial or texto), False
 
 
 def _parte(g, d):

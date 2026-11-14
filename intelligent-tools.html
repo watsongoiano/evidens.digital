@@ -1188,6 +1188,9 @@
             vacina: { endpoint: '/api/gerar-pdf-vacinas', arquivo: 'prescricao_vacinas', descricao: 'vacinas', pergunta: 'Deseja acrescentar alguma vacina?' }
         };
         let catalogo = null;
+        // Em inglês o catálogo aparece traduzido, mas o item segue para o servidor com o título em português
+        // (é por ele que a posologia e a triagem das vacinas são decididas).
+        const tituloOriginal = {};
         const acrescentados = { laboratorio: [], imagem: [], vacina: [] };
         let categoriaDoDialogo = null;
 
@@ -1235,7 +1238,8 @@
 
         function adicionarDoCampo() {
             const campo = document.getElementById('acrescimoBusca');
-            const titulo = campo.value.trim().slice(0, 300);
+            const digitado = campo.value.trim().slice(0, 300);
+            const titulo = tituloOriginal[digitado.toLowerCase()] || digitado;
             if (!titulo || !categoriaDoDialogo) return;
             const lista = acrescentados[categoriaDoDialogo];
             const jaTem = itensDaCategoria(categoriaDoDialogo).some(r => (r.titulo || '').trim().toLowerCase() === titulo.toLowerCase());
@@ -1262,7 +1266,10 @@
             const datalist = document.getElementById('acrescimoLista');
             datalist.innerHTML = '';
             const cat = await carregarCatalogo();
-            (cat[categoria] || []).forEach(t => { const o = document.createElement('option'); o.value = t; datalist.appendChild(o); });
+            (cat[categoria] || []).forEach(t => {
+                const o = document.createElement('option'); o.value = T(t); datalist.appendChild(o);
+                tituloOriginal[o.value.toLowerCase()] = t;
+            });
             const dialogo = document.getElementById('dialogoAcrescimo');
             if (typeof dialogo.showModal === 'function') dialogo.showModal(); else dialogo.setAttribute('open', '');
         }
@@ -1550,7 +1557,9 @@
                         if (li.classList.contains('combo-grupo')) { grupo = li; li.hidden = true; return; }
                         if (li === vazio) return;
                         const alvo = alvoDe(li);
-                        const mostra = !(alvo && alvo.checked) && termos.every(t => li.dataset.busca.includes(t));
+                        // o nome na tela entra na busca: em inglês, quem digita "thyroid" acha "Hypothyroidism"
+                        const onde = li.dataset.busca + ' ' + semAcento(li.textContent);
+                        const mostra = !(alvo && alvo.checked) && termos.every(t => onde.includes(t));
                         li.hidden = !mostra;
                         if (mostra) { algum = true; if (grupo) grupo.hidden = false; }
                     });

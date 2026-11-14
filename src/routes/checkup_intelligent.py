@@ -1597,8 +1597,10 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
 
     try:
         from src.routes.auth import usuario_atual
+        from src.utils import i18n
         pdf_bytes = getattr(pdf_minutas, nome_gerador)(
-            dados_paciente, itens, responsavel=pdf_minutas.responsavel_de(usuario_atual()))
+            dados_paciente, itens, responsavel=pdf_minutas.responsavel_de(usuario_atual()),
+            idioma=i18n.idioma_do_pedido(request))
     except Exception as exc:
         # O detalhe fica só no log do servidor; a resposta não expõe a infraestrutura.
         print(f"❌ Erro ao gerar PDF ({categoria}): {exc}")
