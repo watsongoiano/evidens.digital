@@ -53,9 +53,9 @@
 
   function traduzir(original) {
     var n = normalizar(original);
-    if (!n || !textos || !temLetras(n)) return null;
+    if (!n || !textos) return null;
     if (Object.prototype.hasOwnProperty.call(textos, n)) return textos[n];
-    if (manter[n] || neutro(n)) return null;
+    if (!temLetras(n) || manter[n] || neutro(n)) return null;
     for (var i = 0; i < padroes.length; i++) {
       if (padroes[i][0].test(n)) {
         return n.replace(padroes[i][0], function () {

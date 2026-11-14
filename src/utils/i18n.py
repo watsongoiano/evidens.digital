@@ -41,11 +41,11 @@ def idioma_do_pedido(pedido):
 def _traduzir(texto, d):
     """Devolve ``(traduzido, coberto)``. ``coberto`` é False quando há letras e nenhum par no dicionário."""
     n = normalizar(texto)
-    if not n or not _LETRAS.search(n):
+    if not n:
         return texto, True
     if n in d['textos']:
         return d['textos'][n], True
-    if n in d['manter'] or _NEUTRO.match(n):
+    if not _LETRAS.search(n) or n in d['manter'] or _NEUTRO.match(n):
         return texto, True
     for expressao, saida in d['padroes']:
         m = expressao.match(n)
