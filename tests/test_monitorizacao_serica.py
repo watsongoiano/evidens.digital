@@ -26,8 +26,10 @@ def test_litio_pede_litemia_e_o_painel_da_nice_a_cada_6_meses(client):
 
 
 @pytest.mark.parametrize('dados', [dict(idade=70), dict(medicacoes=['litio', 'enalapril']),
-                                   dict(medicacoes=['litio', 'losartana_hidroclorotiazida'])],
-                         ids=['idoso', 'ieca', 'diuretico'])
+                                   dict(medicacoes=['litio', 'losartana_hidroclorotiazida']),
+                                   dict(medicacoes=['litio', 'espironolactona']),
+                                   dict(medicacoes=['litio', 'sacubitril_valsartana'])],
+                         ids=['idoso', 'ieca', 'diuretico', 'espironolactona', 'arni'])
 def test_litio_a_cada_3_meses_em_idoso_ou_com_farmaco_que_interage(client, dados):
     dados.setdefault('medicacoes', ['litio'])
     recs, _ = _resposta(client, **dados)

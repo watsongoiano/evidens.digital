@@ -570,7 +570,8 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         # NICE CG185 (2014, atualizada em 2023), 1.10: litemia a cada 3 meses no 1º ano e depois a cada 6 meses;
         # a cada 3 meses em idosos, com fármaco que interage (IECA/BRA, diuréticos, AINE), com última litemia
         # ≥ 0,8 mmol/L, má adesão ou mau controle. Peso, ureia e eletrólitos com cálcio, TFG e TSH a cada 6 meses.
-        frequente = idade >= 65 or bool({'ieca_bra', 'tiazidico', 'diuretico_alca'} & med)
+        # IECA/BRA (inclui sacubitril/valsartana) e diuréticos (tiazídico, de alça, poupador de potássio).
+        frequente = idade >= 65 or bool({'ieca_bra', 'arni', 'tiazidico', 'diuretico_alca', 'espironolactona'} & med)
         add('Lítio, soro', 'laboratorio',
             'Litemia com coleta 12 horas após a última dose (aceitável de 10 a 14 h, sempre no mesmo intervalo). Alvo de '
             'manutenção em geral de 0,6 a 0,8 mmol/L. ' + (
