@@ -320,6 +320,25 @@ def definir_situacao(uid, situacao):
         return _usuario(executar(_SELECT + 'WHERE id = ?', (uid,)).fetchone())
 
 
+def aprovar(uid):
+    """Aprova (ou reativa) a conta e encerra as sessões abertas, como ``definir_situacao``.
+
+    Devolve ``(usuario, anterior)``: ``anterior`` é a situação que a conta tinha ('pendente' ou
+    'bloqueado'), ou None se ela já estava aprovada. A troca é condicional no banco, então dois
+    pedidos simultâneos não avisam a pessoa duas vezes.
+    """
+    agora = int(time.time())
+    with _conexao() as executar:
+        linha = executar(_SELECT + 'WHERE id = ?', (uid,)).fetchone()
+        anterior = _usuario(linha)['situacao'] if linha else None
+        mudou = executar("UPDATE usuarios SET situacao = 'aprovado', decidido_em = ?, versao_sessao = versao_sessao + 1 "
+                         "WHERE id = ? AND administrador = 0 AND situacao <> 'aprovado'", (agora, uid)).rowcount == 1
+        if not mudou:
+            executar("UPDATE usuarios SET situacao = 'aprovado', decidido_em = ?, versao_sessao = versao_sessao + 1 "
+                     'WHERE id = ? AND administrador = 0', (agora, uid))
+        return _usuario(executar(_SELECT + 'WHERE id = ?', (uid,)).fetchone()), (anterior if mudou else None)
+
+
 def trocar_senha(uid, nova_senha):
     erro = validar_senha(nova_senha)
     if erro:

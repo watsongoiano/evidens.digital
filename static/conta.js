@@ -143,6 +143,11 @@
       if (dados.senha_temporaria) {
         mostrar(ok, `Senha temporária de ${u.nome}: ${dados.senha_temporaria} — anote agora; ela não será mostrada de novo. Peça que a pessoa troque a senha ao entrar.`);
       }
+      if (dados.aviso) {  // aprovação ou reativação: diz se a pessoa foi avisada por e-mail
+        mostrar(ok, dados.aviso.enviado
+          ? `Conta de ${u.nome} liberada. O aviso foi enviado para ${u.email}.`
+          : `Conta de ${u.nome} liberada. O e-mail de aviso não foi enviado: ${dados.aviso.motivo}. Avise a pessoa por outro meio.`);
+      }
       carregar();
     }
 

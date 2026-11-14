@@ -262,7 +262,17 @@ def admin_acao(uid, acao):
     if alvo['administrador']:
         return jsonify({'error': 'A conta do administrador não pode ser alterada por aqui.'}), 400
     if acao == 'aprovar':
-        return jsonify({'ok': True, 'usuario': contas.publico(contas.definir_situacao(uid, 'aprovado'))})
+        usuario, anterior = contas.aprovar(uid)
+        # Avisa a pessoa quando o acesso passa a valer (aprovação ou reativação). A falha no envio
+        # não desfaz a aprovação: a resposta diz se o aviso saiu, para o administrador saber.
+        aviso = None
+        if anterior is not None:
+            try:
+                enviado, detalhe = notificacoes.enviar_aprovacao(usuario, _url_do_site(), reativada=(anterior == 'bloqueado'))
+            except Exception as erro:
+                enviado, detalhe = False, type(erro).__name__
+            aviso = {'enviado': enviado, 'motivo': None if enviado else detalhe}
+        return jsonify({'ok': True, 'usuario': contas.publico(usuario), 'aviso': aviso})
     if acao == 'bloquear':
         return jsonify({'ok': True, 'usuario': contas.publico(contas.definir_situacao(uid, 'bloqueado'))})
     if acao == 'redefinir-senha':
