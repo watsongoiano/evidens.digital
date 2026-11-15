@@ -49,6 +49,9 @@ def _talvez(classes, chave=None):
 
 def _atributos(marca=(), imuno=False, chave=None, talvez=()):
     detalhe = ''
+    classes_has, so_com_has = medicamentos.classes_anti_hipertensivas(chave)
+    if classes_has:   # contagem de classes para HAS resistente (coerencia.hipertensao_resistente)
+        detalhe += f' data-classe-has="{html.escape("|".join(sorted(classes_has)))}"' + (' data-has-condicional="1"' if so_com_has else '')
     if chave in doses.POR_MEDICAMENTO:
         tipo, parametro = doses.POR_MEDICAMENTO[chave]
         detalhe = f' data-detalhe="{tipo}"' + (f' data-parametro="{round(parametro, 4):g}"' if parametro else '')

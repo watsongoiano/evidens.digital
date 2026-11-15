@@ -235,3 +235,61 @@ def test_metformina_no_texto_livre_mantem_a_vitamina_b12_sem_diabetes(client):
         titulos = [r['titulo'] for r in dados['recommendations']]
         assert titulos.count('Vitamina B12, soro') == 1, corpo
         assert 'diabetes' not in (dados.get('comorbidades_consideradas') or [])
+
+
+# ── HAS resistente (AHA 2018, Carey et al.; AHA/ACC 2025) ────────────────────
+# PA acima da meta (< 130/80) com 3 classes anti-hipertensivas, ou 4 ou mais classes mesmo com a PA na meta.
+TRIPLA = ['losartana', 'hidroclorotiazida', 'anlodipino']
+
+
+def _resistente(escolhidas, pas=None, pad=None, gestante=False, comorbidades=()):
+    from src.utils import medicamentos
+    com, _, inf = coerencia.inferir({'pas': pas, 'pad': pad, 'comorbidades': list(comorbidades),
+                                     'medicacoes': medicamentos.classes_de(escolhidas)},
+                                    gestante=gestante, escolhidas=escolhidas)
+    return 'has_resistente' in com, {i['valor']: i['motivo'] for i in inf}.get('has_resistente', '')
+
+
+def test_tres_classes_com_pa_acima_da_meta_marca_has_resistente():
+    marcou, motivo = _resistente(TRIPLA, 138, 84)
+    assert marcou and '3 classes' in motivo and 'MRPA ou MAPA' in motivo and 'adesão' in motivo
+
+
+def test_tres_classes_com_pa_na_meta_ou_sem_pa_nao_marca():
+    assert not _resistente(TRIPLA, 124, 76)[0]
+    assert not _resistente(TRIPLA)[0]
+
+
+def test_quatro_classes_marcam_mesmo_com_pa_na_meta():
+    marcou, motivo = _resistente(TRIPLA + ['espironolactona'], 122, 74)
+    assert marcou and '4 classes' in motivo
+
+
+def test_associacao_em_comprimido_unico_conta_cada_classe():
+    assert _resistente(['losartana_hidroclorotiazida', 'anlodipino'], 150, 95)[0]
+
+
+def test_mesma_classe_repetida_conta_uma_vez():
+    # IECA + BRA bloqueiam o mesmo sistema; tiazídico + alça são diuréticos
+    assert not _resistente(['losartana', 'enalapril', 'anlodipino'], 150, 95)[0]
+    assert not _resistente(['hidroclorotiazida', 'furosemida', 'anlodipino'], 150, 95)[0]
+
+
+def test_esquema_de_insuficiencia_cardiaca_sem_hipertensao_nao_e_has_resistente():
+    # betabloqueador, espironolactona, alça e sacubitril/valsartana também tratam IC
+    assert not _resistente(['carvedilol', 'espironolactona', 'furosemida', 'sacubitril_valsartana'])[0]
+    assert _resistente(['carvedilol', 'espironolactona', 'furosemida', 'sacubitril_valsartana'],
+                       comorbidades=['hipertensao'])[0]
+
+
+def test_na_gestacao_o_corte_e_140_90():
+    gestante = ['metildopa', 'nifedipino', 'hidralazina']
+    assert not _resistente(gestante, 135, 85, gestante=True)[0]
+    assert _resistente(gestante, 145, 85, gestante=True)[0]
+
+
+def test_has_resistente_recusada_pelo_medico_nao_volta():
+    from src.utils import medicamentos
+    com, _, _ = coerencia.inferir({'pas': 150, 'pad': 95, 'medicacoes': medicamentos.classes_de(TRIPLA)},
+                                  recusados=('has_resistente',), escolhidas=TRIPLA)
+    assert 'has_resistente' not in com

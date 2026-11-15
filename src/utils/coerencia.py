@@ -48,7 +48,7 @@ ROTULOS = {
     'obesidade': 'Obesidade', 'doenca_renal': 'Doença renal crônica',
     'estatinas': 'Estatinas', 'anti_hipertensivos': 'Anti-hipertensivos',
     'insuficiencia_cardiaca': 'Insuficiência cardíaca', 'dcv_aterosclerotica': 'Doença cardiovascular aterosclerótica',
-    'dpoc': 'DPOC', 'hiv': 'HIV', 'diabetes_tipo_1': 'Diabetes tipo 1',
+    'dpoc': 'DPOC', 'hiv': 'HIV', 'diabetes_tipo_1': 'Diabetes tipo 1', 'has_resistente': 'HAS resistente',
 }
 from src.utils.condicoes import TIPOS_DE_DIABETES as DIABETES  # noqa: E402  (tipo 1, tipo 2 e tipos específicos)
 
@@ -99,6 +99,43 @@ def classificar_pa(pas, pad):
     if s_ >= 120:
         return {'categoria': 'elevada', 'rotulo': 'PA elevada'}
     return {'categoria': 'normal', 'rotulo': 'PA normal'}
+
+
+RESISTENTE_REFERENCIA = 'AHA 2018; AHA/ACC 2025'
+RESISTENTE_CONFIRMAR = 'confirmar adesão, doses máximas toleradas e PA fora do consultório (MRPA ou MAPA)'
+
+
+def classes_em_uso(escolhidas, hipertensao):
+    """Classes anti-hipertensivas distintas em uso (betabloqueador, espironolactona etc. só com hipertensão)."""
+    from src.utils.medicamentos import classes_anti_hipertensivas
+    classes = set()
+    for chave in escolhidas or ():
+        delas, so_com_has = classes_anti_hipertensivas(chave)
+        if delas and (hipertensao or not so_com_has):
+            classes |= delas
+    return classes
+
+
+def hipertensao_resistente(escolhidas, hipertensao, pas, pad, gestante=False):
+    """Motivo para marcar HAS resistente, ou None.
+
+    AHA 2018 (Carey et al., Hypertension 2018;72:e53) e AHA/ACC 2025: PA acima da meta com 3 classes
+    anti-hipertensivas em dose máxima tolerada, ou PA na meta com 4 ou mais. Meta < 130/80 (na gestação,
+    hipertensão a partir de 140/90). Com 3 classes e PA não informada, não marca: a dica da tela pede a PA.
+    """
+    classes = classes_em_uso(escolhidas, hipertensao)
+    if len(classes) >= 4:
+        return f'{len(classes)} classes de anti-hipertensivos ({RESISTENTE_REFERENCIA}); {RESISTENTE_CONFIRMAR}'
+    if len(classes) == 3:
+        corte_s, corte_d = (140, 90) if gestante else (130, 80)
+        s_ = float(pas) if pas not in (None, '') else None
+        d_ = float(pad) if pad not in (None, '') else None
+        if (s_ is not None and s_ >= corte_s) or (d_ is not None and d_ >= corte_d):
+            pa = f"{s_:g}" if s_ is not None else '–'
+            pa += '/' + (f"{d_:g}" if d_ is not None else '–')
+            return (f'3 classes de anti-hipertensivos com PA {pa} mmHg acima da meta ({RESISTENTE_REFERENCIA}); '
+                    f'{RESISTENTE_CONFIRMAR}')
+    return None
 
 
 def inferir(data, egfr=None, gestante=False, recusados=(), escolhidas=()):
@@ -158,6 +195,9 @@ def inferir(data, egfr=None, gestante=False, recusados=(), escolhidas=()):
         if limiar:
             marcar(comorbidades, 'comorbidades', 'hipertensao',
                    f"PA {_pa_texto(data)} = {pa['rotulo']} (AHA/ACC 2025); confirmar com MRPA ou MAPA")
+    resistente = hipertensao_resistente(escolhidas, 'hipertensao' in comorbidades, data.get('pas'), data.get('pad'), gestante)
+    if resistente:
+        marcar(comorbidades, 'comorbidades', 'has_resistente', resistente)
     if 'has_resistente' in comorbidades:
         marcar(comorbidades, 'comorbidades', 'hipertensao', 'HAS resistente marcada')
     # Betabloqueador, espironolactona, diurético de alça e sacubitril/valsartana têm outras indicações
