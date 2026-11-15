@@ -78,7 +78,7 @@ def test_medicamento_que_so_se_usa_numa_doenca_marca_a_doenca():
                 'levodopa_benserazida': 'parkinson', 'levodopa_carbidopa': 'parkinson', 'donepezila': 'demencia',
                 'levetiracetam': 'epilepsia', 'alendronato': 'osteoporose', 'tansulosina': 'hpb',
                 'umeclidinio_vilanterol': 'dpoc', 'ticagrelor': 'dcv_aterosclerotica',
-                'tenofovir_lamivudina_dolutegravir': 'hiv', 'adalimumabe': 'doenca_autoimune'}
+                'tenofovir_lamivudina_dolutegravir': 'hiv'}
     for medicamento, doenca in esperado.items():
         com, _, inf = coerencia.inferir({}, escolhidas=[medicamento])
         assert com == [doenca], medicamento
@@ -88,7 +88,9 @@ def test_medicamento_que_so_se_usa_numa_doenca_marca_a_doenca():
         for alvo in alvos:
             assert coerencia.rotulo_de(alvo)
     # os que têm outra indicação comum não marcam nada sozinhos
-    for medicamento in ('metotrexato', 'pramipexol', 'alopurinol', 'clopidogrel', 'tenofovir_entricitabina', 'pregabalina'):
+    # antirreumáticos e imunobiológicos servem a várias doenças imunomediadas, com acompanhamentos diferentes
+    for medicamento in ('metotrexato', 'pramipexol', 'alopurinol', 'clopidogrel', 'tenofovir_entricitabina', 'pregabalina',
+                        'adalimumabe', 'hidroxicloroquina', 'mesalazina', 'sulfassalazina', 'tofacitinibe'):
         assert coerencia.inferir({}, escolhidas=[medicamento])[0] == [], medicamento
     # desmarcar na tela vale
     assert coerencia.inferir({}, escolhidas=['levotiroxina'], recusados=['hipotireoidismo'])[0] == []

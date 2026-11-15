@@ -37,9 +37,21 @@ COMORBIDADES = {
     'cirrose': {'rotulo': 'Cirrose / hepatopatia crônica', 'busca': 'figado'},
     'hepatite_b_cronica': {'rotulo': 'Hepatite B crônica', 'busca': 'figado hbv'},
     'hepatite_c': {'rotulo': 'Hepatite C', 'busca': 'figado hcv'},
-    'doenca_autoimune': {'rotulo': 'Doença inflamatória autoimune (AR, lúpus, psoríase, DII)',
-                         'agravante': 'doença inflamatória crônica',
-                         'busca': 'artrite reumatoide les crohn retocolite espondilite'},
+    # Doenças inflamatórias imunomediadas: cada uma com o seu acompanhamento (antes eram um item só).
+    'artrite_reumatoide': {'rotulo': 'Artrite reumatoide', 'agravante': 'doença inflamatória crônica',
+                           'busca': 'ar autoimune doenca inflamatoria reumatismo'},
+    'lupus': {'rotulo': 'Lúpus eritematoso sistêmico', 'agravante': 'doença inflamatória crônica',
+              'busca': 'les autoimune doenca inflamatoria colagenose'},
+    'psoriase': {'rotulo': 'Psoríase', 'agravante': 'doença inflamatória crônica', 'busca': 'pele autoimune doenca inflamatoria'},
+    'artrite_psoriasica': {'rotulo': 'Artrite psoriásica', 'agravante': 'doença inflamatória crônica',
+                           'busca': 'aps psoriase espondiloartrite autoimune doenca inflamatoria'},
+    'espondiloartrite': {'rotulo': 'Espondiloartrite axial (espondilite anquilosante)', 'agravante': 'doença inflamatória crônica',
+                         'busca': 'ea espondilite anquilosante autoimune doenca inflamatoria'},
+    'doenca_crohn': {'rotulo': 'Doença de Crohn', 'agravante': 'doença inflamatória crônica',
+                     'busca': 'dii doenca inflamatoria intestinal autoimune'},
+    'retocolite': {'rotulo': 'Retocolite ulcerativa', 'agravante': 'doença inflamatória crônica',
+                   'busca': 'rcu colite ulcerativa dii doenca inflamatoria intestinal autoimune'},
+    'esclerose_sistemica': {'rotulo': 'Esclerose sistêmica (esclerodermia)', 'busca': 'autoimune colagenose'},
     'asma_grave': {'rotulo': 'Asma moderada ou grave'},
     'asplenia': {'rotulo': 'Asplenia / esplenectomia', 'busca': 'baco'},
     'anemia_falciforme': {'rotulo': 'Doença falciforme', 'busca': 'anemia falciforme hemoglobinopatia'},
@@ -210,6 +222,51 @@ VSR = 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)'
 SBIM = 'SBIm 2026/2027'
 CGH_CORTICOIDE = 'CGH 2025 (Feuerstein)'
 SPARLING = 'Drugs Aging 2024 (Sparling)'
+# Fontes das comorbidades (links em src/utils/reference_links.py)
+EULAR_CV_ARTRITES = 'EULAR 2016 (risco CV nas artrites inflamatórias)'
+EULAR_CV_DRM = 'EULAR 2022 (risco CV no LES e outras DRM)'
+EULAR_LES = 'EULAR 2010 (monitorização do LES)'
+ACR_NEFRITE = 'ACR 2024 (nefrite lúpica)'
+EULAR_INFECCOES = 'EULAR 2022 (infecções em DRAI)'
+EULAR_VACINAS = 'EULAR 2019 (vacinação em DRAI)'
+AAD_PSORIASE = 'AAD-NPF 2019 (comorbidades da psoríase)'
+ACR_CHEST_DPI = 'ACR/CHEST 2023 (doença pulmonar intersticial)'
+ESC_ERS_HP = 'ESC/ERS 2022 (hipertensão pulmonar)'
+ECCO_ANEMIA = 'ECCO 2015 (anemia na DII)'
+BSG_DII = 'BSG 2025 (vigilância colorretal na DII)'
+ACG_DII = 'ACG 2017 (cuidados preventivos na DII)'
+AASLD_HBV = 'AASLD 2018 (hepatite B)'
+AASLD_HCV = 'AASLD/IDSA (hepatite C)'
+ASCO_HBV = 'ASCO 2020 (hepatite B no câncer)'
+NHLBI_FALCIFORME = 'NHLBI 2014 (doença falciforme)'
+GINA = 'GINA 2024'
+ESC_FA = 'ESC 2024 (fibrilação atrial)'
+AGA_CELIACA = 'AGA 2019 (doença celíaca)'
+BSG_CELIACA = 'BSG 2014 (doença celíaca)'
+ACG_BARRETT = 'ACG 2022 (esôfago de Barrett)'
+PCOS = 'Diretriz internacional de SOP 2023'
+
+# Detalhes que abrem embaixo do item escolhido (como o bloco do HIV): vão no mesmo campo `comorbidades`.
+DETALHES_COMORBIDADE = {
+    'lupus': ('Lúpus: o que se aplica', 'Muda a frequência da proteinúria (ACR 2024).', [
+        ('les_nefrite', 'Nefrite lúpica (atual ou prévia)')]),
+    'psoriase': ('Psoríase: o que se aplica', 'Muda a frequência do rastreio cardiometabólico (AAD-NPF 2019).', [
+        ('psoriase_extensa', 'Mais de 10% da superfície corporal, ou candidata a tratamento sistêmico ou fototerapia')]),
+    'doenca_crohn': ('Doença de Crohn: o que se aplica', 'Define a colonoscopia de vigilância (BSG 2025) e B12/folato (ECCO 2015).', [
+        ('crohn_colon', 'Acomete o cólon (1/3 ou mais do cólon)'),
+        ('crohn_8_anos', '8 anos ou mais desde o início dos sintomas'),
+        ('crohn_cep', 'Colangite esclerosante primária'),
+        ('crohn_delgado', 'Acomete o intestino delgado ou já teve ressecção ileal')]),
+    'retocolite': ('Retocolite: o que se aplica', 'Define a colonoscopia de vigilância (BSG 2025).', [
+        ('rcu_alem_reto', 'Colite além do reto (não só proctite)'),
+        ('rcu_8_anos', '8 anos ou mais desde o início dos sintomas'),
+        ('rcu_cep', 'Colangite esclerosante primária')]),
+    'hepatite_b_cronica': ('Hepatite B: o que se aplica', 'Define o rastreio de carcinoma hepatocelular sem cirrose (AASLD 2018).', [
+        ('hbv_risco_chc', 'História familiar de carcinoma hepatocelular, coinfecção por HIV ou hepatite D, homem asiático ≥ 40 anos, '
+                          'mulher asiática ≥ 50 anos ou origem africana subsaariana')]),
+}
+# Diagnóstico antigo "doença inflamatória autoimune" (um item só): ainda aceito vindo de formulários salvos.
+LEGADO_AUTOIMUNE = 'doenca_autoimune'
 
 
 def imunossupressao_implicada(comorbidades, medicacoes):
@@ -219,7 +276,11 @@ def imunossupressao_implicada(comorbidades, medicacoes):
 
 def agravantes_de_risco(comorbidades, familia, hiv=False):
     """Agravantes de risco cardiovascular (SBC 2025) que o formulário consegue saber."""
-    lista = [COMORBIDADES[c]['agravante'] for c in comorbidades if COMORBIDADES.get(c, {}).get('agravante')]
+    lista = []
+    for c in comorbidades:
+        agravante = COMORBIDADES.get(c, {}).get('agravante') or ('doença inflamatória crônica' if c == LEGADO_AUTOIMUNE else None)
+        if agravante and agravante not in lista:
+            lista.append(agravante)
     if 'obesidade' in comorbidades:
         lista.append('obesidade')
     if hiv:
@@ -253,7 +314,7 @@ def _garantir(recs, nova):
     recs.append(nova)
 
 
-def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False):
+def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False, tabagismo=None, imc=None):
     """Soma às recomendações o que as listas disparam. Devolve as orientações (sem pedido/receita)."""
     com, med, fam = set(comorbidades), set(medicacoes), set(familia)
     orient = []
@@ -716,9 +777,10 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'Pré-diabetes: reavaliar a glicemia ao menos uma vez por ano.',
             'Pré-diabetes | Anual', 'ADA 2025', 'B')
     if 'cirurgia_bariatrica' in com:
-        for titulo in ('Hemograma completo com plaquetas', 'Ferritina, soro', 'Vitamina B12, soro', '25-hidroxivitamina D, soro'):
+        for titulo in ('Hemograma completo com plaquetas', 'Ferritina, soro', 'Vitamina B12, soro', 'Ácido fólico, soro',
+                       '25-hidroxivitamina D, soro', 'Cálcio iônico, soro', 'Paratormônio (PTH), soro'):
             add(titulo, 'laboratorio', 'Após cirurgia bariátrica: rastreamento anual de deficiências nutricionais '
-                '(ferro, B12, vitamina D).', 'Cirurgia bariátrica prévia | Anual', 'ASMBS 2019', 'B')
+                '(ferro, B12, folato, vitamina D, cálcio e PTH).', 'Cirurgia bariátrica prévia | Anual', 'ASMBS 2019', 'B')
     if 'hepatite_c' in com or 'hepatite_b_cronica' in com:
         add('Hepatites A e B (Twinrix® ou vacinas isoladas)', 'vacina',
             'Hepatite viral crônica: vacinar os suscetíveis contra hepatite A (e contra hepatite B, na hepatite C).',
@@ -739,13 +801,235 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'BHOF 2022', 'B')
         add('25-hidroxivitamina D, soro', 'laboratorio', 'Manter 25(OH)D ≥ 30 ng/mL em osteoporose.', 'Osteoporose',
             'BHOF 2022', 'B')
+        for titulo in ('Cálcio iônico, soro', 'Fósforo, soro', 'Creatinina, soro', 'Fosfatase alcalina, soro',
+                       'Paratormônio (PTH), soro'):
+            add(titulo, 'laboratorio', 'Osteoporose: investigar causas secundárias no diagnóstico (cálcio, fósforo, função '
+                'renal, fosfatase alcalina e PTH) antes de iniciar o tratamento.', 'Osteoporose | Avaliação inicial', 'BHOF 2022', 'B')
     if 'gota' in com:
         add('Ácido úrico, soro', 'laboratorio', 'Tratamento por alvo: ácido úrico < 6 mg/dL.', 'Gota | Alvo < 6 mg/dL',
             'ACR 2020', 'A')
+    if 'gota' in com:
+        add('Creatinina, soro', 'laboratorio', 'Gota: função renal para a dose do hipouricemiante e para a escolha do '
+            'anti-inflamatório da crise.', 'Gota | Periódico', 'ACR 2020', 'B')
+        orientar('Gota: comorbidades', 'Rastrear e tratar hipertensão, diabetes, dislipidemia, obesidade e doença renal, '
+                 'frequentes na gota. Evitar diurético para tratar a hipertensão quando houver alternativa.', 'ACR 2020 / ' + EULAR_CV_DRM)
+
+    # ---------------- Doenças inflamatórias imunomediadas: cada uma com o seu acompanhamento ----------------
+    articulares = [c for c in ('artrite_reumatoide', 'artrite_psoriasica', 'espondiloartrite') if c in com]
+    if articulares:
+        nomes = ', '.join(COMORBIDADES[c]['rotulo'] for c in articulares)
+        add('Colesterol total e frações, soro', 'laboratorio',
+            'Artrite inflamatória: risco cardiovascular aumentado. Avaliar o risco (lipídios, pressão arterial, glicemia e '
+            'tabagismo) pelo menos a cada 5 anos e após mudança importante do tratamento, com os lipídios dosados com a '
+            'doença estável ou em remissão.', f'{nomes} | A cada 5 anos', EULAR_CV_ARTRITES, 'B')
+    if 'artrite_reumatoide' in com:
+        orientar('Artrite reumatoide: pulmão e osso',
+                 'Com fator de risco para doença pulmonar intersticial (tabagismo, sexo masculino, idade mais avançada, fator '
+                 'reumatoide ou anti-CCP em título alto, doença ativa), rastrear com prova de função pulmonar com difusão (DLCO) '
+                 'e tomografia de tórax de alta resolução. A artrite reumatoide entra no cálculo do FRAX.', ACR_CHEST_DPI)
+    if 'lupus' in com:
+        for titulo in ('Hemograma completo com plaquetas', 'VHS', 'Proteína C reativa, soro', 'Albumina, soro',
+                       'Creatinina, soro', 'Urina tipo I (EAS)'):
+            add(titulo, 'laboratorio', 'Lúpus sem atividade: hemograma, VHS, PCR, albumina, creatinina e urina tipo I a cada '
+                '6-12 meses; mais vezes com atividade, dano ou conforme o tratamento.',
+                'Lúpus eritematoso sistêmico | A cada 6-12 meses', EULAR_LES, 'C', 'alta')
+        if 'les_nefrite' not in com:
+            add('Relação proteína/creatinina, urina', 'laboratorio',
+                'Lúpus sem nefrite conhecida: rastrear proteinúria pelo menos a cada 6-12 meses e em toda reativação fora do rim.',
+                'Lúpus eritematoso sistêmico | A cada 6-12 meses', ACR_NEFRITE, 'A', 'alta')
+        else:
+            add('Relação proteína/creatinina, urina', 'laboratorio',
+                'Nefrite lúpica: quantificar a proteinúria pelo menos a cada 3 meses até a remissão completa e a cada 3-6 meses '
+                'na remissão mantida.', 'Nefrite lúpica | A cada 3 meses', ACR_NEFRITE, 'A', 'alta')
+        for titulo in ('Complemento C3', 'Complemento C4', 'Anti-DNA'):
+            add(titulo, 'laboratorio', 'Lúpus: complemento (C3, C4) e anti-DNA ajudam a confirmar atividade ou remissão.',
+                'Lúpus eritematoso sistêmico | Conforme indicação clínica', EULAR_LES, 'C')
+        for titulo in ('Anticardiolipina - IgG', 'Anticardiolipina - IgM', 'Anticorpos Beta 2 glicoproteina I - IgG/IgM/IgA',
+                       'Anticoagulante lúpico, pesquisa'):
+            add(titulo, 'laboratorio', 'Lúpus: anticorpos antifosfolípides na avaliação inicial e de novo antes de gestação, '
+                'cirurgia, estrogênio ou após evento vascular, se antes negativos.',
+                'Lúpus eritematoso sistêmico | Avaliação inicial', EULAR_LES, 'C')
+        for titulo in ('Colesterol total e frações, soro', 'Glicose, soro'):
+            add(titulo, 'laboratorio', 'Lúpus: lipídios e glicemia anuais, com pressão arterial e IMC (risco cardiovascular).',
+                'Lúpus eritematoso sistêmico | Anual', EULAR_LES + ' / ' + EULAR_CV_DRM, 'C')
+        for titulo in ('Anti-HIV 1 e 2, soro', 'Anticorpos anti-HCV, soro', 'HBsAg, anti-HBc total e anti-HBs'):
+            add(titulo, 'laboratorio', 'Lúpus: rastrear HIV e hepatites B e C (e tuberculose latente) antes de imunossupressor.',
+                'Lúpus eritematoso sistêmico | Antes do tratamento', EULAR_LES + ' / ' + EULAR_INFECCOES, 'B')
+        orientar('Lúpus: pressão arterial e olhos',
+                 'Considerar alvo de pressão arterial < 130/80 mmHg. Hidroxicloroquina para todos, salvo contraindicação, também '
+                 'pela proteção cardiovascular; exame oftalmológico conforme o uso de antimalárico e de corticoide.',
+                 EULAR_CV_DRM + ' / ' + EULAR_LES)
+    if {'psoriase', 'artrite_psoriasica'} & com:
+        extensa = 'psoriase_extensa' in com
+        add('Colesterol total e frações, soro', 'laboratorio',
+            'Psoríase: dosar os lipídios e rastrear hipertensão e diabetes como na população geral'
+            + ('; mais cedo e com mais frequência na psoríase extensa (> 10% da superfície corporal) ou com indicação de '
+               'tratamento sistêmico ou fototerapia.' if extensa else '.'),
+            ('Psoríase extensa ou com tratamento sistêmico' if extensa else 'Psoríase') + ' | Fator de risco', AAD_PSORIASE, 'B')
+        if extensa:
+            for titulo in ('Glicose, soro', 'Hemoglobina glicada (HbA1c), soro'):
+                add(titulo, 'laboratorio', 'Psoríase extensa (> 10% da superfície corporal) ou com indicação de tratamento '
+                    'sistêmico ou fototerapia: rastreio de diabetes mais cedo e com mais frequência.',
+                    'Psoríase extensa ou com tratamento sistêmico | Fator de risco', AAD_PSORIASE, 'B')
+        if 'psoriase' in com:
+            orientar('Psoríase: comorbidades',
+                     'Perguntar por dor ou rigidez articular em toda consulta (artrite psoriásica), rastrear depressão e '
+                     'ansiedade e orientar sobre tabagismo e álcool.', AAD_PSORIASE)
+    for chave, nome, alem_reto, oito_anos, cep in (
+            ('doenca_crohn', 'Doença de Crohn', 'crohn_colon', 'crohn_8_anos', 'crohn_cep'),
+            ('retocolite', 'Retocolite ulcerativa', 'rcu_alem_reto', 'rcu_8_anos', 'rcu_cep')):
+        if chave not in com:
+            continue
+        for titulo in ('Hemograma completo com plaquetas', 'Ferritina, soro', 'Proteína C reativa, soro'):
+            add(titulo, 'laboratorio', 'Doença inflamatória intestinal em remissão ou leve: hemograma, ferritina e PCR a cada '
+                '6-12 meses para anemia e ferropenia (a cada 3 meses com doença ativa).', f'{nome} | A cada 6-12 meses',
+                ECCO_ANEMIA, 'C')
+        extensao = 'Crohn com 1/3 ou mais do cólon' if chave == 'doenca_crohn' else 'colite além do reto'
+        if cep in com:
+            add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
+                f'{nome} com colangite esclerosante primária: colonoscopia de vigilância anual desde o diagnóstico da colangite, '
+                'com cromoscopia.', f'{nome} com colangite esclerosante | Anual', BSG_DII, 'A', 'alta', substituir=True)
+        elif alem_reto in com and oito_anos in com:
+            add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
+                f'{nome} ({extensao}) há 8 anos ou mais: colonoscopia de vigilância com cromoscopia; a seguinte em 1, 3 '
+                'ou 5 anos conforme o risco (inflamação, displasia prévia, estenose, pseudopólipos, câncer colorretal em '
+                'parente de 1º grau).', f'{nome} há 8 anos ou mais | A cada 1-5 anos', BSG_DII, 'A', 'alta', substituir=True)
+        else:
+            orientar(f'{nome}: colonoscopia de vigilância',
+                     'Primeira colonoscopia de vigilância 8 anos após o início dos sintomas (logo no diagnóstico, se houver '
+                     f'colangite esclerosante primária) quando houver {extensao}; o intervalo seguinte depende do risco. '
+                     'Marque os detalhes do item para o sistema calcular.', BSG_DII)
+        if chave == 'doenca_crohn' and 'crohn_delgado' in com:
+            for titulo in ('Vitamina B12, soro', 'Ácido fólico, soro'):
+                add(titulo, 'laboratorio', 'Crohn de intestino delgado ou ressecção ileal: vitamina B12 e ácido fólico pelo '
+                    'menos uma vez por ano.', 'Crohn de delgado ou ressecção ileal | Anual', ECCO_ANEMIA, 'C')
+    if {'doenca_crohn', 'retocolite'} & com:
+        orientar('Doença inflamatória intestinal: prevenção',
+                 'Exame da pele para melanoma em todos (e para câncer de pele não melanoma em uso de tiopurina); densitometria '
+                 'com fator de risco (corticoide por 3 meses ou mais, pós-menopausa, baixo peso); rastrear depressão e '
+                 'ansiedade; parar de fumar; vacinas antes de imunossupressor.', ACG_DII)
+    if 'esclerose_sistemica' in com:
+        for titulo in ('Ecocardiograma transtorácico', 'Peptídeo natriurético BNP/PROBNP',
+                       'Prova de função pulmonar completa com difusão (DLCO)'):
+            add(titulo, 'laboratorio' if 'Peptídeo' in titulo else 'imagem',
+                'Esclerose sistêmica: avaliação anual do risco de hipertensão arterial pulmonar (ecocardiograma, prova de função '
+                'pulmonar com difusão e NT-proBNP; algoritmo DETECT se mais de 3 anos de doença, CVF ≥ 40% e DLCO < 60%).',
+                'Esclerose sistêmica | Anual', ESC_ERS_HP, 'A', 'alta')
+        add('Tomografia computadorizada de tórax de alta resolução', 'imagem',
+            'Esclerose sistêmica: rastrear doença pulmonar intersticial com tomografia de alta resolução e prova de função '
+            'pulmonar; com doença intersticial, prova de função a cada 3-6 meses no primeiro ano.',
+            'Esclerose sistêmica | Avaliação inicial', ACR_CHEST_DPI, 'B', 'alta')
+    if LEGADO_AUTOIMUNE in com:
+        orientar('Doença inflamatória autoimune: especifique',
+                 'O item antigo reunia doenças com acompanhamento diferente. Escolha na lista a doença (artrite reumatoide, '
+                 'lúpus, psoríase, artrite psoriásica, espondiloartrite, Crohn, retocolite ou esclerose sistêmica).', EULAR_CV_ARTRITES)
+
+    # ---------------- Hepatites virais crônicas ----------------
+    if 'hepatite_b_cronica' in com:
+        for titulo in ('Alanina aminotransferase, soro', 'Carga viral da hepatite B (HBV-DNA quantitativo), plasma'):
+            add(titulo, 'laboratorio', 'Hepatite B crônica: ALT e HBV-DNA a cada 6-12 meses fora de tratamento (a cada 3 meses no '
+                'primeiro ano de acompanhamento ou com ALT alterada) e a cada 3-6 meses em tratamento.',
+                'Hepatite B crônica | A cada 6-12 meses', AASLD_HBV, 'B', 'alta')
+        for titulo in ('Hepatite B - HBeAG (antígeno "E")', 'Hepatite B - HBeAC (anti HBE)'):
+            add(titulo, 'laboratorio', 'Hepatite B crônica: HBeAg e anti-HBe definem a fase da infecção.',
+                'Hepatite B crônica | Avaliação inicial', AASLD_HBV, 'B')
+        for titulo in ('Anticorpos anti-HCV, soro', 'Anti-HIV 1 e 2, soro', 'Anticorpos anti-HAV IgG, soro'):
+            add(titulo, 'laboratorio', 'Hepatite B crônica: testar coinfecção por HCV e HIV e imunidade contra hepatite A '
+                '(vacinar se suscetível). Anti-HDV se houver fator de risco.', 'Hepatite B crônica | Avaliação inicial',
+                AASLD_HBV, 'B')
+        if 'hbv_risco_chc' in com and 'cirrose' not in com:
+            add('Ultrassonografia de abdome superior', 'imagem',
+                'Hepatite B com alto risco de carcinoma hepatocelular, mesmo sem cirrose: ultrassonografia a cada 6 meses, com '
+                'ou sem alfafetoproteína.', 'Hepatite B de alto risco | A cada 6 meses', AASLD_HBV, 'B', 'alta')
+        orientar('Hepatite B: estadiamento e carcinoma hepatocelular',
+                 'Estadiar a fibrose (FIB-4 ou elastografia). Rastreio de carcinoma hepatocelular com ultrassonografia a cada '
+                 '6 meses na cirrose e, sem cirrose, com história familiar de CHC, coinfecção por HIV ou hepatite D, homem '
+                 'asiático ≥ 40 anos, mulher asiática ≥ 50 anos ou origem africana subsaariana.', AASLD_HBV)
+    if 'hepatite_c' in com:
+        add('Carga viral da hepatite C (HCV-RNA quantitativo), plasma', 'laboratorio',
+            'Hepatite C: HCV-RNA confirma a viremia antes do tratamento e, 12 semanas após o fim, a resposta virológica '
+            'sustentada (cura).', 'Hepatite C | Avaliação inicial', AASLD_HCV, 'A', 'alta')
+        add('HBsAg, anti-HBc total e anti-HBs', 'laboratorio',
+            'Hepatite C: HBsAg, anti-HBc e anti-HBs antes do antiviral de ação direta (risco de reativação da hepatite B); '
+            'vacinar contra hepatite B se suscetível.', 'Hepatite C | Antes do tratamento', AASLD_HCV, 'A', 'alta')
+        for titulo in ('Anti-HIV 1 e 2, soro', 'Anticorpos anti-HAV IgG, soro'):
+            add(titulo, 'laboratorio', 'Hepatite C: testar HIV e imunidade contra hepatite A (vacinar se suscetível).',
+                'Hepatite C | Avaliação inicial', AASLD_HCV, 'B')
+        for titulo in ('Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro', 'Hemograma completo com plaquetas',
+                       'Creatinina, soro'):
+            add(titulo, 'laboratorio', 'Hepatite C: FIB-4 (idade, AST, ALT e plaquetas) para estadiar a fibrose; FIB-4 > 3,25 '
+                'indica fibrose avançada ou cirrose. Hemograma, função hepática e creatinina antes do tratamento.',
+                'Hepatite C | Avaliação inicial', AASLD_HCV, 'B')
+        orientar('Hepatite C: depois da cura',
+                 'Com fibrose avançada ou cirrose, a ultrassonografia a cada 6 meses continua mesmo após a cura. Sem ela, '
+                 'não há acompanhamento hepático de rotina; repetir o HCV-RNA se houver nova exposição.', AASLD_HCV)
+
+    # ---------------- Outras comorbidades ----------------
+    if 'neoplasia_ativa' in com:
+        add('HBsAg, anti-HBc total e anti-HBs', 'laboratorio',
+            'Câncer com tratamento sistêmico: HBsAg, anti-HBc total e anti-HBs antes de iniciar (risco de reativação da '
+            'hepatite B); positivo, profilaxia antiviral ou monitorização conforme o caso.', 'Câncer em tratamento | Antes do tratamento',
+            ASCO_HBV, 'B', 'alta')
+    if 'transplante' in com:
+        orientar('Transplante: câncer de pele e rastreios',
+                 'Exame de toda a pele anual por profissional treinado (risco muito aumentado de câncer de pele) e os rastreios '
+                 'de câncer da população geral.', 'KDIGO 2009 (transplante renal)')
+    if 'anemia_falciforme' in com:
+        add('Relação albumina/creatinina urinária (uACR)', 'laboratorio',
+            'Doença falciforme: rastrear albuminúria e proteinúria anualmente (nefropatia falciforme).',
+            'Doença falciforme | Anual', NHLBI_FALCIFORME, 'B')
+        add('Avaliação oftalmológica (fundo de olho)', 'imagem',
+            'Doença falciforme: exame de fundo de olho sob midríase a cada 1-2 anos (retinopatia falciforme).',
+            'Doença falciforme | A cada 1-2 anos', NHLBI_FALCIFORME, 'B')
+    if 'asma_grave' in com:
+        add('Espirometria, com broncodilatador', 'imagem',
+            'Asma: função pulmonar no diagnóstico, 3-6 meses após iniciar o controlador e depois periodicamente, pelo menos a '
+            'cada 1-2 anos.', 'Asma moderada ou grave | A cada 1-2 anos', GINA, 'C')
+    if 'fibrilacao_atrial' in com:
+        add('Ecocardiograma transtorácico', 'imagem',
+            'Fibrilação atrial: ecocardiograma transtorácico para orientar o tratamento (cardiopatia estrutural, função '
+            'ventricular, átrio esquerdo).', 'Fibrilação atrial | Avaliação inicial', ESC_FA, 'B')
+        for titulo in ('Hormônio Tireoestimulante (TSH), soro', 'Hemograma completo com plaquetas', 'Creatinina, soro',
+                       'Sódio e potássio, soro'):
+            add(titulo, 'laboratorio', 'Fibrilação atrial: função tireoidiana, hemograma, função renal e eletrólitos na avaliação '
+                'inicial e na reavaliação periódica (anticoagulação, controle de ritmo e de frequência).',
+                'Fibrilação atrial | Avaliação inicial', ESC_FA, 'B')
+    if 'doenca_celiaca' in com:
+        add('Anticorpo antitransglutaminase tecidual IgA, soro', 'laboratorio',
+            'Doença celíaca: antitransglutaminase IgA aos 6 e 12 meses do diagnóstico e depois anualmente (adesão à dieta sem '
+            'glúten).', 'Doença celíaca | Anual', AGA_CELIACA, 'B')
+        for titulo in ('Hemograma completo com plaquetas', 'Ferritina, soro', 'Ácido fólico, soro', 'Vitamina B12, soro',
+                       '25-hidroxivitamina D, soro', 'Hormônio Tireoestimulante (TSH), soro'):
+            add(titulo, 'laboratorio', 'Doença celíaca: revisão anual com hemograma, ferritina, folato, B12, vitamina D e '
+                'função tireoidiana (deficiências e tireoidite autoimune associadas).', 'Doença celíaca | Anual',
+                BSG_CELIACA, 'C')
+    if 'drge' in com:
+        fumante = tabagismo in ('atual', 'ex')
+        obeso = 'obesidade' in com or (imc or 0) >= 30
+        fatores = [nome for nome, sim in (('sexo masculino', sexo == 'masculino'), ('mais de 50 anos', idade > 50),
+                                          ('tabagismo', fumante), ('obesidade', obeso)) if sim]
+        if len(fatores) >= 3:
+            add('Endoscopia digestiva alta', 'imagem',
+                'Doença do refluxo crônica com 3 ou mais fatores de risco de esôfago de Barrett (sexo masculino, mais de 50 '
+                'anos, tabagismo, obesidade): endoscopia única de rastreio.', 'Refluxo crônico com fatores de risco | Uma vez', ACG_BARRETT, 'C')
+        else:
+            orientar('Refluxo: rastreio de esôfago de Barrett',
+                     'Endoscopia única de rastreio se refluxo crônico e 3 ou mais fatores: sexo masculino, mais de 50 anos, '
+                     'raça branca, tabagismo, obesidade, esôfago de Barrett ou adenocarcinoma de esôfago em parente de 1º grau.',
+                     ACG_BARRETT)
+    if 'sop' in com and sexo == 'feminino' and not gestante:
+        add('TOTG-75g (Teste Oral de Tolerância à Glicose), soro', 'laboratorio',
+            'Síndrome dos ovários policísticos: avaliar a glicemia no diagnóstico e a cada 1-3 anos, qualquer que seja o IMC '
+            '(TOTG preferido; glicemia de jejum ou HbA1c como alternativa).', 'Síndrome dos ovários policísticos | A cada 1-3 anos',
+            PCOS, 'B')
+        add('Colesterol total e frações, soro', 'laboratorio',
+            'Síndrome dos ovários policísticos: perfil lipídico no diagnóstico; depois, conforme o risco cardiovascular.',
+            'Síndrome dos ovários policísticos | Avaliação inicial', PCOS, 'B')
 
     # Vacinas por condição de risco (SBIm: comorbidade de risco em qualquer idade)
     risco_pneumo = {'cirrose', 'asma_grave', 'asplenia', 'anemia_falciforme', 'transplante', 'neoplasia_ativa',
-                    'doenca_autoimune', 'hepatite_b_cronica', 'hepatite_c'} & com or {'imunossupressor', 'corticoide_cronico', 'corticoide_imunossupressor'} & med
+                    'artrite_reumatoide', 'lupus', 'artrite_psoriasica', 'espondiloartrite', 'esclerose_sistemica',
+                    LEGADO_AUTOIMUNE, 'hepatite_b_cronica', 'hepatite_c'} & com or {'imunossupressor', 'corticoide_cronico', 'corticoide_imunossupressor'} & med
     if risco_pneumo and idade < 50:
         add(PNEUMO, 'vacina', 'Dose única. Indicada em qualquer idade com comorbidade de risco para doença pneumocócica invasiva.',
             'Comorbidade de risco | Dose única | PNI: CRIE', SBIM, 'A', 'alta')

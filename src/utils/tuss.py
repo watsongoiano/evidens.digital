@@ -274,6 +274,7 @@ CODIGOS = {
     'Sódio e potássio, soro': ['40302423', '40302318'],
     'Gama-GT, soro': ['40301990'],
     'Proteína C reativa ultrassensível, soro': ['40308391'],
+    'Proteína C reativa, soro': ['40308391'],
     'VHS': ['40304370'],
     'Insulina de jejum, soro': ['40316360'],
     'Apolipoproteína B, soro': ['40301362'],
@@ -313,6 +314,7 @@ CODIGOS = {
     'Teste de caminhada de 6 minutos': ['41401115'],
     'Tomografia computadorizada de tórax de baixa dose (LDCT)': ['41001079'],
     'Tomografia de tórax de baixa dose': ['41001079'],
+    'Tomografia computadorizada de tórax de alta resolução': ['41001079'],
     'Ultrassonografia com Doppler de Aorta Abdominal': ['40901408'],
     'Ultrassonografia de abdome superior': ['40901130'],
     'Ultrassonografia de abdome total': ['40901122'],
@@ -361,6 +363,12 @@ SEM_CODIGO = {
         'sem código conferido na TUSS',
     'Angiotomografia de coronárias':
         'código não conferido',
+    'Prova de função pulmonar completa com difusão (DLCO)':
+        'a difusão de CO não tem código conferido; o 40105075 também cobre a espirometria simples, que não mede a DLCO',
+    'Carga viral da hepatite B (HBV-DNA quantitativo), plasma':
+        'a biologia molecular conferida vai até 40314030; o código do HBV-DNA quantitativo não foi conferido',
+    'Carga viral da hepatite C (HCV-RNA quantitativo), plasma':
+        'a biologia molecular conferida vai até 40314030; o código do HCV-RNA quantitativo não foi conferido',
 }
 
 
