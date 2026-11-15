@@ -1483,6 +1483,18 @@ def _ler_guia_do_plano(usuario):
             'indicacao': pdf_minutas.indicacao_clinica(indicacao)}
 
 
+def _timbrado_do_medico(usuario):
+    """{'timbrado': ...} se o médico enviou o papel timbrado; um timbrado que não abre não impede o pedido."""
+    from src.utils import contas, timbrado
+    if not usuario or not contas.pode_ter_credenciamento(usuario):
+        return {}
+    try:
+        registro = contas.timbrado_de(usuario['id'])
+        return {'timbrado': timbrado.para_o_pdf(registro)} if registro else {}
+    except timbrado.TimbradoInvalido:
+        return {}
+
+
 def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferir=None):
     import io
     from flask import send_file
@@ -1506,6 +1518,7 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
             guia = _ler_guia_do_plano(usuario)
             if guia:
                 extras['guia'] = guia
+        extras.update(_timbrado_do_medico(usuario))
     except PedidoDePdfInvalido as exc:
         return jsonify({'error': exc.mensagem, 'codigo': exc.codigo}), 400
 
