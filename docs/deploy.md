@@ -65,6 +65,31 @@ As minutas (pedidos de exames e receita de vacinas) são geradas dentro da próp
 `fpdf2` e as fontes DejaVu em `assets/fonts`. Não há serviço externo nem variável de ambiente para isso.
 O serviço Gotenberg no Railway, usado antes, pode ser desligado.
 
+## Assinatura digital (certificado ICP-Brasil em nuvem)
+
+Os pedidos saem assinados (PAdES) quando o médico abre uma sessão no provedor do certificado. Código em
+`src/utils/assinatura.py`; rotas em `/api/auth/assinatura`. Hoje o provedor integrado é o BirdID (Soluti);
+os outros provedores em nuvem seguem a mesma API do ITI (DOC-ICP-17.01) e entram em `PROVEDORES` depois de
+testados na homologação de cada um.
+
+| Variável | O que faz |
+|---|---|
+| `BIRDID_CLIENT_ID` | Identificador do aplicativo Evidēns cadastrado na Soluti. |
+| `BIRDID_CLIENT_SECRET` | Segredo do aplicativo. Só no ambiente; nunca no código, no banco ou em conversa. |
+| `BIRDID_URL` | Opcional. Endereço da API (homologação ou produção). Padrão: `https://api.birdid.com.br`. |
+| `ASSINATURA_CHAVE` | Opcional. Chave que cifra o token da sessão no banco. Sem ela, usa-se a `SECRET_KEY`. |
+
+Sem `BIRDID_CLIENT_ID` e `BIRDID_CLIENT_SECRET` a assinatura não aparece para ninguém e os pedidos seguem
+saindo como minuta. O endereço de retorno a cadastrar no provedor é `SITE_URL` + `/api/auth/assinatura/retorno`
+(em produção, `https://evidens.life/api/auth/assinatura/retorno`).
+
+O que fica guardado: o token da sessão (cifrado), o certificado (público) e o nome do titular, até a sessão
+vencer, ser encerrada ou o médico sair da conta. A senha e a chave do certificado nunca passam pelo Evidēns:
+o provedor recebe só o resumo SHA-256 do que vai ser assinado. Nada do paciente é guardado.
+
+O PDF segue o Guia do Desenvolvedor do Validar (https://validar.iti.gov.br/guia-desenvolvedor.html): DocMDP
+na referência da assinatura (P = 2) e metadados com os OIDs do CRM, da UF e do tipo de documento.
+
 ## Conferência depois de um deploy
 
 1. Abrir `/`, conferir imagens, ícones e o botão **Abrir o check-up**.

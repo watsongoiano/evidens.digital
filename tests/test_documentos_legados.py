@@ -58,6 +58,12 @@ def test_endpoint_legado_nao_devolve_documento(client, rota, aceita):
         assert marca not in corpo
 
 
+# A assinatura digital de verdade (src/utils/assinatura.py) cita a conferência no ITI nestes arquivos, e só neles.
+# O PDF só leva a frase quando sai assinado com o certificado do médico: tests/test_assinatura.py confere que
+# o pedido sem assinatura continua minuta e que falha ao assinar não entrega documento nenhum.
+COM_ASSINATURA_REAL = {'src/utils/assinatura.py', 'src/utils/pdf_minutas.py', 'conta.html', 'static/i18n/en.json'}
+
+
 def _arquivos_do_projeto():
     ignorar = {'.git', 'tests', 'docs', 'node_modules', '__pycache__', '.venv', 'venv'}
     extensoes_binarias = {'.png', '.ico', '.jpg', '.jpeg', '.db', '.pdf', '.svg'}
@@ -80,6 +86,6 @@ def test_nenhum_arquivo_declara_assinatura_digital():
         except UnicodeDecodeError:
             continue
         for marca in MARCAS_DE_ASSINATURA:
-            if marca in texto:
+            if marca in texto and caminho.relative_to(RAIZ).as_posix() not in COM_ASSINATURA_REAL:
                 achados.append(f'{caminho.relative_to(RAIZ)}: {marca}')
     assert achados == []

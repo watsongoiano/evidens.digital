@@ -21,11 +21,16 @@ FONTES = Path(__file__).resolve().parents[2] / 'assets' / 'fonts'
 
 AVISO = 'Documento sem assinatura digital. Válido somente com assinatura e carimbo do médico.'
 LINHA_ASSINATURA = 'Assinatura e Carimbo do Médico'
+# Com assinatura digital (src/utils/assinatura.py): no lugar da linha de assinatura e do aviso de minuta.
+ASSINADO_POR = 'Assinado digitalmente por'
+CERTIFICADO = 'Certificado digital ICP-Brasil'
+CONFIRA = 'Confira a assinatura em validar.iti.gov.br'
 TITULOS = {'laboratorio': 'SOLICITAÇÃO DE EXAMES LABORATORIAIS', 'imagem': 'SOLICITAÇÃO DE EXAMES DE IMAGEM',
            'vacina': 'RECEITA DE VACINAS'}
 # Textos fixos das minutas (os testes conferem que cada um tem par em inglês).
 FIXOS = ('Solicito:', 'Prescrevo:', 'Data de emissão', 'Paciente', 'Sexo', 'Idade', 'anos', 'Página', 'Feminino', 'Masculino',
-         'Não informado', 'Não informada', 'Minuta preparada por', 'estudante de medicina', 'Vacina', 'Obs.:')
+         'Não informado', 'Não informada', 'Minuta preparada por', 'estudante de medicina', 'Vacina', 'Obs.:',
+         ASSINADO_POR, CERTIFICADO, CONFIRA)
 MESES_EN = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
 
 
@@ -127,10 +132,12 @@ MARGEM_INFERIOR = 42      # mm reservados à assinatura e ao rodapé de cada fol
 
 
 class _Minuta(FPDF):
-    def __init__(self, titulo, idioma='pt', timbrado=None):
+    def __init__(self, titulo, idioma='pt', timbrado=None, assinatura=None):
         # Com papel timbrado (src/utils/timbrado.py): página do tamanho do timbrado, texto só entre o cabeçalho
         # e o rodapé dele, sem a marca do Evidēns; o timbrado entra como fundo depois (timbrado.aplicar).
         self.timbrado = timbrado
+        # {'titular': nome no certificado} quando o PDF vai ser assinado digitalmente logo depois de gerado.
+        self.assinante = assinatura
         formato = (timbrado['largura'], timbrado['altura']) if timbrado else 'A4'
         super().__init__(orientation='P', unit='mm', format=formato)
         self.idioma = idioma
@@ -193,11 +200,13 @@ class _Minuta(FPDF):
         # A assinatura fica dentro da margem reservada à quebra automática: desligá-la aqui.
         self.set_auto_page_break(auto=False)
         self.set_y(-52 - self.base)
+        resp = getattr(self, 'responsavel', None)
+        if self.assinante:
+            return self._assinatura_digital(resp)
         self.set_draw_color(20, 41, 47)
         self.line(self.w / 2 - 45, self.get_y(), self.w / 2 + 45, self.get_y())
         self.set_font('DejaVu', '', 9.5)
         self.set_text_color(20, 41, 47)
-        resp = getattr(self, 'responsavel', None)
         if resp and not resp.get('estudante'):
             self.set_font('DejaVu', 'B', 9.5)
             self.cell(0, 5, resp['nome'], align='C', new_x='LMARGIN', new_y='NEXT')
@@ -212,6 +221,23 @@ class _Minuta(FPDF):
             self.multi_cell(0, 4.5, f"{self.t('Minuta preparada por')} {resp['nome']} ({self.t('estudante de medicina')}).",
                             align='C', new_x='LMARGIN', new_y='NEXT')
         self.multi_cell(0, 4.5, self.t(AVISO), align='C')
+
+    def _assinatura_digital(self, resp):
+        """No lugar da linha para caneta e carimbo: quem assinou, com que certificado e onde conferir."""
+        self.set_text_color(20, 41, 47)
+        if resp:
+            self.set_font('DejaVu', 'B', 9.5)
+            self.cell(0, 5, resp['nome'], align='C', new_x='LMARGIN', new_y='NEXT')
+            self.set_font('DejaVu', '', 9.5)
+            if resp.get('crm'):
+                self.cell(0, 5, resp['crm'], align='C', new_x='LMARGIN', new_y='NEXT')
+        self.ln(1)
+        self.set_font('DejaVu', '', 8.5)
+        self.multi_cell(0, 4.5, f"{self.t(ASSINADO_POR)} {_texto(self.assinante['titular'], 150)}",
+                        align='C', new_x='LMARGIN', new_y='NEXT')
+        self.set_font('DejaVu', '', 8)
+        self.set_text_color(90, 100, 103)
+        self.multi_cell(0, 4.5, f'{self.t(CERTIFICADO)} · {self.t(CONFIRA)}', align='C')
 
     def bytes(self):
         return bytes(self.output())
@@ -321,7 +347,8 @@ def _pagina_da_guia(pdf, dados_paciente, guia, linhas, parte, partes):
     _campo(pdf, 134, y, 34, 9, '17 - Número no Conselho', numero)
     _campo(pdf, 168, y, 14, 9, '18 - UF', uf)
     _campo(pdf, 182, y, 30, 9, '19 - Código CBO', cred.get('cbo'))
-    _campo(pdf, 212, y, 75, 9, '20 - Assinatura do Profissional Solicitante')
+    _campo(pdf, 212, y, 75, 9, '20 - Assinatura do Profissional Solicitante',
+           'Assinado digitalmente (ICP-Brasil)' if pdf.assinante else '')
     y = _faixa(pdf, y + 10, 'Dados da Solicitação / Procedimentos ou Itens Assistenciais Solicitados')
     _campo(pdf, 10, y, 40, 9, '21 - Caráter do Atendimento', CARATER_ELETIVO)
     _campo(pdf, 50, y, 40, 9, '22 - Data da Solicitação', data_de_emissao('pt'))
@@ -359,7 +386,8 @@ def _pagina_da_guia(pdf, dados_paciente, guia, linhas, parte, partes):
                    f'Guia {parte} de {partes} deste pedido. Solicitação preenchida pelo Evidēns no padrão TISS (ANS), com os códigos da '
                    'TUSS (tabela 22); linha sem código deve ser completada conforme a tabela da operadora. '
                    'Senha, validade e autorização são emitidas pela operadora. '
-                   'Válida somente com assinatura e carimbo do médico solicitante.')
+                   + ('Assinada digitalmente com certificado ICP-Brasil; confira em validar.iti.gov.br.' if pdf.assinante
+                      else 'Válida somente com assinatura e carimbo do médico solicitante.'))
 
 
 TABELA_TUSS = '22'
@@ -420,8 +448,9 @@ def _com_timbrado(pdf, timbrado, paginas=None):
     return papel.aplicar(conteudo, timbrado['arquivo'], paginas)
 
 
-def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='pt', guia=None, timbrado=None):
-    pdf = _Minuta(TITULOS[categoria], idioma, timbrado)
+def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='pt', guia=None, timbrado=None,
+                   assinatura=None):
+    pdf = _Minuta(TITULOS[categoria], idioma, timbrado, assinatura)
     pdf.responsavel = responsavel
     if categoria == 'imagem':
         # Exames de imagem: um pedido por folha (cada serviço de imagem fica com o seu), no mesmo PDF.
@@ -435,16 +464,18 @@ def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='
     return _com_timbrado(pdf, timbrado, paginas_do_pedido)
 
 
-def gerar_pdf_exames_laboratoriais(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None):
-    return _pdf_de_exames(dados_paciente, exames, 'laboratorio', responsavel, idioma, guia, timbrado)
+def gerar_pdf_exames_laboratoriais(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None,
+                                   assinatura=None):
+    return _pdf_de_exames(dados_paciente, exames, 'laboratorio', responsavel, idioma, guia, timbrado, assinatura)
 
 
-def gerar_pdf_exames_imagem(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None):
-    return _pdf_de_exames(dados_paciente, exames, 'imagem', responsavel, idioma, guia, timbrado)
+def gerar_pdf_exames_imagem(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None,
+                            assinatura=None):
+    return _pdf_de_exames(dados_paciente, exames, 'imagem', responsavel, idioma, guia, timbrado, assinatura)
 
 
-def gerar_pdf_vacinas(dados_paciente, vacinas, responsavel=None, idioma='pt', timbrado=None):
-    pdf = _Minuta(TITULOS['vacina'], idioma, timbrado)
+def gerar_pdf_vacinas(dados_paciente, vacinas, responsavel=None, idioma='pt', timbrado=None, assinatura=None):
+    pdf = _Minuta(TITULOS['vacina'], idioma, timbrado, assinatura)
     pdf.responsavel = responsavel
     pdf.add_page()
     pdf.dados_do_paciente(dados_paciente)

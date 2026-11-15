@@ -96,8 +96,58 @@
       const resumo = document.querySelector('[data-resumo]');
       if (resumo) resumo.textContent = `${perfis[usuario.perfil] || ''} · ${usuario.registro} · ${usuario.email}`;
       if (usuario.administrador) document.querySelectorAll('[data-so-admin]').forEach(el => { el.style.display = 'block'; });
-      if (usuario.perfil === 'medico' || usuario.perfil === 'residente') { abrirPlanos(usuario); abrirTimbrado(); }
+      if (usuario.perfil === 'medico' || usuario.perfil === 'residente') { abrirPlanos(usuario); abrirTimbrado(); abrirAssinatura(); }
     }).catch(() => {});
+  }
+
+  // Assinatura digital: preferências e sessão aberta no provedor do certificado (só de quem assina)
+  async function abrirAssinatura() {
+    const secao = document.querySelector('[data-assinatura]');
+    if (!secao) return;
+    let dados;
+    try {
+      const r = await fetch('/api/auth/assinatura', { credentials: 'same-origin' });
+      dados = r.ok ? await r.json() : {};
+    } catch (e) { return; }
+    if (!dados.disponivel) return;       // sem provedor configurado, a seção não aparece
+    secao.style.display = 'block';
+    const erro = secao.querySelector('[data-erro]'), ok = secao.querySelector('[data-ok]');
+    const provedor = document.getElementById('assinaturaProvedor'), horas = document.getElementById('assinaturaHoras');
+    const sempre = document.getElementById('assinaturaSempre');
+    const T = t => (window.evidensIdioma ? window.evidensIdioma.traduzir(t) : t);
+    dados.provedores.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.nome; provedor.appendChild(o); });
+    (dados.em_breve || []).forEach(n => { const o = document.createElement('option'); o.disabled = true; o.textContent = `${n} (${T('em breve')})`; provedor.appendChild(o); });
+    dados.duracoes.forEach(h => { const o = document.createElement('option'); o.value = h; o.textContent = h === 1 ? T('1 hora') : `${h} ${T('horas')}`; horas.appendChild(o); });
+    provedor.value = dados.preferencias.provedor; horas.value = dados.preferencias.horas; sempre.checked = !!dados.preferencias.assinar;
+
+    function mostrarSessao(s) {
+      const linha = secao.querySelector('[data-assinatura-sessao]');
+      secao.querySelector('[data-assinatura-acoes]').style.display = s ? 'flex' : 'none';
+      if (!s) { linha.textContent = T('Nenhuma sessão de assinatura aberta.'); return; }
+      const ate = new Date(s.expira_em * 1000).toLocaleString(document.documentElement.lang || 'pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      linha.textContent = `${T('Assinatura ativa')} · ${s.nome} · ${s.titular} · ${T('até')} ${ate}`;
+    }
+    mostrarSessao(dados.sessao);
+
+    async function guardar() {
+      mostrar(erro, ''); mostrar(ok, '');
+      try {
+        const { resposta, dados: r } = await enviar('/api/auth/assinatura/preferencias',
+          { provedor: provedor.value, horas: Number(horas.value), assinar: sempre.checked });
+        if (!resposta.ok) { mostrar(erro, r.error || 'Não foi possível salvar.'); return; }
+        mostrar(ok, 'Preferência salva.');
+      } catch (e) { mostrar(erro, 'Sem conexão com o servidor. Tente de novo.'); }
+    }
+    [provedor, horas, sempre].forEach(el => el.addEventListener('change', guardar));
+    secao.querySelector('[data-assinatura-encerrar]').addEventListener('click', async () => {
+      mostrar(erro, ''); mostrar(ok, '');
+      try {
+        const { resposta } = await enviar('/api/auth/assinatura/encerrar');
+        if (!resposta.ok) { mostrar(erro, 'Não foi possível encerrar a sessão. Tente de novo.'); return; }
+        mostrarSessao(null);
+        mostrar(ok, 'Sessão de assinatura encerrada.');
+      } catch (e) { mostrar(erro, 'Sem conexão com o servidor. Tente de novo.'); }
+    });
   }
 
   // Papel timbrado: o PDF do consultório vira o fundo dos pedidos (só de quem assina)

@@ -127,6 +127,16 @@ _ESQUEMA = [
         usuario_id BIGINT PRIMARY KEY, arquivo {blob} NOT NULL, nome TEXT NOT NULL, enviado_em BIGINT NOT NULL,
         margem_topo REAL NOT NULL, margem_base REAL NOT NULL
     )""",
+    # Sessão de assinatura digital (src/utils/assinatura.py): uma por conta, enquanto o médico a mantém aberta
+    # no provedor do certificado. O token fica cifrado; o certificado é público. Nada do paciente é guardado.
+    """CREATE TABLE IF NOT EXISTS assinatura_sessoes (
+        usuario_id BIGINT PRIMARY KEY, provedor TEXT NOT NULL, token TEXT NOT NULL, alias TEXT NOT NULL,
+        certificado TEXT NOT NULL, titular TEXT NOT NULL, expira_em BIGINT NOT NULL
+    )""",
+    # Preferências de assinatura da conta: provedor, duração da sessão (horas) e se os pedidos saem assinados.
+    """CREATE TABLE IF NOT EXISTS assinatura_preferencias (
+        usuario_id BIGINT PRIMARY KEY, provedor TEXT NOT NULL, horas INTEGER NOT NULL, assinar INTEGER NOT NULL
+    )""",
 ]
 
 APROVACAO_MANUAL = "aprovacao_manual"
@@ -558,3 +568,50 @@ def ajustar_margens_do_timbrado(uid, margem_topo, margem_base):
 def remover_timbrado(uid):
     with _conexao() as executar:
         executar('DELETE FROM timbrados WHERE usuario_id = ?', (int(uid),))
+
+
+# ── Assinatura digital ────────────────────────────────────────────────────────
+
+_COLUNAS_SESSAO = ('provedor', 'token', 'alias', 'certificado', 'titular', 'expira_em')
+
+
+def abrir_sessao_de_assinatura(uid, provedor, token_cifrado, alias, certificado, titular, expira_em):
+    """Guarda (ou troca) a sessão de assinatura da conta."""
+    with _conexao() as executar:
+        executar('DELETE FROM assinatura_sessoes WHERE usuario_id = ?', (int(uid),))
+        executar('INSERT INTO assinatura_sessoes (usuario_id, provedor, token, alias, certificado, titular, expira_em) '
+                 'VALUES (?, ?, ?, ?, ?, ?, ?)',
+                 (int(uid), str(provedor), str(token_cifrado), str(alias), str(certificado), str(titular)[:150],
+                  int(expira_em)))
+
+
+def sessao_de_assinatura(uid, agora=None):
+    """A sessão ainda válida da conta, ou None (a vencida é apagada aqui)."""
+    agora = int(agora if agora is not None else time.time())
+    with _conexao() as executar:
+        linha = executar('SELECT ' + ', '.join(_COLUNAS_SESSAO) + ' FROM assinatura_sessoes WHERE usuario_id = ?',
+                         (int(uid),)).fetchone()
+        if linha and int(linha[5]) <= agora:
+            executar('DELETE FROM assinatura_sessoes WHERE usuario_id = ?', (int(uid),))
+            linha = None
+    return dict(zip(_COLUNAS_SESSAO, linha)) if linha else None
+
+
+def encerrar_sessao_de_assinatura(uid):
+    with _conexao() as executar:
+        executar('DELETE FROM assinatura_sessoes WHERE usuario_id = ?', (int(uid),))
+
+
+def preferencias_de_assinatura(uid):
+    """{'provedor', 'horas', 'assinar'} da conta, ou None se nunca escolheu."""
+    with _conexao() as executar:
+        linha = executar('SELECT provedor, horas, assinar FROM assinatura_preferencias WHERE usuario_id = ?',
+                         (int(uid),)).fetchone()
+    return {'provedor': linha[0], 'horas': int(linha[1]), 'assinar': bool(linha[2])} if linha else None
+
+
+def salvar_preferencias_de_assinatura(uid, provedor, horas, assinar):
+    with _conexao() as executar:
+        executar('DELETE FROM assinatura_preferencias WHERE usuario_id = ?', (int(uid),))
+        executar('INSERT INTO assinatura_preferencias (usuario_id, provedor, horas, assinar) VALUES (?, ?, ?, ?)',
+                 (int(uid), str(provedor), int(horas), 1 if assinar else 0))

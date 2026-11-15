@@ -83,6 +83,23 @@
       <div data-ok role="status" class="aviso aviso-info" style="display: none;"></div>
     </div>
   </section>
+  <section data-assinatura style="display: none;">
+    <h2 class="text-[22px] font-light tracking-tight mt-12">Assinatura digital</h2>
+    <p class="text-[15px] text-ink/65 leading-relaxed mt-3">Com o seu certificado ICP-Brasil em nuvem, os pedidos de exames e a prescrição de vacinas saem assinados digitalmente e podem ser conferidos em validar.iti.gov.br. A sessão de assinatura é aberta na hora de gerar o pedido, no provedor do certificado. O Evidēns não recebe a senha nem a chave do certificado.</p>
+    <div class="secao mt-5 flex flex-col gap-5">
+      <div class="grade">
+        <div class="campo"><label for="assinaturaProvedor">Provedor do certificado</label><select id="assinaturaProvedor"></select></div>
+        <div class="campo"><label for="assinaturaHoras">Manter a sessão de assinatura por</label><select id="assinaturaHoras"></select></div>
+      </div>
+      <label class="flex items-center gap-3 text-[15px] text-ink/80 cursor-pointer" for="assinaturaSempre"><input type="checkbox" id="assinaturaSempre" class="w-4 h-4 accent-teal">Assinar os pedidos digitalmente</label>
+      <p class="text-[14px] text-ink/70" data-assinatura-sessao></p>
+      <div class="flex flex-wrap items-center gap-3" data-assinatura-acoes style="display: none;">
+        <button type="button" class="btn-claro" data-assinatura-encerrar>Encerrar a sessão de assinatura</button>
+      </div>
+      <div data-erro role="alert" class="aviso aviso-erro" style="display: none;"></div>
+      <div data-ok role="status" class="aviso aviso-info" style="display: none;"></div>
+    </div>
+  </section>
   <h2 class="text-[22px] font-light tracking-tight mt-12">Trocar a senha</h2>
   <form data-form="senha"  class="secao mt-5 flex flex-col gap-5" novalidate>
     <div class="grade">

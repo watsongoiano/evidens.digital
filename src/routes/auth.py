@@ -211,6 +211,9 @@ def login():
 
 @auth_bp.route('/auth/logout', methods=['POST'])
 def logout():
+    u = usuario_atual() if disponivel() else None
+    if u:
+        encerrar_assinatura(u['id'])     # sair da conta também fecha a sessão no provedor do certificado
     session.clear()
     return jsonify({'ok': True})
 
@@ -514,3 +517,179 @@ def admin_agradecimento():
             falhas.append(detalhe)
     return jsonify({'ok': True, 'enviados': enviados, 'falhas': len(falhas),
                     'motivo': falhas[0] if falhas else None, 'restantes': len(contas.sem_email())})
+
+
+# ── Assinatura digital (certificado ICP-Brasil em nuvem; só de quem assina) ───
+#
+# O médico abre uma sessão no provedor do certificado (OAuth 2.0 com PKCE, API do DOC-ICP-17.01 do ITI) e,
+# enquanto ela vale, os pedidos saem assinados. O login do Evidēns não muda. Ver src/utils/assinatura.py.
+
+MSG_ASSINATURA = {
+    'indisponivel': 'A assinatura digital não está disponível nesta conta.',
+    'provedor': 'Escolha o provedor do seu certificado digital.',
+    'duracao': 'Escolha por quanto tempo manter a sessão de assinatura.',
+    'retorno': 'Não foi possível confirmar a autorização. Feche esta aba e tente de novo.',
+    'recusada': 'A autorização não foi concluída no provedor do certificado.',
+    'sem_certificado': 'Nenhum certificado ICP-Brasil válido foi encontrado nesta conta do provedor.',
+    'provedor_fora': 'O provedor do certificado não respondeu. Tente de novo em instantes.',
+}
+VALIDADE_DO_PEDIDO_DE_SESSAO = 15 * 60     # segundos para concluir a autorização no provedor
+
+
+def _pode_assinar(usuario):
+    from src.utils import assinatura
+    return bool(usuario and contas.pode_ter_credenciamento(usuario) and assinatura.disponiveis())
+
+
+def _retorno_da_assinatura():
+    return _url_do_site() + '/api/auth/assinatura/retorno'
+
+
+def _preferencias_de_assinatura(uid, provedores):
+    from src.utils import assinatura
+    p = contas.preferencias_de_assinatura(uid) or {}
+    ids = [x['id'] for x in provedores]
+    return {'provedor': p.get('provedor') if p.get('provedor') in ids else (ids[0] if ids else None),
+            'horas': p.get('horas') if p.get('horas') in assinatura.DURACOES else assinatura.DURACAO_PADRAO,
+            'assinar': bool(p.get('assinar'))}
+
+
+def _sessao_publica(s):
+    from src.utils import assinatura
+    return {'provedor': s['provedor'], 'nome': assinatura.nome_do_provedor(s['provedor']),
+            'titular': s['titular'], 'expira_em': s['expira_em']} if s else None
+
+
+@auth_bp.route('/auth/assinatura')
+@exigir_login
+def assinatura_estado():
+    from src.utils import assinatura
+    u = usuario_atual()
+    if not _pode_assinar(u):
+        return jsonify({'disponivel': False})
+    provedores = assinatura.disponiveis()
+    return jsonify({
+        'disponivel': True, 'provedores': provedores, 'em_breve': list(assinatura.EM_BREVE),
+        'duracoes': list(assinatura.DURACOES),
+        'preferencias': _preferencias_de_assinatura(u['id'], provedores),
+        'sessao': _sessao_publica(contas.sessao_de_assinatura(u['id'])),
+    })
+
+
+@auth_bp.route('/auth/assinatura/preferencias', methods=['POST'])
+@exigir_login
+def assinatura_preferencias():
+    """Corpo: {provedor?, horas?, assinar?}; o que não vem fica como estava."""
+    from src.utils import assinatura
+    u = usuario_atual()
+    if not _pode_assinar(u):
+        return jsonify({'error': MSG_ASSINATURA['indisponivel']}), 403
+    corpo = request.get_json(silent=True) or {}
+    provedores = assinatura.disponiveis()
+    atual = _preferencias_de_assinatura(u['id'], provedores)
+    if 'provedor' in corpo:
+        if corpo['provedor'] not in [p['id'] for p in provedores]:
+            return jsonify({'error': MSG_ASSINATURA['provedor']}), 400
+        atual['provedor'] = corpo['provedor']
+    if 'horas' in corpo:
+        if isinstance(corpo['horas'], bool) or corpo['horas'] not in assinatura.DURACOES:
+            return jsonify({'error': MSG_ASSINATURA['duracao']}), 400
+        atual['horas'] = corpo['horas']
+    if 'assinar' in corpo:
+        atual['assinar'] = corpo['assinar'] is True
+    contas.salvar_preferencias_de_assinatura(u['id'], atual['provedor'], atual['horas'], atual['assinar'])
+    return jsonify({'ok': True, 'preferencias': atual})
+
+
+@auth_bp.route('/auth/assinatura/iniciar', methods=['POST'])
+@exigir_login
+def assinatura_iniciar():
+    """Corpo: {provedor, horas}. Devolve o endereço do provedor onde o médico autoriza a sessão."""
+    import secrets
+    from src.utils import assinatura
+    u = usuario_atual()
+    if not _pode_assinar(u):
+        return jsonify({'error': MSG_ASSINATURA['indisponivel']}), 403
+    corpo = request.get_json(silent=True) or {}
+    provedor, horas = corpo.get('provedor'), corpo.get('horas')
+    if provedor not in [p['id'] for p in assinatura.disponiveis()]:
+        return jsonify({'error': MSG_ASSINATURA['provedor']}), 400
+    if isinstance(horas, bool) or horas not in assinatura.DURACOES:
+        return jsonify({'error': MSG_ASSINATURA['duracao']}), 400
+    verificador, desafio = assinatura.novo_pkce()
+    estado = secrets.token_urlsafe(24)
+    # O verificador do PKCE e o estado ficam no cookie de sessão (assinado) até a volta do provedor.
+    session['assinatura'] = {'e': estado, 'v': verificador, 'p': provedor, 'h': horas, 't': int(time.time())}
+    antes = contas.preferencias_de_assinatura(u['id']) or {}
+    contas.salvar_preferencias_de_assinatura(u['id'], provedor, horas, antes.get('assinar', True))
+    return jsonify({'url': assinatura.url_de_autorizacao(provedor, _retorno_da_assinatura(), estado, desafio, horas)})
+
+
+def _pagina_de_retorno(ok, mensagem):
+    """Página mínima da aba aberta para o provedor: avisa a aba do pedido e se fecha."""
+    from html import escape
+    from flask import make_response
+    titulo = 'Assinatura digital ativada' if ok else 'Assinatura digital não ativada'
+    html = f'''<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>{titulo} · Evidēns</title>
+<style>body{{font-family:system-ui,sans-serif;background:#f4f7f8;color:#14292f;display:grid;place-items:center;
+min-height:100vh;margin:0}}main{{max-width:26rem;padding:2rem;text-align:center}}h1{{font-size:1.25rem}}
+p{{line-height:1.5;color:#3d4f54}}a{{color:#0e97b5;font-weight:600}}</style></head>
+<body><main><h1>{titulo}</h1><p>{escape(mensagem)}</p>
+<p><a href="/intelligent-tools.html">Voltar ao Evidēns</a></p></main>
+<script>try{{localStorage.setItem('evidens-assinatura',JSON.stringify({{ok:{'true' if ok else 'false'},t:Date.now()}}))}}catch(e){{}}
+{'setTimeout(function(){window.close()},1500)' if ok else ''}</script></body></html>'''
+    resposta = make_response(html, 200 if ok else 400)
+    resposta.headers['Content-Type'] = 'text/html; charset=utf-8'
+    resposta.headers['Cache-Control'] = 'no-store'
+    resposta.headers['Referrer-Policy'] = 'no-referrer'
+    return resposta
+
+
+@auth_bp.route('/auth/assinatura/retorno')
+def assinatura_retorno():
+    """Volta do provedor com o código de autorização: troca pelo token e abre a sessão de assinatura."""
+    from src.utils import assinatura
+    u = usuario_atual() if disponivel() else None
+    pedido = session.pop('assinatura', None)
+    if not _pode_assinar(u) or not isinstance(pedido, dict):
+        return _pagina_de_retorno(False, MSG_ASSINATURA['retorno'])
+    estado = request.args.get('state') or ''
+    codigo = request.args.get('code') or ''
+    if (not hmac.compare_digest(estado, str(pedido.get('e') or '')) or len(codigo) > 2000
+            or time.time() - int(pedido.get('t') or 0) > VALIDADE_DO_PEDIDO_DE_SESSAO):
+        return _pagina_de_retorno(False, MSG_ASSINATURA['retorno'])
+    if not codigo:
+        return _pagina_de_retorno(False, MSG_ASSINATURA['recusada'])
+    try:
+        token = assinatura.trocar_codigo(pedido['p'], codigo, pedido['v'], _retorno_da_assinatura(), pedido['h'])
+        cert = assinatura.escolher_certificado(assinatura.certificados(pedido['p'], token['token']))
+        contas.abrir_sessao_de_assinatura(
+            u['id'], pedido['p'], assinatura.cifrar(token['token'], current_app.config['SECRET_KEY']),
+            cert['alias'], cert['pem'], cert['titular'], min(token['expira_em'], cert['valido_ate']))
+    except assinatura.FalhaNaAssinatura as exc:
+        print(f'⚠️ Assinatura digital: sessão não aberta ({exc})')
+        chave = exc.codigo if exc.codigo in ('sem_certificado', 'provedor_fora') else 'recusada'
+        return _pagina_de_retorno(False, MSG_ASSINATURA[chave])
+    return _pagina_de_retorno(True, 'Pode fechar esta aba e voltar ao pedido: ele já sai assinado.')
+
+
+def encerrar_assinatura(uid):
+    """Apaga a sessão de assinatura da conta e pede ao provedor que invalide o token."""
+    from src.utils import assinatura
+    s = contas.sessao_de_assinatura(uid)
+    if not s:
+        return
+    contas.encerrar_sessao_de_assinatura(uid)
+    try:
+        assinatura.revogar(s['provedor'], assinatura.decifrar(s['token'], current_app.config['SECRET_KEY']))
+    except assinatura.FalhaNaAssinatura:
+        pass
+
+
+@auth_bp.route('/auth/assinatura/encerrar', methods=['POST'])
+@exigir_login
+def assinatura_encerrar():
+    encerrar_assinatura(usuario_atual()['id'])
+    return jsonify({'ok': True})
