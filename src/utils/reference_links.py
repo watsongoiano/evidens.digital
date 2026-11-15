@@ -98,6 +98,7 @@ _FONTES_DIRETAS = [
     ('acg 2022 (esôfago de barrett)', 'https://doi.org/10.14309/ajg.0000000000001680'),
     ('diretriz internacional de sop 2023', 'https://doi.org/10.1210/clinem/dgad463'),
     ('acr 2020', 'https://doi.org/10.1002/acr.24180'),
+    ('uspstf 2019 (brca)', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/brca-related-cancer-risk-assessment-genetic-counseling-and-genetic-testing'),
     ('fda (bula do tofacitinibe)', 'https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/203214s038,208246s025,213082s010lbl.pdf'),
     ('ema 2023 (inibidores de jak)', 'https://www.ema.europa.eu/en/medicines/human/referrals/janus-kinase-inhibitors-jaki'),
     ('fda (bula do tocilizumabe)', 'https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/125276s114lbl.pdf'),
