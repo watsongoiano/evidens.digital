@@ -108,6 +108,26 @@ def test_sinonimos_dos_laboratorios(nome, titulo):
     assert laudos.reconhecer(nome) == titulo
 
 
+@pytest.mark.parametrize('nome', ['GLICOSE (URINA)', 'PSA (LIVRE)', 'CREATININA - URINA 24 HORAS', 'TSH (NEONATAL)'])
+def test_qualificador_desconhecido_deixa_o_titulo_sem_reconhecer(nome):
+    """Material ou fração diferente não pode virar o exame do soro (adiaria um exame que não foi feito)."""
+    assert laudos.reconhecer(nome) is None
+
+
+def test_data_de_um_exame_nao_passa_para_o_seguinte():
+    pagina = [['GLICEMIA', '[DATA DA COLETA : 10/09/2026 08:00]', 'Material: Soro',
+               'CREATININA', 'Metodo: Jaffe', 'Material: Soro',
+               'UREIA', '[DATA DA COLETA : 01/01/2030 08:00]', 'Material: Soro']]
+    lido = laudos.ler(_pdf(pagina), HOJE)
+    assert _nomes(lido) == {'Glicemia de jejum, soro': '2026-09-10'}
+    assert lido['sem_data'] == ['CREATININA', 'UREIA']
+
+
+def test_data_do_cabecalho_vale_para_os_exames_sem_data_propria():
+    pagina = [_cabecalho('23/09/2026') + ['UREIA', 'Material: Soro', 'CREATININA', 'Material: Soro']]
+    assert _nomes(laudos.ler(_pdf(pagina), HOJE)) == {'Ureia, soro': '2026-09-23', 'Creatinina, soro': '2026-09-23'}
+
+
 def test_proteina_c_reativa_comum_nao_vira_ultrassensivel():
     assert laudos.reconhecer('PROTEINA C REATIVA') != 'Proteína C reativa ultrassensível, soro'
 

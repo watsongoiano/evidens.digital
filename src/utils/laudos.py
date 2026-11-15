@@ -8,8 +8,10 @@ Como lê (por código, sem IA)
 - Título de exame: linha em maiúsculas, sem dois-pontos, com o nome de um exame conhecido; ou, se o
   nome não é conhecido, imediatamente acima de "Método", "Material" ou "[Data da coleta" (é assim que os laudos
   separam um exame do outro).
-- Data: a "Data da coleta" logo abaixo do título; sem ela, a "Coleta" do cabeçalho da página.
-- Nome: sinônimos usados pelos laboratórios (abaixo) e, depois, os nomes do catálogo do motor.
+- Data: a "Data da coleta" logo abaixo do título (antes do exame seguinte); sem ela, a "Coleta" do
+  cabeçalho da página (antes do primeiro exame). Data própria inválida não herda a do cabeçalho.
+- Nome: sinônimos usados pelos laboratórios (abaixo) e, depois, os nomes do catálogo do motor. Partes
+  entre parênteses ou depois de " - " só valem se todas forem nomes do mesmo exame.
   Título que não bate com nenhum fica em `nao_reconhecidos` (o médico vê e decide).
 
 O arquivo é lido em memória e descartado: nada do laudo é gravado.
@@ -167,12 +169,15 @@ def reconhecer(nome_no_laudo):
     if _INDICE is None:
         _INDICE = _indice()
     chave = _normalizar(nome_no_laudo)
-    candidatos = [chave, re.sub(r'\s*\([^)]*\)', '', chave).strip(), re.sub(r'[()]', '', chave).strip()]
-    candidatos += [parte.strip() for parte in re.split(r'\s+-\s+', chave)]
-    for candidato in candidatos:
-        if candidato in _INDICE:
-            return _INDICE[candidato]
-    return None
+    if chave in _INDICE:
+        return _INDICE[chave]
+    # "NOME (OUTRO NOME)" ou "NOME - OUTRO NOME": só vale se TODAS as partes forem nomes do MESMO exame.
+    # Um qualificador desconhecido ("GLICOSE (URINA)", "PSA (LIVRE)") deixa o título sem reconhecer.
+    partes = [p.strip() for p in re.split(r'\s+-\s+|\(|\)', chave) if p.strip()]
+    if len(partes) < 2:
+        return None
+    titulos = {_INDICE.get(parte) for parte in partes}
+    return titulos.pop() if len(titulos) == 1 and None not in titulos else None
 
 
 def textos_do_pdf(conteudo):
@@ -221,6 +226,14 @@ def _titulo_provavel(linha):
     return not _RUIDO.match(_normalizar(linha))
 
 
+def _eh_titulo(linhas, i):
+    """Título reconhecido vale sozinho (o hemograma, por exemplo, vem sem "Método"); o que não é
+    reconhecido só conta como exame se vier logo acima de "Método", "Material" ou "Data da coleta"."""
+    if not _titulo_provavel(linhas[i]):
+        return False
+    return reconhecer(linhas[i]) is not None or any(_MARCA.match(l) for l in linhas[i + 1:i + 2])
+
+
 def extrair(textos, hoje_=None):
     """Exames do laudo: {'exames': [{'exame', 'data', 'nome_no_laudo'}], 'nao_reconhecidos': [...], 'sem_data': [...]}.
 
@@ -231,24 +244,23 @@ def extrair(textos, hoje_=None):
     for texto in textos:
         linhas = [re.sub(r'\s+', ' ', l).strip() for l in texto.splitlines()]
         linhas = [l for l in linhas if l]
-        m = _DATA_DA_PAGINA.search(re.sub(r'\s+', ' ', texto))
+        titulos = [i for i in range(len(linhas)) if _eh_titulo(linhas, i)]
+        # Data da página: só a do cabeçalho (antes do primeiro exame), nunca a de um exame da página.
+        cabecalho = ' '.join(linhas[:titulos[0]] if titulos else linhas)
+        m = _DATA_DA_PAGINA.search(cabecalho)
         da_pagina = _data(*m.groups(), hoje_) if m else None
-        for i, linha in enumerate(linhas):
-            if not _titulo_provavel(linha):
-                continue
+        for n, i in enumerate(titulos):
+            linha = linhas[i]
             titulo = reconhecer(linha)
-            marcado = any(_MARCA.match(l) for l in linhas[i + 1:i + 2])
-            # Título reconhecido vale sozinho (o hemograma, por exemplo, vem sem "Método"); o que não é
-            # reconhecido só conta como exame se vier seguido de "Método", "Material" ou "Data da coleta".
-            if titulo is None and not marcado:
-                continue
-            data_exame = None
-            for seguinte in linhas[i + 1:i + 5]:
+            fim = titulos[n + 1] if n + 1 < len(titulos) else len(linhas)
+            data_exame, explicita = None, False
+            for seguinte in linhas[i + 1:min(i + 5, fim)]:   # só até o próximo exame
                 m = _DATA_DO_EXAME.search(seguinte)
                 if m:
-                    data_exame = _data(*m.groups(), hoje_)
+                    data_exame, explicita = _data(*m.groups(), hoje_), True
                     break
-            data_exame = data_exame or da_pagina
+            if not explicita:   # data própria inválida (futura, impossível) não herda a da página
+                data_exame = da_pagina
             if titulo is None:
                 if linha not in nao_reconhecidos:
                     nao_reconhecidos.append(linha)
