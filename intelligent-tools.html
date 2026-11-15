@@ -27,7 +27,7 @@
         <i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i>
         <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i>
       </span>
-      <span class="max-sm:flex max-sm:flex-col text-[28px] font-medium tracking-tight leading-none">evidēns<sup class="marca-r">®</sup> <span class="text-teal text-[13px] font-medium">check</span></span>
+      <span class="max-sm:flex max-sm:flex-col text-[28px] font-medium tracking-tight leading-none"><span class="whitespace-nowrap">evidēns<sup class="marca-r">®</sup></span> <span class="text-teal text-[13px] font-medium">check</span></span>
     </a>
     <nav class="flex items-center gap-2 lg:gap-6 text-[13px] uppercase tracking-[0.12em] text-ink/75">
       <a href="/" class="hidden sm:inline hover:text-teal transition">Início</a>
@@ -93,23 +93,6 @@
         <div class="campo"><label for="altura">Altura (cm)</label><input type="number" id="altura" name="altura" placeholder="Ex: 170" inputmode="numeric"></div>
         <div class="campo"><label for="pas">Pressão sistólica (mmHg)</label><input type="number" id="pas" name="pas" placeholder="Ex: 140" inputmode="numeric"></div>
         <div class="campo"><label for="pad">Pressão diastólica (mmHg)</label><input type="number" id="pad" name="pad" placeholder="Ex: 90" inputmode="numeric"></div>
-      </div>
-      <fieldset class="campo mt-5">
-        <legend class="campo-rotulo">Tem exames laboratoriais recentes?</legend>
-        <div class="opcoes" id="tem_exames">
-          <label class="opcao" for="tem_exames_sim"><input type="radio" id="tem_exames_sim" name="tem_exames" value="sim">Sim</label>
-          <label class="opcao" for="tem_exames_nao"><input type="radio" id="tem_exames_nao" name="tem_exames" value="nao">Não</label>
-        </div>
-      </fieldset>
-      <div id="exames-bloco" class="bloco-condicional" hidden>
-        <p class="campo-rotulo text-teal-dark">Exames laboratoriais</p>
-        <p class="text-[13px] text-ink/55 -mt-1 mb-4">Preencha só os que tiver. Colesterol total, HDL e creatinina permitem calcular o PREVENT; HbA1c refina o cálculo.</p>
-        <div class="grade">
-          <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200" inputmode="numeric"></div>
-          <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" placeholder="Ex: 45" inputmode="numeric"></div>
-          <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
-          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5%: critério de diabetes (ADA). Confirme com um segundo exame se não houver hiperglicemia inequívoca e marque o tipo de diabetes.</p></div>
-        </div>
       </div>
     </section>
 
@@ -680,7 +663,27 @@
         <label class="opcao" for="cancer_ovario"><input type="checkbox" id="cancer_ovario" name="historia_familiar" value="cancer_ovario">Câncer de ovário</label>
         <label class="opcao" for="diabetes_familiar"><input type="checkbox" id="diabetes_familiar" name="historia_familiar" value="diabetes">Diabetes</label>
         <label class="opcao" for="dac_precoce_familiar"><input type="checkbox" id="dac_precoce_familiar" name="historia_familiar" value="dac_precoce">DCV prematura (H &lt; 55, M &lt; 65)</label>
+        <label class="opcao" for="fam_asquenaze"><input type="checkbox" id="fam_asquenaze" name="historia_familiar" value="ascendencia_asquenaze">Paciente de ascendência judaica asquenaze</label>
       </div>
+      <div id="familia-mama-bloco" class="bloco-condicional" data-familia="cancer_mama" hidden>
+        <p class="campo-rotulo text-teal-dark">Câncer de mama na família</p>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Marque o que se aplica (parentes de 1º ou 2º grau): define se há indicação de teste genético (NCCN).</p>
+        <div class="opcoes">
+          <label class="opcao" for="fam_mama_ate_50"><input type="checkbox" id="fam_mama_ate_50" name="historia_familiar" value="mama_ate_50">Aos 50 anos ou antes</label>
+          <label class="opcao" for="fam_mama_triplo_negativo"><input type="checkbox" id="fam_mama_triplo_negativo" name="historia_familiar" value="mama_triplo_negativo">Triplo-negativo</label>
+          <label class="opcao" for="fam_mama_masculino"><input type="checkbox" id="fam_mama_masculino" name="historia_familiar" value="mama_masculino">Em homem</label>
+          <label class="opcao" for="fam_mama_bilateral"><input type="checkbox" id="fam_mama_bilateral" name="historia_familiar" value="mama_bilateral">Bilateral, ou mama e ovário na mesma pessoa</label>
+          <label class="opcao" for="fam_mama_prostata_3"><input type="checkbox" id="fam_mama_prostata_3" name="historia_familiar" value="mama_prostata_3_casos" data-par="mama_prostata_3_casos">3 ou mais casos de câncer de mama e/ou de próstata no mesmo ramo da família (materno ou paterno)</label>
+        </div>
+      </div>
+      <div id="familia-ccr-bloco" class="bloco-condicional" data-familia="cancer_colorretal" hidden>
+        <p class="campo-rotulo text-teal-dark">Câncer colorretal na família</p>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Define o início e o intervalo da colonoscopia (USMSTF).</p>
+        <div class="opcoes">
+          <label class="opcao" for="fam_ccr_antes_60"><input type="checkbox" id="fam_ccr_antes_60" name="historia_familiar" value="ccr_antes_60">Parente de 1º grau antes dos 60 anos, ou 2 ou mais parentes de 1º grau</label>
+        </div>
+      </div>
+
       <!-- lista:familia:inicio -->
       <div class="campo mt-5 combo" id="lista_familia" data-campo="historia_familiar">
         <label for="lista_familia-busca">Outras condições em parente de 1º grau</label>
@@ -725,6 +728,14 @@
         <p id="lista_familia-dica" class="text-[12px] text-ink/50 mt-2">Síndromes hereditárias trazem o rastreamento específico; as demais mudam idade de início ou indicação.</p>
       </div>
       <!-- lista:familia:fim -->
+      <div id="familia-prostata-bloco" class="bloco-condicional" data-familia="cancer_prostata" hidden>
+        <p class="campo-rotulo text-teal-dark">Câncer de próstata na família</p>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Marque o que se aplica: define se há indicação de teste genético (NCCN).</p>
+        <div class="opcoes">
+          <label class="opcao" for="fam_prostata_alto_risco"><input type="checkbox" id="fam_prostata_alto_risco" name="historia_familiar" value="prostata_alto_risco">Metastático ou de alto risco</label>
+          <label class="opcao" for="fam_prostata_3"><input type="checkbox" id="fam_prostata_3" data-par="mama_prostata_3_casos">3 ou mais casos de câncer de mama e/ou de próstata no mesmo ramo da família (materno ou paterno)</label>
+        </div>
+      </div>
     </section>
 
     <section class="secao" aria-labelledby="s-habitos">
@@ -793,7 +804,25 @@
 
     <section class="secao" aria-labelledby="s-exames">
       <h2 id="s-exames" class="secao-titulo"><span class="secao-num">08</span>Exames já realizados</h2>
-      <p class="secao-nota">Opcional. Informe o exame e a data em que foi feito, ou anexe o laudo em PDF: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. O laudo é lido e descartado; nada é guardado.</p>
+      <p class="secao-nota">Opcional. Resultados recentes entram no cálculo do risco cardiovascular (PREVENT). Informe também cada exame já feito e a data, digitando ou anexando o laudo em PDF: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. O laudo é lido e descartado; nada é guardado.</p>
+      <fieldset class="campo">
+        <legend class="campo-rotulo">Tem exames laboratoriais recentes?</legend>
+        <div class="opcoes" id="tem_exames">
+          <label class="opcao" for="tem_exames_sim"><input type="radio" id="tem_exames_sim" name="tem_exames" value="sim">Sim</label>
+          <label class="opcao" for="tem_exames_nao"><input type="radio" id="tem_exames_nao" name="tem_exames" value="nao">Não</label>
+        </div>
+      </fieldset>
+      <div id="exames-bloco" class="bloco-condicional" hidden>
+        <p class="campo-rotulo text-teal-dark">Exames laboratoriais</p>
+        <p class="text-[13px] text-ink/55 -mt-1 mb-4">Preencha só os que tiver. Colesterol total, HDL e creatinina permitem calcular o PREVENT; HbA1c refina o cálculo.</p>
+        <div class="grade">
+          <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200" inputmode="numeric"></div>
+          <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" placeholder="Ex: 45" inputmode="numeric"></div>
+          <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
+          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5%: critério de diabetes (ADA). Confirme com um segundo exame se não houver hiperglicemia inequívoca e marque o tipo de diabetes.</p></div>
+        </div>
+      </div>
+      <p class="campo-rotulo mt-6">Exames já feitos e datas</p>
       <div id="examesAnteriores" class="flex flex-col gap-4"></div>
       <datalist id="examesConhecidos"></datalist>
       <div class="flex flex-wrap gap-3 mt-4">
@@ -1798,6 +1827,30 @@
         checkupForm.addEventListener('change', atualizarDetalhesDasComorbidades);
         checkupForm.addEventListener('click', () => setTimeout(atualizarDetalhesDasComorbidades, 0));
         atualizarDetalhesDasComorbidades();
+
+        // Câncer na família: cada item abre os seus detalhes (como o bloco do HIV). Desmarcar o item limpa os detalhes.
+        function atualizarDetalhesDaFamilia() {
+            const marcados = new FormData(checkupForm).getAll('historia_familiar');
+            // o critério compartilhado vale se estiver marcado em qualquer bloco que estava aberto antes desta atualização
+            const daMama = document.getElementById('fam_mama_prostata_3'), daProstata = document.getElementById('fam_prostata_3');
+            const compartilhado = [daMama, daProstata].some(c => c.checked && !c.closest('[data-familia]').hidden);
+            document.querySelectorAll('[data-familia]').forEach(bloco => {
+                const aberto = marcados.includes(bloco.dataset.familia);
+                bloco.hidden = !aberto;
+                if (!aberto) bloco.querySelectorAll('input:checked').forEach(c => { c.checked = false; });
+            });
+            // "3 ou mais casos de mama e/ou próstata" aparece nos dois blocos: uma caixa só vale (a do bloco da mama
+            // vai no formulário; a da próstata só espelha). Sem o bloco da mama aberto, a da próstata envia o valor.
+            [daMama, daProstata].forEach(c => { if (!c.closest('[data-familia]').hidden) c.checked = compartilhado; });
+            daProstata.name = document.getElementById('familia-mama-bloco').hidden ? 'historia_familiar' : '';
+            daProstata.value = 'mama_prostata_3_casos';
+        }
+        document.querySelectorAll('[data-par]').forEach(caixa => caixa.addEventListener('change', () => {
+            document.querySelectorAll(`[data-par="${caixa.dataset.par}"]`).forEach(outra => { outra.checked = caixa.checked; });
+        }));
+        checkupForm.addEventListener('change', atualizarDetalhesDaFamilia);
+        checkupForm.addEventListener('click', () => setTimeout(atualizarDetalhesDaFamilia, 0));
+        atualizarDetalhesDaFamilia();
 
         // Listener para tabagismo - mostrar campos condicionais
         document.getElementById('tabagismo').addEventListener('change', function(ev) {

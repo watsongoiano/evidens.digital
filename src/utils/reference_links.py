@@ -98,6 +98,7 @@ _FONTES_DIRETAS = [
     ('acg 2022 (esôfago de barrett)', 'https://doi.org/10.14309/ajg.0000000000001680'),
     ('diretriz internacional de sop 2023', 'https://doi.org/10.1210/clinem/dgad463'),
     ('acr 2020', 'https://doi.org/10.1002/acr.24180'),
+    ('uspstf 2019 (brca)', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/brca-related-cancer-risk-assessment-genetic-counseling-and-genetic-testing'),
     ('ms 2024 (pcdt hiv)', 'https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf'),
     ('hivma/idsa 2024', 'https://doi.org/10.1093/cid/ciae479'),
     ('einstein pré-natal', 'https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf'),
