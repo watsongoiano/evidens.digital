@@ -2151,7 +2151,8 @@
   "Confira a assinatura em validar.iti.gov.br": "Check the signature at validar.iti.gov.br",
   "Pedidos assinados digitalmente": "Digitally signed orders",
   "O navegador bloqueou a nova aba.": "The browser blocked the new tab.",
-  "Abrir o provedor do certificado": "Open the certificate provider"
+  "Abrir o provedor do certificado": "Open the certificate provider",
+  "3 classes de anti-hipertensivos: é HAS resistente se a PA estiver acima da meta (≥ 130/80) com doses máximas toleradas e adesão confirmada. Informe a PA ou marque \"HAS resistente\" se for o caso.": "3 antihypertensive classes: this is resistant hypertension if BP is above target (≥ 130/80) on maximally tolerated doses with confirmed adherence. Enter the BP or check \"Resistant hypertension\" if that is the case."
  },
  "padroes": [
   [
@@ -2461,6 +2462,14 @@
   [
    "^Carga viral atual: (\\d+) cópias/mL\\.$",
    "Current viral load: %1 copies/mL."
+  ],
+  [
+   "^(\\d+) classes de anti-hipertensivos \\(AHA 2018; AHA/ACC 2025\\); confirmar adesão, doses máximas toleradas e PA fora do consultório \\(MRPA ou MAPA\\)$",
+   "%1 antihypertensive classes (AHA 2018; AHA/ACC 2025); confirm adherence, maximally tolerated doses and out-of-office BP (HBPM or ABPM)"
+  ],
+  [
+   "^3 classes de anti-hipertensivos com PA (\\d+|–)/(\\d+|–) mmHg acima da meta \\(AHA 2018; AHA/ACC 2025\\); confirmar adesão, doses máximas toleradas e PA fora do consultório \\(MRPA ou MAPA\\)$",
+   "3 antihypertensive classes with BP %1/%2 mmHg above target (AHA 2018; AHA/ACC 2025); confirm adherence, maximally tolerated doses and out-of-office BP (HBPM or ABPM)"
   ]
  ],
  "manter": [

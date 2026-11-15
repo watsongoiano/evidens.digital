@@ -254,6 +254,35 @@ for _comorbidade, _rotulos in IMPLICA.items():
         MARCA.setdefault(chave_de(_rotulo), []).append(_comorbidade)
 
 
+# Classe anti-hipertensiva (para contar classes na hipertensão resistente). IECA, BRA, alisquireno e
+# sacubitril/valsartana bloqueiam o mesmo sistema; tiazídico e diurético de alça contam como diurético.
+CLASSE_ANTI_HIPERTENSIVA = {
+    'ieca_bra': 'bloqueio do SRAA', 'arni': 'bloqueio do SRAA', 'tiazidico': 'diurético', 'diuretico_alca': 'diurético',
+    'bcc': 'bloqueador de canal de cálcio', 'betabloqueador': 'betabloqueador', 'betabloqueador_has': 'betabloqueador',
+    'espironolactona': 'antagonista mineralocorticoide',
+}
+_OUTROS_ANTI_HIPERTENSIVOS = {
+    'hidralazina': 'vasodilatador direto', 'minoxidil_oral': 'vasodilatador direto',
+    'clonidina': 'simpatolítico central', 'metildopa': 'simpatolítico central', 'alisquireno': 'bloqueio do SRAA',
+}
+
+
+def classes_anti_hipertensivas(chave):
+    """(classes anti-hipertensivas do medicamento, só_com_hipertensao).
+
+    Betabloqueador, espironolactona, diurético de alça e sacubitril/valsartana também se usam em IC, FA e
+    edema: só contam como anti-hipertensivo quando há hipertensão (mesma regra de coerencia.inferir).
+    """
+    from src.utils.condicoes import MEDICACOES
+    m = MEDICAMENTOS.get(chave)
+    if not m:
+        return set(), False
+    classes = {_OUTROS_ANTI_HIPERTENSIVOS[chave] if c == 'anti_hipertensivo_outro' else CLASSE_ANTI_HIPERTENSIVA.get(c)
+               for c in m['classes']} - {None}
+    sempre = any('anti_hipertensivos' in MEDICACOES.get(c, {}).get('marca', []) for c in m['classes'])
+    return classes, bool(classes) and not sempre
+
+
 def classes_de(medicacoes, excluir=None):
     """Troca cada princípio ativo pelas suas classes; chaves de classe (e as antigas) passam direto.
 
