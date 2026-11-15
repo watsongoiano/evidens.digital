@@ -15,6 +15,7 @@ TAMANHO_MAXIMO = 3 * 1024 * 1024
 PT_EM_MM = 25.4 / 72
 FOLGA = 4.0              # mm entre o que está desenhado no timbrado e o texto do pedido
 MARGEM_PADRAO = 20.0     # mm, quando o timbrado não tem nada naquela borda
+AREA_MINIMA = 120.0       # mm livres para o pedido entre o cabeçalho e o rodapé (assinatura incluída)
 MARGEM_MINIMA, FRACAO_MAXIMA = 10.0, 0.4   # cada margem: de 10 mm até 40% da altura da página
 
 MENSAGENS = {
@@ -23,6 +24,7 @@ MENSAGENS = {
     'senha': 'O PDF do timbrado está protegido por senha.',
     'invalido': 'Não foi possível abrir o PDF do timbrado.',
     'tamanho': 'A página do timbrado precisa ter entre 10 e 50 cm de lado.',
+    'area': 'O timbrado deixa menos de 12 cm livres entre o cabeçalho e o rodapé: use um modelo com mais espaço para o pedido.',
     'margens': 'Margens inválidas: cada uma entre 10 mm e 40% da altura da página, deixando espaço para o pedido.',
 }
 
@@ -131,7 +133,10 @@ def margens_sugeridas(conteudo):
             return MARGEM_PADRAO
         return round(min(max(valor + FOLGA, MARGEM_MINIMA), limite), 1)
 
-    return ajustar(topo), ajustar(base)
+    topo, base = ajustar(topo), ajustar(base)
+    if altura_mm - topo - base < AREA_MINIMA:
+        raise TimbradoInvalido('area')
+    return topo, base
 
 
 def conferir_margens(conteudo, topo, base):
@@ -142,7 +147,7 @@ def conferir_margens(conteudo, topo, base):
     except (TypeError, ValueError):
         raise TimbradoInvalido('margens')
     limite = altura * FRACAO_MAXIMA
-    if not (MARGEM_MINIMA <= topo <= limite and MARGEM_MINIMA <= base <= limite) or altura - topo - base < 120:
+    if not (MARGEM_MINIMA <= topo <= limite and MARGEM_MINIMA <= base <= limite) or altura - topo - base < AREA_MINIMA:
         raise TimbradoInvalido('margens')
     return round(topo, 1), round(base, 1)
 

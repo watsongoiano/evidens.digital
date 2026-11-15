@@ -70,6 +70,17 @@ def test_arquivo_invalido(conteudo, codigo):
     assert erro.value.codigo == codigo
 
 
+def test_timbrado_sem_espaco_para_o_pedido_e_recusado():
+    """Cabeçalho e rodapé grandes (ou página pequena) deixariam o pedido espremido: recusa no envio."""
+    pdf = FPDF(format=(150, 160))
+    pdf.add_page()
+    pdf.rect(10, 5, 50, 40, 'F')
+    pdf.rect(10, 115, 50, 40, 'F')
+    with pytest.raises(timbrado.TimbradoInvalido) as erro:
+        timbrado.margens_sugeridas(bytes(pdf.output()))
+    assert erro.value.codigo == 'area'
+
+
 @pytest.mark.parametrize('topo, base, valido', [(38, 25, True), (5, 25, False), (38, 200, False), ('x', 20, False)])
 def test_conferir_margens(topo, base, valido):
     if valido:

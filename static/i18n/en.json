@@ -1883,7 +1883,8 @@
   "O PDF do timbrado está protegido por senha.": "The letterhead PDF is password-protected.",
   "Não foi possível abrir o PDF do timbrado.": "The letterhead PDF could not be opened.",
   "A página do timbrado precisa ter entre 10 e 50 cm de lado.": "The letterhead page must be between 10 and 50 cm on each side.",
-  "Margens inválidas: cada uma entre 10 mm e 40% da altura da página, deixando espaço para o pedido.": "Invalid margins: each must be between 10 mm and 40% of the page height, leaving room for the order."
+  "Margens inválidas: cada uma entre 10 mm e 40% da altura da página, deixando espaço para o pedido.": "Invalid margins: each must be between 10 mm and 40% of the page height, leaving room for the order.",
+  "O timbrado deixa menos de 12 cm livres entre o cabeçalho e o rodapé: use um modelo com mais espaço para o pedido.": "The letterhead leaves less than 12 cm free between the header and the footer: use a template with more room for the order."
  },
  "padroes": [
   [
