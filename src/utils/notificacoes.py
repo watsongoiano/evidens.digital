@@ -47,17 +47,23 @@ def _sem_quebra(texto, maximo=200):
 
 def mensagem_de_cadastro(usuario, url_admin):
     nome = _sem_quebra(usuario.get('nome'))
+    if usuario.get('situacao') == 'aprovado':
+        abertura, assunto = 'Uma nova conta foi criada no Evidēns e já está liberada.', f'Evidēns: nova conta ({nome})'
+        acao = f'Se algo não conferir, bloqueie a conta em: {url_admin}'
+    else:
+        abertura, assunto = 'Há um novo pedido de abertura de conta no Evidēns.', f'Evidēns: novo pedido de conta ({nome})'
+        acao = f'Confira o registro profissional e aprove ou recuse em: {url_admin}'
     corpo = '\n'.join([
-        'Há um novo pedido de abertura de conta no Evidēns.',
+        abertura,
         '',
         f'Nome: {nome}',
         f"Perfil: {PERFIS.get(usuario.get('perfil'), _sem_quebra(usuario.get('perfil')))}",
         f"Registro: {_sem_quebra(usuario.get('registro'))}",
         f"E-mail: {_sem_quebra(usuario.get('email'))}",
         '',
-        f'Confira o registro profissional e aprove ou recuse em: {url_admin}',
+        acao,
     ])
-    return f'Evidēns: novo pedido de conta ({nome})', corpo
+    return assunto, corpo
 
 
 def remetente_proprio() -> str:
@@ -111,15 +117,22 @@ def mensagem_de_boas_vindas(usuario, url_site):
     """Texto de boas-vindas: por que a ferramenta existe, o que acontece agora, fase de desenvolvimento
     e convite a dar feedback."""
     primeiro_nome = _primeiro_nome(usuario)
+    if usuario.get('situacao') == 'pendente':  # aprovação manual ligada
+        abertura = 'Ficamos felizes com o seu pedido de conta no Evidēns!'
+        acesso = ('O seu pedido já foi enviado para a nossa equipe conferir o cadastro e liberar o acesso. É só aguardar: '
+                  f'assim que a conta for aprovada, entre em {url_site}/login com o e-mail e a senha que você cadastrou!')
+    else:
+        abertura = 'Ficamos felizes com a sua conta no Evidēns!'
+        acesso = (f'A sua conta já está liberada: é só entrar em {url_site}/login com o e-mail e a senha que você '
+                  'cadastrou!')
     corpo = '\n'.join([
         f'Olá, {primeiro_nome}.' if primeiro_nome else 'Olá.',
         '',
-        'Ficamos felizes com o seu pedido de conta no Evidēns!',
+        abertura,
         '',
         'Uma breve apresentação: ' + _apresentacao(),
         '',
-        'O seu pedido já foi enviado para a nossa equipe conferir o cadastro e liberar o acesso. É só aguardar: '
-        f'assim que a conta for aprovada, entre em {url_site}/login com o e-mail e a senha que você cadastrou!',
+        acesso,
         '',
     ] + _fecho(url_site))
     return 'Bem-vindo(a) ao Evidēns', corpo

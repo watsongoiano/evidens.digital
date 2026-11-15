@@ -33,13 +33,18 @@
 
 <main class="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 pt-14 lg:pt-20 pb-24">
   <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">ADMINISTRAÇÃO</p>
-  <h1 class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Cadastros <span class="font-serif italic text-teal tracking-tight">para conferir.</span></h1>
-  <p class="text-[16px] text-ink/65 leading-relaxed mt-5">Confira o registro profissional antes de aprovar. Bloquear encerra na hora as sessões abertas da pessoa.</p>
+  <h1 class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Contas <span class="font-serif italic text-teal tracking-tight">cadastradas.</span></h1>
+  <p class="text-[16px] text-ink/65 leading-relaxed mt-5">A conta é liberada assim que é criada. Bloquear encerra na hora as sessões abertas da pessoa.</p>
   <div data-erro role="alert" class="aviso aviso-erro mt-8" style="display: none;"></div>
   <div data-ok role="status" class="aviso aviso-atencao mt-8" style="display: none;"></div>
   <section class="mt-10"><h2 class="categoria-titulo">Aguardando aprovação <span data-contagem="pendente" class="text-ink/30"></span></h2><div data-lista="pendente"></div></section>
   <section class="mt-10"><h2 class="categoria-titulo">Aprovados <span data-contagem="aprovado" class="text-ink/30"></span></h2><div data-lista="aprovado"></div></section>
   <section class="mt-10"><h2 class="categoria-titulo">Bloqueados <span data-contagem="bloqueado" class="text-ink/30"></span></h2><div data-lista="bloqueado"></div></section>
+  <section class="mt-10" data-aprovacao>
+    <h2 class="categoria-titulo">Aprovação manual</h2>
+    <p data-aprovacao-estado class="text-[14px] text-ink/60 leading-relaxed">Verificando…</p>
+    <button type="button" class="btn-claro mt-4" data-aprovacao-botao>Ligar a aprovação manual</button>
+  </section>
   <section class="mt-10" data-aviso>
     <h2 class="categoria-titulo">Aviso por e-mail</h2>
     <p data-aviso-estado class="text-[14px] text-ink/60 leading-relaxed">Verificando…</p>
