@@ -76,7 +76,7 @@
   const login = document.querySelector('form[data-form="login"]');
   const cadastro = new URLSearchParams(window.location.search).get('cadastro');
   if (login && cadastro === 'liberado') {
-    mostrar(login.querySelector('[data-ok]'), 'Conta criada e liberada. Entre com o e-mail e a senha que você cadastrou.');
+    mostrar(login.querySelector('[data-ok]'), 'Conta criada com sucesso.');
   } else if (login && cadastro === 'recebido') {
     mostrar(login.querySelector('[data-ok]'),
       'Cadastro recebido. Assim que o responsável técnico conferir o seu registro e aprovar a conta, entre aqui com o e-mail e a senha que você cadastrou.');

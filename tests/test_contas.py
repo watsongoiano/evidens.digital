@@ -298,5 +298,5 @@ def test_depois_do_cadastro_a_pessoa_vai_para_o_login_com_o_aviso(anonimo):
     assert 'data-form="cadastro" data-destino="/login?cadastro=recebido"' in anonimo.get('/cadastro').get_data(as_text=True)
     assert anonimo.get('/login?cadastro=recebido').status_code == 200
     js = anonimo.get('/static/conta.js').get_data(as_text=True)
-    assert "cadastro === 'liberado'" in js and 'Conta criada e liberada.' in js
+    assert "cadastro === 'liberado'" in js and 'Conta criada com sucesso.' in js
     assert "cadastro === 'recebido'" in js and 'Cadastro recebido.' in js

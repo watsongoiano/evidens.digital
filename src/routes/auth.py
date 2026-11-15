@@ -183,7 +183,7 @@ def cadastro():
         return jsonify({'ok': True, 'liberado': False,
                         'mensagem': 'Cadastro recebido. Você poderá entrar assim que a conta for aprovada.'}), 202
     return jsonify({'ok': True, 'liberado': True,
-                    'mensagem': 'Conta criada. Entre com o e-mail e a senha que você cadastrou.'}), 201
+                    'mensagem': 'Conta criada com sucesso.'}), 201
 
 
 @auth_bp.route('/auth/login', methods=['POST'])
