@@ -308,9 +308,10 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     criterios = criterios_teste_genetico(fam)
     if criterios and 'brca' not in fam:
         orientar('Teste genético indicado: aconselhamento e painel germinativo (BRCA1/2)',
-                 'A história familiar preenche critério para teste genético: ' + '; '.join(criterios) + '. Encaminhar para '
-                 'aconselhamento genético. O ideal é testar primeiro o familiar com câncer; se não for possível, testar o '
-                 'paciente com painel que inclua BRCA1, BRCA2 e PALB2.', NCCN_GENETICA + ' / ' + USPSTF_BRCA)
+                 'A história familiar preenche critério para teste genético. ' +
+                 ' '.join(c[0].upper() + c[1:] + '.' for c in criterios) +
+                 ' Encaminhar para aconselhamento genético. O ideal é testar primeiro o familiar com câncer; se não for '
+                 'possível, testar o paciente com painel que inclua BRCA1, BRCA2 e PALB2.', NCCN_GENETICA + ' / ' + USPSTF_BRCA)
     elif tem_mama and 'brca' not in fam:
         orientar('Câncer de mama na família sem critério para teste genético',
                  'Câncer de mama na família, por si só, não indica teste de BRCA1/2. Pelo NCCN, o teste é indicado quando há '
