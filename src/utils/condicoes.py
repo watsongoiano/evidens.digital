@@ -172,7 +172,7 @@ FAMILIA_DETALHES = {
     'mama_bilateral': 'Câncer de mama bilateral, ou mama e ovário na mesma pessoa',
     'mama_masculino': 'Câncer de mama em homem',
     'mama_triplo_negativo': 'Câncer de mama triplo-negativo',
-    'mama_prostata_3_casos': '3 ou mais casos de câncer de mama e/ou próstata do mesmo lado da família',
+    'mama_prostata_3_casos': '3 ou mais casos de câncer de mama e/ou de próstata no mesmo ramo da família (materno ou paterno)',
     'prostata_alto_risco': 'Câncer de próstata metastático ou de alto risco',
     'ccr_antes_60': 'Câncer colorretal antes dos 60 anos, ou em 2 ou mais parentes de 1º grau',
     'ascendencia_asquenaze': 'Ascendência judaica asquenaze (do paciente)',
@@ -199,7 +199,7 @@ def criterios_teste_genetico(familia):
     if 'prostata_alto_risco' in fam:
         criterios.append('câncer de próstata metastático ou de alto risco em parente de 1º grau')
     if 'mama_prostata_3_casos' in fam:
-        criterios.append('3 ou mais casos de câncer de mama e/ou próstata do mesmo lado da família')
+        criterios.append('3 ou mais casos de câncer de mama e/ou de próstata no mesmo ramo da família (materno ou paterno)')
     if 'mama_bilateral' in fam:
         criterios.append('câncer de mama bilateral, ou mama e ovário, na mesma pessoa da família')
     return criterios
@@ -316,8 +316,8 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         orientar('Câncer de mama na família sem critério para teste genético',
                  'Câncer de mama na família, por si só, não indica teste de BRCA1/2. Pelo NCCN, o teste é indicado quando há '
                  'em parente próximo: câncer de mama aos 50 anos ou antes, triplo-negativo, em homem, bilateral; câncer de '
-                 'ovário ou de pâncreas; câncer de próstata metastático ou de alto risco; ou 3 ou mais casos de mama e/ou '
-                 'próstata do mesmo lado da família. Se algum desses se aplicar, marque o detalhe na história familiar. '
+                 'ovário ou de pâncreas; câncer de próstata metastático ou de alto risco; ou 3 ou mais casos de câncer de mama e/ou de '
+                 'próstata no mesmo ramo da família (materno ou paterno). Se algum desses se aplicar, marque o detalhe na história familiar. '
                  'Sem eles, não testar de rotina; rever a história familiar a cada consulta.',
                  NCCN_GENETICA + ' / ' + USPSTF_BRCA)
     if 'ascendencia_asquenaze' in fam and not criterios and 'brca' not in fam:
