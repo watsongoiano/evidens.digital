@@ -1,5 +1,5 @@
 # Dependências para rodar os testes localmente e na integração contínua.
 # As dependências de produção são as de api/requirements.txt.
 -r api/requirements.txt
-pytest>=8,<9
+pytest>=9.2.0,<10
 # pypdf vem de api/requirements.txt (leitura de laudos); os testes também o usam para ler os PDFs.
