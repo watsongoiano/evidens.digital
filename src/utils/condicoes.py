@@ -165,6 +165,45 @@ FAMILIA = {
 # Marcadas por chip na tela (e "cardiopatia" é o valor antigo de DAC precoce).
 FAMILIA_CHIPS = ('cancer_mama', 'cancer_colorretal', 'cancer_ovario', 'diabetes', 'dac_precoce', 'cardiopatia')
 
+# Detalhes dos casos de câncer na família (caixas que aparecem quando há câncer na família). Decidem a
+# indicação de teste genético (NCCN) e o rastreio colorretal (USMSTF); vão na mesma lista historia_familiar.
+FAMILIA_DETALHES = {
+    'mama_ate_50': 'Câncer de mama diagnosticado aos 50 anos ou antes',
+    'mama_bilateral': 'Câncer de mama bilateral, ou mama e ovário na mesma pessoa',
+    'mama_masculino': 'Câncer de mama em homem',
+    'mama_triplo_negativo': 'Câncer de mama triplo-negativo',
+    'mama_prostata_3_casos': '3 ou mais casos de câncer de mama e/ou próstata do mesmo lado da família',
+    'prostata_alto_risco': 'Câncer de próstata metastático ou de alto risco',
+    'ccr_antes_60': 'Câncer colorretal antes dos 60 anos, ou em 2 ou mais parentes de 1º grau',
+    'ascendencia_asquenaze': 'Ascendência judaica asquenaze (do paciente)',
+}
+NCCN_GENETICA = 'NCCN 2026 (risco genético mama/ovário/pâncreas/próstata)'
+USPSTF_BRCA = 'USPSTF 2019 (BRCA)'
+USMSTF = 'USMSTF 2017'
+
+
+def criterios_teste_genetico(familia):
+    """Critérios do NCCN (pessoa sem câncer, com parente próximo) para teste germinativo de BRCA1/2 e painel."""
+    fam = set(familia)
+    criterios = []
+    if 'mama_ate_50' in fam:
+        criterios.append('câncer de mama aos 50 anos ou antes em parente próximo')
+    if 'mama_triplo_negativo' in fam:
+        criterios.append('câncer de mama triplo-negativo em parente próximo (até 60 anos)')
+    if 'mama_masculino' in fam:
+        criterios.append('câncer de mama em homem da família')
+    if 'cancer_ovario' in fam:
+        criterios.append('câncer de ovário (epitelial) em parente próximo, em qualquer idade')
+    if 'cancer_pancreas' in fam:
+        criterios.append('câncer de pâncreas em parente de 1º grau, em qualquer idade')
+    if 'prostata_alto_risco' in fam:
+        criterios.append('câncer de próstata metastático ou de alto risco em parente de 1º grau')
+    if 'mama_prostata_3_casos' in fam:
+        criterios.append('3 ou mais casos de câncer de mama e/ou próstata do mesmo lado da família')
+    if 'mama_bilateral' in fam:
+        criterios.append('câncer de mama bilateral, ou mama e ovário, na mesma pessoa da família')
+    return criterios
+
 PNEUMO = 'Pneumocócica conjugada 20-valente (Prevenar 20®)'
 ZOSTER = 'Herpes Zóster (Shingrix®)'
 VSR = 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)'
@@ -226,32 +265,65 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         orient.append({'titulo': titulo, 'descricao': descricao, 'referencia': referencia})
 
     # ---------------- História familiar ----------------
-    if 'cancer_colorretal' in fam:
+    # Colorretal (USMSTF 2017): parente de 1º grau antes dos 60 anos, ou 2 ou mais parentes → colonoscopia a cada
+    # 5 anos a partir dos 40 (ou 10 anos antes do caso mais jovem); 1 parente com 60 anos ou mais → rastreio de
+    # risco habitual, mas começando aos 40.
+    if 'ccr_antes_60' in fam:
         if idade >= 40:
             add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
-                'Parente de 1º grau com câncer colorretal: colonoscopia a partir dos 40 anos, ou 10 anos antes da idade '
-                'do diagnóstico do familiar mais jovem (o que vier primeiro), repetida a cada 5 anos.',
-                'História familiar de CCR | A partir de 40 anos | A cada 5 anos',
-                'USMSTF 2017 / ACG 2021', 'B', 'alta', substituir=True)
+                'Parente de 1º grau com câncer colorretal antes dos 60 anos (ou 2 ou mais parentes de 1º grau): '
+                'colonoscopia a cada 5 anos a partir dos 40 anos, ou 10 anos antes da idade do diagnóstico do familiar '
+                'mais jovem (o que vier primeiro).',
+                'História familiar de CCR antes dos 60 anos | A partir de 40 anos | A cada 5 anos',
+                USMSTF, 'B', 'alta', substituir=True)
         else:
             orientar('Colonoscopia por história familiar de câncer colorretal',
-                     'Iniciar aos 40 anos ou 10 anos antes da idade do diagnóstico do familiar de 1º grau mais jovem '
-                     '(o que vier primeiro); depois, a cada 5 anos.', 'USMSTF 2017 / ACG 2021')
-    if 'cancer_mama' in fam and sexo == 'feminino':
+                     'Parente de 1º grau com câncer colorretal antes dos 60 anos (ou 2 ou mais parentes): colonoscopia a cada '
+                     '5 anos, começando aos 40 anos ou 10 anos antes da idade do diagnóstico do familiar mais jovem (o que '
+                     'vier primeiro).', USMSTF)
+    elif 'cancer_colorretal' in fam:
+        if idade >= 40:
+            add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
+                'Um parente de 1º grau com câncer colorretal diagnosticado aos 60 anos ou mais: rastreio de risco habitual '
+                '(colonoscopia a cada 10 anos ou pesquisa de sangue oculto anual), começando aos 40 anos.',
+                'História familiar de CCR aos 60 anos ou mais | A partir de 40 anos | A cada 10 anos',
+                USMSTF, 'B', 'alta', substituir=True)
+        orientar('Câncer colorretal na família: idade do familiar',
+                 'Se o diagnóstico do familiar foi antes dos 60 anos, ou se há 2 ou mais parentes de 1º grau, marque o detalhe '
+                 'na história familiar: a colonoscopia passa a cada 5 anos, a partir dos 40 anos ou 10 anos antes do caso mais '
+                 'jovem.', USMSTF)
+    tem_mama = bool({'cancer_mama', 'mama_ate_50', 'mama_bilateral', 'mama_masculino', 'mama_triplo_negativo'} & fam)
+    if tem_mama and sexo == 'feminino':
         if idade >= 40:
             add('Mamografia Digital - Bilateral', 'imagem',
-                'Parente de 1º grau com câncer de mama: mamografia anual a partir dos 40 anos (ou 10 anos antes do '
-                'diagnóstico da familiar, não antes dos 30).',
-                'História familiar de câncer de mama | Anual', 'ACR 2023 / NCCN 2024', 'B', 'alta', substituir=True)
-        elif idade >= 30:
-            orientar('Mamografia por história familiar de câncer de mama',
-                     'Se a familiar de 1º grau teve o diagnóstico antes dos 50 anos, iniciar a mamografia anual 10 anos '
-                     'antes dessa idade (não antes dos 30).', 'ACR 2023 / NCCN 2024')
-    if {'cancer_mama', 'cancer_ovario'} & fam and sexo == 'feminino':
-        orientar('Avaliação de risco para BRCA1/2',
-                 'História familiar de câncer de mama ou ovário: aplicar ferramenta de rastreio de risco familiar; '
-                 'se positiva, encaminhar para aconselhamento genético e, se indicado, teste de BRCA.',
-                 'USPSTF 2019 (grau B)')
+                'Parente de 1º grau com câncer de mama: risco acima do habitual; mamografia anual a partir dos 40 anos. '
+                'Calcular o risco de câncer de mama ao longo da vida (Tyrer-Cuzick/IBIS): 20% ou mais indica ressonância '
+                'anual associada.', 'História familiar de câncer de mama | Anual', 'ACR 2023', 'B', 'alta', substituir=True)
+        elif idade >= 25:
+            orientar('Rastreio de câncer de mama por história familiar',
+                     'Calcular o risco de câncer de mama ao longo da vida (Tyrer-Cuzick/IBIS) até os 25 anos. Com risco de '
+                     '20% ou mais: ressonância anual a partir de 25-30 anos e mamografia anual a partir de 30. Abaixo disso: '
+                     'mamografia anual a partir dos 40.', 'ACR 2023')
+    # Teste genético (BRCA1/2 e painel): só com os critérios do NCCN, não para toda história de câncer de mama.
+    criterios = criterios_teste_genetico(fam)
+    if criterios and 'brca' not in fam:
+        orientar('Teste genético indicado: aconselhamento e painel germinativo (BRCA1/2)',
+                 'A história familiar preenche critério para teste genético: ' + '; '.join(criterios) + '. Encaminhar para '
+                 'aconselhamento genético. O ideal é testar primeiro o familiar com câncer; se não for possível, testar o '
+                 'paciente com painel que inclua BRCA1, BRCA2 e PALB2.', NCCN_GENETICA + ' / ' + USPSTF_BRCA)
+    elif tem_mama and 'brca' not in fam:
+        orientar('Câncer de mama na família sem critério para teste genético',
+                 'Câncer de mama na família, por si só, não indica teste de BRCA1/2. Pelo NCCN, o teste é indicado quando há '
+                 'em parente próximo: câncer de mama aos 50 anos ou antes, triplo-negativo, em homem, bilateral; câncer de '
+                 'ovário ou de pâncreas; câncer de próstata metastático ou de alto risco; ou 3 ou mais casos de mama e/ou '
+                 'próstata do mesmo lado da família. Se algum desses se aplicar, marque o detalhe na história familiar. '
+                 'Sem eles, não testar de rotina; rever a história familiar a cada consulta.',
+                 NCCN_GENETICA + ' / ' + USPSTF_BRCA)
+    if 'ascendencia_asquenaze' in fam and not criterios and 'brca' not in fam:
+        orientar('Ascendência judaica asquenaze',
+                 'Ascendência associada a variantes fundadoras de BRCA1/2: aplicar ferramenta de risco familiar e oferecer '
+                 'aconselhamento genético; o teste pode ser considerado mesmo sem câncer na família.',
+                 NCCN_GENETICA + ' / ' + USPSTF_BRCA)
     if {'dac_precoce', 'cardiopatia', 'avc_precoce'} & fam:
         orientar('História familiar de DCV prematura',
                  'Agravante de risco cardiovascular (já considerado na categoria SBC). Em risco intermediário, o escore '

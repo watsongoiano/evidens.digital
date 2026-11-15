@@ -634,6 +634,20 @@
         <label class="opcao" for="diabetes_familiar"><input type="checkbox" id="diabetes_familiar" name="historia_familiar" value="diabetes">Diabetes</label>
         <label class="opcao" for="dac_precoce_familiar"><input type="checkbox" id="dac_precoce_familiar" name="historia_familiar" value="dac_precoce">DCV prematura (H &lt; 55, M &lt; 65)</label>
       </div>
+      <div id="familia-detalhes" class="mt-5" style="display: none;">
+        <p class="campo-rotulo">Detalhes dos casos de câncer na família</p>
+        <p class="text-[12px] text-ink/55 mb-2">Marque o que se aplica: decide se há indicação de teste genético (NCCN) e o intervalo da colonoscopia (USMSTF). Pode incluir parentes de 2º grau (avós, tios, netos).</p>
+        <div class="opcoes">
+          <label class="opcao" for="fam_mama_ate_50"><input type="checkbox" id="fam_mama_ate_50" name="historia_familiar" value="mama_ate_50">Câncer de mama aos 50 anos ou antes</label>
+          <label class="opcao" for="fam_mama_bilateral"><input type="checkbox" id="fam_mama_bilateral" name="historia_familiar" value="mama_bilateral">Mama bilateral, ou mama e ovário na mesma pessoa</label>
+          <label class="opcao" for="fam_mama_masculino"><input type="checkbox" id="fam_mama_masculino" name="historia_familiar" value="mama_masculino">Câncer de mama em homem</label>
+          <label class="opcao" for="fam_mama_triplo_negativo"><input type="checkbox" id="fam_mama_triplo_negativo" name="historia_familiar" value="mama_triplo_negativo">Mama triplo-negativo</label>
+          <label class="opcao" for="fam_mama_prostata_3"><input type="checkbox" id="fam_mama_prostata_3" name="historia_familiar" value="mama_prostata_3_casos">3 ou mais casos de mama e/ou próstata do mesmo lado</label>
+          <label class="opcao" for="fam_prostata_alto_risco"><input type="checkbox" id="fam_prostata_alto_risco" name="historia_familiar" value="prostata_alto_risco">Próstata metastático ou de alto risco</label>
+          <label class="opcao" for="fam_ccr_antes_60"><input type="checkbox" id="fam_ccr_antes_60" name="historia_familiar" value="ccr_antes_60">Colorretal antes dos 60 anos, ou em 2 ou mais parentes de 1º grau</label>
+          <label class="opcao" for="fam_asquenaze"><input type="checkbox" id="fam_asquenaze" name="historia_familiar" value="ascendencia_asquenaze">Ascendência judaica asquenaze (do paciente)</label>
+        </div>
+      </div>
       <!-- lista:familia:inicio -->
       <div class="campo mt-5 combo" id="lista_familia" data-campo="historia_familiar">
         <label for="lista_familia-busca">Outras condições em parente de 1º grau</label>
@@ -1737,6 +1751,18 @@
         document.getElementById('hiv').addEventListener('change', atualizarBlocoHiv);
         document.getElementById('exames_hiv_previos').addEventListener('change', atualizarBlocoHiv);
         atualizarBlocoHiv();
+
+        // Detalhes dos casos de câncer na família: aparecem quando há câncer que muda teste genético ou colonoscopia.
+        const CANCER_NA_FAMILIA = ['cancer_mama', 'cancer_colorretal', 'cancer_ovario', 'cancer_prostata', 'cancer_pancreas'];
+        function atualizarDetalhesDaFamilia() {
+            const bloco = document.getElementById('familia-detalhes');
+            const marcados = new FormData(checkupForm).getAll('historia_familiar');
+            const detalhe = Array.from(bloco.querySelectorAll('input:checked')).length > 0;
+            bloco.style.display = (detalhe || marcados.some(v => CANCER_NA_FAMILIA.includes(v))) ? 'block' : 'none';
+        }
+        checkupForm.addEventListener('change', atualizarDetalhesDaFamilia);
+        checkupForm.addEventListener('click', () => setTimeout(atualizarDetalhesDaFamilia, 0));
+        atualizarDetalhesDaFamilia();
 
         // Listener para tabagismo - mostrar campos condicionais
         document.getElementById('tabagismo').addEventListener('change', function(ev) {
