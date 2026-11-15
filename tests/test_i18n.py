@@ -97,7 +97,7 @@ def _chaves_do_motor():
     (``'x' in fam``, ``{'a', 'b'} & com``), das listas de condicoes.py e das caixas do formulário."""
     from src.utils import condicoes, medicamentos
 
-    chaves = {'historia_familiar': set(condicoes.FAMILIA) | set(condicoes.FAMILIA_CHIPS), 'comorbidades': set(condicoes.COMORBIDADES),
+    chaves = {'historia_familiar': set(condicoes.FAMILIA) | set(condicoes.FAMILIA_CHIPS) | set(condicoes.FAMILIA_DETALHES), 'comorbidades': set(condicoes.COMORBIDADES),
               'medicacoes': set(condicoes.MEDICACOES)}
     fonte = '\n'.join(c.read_text(encoding='utf-8') for c in sorted((RAIZ / 'src').rglob('*.py')))
     for chave, variavel in re.findall(r"'([a-z_0-9]+)' in (\w+)\b", fonte):

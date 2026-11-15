@@ -74,6 +74,7 @@ def _uspstf_url_by_title(title_lc: str) -> str:
 # Fontes citadas pelo pré-natal, pelas listas e pelas síndromes hereditárias: (trecho do rótulo, URL).
 # A ordem importa: o primeiro trecho contido no rótulo vence.
 _FONTES_DIRETAS = [
+    ('uspstf 2019 (brca)', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/brca-related-cancer-risk-assessment-genetic-counseling-and-genetic-testing'),
     ('ms 2024 (pcdt hiv)', 'https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf'),
     ('hivma/idsa 2024', 'https://doi.org/10.1093/cid/ciae479'),
     ('einstein pré-natal', 'https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf'),
