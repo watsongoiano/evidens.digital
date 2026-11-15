@@ -129,6 +129,17 @@ _SINONIMOS = {
     'Complemento C4': ['complemento serico c4', 'complemento c4', 'c4'],
     'Amilase': ['amilase'],
     'Lipase': ['lipase'],
+    'Ferro sérico': ['ferro', 'ferro serico'],
+    'Reticulócitos, contagem': ['reticulocitos', 'contagem de reticulocitos'],
+    'Tempo de tromboplastina parcial ativada': ['tempo de tromboplastina parcial ativado', 'ttpa', 'ttpa - tempo de tromboplastina parcial ativada'],
+    'Gasometria arterial, sangue arterial': ['gasometria arterial'],
+    'Colesterol (HDL)': ['hdl colesterol', 'colesterol hdl', 'hdl', 'hdl-colesterol'],
+    'Colesterol (LDL)': ['ldl colesterol', 'colesterol ldl', 'ldl', 'ldl-colesterol'],
+    'FAN (fator antinuclear)': ['fan', 'fator antinuclear', 'fan, pesquisa de autoanticorpos anticelulas hep-2',
+                                'pesquisa de autoanticorpos anticelulas hep-2'],
+    'Antimitocondria': ['anticorpos antimitocondria', 'anticorpo antimitocondria'],
+    'Antimúsculo liso': ['anticorpo antimusculo liso', 'anticorpos antimusculo liso'],
+    'Aspergilus, reação sorológica': ['sorologia para aspergillus', 'sorologia para aspergilus'],
 }
 
 _RUIDO = re.compile(r'^(resultado|valor(es)? de referencia|material|metodo|nota|notas|observ|paciente|nome|medico|'
@@ -136,6 +147,11 @@ _RUIDO = re.compile(r'^(resultado|valor(es)? de referencia|material|metodo|nota|
                     r'interpreta|referencia)')
 _MARCA = re.compile(r'^(m[ée]todo|material|\[?\s*data\s+d[ae]\s+coleta|amostra)\b', re.IGNORECASE)
 _DATA_DO_EXAME = re.compile(r'data\s+d[ae]\s+coleta\s*:?\s*(\d{2})/(\d{2})/(\d{4})', re.IGNORECASE)
+# "Coletado(13/11/2026 10:49) Liberado(...)": no fim de cada exame (laudos do sistema Matrix/MV). O "Cadastro"
+# do cabeçalho é a data do pedido, não da coleta, e não é usado.
+_COLETADO = re.compile(r'coletad[oa]\s*\(\s*(\d{2})/(\d{2})/(\d{4})', re.IGNORECASE)
+# Sobra no título: "TEMPO DE PROTROMBINA   Valores de Referência" (cabeçalho da coluna na mesma linha).
+_COLUNA_DE_REFERENCIA = re.compile(r'\s+valor(es)?\s+de\s+refer[eê]ncias?\s*$', re.IGNORECASE)
 _DATA_DA_PAGINA = re.compile(r'(?:data\s+d[ae]\s+coleta|coletad[oa]\s+em|\bcoleta)\s*:?\s+(\d{2})/(\d{2})/(\d{4})',
                              re.IGNORECASE)
 
@@ -171,6 +187,10 @@ def reconhecer(nome_no_laudo):
     chave = _normalizar(nome_no_laudo)
     if chave in _INDICE:
         return _INDICE[chave]
+    # "DOSAGEM DE CREATININA", "DOSAGEM DE POTÁSSIO TLR": o prefixo e a sigla da rotina não mudam o exame
+    enxuta = re.sub(r'\s+tlr$', '', re.sub(r'^dosagem d[eoa]s?\s+', '', chave))
+    if enxuta != chave:
+        return reconhecer(enxuta)
     # "NOME (OUTRO NOME)" ou "NOME - OUTRO NOME": só vale se TODAS as partes forem nomes do MESMO exame.
     # Um qualificador desconhecido ("GLICOSE (URINA)", "PSA (LIVRE)") deixa o título sem reconhecer.
     partes = [p.strip() for p in re.split(r'\s+-\s+|\(|\)', chave) if p.strip()]
@@ -217,7 +237,12 @@ def _data(dia, mes, ano, hoje_):
     return d if date(1990, 1, 1) <= d <= hoje_ else None
 
 
+def _sem_coluna(linha):
+    return _COLUNA_DE_REFERENCIA.sub('', linha)
+
+
 def _titulo_provavel(linha):
+    linha = _sem_coluna(linha)
     letras = [c for c in linha if c.isalpha()]
     if len(letras) < 2 or len(linha) > 90 or ':' in linha or '[' in linha or re.search(r'\d{2}/\d{2}/\d{4}', linha):
         return False
@@ -231,7 +256,7 @@ def _eh_titulo(linhas, i):
     reconhecido só conta como exame se vier logo acima de "Método", "Material" ou "Data da coleta"."""
     if not _titulo_provavel(linhas[i]):
         return False
-    return reconhecer(linhas[i]) is not None or any(_MARCA.match(l) for l in linhas[i + 1:i + 2])
+    return reconhecer(_sem_coluna(linhas[i])) is not None or any(_MARCA.match(l) for l in linhas[i + 1:i + 2])
 
 
 def extrair(textos, hoje_=None):
@@ -241,16 +266,32 @@ def extrair(textos, hoje_=None):
     """
     hoje_ = hoje_ or hoje()
     achados, nao_reconhecidos, sem_data = {}, [], []
+
+    def guardar(titulo, linha, data_exame):
+        if data_exame is None:
+            if linha not in sem_data:
+                sem_data.append(linha)
+            return
+        anterior = achados.get(titulo)
+        if anterior is None or data_exame > anterior['data']:
+            achados[titulo] = {'exame': titulo, 'data': data_exame, 'nome_no_laudo': linha}
+
+    pendente = None   # exame do fim da página anterior cujo "Coletado(...)" ficou na página seguinte
     for texto in textos:
         linhas = [re.sub(r'\s+', ' ', l).strip() for l in texto.splitlines()]
         linhas = [l for l in linhas if l]
         titulos = [i for i in range(len(linhas)) if _eh_titulo(linhas, i)]
+        if pendente:
+            antes = linhas[:titulos[0]] if titulos else linhas
+            m = next((m for m in map(_COLETADO.search, antes) if m), None)
+            guardar(pendente[0], pendente[1], _data(*m.groups(), hoje_) if m else pendente[2])
+            pendente = None
         # Data da página: só a do cabeçalho (antes do primeiro exame), nunca a de um exame da página.
         cabecalho = ' '.join(linhas[:titulos[0]] if titulos else linhas)
         m = _DATA_DA_PAGINA.search(cabecalho)
         da_pagina = _data(*m.groups(), hoje_) if m else None
         for n, i in enumerate(titulos):
-            linha = linhas[i]
+            linha = _sem_coluna(linhas[i])
             titulo = reconhecer(linha)
             fim = titulos[n + 1] if n + 1 < len(titulos) else len(linhas)
             data_exame, explicita = None, False
@@ -259,19 +300,22 @@ def extrair(textos, hoje_=None):
                 if m:
                     data_exame, explicita = _data(*m.groups(), hoje_), True
                     break
+            if not explicita:   # "Coletado(...)" em qualquer ponto do bloco do exame
+                m = next((m for m in map(_COLETADO.search, linhas[i + 1:fim]) if m), None)
+                if m:
+                    data_exame, explicita = _data(*m.groups(), hoje_), True
             if not explicita:   # data própria inválida (futura, impossível) não herda a da página
                 data_exame = da_pagina
             if titulo is None:
                 if linha not in nao_reconhecidos:
                     nao_reconhecidos.append(linha)
                 continue
-            if data_exame is None:
-                if linha not in sem_data:
-                    sem_data.append(linha)
+            if not explicita and n + 1 == len(titulos):
+                pendente = (titulo, linha, data_exame)   # o fim do exame pode estar na próxima página
                 continue
-            anterior = achados.get(titulo)
-            if anterior is None or data_exame > anterior['data']:
-                achados[titulo] = {'exame': titulo, 'data': data_exame, 'nome_no_laudo': linha}
+            guardar(titulo, linha, data_exame)
+    if pendente:
+        guardar(*pendente)
     exames = sorted(achados.values(), key=lambda e: tuss._chave(e['exame']))
     return {'exames': [dict(e, data=e['data'].isoformat()) for e in exames],
             'nao_reconhecidos': nao_reconhecidos, 'sem_data': sem_data}

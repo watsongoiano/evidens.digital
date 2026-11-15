@@ -200,3 +200,42 @@ def test_laudo_lido_adia_o_exame_em_dia(client):
     adiados = {r['titulo'] for r in dados.get('nao_incluidas', []) if r.get('estado') == 'em_dia'}
     hpv = 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular'
     assert hpv not in pedidos and hpv in adiados
+
+
+# Sistema Matrix/MV: "Valores de Referência" na linha do título, "DOSAGEM DE ..." e a coleta em
+# "Coletado(dd/mm/aaaa hh:mm) Liberado(...)" no fim de cada exame; o "Cadastro" do cabeçalho é a data do
+# pedido. Um exame pode terminar (com o "Coletado") na página seguinte.
+def _cabecalho_mv():
+    return ['Avenida Ficticia, s/n', f'Sr(a): {PACIENTE.upper()}', 'Pedido Matrix: 1 Prontuario MV: 2',
+            'Medico Solicitante: CRM-GO-1 MEDICO DE TESTE', 'Cadastro: 01/11/2026 10:35:00']
+
+
+FORMATO_MV = [
+    _cabecalho_mv() + [
+        'TEMPO DE PROTROMBINA                     Valores de Referencia',
+        '   82,0 %Atividade: 70,0 - 100,0 %', 'Material : Plasma', 'Metodo : Coagulometrico',
+        'Hash laudo: 9F589E504AA8',
+        'Coletado(13/11/2026 10:49) Liberado(13/11/2026 11:27)', 'Liberacao: Biomedico de Teste - CRBM 1'],
+    _cabecalho_mv() + [
+        'DOSAGEM DE CREATININA                    Valores de Referencia', 'Resultado: 0,9 mg/dL',
+        'Material: Soro', 'Coletado(12/11/2026 10:49) Liberado(12/11/2026 11:32)',
+        'DOSAGEM DE POTASSIO TLR                  Valores de referencia', 'Resultado: 4,1 mmol/L',
+        'Material: Sangue Total', 'Coletado(12/11/2026 10:49) Liberado(12/11/2026 11:27)',
+        'DOSAGEM DE HDL COLESTEROL', 'HDL: 45 mg/dL', 'Material: Soro'],
+    _cabecalho_mv() + ['Hash laudo: 1B2B', 'Coletado(10/11/2026 10:49) Liberado(10/11/2026 11:27)',
+                       'HORMONIO TIREOESTIMULANTE                Valores de Referencia',
+                       'Resultado: 2,1 uUI/mL', 'Coletado(09/11/2026 16:10) Liberado(09/11/2026 17:30)'],
+]
+
+
+def test_laudo_matrix_mv_le_titulo_sem_coluna_e_coleta_no_fim_do_exame():
+    lido = laudos.ler(_pdf(FORMATO_MV), HOJE)
+    assert _nomes(lido) == {
+        'Tempo de protrombina (TP/INR), plasma': '2026-11-13',
+        'Creatinina, soro': '2026-11-12',
+        'Potássio, soro': '2026-11-12',
+        'Colesterol (HDL)': '2026-11-10',     # o "Coletado" ficou no topo da página seguinte
+        'Hormônio Tireoestimulante (TSH), soro': '2026-11-09',
+    }
+    assert lido['sem_data'] == [] and lido['nao_reconhecidos'] == []
+    assert '2026-11-01' not in _nomes(lido).values()      # "Cadastro" não é coleta
