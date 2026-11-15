@@ -132,6 +132,15 @@ MEDICACOES = {
     'antipsicotico_atipico': {'rotulo': 'Antipsicótico de 2ª geração'},
     'inibidor_aromatase': {'rotulo': 'Inibidor de aromatase'},
     'hidroxicloroquina': {'rotulo': 'Hidroxicloroquina'},
+    'inibidor_jak': {'rotulo': 'Inibidor de JAK'},
+    'tocilizumabe': {'rotulo': 'Tocilizumabe'},
+    'rituximabe': {'rotulo': 'Rituximabe'},
+    'oncologico': {'rotulo': 'Tratamento sistêmico do câncer'},
+    'antraciclina': {'rotulo': 'Antraciclina', 'imunossupressao': True},
+    'anti_her2': {'rotulo': 'Terapia anti-HER2'},
+    'inibidor_checkpoint': {'rotulo': 'Inibidor de checkpoint imunológico'},
+    'fluoropirimidina': {'rotulo': 'Fluoropirimidina', 'imunossupressao': True},
+    'bloqueio_hormonal': {'rotulo': 'Agonista ou antagonista de GnRH'},
 }
 
 HEREDITARIAS = 'Síndromes e doenças hereditárias'
@@ -206,6 +215,15 @@ AGA_CELIACA = 'AGA 2019 (doença celíaca)'
 BSG_CELIACA = 'BSG 2014 (doença celíaca)'
 ACG_BARRETT = 'ACG 2022 (esôfago de Barrett)'
 PCOS = 'Diretriz internacional de SOP 2023'
+FDA_TOFACITINIBE = 'FDA (bula do tofacitinibe)'
+EMA_JAK = 'EMA 2023 (inibidores de JAK)'
+FDA_TOCILIZUMABE = 'FDA (bula do tocilizumabe)'
+BUCH_RITUXIMABE = 'Buch 2011 (consenso do rituximabe)'
+ESC_ONCO = 'ESC 2022 (cardio-oncologia)'
+ASCO_IRAE = 'ASCO 2021 (eventos imunomediados)'
+EMA_DPD = 'EMA 2020 (teste de DPD)'
+AHA_ADT = 'AHA/ACS/AUA 2010 (bloqueio androgênico)'
+NCCN_OSSO = 'NCCN (saúde óssea no câncer)'
 
 # Detalhes que abrem embaixo do item escolhido (como o bloco do HIV): vão no mesmo campo `comorbidades`.
 DETALHES_COMORBIDADE = {
@@ -613,6 +631,74 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         for titulo in ('Antígeno HBs, soro', 'Anticorpos anti-HBc total, soro'):
             add(titulo, 'laboratorio', 'Imunobiológico ou inibidor de JAK: rastrear hepatite B antes do tratamento '
                 '(risco de reativação, sobretudo com rituximabe).', 'Imunobiológico | Antes do tratamento', 'ACR 2022 / AASLD 2018', 'A', 'alta')
+    if 'biologico' in med:
+        add('Anticorpos anti-HCV, soro', 'laboratorio', 'Imunobiológico ou inibidor de JAK: rastrear hepatite C antes do '
+            'tratamento; HCV-RNA positivo, encaminhar para tratamento antiviral.', 'Imunobiológico | Antes do tratamento',
+            EULAR_INFECCOES, 'B', 'alta')
+    if 'inibidor_jak' in med:
+        add('Hemograma completo com plaquetas', 'laboratorio',
+            'Inibidor de JAK: neutrófilos, linfócitos e hemoglobina no início, após 4-8 semanas e depois a cada 3 meses.',
+            'Em uso de inibidor de JAK | A cada 3 meses', FDA_TOFACITINIBE, 'B', 'alta')
+        add('Colesterol total e frações, soro', 'laboratorio',
+            'Inibidor de JAK: perfil lipídico 4-8 semanas após o início (elevação de LDL e HDL) e depois conforme o risco '
+            'cardiovascular.', 'Em uso de inibidor de JAK | Após 4-8 semanas do início', FDA_TOFACITINIBE, 'B')
+        for titulo in ('Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro'):
+            add(titulo, 'laboratorio', 'Inibidor de JAK: enzimas hepáticas de rotina durante o uso.',
+                'Em uso de inibidor de JAK | Periódico', FDA_TOFACITINIBE, 'B')
+        orientar('Inibidor de JAK: quem tem mais risco',
+                 'Com 65 anos ou mais, tabagismo atual ou prévio de longa duração, outros fatores de risco cardiovascular ou de '
+                 'câncer, usar só se não houver alternativa adequada; cautela com risco de trombose venosa. Vacina inativada '
+                 'contra herpes-zóster antes ou durante o uso.', EMA_JAK)
+    if 'tocilizumabe' in med:
+        for titulo in ('Hemograma completo com plaquetas', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro'):
+            add(titulo, 'laboratorio', 'Tocilizumabe: neutrófilos, plaquetas e transaminases no início, 4-8 semanas após (as '
+                'transaminases a cada 4-8 semanas nos primeiros 6 meses) e depois a cada 3 meses.',
+                'Em uso de tocilizumabe | A cada 3 meses', FDA_TOCILIZUMABE, 'B', 'alta')
+        add('Colesterol total e frações, soro', 'laboratorio', 'Tocilizumabe: perfil lipídico 4-8 semanas após o início.',
+            'Em uso de tocilizumabe | Após 4-8 semanas do início', FDA_TOCILIZUMABE, 'B')
+    if 'rituximabe' in med:
+        add('Imunoglobulina G (IgG), soro', 'laboratorio',
+            'Rituximabe: IgG antes do primeiro ciclo e antes de cada novo ciclo (hipogamaglobulinemia aumenta o risco de '
+            'infecção grave).', 'Em uso de rituximabe | Antes de cada ciclo', BUCH_RITUXIMABE, 'C', 'alta')
+    if {'oncologico', 'antraciclina', 'anti_her2', 'inibidor_checkpoint', 'fluoropirimidina'} & med:
+        add('HBsAg, anti-HBc total e anti-HBs', 'laboratorio',
+            'Tratamento sistêmico do câncer: HBsAg, anti-HBc total e anti-HBs antes de iniciar (risco de reativação da '
+            'hepatite B).', 'Câncer em tratamento | Antes do tratamento', ASCO_HBV, 'B', 'alta')
+    if {'antraciclina', 'anti_her2'} & med:
+        for titulo in ('Ecocardiograma transtorácico', 'Eletrocardiograma de repouso'):
+            add(titulo, 'imagem', 'Antraciclina ou terapia anti-HER2: ecocardiograma (com strain, se disponível) e ECG antes '
+                'de iniciar; na terapia anti-HER2, ecocardiograma a cada 3 meses durante o tratamento e 12 meses após o fim.',
+                'Antraciclina ou anti-HER2 | Antes do tratamento', ESC_ONCO, 'A', 'alta')
+        for titulo in ('Troponina, soro', 'Peptídeo natriurético BNP/PROBNP'):
+            add(titulo, 'laboratorio', 'Antraciclina ou terapia anti-HER2: troponina e peptídeo natriurético basais para '
+                'estratificar o risco de cardiotoxicidade e comparar no seguimento.',
+                'Antraciclina ou anti-HER2 | Antes do tratamento', ESC_ONCO, 'B', 'alta')
+    if 'anti_her2' in med:
+        add('Ecocardiograma transtorácico', 'imagem', 'Terapia anti-HER2: ecocardiograma a cada 3 meses durante o tratamento.',
+            'Em terapia anti-HER2 | A cada 3 meses', ESC_ONCO, 'A', 'alta')
+    if 'inibidor_checkpoint' in med:
+        for titulo, categoria in (('Eletrocardiograma de repouso', 'imagem'), ('Troponina, soro', 'laboratorio'),
+                                  ('Peptídeo natriurético BNP/PROBNP', 'laboratorio')):
+            add(titulo, categoria, 'Inibidor de checkpoint: ECG, troponina e peptídeo natriurético antes de iniciar '
+                '(miocardite imunomediada).', 'Inibidor de checkpoint | Antes do tratamento', ESC_ONCO, 'A', 'alta')
+        for titulo in ('Hormônio Tireoestimulante (TSH), soro', 'T4 livre, soro', 'Glicose, soro'):
+            add(titulo, 'laboratorio', 'Inibidor de checkpoint: TSH, T4 livre e glicemia no início e a cada 4-6 semanas '
+                'durante o tratamento (tireoidite, hipofisite, diabetes imunomediado).',
+                'Inibidor de checkpoint | A cada 4-6 semanas', ASCO_IRAE, 'B', 'alta')
+    if 'fluoropirimidina' in med:
+        add('Genotipagem do gene DPYD (deficiência de DPD)', 'laboratorio',
+            'Fluoruracila ou capecitabina: testar deficiência de DPD (genotipagem do DPYD ou uracilemia) antes de iniciar; '
+            'deficiência completa contraindica, parcial pede dose inicial menor.', 'Fluoropirimidina | Antes do tratamento',
+            EMA_DPD, 'A', 'alta')
+    if 'bloqueio_hormonal' in med:
+        add('Densitometria óssea (DEXA)', 'imagem',
+            'Bloqueio hormonal com agonista ou antagonista de GnRH: densitometria no início e periodicamente (perda óssea '
+            'acelerada pela queda dos hormônios sexuais).', 'Agonista ou antagonista de GnRH | Antes do tratamento', NCCN_OSSO, 'B')
+        if sexo == 'masculino':
+            for titulo in ('Glicose, soro', 'Colesterol total e frações, soro'):
+                add(titulo, 'laboratorio', 'Bloqueio androgênico: pressão arterial, perfil lipídico e glicemia antes de '
+                    'iniciar (resistência insulínica, dislipidemia e risco cardiovascular).',
+                    'Bloqueio androgênico | Antes do tratamento', AHA_ADT, 'B')
     for classe, exames, quando, ref in (
             ('metotrexato', ('Hemograma completo com plaquetas', 'Aspartato aminotransferase, soro',
                              'Alanina aminotransferase, soro', 'Creatinina, soro'), 'A cada 8-12 semanas', 'ACR 2021'),

@@ -117,6 +117,8 @@ DESCRICOES = {
     '40307824': 'Toxoplasmose IgG - pesquisa e/ou dosagem',
     '40307832': 'Toxoplasmose IgM - pesquisa e/ou dosagem',
     '40308391': 'Proteína C reativa, quantitativa - pesquisa e/ou dosagem',
+    '40302571': 'Troponina',
+    '40307280': 'IgG',
     '40308553': 'Anti-transglutaminase tecidual - IgA',
     '40308804': 'Anticorpos anti peptídeo cíclico citrulinado - IgG',
     # Microbiologia
@@ -275,6 +277,8 @@ CODIGOS = {
     'Gama-GT, soro': ['40301990'],
     'Proteína C reativa ultrassensível, soro': ['40308391'],
     'Proteína C reativa, soro': ['40308391'],
+    'Troponina, soro': ['40302571'],
+    'Imunoglobulina G (IgG), soro': ['40307280'],
     'VHS': ['40304370'],
     'Insulina de jejum, soro': ['40316360'],
     'Apolipoproteína B, soro': ['40301362'],
@@ -365,6 +369,8 @@ SEM_CODIGO = {
         'código não conferido',
     'Prova de função pulmonar completa com difusão (DLCO)':
         'a difusão de CO não tem código conferido; o 40105075 também cobre a espirometria simples, que não mede a DLCO',
+    'Genotipagem do gene DPYD (deficiência de DPD)':
+        'teste farmacogenético sem código conferido na TUSS',
     'Carga viral da hepatite B (HBV-DNA quantitativo), plasma':
         'a biologia molecular conferida vai até 40314030; o código do HBV-DNA quantitativo não foi conferido',
     'Carga viral da hepatite C (HCV-RNA quantitativo), plasma':
