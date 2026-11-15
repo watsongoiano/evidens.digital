@@ -1963,10 +1963,13 @@
                 const est2 = pas >= 140 || pad >= 90, est1 = pas >= 130 || pad >= 80;
                 if (est2 || (est1 && !gest)) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg = HAS estágio ${est2 ? 2 : 1} (AHA/ACC 2025); confirmar com MRPA ou MAPA`);
                 // HAS resistente (AHA 2018; AHA/ACC 2025): PA acima da meta com 3 classes, ou 4 ou mais classes.
-                const resistente = motivoDeHasResistente(!!r.hipertensao || marcada('hipertensao'), pas, pad, gest);
+                // Só conta hipertensão pedida agora ou marcada à mão: a automática de uma rodada anterior, cuja regra
+                // já não vale (PA corrigida), não pode sustentar a si mesma pela HAS resistente.
+                const manual = id => marcada(id) && !auto.has(id);
+                const resistente = motivoDeHasResistente(!!r.hipertensao || manual('hipertensao'), pas, pad, gest);
                 if (resistente) pedir('has_resistente', 'classes', resistente);
                 // (motivo próprio da hipertensão, se já houver um, continua sendo o mostrado)
-                if (document.getElementById('has_resistente').checked || (resistente && !recusados.has('has_resistente'))) {
+                if (manual('has_resistente') || (resistente && !recusados.has('has_resistente'))) {
                     if (r.hipertensao) r.hipertensao.unshift({ fonte: 'has_resistente', motivo: 'HAS resistente marcada' });
                     else pedir('hipertensao', 'has_resistente', 'HAS resistente marcada');
                 }
