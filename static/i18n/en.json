@@ -1828,7 +1828,12 @@
   "HIV: informe o CD4 e/ou a carga viral mais recentes (ou responda que não há exames anteriores).": "HIV: enter the most recent CD4 and/or viral load (or answer that there are no previous results).",
   "Sem CD4 anterior: pedir agora.": "No previous CD4: order now.",
   "Sem carga viral anterior: pedir agora.": "No previous viral load: order now.",
-  "Tem CD4 e carga viral anteriores?": "Are there previous CD4 and viral load results?"
+  "Tem CD4 e carga viral anteriores?": "Are there previous CD4 and viral load results?",
+  "Use o e-mail e a senha da sua conta.": "Use the e-mail and password of your account.",
+  "Preencha os dados abaixo. A conta é liberada assim que o cadastro é concluído.": "Fill in the details below. The account is released as soon as registration is complete.",
+  "Guardamos nome, e-mail, registro profissional e perfil, para identificar quem usa a ferramenta. A senha é armazenada de forma irreversível. Dados de pacientes não são gravados. Detalhes nos": "We keep your name, e-mail, professional license and profile, to identify who uses the tool. The password is stored irreversibly. Patient data is not saved. Details in the",
+  "Contas cadastradas": "Registered accounts",
+  "Conta criada com sucesso.": "Account created successfully."
  },
  "padroes": [
   [

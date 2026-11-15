@@ -54,11 +54,27 @@ def test_painel_de_uso_e_lista_de_usuarios_sao_so_do_administrador(anonimo, clie
     assert client.get('/admin').status_code == 302
 
 
-# --- Cadastro com aprovação ---------------------------------------------------
+# --- Cadastro: liberado na hora; aprovação manual como reserva ---------------
 
-def test_cadastro_fica_pendente_e_so_entra_depois_de_aprovado(anonimo, admin, contas):
+@pytest.fixture()
+def aprovacao_manual(admin, contas):
+    """Liga a aprovação manual pelo painel e desliga no fim (o banco de teste é compartilhado)."""
+    assert admin.post('/api/admin/aprovacao-manual', json={'ligada': True}).get_json() == {'ok': True, 'aprovacao_manual': True}
+    yield
+    contas.definir_aprovacao_manual(False)
+
+
+def test_cadastro_ja_nasce_liberado(anonimo, contas):
     email, resposta = _novo(anonimo)
-    assert resposta.status_code == 202
+    assert resposta.status_code == 201 and resposta.get_json()['liberado'] is True
+    assert contas.por_id(_id(contas, email))['situacao'] == 'aprovado'
+    assert _entrar(anonimo, email).status_code == 200
+    assert anonimo.post('/api/checkup-intelligent', json=PACIENTE).status_code == 200
+
+
+def test_com_aprovacao_manual_fica_pendente_e_so_entra_depois_de_aprovado(anonimo, admin, contas, aprovacao_manual):
+    email, resposta = _novo(anonimo)
+    assert resposta.status_code == 202 and resposta.get_json()['liberado'] is False
     assert _entrar(anonimo, email).status_code == 403                      # senha certa, conta pendente
     assert anonimo.post('/api/checkup-intelligent', json=PACIENTE).status_code == 401
 
@@ -66,6 +82,39 @@ def test_cadastro_fica_pendente_e_so_entra_depois_de_aprovado(anonimo, admin, co
     assert _entrar(anonimo, email).status_code == 200
     assert anonimo.post('/api/checkup-intelligent', json=PACIENTE).status_code == 200
     assert anonimo.get('/intelligent-tools').status_code == 200
+
+
+def test_pendente_de_antes_entra_quando_a_aprovacao_manual_e_desligada(anonimo, admin, contas, aprovacao_manual):
+    email, _ = _novo(anonimo)
+    assert _entrar(anonimo, email).status_code == 403
+    assert admin.post('/api/admin/aprovacao-manual', json={'ligada': False}).get_json()['aprovacao_manual'] is False
+    assert _entrar(anonimo, email).status_code == 200
+    assert contas.por_id(_id(contas, email))['situacao'] == 'aprovado'
+
+
+def test_liberacao_no_login_nao_desfaz_bloqueio_feito_no_meio_tempo(contas):
+    """Se o administrador bloqueia entre a leitura da conta e a liberação, o bloqueio prevalece."""
+    contas.definir_aprovacao_manual(True)
+    try:
+        u = contas.criar(f'corrida{next(_seq)}@exemplo.test', 'Pessoa Corrida', 'CRM-GO 3', 'medico', SENHA_DE_TESTE)
+    finally:
+        contas.definir_aprovacao_manual(False)
+    contas.definir_situacao(u['id'], 'bloqueado')
+    assert contas.liberar_pendente(u['id'])['situacao'] == 'bloqueado'
+    contas.definir_situacao(u['id'], 'pendente')
+    assert contas.liberar_pendente(u['id'])['situacao'] == 'aprovado'
+
+
+def test_bloqueio_continua_valendo(anonimo, admin, contas):
+    email, _ = _novo(anonimo)
+    assert admin.post(f'/api/admin/usuarios/{_id(contas, email)}/bloquear').status_code == 200
+    assert _entrar(anonimo, email).status_code == 403
+
+
+def test_aprovacao_manual_e_so_do_administrador(anonimo, client, admin):
+    assert anonimo.post('/api/admin/aprovacao-manual', json={'ligada': True}).status_code == 401
+    assert client.post('/api/admin/aprovacao-manual', json={'ligada': True}).status_code == 403
+    assert admin.get('/api/admin/usuarios').get_json()['aprovacao_manual'] is False
 
 
 def test_cadastro_repetido_responde_igual_e_nao_troca_a_senha(anonimo, contas):
@@ -87,7 +136,7 @@ def test_cadastro_invalido_e_recusado(anonimo, extra):
 def test_cadastro_nunca_cria_administrador(anonimo, contas):
     email, _ = _novo(anonimo, administrador=True, situacao='aprovado')
     u = contas.por_id(_id(contas, email))
-    assert not u['administrador'] and u['situacao'] == 'pendente'
+    assert not u['administrador'] and u['situacao'] == 'aprovado'
 
 
 # --- Login ---------------------------------------------------------------------
@@ -225,7 +274,7 @@ def test_rota_de_saude_do_banco(anonimo, monkeypatch):
 def test_crm_em_dois_campos_vira_registro_padronizado(anonimo, contas):
     r = anonimo.post('/api/auth/cadastro', json=dict(aceite_termos=True, email='doiscampos@exemplo.test', nome='Pessoa de Teste', perfil='medico',
                                                      crm_uf='go', crm_numero='26.815', senha=SENHA_DE_TESTE))
-    assert r.status_code == 202
+    assert r.status_code == 201
     assert next(u for u in contas.listar() if u['email'] == 'doiscampos@exemplo.test')['registro'] == 'CRM-GO 26815'
 
 
@@ -240,13 +289,14 @@ def test_crm_invalido_e_recusado(anonimo, campos):
 def test_estudante_informa_matricula(anonimo, contas):
     r = anonimo.post('/api/auth/cadastro', json=dict(aceite_termos=True, email='aluna@exemplo.test', nome='Aluna de Teste', perfil='estudante',
                                                      registro='2023001 · UFG', senha=SENHA_DE_TESTE))
-    assert r.status_code == 202
+    assert r.status_code == 201
     assert next(u for u in contas.listar() if u['email'] == 'aluna@exemplo.test')['registro'] == '2023001 · UFG'
 
 
 def test_depois_do_cadastro_a_pessoa_vai_para_o_login_com_o_aviso(anonimo):
-    """O formulário de cadastro leva ao login; lá, o aviso de que a conta aguarda aprovação."""
+    """O formulário de cadastro leva ao login; lá, o aviso de conta liberada (ou, com aprovação manual, recebida)."""
     assert 'data-form="cadastro" data-destino="/login?cadastro=recebido"' in anonimo.get('/cadastro').get_data(as_text=True)
     assert anonimo.get('/login?cadastro=recebido').status_code == 200
     js = anonimo.get('/static/conta.js').get_data(as_text=True)
-    assert "get('cadastro') === 'recebido'" in js and 'Cadastro recebido.' in js
+    assert "cadastro === 'liberado'" in js and 'Conta criada com sucesso.' in js
+    assert "cadastro === 'recebido'" in js and 'Cadastro recebido.' in js
