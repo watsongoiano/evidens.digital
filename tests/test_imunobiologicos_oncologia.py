@@ -20,15 +20,23 @@ def test_todo_imunobiologico_rastreia_tb_e_hepatites(nome):
 
 def test_inibidor_de_jak():
     recs, orient = _rodar(['baricitinibe'])
-    assert recs['Hemograma completo com plaquetas']['subtitulo'] == 'Em uso de inibidor de JAK | A cada 3 meses'
+    assert recs['Hemograma completo com plaquetas']['subtitulo'] == 'Em uso de inibidor de JAK | A cada 4-12 semanas'
     assert recs['Colesterol total e frações, soro']['subtitulo'].endswith('Após 4-8 semanas do início')
     assert 'Inibidor de JAK: quem tem mais risco' in orient
     assert 'Hemograma completo com plaquetas' not in _rodar(['adalimumabe'])[0]
 
 
+def test_fase_inicial_nao_e_adiada_por_trimestre():
+    """Sem saber a fase do tratamento, vale o menor intervalo (4-8 semanas no início), não o trimestral."""
+    from src.utils import periodicidade
+    for nome in ('tocilizumabe', 'tofacitinibe'):
+        rec = _rodar([nome])[0]['Hemograma completo com plaquetas']
+        assert periodicidade.intervalo(rec['subtitulo'])['n'] == 4 and periodicidade.intervalo(rec['subtitulo'])['unidade'] == 'semanas'
+
+
 def test_tocilizumabe_e_rituximabe():
     toci, _ = _rodar(['tocilizumabe'])
-    assert toci['Alanina aminotransferase, soro']['subtitulo'] == 'Em uso de tocilizumabe | A cada 3 meses'
+    assert toci['Alanina aminotransferase, soro']['subtitulo'] == 'Em uso de tocilizumabe | A cada 4-12 semanas'
     rtx, _ = _rodar(['rituximabe'])
     assert rtx['Imunoglobulina G (IgG), soro']['subtitulo'] == 'Em uso de rituximabe | Antes de cada ciclo'
 

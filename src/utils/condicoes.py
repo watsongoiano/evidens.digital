@@ -638,7 +638,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     if 'inibidor_jak' in med:
         add('Hemograma completo com plaquetas', 'laboratorio',
             'Inibidor de JAK: neutrófilos, linfócitos e hemoglobina no início, após 4-8 semanas e depois a cada 3 meses.',
-            'Em uso de inibidor de JAK | A cada 3 meses', FDA_TOFACITINIBE, 'B', 'alta')
+            'Em uso de inibidor de JAK | A cada 4-12 semanas', FDA_TOFACITINIBE, 'B', 'alta')
         add('Colesterol total e frações, soro', 'laboratorio',
             'Inibidor de JAK: perfil lipídico 4-8 semanas após o início (elevação de LDL e HDL) e depois conforme o risco '
             'cardiovascular.', 'Em uso de inibidor de JAK | Após 4-8 semanas do início', FDA_TOFACITINIBE, 'B')
@@ -653,7 +653,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         for titulo in ('Hemograma completo com plaquetas', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro'):
             add(titulo, 'laboratorio', 'Tocilizumabe: neutrófilos, plaquetas e transaminases no início, 4-8 semanas após (as '
                 'transaminases a cada 4-8 semanas nos primeiros 6 meses) e depois a cada 3 meses.',
-                'Em uso de tocilizumabe | A cada 3 meses', FDA_TOCILIZUMABE, 'B', 'alta')
+                'Em uso de tocilizumabe | A cada 4-12 semanas', FDA_TOCILIZUMABE, 'B', 'alta')
         add('Colesterol total e frações, soro', 'laboratorio', 'Tocilizumabe: perfil lipídico 4-8 semanas após o início.',
             'Em uso de tocilizumabe | Após 4-8 semanas do início', FDA_TOCILIZUMABE, 'B')
     if 'rituximabe' in med:
