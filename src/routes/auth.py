@@ -1,4 +1,5 @@
-"""Área de acesso: cadastro com aprovação, login, senha e administração de contas."""
+"""Área de acesso: cadastro (liberado na hora ou, com a aprovação manual ligada, depois de aprovado),
+login, senha e administração de contas."""
 import hmac
 import os
 import time
@@ -177,8 +178,12 @@ def cadastro():
                     contas.liberar_email(novo['id'], 'boas_vindas')
         except Exception as erro:
             print(f'⚠️ E-mail de cadastro falhou: {type(erro).__name__}')
-    # Mesma resposta para e-mail novo e e-mail já cadastrado.
-    return jsonify({'ok': True, 'mensagem': 'Cadastro recebido. Você poderá entrar assim que a conta for aprovada.'}), 202
+    # Mesma resposta para e-mail novo e e-mail já cadastrado: ela depende só do modo de aprovação.
+    if contas.aprovacao_manual():
+        return jsonify({'ok': True, 'liberado': False,
+                        'mensagem': 'Cadastro recebido. Você poderá entrar assim que a conta for aprovada.'}), 202
+    return jsonify({'ok': True, 'liberado': True,
+                    'mensagem': 'Conta criada com sucesso.'}), 201
 
 
 @auth_bp.route('/auth/login', methods=['POST'])
@@ -191,7 +196,11 @@ def login():
     if u is None:
         return jsonify({'error': 'E-mail ou senha incorretos.'}), 401
     if u['situacao'] == 'pendente':
-        return jsonify({'error': 'Sua conta ainda aguarda aprovação.'}), 403
+        if contas.aprovacao_manual():
+            return jsonify({'error': 'Sua conta ainda aguarda aprovação.'}), 403
+        # Pedido feito quando a aprovação manual estava ligada: com ela desligada, libera agora
+        # (só se continuar pendente; reativar conta bloqueada é só pelo administrador).
+        u = contas.liberar_pendente(u['id'])
     if u['situacao'] != 'aprovado':
         return jsonify({'error': 'Esta conta está bloqueada. Fale com o responsável técnico.'}), 403
     _abrir_sessao(u)
@@ -332,7 +341,16 @@ def admin_boas_vindas_teste():
 @auth_bp.route('/admin/usuarios')
 @exigir_administrador
 def admin_usuarios():
-    return jsonify({'usuarios': [contas.publico(u) for u in contas.listar()]})
+    return jsonify({'usuarios': [contas.publico(u) for u in contas.listar()],
+                    'aprovacao_manual': contas.aprovacao_manual()})
+
+
+@auth_bp.route('/admin/aprovacao-manual', methods=['POST'])
+@exigir_administrador
+def admin_aprovacao_manual():
+    """Liga ou desliga a aprovação manual de contas novas (reserva para fechar o cadastro)."""
+    ligada = _corpo().get('ligada') in (True, 'true', '1', 1, 'on')
+    return jsonify({'ok': True, 'aprovacao_manual': contas.definir_aprovacao_manual(ligada)})
 
 
 @auth_bp.route('/admin/usuarios/<int:uid>/<acao>', methods=['POST'])

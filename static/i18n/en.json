@@ -1848,7 +1848,12 @@
   "Não foi possível abrir o PDF.": "The PDF could not be opened.",
   "O PDF não tem texto (parece escaneado). Digite os exames e as datas.": "The PDF has no text (it looks scanned). Type the tests and dates.",
   "Anexe o laudo em PDF.": "Attach the lab report as a PDF.",
-  "O PDF tem mais de 60 páginas.": "The PDF has more than 60 pages."
+  "O PDF tem mais de 60 páginas.": "The PDF has more than 60 pages.",
+  "Use o e-mail e a senha da sua conta.": "Use the e-mail and password of your account.",
+  "Preencha os dados abaixo. A conta é liberada assim que o cadastro é concluído.": "Fill in the details below. The account is released as soon as registration is complete.",
+  "Guardamos nome, e-mail, registro profissional e perfil, para identificar quem usa a ferramenta. A senha é armazenada de forma irreversível. Dados de pacientes não são gravados. Detalhes nos": "We keep your name, e-mail, professional license and profile, to identify who uses the tool. The password is stored irreversibly. Patient data is not saved. Details in the",
+  "Contas cadastradas": "Registered accounts",
+  "Conta criada com sucesso.": "Account created successfully."
  },
  "padroes": [
   [

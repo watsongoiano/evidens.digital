@@ -66,7 +66,7 @@ def test_cadastro_sem_aceite_e_recusado_e_com_aceite_fica_registrado(anonimo, co
     r = anonimo.post('/api/auth/cadastro', json=dados)
     assert r.status_code == 400 and 'Termos de Uso' in ' '.join(r.get_json()['erros'])
     assert not any(u['email'] == 'aceite@exemplo.test' for u in contas.listar())
-    assert anonimo.post('/api/auth/cadastro', json=dict(dados, aceite_termos='on')).status_code == 202
+    assert anonimo.post('/api/auth/cadastro', json=dict(dados, aceite_termos='on')).status_code == 201
     u = next(u for u in contas.listar() if u['email'] == 'aceite@exemplo.test')
     assert contas.aceitou(u['id'], termos.VERSAO)
 

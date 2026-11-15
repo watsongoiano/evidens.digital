@@ -56,7 +56,9 @@
           return;
         }
         if (form.dataset.destino) {
-          window.location.href = form.dataset.destino;
+          // Cadastro com a conta já liberada (aprovação manual desligada) chega ao login com outro aviso.
+          window.location.href = r.liberado ? form.dataset.destino.replace('cadastro=recebido', 'cadastro=liberado')
+                                            : form.dataset.destino;
           return;
         }
         form.reset();
@@ -70,9 +72,12 @@
     });
   });
 
-  // Quem acabou de se cadastrar chega ao login com o aviso de que a conta aguarda aprovação.
+  // Quem acabou de se cadastrar chega ao login com o aviso do que acontece agora.
   const login = document.querySelector('form[data-form="login"]');
-  if (login && new URLSearchParams(window.location.search).get('cadastro') === 'recebido') {
+  const cadastro = new URLSearchParams(window.location.search).get('cadastro');
+  if (login && cadastro === 'liberado') {
+    mostrar(login.querySelector('[data-ok]'), 'Conta criada com sucesso.');
+  } else if (login && cadastro === 'recebido') {
     mostrar(login.querySelector('[data-ok]'),
       'Cadastro recebido. Assim que o responsável técnico conferir o seu registro e aprovar a conta, entre aqui com o e-mail e a senha que você cadastrou.');
   }
@@ -147,7 +152,7 @@
     carregar();
   }
 
-  // Painel de aprovação
+  // Painel de contas
   const listas = document.querySelectorAll('[data-lista]');
   if (listas.length) {
     const erro = document.querySelector('main > [data-erro]');
@@ -181,7 +186,8 @@
       const r = await fetch('/api/admin/usuarios', { credentials: 'same-origin' });
       if (r.status === 401) { window.location.href = '/login'; return; }
       if (!r.ok) { mostrar(erro, 'Não foi possível carregar os cadastros.'); return; }
-      const { usuarios } = await r.json();
+      const { usuarios, aprovacao_manual } = await r.json();
+      pintarAprovacao(aprovacao_manual);
       listas.forEach(lista => {
         const situacao = lista.dataset.lista;
         const itens = usuarios.filter(u => u.situacao === situacao);
@@ -190,6 +196,28 @@
         const n = document.querySelector(`[data-contagem="${situacao}"]`); if (n) n.textContent = itens.length;
       });
     }
+
+    // Reserva: aprovação manual de contas novas (desligada, a conta nasce liberada)
+    const aprovacao = document.querySelector('[data-aprovacao]');
+    let manual = false;
+    function pintarAprovacao(ligada) {
+      if (!aprovacao) return;
+      manual = !!ligada;
+      aprovacao.querySelector('[data-aprovacao-estado]').textContent = manual
+        ? 'Ligada: contas novas ficam em "Aguardando aprovação" até você aprovar.'
+        : 'Desligada: a conta é liberada assim que é criada. Ligue se precisar fechar o cadastro de novo.';
+      aprovacao.querySelector('[data-aprovacao-botao]').textContent = manual ? 'Desligar a aprovação manual' : 'Ligar a aprovação manual';
+    }
+    const botaoAprovacao = aprovacao && aprovacao.querySelector('[data-aprovacao-botao]');
+    if (botaoAprovacao) botaoAprovacao.addEventListener('click', async () => {
+      mostrar(erro, ''); mostrar(ok, '');
+      botaoAprovacao.disabled = true;
+      const { resposta, dados } = await enviar('/api/admin/aprovacao-manual', { ligada: !manual });
+      botaoAprovacao.disabled = false;
+      if (!resposta.ok) { mostrar(erro, (dados && dados.error) || 'Não foi possível mudar a aprovação manual.'); return; }
+      pintarAprovacao(dados.aprovacao_manual);
+      mostrar(ok, dados.aprovacao_manual ? 'Aprovação manual ligada.' : 'Aprovação manual desligada: contas novas já nascem liberadas.');
+    });
 
     async function agir(u, acao) {
       mostrar(erro, ''); mostrar(ok, '');
@@ -272,17 +300,17 @@
       fetch('/api/admin/aviso', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(d => {
         if (!d) { estado.textContent = 'Não foi possível verificar o aviso por e-mail.'; return; }
         estadoBv.textContent = d.boas_vindas
-          ? 'Boas-vindas: ligadas. Quem pede a conta recebe um e-mail explicando a aprovação, a fase de desenvolvimento e o convite a dar feedback.'
+          ? 'Boas-vindas: ligadas. Quem cria a conta recebe um e-mail com a apresentação, a fase de desenvolvimento e o convite a dar feedback.'
           : 'Boas-vindas: desligadas. Para enviar e-mail a quem se cadastra, verifique o domínio evidens.life na Resend e defina AVISO_CADASTRO_DE na Vercel (passo a passo em docs/deploy.md).';
         botaoBv.disabled = !d.boas_vindas;
         pendentesAg = d.agradecimento_pendentes || 0;
         pintarAgradecimento(d.boas_vindas);
         if (!d.configurado) {
-          estado.textContent = 'Desligado. Para receber um e-mail a cada novo pedido de conta, cadastre a variável RESEND_API_KEY na Vercel (passo a passo em docs/deploy.md).';
+          estado.textContent = 'Desligado. Para receber um e-mail a cada conta nova, cadastre a variável RESEND_API_KEY na Vercel (passo a passo em docs/deploy.md).';
           return;
         }
         estado.textContent = d.destinatarios.length
-          ? 'Ligado. Cada novo pedido de conta é avisado a: ' + d.destinatarios.join(', ') + '.'
+          ? 'Ligado. Cada conta nova é avisada a: ' + d.destinatarios.join(', ') + '.'
           : 'Ligado, mas sem destinatário: defina AVISO_CADASTRO_PARA na Vercel.';
         botao.disabled = !d.destinatarios.length;
       }).catch(() => { estado.textContent = 'Não foi possível verificar o aviso por e-mail.'; });

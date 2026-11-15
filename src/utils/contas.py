@@ -117,7 +117,13 @@ _ESQUEMA = [
         id {pk}, usuario_id BIGINT NOT NULL, versao TEXT NOT NULL, aceito_em BIGINT NOT NULL
     )""",
     "CREATE INDEX IF NOT EXISTS aceites_termos_usuario ON aceites_termos (usuario_id)",
+    # Ajustes do administrador (chave e valor). Hoje: aprovação manual de cadastros.
+    """CREATE TABLE IF NOT EXISTS configuracoes (
+        chave TEXT PRIMARY KEY, valor TEXT NOT NULL
+    )""",
 ]
+
+APROVACAO_MANUAL = "aprovacao_manual"
 
 
 @contextmanager
@@ -239,8 +245,25 @@ def _validar_cadastro(email, nome, registro, perfil, senha):
         raise DadosInvalidos(erros)
 
 
+def aprovacao_manual() -> bool:
+    """Reserva para fechar a porta: com a aprovação manual ligada, contas novas nascem pendentes e só
+    entram depois de aprovadas em /admin. Desligada (padrão), a conta já nasce liberada."""
+    with _conexao() as executar:
+        linha = executar('SELECT valor FROM configuracoes WHERE chave = ?', (APROVACAO_MANUAL,)).fetchone()
+    return bool(linha) and linha[0] == '1'
+
+
+def definir_aprovacao_manual(ligada: bool):
+    with _conexao() as executar:
+        executar('INSERT INTO configuracoes (chave, valor) VALUES (?, ?) '
+                 'ON CONFLICT (chave) DO UPDATE SET valor = excluded.valor',
+                 (APROVACAO_MANUAL, '1' if ligada else '0'))
+    return bool(ligada)
+
+
 def criar(email, nome, registro, perfil, senha, administrador=False):
-    """Cria a conta. Administrador já nasce aprovado; os demais ficam pendentes.
+    """Cria a conta. Já nasce aprovada, salvo com a aprovação manual ligada (aí fica pendente).
+    Administrador sempre nasce aprovado.
 
     Devolve o usuário, ou None se o e-mail já tinha conta (quem chama responde
     do mesmo jeito nos dois casos, para não revelar quem está cadastrado).
@@ -250,6 +273,7 @@ def criar(email, nome, registro, perfil, senha, administrador=False):
     registro = (registro or '').strip()
     _validar_cadastro(email, nome, registro, perfil, senha)
     agora = int(time.time())
+    liberada = administrador or not aprovacao_manual()
     with _conexao() as executar:
         if executar(_SELECT + 'WHERE email = ?', (email,)).fetchone():
             return None
@@ -258,8 +282,8 @@ def criar(email, nome, registro, perfil, senha, administrador=False):
                 'INSERT INTO usuarios (email, nome, registro, perfil, senha_hash, situacao, administrador, criado_em, decidido_em) '
                 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 (email, nome, registro, perfil, generate_password_hash(senha),
-                 'aprovado' if administrador else 'pendente', 1 if administrador else 0,
-                 agora, agora if administrador else None))
+                 'aprovado' if liberada else 'pendente', 1 if administrador else 0,
+                 agora, agora if liberada else None))
         except Exception as erro:
             # Outra requisição criou o mesmo e-mail (ou o administrador) no intervalo.
             if 'unique' in str(erro).lower() or 'IntegrityError' in type(erro).__name__ or 'UniqueViolation' in type(erro).__name__:
@@ -344,6 +368,18 @@ def definir_situacao(uid, situacao):
         # Mudar a situação encerra as sessões abertas do usuário.
         executar('UPDATE usuarios SET situacao = ?, decidido_em = ?, versao_sessao = versao_sessao + 1 WHERE id = ? AND administrador = 0',
                  (situacao, int(time.time()), uid))
+        return _usuario(executar(_SELECT + 'WHERE id = ?', (uid,)).fetchone())
+
+
+def liberar_pendente(uid):
+    """Libera no login uma conta que ficou pendente (aprovação manual desligada depois).
+
+    A troca só vale se a conta continua 'pendente' no banco: um bloqueio feito nesse meio-tempo
+    pelo administrador prevalece. Devolve o usuário como ficou.
+    """
+    with _conexao() as executar:
+        executar("UPDATE usuarios SET situacao = 'aprovado', decidido_em = ? "
+                 "WHERE id = ? AND administrador = 0 AND situacao = 'pendente'", (int(time.time()), uid))
         return _usuario(executar(_SELECT + 'WHERE id = ?', (uid,)).fetchone())
 
 

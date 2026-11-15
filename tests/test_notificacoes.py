@@ -46,12 +46,12 @@ def test_sem_chave_nada_e_enviado_e_o_cadastro_segue(anonimo, monkeypatch):
     monkeypatch.delenv('RESEND_API_KEY', raising=False)
     chamadas = []
     monkeypatch.setattr(notificacoes.urllib.request, 'urlopen', lambda *a, **k: chamadas.append(1))
-    assert _cadastrar(anonimo, 'semchave@exemplo.test').status_code == 202
+    assert _cadastrar(anonimo, 'semchave@exemplo.test').status_code == 201
     assert not chamadas and not notificacoes.configurado()
 
 
 def test_novo_pedido_avisa_o_administrador(anonimo, administrador, resend):
-    assert _cadastrar(anonimo, 'aviso1@exemplo.test').status_code == 202
+    assert _cadastrar(anonimo, 'aviso1@exemplo.test').status_code == 201
     assert len(resend) == 1
     envio = resend[0]
     assert envio['url'] == 'https://api.resend.com/emails' and envio['timeout'] == notificacoes.TEMPO_LIMITE
@@ -85,7 +85,7 @@ def test_falha_no_envio_nao_impede_o_cadastro(anonimo, administrador, monkeypatc
         raise urllib.error.URLError('sem rede')
 
     monkeypatch.setattr(notificacoes.urllib.request, 'urlopen', quebra)
-    assert _cadastrar(anonimo, 'aviso4@exemplo.test').status_code == 202
+    assert _cadastrar(anonimo, 'aviso4@exemplo.test').status_code == 201
     assert any(u['email'] == 'aviso4@exemplo.test' for u in contas.listar())
 
 
@@ -124,10 +124,10 @@ def test_enxurrada_de_cadastros_nao_lota_a_caixa_do_administrador(anonimo, admin
     contador = [0]
     for n in range(1, notificacoes.LIMITE_POR_HORA + 5):
         contador[0] = n
-        assert _cadastrar(anonimo, f'enxurrada{n}@exemplo.test').status_code == 202
+        assert _cadastrar(anonimo, f'enxurrada{n}@exemplo.test').status_code == 201
     assert len(resend) == notificacoes.LIMITE_POR_HORA + 1
     assert 'muitos pedidos' in resend[-1]['corpo']['subject']
-    assert all('novo pedido de conta' in e['corpo']['subject'] for e in resend[:-1])
+    assert all('nova conta' in e['corpo']['subject'] for e in resend[:-1])
 
 
 def test_contagem_de_cadastros_recentes(contas):
@@ -151,17 +151,31 @@ def test_boas_vindas_desligadas_sem_remetente_do_dominio(anonimo, administrador,
 def test_boas_vindas_vao_para_quem_se_cadastrou(anonimo, administrador, resend, monkeypatch):
     monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
     monkeypatch.setenv('EMAIL_CONTATO', 'retorno@exemplo.test')
-    assert _cadastrar(anonimo, 'bv1@exemplo.test', nome='Maria Nova Silva').status_code == 202
+    assert _cadastrar(anonimo, 'bv1@exemplo.test', nome='Maria Nova Silva').status_code == 201
     assert len(resend) == 2
     bv = next(e['corpo'] for e in resend if e['corpo']['to'] == ['bv1@exemplo.test'])
     assert bv['subject'] == 'Bem-vindo(a) ao Evidēns' and bv['from'] == 'Evidēns <contato@exemplo.test>'
     assert bv['reply_to'] == 'retorno@exemplo.test'
     for trecho in ('Olá, Maria.', 'fase de desenvolvimento', 'feedback', 'https://evidens.life/login',
-                   'https://evidens.life/contact ou pelo e-mail retorno@exemplo.test', 'conferir o cadastro',
+                   'https://evidens.life/contact ou pelo e-mail retorno@exemplo.test', 'já está liberada',
                    'cerca de 21% dos exames laboratoriais', 'cerca de 45% dos exames indicados', 'PLOS ONE, 2013',
                    'https://hms.harvard.edu/news/unnecessary-testing', 'Criador e responsável técnico'):
         assert trecho in bv['text'], trecho
     assert SENHA_DE_TESTE not in bv['text'] and administrador['email'] not in bv['text']
+    assert 'conferir o cadastro' not in bv['text']
+
+
+def test_com_aprovacao_manual_os_emails_falam_em_conferencia(anonimo, admin, administrador, resend, monkeypatch, contas):
+    monkeypatch.setenv('AVISO_CADASTRO_DE', 'Evidēns <contato@exemplo.test>')
+    assert admin.post('/api/admin/aprovacao-manual', json={'ligada': True}).get_json()['aprovacao_manual'] is True
+    try:
+        assert _cadastrar(anonimo, 'bvm@exemplo.test').status_code == 202
+    finally:
+        contas.definir_aprovacao_manual(False)
+    bv = next(e['corpo'] for e in resend if e['corpo']['to'] == ['bvm@exemplo.test'])
+    aviso = next(e['corpo'] for e in resend if e['corpo']['to'] == [administrador['email']])
+    assert 'conferir o cadastro' in bv['text'] and 'já está liberada' not in bv['text']
+    assert 'novo pedido de conta' in aviso['subject'] and 'aprove ou recuse' in aviso['text']
 
 
 def test_boas_vindas_sem_email_de_contato_mostram_so_a_pagina(monkeypatch):
@@ -212,7 +226,7 @@ def antigos(contas, anonimo, administrador, monkeypatch):
     for chave, situacao in (('aprovada', 'aprovado'), ('pendente', 'pendente'), ('bloqueada', 'bloqueado')):
         u = contas.criar(f'antigo-{chave}-{len(contas.listar())}@exemplo.test', f'{chave.capitalize()} Antiga',
                          'CRM-GO 999', 'medico', SENHA_DE_TESTE)
-        criados[chave] = contas.definir_situacao(u['id'], situacao) if situacao != 'pendente' else u
+        criados[chave] = contas.definir_situacao(u['id'], situacao)
     return criados
 
 

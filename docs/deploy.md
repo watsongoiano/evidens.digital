@@ -37,9 +37,10 @@ Sem banco ou sem chave, a home continua no ar e o check-up responde 503 ("área 
 Fluxo:
 
 1. O administrador é criado em `/configurar`, com o código de instalação. A página deixa de funcionar assim que existe um administrador.
-2. Médicos, residentes e estudantes se cadastram em `/cadastro` e ficam **pendentes**.
-3. O administrador confere o registro e aprova (ou recusa) em `/admin`. Bloquear derruba na hora as sessões da pessoa.
-4. Não há envio de e-mail: quem esquece a senha pede uma **senha temporária**, gerada pelo administrador em `/admin` e mostrada uma única vez.
+2. Médicos, residentes e estudantes se cadastram em `/cadastro` e a conta já nasce **liberada**.
+3. Em `/admin` o administrador pode **bloquear** qualquer conta (derruba na hora as sessões da pessoa) e reativá-la depois.
+4. Reserva: em `/admin`, **Aprovação manual** fecha o cadastro. Ligada, contas novas ficam **pendentes** até o administrador aprovar (ou recusar); desligada de novo, quem ficou pendente entra no próximo login.
+5. Não há envio de e-mail: quem esquece a senha pede uma **senha temporária**, gerada pelo administrador em `/admin` e mostrada uma única vez.
 
 Proteções: senha com hash (scrypt), mínimo de 10 caracteres; bloqueio de 15 minutos após 5 senhas erradas para o mesmo e-mail; cookie de sessão `HttpOnly`, `Secure` e `SameSite=Lax`, válido por 12 horas; envios vindos de outro site são recusados; trocar a senha encerra as outras sessões.
 
