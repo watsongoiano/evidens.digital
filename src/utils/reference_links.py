@@ -74,6 +74,30 @@ def _uspstf_url_by_title(title_lc: str) -> str:
 # Fontes citadas pelo pré-natal, pelas listas e pelas síndromes hereditárias: (trecho do rótulo, URL).
 # A ordem importa: o primeiro trecho contido no rótulo vence.
 _FONTES_DIRETAS = [
+    # Comorbidades (src/utils/condicoes.py): as específicas antes das genéricas ("acg", "aasld")
+    ('eular 2016 (risco cv', 'https://doi.org/10.1136/annrheumdis-2016-209775'),
+    ('eular 2022 (risco cv', 'https://doi.org/10.1136/annrheumdis-2021-221733'),
+    ('eular 2010 (monitorização do les)', 'https://doi.org/10.1136/ard.2009.117200'),
+    ('acr 2024 (nefrite lúpica)', 'https://doi.org/10.1002/art.43212'),
+    ('eular 2022 (infecções', 'https://doi.org/10.1136/ard-2022-223335'),
+    ('eular 2019 (vacinação', 'https://doi.org/10.1136/annrheumdis-2019-215882'),
+    ('aad-npf 2019', 'https://doi.org/10.1016/j.jaad.2018.11.058'),
+    ('acr/chest 2023', 'https://doi.org/10.1002/art.42860'),
+    ('esc/ers 2022', 'https://doi.org/10.1093/eurheartj/ehac237'),
+    ('ecco 2015', 'https://doi.org/10.1093/ecco-jcc/jju009'),
+    ('bsg 2025', 'https://doi.org/10.1136/gutjnl-2025-335023'),
+    ('acg 2017 (cuidados preventivos', 'https://doi.org/10.1038/ajg.2016.537'),
+    ('aasld 2018 (hepatite b)', 'https://doi.org/10.1002/hep.29800'),
+    ('aasld/idsa (hepatite c)', 'https://www.hcvguidelines.org/'),
+    ('asco 2020 (hepatite b', 'https://doi.org/10.1200/JCO.20.01757'),
+    ('nhlbi 2014', 'https://doi.org/10.1001/jama.2014.10517'),
+    ('gina 2024', 'https://ginasthma.org/reports/'),
+    ('esc 2024 (fibrilação atrial)', 'https://doi.org/10.1093/eurheartj/ehae176'),
+    ('aga 2019 (doença celíaca)', 'https://doi.org/10.1053/j.gastro.2018.12.010'),
+    ('bsg 2014 (doença celíaca)', 'https://doi.org/10.1136/gutjnl-2013-306578'),
+    ('acg 2022 (esôfago de barrett)', 'https://doi.org/10.14309/ajg.0000000000001680'),
+    ('diretriz internacional de sop 2023', 'https://doi.org/10.1210/clinem/dgad463'),
+    ('acr 2020', 'https://doi.org/10.1002/acr.24180'),
     ('ms 2024 (pcdt hiv)', 'https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf'),
     ('hivma/idsa 2024', 'https://doi.org/10.1093/cid/ciae479'),
     ('einstein pré-natal', 'https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf'),
@@ -137,7 +161,7 @@ _FONTES_DIRETAS = [
 
 
 def _fonte_direta(token_lc: str, title_lc: str) -> str:
-    if token_lc.startswith('aasld'):
+    if token_lc.startswith('aasld') and '(' not in token_lc:
         # carcinoma hepatocelular (ultrassonografia na cirrose) ou esteatose (FIB-4)
         return ('https://doi.org/10.1097/HEP.0000000000000466' if 'ultrassonografia' in title_lc
                 else 'https://doi.org/10.1097/HEP.0000000000000323')

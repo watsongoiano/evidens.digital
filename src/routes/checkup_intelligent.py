@@ -1151,7 +1151,7 @@ def generate_intelligent_recommendations():
         
         # Listas de comorbidades, medicações e história familiar (src/utils/condicoes.py)
         orientacoes = condicoes.aplicar(recommendations, age, sex, comorbidades, medicacoes_checkboxes, familia,
-                                        gestante=is_pregnant)
+                                        gestante=is_pregnant, tabagismo=tabagismo, imc=imc)
 
         # Gestação: rotina do pré-natal pela idade gestacional; itens do check-up geral que
         # não se aplicam na gestação saem da lista e aparecem como "adiados".

@@ -239,7 +239,14 @@
             <li role="option" data-valor="cirrose" data-busca="cirrose / hepatopatia cronica figado ">Cirrose / hepatopatia crônica</li>
             <li role="option" data-valor="hepatite_b_cronica" data-busca="hepatite b cronica figado hbv ">Hepatite B crônica</li>
             <li role="option" data-valor="hepatite_c" data-busca="hepatite c figado hcv ">Hepatite C</li>
-            <li role="option" data-valor="doenca_autoimune" data-busca="doenca inflamatoria autoimune (ar, lupus, psoriase, dii) artrite reumatoide les crohn retocolite espondilite ">Doença inflamatória autoimune (AR, lúpus, psoríase, DII)</li>
+            <li role="option" data-valor="artrite_reumatoide" data-busca="artrite reumatoide ar autoimune doenca inflamatoria reumatismo ">Artrite reumatoide</li>
+            <li role="option" data-valor="lupus" data-busca="lupus eritematoso sistemico les autoimune doenca inflamatoria colagenose ">Lúpus eritematoso sistêmico</li>
+            <li role="option" data-valor="psoriase" data-busca="psoriase pele autoimune doenca inflamatoria ">Psoríase</li>
+            <li role="option" data-valor="artrite_psoriasica" data-busca="artrite psoriasica aps psoriase espondiloartrite autoimune doenca inflamatoria ">Artrite psoriásica</li>
+            <li role="option" data-valor="espondiloartrite" data-busca="espondiloartrite axial (espondilite anquilosante) ea espondilite anquilosante autoimune doenca inflamatoria ">Espondiloartrite axial (espondilite anquilosante)</li>
+            <li role="option" data-valor="doenca_crohn" data-busca="doenca de crohn dii doenca inflamatoria intestinal autoimune ">Doença de Crohn</li>
+            <li role="option" data-valor="retocolite" data-busca="retocolite ulcerativa rcu colite ulcerativa dii doenca inflamatoria intestinal autoimune ">Retocolite ulcerativa</li>
+            <li role="option" data-valor="esclerose_sistemica" data-busca="esclerose sistemica (esclerodermia) autoimune colagenose ">Esclerose sistêmica (esclerodermia)</li>
             <li role="option" data-valor="asma_grave" data-busca="asma moderada ou grave  ">Asma moderada ou grave</li>
             <li role="option" data-valor="asplenia" data-busca="asplenia / esplenectomia baco ">Asplenia / esplenectomia</li>
             <li role="option" data-valor="anemia_falciforme" data-busca="doenca falciforme anemia falciforme hemoglobinopatia ">Doença falciforme</li>
@@ -269,6 +276,46 @@
         </div>
         <div class="opcoes mt-3" id="lista_comorbidades-itens"></div>
         <p id="lista_comorbidades-dica" class="text-[12px] text-ink/50 mt-2">Digite o nome ou escolha na lista. Os itens com exame, vacina ou alerta próprios entram nas recomendações.</p>
+      </div>
+      <div id="detalhes-lupus" class="bloco-condicional" data-comorbidade="lupus" hidden>
+        <p class="campo-rotulo text-teal-dark">Lúpus: o que se aplica</p>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Muda a frequência da proteinúria (ACR 2024).</p>
+        <div class="opcoes">
+          <label class="opcao" for="det_les_nefrite"><input type="checkbox" id="det_les_nefrite" name="comorbidades" value="les_nefrite">Nefrite lúpica (atual ou prévia)</label>
+        </div>
+      </div>
+      <div id="detalhes-psoriase" class="bloco-condicional" data-comorbidade="psoriase" hidden>
+        <p class="campo-rotulo text-teal-dark">Psoríase: o que se aplica</p>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Muda a frequência do rastreio cardiometabólico (AAD-NPF 2019).</p>
+        <div class="opcoes">
+          <label class="opcao" for="det_psoriase_extensa"><input type="checkbox" id="det_psoriase_extensa" name="comorbidades" value="psoriase_extensa">Mais de 10% da superfície corporal, ou candidata a tratamento sistêmico ou fototerapia</label>
+        </div>
+      </div>
+      <div id="detalhes-doenca_crohn" class="bloco-condicional" data-comorbidade="doenca_crohn" hidden>
+        <p class="campo-rotulo text-teal-dark">Doença de Crohn: o que se aplica</p>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Define a colonoscopia de vigilância (BSG 2025) e B12/folato (ECCO 2015).</p>
+        <div class="opcoes">
+          <label class="opcao" for="det_crohn_colon"><input type="checkbox" id="det_crohn_colon" name="comorbidades" value="crohn_colon">Acomete o cólon (1/3 ou mais do cólon)</label>
+          <label class="opcao" for="det_crohn_8_anos"><input type="checkbox" id="det_crohn_8_anos" name="comorbidades" value="crohn_8_anos">8 anos ou mais desde o início dos sintomas</label>
+          <label class="opcao" for="det_crohn_cep"><input type="checkbox" id="det_crohn_cep" name="comorbidades" value="crohn_cep">Colangite esclerosante primária</label>
+          <label class="opcao" for="det_crohn_delgado"><input type="checkbox" id="det_crohn_delgado" name="comorbidades" value="crohn_delgado">Acomete o intestino delgado ou já teve ressecção ileal</label>
+        </div>
+      </div>
+      <div id="detalhes-retocolite" class="bloco-condicional" data-comorbidade="retocolite" hidden>
+        <p class="campo-rotulo text-teal-dark">Retocolite: o que se aplica</p>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Define a colonoscopia de vigilância (BSG 2025).</p>
+        <div class="opcoes">
+          <label class="opcao" for="det_rcu_alem_reto"><input type="checkbox" id="det_rcu_alem_reto" name="comorbidades" value="rcu_alem_reto">Colite além do reto (não só proctite)</label>
+          <label class="opcao" for="det_rcu_8_anos"><input type="checkbox" id="det_rcu_8_anos" name="comorbidades" value="rcu_8_anos">8 anos ou mais desde o início dos sintomas</label>
+          <label class="opcao" for="det_rcu_cep"><input type="checkbox" id="det_rcu_cep" name="comorbidades" value="rcu_cep">Colangite esclerosante primária</label>
+        </div>
+      </div>
+      <div id="detalhes-hepatite_b_cronica" class="bloco-condicional" data-comorbidade="hepatite_b_cronica" hidden>
+        <p class="campo-rotulo text-teal-dark">Hepatite B: o que se aplica</p>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Define o rastreio de carcinoma hepatocelular sem cirrose (AASLD 2018).</p>
+        <div class="opcoes">
+          <label class="opcao" for="det_hbv_risco_chc"><input type="checkbox" id="det_hbv_risco_chc" name="comorbidades" value="hbv_risco_chc">História familiar de carcinoma hepatocelular, coinfecção por HIV ou hepatite D, homem asiático ≥ 40 anos, mulher asiática ≥ 50 anos ou origem africana subsaariana</label>
+        </div>
       </div>
       <!-- lista:comorbidades:fim -->
     </section>
@@ -546,30 +593,30 @@
             <li class="combo-grupo" role="presentation">Imunossupressores e imunobiológicos</li>
             <li role="option" data-valor="metotrexato" data-busca="metotrexato imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1" data-detalhe="metotrexato">Metotrexato</li>
             <li role="option" data-valor="azatioprina" data-busca="azatioprina imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1" data-detalhe="azatioprina">Azatioprina</li>
-            <li role="option" data-valor="leflunomida" data-busca="leflunomida imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-marca="doenca_autoimune" data-imuno="1">Leflunomida</li>
+            <li role="option" data-valor="leflunomida" data-busca="leflunomida imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Leflunomida</li>
             <li role="option" data-valor="micofenolato" data-busca="micofenolato imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Micofenolato</li>
             <li role="option" data-valor="ciclosporina" data-busca="ciclosporina imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Ciclosporina</li>
             <li role="option" data-valor="tacrolimo" data-busca="tacrolimo imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Tacrolimo</li>
             <li role="option" data-valor="sirolimo" data-busca="sirolimo imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Sirolimo</li>
             <li role="option" data-valor="everolimo" data-busca="everolimo imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Everolimo</li>
-            <li role="option" data-valor="tofacitinibe" data-busca="tofacitinibe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-marca="doenca_autoimune" data-imuno="1">Tofacitinibe</li>
-            <li role="option" data-valor="upadacitinibe" data-busca="upadacitinibe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-marca="doenca_autoimune" data-imuno="1">Upadacitinibe</li>
-            <li role="option" data-valor="adalimumabe" data-busca="adalimumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-marca="doenca_autoimune" data-imuno="1">Adalimumabe</li>
-            <li role="option" data-valor="etanercepte" data-busca="etanercepte imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-marca="doenca_autoimune" data-imuno="1">Etanercepte</li>
-            <li role="option" data-valor="infliximabe" data-busca="infliximabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-marca="doenca_autoimune" data-imuno="1">Infliximabe</li>
-            <li role="option" data-valor="golimumabe" data-busca="golimumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-marca="doenca_autoimune" data-imuno="1">Golimumabe</li>
-            <li role="option" data-valor="tocilizumabe" data-busca="tocilizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-marca="doenca_autoimune" data-imuno="1">Tocilizumabe</li>
+            <li role="option" data-valor="tofacitinibe" data-busca="tofacitinibe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Tofacitinibe</li>
+            <li role="option" data-valor="upadacitinibe" data-busca="upadacitinibe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Upadacitinibe</li>
+            <li role="option" data-valor="adalimumabe" data-busca="adalimumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Adalimumabe</li>
+            <li role="option" data-valor="etanercepte" data-busca="etanercepte imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Etanercepte</li>
+            <li role="option" data-valor="infliximabe" data-busca="infliximabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Infliximabe</li>
+            <li role="option" data-valor="golimumabe" data-busca="golimumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Golimumabe</li>
+            <li role="option" data-valor="tocilizumabe" data-busca="tocilizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Tocilizumabe</li>
             <li role="option" data-valor="rituximabe" data-busca="rituximabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Rituximabe</li>
-            <li role="option" data-valor="ustequinumabe" data-busca="ustequinumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-marca="doenca_autoimune" data-imuno="1">Ustequinumabe</li>
-            <li role="option" data-valor="risanquizumabe" data-busca="risanquizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-marca="doenca_autoimune" data-imuno="1">Risanquizumabe</li>
-            <li role="option" data-valor="guselcumabe" data-busca="guselcumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-marca="doenca_autoimune" data-imuno="1">Guselcumabe</li>
+            <li role="option" data-valor="ustequinumabe" data-busca="ustequinumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Ustequinumabe</li>
+            <li role="option" data-valor="risanquizumabe" data-busca="risanquizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Risanquizumabe</li>
+            <li role="option" data-valor="guselcumabe" data-busca="guselcumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Guselcumabe</li>
             <li role="option" data-valor="natalizumabe" data-busca="natalizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Natalizumabe</li>
             <li role="option" data-valor="ocrelizumabe" data-busca="ocrelizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Ocrelizumabe</li>
             <li role="option" data-valor="fingolimode" data-busca="fingolimode imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Fingolimode</li>
             <li class="combo-grupo" role="presentation">Reumatologia e gota</li>
-            <li role="option" data-valor="hidroxicloroquina" data-busca="hidroxicloroquina reumatologia e gota reumatismo gota " data-marca="doenca_autoimune" data-detalhe="hidroxicloroquina">Hidroxicloroquina</li>
-            <li role="option" data-valor="sulfassalazina" data-busca="sulfassalazina reumatologia e gota reumatismo gota " data-marca="doenca_autoimune">Sulfassalazina</li>
-            <li role="option" data-valor="mesalazina" data-busca="mesalazina reumatologia e gota reumatismo gota " data-marca="doenca_autoimune">Mesalazina</li>
+            <li role="option" data-valor="hidroxicloroquina" data-busca="hidroxicloroquina reumatologia e gota reumatismo gota " data-detalhe="hidroxicloroquina">Hidroxicloroquina</li>
+            <li role="option" data-valor="sulfassalazina" data-busca="sulfassalazina reumatologia e gota reumatismo gota ">Sulfassalazina</li>
+            <li role="option" data-valor="mesalazina" data-busca="mesalazina reumatologia e gota reumatismo gota ">Mesalazina</li>
             <li role="option" data-valor="alopurinol" data-busca="alopurinol reumatologia e gota reumatismo gota ">Alopurinol</li>
             <li role="option" data-valor="colchicina" data-busca="colchicina reumatologia e gota reumatismo gota ">Colchicina</li>
             <li role="option" data-valor="benzbromarona" data-busca="benzbromarona reumatologia e gota reumatismo gota ">Benzbromarona</li>
@@ -1737,6 +1784,20 @@
         document.getElementById('hiv').addEventListener('change', atualizarBlocoHiv);
         document.getElementById('exames_hiv_previos').addEventListener('change', atualizarBlocoHiv);
         atualizarBlocoHiv();
+
+        // Comorbidade com detalhes (lúpus, psoríase, Crohn, retocolite, hepatite B): o item escolhido abre o seu bloco,
+        // como o do HIV. Tirar o item fecha o bloco e desmarca os detalhes.
+        function atualizarDetalhesDasComorbidades() {
+            const marcadas = new FormData(checkupForm).getAll('comorbidades');
+            document.querySelectorAll('[data-comorbidade]').forEach(bloco => {
+                const aberto = marcadas.includes(bloco.dataset.comorbidade);
+                bloco.hidden = !aberto;
+                if (!aberto) bloco.querySelectorAll('input:checked').forEach(c => { c.checked = false; });
+            });
+        }
+        checkupForm.addEventListener('change', atualizarDetalhesDasComorbidades);
+        checkupForm.addEventListener('click', () => setTimeout(atualizarDetalhesDasComorbidades, 0));
+        atualizarDetalhesDasComorbidades();
 
         // Listener para tabagismo - mostrar campos condicionais
         document.getElementById('tabagismo').addEventListener('change', function(ev) {

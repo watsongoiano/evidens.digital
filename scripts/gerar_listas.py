@@ -78,6 +78,24 @@ def _combo(ident, campo, rotulo, exemplo, dica, linhas):
 '''
 
 
+def _detalhes_das_comorbidades():
+    """Um bloco por comorbidade com detalhes (condicoes.DETALHES_COMORBIDADE), aberto só com o item escolhido."""
+    saida = []
+    for chave, (titulo, dica, itens) in condicoes.DETALHES_COMORBIDADE.items():
+        opcoes = '\n'.join(
+            f'          <label class="opcao" for="det_{valor}"><input type="checkbox" id="det_{valor}" name="comorbidades" '
+            f'value="{valor}">{html.escape(rotulo)}</label>' for valor, rotulo in itens)
+        saida.append(f'''      <div id="detalhes-{chave}" class="bloco-condicional" data-comorbidade="{chave}" hidden>
+        <p class="campo-rotulo text-teal-dark">{html.escape(titulo)}</p>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">{html.escape(dica)}</p>
+        <div class="opcoes">
+{opcoes}
+        </div>
+      </div>
+''')
+    return ''.join(saida)
+
+
 def blocos(pagina):
     def simples(itens):
         """O que já é botão na tela não entra na lista (sem duplicata); itens com 'grupo' vêm agrupados."""
@@ -111,7 +129,7 @@ def blocos(pagina):
     return {
         'comorbidades': _combo('lista_comorbidades', 'comorbidades', 'Outras comorbidades', 'hipotireoidismo, asma, gota…',
                                'Digite o nome ou escolha na lista. Os itens com exame, vacina ou alerta próprios entram nas recomendações.',
-                               simples(condicoes.COMORBIDADES)),
+                               simples(condicoes.COMORBIDADES)) + _detalhes_das_comorbidades(),
         'medicacoes': '      <div class="opcoes mt-4">\n' + '\n'.join(chips) + '\n      </div>\n'
                       + _combo('lista_medicacoes', 'medicacoes', 'Outras medicações', 'anlodipino, rosuvastatina, bombinha…',
                                'Busca por princípio ativo ou classe. A medicação define monitorização laboratorial, vacinas e '
