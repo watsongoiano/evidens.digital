@@ -56,6 +56,33 @@
       </div>
     </form>
   </section>
+  <section data-timbrado style="display: none;">
+    <h2 class="text-[22px] font-light tracking-tight mt-12">Papel timbrado</h2>
+    <p class="text-[15px] text-ink/65 leading-relaxed mt-3">Envie o PDF do receituário que você usa no consultório (só o fundo: logo, cabeçalho e rodapé). Os pedidos de exames e a prescrição de vacinas passam a sair nele, escritos no espaço entre o cabeçalho e o rodapé. O timbrado fica só na sua conta. A guia SP/SADT continua no formato padrão.</p>
+    <div class="secao mt-5 flex flex-col gap-5">
+      <label for="timbradoPdf" data-soltar class="flex flex-col items-center justify-center gap-2 text-center rounded-2xl border-2 border-dashed border-teal/30 bg-mist/40 px-5 py-8 cursor-pointer hover:border-teal transition">
+        <i class="fa-solid fa-file-arrow-up text-teal text-[22px]"></i>
+        <span class="text-[15px] text-ink/80">Arraste o PDF do timbrado aqui ou clique para escolher</span>
+        <span class="text-[12px] text-ink/50">PDF de até 3 MB; vale a 1ª página</span>
+      </label>
+      <input type="file" id="timbradoPdf" accept="application/pdf,.pdf" class="sr-only">
+      <div data-timbrado-atual style="display: none;" class="flex flex-col gap-4">
+        <p class="text-[14px] text-ink/70"><i class="fa-solid fa-file-pdf text-teal mr-1.5"></i><span data-timbrado-nome></span></p>
+        <div class="grade">
+          <div class="campo"><label for="margem_topo">Espaço do cabeçalho (mm)</label><input type="number" id="margem_topo" step="1" min="10" inputmode="numeric"></div>
+          <div class="campo"><label for="margem_base">Espaço do rodapé (mm)</label><input type="number" id="margem_base" step="1" min="10" inputmode="numeric"></div>
+        </div>
+        <p class="text-[12px] text-ink/55 -mt-2">Medimos automaticamente onde termina o cabeçalho e onde começa o rodapé. Confira na prévia; se o texto encostar no timbrado, aumente o espaço.</p>
+        <div class="flex flex-wrap gap-3">
+          <button type="button" class="btn-escuro" data-timbrado-margens>Salvar espaços</button>
+          <a target="_blank" rel="noopener" class="btn-claro" data-timbrado-previa><i class="fa-solid fa-eye text-[11px]"></i>Ver prévia</a>
+          <button type="button" class="btn-claro" data-timbrado-remover>Remover timbrado</button>
+        </div>
+      </div>
+      <div data-erro role="alert" class="aviso aviso-erro" style="display: none;"></div>
+      <div data-ok role="status" class="aviso aviso-info" style="display: none;"></div>
+    </div>
+  </section>
   <h2 class="text-[22px] font-light tracking-tight mt-12">Trocar a senha</h2>
   <form data-form="senha"  class="secao mt-5 flex flex-col gap-5" novalidate>
     <div class="grade">

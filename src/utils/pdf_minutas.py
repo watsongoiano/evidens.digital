@@ -127,13 +127,19 @@ MARGEM_INFERIOR = 42      # mm reservados à assinatura e ao rodapé de cada fol
 
 
 class _Minuta(FPDF):
-    def __init__(self, titulo, idioma='pt'):
-        super().__init__(orientation='P', unit='mm', format='A4')
+    def __init__(self, titulo, idioma='pt', timbrado=None):
+        # Com papel timbrado (src/utils/timbrado.py): página do tamanho do timbrado, texto só entre o cabeçalho
+        # e o rodapé dele, sem a marca do Evidēns; o timbrado entra como fundo depois (timbrado.aplicar).
+        self.timbrado = timbrado
+        formato = (timbrado['largura'], timbrado['altura']) if timbrado else 'A4'
+        super().__init__(orientation='P', unit='mm', format=formato)
         self.idioma = idioma
         titulo = self.t(titulo)
         self.titulo = titulo
-        self.set_margins(20, 18, 20)
-        self.set_auto_page_break(auto=True, margin=MARGEM_INFERIOR)   # espaço para assinatura e rodapé
+        self.base = (timbrado['margem_base'] if timbrado else 0)
+        self.margem_inferior = MARGEM_INFERIOR + self.base
+        self.set_margins(20, timbrado['margem_topo'] if timbrado else 18, 20)
+        self.set_auto_page_break(auto=True, margin=self.margem_inferior)   # espaço para assinatura e rodapé
         self.add_font('DejaVu', '', str(FONTES / 'DejaVuSans.ttf'))
         self.add_font('DejaVu', 'B', str(FONTES / 'DejaVuSans-Bold.ttf'))
         self.add_font('DejaVu', 'I', str(FONTES / 'DejaVuSans-Oblique.ttf'))
@@ -147,20 +153,21 @@ class _Minuta(FPDF):
     def header(self):
         if getattr(self, 'em_guia', False):
             return
-        self.set_font('DejaVu', 'B', 11)
-        self.set_text_color(14, 151, 181)
-        self.cell(0, 6, 'evidēns', new_x='LMARGIN', new_y='NEXT')
+        if not self.timbrado:
+            self.set_font('DejaVu', 'B', 11)
+            self.set_text_color(14, 151, 181)
+            self.cell(0, 6, 'evidēns', new_x='LMARGIN', new_y='NEXT')
         self.set_font('DejaVu', 'B', 15)
         self.set_text_color(20, 41, 47)
         self.cell(0, 10, self.titulo, align='C', new_x='LMARGIN', new_y='NEXT')
         self.set_draw_color(20, 41, 47)
-        self.line(20, self.get_y() + 1, 190, self.get_y() + 1)
+        self.line(self.l_margin, self.get_y() + 1, self.w - self.r_margin, self.get_y() + 1)
         self.ln(6)
 
     def footer(self):
         if getattr(self, 'em_guia', False):
             return
-        self.set_y(-14)
+        self.set_y(-14 - self.base)
         self.set_font('DejaVu', '', 7.5)
         self.set_text_color(90, 100, 103)
         self.cell(0, 5, f'{self.t("Página")} {self.page_no()}/{{nb}}', align='R')
@@ -181,13 +188,13 @@ class _Minuta(FPDF):
 
     def assinatura(self):
         """Linha de assinatura no fim da última página (nova página se não couber)."""
-        if self.get_y() > 224:
+        if self.get_y() > self.h - self.margem_inferior - 31:
             self.add_page()
         # A assinatura fica dentro da margem reservada à quebra automática: desligá-la aqui.
         self.set_auto_page_break(auto=False)
-        self.set_y(-52)
+        self.set_y(-52 - self.base)
         self.set_draw_color(20, 41, 47)
-        self.line(60, self.get_y(), 150, self.get_y())
+        self.line(self.w / 2 - 45, self.get_y(), self.w / 2 + 45, self.get_y())
         self.set_font('DejaVu', '', 9.5)
         self.set_text_color(20, 41, 47)
         resp = getattr(self, 'responsavel', None)
@@ -282,7 +289,7 @@ def _faixa(pdf, y, texto):
 
 
 def _pagina_da_guia(pdf, dados_paciente, guia, linhas, parte, partes):
-    pdf.add_page(orientation='L')
+    pdf.add_page(orientation='L', format='A4')   # a guia é sempre A4, com ou sem papel timbrado
     cred, resp = guia['credenciamento'], guia.get('responsavel') or {}
     uf, numero = _numero_do_crm(resp.get('crm'))
     _encaixar(pdf, 10, 8, 58, 9, cred['operadora'], 11, estilo='B')
@@ -381,7 +388,7 @@ def _anexar_guias(pdf, dados_paciente, exames, guia):
 
 def _folha_de_pedido(pdf, dados_paciente, exames, numerar=True):
     """Uma folha de pedido: dados do paciente, "Solicito:", os exames e a assinatura."""
-    pdf.set_auto_page_break(auto=True, margin=MARGEM_INFERIOR)    # a assinatura da folha anterior desliga
+    pdf.set_auto_page_break(auto=True, margin=pdf.margem_inferior)    # a assinatura da folha anterior desliga
     pdf.add_page()
     pdf.dados_do_paciente(dados_paciente)
     pdf.set_font('DejaVu', 'B', 11)
@@ -404,8 +411,17 @@ def _folha_de_pedido(pdf, dados_paciente, exames, numerar=True):
     pdf.assinatura()
 
 
-def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='pt', guia=None):
-    pdf = _Minuta(TITULOS[categoria], idioma)
+def _com_timbrado(pdf, timbrado, paginas=None):
+    """Bytes do PDF; com timbrado, as `paginas` primeiras (o pedido) ganham o fundo do médico."""
+    conteudo = pdf.bytes()
+    if not timbrado:
+        return conteudo
+    from src.utils import timbrado as papel
+    return papel.aplicar(conteudo, timbrado['arquivo'], paginas)
+
+
+def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='pt', guia=None, timbrado=None):
+    pdf = _Minuta(TITULOS[categoria], idioma, timbrado)
     pdf.responsavel = responsavel
     if categoria == 'imagem':
         # Exames de imagem: um pedido por folha (cada serviço de imagem fica com o seu), no mesmo PDF.
@@ -413,21 +429,22 @@ def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='
             _folha_de_pedido(pdf, dados_paciente, [exame], numerar=False)
     else:
         _folha_de_pedido(pdf, dados_paciente, exames)
+    paginas_do_pedido = pdf.page_no()
     if guia:
         _anexar_guias(pdf, dados_paciente, exames, dict(guia, responsavel=responsavel))
-    return pdf.bytes()
+    return _com_timbrado(pdf, timbrado, paginas_do_pedido)
 
 
-def gerar_pdf_exames_laboratoriais(dados_paciente, exames, responsavel=None, idioma='pt', guia=None):
-    return _pdf_de_exames(dados_paciente, exames, 'laboratorio', responsavel, idioma, guia)
+def gerar_pdf_exames_laboratoriais(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None):
+    return _pdf_de_exames(dados_paciente, exames, 'laboratorio', responsavel, idioma, guia, timbrado)
 
 
-def gerar_pdf_exames_imagem(dados_paciente, exames, responsavel=None, idioma='pt', guia=None):
-    return _pdf_de_exames(dados_paciente, exames, 'imagem', responsavel, idioma, guia)
+def gerar_pdf_exames_imagem(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None):
+    return _pdf_de_exames(dados_paciente, exames, 'imagem', responsavel, idioma, guia, timbrado)
 
 
-def gerar_pdf_vacinas(dados_paciente, vacinas, responsavel=None, idioma='pt'):
-    pdf = _Minuta(TITULOS['vacina'], idioma)
+def gerar_pdf_vacinas(dados_paciente, vacinas, responsavel=None, idioma='pt', timbrado=None):
+    pdf = _Minuta(TITULOS['vacina'], idioma, timbrado)
     pdf.responsavel = responsavel
     pdf.add_page()
     pdf.dados_do_paciente(dados_paciente)
@@ -444,4 +461,4 @@ def gerar_pdf_vacinas(dados_paciente, vacinas, responsavel=None, idioma='pt'):
         pdf.multi_cell(0, 5.5, pdf.t(posologia_da_vacina(titulo, vacina.get('esquema_pdf'))))
         pdf.ln(2)
     pdf.assinatura()
-    return pdf.bytes()
+    return _com_timbrado(pdf, timbrado)
