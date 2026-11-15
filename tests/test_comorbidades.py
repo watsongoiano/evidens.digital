@@ -50,7 +50,8 @@ def test_lupus_monitorizacao_e_nefrite():
     assert 'Antes do tratamento' in recs['HBsAg, anti-HBc total e anti-HBs']['subtitulo']
     assert 'Lúpus: pressão arterial e olhos' in orient
     com_nefrite, _ = _rodar(['lupus', 'les_nefrite'])
-    assert 'Nefrite lúpica | A cada 3 meses' in com_nefrite['Relação proteína/creatinina, urina']['subtitulo']
+    proteinuria = com_nefrite['Relação proteína/creatinina, urina']
+    assert proteinuria['subtitulo'] == 'Nefrite lúpica | A cada 3 meses' and proteinuria['descricao'].startswith('Nefrite lúpica')
     # detalhe sozinho (sem o lúpus) não faz nada
     assert _rodar(['les_nefrite'])[0] == {}
 
@@ -102,6 +103,13 @@ def test_hepatite_b_monitorizacao_e_carcinoma():
     assert 'Hepatite B: estadiamento e carcinoma hepatocelular' in orient
     risco, _ = _rodar(['hepatite_b_cronica', 'hbv_risco_chc'])
     assert risco['Ultrassonografia de abdome superior']['subtitulo'] == 'Hepatite B de alto risco | A cada 6 meses'
+
+
+def test_dlco_nao_e_coberta_por_espirometria():
+    from src.utils import periodicidade, tuss
+    assert 'Prova de função pulmonar completa com difusão (DLCO)' in tuss.SEM_CODIGO
+    assert periodicidade.chaves('Prova de função pulmonar completa com difusão (DLCO)') != \
+        periodicidade.chaves('Espirometria, com broncodilatador')
 
 
 def test_hepatite_c_avaliacao_antes_do_tratamento():

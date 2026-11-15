@@ -760,10 +760,11 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             add(titulo, 'laboratorio', 'Lúpus sem atividade: hemograma, VHS, PCR, albumina, creatinina e urina tipo I a cada '
                 '6-12 meses; mais vezes com atividade, dano ou conforme o tratamento.',
                 'Lúpus eritematoso sistêmico | A cada 6-12 meses', EULAR_LES, 'C', 'alta')
-        add('Relação proteína/creatinina, urina', 'laboratorio',
-            'Lúpus sem nefrite conhecida: rastrear proteinúria pelo menos a cada 6-12 meses e em toda reativação fora do rim.',
-            'Lúpus eritematoso sistêmico | A cada 6-12 meses', ACR_NEFRITE, 'A', 'alta')
-        if 'les_nefrite' in com:
+        if 'les_nefrite' not in com:
+            add('Relação proteína/creatinina, urina', 'laboratorio',
+                'Lúpus sem nefrite conhecida: rastrear proteinúria pelo menos a cada 6-12 meses e em toda reativação fora do rim.',
+                'Lúpus eritematoso sistêmico | A cada 6-12 meses', ACR_NEFRITE, 'A', 'alta')
+        else:
             add('Relação proteína/creatinina, urina', 'laboratorio',
                 'Nefrite lúpica: quantificar a proteinúria pelo menos a cada 3 meses até a remissão completa e a cada 3-6 meses '
                 'na remissão mantida.', 'Nefrite lúpica | A cada 3 meses', ACR_NEFRITE, 'A', 'alta')
