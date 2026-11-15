@@ -96,8 +96,65 @@
       const resumo = document.querySelector('[data-resumo]');
       if (resumo) resumo.textContent = `${perfis[usuario.perfil] || ''} · ${usuario.registro} · ${usuario.email}`;
       if (usuario.administrador) document.querySelectorAll('[data-so-admin]').forEach(el => { el.style.display = 'block'; });
-      if (usuario.perfil === 'medico' || usuario.perfil === 'residente') abrirPlanos(usuario);
+      if (usuario.perfil === 'medico' || usuario.perfil === 'residente') { abrirPlanos(usuario); abrirTimbrado(); }
     }).catch(() => {});
+  }
+
+  // Papel timbrado: o PDF do consultório vira o fundo dos pedidos (só de quem assina)
+  function abrirTimbrado() {
+    const secao = document.querySelector('[data-timbrado]');
+    if (!secao) return;
+    secao.style.display = 'block';
+    const erro = secao.querySelector('[data-erro]'), ok = secao.querySelector('[data-ok]');
+    const atual = secao.querySelector('[data-timbrado-atual]');
+    const entrada = document.getElementById('timbradoPdf');
+    const topo = document.getElementById('margem_topo'), base = document.getElementById('margem_base');
+
+    function mostrarTimbrado(t) {
+      atual.style.display = t ? 'flex' : 'none';
+      if (!t) return;
+      secao.querySelector('[data-timbrado-nome]').textContent =
+        `${t.nome} · ${t.largura} × ${t.altura} mm · enviado em ${new Date(t.enviado_em * 1000).toLocaleDateString('pt-BR')}`;
+      topo.value = Math.round(t.margem_topo); base.value = Math.round(t.margem_base);
+      topo.max = base.max = Math.floor(t.altura * 0.4);
+      secao.querySelector('[data-timbrado-previa]').href = '/api/auth/timbrado/previa?v=' + Date.now();
+    }
+
+    async function enviarArquivo(arquivo) {
+      mostrar(erro, ''); mostrar(ok, '');
+      if (!arquivo) return;
+      const corpo = new FormData(); corpo.append('arquivo', arquivo);
+      mostrar(ok, 'Enviando…');
+      try {
+        const r = await fetch('/api/auth/timbrado', { method: 'POST', body: corpo, credentials: 'same-origin' });
+        const dados = await r.json();
+        if (!r.ok) { mostrar(ok, ''); mostrar(erro, dados.error || 'Não foi possível enviar o timbrado.'); return; }
+        mostrarTimbrado(dados.timbrado);
+        mostrar(ok, 'Timbrado salvo. Confira a prévia: os próximos pedidos já saem nele.');
+      } catch (e) { mostrar(ok, ''); mostrar(erro, 'Sem conexão com o servidor. Tente de novo.'); }
+    }
+
+    entrada.addEventListener('change', () => { enviarArquivo(entrada.files[0]); entrada.value = ''; });
+    const soltar = secao.querySelector('[data-soltar]');
+    ['dragenter', 'dragover'].forEach(n => soltar.addEventListener(n, e => { e.preventDefault(); soltar.classList.add('border-teal'); }));
+    ['dragleave', 'drop'].forEach(n => soltar.addEventListener(n, e => { e.preventDefault(); soltar.classList.remove('border-teal'); }));
+    soltar.addEventListener('drop', e => enviarArquivo(e.dataTransfer.files[0]));
+
+    secao.querySelector('[data-timbrado-margens]').addEventListener('click', async () => {
+      mostrar(erro, ''); mostrar(ok, '');
+      const { resposta, dados } = await enviar('/api/auth/timbrado/margens', { margem_topo: topo.value, margem_base: base.value });
+      if (!resposta.ok) { mostrar(erro, dados.error || 'Não foi possível salvar.'); return; }
+      mostrarTimbrado(dados.timbrado);
+      mostrar(ok, 'Espaços salvos. Confira a prévia.');
+    });
+    secao.querySelector('[data-timbrado-remover]').addEventListener('click', async () => {
+      mostrar(erro, ''); mostrar(ok, '');
+      const { resposta } = await enviar('/api/auth/timbrado/remover');
+      if (!resposta.ok) { mostrar(erro, 'Não foi possível remover.'); return; }
+      mostrarTimbrado(null);
+      mostrar(ok, 'Timbrado removido: os pedidos voltam ao modelo do Evidēns.');
+    });
+    fetch('/api/auth/timbrado', { credentials: 'same-origin' }).then(r => r.json()).then(d => mostrarTimbrado(d.timbrado)).catch(() => {});
   }
 
   // Planos de saúde em que o médico é credenciado (dados da guia SP/SADT)

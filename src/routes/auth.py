@@ -266,6 +266,96 @@ def credenciamentos_excluir(cid):
     return jsonify({'ok': True})
 
 
+# ── Papel timbrado (fundo dos pedidos; só de quem assina) ─────────────────────
+
+def _meta_do_timbrado(t):
+    from src.utils import timbrado
+    largura, altura = timbrado.dimensoes(t['arquivo'])
+    return {'nome': t['nome'], 'enviado_em': t['enviado_em'], 'margem_topo': t['margem_topo'],
+            'margem_base': t['margem_base'], 'largura': largura, 'altura': altura}
+
+
+@auth_bp.route('/auth/timbrado')
+@exigir_login
+def timbrado_estado():
+    u = usuario_atual()
+    if not contas.pode_ter_credenciamento(u):
+        return jsonify({'timbrado': None, 'disponivel': False})
+    t = contas.timbrado_de(u['id'])
+    return jsonify({'timbrado': _meta_do_timbrado(t) if t else None, 'disponivel': True})
+
+
+@auth_bp.route('/auth/timbrado', methods=['POST'])
+@exigir_login
+def timbrado_enviar():
+    """Recebe o PDF do timbrado (campo `arquivo`), mede a área livre e guarda na conta."""
+    from src.utils import timbrado
+    u = usuario_atual()
+    if not contas.pode_ter_credenciamento(u):
+        return jsonify({'error': MSG_SO_QUEM_ASSINA}), 403
+    request.max_content_length = timbrado.TAMANHO_MAXIMO + 64 * 1024
+    try:
+        arquivo = request.files.get('arquivo')
+    except Exception:
+        return jsonify({'error': timbrado.MENSAGENS['grande']}), 413
+    if arquivo is None:
+        return jsonify({'error': timbrado.MENSAGENS['nao_pdf']}), 400
+    conteudo = arquivo.read(timbrado.TAMANHO_MAXIMO + 1)
+    try:
+        topo, base = timbrado.margens_sugeridas(conteudo)
+    except timbrado.TimbradoInvalido as erro:
+        return jsonify({'error': timbrado.MENSAGENS.get(erro.codigo, timbrado.MENSAGENS['invalido'])}), 422
+    nome = (arquivo.filename or 'timbrado.pdf').rsplit('/', 1)[-1].rsplit('\\', 1)[-1][:120]
+    contas.salvar_timbrado(u['id'], conteudo, nome, topo, base)
+    return jsonify({'ok': True, 'timbrado': _meta_do_timbrado(contas.timbrado_de(u['id']))}), 201
+
+
+@auth_bp.route('/auth/timbrado/margens', methods=['POST'])
+@exigir_login
+def timbrado_margens():
+    from src.utils import timbrado
+    u = usuario_atual()
+    t = contas.timbrado_de(u['id']) if contas.pode_ter_credenciamento(u) else None
+    if not t:
+        return jsonify({'error': 'Envie o timbrado antes de ajustar as margens.'}), 404
+    d = _corpo()
+    try:
+        topo, base = timbrado.conferir_margens(t['arquivo'], d.get('margem_topo'), d.get('margem_base'))
+    except timbrado.TimbradoInvalido as erro:
+        return jsonify({'error': timbrado.MENSAGENS.get(erro.codigo, timbrado.MENSAGENS['invalido'])}), 400
+    contas.ajustar_margens_do_timbrado(u['id'], topo, base)
+    return jsonify({'ok': True, 'timbrado': _meta_do_timbrado(contas.timbrado_de(u['id']))})
+
+
+@auth_bp.route('/auth/timbrado/remover', methods=['POST'])
+@exigir_login
+def timbrado_remover():
+    contas.remover_timbrado(usuario_atual()['id'])
+    return jsonify({'ok': True})
+
+
+@auth_bp.route('/auth/timbrado/previa')
+@exigir_login
+def timbrado_previa():
+    """Pedido de exemplo (paciente fictício) sobre o timbrado, para o médico conferir a área livre."""
+    import io
+    from flask import send_file
+    from src.utils import pdf_minutas, timbrado
+    u = usuario_atual()
+    t = contas.timbrado_de(u['id']) if contas.pode_ter_credenciamento(u) else None
+    if not t:
+        return jsonify({'error': 'Nenhum timbrado enviado.'}), 404
+    exemplo = [{'titulo': titulo} for titulo in (
+        'Hemograma completo com plaquetas', 'Glicose, soro', 'Hemoglobina glicada (HbA1c), soro',
+        'Colesterol total e frações, soro', 'Creatinina, soro', 'Hormônio Tireoestimulante (TSH), soro')]
+    pdf = pdf_minutas.gerar_pdf_exames_laboratoriais(
+        {'nome': 'Paciente de exemplo', 'idade': 50, 'sexo': 'feminino'}, exemplo,
+        responsavel=pdf_minutas.responsavel_de(u), timbrado=timbrado.para_o_pdf(t))
+    resposta = send_file(io.BytesIO(pdf), mimetype='application/pdf', download_name='previa-timbrado.pdf')
+    resposta.headers['Cache-Control'] = 'no-store'
+    return resposta
+
+
 @auth_bp.route('/auth/configurar', methods=['POST'])
 def configurar():
     """Cria o primeiro administrador. Só funciona com o código de instalação e enquanto não houver administrador."""

@@ -121,6 +121,12 @@ _ESQUEMA = [
     """CREATE TABLE IF NOT EXISTS configuracoes (
         chave TEXT PRIMARY KEY, valor TEXT NOT NULL
     )""",
+    # Papel timbrado do médico (PDF do consultório): fundo dos pedidos gerados. Um por conta.
+    # Margens em mm: a área onde o pedido é escrito, entre o cabeçalho e o rodapé do timbrado.
+    """CREATE TABLE IF NOT EXISTS timbrados (
+        usuario_id BIGINT PRIMARY KEY, arquivo {blob} NOT NULL, nome TEXT NOT NULL, enviado_em BIGINT NOT NULL,
+        margem_topo REAL NOT NULL, margem_base REAL NOT NULL
+    )""",
 ]
 
 APROVACAO_MANUAL = "aprovacao_manual"
@@ -133,11 +139,11 @@ def _conexao():
         raise ContasIndisponiveis()
     if _eh_sqlite(url):
         con = sqlite3.connect(url.split('sqlite:///', 1)[1])
-        marcador, pk = '?', 'INTEGER PRIMARY KEY AUTOINCREMENT'
+        marcador, pk, blob = '?', 'INTEGER PRIMARY KEY AUTOINCREMENT', 'BLOB'
     else:
         import psycopg  # só é necessário em produção
         con = psycopg.connect(url, connect_timeout=10)
-        marcador, pk = '%s', 'BIGSERIAL PRIMARY KEY'
+        marcador, pk, blob = '%s', 'BIGSERIAL PRIMARY KEY', 'BYTEA'
 
     def executar(sql, params=()):
         cur = con.cursor()
@@ -147,7 +153,7 @@ def _conexao():
     try:
         if url not in _ESQUEMA_PRONTO:
             for comando in _ESQUEMA:
-                executar(comando.format(pk=pk))
+                executar(comando.format(pk=pk, blob=blob))
             con.commit()
             _ESQUEMA_PRONTO.add(url)
         yield executar
@@ -516,3 +522,39 @@ def aceitou(uid, versao):
     with _conexao() as executar:
         return executar('SELECT 1 FROM aceites_termos WHERE usuario_id = ? AND versao = ?',
                         (uid, versao)).fetchone() is not None
+
+
+# ── Papel timbrado ────────────────────────────────────────────────────────────
+
+def salvar_timbrado(uid, arquivo, nome, margem_topo, margem_base):
+    """Guarda (ou troca) o timbrado da conta."""
+    with _conexao() as executar:
+        executar('DELETE FROM timbrados WHERE usuario_id = ?', (int(uid),))
+        executar('INSERT INTO timbrados (usuario_id, arquivo, nome, enviado_em, margem_topo, margem_base) '
+                 'VALUES (?, ?, ?, ?, ?, ?)',
+                 (int(uid), bytes(arquivo), str(nome)[:120], int(time.time()), float(margem_topo), float(margem_base)))
+
+
+def timbrado_de(uid, com_arquivo=True):
+    """{'arquivo', 'nome', 'enviado_em', 'margem_topo', 'margem_base'} ou None."""
+    colunas = ('arquivo, ' if com_arquivo else '') + 'nome, enviado_em, margem_topo, margem_base'
+    with _conexao() as executar:
+        linha = executar(f'SELECT {colunas} FROM timbrados WHERE usuario_id = ?', (int(uid),)).fetchone()
+    if not linha:
+        return None
+    nomes = (['arquivo'] if com_arquivo else []) + ['nome', 'enviado_em', 'margem_topo', 'margem_base']
+    t = dict(zip(nomes, linha))
+    if com_arquivo:
+        t['arquivo'] = bytes(t['arquivo'])
+    return t
+
+
+def ajustar_margens_do_timbrado(uid, margem_topo, margem_base):
+    with _conexao() as executar:
+        return executar('UPDATE timbrados SET margem_topo = ?, margem_base = ? WHERE usuario_id = ?',
+                        (float(margem_topo), float(margem_base), int(uid))).rowcount == 1
+
+
+def remover_timbrado(uid):
+    with _conexao() as executar:
+        executar('DELETE FROM timbrados WHERE usuario_id = ?', (int(uid),))
