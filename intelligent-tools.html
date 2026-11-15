@@ -27,7 +27,7 @@
         <i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i>
         <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i>
       </span>
-      <span class="max-sm:flex max-sm:flex-col text-[28px] font-medium tracking-tight leading-none">evidēns<sup class="marca-r">®</sup> <span class="text-teal text-[13px] font-medium">check</span></span>
+      <span class="max-sm:flex max-sm:flex-col text-[28px] font-medium tracking-tight leading-none"><span class="whitespace-nowrap">evidēns<sup class="marca-r">®</sup></span> <span class="text-teal text-[13px] font-medium">check</span></span>
     </a>
     <nav class="flex items-center gap-2 lg:gap-6 text-[13px] uppercase tracking-[0.12em] text-ink/75">
       <a href="/" class="hidden sm:inline hover:text-teal transition">Início</a>
@@ -93,23 +93,6 @@
         <div class="campo"><label for="altura">Altura (cm)</label><input type="number" id="altura" name="altura" placeholder="Ex: 170" inputmode="numeric"></div>
         <div class="campo"><label for="pas">Pressão sistólica (mmHg)</label><input type="number" id="pas" name="pas" placeholder="Ex: 140" inputmode="numeric"></div>
         <div class="campo"><label for="pad">Pressão diastólica (mmHg)</label><input type="number" id="pad" name="pad" placeholder="Ex: 90" inputmode="numeric"></div>
-      </div>
-      <fieldset class="campo mt-5">
-        <legend class="campo-rotulo">Tem exames laboratoriais recentes?</legend>
-        <div class="opcoes" id="tem_exames">
-          <label class="opcao" for="tem_exames_sim"><input type="radio" id="tem_exames_sim" name="tem_exames" value="sim">Sim</label>
-          <label class="opcao" for="tem_exames_nao"><input type="radio" id="tem_exames_nao" name="tem_exames" value="nao">Não</label>
-        </div>
-      </fieldset>
-      <div id="exames-bloco" class="bloco-condicional" hidden>
-        <p class="campo-rotulo text-teal-dark">Exames laboratoriais</p>
-        <p class="text-[13px] text-ink/55 -mt-1 mb-4">Preencha só os que tiver. Colesterol total, HDL e creatinina permitem calcular o PREVENT; HbA1c refina o cálculo.</p>
-        <div class="grade">
-          <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200" inputmode="numeric"></div>
-          <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" placeholder="Ex: 45" inputmode="numeric"></div>
-          <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
-          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5%: critério de diabetes (ADA). Confirme com um segundo exame se não houver hiperglicemia inequívoca e marque o tipo de diabetes.</p></div>
-        </div>
       </div>
     </section>
 
@@ -774,7 +757,25 @@
 
     <section class="secao" aria-labelledby="s-exames">
       <h2 id="s-exames" class="secao-titulo"><span class="secao-num">08</span>Exames já realizados</h2>
-      <p class="secao-nota">Opcional. Informe o exame e a data em que foi feito, ou anexe o laudo em PDF: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. O laudo é lido e descartado; nada é guardado.</p>
+      <p class="secao-nota">Opcional. Resultados recentes entram no cálculo do risco cardiovascular (PREVENT). Informe também cada exame já feito e a data, digitando ou anexando o laudo em PDF: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. O laudo é lido e descartado; nada é guardado.</p>
+      <fieldset class="campo">
+        <legend class="campo-rotulo">Tem exames laboratoriais recentes?</legend>
+        <div class="opcoes" id="tem_exames">
+          <label class="opcao" for="tem_exames_sim"><input type="radio" id="tem_exames_sim" name="tem_exames" value="sim">Sim</label>
+          <label class="opcao" for="tem_exames_nao"><input type="radio" id="tem_exames_nao" name="tem_exames" value="nao">Não</label>
+        </div>
+      </fieldset>
+      <div id="exames-bloco" class="bloco-condicional" hidden>
+        <p class="campo-rotulo text-teal-dark">Exames laboratoriais</p>
+        <p class="text-[13px] text-ink/55 -mt-1 mb-4">Preencha só os que tiver. Colesterol total, HDL e creatinina permitem calcular o PREVENT; HbA1c refina o cálculo.</p>
+        <div class="grade">
+          <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200" inputmode="numeric"></div>
+          <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" placeholder="Ex: 45" inputmode="numeric"></div>
+          <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
+          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5%: critério de diabetes (ADA). Confirme com um segundo exame se não houver hiperglicemia inequívoca e marque o tipo de diabetes.</p></div>
+        </div>
+      </div>
+      <p class="campo-rotulo mt-6">Exames já feitos e datas</p>
       <div id="examesAnteriores" class="flex flex-col gap-4"></div>
       <datalist id="examesConhecidos"></datalist>
       <div class="flex flex-wrap gap-3 mt-4">

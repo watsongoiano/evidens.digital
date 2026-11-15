@@ -401,7 +401,10 @@ def test_logo_do_cabecalho_e_a_mesma_palavra_do_rodape(pagina):
     html = (RAIZ / pagina).read_text(encoding='utf-8')
     cabecalho = html.split('</header>')[0]
     assert 'grid-cols-3 gap-[3px]' in cabecalho
-    assert 'text-[28px] font-medium tracking-tight leading-none">evidēns<sup class="marca-r">®</sup>' in cabecalho
+    # A palavra e o ® ficam no mesmo elemento: no celular o logo vira coluna (flex-col) e o ® solto caía
+    # sozinho numa linha, por cima do "e".
+    assert ('text-[28px] font-medium tracking-tight leading-none"><span class="whitespace-nowrap">'
+            'evidēns<sup class="marca-r">®</sup></span>') in cabecalho
     rodape = (RAIZ / 'index.html').read_text(encoding='utf-8').split('<footer')[1]
     assert 'text-[28px] font-medium tracking-tight">evidēns<sup class="marca-r">®</sup>' in rodape
 
