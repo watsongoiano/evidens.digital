@@ -28,8 +28,26 @@ TAMANHO_MAXIMO = 4 * 1024 * 1024     # a função da Vercel recebe até 4,5 MB p
 PAGINAS_MAXIMAS = 60
 
 
+# Mensagens fixas mostradas ao médico (a resposta nunca carrega o texto de uma exceção).
+MENSAGENS = {
+    'nao_pdf': 'O arquivo não é um PDF.',
+    'grande': 'O arquivo passa de 4 MB. Envie um laudo por vez.',
+    'senha': 'O PDF está protegido por senha.',
+    'paginas': f'O PDF tem mais de {PAGINAS_MAXIMAS} páginas.',
+    'invalido': 'Não foi possível abrir o PDF.',
+    'sem_texto': 'O PDF não tem texto (parece escaneado). Digite os exames e as datas.',
+}
+
+
 class LaudoIlegivel(Exception):
-    """PDF inválido, protegido ou sem texto (escaneado)."""
+    """PDF inválido, protegido ou sem texto (escaneado). `codigo` é uma chave de MENSAGENS."""
+
+    def __init__(self, codigo):
+        super().__init__(codigo)
+        self.codigo = codigo
+
+    def __str__(self):
+        return MENSAGENS.get(self.codigo, MENSAGENS['invalido'])
 
 
 # Nomes que os laboratórios usam → título do motor. Chaves já normalizadas (minúsculas, sem acento).
@@ -160,9 +178,9 @@ def reconhecer(nome_no_laudo):
 def textos_do_pdf(conteudo):
     """Texto de cada página. Levanta LaudoIlegivel se não houver o que ler."""
     if not conteudo or not conteudo.lstrip().startswith(b'%PDF'):
-        raise LaudoIlegivel('O arquivo não é um PDF.')
+        raise LaudoIlegivel('nao_pdf')
     if len(conteudo) > TAMANHO_MAXIMO:
-        raise LaudoIlegivel('O arquivo passa de 4 MB. Envie um laudo por vez.')
+        raise LaudoIlegivel('grande')
     try:
         from pypdf import PdfReader
         leitor = PdfReader(io.BytesIO(conteudo))
@@ -173,16 +191,16 @@ def textos_do_pdf(conteudo):
             except Exception:
                 aberto = 0
             if not aberto:
-                raise LaudoIlegivel('O PDF está protegido por senha.')
+                raise LaudoIlegivel('senha')
         if len(leitor.pages) > PAGINAS_MAXIMAS:
-            raise LaudoIlegivel(f'O PDF tem mais de {PAGINAS_MAXIMAS} páginas.')
+            raise LaudoIlegivel('paginas')
         textos = [(pagina.extract_text(extraction_mode='layout') or '') for pagina in leitor.pages]
     except LaudoIlegivel:
         raise
     except Exception:
-        raise LaudoIlegivel('Não foi possível abrir o PDF.')
+        raise LaudoIlegivel('invalido')
     if not any(re.search(r'[A-Za-zÀ-ú]{3}', t) for t in textos):
-        raise LaudoIlegivel('O PDF não tem texto (parece escaneado). Digite os exames e as datas.')
+        raise LaudoIlegivel('sem_texto')
     return textos
 
 

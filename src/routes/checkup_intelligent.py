@@ -1564,7 +1564,7 @@ def ler_laudo_endpoint():
     try:
         lido = laudos.ler(arquivo.read(laudos.TAMANHO_MAXIMO + 1))
     except laudos.LaudoIlegivel as erro:
-        return jsonify({'error': str(erro)}), 422
+        return jsonify({'error': laudos.MENSAGENS.get(erro.codigo, laudos.MENSAGENS['invalido'])}), 422
     return jsonify(lido)
 
 
