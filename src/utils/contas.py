@@ -371,6 +371,18 @@ def definir_situacao(uid, situacao):
         return _usuario(executar(_SELECT + 'WHERE id = ?', (uid,)).fetchone())
 
 
+def liberar_pendente(uid):
+    """Libera no login uma conta que ficou pendente (aprovação manual desligada depois).
+
+    A troca só vale se a conta continua 'pendente' no banco: um bloqueio feito nesse meio-tempo
+    pelo administrador prevalece. Devolve o usuário como ficou.
+    """
+    with _conexao() as executar:
+        executar("UPDATE usuarios SET situacao = 'aprovado', decidido_em = ? "
+                 "WHERE id = ? AND administrador = 0 AND situacao = 'pendente'", (int(time.time()), uid))
+        return _usuario(executar(_SELECT + 'WHERE id = ?', (uid,)).fetchone())
+
+
 def aprovar(uid):
     """Aprova (ou reativa) a conta e encerra as sessões abertas, como ``definir_situacao``.
 

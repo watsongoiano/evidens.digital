@@ -92,6 +92,19 @@ def test_pendente_de_antes_entra_quando_a_aprovacao_manual_e_desligada(anonimo, 
     assert contas.por_id(_id(contas, email))['situacao'] == 'aprovado'
 
 
+def test_liberacao_no_login_nao_desfaz_bloqueio_feito_no_meio_tempo(contas):
+    """Se o administrador bloqueia entre a leitura da conta e a liberação, o bloqueio prevalece."""
+    contas.definir_aprovacao_manual(True)
+    try:
+        u = contas.criar(f'corrida{next(_seq)}@exemplo.test', 'Pessoa Corrida', 'CRM-GO 3', 'medico', SENHA_DE_TESTE)
+    finally:
+        contas.definir_aprovacao_manual(False)
+    contas.definir_situacao(u['id'], 'bloqueado')
+    assert contas.liberar_pendente(u['id'])['situacao'] == 'bloqueado'
+    contas.definir_situacao(u['id'], 'pendente')
+    assert contas.liberar_pendente(u['id'])['situacao'] == 'aprovado'
+
+
 def test_bloqueio_continua_valendo(anonimo, admin, contas):
     email, _ = _novo(anonimo)
     assert admin.post(f'/api/admin/usuarios/{_id(contas, email)}/bloquear').status_code == 200

@@ -198,8 +198,9 @@ def login():
     if u['situacao'] == 'pendente':
         if contas.aprovacao_manual():
             return jsonify({'error': 'Sua conta ainda aguarda aprovação.'}), 403
-        # Pedido feito quando a aprovação manual estava ligada: com ela desligada, libera agora.
-        u, _ = contas.aprovar(u['id'])
+        # Pedido feito quando a aprovação manual estava ligada: com ela desligada, libera agora
+        # (só se continuar pendente; reativar conta bloqueada é só pelo administrador).
+        u = contas.liberar_pendente(u['id'])
     if u['situacao'] != 'aprovado':
         return jsonify({'error': 'Esta conta está bloqueada. Fale com o responsável técnico.'}), 403
     _abrir_sessao(u)
