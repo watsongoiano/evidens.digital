@@ -1854,6 +1854,8 @@
   "Guardamos nome, e-mail, registro profissional e perfil, para identificar quem usa a ferramenta. A senha é armazenada de forma irreversível. Dados de pacientes não são gravados. Detalhes nos": "We keep your name, e-mail, professional license and profile, to identify who uses the tool. The password is stored irreversibly. Patient data is not saved. Details in the",
   "Contas cadastradas": "Registered accounts",
   "Conta criada com sucesso.": "Account created successfully.",
+  "Opcional. Resultados recentes entram no cálculo do risco cardiovascular (PREVENT). Informe também cada exame já feito e a data, digitando ou anexando o laudo em PDF: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. O laudo é lido e descartado; nada é guardado.": "Optional. Recent results feed the cardiovascular risk calculation (PREVENT). Also enter each test already done and its date, by typing or attaching the lab report as a PDF: anything still within the guideline interval is not ordered again. The report is read and discarded; nothing is stored.",
+  "Exames já feitos e datas": "Tests already done and dates",
   "Papel timbrado": "Letterhead",
   "Envie o PDF do receituário que você usa no consultório (só o fundo: logo, cabeçalho e rodapé).": "Upload the PDF of the prescription pad you use in your office (just the background: logo, header and footer).",
   "Os pedidos de exames e a prescrição de vacinas passam a sair nele, escritos no espaço entre o cabeçalho e o rodapé.": "Test orders and vaccine prescriptions will then be printed on it, in the space between the header and the footer.",
