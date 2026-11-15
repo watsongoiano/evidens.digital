@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const COLUNAS = ['checkup', 'pdf_laboratorio', 'pdf_imagem', 'pdf_vacinas', 'guia_plano', 'login'];
-  const CARTOES = ['checkup', 'pdf_laboratorio', 'pdf_imagem', 'pdf_vacinas', 'guia_plano', 'acesso', 'login', 'visita'];
+  const CARTOES = ['checkup', 'pdf_laboratorio', 'pdf_imagem', 'pdf_vacinas', 'guia_plano', 'pdf_assinado', 'acesso', 'login', 'visita'];
   const PERFIS = { medico: 'Médico', residente: 'Residente', estudante: 'Estudante' };
   let dados = null;
   let periodo = 'mes';

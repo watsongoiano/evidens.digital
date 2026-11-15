@@ -1366,8 +1366,8 @@ for _rota in ('/gerar-receita-vacinas', '/gerar-solicitacao-exames', '/generate-
 
 # ==================== ENDPOINTS DE GERAÇÃO DE PDFs ====================
 #
-# Produzem minutas em PDF (sem assinatura digital) a partir da lista que o navegador
-# devolve. O pedido é validado e limitado, o conteúdo é escapado nos templates e as
+# Produzem minutas em PDF a partir da lista que o navegador devolve; com sessão de assinatura digital
+# aberta e `assinar: true` no pedido, o PDF sai assinado (src/utils/assinatura.py). O pedido é validado e limitado, o conteúdo é escapado nos templates e as
 # vacinas passam de novo pela triagem de segurança antes de irem para o papel.
 
 MAX_ITENS_PDF = 80
@@ -1495,6 +1495,41 @@ def _timbrado_do_medico(usuario):
         return {}
 
 
+MSG_SEM_SESSAO_DE_ASSINATURA = 'Abra a sessão de assinatura digital para assinar este pedido.'
+MSG_SESSAO_DE_ASSINATURA_VENCIDA = 'A sessão de assinatura digital terminou. Abra uma nova para assinar este pedido.'
+MSG_ASSINATURA_FALHOU = ('Não foi possível assinar o pedido agora. Tente de novo em instantes '
+                         'ou gere o pedido sem assinatura digital.')
+
+
+def _sessao_para_assinar(usuario):
+    """A sessão de assinatura do médico, se o pedido veio com `assinar: true`; None se não pediu assinatura.
+
+    Pedido de assinatura sem sessão aberta é recusado: nunca sai um PDF sem assinatura no lugar do assinado.
+    """
+    corpo = request.get_json(silent=True) or {}
+    if corpo.get('assinar') is not True:
+        return None
+    from src.routes.auth import _pode_assinar
+    from src.utils import contas
+    if not _pode_assinar(usuario):
+        raise PedidoDePdfInvalido('A assinatura digital não está disponível nesta conta.', codigo='assinatura_indisponivel')
+    sessao = contas.sessao_de_assinatura(usuario['id'])
+    if not sessao:
+        raise PedidoDePdfInvalido(MSG_SEM_SESSAO_DE_ASSINATURA, codigo='assinatura_sem_sessao')
+    return sessao
+
+
+def _assinar(pdf_bytes, sessao, usuario, categoria):
+    """O PDF final (já com o timbrado) assinado com o certificado do médico no provedor."""
+    from flask import current_app
+    from src.utils import assinatura, contas
+    token = assinatura.decifrar(sessao['token'], current_app.config['SECRET_KEY'])
+    return assinatura.assinar_pdf(
+        pdf_bytes, sessao['certificado'],
+        lambda resumo: assinatura.assinar_resumo(sessao['provedor'], token, sessao['alias'], resumo),
+        metadados=assinatura.metadados_iti(contas.crm_de(usuario), categoria), titular=sessao['titular'])
+
+
 def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferir=None):
     import io
     from flask import send_file
@@ -1519,8 +1554,11 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
             if guia:
                 extras['guia'] = guia
         extras.update(_timbrado_do_medico(usuario))
+        sessao = _sessao_para_assinar(usuario)
+        if sessao:
+            extras['assinatura'] = {'titular': sessao['titular']}
     except PedidoDePdfInvalido as exc:
-        return jsonify({'error': exc.mensagem, 'codigo': exc.codigo}), 400
+        return jsonify({'error': exc.mensagem, 'codigo': exc.codigo}), 409 if exc.codigo == 'assinatura_sem_sessao' else 400
 
     try:
         pdf_bytes = getattr(pdf_minutas, nome_gerador)(
@@ -1537,6 +1575,18 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
         }), 502
 
     from src.utils import uso
+    if sessao:
+        from src.utils import assinatura, contas
+        try:
+            pdf_bytes = _assinar(pdf_bytes, sessao, usuario, categoria)
+        except assinatura.SessaoExpirada:
+            # O provedor não aceita mais o token (venceu ou foi encerrado no aplicativo dele).
+            contas.encerrar_sessao_de_assinatura(usuario['id'])
+            return jsonify({'error': MSG_SESSAO_DE_ASSINATURA_VENCIDA, 'codigo': 'assinatura_sem_sessao'}), 409
+        except assinatura.FalhaNaAssinatura as exc:
+            print(f"❌ Erro ao assinar PDF ({categoria}): {exc}")
+            return jsonify({'error': MSG_ASSINATURA_FALHOU, 'codigo': 'assinatura_falhou'}), 502
+        uso.registrar('pdf_assinado', usuario)
     uso.registrar(uso.POR_CATEGORIA_DE_PDF.get(categoria), usuario)
     if extras.get('guia'):
         uso.registrar('guia_plano', usuario)

@@ -906,6 +906,7 @@
         <button type="button" class="btn-claro" onclick="gerarPDFExamesImagem()"><i class="fa-solid fa-x-ray text-[12px]"></i>PDF exames de imagem</button>
         <button type="button" class="btn-claro" onclick="gerarPDFVacinas()"><i class="fa-solid fa-syringe text-[12px]"></i>PDF vacinas</button>
       </div>
+      <p id="assinaturaSelo" class="text-[13px] text-ink/60 mt-4" style="display: none;"><i class="fa-solid fa-signature text-teal text-[12px] mr-1.5"></i><span data-assinatura-sessao></span> · <button type="button" class="text-teal underline underline-offset-2" data-assinatura-encerrar>Encerrar</button></p>
     </div>
     <div id="naoIncluidasContent"></div>
   </section>
@@ -944,9 +945,28 @@
     </div>
     <p id="guiaConvite" class="text-[13px] text-ink/55 mt-6 pt-5 border-t border-ink/10" style="display: none;">Atende por plano de saúde? <a href="/conta" class="text-teal underline underline-offset-2">Cadastre o seu credenciamento</a> e a guia do plano sai junto com o pedido, já preenchida.</p>
 
+    <div id="assinaturaPainel" class="mt-6 pt-5 border-t border-ink/10" style="display: none;">
+      <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-3">ASSINATURA DIGITAL</p>
+      <label class="opcao" for="assinarDigitalmente"><input type="checkbox" id="assinarDigitalmente">Assinar digitalmente (ICP-Brasil)</label>
+      <p id="assinaturaAtiva" class="text-[13px] text-ink/60 mt-3" style="display: none;"><i class="fa-solid fa-circle-check text-teal mr-1.5"></i><span data-assinatura-sessao></span> · <button type="button" class="text-teal underline underline-offset-2" data-assinatura-encerrar>Encerrar</button></p>
+      <div id="assinaturaAbrir" style="display: none;">
+        <div class="grade mt-4">
+          <div class="campo"><label for="assinaturaProvedor">Provedor do certificado</label><select id="assinaturaProvedor"></select></div>
+          <div class="campo"><label for="assinaturaHoras">Manter a sessão de assinatura por</label><select id="assinaturaHoras"></select></div>
+        </div>
+        <p class="text-[13px] text-ink/55 mt-3">Você confirma no provedor do certificado, em outra aba, e o pedido sai assinado em seguida. Enquanto a sessão durar, os próximos pedidos saem assinados sem nova confirmação. O Evidēns não recebe a senha nem a chave do seu certificado.</p>
+      </div>
+      <div id="assinaturaEspera" role="status" class="aviso aviso-info mt-3" style="display: none;">
+        <p>Aguardando a sua confirmação no provedor do certificado. Depois de confirmar, volte a esta aba: o pedido é gerado sozinho.</p>
+        <p class="mt-3" style="display: none;">O navegador bloqueou a nova aba. <a id="assinaturaLink" target="_blank" rel="noopener noreferrer" class="text-teal underline underline-offset-2">Abrir o provedor do certificado</a></p>
+        <p class="mt-3"><button type="button" id="assinaturaConferir" class="btn-claro">Já confirmei</button></p>
+      </div>
+      <div id="assinaturaErro" role="alert" class="aviso aviso-erro mt-3" style="display: none;"></div>
+    </div>
+
     <div class="flex flex-wrap items-center gap-3 mt-6">
       <button type="button" id="acrescimoSim" class="btn-claro">Sim, acrescentar</button>
-      <button type="button" id="acrescimoGerar" class="btn-escuro">Gerar o PDF <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button>
+      <button type="button" id="acrescimoGerar" class="btn-escuro"><span id="acrescimoGerarTexto">Gerar o PDF</span> <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button>
       <button type="button" id="acrescimoCancelar" class="text-[14px] text-ink/55 underline underline-offset-2 ml-auto">Cancelar</button>
     </div>
   </form>
@@ -1607,7 +1627,7 @@
             };
         }
 
-        async function baixarPdf(endpoint, itens, prefixoArquivo, descricao, guia) {
+        async function baixarPdf(endpoint, itens, prefixoArquivo, descricao, guia, assinar) {
             try {
                 if (!currentRecommendations || currentRecommendations.length === 0) {
                     alert(T('Gere as recomendações primeiro!'));
@@ -1622,7 +1642,7 @@
                     body: JSON.stringify(Object.assign({
                         dados_paciente: dadosDoPacienteParaPdf(),
                         recomendacoes: itens
-                    }, guia ? { guia } : {}))
+                    }, guia ? { guia } : {}, assinar ? { assinar: true } : {}))
                 });
 
                 if (!response.ok) {
@@ -1630,6 +1650,8 @@
                     try {
                         const errorData = await response.json();
                         mensagem = errorData.error || mensagem;
+                        // A sessão de assinatura acabou no meio do caminho: o selo some e o próximo pedido reabre.
+                        if (errorData.codigo === 'assinatura_sem_sessao') sessaoDeAssinaturaEncerrada();
                     } catch (erroDeLeitura) {
                         // resposta sem JSON: mantém a mensagem genérica
                     }
@@ -1743,6 +1765,7 @@
                 tituloOriginal[o.value.toLowerCase()] = t;
             });
             await prepararGuia(categoria);
+            await prepararAssinatura();
             const dialogo = document.getElementById('dialogoAcrescimo');
             if (typeof dialogo.showModal === 'function') dialogo.showModal(); else dialogo.setAttribute('open', '');
         }
@@ -1780,15 +1803,164 @@
                 document.getElementById('guiaManter').focus();
                 return;
             }
-            fecharDialogo();
             const doc = DOCUMENTOS[categoria];
             const itens = itensDaCategoria(categoria);
             if (!itens.length) {
+                fecharDialogo();
                 alert(T(categoria === 'vacina' ? 'Nenhuma vacina foi recomendada!' : 'Nenhum item desta categoria para imprimir.'));
                 return;
             }
-            baixarPdf(doc.endpoint, itens, doc.arquivo, doc.descricao, guia);
+            const assinar = querAssinar();
+            const gerar = () => { fecharDialogo(); baixarPdf(doc.endpoint, itens, doc.arquivo, doc.descricao, guia, assinar); };
+            if (assinar && !assinatura.sessao) { abrirSessaoDeAssinatura(gerar); return; }
+            gerar();
         });
+
+        // --- Assinatura digital (certificado ICP-Brasil em nuvem) -----------------
+        // Só para médico e residente, e só se houver provedor configurado. A sessão é aberta no provedor
+        // (outra aba) e vale pelo tempo escolhido; enquanto vale, o pedido sai assinado.
+        const assinatura = { carregada: false, disponivel: false, sessao: null, aoAbrir: null };
+        const elA = id => document.getElementById(id);
+
+        async function estadoDaAssinatura() {
+            try {
+                const r = await fetch('/api/auth/assinatura', { credentials: 'same-origin' });
+                const dados = r.ok ? await r.json() : {};
+                assinatura.disponivel = !!dados.disponivel;
+                assinatura.sessao = dados.sessao || null;
+                assinatura.dados = dados;
+                assinatura.carregada = true;
+            } catch (e) {
+                assinatura.disponivel = false;      // sem rede: tenta de novo no próximo diálogo
+                assinatura.carregada = false;
+            }
+            desenharSessaoDeAssinatura();
+            return assinatura;
+        }
+
+        function textoDaSessao(s) {
+            const ate = new Date(s.expira_em * 1000).toLocaleTimeString(document.documentElement.lang || 'pt-BR', { hour: '2-digit', minute: '2-digit' });
+            return `${T('Assinatura ativa')} · ${s.nome} · ${s.titular} · ${T('até')} ${ate}`;
+        }
+
+        function desenharSessaoDeAssinatura() {
+            const s = assinatura.sessao && assinatura.sessao.expira_em * 1000 > Date.now() ? assinatura.sessao : null;
+            assinatura.sessao = s;
+            document.querySelectorAll('[data-assinatura-sessao]').forEach(el => { el.textContent = s ? textoDaSessao(s) : ''; });
+            elA('assinaturaSelo').style.display = s ? '' : 'none';
+            const marcado = elA('assinarDigitalmente').checked;
+            elA('assinaturaAtiva').style.display = s && marcado ? '' : 'none';
+            elA('assinaturaAbrir').style.display = !s && marcado && !assinatura.aoAbrir ? '' : 'none';
+            elA('assinaturaEspera').style.display = assinatura.aoAbrir ? '' : 'none';
+            const provedor = elA('assinaturaProvedor');
+            const nome = provedor.options.length ? provedor.options[provedor.selectedIndex].textContent : '';
+            elA('acrescimoGerarTexto').textContent = marcado && !s ? `${T('Continuar com')} ${nome}` : T('Gerar o PDF');
+        }
+
+        function querAssinar() {
+            return assinatura.disponivel && elA('assinaturaPainel').style.display !== 'none' && elA('assinarDigitalmente').checked;
+        }
+
+        async function prepararAssinatura() {
+            const painel = elA('assinaturaPainel');
+            cancelarEsperaDaAssinatura();
+            elA('assinaturaErro').style.display = 'none';
+            await estadoDaAssinatura();
+            painel.style.display = assinatura.disponivel ? '' : 'none';
+            if (!assinatura.disponivel) return;
+            const d = assinatura.dados;
+            const provedor = elA('assinaturaProvedor');
+            provedor.innerHTML = '';
+            d.provedores.forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.nome; provedor.appendChild(o); });
+            (d.em_breve || []).forEach(n => { const o = document.createElement('option'); o.disabled = true; o.textContent = `${n} (${T('em breve')})`; provedor.appendChild(o); });
+            provedor.value = d.preferencias.provedor;
+            const horas = elA('assinaturaHoras');
+            horas.innerHTML = '';
+            d.duracoes.forEach(h => { const o = document.createElement('option'); o.value = h; o.textContent = h === 1 ? T('1 hora') : `${h} ${T('horas')}`; horas.appendChild(o); });
+            horas.value = d.preferencias.horas;
+            elA('assinarDigitalmente').checked = !!d.preferencias.assinar;
+            desenharSessaoDeAssinatura();
+        }
+
+        function guardarPreferenciaDeAssinatura(corpo) {
+            fetch('/api/auth/assinatura/preferencias', {
+                method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo)
+            }).catch(() => {});
+        }
+
+        function erroDaAssinatura(mensagem) {
+            const caixa = elA('assinaturaErro');
+            caixa.textContent = mensagem ? T(mensagem) : '';
+            caixa.style.display = mensagem ? '' : 'none';
+        }
+
+        function cancelarEsperaDaAssinatura() {
+            assinatura.aoAbrir = null;
+            if (assinatura.relogio) { clearInterval(assinatura.relogio); assinatura.relogio = null; }
+        }
+
+        // Abre o provedor em outra aba (o resultado do check-up fica nesta) e gera o pedido quando a sessão abrir.
+        async function abrirSessaoDeAssinatura(depois) {
+            erroDaAssinatura('');
+            const aba = window.open('', '_blank');     // aberta já no clique, para o navegador não bloquear
+            let url = null;
+            try {
+                const r = await fetch('/api/auth/assinatura/iniciar', {
+                    method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provedor: elA('assinaturaProvedor').value, horas: Number(elA('assinaturaHoras').value) })
+                });
+                const dados = await r.json().catch(() => ({}));
+                if (!r.ok || !dados.url) throw new Error(dados.error || 'Não foi possível abrir a sessão de assinatura. Tente de novo.');
+                url = dados.url;
+            } catch (e) {
+                if (aba) aba.close();
+                erroDaAssinatura(e.message);
+                return;
+            }
+            // Aba bloqueada pelo navegador: o check-up fica aqui e o médico abre o provedor pelo link.
+            const link = elA('assinaturaLink');
+            link.href = aba ? '#' : url;
+            link.parentElement.style.display = aba ? 'none' : '';
+            if (aba) { aba.opener = null; aba.location.href = url; }
+            assinatura.aoAbrir = depois;
+            assinatura.relogio = setInterval(conferirSessaoDeAssinatura, 4000);
+            desenharSessaoDeAssinatura();
+        }
+
+        async function conferirSessaoDeAssinatura() {
+            if (!assinatura.aoAbrir || assinatura.conferindo) return;
+            assinatura.conferindo = true;
+            await estadoDaAssinatura();
+            assinatura.conferindo = false;
+            if (!assinatura.sessao || !assinatura.aoAbrir) return;
+            const depois = assinatura.aoAbrir;
+            cancelarEsperaDaAssinatura();
+            desenharSessaoDeAssinatura();
+            if (elA('dialogoAcrescimo').open) depois();
+        }
+
+        function sessaoDeAssinaturaEncerrada() {
+            assinatura.sessao = null;
+            desenharSessaoDeAssinatura();
+        }
+
+        elA('assinarDigitalmente').addEventListener('change', e => {
+            cancelarEsperaDaAssinatura();
+            erroDaAssinatura('');
+            guardarPreferenciaDeAssinatura({ assinar: e.target.checked });
+            desenharSessaoDeAssinatura();
+        });
+        elA('assinaturaProvedor').addEventListener('change', desenharSessaoDeAssinatura);
+        elA('assinaturaConferir').addEventListener('click', conferirSessaoDeAssinatura);
+        document.querySelectorAll('[data-assinatura-encerrar]').forEach(botao => botao.addEventListener('click', async () => {
+            sessaoDeAssinaturaEncerrada();
+            try { await fetch('/api/auth/assinatura/encerrar', { method: 'POST', credentials: 'same-origin' }); } catch (e) { /* a sessão vence sozinha */ }
+        }));
+        // A aba do provedor avisa por aqui quando a sessão abre; voltar a esta aba também confere.
+        window.addEventListener('storage', e => { if (e.key === 'evidens-assinatura') conferirSessaoDeAssinatura(); });
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) conferirSessaoDeAssinatura(); });
+        elA('dialogoAcrescimo').addEventListener('close', cancelarEsperaDaAssinatura);
+        estadoDaAssinatura();
 
         function gerarPDFExamesLaboratoriais() { return abrirDialogoDePdf('laboratorio'); }
         function gerarPDFExamesImagem() { return abrirDialogoDePdf('imagem'); }

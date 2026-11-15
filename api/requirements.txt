@@ -6,3 +6,5 @@ psycopg[binary]==3.3.9
 fpdf2==2.9.0
 # Leitura de laudos em PDF (exames já realizados).
 pypdf==7.1.0
+# Assinatura digital dos pedidos no padrão PAdES (certificado ICP-Brasil em nuvem).
+pyHanko==0.38.1
