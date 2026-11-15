@@ -745,3 +745,19 @@ def test_ultima_linha_do_rodape_da_home_nao_depende_da_animacao_de_entrada():
     grupos = pagina_inicial[pagina_inicial.index('const groups = ['):pagina_inicial.index('const rv = [];')]
     assert "#footer > div:last-child" not in grupos.split('];')[0]
     assert 'mostrarTudoNoFim' in pagina_inicial
+
+
+def test_campos_condicionais_nao_sao_escondidos_depois_da_escolha(pagina):
+    # Um DOMContentLoaded que escondia gestação e amamentação disparava, com a rede lenta do celular, depois
+    # de o médico já ter escolhido o sexo: os campos sumiam. Eles nascem ocultos no HTML e seguem o valor.
+    assert "addEventListener('DOMContentLoaded'" not in pagina
+    for campo in ('gestante-item', 'lactante-item', 'hpv-item', 'macos_ano_field', 'anos_parou_fumar_field'):
+        assert re.search(rf'id="{campo}"[^>]*style="display: none;"', pagina), campo
+
+
+def test_medicacoes_anti_hipertensivas_levam_a_classe_para_a_has_resistente(pagina):
+    from src.utils import medicamentos
+    for chave in ('losartana', 'hidroclorotiazida', 'anlodipino'):
+        classes, _ = medicamentos.classes_anti_hipertensivas(chave)
+        assert re.search(rf'value="{chave}"[^>]*data-classe-has="{"|".join(sorted(classes))}"', pagina), chave
+    assert re.search(r'data-valor="carvedilol"[^>]*data-classe-has="betabloqueador" data-has-condicional="1"', pagina)
