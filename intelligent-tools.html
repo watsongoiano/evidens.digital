@@ -746,10 +746,15 @@
 
     <section class="secao" aria-labelledby="s-exames">
       <h2 id="s-exames" class="secao-titulo"><span class="secao-num">08</span>Exames já realizados</h2>
-      <p class="secao-nota">Opcional. Informe o exame e a data em que foi feito: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. As datas não são guardadas.</p>
+      <p class="secao-nota">Opcional. Informe o exame e a data em que foi feito, ou anexe o laudo em PDF: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. O laudo é lido e descartado; nada é guardado.</p>
       <div id="examesAnteriores" class="flex flex-col gap-4"></div>
       <datalist id="examesConhecidos"></datalist>
-      <button type="button" id="adicionarExameAnterior" class="btn-claro mt-4"><i class="fa-solid fa-plus text-[11px]"></i> Adicionar exame</button>
+      <div class="flex flex-wrap gap-3 mt-4">
+        <button type="button" id="adicionarExameAnterior" class="btn-claro"><i class="fa-solid fa-plus text-[11px]"></i> Adicionar exame</button>
+        <label for="laudoPdf" class="btn-claro cursor-pointer"><i class="fa-solid fa-file-arrow-up text-[11px]"></i> Anexar laudo (PDF)</label>
+        <input type="file" id="laudoPdf" accept="application/pdf,.pdf" multiple class="sr-only">
+      </div>
+      <div id="laudoStatus" role="status" class="aviso aviso-atencao mt-4" style="display: none;"></div>
       <div class="campo mt-6" id="hpv-item" style="display: none;">
         <label for="hpv_resultado">Último teste de DNA-HPV (colo do útero)</label>
         <select id="hpv_resultado" name="hpv_resultado">
@@ -974,6 +979,68 @@
         document.getElementById('adicionarExameAnterior').addEventListener('click', () => {
             carregarExamesConhecidos();
             adicionarExameAnterior().querySelector('[data-exame-anterior]').focus();
+        });
+
+        // Laudo em PDF: o servidor lê os exames e as datas de coleta; aqui eles viram linhas para o médico conferir.
+        function linhaDoExame(exame) {
+            return Array.from(document.querySelectorAll('#examesAnteriores .exame-anterior')).find(linha => {
+                const digitado = linha.querySelector('[data-exame-anterior]').value.trim();
+                return (nomeDoExame[digitado.toLowerCase()] || digitado) === exame;
+            });
+        }
+
+        function mostrarLeituraDoLaudo(partes) {
+            const caixa = document.getElementById('laudoStatus');
+            caixa.replaceChildren();
+            partes.forEach(([texto, itens]) => {
+                const p = document.createElement('p'); p.textContent = texto; caixa.appendChild(p);
+                if (itens && itens.length) {
+                    const ul = document.createElement('ul'); ul.className = 'mt-1 mb-2 ml-5 list-disc';
+                    itens.forEach(i => { const li = document.createElement('li'); li.textContent = i; ul.appendChild(li); });
+                    caixa.appendChild(ul);
+                }
+            });
+            caixa.style.display = partes.length ? 'block' : 'none';
+        }
+
+        document.getElementById('laudoPdf').addEventListener('change', async evento => {
+            const entrada = evento.target;
+            const arquivos = Array.from(entrada.files || []);
+            if (!arquivos.length) return;
+            await carregarExamesConhecidos();
+            mostrarLeituraDoLaudo([[T('Lendo o laudo…')]]);
+            let incluidos = 0, atualizados = 0;
+            const naoReconhecidos = [], semData = [], falhas = [];
+            for (const arquivo of arquivos) {
+                const corpo = new FormData(); corpo.append('arquivo', arquivo);
+                let r, dados;
+                try {
+                    r = await fetch('/api/laudos/ler', { method: 'POST', body: corpo, credentials: 'same-origin' });
+                    dados = await r.json();
+                } catch (e) { falhas.push(arquivo.name + ': ' + T('sem conexão com o servidor.')); continue; }
+                if (!r.ok) { falhas.push(arquivo.name + ': ' + T(dados.error || 'não foi possível ler.')); continue; }
+                (dados.exames || []).forEach(({ exame, data }) => {
+                    const existente = linhaDoExame(exame);
+                    if (!existente) { adicionarExameAnterior(T(exame), data); incluidos++; return; }
+                    const campo = existente.querySelector('[data-data-anterior]');
+                    if (!campo.value || campo.value < data) { campo.value = data; atualizados++; }
+                });
+                (dados.nao_reconhecidos || []).forEach(n => { if (!naoReconhecidos.includes(n)) naoReconhecidos.push(n); });
+                (dados.sem_data || []).forEach(n => { if (!semData.includes(n)) semData.push(n); });
+            }
+            entrada.value = '';
+            const partes = [];
+            if (incluidos || atualizados) {
+                partes.push([T('Exames lidos do laudo:') + ' ' + incluidos + ' ' + T('incluídos') +
+                    (atualizados ? ', ' + atualizados + ' ' + T('com data atualizada') : '') + '. ' + T('Confira nomes e datas antes de gerar.')]);
+            } else if (!falhas.length) {
+                partes.push([T('Nenhum exame conhecido foi encontrado no laudo. Digite os exames e as datas.')]);
+            }
+            if (naoReconhecidos.length) partes.push([T('Não reconhecidos (não entram no cálculo; inclua à mão se for o caso):'), naoReconhecidos]);
+            if (semData.length) partes.push([T('Sem data de coleta no laudo (inclua à mão com a data):'), semData]);
+            if (falhas.length) partes.push([T('Não foi possível ler:'), falhas]);
+            mostrarLeituraDoLaudo(partes);
+            checkupForm.dispatchEvent(new Event('change', { bubbles: true }));   // os resultados deixam de valer
         });
 
         function mostrarErros(mensagens) {

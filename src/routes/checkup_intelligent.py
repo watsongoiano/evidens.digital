@@ -1549,6 +1549,25 @@ def exames_conhecidos_endpoint():
     return jsonify({'exames': periodicidade.exames_conhecidos()})
 
 
+@checkup_intelligent_bp.route('/laudos/ler', methods=['POST'])
+def ler_laudo_endpoint():
+    """Lê um laudo em PDF (campo `arquivo`) e devolve os exames e as datas de coleta para "Exames já
+    realizados". O arquivo é lido em memória e descartado; nada dele é gravado nem registrado."""
+    from src.utils import laudos
+    request.max_content_length = laudos.TAMANHO_MAXIMO + 64 * 1024
+    try:
+        arquivo = request.files.get('arquivo')
+    except Exception:  # corpo maior que o limite
+        return jsonify({'error': 'O arquivo passa de 4 MB. Envie um laudo por vez.'}), 413
+    if arquivo is None:
+        return jsonify({'error': 'Anexe o laudo em PDF.'}), 400
+    try:
+        lido = laudos.ler(arquivo.read(laudos.TAMANHO_MAXIMO + 1))
+    except laudos.LaudoIlegivel as erro:
+        return jsonify({'error': str(erro)}), 422
+    return jsonify(lido)
+
+
 @checkup_intelligent_bp.route('/coerencia')
 def coerencia_endpoint():
     """Termos usados pela tela para marcar caixas a partir do texto (mesma lista do servidor)."""
