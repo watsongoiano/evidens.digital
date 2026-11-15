@@ -2149,7 +2149,9 @@
   "Assinado digitalmente por": "Digitally signed by",
   "Certificado digital ICP-Brasil": "ICP-Brasil digital certificate",
   "Confira a assinatura em validar.iti.gov.br": "Check the signature at validar.iti.gov.br",
-  "Pedidos assinados digitalmente": "Digitally signed orders"
+  "Pedidos assinados digitalmente": "Digitally signed orders",
+  "O navegador bloqueou a nova aba.": "The browser blocked the new tab.",
+  "Abrir o provedor do certificado": "Open the certificate provider"
  },
  "padroes": [
   [

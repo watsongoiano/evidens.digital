@@ -211,10 +211,15 @@ def login():
 
 @auth_bp.route('/auth/logout', methods=['POST'])
 def logout():
-    u = usuario_atual() if disponivel() else None
-    if u:
-        encerrar_assinatura(u['id'])     # sair da conta também fecha a sessão no provedor do certificado
-    session.clear()
+    try:
+        u = usuario_atual() if disponivel() else None
+        if u:
+            encerrar_assinatura(u['id'])     # sair da conta também fecha a sessão no provedor do certificado
+    except Exception as exc:
+        # Banco fora do ar não pode impedir a saída: a sessão de assinatura vence sozinha.
+        print(f'⚠️ Assinatura digital: sessão não encerrada na saída ({type(exc).__name__})')
+    finally:
+        session.clear()
     return jsonify({'ok': True})
 
 

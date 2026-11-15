@@ -400,3 +400,15 @@ def test_pedido_assinado_com_timbrado_e_guia_do_plano(app, contas, provedor):
     assert 'Clinica Exemplo Timbrado' in paginas[0].extract_text()
     guia = ' '.join(paginas[-1].extract_text().split())
     assert 'Assinado digitalmente (ICP-Brasil)' in guia and 'assinatura e carimbo do médico solicitante' not in guia
+
+
+def test_sair_da_conta_limpa_a_sessao_mesmo_se_o_encerramento_da_assinatura_falhar(app, contas, provedor, monkeypatch):
+    cliente, _ = _conta(app, contas)
+    _abrir_sessao(cliente, provedor)
+
+    def banco_fora(uid, agora=None):
+        raise RuntimeError('banco fora do ar')
+    monkeypatch.setattr(contas, 'sessao_de_assinatura', banco_fora)
+    assert cliente.post('/api/auth/logout').status_code == 200
+    monkeypatch.undo()
+    assert cliente.get('/api/auth/eu').get_json() == {'usuario': None}

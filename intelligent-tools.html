@@ -958,6 +958,7 @@
       </div>
       <div id="assinaturaEspera" role="status" class="aviso aviso-info mt-3" style="display: none;">
         <p>Aguardando a sua confirmação no provedor do certificado. Depois de confirmar, volte a esta aba: o pedido é gerado sozinho.</p>
+        <p class="mt-3" style="display: none;">O navegador bloqueou a nova aba. <a id="assinaturaLink" target="_blank" rel="noopener noreferrer" class="text-teal underline underline-offset-2">Abrir o provedor do certificado</a></p>
         <p class="mt-3"><button type="button" id="assinaturaConferir" class="btn-claro">Já confirmei</button></p>
       </div>
       <div id="assinaturaErro" role="alert" class="aviso aviso-erro mt-3" style="display: none;"></div>
@@ -1916,9 +1917,11 @@
                 erroDaAssinatura(e.message);
                 return;
             }
-            if (!aba) { window.location.href = url; return; }   // aba bloqueada: segue nesta mesma
-            aba.opener = null;
-            aba.location.href = url;
+            // Aba bloqueada pelo navegador: o check-up fica aqui e o médico abre o provedor pelo link.
+            const link = elA('assinaturaLink');
+            link.href = aba ? '#' : url;
+            link.parentElement.style.display = aba ? 'none' : '';
+            if (aba) { aba.opener = null; aba.location.href = url; }
             assinatura.aoAbrir = depois;
             assinatura.relogio = setInterval(conferirSessaoDeAssinatura, 4000);
             desenharSessaoDeAssinatura();
