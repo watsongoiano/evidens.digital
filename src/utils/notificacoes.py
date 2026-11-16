@@ -163,27 +163,47 @@ def mensagem_de_agradecimento(usuario, url_site):
 
 
 def mensagem_de_novidades(usuario, url_site):
-    """Comunicado de novembro de 2026: boas-vindas em uma linha e o resumo das atualizações."""
+    """Comunicado de novembro de 2026, escrito pelo Dr. Rodolfo: boas-vindas e o resumo das atualizações.
+
+    Só promete o que o sistema faz: a guia SP/SADT sai preenchida na parte da solicitação (a autorização é da
+    operadora) e o médico cadastra o credenciamento, nunca a senha do plano."""
     primeiro_nome = _primeiro_nome(usuario)
     corpo = '\n'.join([
         f'Olá, {primeiro_nome}.' if primeiro_nome else 'Olá.',
         '',
-        'Que bom ter você no Evidēns! Passamos para contar, em poucas linhas, o que mudou na plataforma.',
+        'Aqui quem fala é o Rodolfo C. Frota, criador do Evidēns! Fico feliz com os mais de 100 médicos que se '
+        'cadastraram nos últimos dias. Espero que, além de simplificar a nossa rotina, o Evidēns nos ajude a '
+        'reduzir o desperdício com exames mal indicados e a lembrar das indicações que acabam esquecidas.',
         '',
-        '- Revisão clínica de todas as regras (rastreamento, câncer, vacinas, gestação, comorbidades e '
-        'medicações), cada uma com a referência e com aviso quando as diretrizes divergem.',
-        '- Função renal ao lado do PREVENT: TFG pela CKD-EPI 2021, estágio da DRC (KDIGO 2024) e risco de '
-        'falência renal em 2 e 5 anos (KFRE).',
-        '- Exames já feitos num só lugar, com a leitura do laudo em PDF e os resultados entrando nos cálculos.',
-        '- Guia SP/SADT no padrão TISS 4 e receituário com o seu modelo (enviado, montado na tela ou em papel '
-        'já timbrado).',
-        '- Aviso antes de gerar o pedido quando há exames alternativos (por exemplo, colonoscopia e FIT).',
-        '- Orientações mais enxutas, que abrem com um toque.',
+        'Passo para contar, em poucas linhas, as atualizações do fim de semana:',
         '',
-        f'É só entrar em {url_site}/login para conferir.',
+        '- Função renal automática: TFG pela CKD-EPI 2021, estágio da DRC (KDIGO 2024) e risco de falência '
+        'renal em 2 e 5 anos (KFRE), calculados com os dados informados.',
+        '- Exames anteriores: escolha entre os 42 exames mais comuns, digite o resultado ou anexe o laudo em '
+        'PDF, que preenche nomes, datas e valores. O Evidēns compara com o que está indicado e só pede de novo '
+        'o que já venceu pela periodicidade das diretrizes.',
+        '- Guia SP/SADT no padrão TISS 4 e receituário com o seu modelo: cadastre no painel da sua conta os '
+        'dados do seu credenciamento em cada plano (operadora, código do prestador, CBO) e o seu timbrado. A '
+        'guia sai preenchida na parte da solicitação, pronta para a autorização da operadora.',
+        '- Orientações mais enxutas: detalhes importantes para a decisão no consultório, que abrem com um toque.',
+        '- Revisão completa das regras: conferimos todas as recomendações contra as diretrizes de referência, '
+        'testadas em mais de 6.000 casos simulados, e corrigimos pequenos erros.',
         '',
-    ] + _fecho(url_site))
-    return 'Evidēns: o que há de novo', corpo
+        'Nas próximas semanas vêm novidades sugeridas por vocês, como a APAC de exames de imagem e o cálculo do '
+        'risco cardiovascular pré-operatório.',
+        '',
+        'Lembrando que as recomendações são sugestões para a sua avaliação: revise e individualize sempre. '
+        'Fiquem à vontade para responder este e-mail com qualquer feedback.',
+        '',
+        f'Para conferir, é só entrar em {url_site}/login',
+        '',
+        'Um abraço e uma ótima semana!',
+        '',
+        'Rodolfo C. Frota',
+        'CRM-GO 26.815',
+        'Criador do Evidēns',
+    ])
+    return 'Evidēns: novidades do fim de semana', corpo
 
 
 def enviar_lote(mensagens):

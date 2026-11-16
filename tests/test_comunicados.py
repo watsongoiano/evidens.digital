@@ -26,11 +26,14 @@ def aprovados(contas):
 def test_texto_tem_boas_vindas_em_uma_linha_e_as_novidades():
     assunto, texto = notificacoes.mensagem_de_novidades({'nome': 'Ana Souza'}, 'https://evidens.life')
     linhas = texto.split('\n')
-    assert assunto == 'Evidēns: o que há de novo'
-    assert linhas[0] == 'Olá, Ana.' and linhas[2].startswith('Que bom ter você no Evidēns!')
-    for trecho in ('CKD-EPI 2021', 'KFRE', 'TISS 4', 'colonoscopia e FIT', 'https://evidens.life/login',
-                   'fase de desenvolvimento'):
+    assert assunto == 'Evidēns: novidades do fim de semana'
+    assert linhas[0] == 'Olá, Ana.' and linhas[2].startswith('Aqui quem fala é o Rodolfo C. Frota')
+    for trecho in ('CKD-EPI 2021', 'KFRE', 'TISS 4', '42 exames mais comuns', 'https://evidens.life/login',
+                   'revise e individualize sempre', 'CRM-GO 26.815'):
         assert trecho in texto, trecho
+    # Só o que o sistema faz: a guia não sai autorizada e nenhuma senha de plano é pedida.
+    for proibido in ('já autorizad', 'dados de login', 'senha'):
+        assert proibido not in texto, proibido
 
 
 def test_envio_em_lote_uma_vez_so_para_aprovados(contas, aprovados, resend, monkeypatch):
