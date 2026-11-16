@@ -1877,7 +1877,7 @@ def preoperatorio_endpoint():
     preoperatorio.aplicar_exames_anteriores(p, anteriores)
     resultado = preoperatorio.avaliar(p)
     pas, pad = p.get('pas'), p.get('pad')
-    ctx = {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr'], 'cirurgia': p['cirurgia'],
+    ctx = {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr'], 'tfg': resultado['tfg'], 'cirurgia': p['cirurgia'],
            'sangramento': p['sangramento'], 'cirurgia_risco_elevado': resultado['contexto']['cir_elev'],
            'urgencia': p['urgencia'], 'neuroaxial': p['neuroaxial'], 'condicoes': set(p['condicoes']),
            'stent': p['stent'], 'aas_indicacao': p['aas_indicacao'],

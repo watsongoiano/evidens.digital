@@ -281,7 +281,7 @@ def test_rota_do_preoperatorio(app, contas):
 
 def test_jovem_sem_comorbidade_em_cirurgia_de_baixo_risco_recebe_orientacao_curta():
     r = po.avaliar(_p(idade=28, sexo='feminino', cirurgia='pele'))
-    assert r['resumido'] and r['resumo']['titulo'] == 'Avaliação cardiológica não indicada'
+    assert r['resumido'] and r['resumo']['titulo'] == 'Risco cardiológico não indicado para este paciente.'
     assert 'cirurgia de baixo risco' in r['resumo']['texto'] and r['resumo']['referencias']
     assert not any(e['estado'] == 'indicado' for e in r['exames'])
     # Com doença cardiovascular ou sintomas, mesmo em cirurgia de baixo risco, o resultado completo continua.
@@ -324,3 +324,33 @@ def test_uti_pela_sbc_com_nivel_e_aviso_da_aha():
     r = po.avaliar(_p(condicoes=['dac']))                    # RCRI 2: risco intermediário
     uti = next(x for x in r['pos_operatorio'] if x['titulo'].startswith('Unidade de terapia intensiva'))
     assert uti['classe'] == 'SBC IIa-C'
+
+
+# ── Conclusão com título, orientações perioperatórias e anemia ─────────────────────────────────────────────────
+def test_titulo_da_conclusao_do_risco_cardiologico():
+    assert po.avaliar(_p(cirurgia='hernia'))['indicacao']['titulo'] == 'Risco cardiológico não indicado para este paciente.'
+    r = po.avaliar(_p(idade=72, condicoes=['dac', 'ic'], escadas='nao'))
+    assert r['indicacao']['tipo'] == 'indicada' and r['indicacao']['titulo'] == 'Risco cardiológico indicado para este paciente.'
+    r = po.avaliar(_p(idade=72, condicoes=['dac', 'ic'], escadas='sim', sintomas=['angina']))
+    assert r['indicacao']['tipo'] == 'nao_indicada' and 'fora do contexto cirúrgico' in r['indicacao']['nota']
+
+
+def test_orientacoes_perioperatorias_so_para_quem_esta_na_situacao():
+    titulos = lambda r: {o['titulo'] for o in r['orientacoes']}
+    colectomia = po.avaliar(_p(idade=60, cirurgia='colectomia', sangramento='alto', hemoglobina=10.2))
+    t = titulos(colectomia)
+    assert {'Jejum antes da anestesia', 'Higiene oral com antisséptico', 'Anemia (hemoglobina 10,2 g/dL)',
+            'Ácido tranexâmico se houver perda sanguínea esperada', 'Mascar chiclete depois da cirurgia abdominal'} <= t
+    goma = next(o for o in colectomia['orientacoes'] if o['titulo'].startswith('Mascar chiclete'))
+    assert 'íleo paralítico' in goma['texto'] and goma['referencias'][0]['url'].endswith('CD006506.pub3')
+    assert {'Ferritina, soro', 'Índice de saturação de transferrina, soro'} <= {e['titulo'] for e in colectomia['exames']}
+    catarata = titulos(po.avaliar(_p(idade=40, cirurgia='catarata', hemoglobina=13.5)))
+    assert 'Mascar chiclete depois da cirurgia abdominal' not in catarata and 'Higiene oral com antisséptico' not in catarata
+    assert not any(t.startswith('Anemia') for t in catarata)
+    assert 'Jejum antes da anestesia' not in titulos(po.avaliar(_p(cirurgia='colectomia', urgencia='emergencia')))
+
+
+def test_tfg_pela_ckd_epi_ao_lado_do_clcr():
+    r = po.avaliar(_p(idade=80, sexo='feminino', peso=45, creatinina=1.2))
+    assert r['tfg'] is not None and r['clcr'] is not None and r['tfg'] != r['clcr']
+    assert po.avaliar(_p())['tfg'] is None

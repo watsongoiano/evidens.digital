@@ -58,7 +58,7 @@ _URL_SBD_PT = 'https://diretriz.diabetes.org.br/rastreamento-e-controle-da-hiper
 _URL_SBA_GLP1 = ('https://www.sbahq.org/nota-da-sba-de-atualizacao-sobre-as-recomendacoes-do-manejo-perioperatorio-'
                  'dos-agonistas-do-receptor-glp-1-e-coagonistas-glp-1-gip/')
 _URL_KDIGO_DM = 'https://doi.org/10.1016/j.kint.2022.06.008'
-_URL_ASRA = 'https://doi.org/10.1097/AAP.0000000000000763'
+_URL_ASRA = 'https://doi.org/10.1136/rapm-2024-105766'
 _URL_VALVAS = 'https://doi.org/10.1161/CIR.0000000000000923'
 _URL_MEC = 'https://doi.org/10.15585/mmwr.rr7304a1'
 
@@ -79,7 +79,7 @@ REFERENCIAS = {
     'sba_glp1': {'label': 'SBA 2026, nota C.SBA-01744/2026 sobre aGLP-1 e coagonistas GLP-1/GIP no perioperatório',
                  'url': _URL_SBA_GLP1},
     'kdigo_dm': {'label': 'KDIGO 2022, diabetes na doença renal crônica', 'url': _URL_KDIGO_DM},
-    'asra': {'label': 'ASRA 2018 (4ª ed.), anestesia regional e antitrombóticos', 'url': _URL_ASRA},
+    'asra': {'label': 'ASRA 2025 (5ª ed.), anestesia regional e antitrombóticos (Reg Anesth Pain Med)', 'url': _URL_ASRA},
     'valvas': {'label': 'ACC/AHA 2020, valvopatias (Circulation 2021;143:e72–e227)', 'url': _URL_VALVAS},
     'mec': {'label': 'CDC US MEC 2024, critérios de elegibilidade para contraceptivos (MMWR 2024;73(4))',
             'url': _URL_MEC},
@@ -663,17 +663,24 @@ def _isglt2(chave, ctx):
 
 
 def _metformina(chave, ctx):
-    clcr = ctx.get('clcr')
+    # O limite da metformina é de TFG estimada (mL/min/1,73 m²), não de ClCr por Cockcroft-Gault: as duas medidas não
+    # se trocam, sobretudo nos extremos de peso. Por isso usa ``tfg`` (CKD-EPI 2021), e não ``clcr``.
+    tfg = ctx.get('tfg')
     refs = [_sbd('R5 e Tabela 2'), _aha('§7.8, rec. 3'), _ref('spaqi_endo')]
-    if clcr is not None and clcr < 30:
-        return _item(chave, 'suspender', 'Suspender (ClCr < 30 mL/min)',
-                     f'ClCr {clcr:.0f} mL/min: a metformina é contraindicada com filtração abaixo de 30 mL/min/1,73 m². '
+    if tfg is not None and tfg < 30:
+        return _item(chave, 'suspender', 'Suspender (TFG < 30)',
+                     f'TFG {tfg:.0f} mL/min/1,73 m² (CKD-EPI 2021): a metformina é contraindicada abaixo de 30. '
                      'Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir sem '
                      'função renal estável.',
                      'KDIGO 2022: ponto de prática (sem gradação)', _refs(_ref('kdigo_dm'), *refs))
-    return _item(chave, 'suspender', 'Tomar até a véspera; não tomar no dia',
-                 'Manter até a véspera e não tomar no dia da cirurgia. Reintroduzir com o paciente estável, com função '
-                 'renal preservada e sem complicação que leve a hipóxia tecidual.',
+    texto = ('Manter até a véspera e não tomar no dia da cirurgia. Reintroduzir com o paciente estável, com função '
+             'renal preservada e sem complicação que leve a hipóxia tecidual.')
+    if tfg is not None and tfg < 45:
+        texto += f' TFG {tfg:.0f} mL/min/1,73 m²: dose máxima de 1.000 mg/dia (KDIGO 2022).'
+        refs.append(_ref('kdigo_dm'))
+    elif tfg is None:
+        texto += ' Sem creatinina: confira a TFG, porque a metformina é contraindicada abaixo de 30 mL/min/1,73 m².'
+    return _item(chave, 'suspender', 'Tomar até a véspera; não tomar no dia', texto,
                  'SBD/SBA/ABESO IIa-B · AHA 2a (C-LD)', _refs(*refs), _DIV_METFORMINA)
 
 
@@ -880,7 +887,7 @@ def _doac(chave, ctx):
                      f'Dabigatrana com ClCr {_num(clcr)} mL/min: a ASRA não recomenda bloqueio neuroaxial; preferir '
                      'outra técnica anestésica, em decisão com a anestesia. Se a neuroaxial for indispensável, '
                      'suspender por mais tempo (pela AHA, ≥6 dias sem dose) e conferir o efeito residual.',
-                     'ASRA 2018 · AHA 1 (B-NR)', _refs(_ref('asra'), refs))
+                     'ASRA 2025 · AHA 1 (B-NR)', _refs(_ref('asra'), refs))
     if sang == 'minimo':
         return _item(chave, 'manter', 'Não interromper',
                      'Sangramento mínimo: manter (AHA, Tabela 13). SBC: catarata, I-B; endoscopia de baixo risco e '
@@ -919,7 +926,14 @@ def _doac(chave, ctx):
              f'heparina.{nota}')
     if neuraxial:
         texto += (' Neuroaxial: interrupção completa por ≥5 meias-vidas (≥3 dias para anti-Xa; ≥4 dias para '
-                  'dabigatrana, 5–6 se ClCr <50) e próxima dose ≥6 h após retirar o cateter peridural (SBC I-B).')
+                  'dabigatrana, 5–6 se ClCr <50). Em dose terapêutica, a primeira dose só ≥24 h após a punção ou a '
+                  'retirada do cateter (ASRA 2025); as 6 h valem só para dose profilática.')
+        refs = _refs(refs, _ref('asra'))
+        div_neuro = ('Reinício após a punção ou a retirada do cateter: a SBC fala em ≥6 h (I-B), sem distinguir a '
+                     'dose; a ASRA 2025 pede ≥24 h na dose terapêutica e 6 h só na profilática. Nós optamos por '
+                     'seguir a ASRA, mais segura para quem usa dose terapêutica.')
+    else:
+        div_neuro = ''
     div = ''
     if farmaco == 'apixabana' and 15 <= clcr < 50 and sang == 'baixo_moderado':
         resumo = 'Última dose ≥48 h antes; reiniciar 48 h depois'
@@ -936,6 +950,7 @@ def _doac(chave, ctx):
         div = ('A SBC não tem quadro para a edoxabana (só texto, sem classe); a AHA a agrupa com apixabana e '
                'rivaroxabana. Nós optamos por seguir a AHA.')
     classe = f'AHA 1 (B-NR) · SBC {classe_sbc}' if classe_sbc else 'AHA 1 (B-NR) · SBC: texto, sem classe'
+    div = ' '.join(x for x in (div, div_neuro) if x)
     return _item(chave, 'suspender', resumo, texto, classe, refs, div)
 
 
@@ -1007,12 +1022,12 @@ def _enoxaparina(chave, ctx):
                      'Sem tempo para o intervalo de 24 h: informar à anestesia a hora da última aplicação. Anestesia '
                      'neuroaxial só ≥24 h após dose plena e ≥12 h após dose profilática (ASRA); com dose recente, '
                      'preferir outra técnica.',
-                     'ASRA 2018 · SBC IIa-C', _refs(_ref('asra'), _sbc('Quadro 25')))
+                     'ASRA 2025 · SBC IIa-C', _refs(_ref('asra'), _sbc('Quadro 25')))
     return _item(chave, 'suspender', 'Dose plena: última dose 24 h antes',
                  'Em dose plena, última aplicação 24 h antes e retorno ≥24 h depois (48–72 h se sangramento alto), com '
                  'hemostasia: intervalos que a SBC define para a HBPM na ponte, aqui estendidos ao uso contínuo. Na '
                  'anestesia neuroaxial (ASRA): punção ≥24 h após dose plena e ≥12 h após dose profilática.',
-                 'SBC IIa-C (extrapolado da ponte) · ASRA 2018', _refs(_sbc('Quadro 25'), _ref('asra')))
+                 'SBC IIa-C (extrapolado da ponte) · ASRA 2025', _refs(_sbc('Quadro 25'), _ref('asra')))
 
 
 # --- Antiagregantes -----------------------------------------------------------------------------------------------
@@ -1377,11 +1392,14 @@ def _avisos(meds, ctx):
             'Anestesia neuroaxial e anticoagulantes',
             'A AHA trata a anestesia neuroaxial como procedimento de maior risco de sangramento: interrupção completa '
             'do anticoagulante (≥5 meias-vidas: ≥3 dias para anti-Xa; ≥4 dias para dabigatrana, 5–6 se ClCr <50) e '
-            'decisão de equipe. Com cateter peridural, a próxima dose de DOAC só ≥6 h após a retirada (SBC I-B). '
-            'ASRA: anti-Xa ≥72 h; dabigatrana 72–120 h conforme o ClCr, e não fazer o bloqueio com ClCr <30; HBPM '
-            '≥24 h após dose plena e ≥12 h após dose profilática; clopidogrel e ticagrelor 5–7 dias, prasugrel 7–10 '
-            'dias; AAS isolado não impede o bloqueio.',
-            _refs(_aha('§7.6 (texto) e Tabela 13'), _sbc('Quadro 26'), _ref('asra'))))
+            'decisão de equipe. ASRA 2025, antes da punção, em dose terapêutica: anti-Xa ≥72 h; dabigatrana 72–120 h '
+            'conforme o ClCr, e não fazer o bloqueio com ClCr <30; HBPM ≥24 h após dose plena e ≥12 h após dose '
+            'profilática; clopidogrel e ticagrelor 5–7 dias, prasugrel 7–10 dias; AAS isolado não impede o bloqueio. '
+            'Depois da punção ou da retirada do cateter, DOAC em dose terapêutica só após ≥24 h (6 h só na dose '
+            'profilática).',
+            _refs(_aha('§7.6 (texto) e Tabela 13'), _sbc('Quadro 26'), _ref('asra')),
+            'A SBC (I-B) fala em ≥6 h após a retirada do cateter para o DOAC, sem distinguir a dose; a ASRA 2025 pede '
+            '≥24 h na dose terapêutica. Nós optamos por seguir a ASRA.'))
 
     diabetico = cond & {'diabetes', 'diabetes_insulina'} or any(
         set(MEDICAMENTOS[m]['classes']) & _ANTIDIABETICOS for m in meds)
@@ -1452,7 +1470,8 @@ def condutas(medicacoes: list[str], ctx: dict) -> dict:
 
     ``medicacoes``: chaves de ``MEDICAMENTOS`` (chaves desconhecidas são ignoradas; repetidas contam uma vez).
     ``ctx`` (tudo opcional): idade, sexo ('masculino'|'feminino'), peso, clcr (mL/min, Cockcroft-Gault),
-    sangramento ('minimo'|'baixo_moderado'|'alto'), cirurgia_risco_elevado, urgencia
+    tfg (mL/min/1,73 m², CKD-EPI 2021; usada só na metformina), sangramento ('minimo'|'baixo_moderado'|'alto'),
+    cirurgia_risco_elevado, urgencia
     ('eletiva'|'tempo_sensivel'|'urgencia'|'emergencia'), neuraxial (aceita também 'neuroaxial'), condicoes (set), stent
     ({'tipo': 'farmacologico'|'convencional'|'balao', 'indicacao': 'sca'|'dac_cronica', 'dias': int}; 'meses' ainda
     é aceito), aas_indicacao ('primaria'|'secundaria'), pa_controlada, cirurgia (chave de preoperatorio.CIRURGIAS).

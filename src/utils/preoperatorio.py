@@ -48,6 +48,9 @@ COCHRANE_IMT = _ref('Cochrane 2015 (treino inspiratório)', 'https://doi.org/10.
 TABAGISMO = _ref('Wong 2012', 'https://doi.org/10.1007/s12630-011-9652-x')
 CAROTIDA_AHA = _ref('AHA/ASA 2021 (prevenção secundária do AVC)', 'https://doi.org/10.1161/STR.0000000000000375')
 CAROTIDA_ESVS = _ref('ESVS 2023 (doença carotídea)', 'https://doi.org/10.1016/j.ejvs.2022.04.011')
+ASA_JEJUM = _ref('ASA 2017 (jejum pré-operatório)', 'https://doi.org/10.1097/ALN.0000000000001452')
+ASA_JEJUM_2023 = _ref('ASA 2023 (líquidos com carboidrato)', 'https://doi.org/10.1097/ALN.0000000000004381')
+COCHRANE_GOMA = _ref('Cochrane 2015 (goma de mascar)', 'https://doi.org/10.1002/14651858.CD006506.pub3')
 SBD = _ref('SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91)', 'https://doi.org/10.1186/s13098-025-02060-5')
 
 # ── Cirurgias ────────────────────────────────────────────────────────────────
@@ -129,6 +132,15 @@ MICA_ASA = {1: -5.17, 2: -3.29, 3: -1.92, 4: -0.95, 5: 0.0}
 MICA_FUNCIONAL = {'independente': 0.0, 'parcial': 0.65, 'total': 1.03}
 ESTADOS_FUNCIONAIS = {'independente': 'Independente', 'parcial': 'Parcialmente dependente',
                       'total': 'Totalmente dependente'}
+
+CIRURGIAS_ABDOMINAIS = {'colecistectomia', 'colectomia', 'perfuracao_intestinal', 'pancreas', 'figado', 'cistectomia',
+                        'ginecologica_maior', 'aorta_aberta', 'adrenal', 'urologica_maior', 'transplante_hepatico',
+                        'esofagectomia'}
+
+TITULO_DA_CONCLUSAO = {'nao_indicada': 'Risco cardiológico não indicado para este paciente.',
+                       'indicada': 'Risco cardiológico indicado para este paciente.',
+                       'adiar': 'Estabilizar e adiar a cirurgia eletiva; risco cardiológico indicado.',
+                       'emergencia': 'Cirurgia de emergência: operar sem exames que atrasem.'}
 
 RISCO_DA_CIRURGIA = {'baixo': 'Baixo (< 1%)', 'intermediario': 'Intermediário (1–5%)', 'alto': 'Alto (> 5%)'}
 
@@ -847,6 +859,14 @@ def exames(p, ctx):
                 saida.append(_item('Glicose, soro', 'laboratorio', 'indicado', motivo + ' Glicemia de jejum.',
                                    outra='SBD I-B', refs=[SBD]))
 
+    # Anemia antes da eletiva: pesquisar ferropenia para tratar com ferro (AHA, manejo da anemia, rec. 2: 2a B-R)
+    hb = p.get('hemoglobina')
+    if hb is not None and p['urgencia'] in ('eletiva', 'tempo_sensivel') and hb < (13 if p['sexo'] == 'masculino' else 12):
+        for titulo in ('Ferritina, soro', 'Índice de saturação de transferrina, soro'):
+            saida.append(_item(titulo, 'laboratorio', 'indicado',
+                               f'Anemia (hemoglobina {_fmt(hb)} g/dL): pesquisar ferropenia, que se trata com ferro antes '
+                               'da cirurgia eletiva.', aha='2a (tratamento)', sbc='—', refs=[AHA]))
+
     # Exames de rotina (NICE NG45): "Offer" = indicado; "Consider" = considerar
     asa, porte = p['asa'], cir['porte']
     renal = 'doenca_renal' in c
@@ -1036,6 +1056,55 @@ def _adiamentos_do_stent(st, urgencia):
                    'O intervalo mínimo para cirurgia eletiva já passou. Manter o AAS.', 'AHA · SBC', refs, ok=True)]
 
 
+def _orientacoes_perioperatorias(p, cir_ia):
+    """Orientações gerais, cada uma só para quem está na situação (jejum, higiene oral, anemia, sangramento, íleo)."""
+    saida = []
+    eletiva = p['urgencia'] in ('eletiva', 'tempo_sensivel')
+    if eletiva:
+        saida.append({'titulo': 'Jejum antes da anestesia',
+                      'texto': 'Líquidos claros (água, chá, café sem leite, suco sem polpa) até 2 h antes; refeição leve '
+                               'até 6 h antes; frituras, gordura ou carne até 8 h antes. Bebida clara com carboidrato pode '
+                               'ser tomada até 2 h antes por adultos. Em uso de aGLP-1 ou tirzepatida, vale a orientação '
+                               'própria (dieta líquida nas 24 h antes e jejum de 8 a 12 h).',
+                      'classe': 'ASA 2017 e 2023: diretriz de prática', 'referencias': [ASA_JEJUM, ASA_JEJUM_2023]})
+    if cir_ia:
+        saida.append({'titulo': 'Higiene oral com antisséptico',
+                      'texto': 'Bochecho com 15 mL de clorexidina 0,2% (ou iodopovidona 5%) por 30 a 60 s antes e depois '
+                               'da cirurgia, para reduzir infecção; tratar doença periodontal ou dentária antes da eletiva.',
+                      'classe': 'SBC IIa-B', 'referencias': [SBC]})
+    hb = p.get('hemoglobina')
+    if hb is not None and eletiva and hb < (13 if p['sexo'] == 'masculino' else 12):
+        saida.append({'titulo': f'Anemia (hemoglobina {_fmt(hb)} g/dL)',
+                      'texto': 'Pesquisar ferropenia: ferritina < 100 ng/mL, saturação de transferrina < 20% ou '
+                               'microcitose. Se ferropriva, ferro antes da cirurgia eletiva reduz transfusão e eleva a '
+                               'hemoglobina; com menos de 2 semanas até a cirurgia, o ferro venoso funciona melhor que o '
+                               'oral.',
+                      'classe': 'AHA 2a (B-R)', 'referencias': [AHA]})
+    if p['sangramento'] == 'alto' or CIRURGIAS[p['cirurgia']]['porte'] == 'maior':
+        saida.append({'titulo': 'Ácido tranexâmico se houver perda sanguínea esperada',
+                      'texto': 'Reduz o sangramento, a transfusão e a anemia pós-operatória; decisão da equipe cirúrgica '
+                               'e da anestesia, pesando as contraindicações.',
+                      'classe': 'AHA 2a (A)', 'referencias': [AHA]})
+    if p['cirurgia'] in CIRURGIAS_ABDOMINAIS:
+        saida.append({'titulo': 'Mascar chiclete depois da cirurgia abdominal',
+                      'texto': 'Mascar goma é uma "alimentação simulada": estimula o nervo vago e o reflexo '
+                               'cefálico, que aceleram o retorno do intestino e ajudam a evitar o íleo paralítico. Em 81 '
+                               'ensaios (9.072 pacientes), antecipou os flatos em cerca de 10 h e a evacuação em cerca de '
+                               '13 h e encurtou a internação em cerca de 0,7 dia, sem mais complicações. Ensaios pequenos e '
+                               'de qualidade baixa; o efeito é menor dentro de protocolos de recuperação acelerada (ERAS).',
+                      'classe': 'Cochrane 2015: evidência de qualidade baixa', 'referencias': [COCHRANE_GOMA]})
+    return saida
+
+
+def _detalhe_da_conclusao(conclusao, nota):
+    """Linha sob o título da conclusão: o motivo na indicada, o alerta (se houver) na não indicada."""
+    tipo, texto = conclusao
+    if tipo == 'nao_indicada':
+        return nota
+    prefixo = 'Avaliação cardiológica indicada: '
+    return 'Motivo: ' + texto[len(prefixo):] if texto.startswith(prefixo) else texto
+
+
 def avaliar(p):
     """Resultado completo da avaliação pré-operatória."""
     from src.utils.medicamentos import classes_de
@@ -1064,7 +1133,7 @@ def avaliar(p):
     adiar = adiamentos(p)
     sint_isq_novo = bool(p['sintomas'] & {'angina', 'dispneia_nova'})
 
-    passos, conclusao = [], None
+    passos, conclusao, nota_conclusao = [], None, ''
     passos.append(_passo('Cirurgia de emergência?', 'Sim' if emergencia else 'Não', 'atencao' if emergencia else 'ok',
                          'Operar sem exames que atrasem a cirurgia; só monitorização e redução de risco.'))
     if emergencia:
@@ -1106,8 +1175,9 @@ def avaliar(p):
         if estado == 'boa':
             texto = 'Risco elevado, mas boa capacidade funcional: liberar sem prova funcional.'
             if sint_isq_novo:
-                texto += (' Angina ou dispneia nova ou em mudança: investigar como fora do contexto cirúrgico, pelas '
-                          'diretrizes de dor torácica e doença coronária.')
+                nota_conclusao = ('Angina ou dispneia nova ou em mudança: investigar como fora do contexto cirúrgico, '
+                                  'pelas diretrizes de dor torácica e doença coronária.')
+                texto += ' ' + nota_conclusao
             conclusao = ('nao_indicada', texto)
         else:
             investigar = p['urgencia'] in ('eletiva', 'tempo_sensivel', 'urgencia')
@@ -1137,6 +1207,9 @@ def avaliar(p):
     if frag:
         escores.append(frag)
     depuracao = clcr(p)
+    from src.utils import prevent
+    tfg = (round(prevent.egfr_ckd_epi_2021(float(p['creatinina']), p['idade'], p['sexo']))
+           if p['creatinina'] else None)
 
     orientacoes = []
     if p['idade'] >= 65 and cir_ia and frag is None:
@@ -1154,6 +1227,7 @@ def avaliar(p):
         orientacoes.append({'titulo': 'Parar de fumar', 'texto': 'Parar 4 semanas ou mais antes reduz complicações '
                             'respiratórias e de cicatrização; parar mais perto da cirurgia não aumenta o risco.',
                             'classe': 'Metanálise', 'referencias': [TABAGISMO]})
+    orientacoes.extend(_orientacoes_perioperatorias(p, cir_ia))
 
     pulmonar = ariscat(p)
     medidas_pulmonares = []
@@ -1204,7 +1278,7 @@ def avaliar(p):
                 and sb['nivel'] != 'alto' and (frag is None or (frag['valor'] or 0) < 5))
     resumo = None
     if resumido:
-        resumo = {'titulo': 'Avaliação cardiológica não indicada',
+        resumo = {'titulo': 'Risco cardiológico não indicado para este paciente.',
                   'texto': 'Motivo: cirurgia de baixo risco (< 1%), em paciente com menos de 65 anos, sem '
                            'comorbidade, sem sintomas e sem condição instável. Exames cardíacos adicionais não mudam '
                            'a conduta neste perfil; pode operar.',
@@ -1216,6 +1290,8 @@ def avaliar(p):
         'cirurgia': {'rotulo': cir['rotulo'], 'risco': RISCO_DA_CIRURGIA[cir['risco']],
                      'urgencia': URGENCIAS[p['urgencia']]},
         'indicacao': {'passos': passos, 'tipo': conclusao[0], 'conclusao': conclusao[1],
+                      'titulo': TITULO_DA_CONCLUSAO[conclusao[0]], 'nota': nota_conclusao,
+                      'detalhe': _detalhe_da_conclusao(conclusao, nota_conclusao),
                       'referencias': [AHA, SBC],
                       'divergencia': ('A AHA recomenda o escore em quem tem doença cardiovascular conhecida (2a) e '
                                       'classifica o risco em baixo ou elevado (≥ 1%); a SBC calcula para todos, em '
@@ -1224,6 +1300,7 @@ def avaliar(p):
         'adiar': adiar,
         'escores': escores,
         'clcr': depuracao,
+        'tfg': tfg,
         'exames': lista_exames,
         'orientacoes': orientacoes,
         'pulmonar': {'escore': pulmonar, 'stop_bang': sb, 'medidas': medidas_pulmonares},
