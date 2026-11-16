@@ -184,8 +184,8 @@ def _numero(texto, campo):
         valor = float(bruto.replace('.', '').replace(',', '.'))
     else:
         valor = float(bruto)
-    if milhar and valor < 1000:
-        valor *= 1000                                # "7,5 mil/mm³" ou "250 x10³/µL"
+    if milhar and re.match(r'\s*(mil\b|x\s*10\s*(³|\^?3)|10\s*(³|\^?3)|k/)', texto[m.end():], re.IGNORECASE):
+        valor *= 1000                                # "7,5 mil/mm³" ou "250 x10³/µL"; "500 /mm³" fica 500
     if not campo['min'] <= valor <= campo['max']:
         return None
     return int(valor) if valor.is_integer() else round(valor, 3)

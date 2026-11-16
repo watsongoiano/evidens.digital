@@ -1220,7 +1220,8 @@
             querem.forEach(chave => {
                 const guardado = document.querySelector(`#resultadosGuardados [data-resultado="${chave}"]`);
                 if (guardado) { caixa.appendChild(guardado); return; }
-                if (document.querySelector(`#examesAnteriores [data-resultado="${chave}"]`)) return;   // já está em outro cartão
+                // O campo do cálculo já está em outro cartão (ex.: HDL de outra coleta): este cartão ganha o seu próprio
+                // campo, que vai para o resumo com a data dele; o cálculo segue com o do primeiro cartão.
                 const criado = criarCampo(campoComum[chave] || (examesComuns && examesComuns.livre) || { nome: chave, rotulo: 'Resultado', texto: true });
                 caixa.appendChild(criado);
                 const lista = criado.querySelector('select');
@@ -1229,10 +1230,17 @@
             atualizarCamposDoColo();
             marcarComuns();
         }
+        function apagarResultadosDoCartao(linha) {
+            linha.querySelectorAll('[data-campo]').forEach(e => {
+                if (e.value === '') return;
+                e.value = '';
+                e.dispatchEvent(new Event(e.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
+            });
+        }
         function preencherResultados(linha, resultados) {
             let algum = false;
             Object.entries(resultados || {}).forEach(([nome, valor]) => {
-                const entrada = linha.querySelector(`[data-campo="${nome}"]`) || document.querySelector(`#examesAnteriores [data-campo="${nome}"]`);
+                const entrada = linha.querySelector(`[data-campo="${nome}"]`);
                 if (!entrada || valor === null || valor === undefined) return;
                 entrada.value = String(valor);
                 entrada.dispatchEvent(new Event(entrada.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
@@ -1431,8 +1439,10 @@
                     const temValor = resultados && Object.keys(resultados).length;
                     const def = comuns.apelidos[exame];
                     const componente = def && def.titulo !== exame && def.campos.length < ((comuns.apelidos[def.titulo] || {}).campos || []).length;
+                    // Só da mesma coleta: com outra data, o componente fica no seu próprio cartão, com a data dele.
                     const painel = componente && linhaDoExame(def.titulo);
-                    if (painel && def.campos.every(c => painel.querySelector(`[data-campo="${c}"]`))) {
+                    if (painel && painel.querySelector('[data-data-anterior]').value === data
+                        && def.campos.every(c => painel.querySelector(`[data-campo="${c}"]`))) {
                         const vazios = Object.fromEntries(Object.entries(resultados || {}).filter(([c]) => !painel.querySelector(`[data-campo="${c}"]`).value));
                         if (preencherResultados(painel, vazios)) comValor++;
                         return;
@@ -1446,6 +1456,9 @@
                     }
                     const campo = existente.querySelector('[data-data-anterior]');
                     if (!campo.value || campo.value <= data) {
+                        // Coleta mais nova: os resultados da anterior deixam de valer (um campo que o laudo novo não
+                        // traz, como um HPV detectado, não pode ficar com o valor antigo).
+                        if (campo.value && campo.value < data) apagarResultadosDoCartao(existente);
                         if (campo.value !== data) { campo.value = data; atualizados++; }
                         if (temValor && preencherResultados(existente, resultados)) comValor++;
                     }

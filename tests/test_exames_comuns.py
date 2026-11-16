@@ -51,6 +51,9 @@ def test_outros_nomes_do_mesmo_exame_levam_aos_mesmos_campos():
     # Algum tipo de HPV detectado: o passo seguinte depende do tipo e da citologia, e fica com o médico.
     ('Pesquisa do Papilomavírus Humano (HPV), por técnica molecular', ['HPV 16: Não detectado', 'HPV 18: Detectado'], {}),
     ('Pesquisa do Papilomavírus Humano (HPV), por técnica molecular', ['Resultado: Não detectado'], {'hpv_resultado': 'nao_detectado'}),
+    # Milhar só com a unidade dizendo: "500 /mm³" é 500; "7,5 mil/mm³" e "250 x10³/µL" são 7.500 e 250.000.
+    ('Hemograma completo com plaquetas', ['Leucocitos: 500 /mm3', 'Plaquetas: 250 x10³/uL'], {'leucocitos': 500, 'plaquetas': 250000}),
+    ('Hemograma completo com plaquetas', ['Leucocitos: 7,5 mil/mm3', 'Plaquetas: 180 /mm3'], {'leucocitos': 7500}),
     # A referência nunca vira resultado; número fora da faixa possível não é lido.
     ('Creatinina, soro', ['Valores de referência: 0,7 a 1,3 mg/dL'], {}),
     ('Creatinina, soro', ['Resultado: 90 mg/dL'], {}),
@@ -119,3 +122,12 @@ def test_tela_tem_os_cartoes_e_o_resumo():
     for nome in E.DO_MOTOR:
         assert f'data-campo="{nome}"' in html
 
+
+
+def test_nenhuma_funcao_da_tela_e_declarada_duas_vezes():
+    """Duas declarações com o mesmo nome: a segunda apaga a primeira sem erro (já aconteceu com limparResultados)."""
+    import re
+    from collections import Counter
+    html = TELA.read_text(encoding='utf-8')
+    repetidas = [n for n, q in Counter(re.findall(r'^ {8}(?:async\s+)?function\s+(\w+)\s*\(', html, re.M)).items() if q > 1]
+    assert not repetidas, repetidas
