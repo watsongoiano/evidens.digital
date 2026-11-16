@@ -116,7 +116,8 @@ def test_rota_da_definicao(client, anonimo):
 
 def test_tela_tem_os_cartoes_e_o_resumo():
     html = TELA.read_text(encoding='utf-8')
-    assert 'id="abrirExamesComuns"' in html and 'id="examesComunsPainel"' in html
+    assert 'id="examesComunsPainel"' in html and 'data-cartoes-do-grupo' in html   # o cartão abre junto do grupo
+    assert 'montagemDosComuns' in html                                             # montado uma vez só
     assert "fetch('/api/exames-comuns'" in html
     assert 'id="resultadosInformados"' in html and 'function exibirResultadosInformados' in html
     for nome in E.DO_MOTOR:
@@ -131,3 +132,13 @@ def test_nenhuma_funcao_da_tela_e_declarada_duas_vezes():
     html = TELA.read_text(encoding='utf-8')
     repetidas = [n for n, q in Counter(re.findall(r'^ {8}(?:async\s+)?function\s+(\w+)\s*\(', html, re.M)).items() if q > 1]
     assert not repetidas, repetidas
+
+
+def test_lista_sem_repeticao():
+    titulos = [t for _, t, _ in E.EXAMES]
+    assert len(titulos) == len(set(titulos))
+    assert len(set(E.CURTO.values())) == len(E.CURTO)                 # nenhum botão com o mesmo nome
+    nomes = [c['nome'] for _, _, campos in E.EXAMES for c in campos]
+    assert len(nomes) == len(set(nomes))                               # nenhum campo de resultado em dois exames
+    grupos = [g for g, _, _ in E.EXAMES]
+    assert [g for i, g in enumerate(grupos) if i == 0 or grupos[i - 1] != g] == list(dict.fromkeys(grupos))   # grupos contíguos

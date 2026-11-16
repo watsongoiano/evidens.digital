@@ -90,6 +90,8 @@ html.lenis, html.lenis body { height: auto; }
   .exame-campos .campo input, .exame-campos .campo select { @apply h-11 px-3 text-[15px] bg-white; }
   .exame-campos .campo:has(.opcoes) { @apply col-span-2; }
   .exame-titulo[hidden], .exame-cartao [hidden], #examesComunsPainel .opcao[hidden] { display: none; }
+  .exames-comuns-grupo { @apply mt-6 first:mt-0; }
+  .exames-comuns-cartoes { @apply flex flex-col gap-3 mt-3 empty:mt-0; }
   .resultado-informado { @apply py-3 border-t border-ink/5 first-of-type:border-t-0; }
 
   .risco-cartao { @apply mt-8 rounded-[22px] bg-white border border-ink/10 p-6 sm:p-7; }
