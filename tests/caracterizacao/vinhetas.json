@@ -214,7 +214,8 @@
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
-        "Anti-HCV IgG, soro"
+        "Anti-HCV IgG, soro",
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -254,6 +255,7 @@
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
         "Anti-HCV IgG, soro",
+        "Sangue oculto nas fezes (FIT)",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
@@ -304,7 +306,8 @@
         "Ácido úrico, soro",
         "EAS - Elementos Anormais e Sedimentoscopia",
         "Razão albumina/creatinina, urina",
-        "PSA total, soro"
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -357,6 +360,7 @@
         "EAS - Elementos Anormais e Sedimentoscopia",
         "Razão albumina/creatinina, urina",
         "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)",
         "Aspartato aminotransferase, soro",
         "Alanina aminotransferase, soro",
         "Relação albumina/creatinina urinária (uACR)",
@@ -418,7 +422,8 @@
         "Ácido úrico, soro",
         "EAS - Elementos Anormais e Sedimentoscopia",
         "Razão albumina/creatinina, urina",
-        "PSA total, soro"
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -464,6 +469,7 @@
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
         "Anti-HCV IgG, soro",
+        "Sangue oculto nas fezes (FIT)",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular",
         "Aspartato aminotransferase, soro",
         "Alanina aminotransferase, soro",
@@ -514,7 +520,8 @@
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
         "Anti-HCV IgG, soro",
-        "PSA total, soro"
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -558,6 +565,7 @@
         "Creatinina, soro",
         "Anti-HCV IgG, soro",
         "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)",
         "Gasometria arterial, sangue arterial",
         "Sódio, soro",
         "Potássio, soro",
@@ -605,7 +613,9 @@
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
-        "Anti-HCV IgG, soro"
+        "Anti-HCV IgG, soro",
+        "Sangue oculto nas fezes (FIT)",
+        "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -631,9 +641,9 @@
     ],
     "outras_recomendacoes": []
   },
-  "h88_higido": {
+  "h69_higido": {
     "entrada": {
-      "idade": 88,
+      "idade": 69,
       "sexo": "masculino",
       "tabagismo": "nunca",
       "imunossupressao": "nao"
@@ -646,7 +656,89 @@
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
         "Anti-HCV IgG, soro",
-        "PSA total, soro"
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h70_higido": {
+    "entrada": {
+      "idade": 70,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "Sangue oculto nas fezes (FIT)"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ],
+      [
+        "PSA total, soro",
+        "nao_recomendado"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h76_higido": {
+    "entrada": {
+      "idade": 76,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro"
       ],
       "imagem": [
         "Eletrocardiograma de repouso"
@@ -665,6 +757,96 @@
       [
         "Febre Amarela (Stamaril®)",
         "precaucao"
+      ],
+      [
+        "PSA total, soro",
+        "nao_recomendado"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h88_higido": {
+    "entrada": {
+      "idade": 88,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ],
+      [
+        "PSA total, soro",
+        "nao_recomendado"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h60_fumante_sem_macos_ano": {
+    "entrada": {
+      "idade": 60,
+      "sexo": "masculino",
+      "tabagismo": "atual",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Creatinina, soro",
+        "Anti-HCV IgG, soro",
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
+      ],
+      "imagem": [
+        "Eletrocardiograma de repouso",
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "Dengue (Qdenga®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ],
+      [
+        "Tomografia computadorizada de tórax de baixa dose (LDCT)",
+        "dados_insuficientes"
       ]
     ],
     "outras_recomendacoes": []

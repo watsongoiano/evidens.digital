@@ -31,8 +31,11 @@ def _colo(client, **dados):
 @pytest.mark.parametrize('idade', [25, 29, 30, 45, 64, 65])
 def test_risco_habitual_teste_de_hpv_a_cada_5_anos_dos_25_aos_65(client, idade):
     recs, orient = _colo(client, idade=idade)
-    assert list(recs) == [HPV] and recs[HPV]['subtitulo'] == 'Mulheres 25-65 anos | A cada 5 anos'
-    assert 'MS 2025' in recs[HPV]['referencia'] and 'SBOC 2026' in recs[HPV]['referencia']
+    assert list(recs) == [HPV] and recs[HPV]['subtitulo'] == 'Mulheres 25-64 anos (ACOG: até 65) | A cada 5 anos'
+    # O MS convida até os 64; aos 65 a fonte é só a ACOG.
+    assert ('MS 2025' in recs[HPV]['referencia'] and 'SBOC 2026' in recs[HPV]['referencia']) == (idade <= 64)
+    if idade == 65:
+        assert recs[HPV]['referencia'] == 'ACOG 2026'
     # A ACOG só apoia o teste primário a partir dos 30 anos; dos 25 aos 29 a divergência vai para as orientações.
     assert ('ACOG 2026' in recs[HPV]['referencia']) == (idade >= 30)
     assert (DIVERGENCIA in orient) == (idade < 30)
@@ -59,9 +62,68 @@ def test_antes_dos_21_nao_se_pede_nada(client, idade):
     assert recs == {} and not any(t.startswith('Colo do útero') for t in orient)
 
 
+@pytest.mark.parametrize('idade, encerra', [(60, False), (61, True), (65, True)])
+def test_negativo_depois_dos_60_encerra_o_rastreamento(client, idade, encerra):
+    recs, orient = _colo(client, idade=idade, hpv_resultado='nao_detectado')
+    assert (HPV in recs) == (not encerra)
+    assert ('Colo do útero: rastreamento encerrado' in orient) == encerra
+    if encerra:
+        assert 'antes dos 60 anos, ainda falta um' in orient['Colo do útero: rastreamento encerrado']['descricao']
+    # sem resultado informado, o teste continua sendo pedido
+    recs, _ = _colo(client, idade=idade)
+    assert HPV in recs
+
+
+ENCERRAR = 'Colo do útero: quando encerrar o rastreamento'
+
+
+@pytest.mark.parametrize('idade', [66, 75, 88])
+@pytest.mark.parametrize('adequado, nic2, resultado, pede', [
+    ('sim', None, None, False),          # rastreio anterior adequado e negativo: para (ACOG)
+    (None, None, 'nao_detectado', False),  # negativo depois dos 60 (MS) sem resposta sobre o rastreio anterior
+    (None, None, None, True),            # não sabe: não se presume que possa parar
+    ('nao', None, None, True),           # rastreio inadequado: continua (ACOG; MS rec. 13)
+    ('nao', None, 'nao_detectado', True),
+    ('sim', 'sim', None, True),          # NIC 2+ tratada: 25 anos após o tratamento
+])
+def test_depois_dos_65_para_so_com_rastreio_adequado(client, idade, adequado, nic2, resultado, pede):
+    extra = {k: v for k, v in (('colo_rastreio_adequado', adequado), ('colo_nic2_previa', nic2), ('hpv_resultado', resultado)) if v}
+    recs, orient = _colo(client, idade=idade, **extra)
+    assert (HPV in recs) == pede
+    assert ENCERRAR in orient
+    o = orient[ENCERRAR]
+    assert 'As diretrizes divergem' in o['descricao'] and '3 citologias negativas seguidas' in o['descricao']
+    assert 'MS 2025' in o['referencia'] and 'ACOG 2026' in o['referencia']
+    if pede:
+        assert recs[HPV]['subtitulo'].startswith('Mulheres acima de 65 anos')
+        assert ('25 anos após o tratamento' in recs[HPV]['descricao']) == (nic2 == 'sim')
+
+
+def test_nic2_tratada_depois_dos_60_negativo_nao_encerra(client):
+    recs, orient = _colo(client, idade=62, hpv_resultado='nao_detectado', colo_nic2_previa='sim')
+    assert HPV in recs and '25 anos após o tratamento' in recs[HPV]['descricao']
+    assert 'Colo do útero: rastreamento encerrado' not in orient
+
+
+def test_texto_dos_metodos_nao_diz_que_a_acog_proibe_o_coteste(client):
+    recs, _ = _colo(client, idade=40)
+    texto = recs[HPV]['descricao']
+    assert 'coteste não é recomendado' not in texto
+    for trecho in ('MS 2025, teste de DNA-HPV sem citologia junto', 'HPV primário a cada 5 anos é o preferido',
+                   'coteste (HPV com citologia) a cada 5 anos é aceitável', 'autocoleta a cada 3 anos'):
+        assert trecho in texto, trecho
+
+
+@pytest.mark.parametrize('valor', ['talvez', 3])
+def test_resposta_invalida_do_historico_do_colo_e_recusada(client, valor):
+    r = client.post('/api/checkup-intelligent', json=dict(idade=70, sexo='feminino', tabagismo='nunca',
+                                                          colo_rastreio_adequado=valor))
+    assert r.status_code == 400
+
+
 def test_depois_dos_65_orienta_quando_encerrar(client):
-    recs, orient = _colo(client, idade=66)
-    assert recs == {} and 'Colo do útero: quando encerrar o rastreamento' in orient
+    recs, orient = _colo(client, idade=66, colo_rastreio_adequado='sim')
+    assert recs == {} and ENCERRAR in orient
     recs, _ = _colo(client, idade=62)
     assert 'Depois dos 60 anos, um teste negativo encerra' in recs[HPV]['descricao']
 
