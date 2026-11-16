@@ -4179,7 +4179,49 @@
   "Al-Temimi 2019, NSQIP": "Al-Temimi 2019, NSQIP",
   "Dexter 2022": "Dexter 2022",
   "Jiang 2021, NSQIP": "Jiang 2021, NSQIP",
-  "Xia 2018, NSQIP": "Xia 2018, NSQIP"
+  "Xia 2018, NSQIP": "Xia 2018, NSQIP",
+  "Cardiopatia congênita de risco elevado": "Elevated-risk congenital heart disease",
+  "História familiar de doença coronária precoce": "Family history of premature coronary artery disease",
+  "Boa capacidade funcional: operar sem prova funcional.": "Good functional capacity: proceed to surgery without stress testing.",
+  "Nós optamos por seguir o fluxo da AHA/ACC 2026 (Figura 1), que libera este paciente para a cirurgia sem exames cardíacos: o exame não foi marcado e fica a considerar.": "We chose to follow the AHA/ACC 2026 flowchart (Figure 1), which clears this patient for surgery without cardiac tests: the test was not selected and is left for consideration.",
+  "Nós optamos por sugerir, sinalizando a diferença.": "We chose to suggest it, flagging the difference.",
+  "A SBC indica (I-B) na IC conhecida sem eco no último ano; a AHA não vê benefício no paciente estável e assintomático.": "The SBC recommends it (I-B) in known heart failure with no echocardiogram in the past year; the AHA sees no benefit in the stable, asymptomatic patient.",
+  "É rastreio oportunístico e não depende do risco cardiológico: com o paciente liberado pelo fluxo, não foi marcado e fica a considerar.": "This is opportunistic screening and does not depend on the cardiac risk: with the patient cleared by the flowchart, it was not selected and is left for consideration.",
+  "Fator de risco, doença ou sintoma cardiovascular?": "Cardiovascular risk factor, disease or symptom?",
+  "Sem nenhum deles, o paciente é liberado para a cirurgia, sem avaliação cardiológica nem exames cardíacos.": "With none of them, the patient is cleared for surgery, with no cardiology evaluation and no cardiac tests.",
+  "Fatores de risco: hipertensão, tabagismo, dislipidemia, diabetes, obesidade, história familiar de doença coronária precoce, mulher com mais de 65 anos, homem com mais de 55.": "Risk factors: hypertension, smoking, dyslipidemia, diabetes, obesity, family history of premature coronary artery disease, women older than 65, men older than 55.",
+  "Risco calculado e modificadores de risco": "Calculated risk and risk modifiers",
+  "Modificador": "Modifier",
+  "RCRI 0–1, AUB-HAS2 0–1 e Gupta MICA < 1%, sem modificador de risco: risco baixo; liberar sem testes de isquemia.": "RCRI 0–1, AUB-HAS2 0–1 and Gupta MICA < 1%, with no risk modifier: low risk; clear without ischemia testing.",
+  "Modificadores: valvopatia grave, hipertensão pulmonar grave, cardiopatia congênita de risco elevado, stent coronário ou cirurgia de revascularização, AVC recente, marca-passo ou CDI, fragilidade.": "Modifiers: severe valvular heart disease, severe pulmonary hypertension, elevated-risk congenital heart disease, coronary stent or bypass surgery, recent stroke, pacemaker or ICD, frailty.",
+  "Com modificador, o fluxo segue com qualquer risco calculado.": "With a modifier, the flowchart continues whatever the calculated risk.",
+  "Sem fator de risco, doença ou sintoma cardiovascular: liberar para a cirurgia, sem avaliação cardiológica nem exames cardíacos.": "No cardiovascular risk factor, disease or symptom: clear for surgery, with no cardiology evaluation and no cardiac tests.",
+  "Risco calculado baixo e sem modificador de risco: liberar sem investigação de isquemia.": "Low calculated risk and no risk modifier: clear without ischemia work-up.",
+  "Com modificador, a AHA/ACC sugere discutir em equipe o momento da cirurgia e os exames.": "With a modifier, the AHA/ACC suggests a team-based discussion of the timing of surgery and of testing.",
+  "tabagismo": "smoking",
+  "dislipidemia": "dyslipidemia",
+  "história familiar de doença coronária precoce": "family history of premature coronary artery disease",
+  "mulher com mais de 65 anos": "woman older than 65",
+  "homem com mais de 55 anos": "man older than 55",
+  "doença cardiovascular": "cardiovascular disease",
+  "sintomas": "symptoms",
+  "PA ≥ 180 × 110": "BP ≥ 180 × 110",
+  "valvopatia moderada ou grave": "moderate or severe valvular heart disease",
+  "hipertensão pulmonar": "pulmonary hypertension",
+  "cardiopatia congênita de risco elevado": "elevated-risk congenital heart disease",
+  "stent coronário ou cirurgia de revascularização": "coronary stent or bypass surgery",
+  "AVC ou AIT recente": "recent stroke or TIA",
+  "marca-passo ou CDI": "pacemaker or ICD",
+  "fragilidade": "frailty",
+  "doença renal crônica (item do RCRI)": "chronic kidney disease (an RCRI item)",
+  "Aqui o fluxo manda operar sem exames.": "Here the flowchart says to operate without tests.",
+  "Aqui o fluxo libera para a cirurgia.": "Here the flowchart clears the patient for surgery.",
+  "Por que não é indicado: o fluxo, passo a passo": "Why it is not indicated: the flowchart, step by step",
+  "Por que foi liberado: o fluxo, passo a passo": "Why the patient was cleared: the flowchart, step by step",
+  "O paciente segue as perguntas da diretriz até o passo que o libera; ao lado, a resposta para este paciente.": "The patient follows the guideline's questions down to the step that clears them; beside each one, the answer for this patient.",
+  "Risco cardiológico não indicado: nenhum exame cardíaco foi marcado. Os marcados são da rotina pré-operatória (porte da cirurgia, classe ASA e doenças do paciente).": "Cardiac risk assessment not indicated: no cardiac test was selected. The selected ones belong to the preoperative routine (surgery grade, ASA class and the patient's conditions).",
+  "Risco cardiológico não indicado: nenhum exame foi marcado. Os listados ficam a considerar.": "Cardiac risk assessment not indicated: no test was selected. The listed ones are left for consideration.",
+  "Motivo:": "Reason:"
  },
  "padroes": [
   [
@@ -5029,6 +5071,22 @@
   [
    "^Faltam dados que podem mudar o escore: (.+)\\.$",
    "Data that may change the score are missing: $1."
+  ],
+  [
+   "^A AHA não vê benefício no ECG de rotina em assintomático antes de cirurgia de baixo risco \\(classe 3\\); a SBC indica \\((.+)\\)\\.$",
+   "The AHA sees no benefit in a routine ECG for asymptomatic patients before low-risk surgery (class 3); the SBC recommends it ($1)."
+  ],
+  [
+   "^Neste paciente: (.+)\\.$",
+   "In this patient: $1."
+  ],
+  [
+   "^Este paciente não tem nenhum deles, mas segue no fluxo: (.+)\\.$",
+   "This patient has none of them, but stays in the flowchart: $1."
+  ],
+  [
+   "^Modificador de risco \\((.+)\\), mas boa capacidade funcional: liberar sem prova funcional\\.$",
+   "Risk modifier ($1), but good functional capacity: clear without stress testing."
   ]
  ],
  "manter": [

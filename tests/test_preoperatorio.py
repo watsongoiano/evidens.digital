@@ -120,23 +120,114 @@ def test_cirurgia_de_baixo_risco_nao_indica_avaliacao_nem_exames_cardiacos():
 
 
 def test_risco_baixo_pelos_escores_libera():
-    r = po.avaliar(_p(idade=50, condicoes=[], creatinina=0.9, hemoglobina=14))
-    assert r['indicacao']['tipo'] == 'nao_indicada' and r['indicacao']['passos'][-1]['resposta'] == 'Baixo'
+    r = po.avaliar(_p(idade=50, condicoes=['hipertensao'], creatinina=0.9, hemoglobina=14))
+    ind = r['indicacao']
+    assert ind['tipo'] == 'nao_indicada' and ind['passos'][-1]['resposta'] == 'Baixo'
+    assert ind['caminho'] == 'risco_baixo' and ind['liberado'] and ind['passos'][-1]['libera']
+
+
+def test_fluxo_da_aha_libera_quem_nao_tem_fator_doenca_nem_sintoma():
+    """AHA/ACC, Figura 1, primeira pergunta. Fatores: hipertensão, tabagismo, dislipidemia, diabetes, obesidade,
+    história familiar de doença coronária precoce, mulher > 65 anos, homem > 55 anos."""
+    r = po.avaliar(_p(idade=45, cirurgia='pancreas'))
+    ind = r['indicacao']
+    assert (ind['tipo'], ind['caminho'], ind['liberado']) == ('nao_indicada', 'sem_fatores', True)
+    assert ind['titulo'] == 'Risco cardiológico não indicado para este paciente.'
+    assert ind['detalhe'].startswith('Sem fator de risco, doença ou sintoma cardiovascular')
+    assert [x['pergunta'] for x in ind['passos']] == ['Cirurgia de emergência?',
+                                                      'Fator de risco, doença ou sintoma cardiovascular?']
+    assert ind['passos'][-1]['resposta'] == 'Não' and ind['passos'][-1]['libera']
+    assert all(x['referencias'] for x in ind['passos'])
+    # Cada fator de risco leva o paciente ao passo seguinte
+    for extra in (dict(condicoes=['hipertensao']), dict(condicoes=['dislipidemia']), dict(condicoes=['tabagismo']),
+                  dict(condicoes=['historia_familiar_dac']), dict(condicoes=['obesidade']), dict(idade=56),
+                  dict(idade=66, sexo='feminino'), dict(medicacoes=['atorvastatina']), dict(sintomas=['palpitacoes'])):
+        ind = po.avaliar(_p(**dict(dict(idade=45, cirurgia='pancreas', creatinina=0.9, hemoglobina=14), **extra)))['indicacao']
+        assert ind['caminho'] != 'sem_fatores', extra
+    assert po.avaliar(_p(idade=65, sexo='feminino', cirurgia='pancreas'))['indicacao']['caminho'] == 'sem_fatores'
+    assert po.avaliar(_p(idade=55, cirurgia='pancreas'))['indicacao']['caminho'] == 'sem_fatores'
+    # Sem fator, mas com escore elevado ou doença renal (item do RCRI): não libera neste passo, e o passo diz por quê
+    ind = po.avaliar(_p(idade=40, sexo='feminino', cirurgia='aorta_aberta', creatinina=0.8, hemoglobina=10.5,
+                        escadas='nao'))['indicacao']
+    assert ind['tipo'] == 'indicada' and 'AUB-HAS2 2' in ind['passos'][1]['texto']
+    assert ind['passos'][1]['resposta'] == 'Não' and ind['passos'][1]['estado'] == 'atencao'
+    assert po.avaliar(_p(idade=45, condicoes=['doenca_renal'], escadas='nao'))['indicacao']['caminho'] == 'incompleto'
+
+
+def test_liberado_pelo_fluxo_nao_marca_exame_cardiaco():
+    """Risco cardiológico não indicado → nenhum exame cardíaco marcado sozinho; o que só a SBC indica (ou que a AHA
+    recomenda fora do fluxo) fica a considerar, com o aviso."""
+    casos = (dict(idade=45, cirurgia='hernia'),                                           # sem fatores
+             dict(idade=68, sexo='feminino', cirurgia='catarata', condicoes=['diabetes']),  # cirurgia de baixo risco
+             dict(idade=66, condicoes=['hipertensao', 'fa'], creatinina=1.0, hemoglobina=14))  # risco calculado baixo
+    for caso in casos:
+        r = po.avaliar(_p(**caso))
+        assert r['indicacao']['liberado'], caso
+        cardiacos = [e for e in r['exames'] if e['titulo'] in po.EXAMES_CARDIACOS]
+        assert cardiacos and not [e['titulo'] for e in cardiacos if e['estado'] == 'indicado'], caso
+        assert po.NOTA_DO_FLUXO in _exame(r, 'Eletrocardiograma de repouso')['divergencia'], caso
+    # FA em cirurgia intermediária: ECG 2a na AHA e I na SBC, BNP 2a/I: aparecem, mas a considerar
+    ecg, bnp = _exame(r, 'Eletrocardiograma de repouso'), _exame(r, 'Peptídeo natriurético BNP/PROBNP')
+    assert (ecg['estado'], ecg['aha'], ecg['sbc']) == ('considerar', '2a', 'I')
+    assert (bnp['estado'], bnp['aha'], bnp['sbc']) == ('considerar', '2a', 'I')
+    assert po.NOTA_DO_FLUXO in bnp['divergencia']
+    # O que não é do risco cardiológico segue a sua própria regra (NICE pelo porte e ASA; HbA1c no diabetes)
+    assert _exame(r, 'Hemograma completo com plaquetas')['estado'] == 'indicado'
+    r = po.avaliar(_p(idade=68, sexo='feminino', cirurgia='catarata', condicoes=['diabetes']))
+    assert _exame(r, 'Hemoglobina glicada (HbA1c), soro')['estado'] == 'indicado'
+    # Transplante tem recomendação própria da SBC: fica marcado
+    r = po.avaliar(_p(idade=40, cirurgia='transplante_hepatico'))
+    assert r['indicacao']['liberado'] and _exame(r, 'Ecocardiograma transtorácico')['estado'] == 'indicado'
+
+
+def test_risco_elevado_ou_modificador_com_boa_capacidade_nao_diz_nao_indicado():
+    """Passou pelo risco elevado ou por um modificador e foi liberado pela capacidade: os exames do ramo ficam e o
+    título não diz "não indicado"."""
+    r = po.avaliar(_p(idade=70, condicoes=['dac'], creatinina=1.0, hemoglobina=14, escadas='sim'))
+    ind = r['indicacao']
+    assert (ind['tipo'], ind['caminho'], ind['liberado']) == ('nao_indicada', 'capacidade_boa', False)
+    assert ind['titulo'] == 'Boa capacidade funcional: operar sem prova funcional.'
+    assert _exame(r, 'Eletrocardiograma de repouso')['estado'] == 'indicado'
+    # Modificador (stent), risco calculado baixo: segue para a capacidade funcional
+    base = dict(idade=50, cirurgia='quadril', condicoes=['stent'], creatinina=1.0, hemoglobina=14,
+                stent={'tipo': 'farmacologico', 'indicacao': 'dac_cronica', 'data': '2024-01-10'})
+    ind = po.avaliar(_p(escadas='sim', **base))['indicacao']
+    assert ind['caminho'] == 'capacidade_boa' and 'stent coronário' in ind['conclusao']
+    passo = next(x for x in ind['passos'] if x['pergunta'] == 'Risco calculado e modificadores de risco')
+    assert passo['resposta'] == 'Modificador' and 'Neste paciente: stent coronário' in passo['texto']
+    r = po.avaliar(_p(escadas='nao', **base))
+    assert r['indicacao']['tipo'] == 'indicada' and 'stent coronário' in r['indicacao']['conclusao']
+    # Prova de isquemia de saída só com risco calculado elevado (AHA 2b; SBC IIa)
+    assert not [e for e in r['exames'] if e.get('grupo') == 'isquemia' and e['aha'] == '2b']
+    # Fragilidade (CFS ≥ 5) e os demais modificadores
+    for extra in (dict(cfs=5), dict(condicoes=['marcapasso_cdi']), dict(condicoes=['valvopatia']),
+                  dict(condicoes=['hipertensao_pulmonar']), dict(condicoes=['cardiopatia_congenita']),
+                  dict(condicoes=['avc_ait_recente'])):
+        ind = po.avaliar(_p(**dict(dict(idade=60, cirurgia='quadril', creatinina=1.0, hemoglobina=14, escadas='sim'),
+                                   **extra)))['indicacao']
+        assert ind['caminho'] in ('capacidade_boa', 'instavel') or ind['tipo'] == 'adiar', extra
+    assert po.avaliar(_p(idade=60, cirurgia='quadril', creatinina=1.0, hemoglobina=14, escadas='sim',
+                         cfs=4))['indicacao']['caminho'] == 'risco_baixo'
 
 
 def test_dado_ausente_nao_vira_risco_baixo():
     """Auditoria PREOP-04: sem creatinina, RCRI 1 pode ser 2; o risco fica incompleto, não baixo."""
-    r = po.avaliar(_p(idade=50, escadas='nao'))
+    r = po.avaliar(_p(idade=50, condicoes=['hipertensao'], escadas='nao'))
     ind = r['indicacao']
     assert ind['tipo'] == 'incompleto' and ind['titulo'] == 'Faltam dados para decidir o risco cardiológico.'
-    passo = next(x for x in ind['passos'] if x['pergunta'] == 'Risco do paciente pelos escores')
+    passo = next(x for x in ind['passos'] if x['pergunta'] == 'Risco calculado e modificadores de risco')
     assert passo['resposta'] == 'Incompleto' and passo['estado'] == 'atencao'
     assert 'creatinina (com ≥ 2,0 mg/dL, o RCRI passa a 2)' in ind['conclusao']
     assert _exame(r, 'Creatinina, soro')['estado'] == 'indicado'
     assert not any(e.get('grupo') == 'isquemia' and e['estado'] != 'nao_indicado' for e in r['exames'])
     # Com boa capacidade, o dado que falta não muda a conduta: libera
-    r = po.avaliar(_p(idade=50, escadas='sim'))
+    r = po.avaliar(_p(idade=50, condicoes=['hipertensao'], escadas='sim'))
     assert r['indicacao']['tipo'] == 'nao_indicada' and 'incompleto' in r['indicacao']['conclusao']
+    assert r['indicacao']['caminho'] == 'incompleto_capacidade_boa' and r['indicacao']['liberado']
+    assert r['indicacao']['titulo'] == 'Risco cardiológico não indicado para este paciente.'
+    assert _exame(r, 'Eletrocardiograma de repouso')['estado'] == 'considerar'
+    # Sem fator de risco, doença nem sintoma, a creatinina que falta não segura o paciente (AHA, Figura 1)
+    assert po.avaliar(_p(idade=50, escadas='nao'))['indicacao']['caminho'] == 'sem_fatores'
     # RCRI 0 sem creatinina não sobe a 2: continua baixo
     assert po.avaliar(_p(idade=50, cirurgia='hernia', escadas='nao'))['indicacao']['tipo'] == 'nao_indicada'
     # Hemoglobina no AUB-HAS2 (idade ≥ 75 já soma 1)
@@ -148,8 +239,8 @@ def test_dado_ausente_nao_vira_risco_baixo():
 def test_mica_sem_dados_nao_e_risco_baixo():
     m = po.mica(_p(asa=None))
     assert m['risco'] is None and m['nivel'] is None and m['faixa'] == 'Faltam dados'
-    r = po.avaliar(_p(idade=50, creatinina=0.9, hemoglobina=14))
-    passo = next(x for x in r['indicacao']['passos'] if x['pergunta'] == 'Risco do paciente pelos escores')
+    r = po.avaliar(_p(idade=50, condicoes=['hipertensao'], creatinina=0.9, hemoglobina=14))
+    passo = next(x for x in r['indicacao']['passos'] if x['pergunta'] == 'Risco calculado e modificadores de risco')
     assert 'Gupta MICA não calculado: faltam a classe ASA e o estado funcional.' in passo['texto']
 
 
@@ -234,14 +325,16 @@ def test_divergencias_ecg_e_eco():
     # Diabético de 45 anos em cirurgia de baixo risco: SBC indica ECG (I), AHA não vê benefício
     r = po.avaliar(_p(idade=45, cirurgia='catarata', condicoes=['diabetes']))
     ecg = _exame(r, 'Eletrocardiograma de repouso')
-    assert ecg['sbc'] == 'I' and ecg['aha'].startswith('3') and ecg['estado'] == 'indicado' and ecg['divergencia']
+    assert ecg['sbc'] == 'I' and ecg['aha'].startswith('3') and ecg['estado'] == 'considerar'
+    assert 'a SBC indica (diabetes)' in ecg['divergencia'] and po.NOTA_DO_FLUXO in ecg['divergencia']
     # Assintomático antes de cirurgia de alto risco: eco IIb na SBC, sem benefício na AHA
     r = po.avaliar(_p(cirurgia='pancreas', condicoes=['dac']))
     eco = _exame(r, 'Ecocardiograma transtorácico')
     assert eco['estado'] == 'considerar' and eco['sbc'] == 'IIb' and eco['divergencia']
     # IC conhecida, sem eco no último ano, em cirurgia de risco intermediário ou alto: SBC I-B; AHA sem benefício
     eco = _exame(po.avaliar(_p(cirurgia='quadril', condicoes=['ic'])), 'Ecocardiograma transtorácico')
-    assert eco['estado'] == 'indicado' and eco['sbc'] == 'I' and eco['aha'].startswith('3') and eco['divergencia']
+    assert eco['estado'] == 'indicado' and eco['sbc'] == 'I' and eco['aha'].startswith('3')
+    assert eco['divergencia'].endswith('Nós optamos por sugerir, sinalizando a diferença.')
     # Dispneia nova: eco classe 1 na AHA
     r = po.avaliar(_p(sintomas=['dispneia_nova']))
     assert _exame(r, 'Ecocardiograma transtorácico')['aha'] == '1'
@@ -344,7 +437,11 @@ SBD_URL = 'https://doi.org/10.1186/s13098-025-02060-5'
 
 
 def test_rastreio_de_diabetes_em_quem_tem_35_anos_ou_mais():
+    # Liberado pelo fluxo: o rastreio é oportunístico, aparece a considerar (não é marcado sozinho)
     r = po.avaliar(_p(idade=40, cirurgia='hernia'))
+    a1c, gli = _exame(r, 'Hemoglobina glicada (HbA1c), soro'), _exame(r, 'Glicose, soro')
+    assert a1c['estado'] == gli['estado'] == 'considerar' and 'rastreio oportunístico' in a1c['divergencia']
+    r = po.avaliar(_p(idade=70, condicoes=['dac'], creatinina=1.0, hemoglobina=14, escadas='sim'))
     a1c, gli = _exame(r, 'Hemoglobina glicada (HbA1c), soro'), _exame(r, 'Glicose, soro')
     assert a1c['estado'] == gli['estado'] == 'indicado' and a1c['outra'] == 'SBD I-B'
     assert 'NICE' in a1c['divergencia'] and SBD_URL in {x['url'] for x in a1c['referencias']}

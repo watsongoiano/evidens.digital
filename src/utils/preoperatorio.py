@@ -170,6 +170,8 @@ CIRURGIAS_ABDOMINAIS = {'colecistectomia', 'hernia_hiatal', 'esplenectomia', 'co
                         'ginecologica_maior', 'aorta_aberta', 'adrenal', 'urologica_maior', 'transplante_hepatico',
                         'esofagectomia'}
 
+# Liberado depois de passar pelo risco elevado ou por um modificador: o título não diz "não indicado"
+TITULO_DO_CAMINHO = {'capacidade_boa': 'Boa capacidade funcional: operar sem prova funcional.'}
 TITULO_DA_CONCLUSAO = {'nao_indicada': 'Risco cardiológico não indicado para este paciente.',
                        'incompleto': 'Faltam dados para decidir o risco cardiológico.',
                        'indicada': 'Risco cardiológico indicado para este paciente.',
@@ -202,7 +204,28 @@ CONDICOES = ('dac', 'iam_previo', 'stent', 'revascularizacao_cirurgica', 'ic', '
              'avc_ait_recente', 'diabetes', 'diabetes_insulina', 'hipertensao', 'fa', 'valvopatia', 'protese_mecanica',
              'protese_mecanica_mitral', 'dpoc', 'doenca_arterial_periferica', 'marcapasso_cdi', 'hipertensao_pulmonar',
              'tev', 'tev_recente_3m', 'tev_3_12m', 'cancer_ativo', 'trombofilia_grave', 'tabagismo', 'obesidade',
-             'hepatopatia', 'doenca_renal')
+             'hepatopatia', 'doenca_renal', 'dislipidemia', 'historia_familiar_dac', 'cardiopatia_congenita')
+# Fluxo da AHA/ACC (Figura 1). Fatores de risco cardiovascular (nota *): hipertensão, tabagismo, colesterol alto,
+# diabetes, obesidade, história familiar de doença coronária precoce, mulher > 65 anos, homem > 55 anos.
+FATORES_DE_RISCO = {'hipertensao': 'hipertensão', 'tabagismo': 'tabagismo', 'dislipidemia': 'dislipidemia',
+                    'diabetes': 'diabetes', 'obesidade': 'obesidade',
+                    'historia_familiar_dac': 'história familiar de doença coronária precoce'}
+DOENCA_CARDIOVASCULAR = {'dac', 'iam_previo', 'stent', 'revascularizacao_cirurgica', 'ic', 'avc_ait', 'fa', 'valvopatia',
+                         'doenca_arterial_periferica', 'protese_mecanica', 'hipertensao_pulmonar', 'marcapasso_cdi',
+                         'cardiopatia_congenita'}
+# Modificadores de risco da mesma figura: seguem para a capacidade funcional com qualquer risco calculado.
+MODIFICADORES_DE_RISCO = (
+    ({'valvopatia'}, 'valvopatia moderada ou grave'), ({'hipertensao_pulmonar'}, 'hipertensão pulmonar'),
+    ({'cardiopatia_congenita'}, 'cardiopatia congênita de risco elevado'),
+    ({'stent', 'revascularizacao_cirurgica'}, 'stent coronário ou cirurgia de revascularização'),
+    ({'avc_ait_recente'}, 'AVC ou AIT recente'), ({'marcapasso_cdi'}, 'marca-passo ou CDI'))
+# Exames cardíacos: quando o fluxo libera o paciente, não são marcados sozinhos (ficam "a considerar", com o aviso)
+EXAMES_CARDIACOS = {'Eletrocardiograma de repouso', 'Ecocardiograma transtorácico', 'Peptídeo natriurético BNP/PROBNP',
+                    'Troponina, soro'}
+# 'incompleto_capacidade_boa': faltou dado para fechar o escore, mas a capacidade funcional libera de qualquer jeito
+CAMINHOS_QUE_LIBERAM = ('sem_fatores', 'cirurgia_baixo_risco', 'risco_baixo', 'incompleto_capacidade_boa')
+NOTA_DO_FLUXO = ('Nós optamos por seguir o fluxo da AHA/ACC 2026 (Figura 1), que libera este paciente para a cirurgia '
+                 'sem exames cardíacos: o exame não foi marcado e fica a considerar.')
 # Classe ASA mínima sugerida pelos exemplos aprovados pela ASA (2014, emenda de 2020). É só o ponto de partida do
 # campo "Classe ASA": o médico ajusta. IV: IAM, AVC, AIT ou stent há menos de 3 meses, isquemia em curso, disfunção
 # valvar grave, choque; a IC descompensada entra pela definição (ameaça constante à vida), não por exemplo listado.
@@ -306,6 +329,7 @@ INSTAVEL_IMPLICA = {'sca': 'dac', 'angina_grave': 'dac', 'ic_descompensada': 'ic
 def sugestoes_da_tela():
     """O que a tela preenche sozinha a partir do que já foi informado (scripts/gerar_preop.py grava na página)."""
     from src.utils import preop_medicamentos as pm
+    from src.utils.medicamentos import MEDICAMENTOS
     return {
         'implica': INSTAVEL_IMPLICA,
         'duracao': {k: {'faixa': faixa, 'texto': texto, 'fonte': ref['label'], 'url': ref['url'],
@@ -318,6 +342,8 @@ def sugestoes_da_tela():
                         for k, (classe, piso, fonte, nota) in SANGRAMENTO_TIPICO.items()},
         # AAS: com doença aterosclerótica ou inibidor de P2Y12 a indicação já é prevenção secundária (não se pergunta)
         'aas_secundaria': sorted(pm._SECUNDARIA), 'p2y12': sorted(pm._P2Y12),
+        # Estatina em uso: dislipidemia em tratamento, fator de risco na Figura 1 da AHA/ACC (a tela marca sozinha)
+        'estatinas': sorted(m for m, d in MEDICAMENTOS.items() if 'estatina' in d.get('classes', ())),
         'asa_url': ASA_PS['url'],
     }
 
@@ -485,6 +511,8 @@ def ler(dados, hoje=None):
         if instavel in p['instaveis']:
             c.add(antecedente)
     from src.utils.medicamentos import MEDICAMENTOS
+    if any('estatina' in MEDICAMENTOS.get(m, {}).get('classes', ()) for m in p['medicacoes']):
+        c.add('dislipidemia')        # colesterol alto em tratamento segue sendo fator de risco (AHA/ACC, Figura 1)
     if any('insulina' in MEDICAMENTOS.get(m, {}).get('classes', ()) for m in p['medicacoes']):
         c.add('diabetes_insulina')   # insulina em uso conta no RCRI e no VSG-CRI
     if 'diabetes_insulina' in c:
@@ -841,8 +869,8 @@ def exames(p, ctx):
     indicado = aha_ecg in ('2a', '2b') or sbc_ecg in ('I', 'IIa')
     div = ''
     if aha_ecg.startswith('3') and sbc_ecg in ('I', 'IIa'):
-        div = (f'A AHA não recomenda ECG de rotina em assintomático antes de cirurgia de baixo risco; a SBC indica '
-               f'({motivos_sbc[0][1]}). Nós optamos por sugerir o ECG, sinalizando a diferença.')
+        div = (f'A AHA não vê benefício no ECG de rotina em assintomático antes de cirurgia de baixo risco '
+               f'(classe 3); a SBC indica ({motivos_sbc[0][1]}).')
     elif aha_ecg in ('2a', '2b') and sbc_ecg == 'I':
         div = f'Classe I na SBC e {aha_ecg} na AHA.'
     elif not aha_ecg and sbc_ecg in ('I', 'IIa'):
@@ -888,7 +916,7 @@ def exames(p, ctx):
         aha_eco, sbc_eco = '3: sem benefício', 'I'
         motivo = 'Insuficiência cardíaca conhecida, sem ecocardiograma no último ano.'
         div = ('A SBC indica (I-B) na IC conhecida sem eco no último ano; a AHA não vê benefício no paciente estável '
-               'e assintomático. Nós optamos por sugerir, sinalizando a diferença.')
+               'e assintomático.')
     elif 'protese_mecanica' in c and cir_ia:
         sbc_eco, motivo = 'IIa', 'Prótese valvar, sem ecocardiograma no último ano.'
     elif cir['risco'] == 'alto':
@@ -1022,19 +1050,24 @@ def exames(p, ctx):
                       'Sem diagnóstico de diabetes, com fator de risco') + ': rastreio de diabetes.'
             div = ('A NICE NG45 não oferece HbA1c de rotina a quem não tem diabetes. Nós optamos por seguir a '
                    'SBD/SBA/ABESO 2026 (I-B) e a AHA (2a), que incluem quem tem risco de diabetes.')
+            rastreio = 'indicado'
+            if ctx.get('liberado'):
+                rastreio = 'considerar'
+                div += (' É rastreio oportunístico e não depende do risco cardiológico: com o paciente liberado pelo '
+                        'fluxo, não foi marcado e fica a considerar.')
             if dias is not None and dias <= 92:
                 saida.append(_item('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'ja_feito', feita,
                                    aha='2a', sbc='—', outra='SBD I-B', refs=[SBD, AHA, NICE], divergencia=div))
             else:
-                saida.append(_item('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'indicado', motivo,
+                saida.append(_item('Hemoglobina glicada (HbA1c), soro', 'laboratorio', rastreio, motivo,
                                    aha='2a', sbc='—', outra='SBD I-B', refs=[SBD, AHA, NICE], divergencia=div))
             gdias = _feito_ha_dias(p, 'Glicose, soro')
             if gdias is not None and gdias <= 92:
                 saida.append(_item('Glicose, soro', 'laboratorio', 'ja_feito', f'Feita {_ha_dias(gdias)}.',
                                    outra='SBD I-B', refs=[SBD]))
             else:
-                saida.append(_item('Glicose, soro', 'laboratorio', 'indicado', motivo + ' Glicemia de jejum.',
-                                   outra='SBD I-B', refs=[SBD]))
+                saida.append(_item('Glicose, soro', 'laboratorio', rastreio, motivo + ' Glicemia de jejum.',
+                                   outra='SBD I-B', refs=[SBD], divergencia=div if rastreio == 'considerar' else ''))
 
     # Anemia antes da eletiva: pesquisar ferropenia para tratar com ferro (AHA, manejo da anemia, rec. 2: 2a B-R)
     hb = p.get('hemoglobina')
@@ -1111,6 +1144,15 @@ def exames(p, ctx):
         saida.append(_item('Beta-hCG, soro', 'laboratorio', 'considerar',
                            'Perguntar sobre gravidez; testar, com consentimento, se houver dúvida.', outra='NICE',
                            refs=[NICE]))
+    transplante = p['cirurgia'] in ('transplante_hepatico', 'transplante_renal', 'transplante_pulmonar')
+    for item in saida:
+        if item['titulo'] not in EXAMES_CARDIACOS or item['estado'] != 'indicado':
+            continue
+        if ctx.get('liberado') and not transplante and not item['aha'].startswith('1'):
+            item['estado'] = 'considerar'
+            item['divergencia'] = (item['divergencia'] + ' ' + NOTA_DO_FLUXO).strip()
+        elif item['aha'].startswith('3'):
+            item['divergencia'] = (item['divergencia'] + ' Nós optamos por sugerir, sinalizando a diferença.').strip()
     for item in saida:
         achado = _feito(p, item['titulo']) if item['categoria'] != 'outro' else None
         if achado:
@@ -1120,8 +1162,9 @@ def exames(p, ctx):
 
 # ── Indicação, adiamentos e pós-operatório ──────────────────────────────────
 
-def _passo(pergunta, resposta, estado, texto):
-    return {'pergunta': pergunta, 'resposta': resposta, 'estado': estado, 'texto': texto}
+def _passo(pergunta, resposta, estado, texto, refs=(), libera=False):
+    return {'pergunta': pergunta, 'resposta': resposta, 'estado': estado, 'texto': texto, 'referencias': list(refs),
+            'libera': libera}
 
 
 def _adiar(titulo, texto, classe, refs, divergencia='', ok=False):
@@ -1282,10 +1325,10 @@ def _orientacoes_perioperatorias(p, cir_ia):
 
 
 def _detalhe_da_conclusao(conclusao, nota):
-    """Linha sob o título da conclusão: o motivo na indicada, o alerta (se houver) na não indicada."""
+    """Linha sob o título da conclusão: o motivo (o passo do fluxo que liberou ou que indicou)."""
     tipo, texto = conclusao
     if tipo == 'nao_indicada':
-        return nota
+        return texto        # a tela põe o rótulo "Motivo:" na frente
     prefixo = 'Avaliação cardiológica indicada: '
     return 'Motivo: ' + texto[len(prefixo):] if texto.startswith(prefixo) else texto
 
@@ -1297,8 +1340,7 @@ def avaliar(p):
     c = p['condicoes']
     escore_rcri, escore_aub, escore_vsg, escore_mica = rcri(p), aub_has2(p), vsg_cri(p), mica(p)
     cap = capacidade_funcional(p)
-    dcv = bool(c & {'dac', 'iam_previo', 'stent', 'revascularizacao_cirurgica', 'ic', 'avc_ait', 'fa', 'valvopatia',
-                    'doenca_arterial_periferica', 'protese_mecanica', 'hipertensao_pulmonar', 'marcapasso_cdi'})
+    dcv = bool(c & DOENCA_CARDIOVASCULAR)
     # Risco do paciente pelos algoritmos da SBC (RCRI, AUB-HAS2; VSG-CRI na vascular arterial): "pac_ia".
     elevado_por = []
     if escore_rcri['valor'] >= 2:
@@ -1332,35 +1374,81 @@ def avaliar(p):
     mica_sem_dados = escore_mica.get('risco') is None and bool(escore_mica.get('falta'))
     sint_isq_novo = bool(p['sintomas'] & {'angina', 'dispneia_nova'})
 
-    passos, conclusao, nota_conclusao = [], None, ''
+    # AHA/ACC, Figura 1, primeira pergunta: fator de risco, doença ou sintoma cardiovascular
+    fatores = [rotulo for k, rotulo in FATORES_DE_RISCO.items() if k in c]
+    if (p['sexo'] == 'feminino' and p['idade'] > 65) or (p['sexo'] == 'masculino' and p['idade'] > 55):
+        fatores.append('mulher com mais de 65 anos' if p['sexo'] == 'feminino' else 'homem com mais de 55 anos')
+    tem_fator_doenca_ou_sintoma = bool(fatores or dcv or p['sintomas'] or p['instaveis'] or p['pa_descontrolada'])
+    # Modificadores de risco da mesma figura (fragilidade: CFS ≥ 5)
+    frag = fragilidade(p)
+    modificadores = [rotulo for chaves, rotulo in MODIFICADORES_DE_RISCO if c & chaves]
+    if frag and frag['valor'] >= 5 and frag['valor'] != 9:
+        modificadores.append('fragilidade')
+
+    passos, conclusao, nota_conclusao, caminho = [], None, '', None
+
+    def liberar(texto, por):
+        passos[-1]['libera'] = True
+        return ('nao_indicada', texto), por
+
     passos.append(_passo('Cirurgia de emergência?', 'Sim' if emergencia else 'Não', 'atencao' if emergencia else 'ok',
-                         'Operar sem exames que atrasem a cirurgia; só monitorização e redução de risco.'))
+                         'Operar sem exames que atrasem a cirurgia; só monitorização e redução de risco.',
+                         refs=[AHA, SBC]))
     if emergencia:
-        conclusao = ('emergencia', 'Cirurgia de emergência: sem avaliação que atrase a operação. Monitorização, '
-                                   'troponina pós-operatória se houver risco e manejo dos medicamentos.')
+        conclusao, caminho = ('emergencia', 'Cirurgia de emergência: sem avaliação que atrase a operação. '
+                              'Monitorização, troponina pós-operatória se houver risco e manejo dos medicamentos.'), \
+            'emergencia'
+    if not conclusao:
+        # Sem fator, doença ou sintoma, a AHA libera. Nós só liberamos aqui se o escore também não estiver elevado e
+        # não houver doença renal (item do RCRI): a SBC calcula o escore para todos.
+        pesa = ', '.join(elevado_por) or ('doença renal crônica (item do RCRI)' if 'doenca_renal' in c else '')
+        saudavel = not tem_fator_doenca_ou_sintoma and not pesa
+        texto_passo = ('Sem nenhum deles, o paciente é liberado para a cirurgia, sem avaliação cardiológica nem exames '
+                       'cardíacos. Fatores de risco: hipertensão, tabagismo, dislipidemia, diabetes, obesidade, '
+                       'história familiar de doença coronária precoce, mulher com mais de 65 anos, homem com mais '
+                       'de 55.')
+        if tem_fator_doenca_ou_sintoma:
+            tem = fatores[:] + (['doença cardiovascular'] if dcv or p['instaveis'] else []) \
+                + (['sintomas'] if p['sintomas'] else []) + (['PA ≥ 180 × 110'] if p['pa_descontrolada'] else [])
+            texto_passo += ' Neste paciente: ' + ', '.join(tem) + '.'
+        elif pesa:
+            texto_passo += f' Este paciente não tem nenhum deles, mas segue no fluxo: {pesa}.'
+        passos.append(_passo('Fator de risco, doença ou sintoma cardiovascular?',
+                             'Sim' if tem_fator_doenca_ou_sintoma else 'Não',
+                             'ok' if saudavel else 'atencao', texto_passo, refs=[AHA]))
+        if saudavel:
+            conclusao, caminho = liberar('Sem fator de risco, doença ou sintoma cardiovascular: liberar para a '
+                                         'cirurgia, sem avaliação cardiológica nem exames cardíacos.', 'sem_fatores')
     if not conclusao:
         inst = bool(p['instaveis']) or p['pa_descontrolada']
         passos.append(_passo('Condição cardiovascular grave ou instável?', 'Sim' if inst else 'Não',
                              'atencao' if inst else 'ok',
                              'SCA, IC descompensada, angina CCS III/IV, estenose aórtica ou mitral importante '
-                             'sintomática, BAVT/TV, FA com FC > 120, PA ≥ 180 × 110, HAP sintomática.'))
+                             'sintomática, BAVT/TV, FA com FC > 120, PA ≥ 180 × 110, HAP sintomática.',
+                             refs=[AHA, SBC]))
         if inst and p['urgencia'] in ('eletiva', 'tempo_sensivel'):
-            conclusao = ('adiar', 'Condição grave ou instável: estabilizar e adiar a cirurgia eletiva; '
-                                  'avaliação cardiológica indicada.')
+            conclusao, caminho = ('adiar', 'Condição grave ou instável: estabilizar e adiar a cirurgia eletiva; '
+                                  'avaliação cardiológica indicada.'), 'instavel'
         elif inst:
-            conclusao = ('indicada', 'Condição grave ou instável em cirurgia de urgência: estabilizar o quanto o tempo '
-                                     'permitir, sem atrasar a operação; avaliação cardiológica e monitorização '
-                                     'perioperatória.')
+            conclusao, caminho = ('indicada', 'Condição grave ou instável em cirurgia de urgência: estabilizar o '
+                                  'quanto o tempo permitir, sem atrasar a operação; avaliação cardiológica e '
+                                  'monitorização perioperatória.'), 'instavel'
     if not conclusao:
         passos.append(_passo('Risco intrínseco da cirurgia', RISCO_DA_CIRURGIA[cir['risco']].split(' (')[0],
                              'ok' if not cir_ia else 'atencao',
                              'Baixo risco (< 1%) em paciente estável: não há avaliação cardiológica nem exames '
-                             'cardíacos de rotina indicados.'))
+                             'cardíacos de rotina indicados.', refs=[SBC, AHA]))
         if not cir_ia:
-            conclusao = ('nao_indicada', 'Cirurgia de baixo risco em paciente estável: avaliação cardiológica e '
-                                         'exames cardíacos de rotina não indicados. Pode operar.')
+            conclusao, caminho = liberar('Cirurgia de baixo risco em paciente estável: avaliação cardiológica e '
+                                         'exames cardíacos de rotina não indicados. Pode operar.',
+                                         'cirurgia_baixo_risco')
     if not conclusao:
-        texto_passo = 'RCRI 0–1, AUB-HAS2 0–1 e Gupta MICA < 1%: risco baixo; liberar sem testes de isquemia.'
+        texto_passo = ('RCRI 0–1, AUB-HAS2 0–1 e Gupta MICA < 1%, sem modificador de risco: risco baixo; liberar sem '
+                       'testes de isquemia. Modificadores: valvopatia grave, hipertensão pulmonar grave, cardiopatia '
+                       'congênita de risco elevado, stent coronário ou cirurgia de revascularização, AVC recente, '
+                       'marca-passo ou CDI, fragilidade. Com modificador, o fluxo segue com qualquer risco calculado.')
+        if modificadores:
+            texto_passo += ' Neste paciente: ' + ', '.join(modificadores) + '.'
         if incompleto:
             texto_passo += ' Faltam dados que podem mudar o escore: ' + '; '.join(t for _, t in faltam_para_o_risco) + '.'
         if mica_sem_dados and not risco_elevado:
@@ -1368,46 +1456,66 @@ def avaliar(p):
                        for x in escore_mica['falta']]
             texto_passo += (' Gupta MICA não calculado: ' + ('faltam ' if len(artigos) > 1 else 'falta ')
                             + ' e '.join(artigos) + '.')
-        passos.append(_passo('Risco do paciente pelos escores',
-                             'Elevado' if risco_elevado else 'Incompleto' if incompleto else 'Baixo',
-                             'atencao' if risco_elevado or incompleto else 'ok', texto_passo))
-        if not risco_elevado and not incompleto:
-            conclusao = ('nao_indicada', 'Risco baixo pelos escores: liberar sem investigação de isquemia.')
+        passos.append(_passo('Risco calculado e modificadores de risco',
+                             'Elevado' if risco_elevado else 'Modificador' if modificadores
+                             else 'Incompleto' if incompleto else 'Baixo',
+                             'atencao' if risco_elevado or modificadores or incompleto else 'ok', texto_passo,
+                             refs=[AHA, SBC]))
+        if not risco_elevado and not modificadores and not incompleto:
+            conclusao, caminho = liberar('Risco calculado baixo e sem modificador de risco: liberar sem '
+                                         'investigação de isquemia.', 'risco_baixo')
     investigar = False
     if not conclusao:
         estado = cap['estado']
         passos.append(_passo('Capacidade funcional', cap['valor'], 'ok' if estado == 'boa' else 'atencao',
                              '≥ 4 METs (sobe 2 lances) ou DASI > 34, com sintomas estáveis: liberar sem prova funcional. '
-                             'Baixa ou desconhecida: biomarcadores e, só se mudar a conduta, prova funcional.'))
+                             'Baixa ou desconhecida: biomarcadores e, só se mudar a conduta, prova funcional.',
+                             refs=[AHA, SBC]))
         if estado == 'boa':
-            texto = ('Risco do paciente incompleto, mas boa capacidade funcional: liberar sem prova funcional.'
-                     if incompleto else 'Risco elevado, mas boa capacidade funcional: liberar sem prova funcional.')
+            if risco_elevado:
+                texto = 'Risco elevado, mas boa capacidade funcional: liberar sem prova funcional.'
+            elif modificadores:
+                texto = ('Modificador de risco (' + ', '.join(modificadores) + '), mas boa capacidade funcional: '
+                         'liberar sem prova funcional. Com modificador, a AHA/ACC sugere discutir em equipe o '
+                         'momento da cirurgia e os exames.')
+            else:
+                texto = 'Risco do paciente incompleto, mas boa capacidade funcional: liberar sem prova funcional.'
             if sint_isq_novo:
                 nota_conclusao = ('Angina ou dispneia nova ou em mudança: investigar como fora do contexto cirúrgico, '
                                   'pelas diretrizes de dor torácica e doença coronária.')
                 texto += ' ' + nota_conclusao
+            passos[-1]['libera'] = True
             conclusao = ('nao_indicada', texto)
-        elif incompleto:
+            caminho = 'capacidade_boa' if risco_elevado or modificadores else 'incompleto_capacidade_boa'
+        elif incompleto and not modificadores:
             # Sem o dado, não se sabe se o risco é elevado: o exame que falta vem antes de qualquer teste de isquemia.
-            conclusao = ('incompleto', 'Faltam dados para fechar o risco do paciente: '
-                         + '; '.join(t for _, t in faltam_para_o_risco) + '. Com o resultado: risco elevado, avaliação '
-                         'cardiológica indicada; risco baixo, liberar sem investigação de isquemia.')
+            conclusao, caminho = ('incompleto', 'Faltam dados para fechar o risco do paciente: '
+                                  + '; '.join(t for _, t in faltam_para_o_risco) + '. Com o resultado: risco elevado, '
+                                  'avaliação cardiológica indicada; risco baixo, liberar sem investigação de '
+                                  'isquemia.'), 'incompleto'
         else:
-            investigar = p['urgencia'] in ('eletiva', 'tempo_sensivel', 'urgencia')
+            # Prova de isquemia só com risco calculado elevado (AHA 2b; SBC IIa); só com modificador, a avaliação é
+            # indicada (equipe, biomarcadores), sem prova funcional de saída
+            investigar = risco_elevado and p['urgencia'] in ('eletiva', 'tempo_sensivel', 'urgencia')
             motivos = [f'cirurgia de risco {RISCO_DA_CIRURGIA[cir["risco"]].split(" (")[0].lower()}',
-                       ', '.join(elevado_por), f'capacidade funcional {cap["valor"].lower()}']
-            conclusao = ('indicada', 'Avaliação cardiológica indicada: ' + '; '.join(m for m in motivos if m) + '.')
+                       ', '.join(elevado_por), *modificadores, f'capacidade funcional {cap["valor"].lower()}']
+            conclusao, caminho = ('indicada', 'Avaliação cardiológica indicada: '
+                                  + '; '.join(m for m in motivos if m) + '.'), 'investigar'
     # Dispneia nova, sinais de IC ou sopro: avaliar o VE ou a valva antes de qualquer cirurgia eletiva (AHA §4.2, 1;
     # §6.5, 1), qualquer que seja o escore ou a capacidade.
     if conclusao[0] in ('nao_indicada', 'incompleto') and p['sintomas'] & {'dispneia_nova', 'sinais_ic', 'sopro'} \
             and p['urgencia'] in ('eletiva', 'tempo_sensivel'):
         conclusao = ('indicada', 'Dispneia nova, sinais de insuficiência cardíaca ou sopro: avaliar a função '
                                  'ventricular ou a valva (ecocardiograma) antes de operar.')
+        caminho = 'sintoma_novo'
+        for passo in passos:
+            passo['libera'] = False
     if any(not a.get('ok') for a in adiar) and conclusao[0] in ('nao_indicada', 'indicada', 'incompleto'):
         conclusao = (conclusao[0], conclusao[1] + ' Antes, veja o que pede adiamento.')
 
     classes_meds = set(classes_de(p['medicacoes']))
-    ctx = {'cir_elev': cir_ia, 'pac_ia': pac_ia, 'dcv': dcv, 'investigar_isquemia': investigar,
+    liberado = conclusao[0] == 'nao_indicada' and caminho in CAMINHOS_QUE_LIBERAM
+    ctx = {'cir_elev': cir_ia, 'pac_ia': pac_ia, 'dcv': dcv, 'investigar_isquemia': investigar, 'liberado': liberado,
            'classes_medicacoes': classes_meds, 'capacidade': cap['estado'],
            'faltam_para_o_risco': {k for k, _ in faltam_para_o_risco} if conclusao[0] == 'incompleto' else set()}
     lista_exames = exames(p, ctx)
@@ -1417,7 +1525,6 @@ def avaliar(p):
         escores.append(escore_vsg)
     escores.append(escore_mica)
     escores.append(cap)
-    frag = fragilidade(p)
     if frag:
         escores.append(frag)
     depuracao = clcr(p)
@@ -1513,8 +1620,10 @@ def avaliar(p):
         'resumo': resumo,
         'cirurgia': {'rotulo': cir['rotulo'], 'risco': RISCO_DA_CIRURGIA[cir['risco']],
                      'urgencia': URGENCIAS[p['urgencia']]},
-        'indicacao': {'passos': passos, 'tipo': conclusao[0], 'conclusao': conclusao[1],
-                      'titulo': TITULO_DA_CONCLUSAO[conclusao[0]], 'nota': nota_conclusao,
+        'indicacao': {'passos': passos, 'tipo': conclusao[0], 'conclusao': conclusao[1], 'caminho': caminho,
+                      'liberado': liberado,
+                      'titulo': TITULO_DO_CAMINHO.get(caminho, TITULO_DA_CONCLUSAO[conclusao[0]]),
+                      'nota': nota_conclusao,
                       'detalhe': _detalhe_da_conclusao(conclusao, nota_conclusao),
                       'referencias': [AHA, SBC],
                       'divergencia': ('A AHA recomenda o escore em quem tem doença cardiovascular conhecida (2a) e '

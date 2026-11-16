@@ -184,6 +184,9 @@ html.lenis, html.lenis body { height: auto; }
   .po-resposta { @apply self-start rounded-full px-2 py-1 text-center font-mono text-[11px]; }
   .po-resposta-ok { @apply bg-mist text-ink; }
   .po-resposta-atencao { @apply bg-[#D35400] text-white; }
+  .po-passo-libera { @apply -mx-3 px-3 rounded-xl bg-teal/[0.07] border-t-transparent; }
+  .po-passo-libera + .po-passo { @apply border-t-transparent; }
+  .po-libera { @apply mt-1.5 font-medium text-teal-dark; }
   .po-item { @apply py-3 border-t border-ink/5 first:border-t-0; }
   .po-exame { @apply flex gap-3 items-start cursor-pointer; }
   .po-exame input { @apply mt-1 w-4 h-4 accent-teal shrink-0; }
