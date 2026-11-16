@@ -2034,7 +2034,9 @@
         function semEfeitoNasRecomendacoes(evento) {
             const campo = evento && evento.target;
             if (!campo || !(campo.id === 'nome_paciente' || campo.hasAttribute('data-plano'))) return false;
-            if (campo.id === 'nome_paciente' && evento.type === 'change' && recommendationsDiv.style.display === 'block') {
+            if (campo.id === 'nome_paciente' && evento.type === 'change'
+                    && (recommendationsDiv.style.display === 'block'
+                        || document.getElementById('preopResultado').style.display === 'block')) {
                 pedirConfirmacaoDoPlano();
             }
             return true;
@@ -3558,6 +3560,7 @@
         function definirModo(novo) {
             if (novo === modo) return;
             modo = novo;
+            revisaoDoFormulario += 1;     // resposta ainda pendente da outra aba não volta para a tela
             document.querySelectorAll('[data-modo]').forEach(el => { el.hidden = el.dataset.modo !== modo; });
             document.querySelectorAll('.aba-modo').forEach(b => b.setAttribute('aria-selected', b.dataset.aba === modo ? 'true' : 'false'));
             const fim = document.getElementById('formErrors');

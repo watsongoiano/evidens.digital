@@ -1871,8 +1871,9 @@ def preoperatorio_endpoint():
     try:
         p = preoperatorio.ler(bruto)
     except preoperatorio.EntradaInvalida as exc:
-        return jsonify({'error': 'Dados inválidos: ' + str(exc), 'codigo': 'entrada_invalida',
-                        'erros': [{'campo': '', 'mensagem': str(exc)}]}), 400
+        mensagem = exc.mensagem     # texto de validação escrito por nós, nunca o rastro da exceção
+        return jsonify({'error': 'Dados inválidos: ' + mensagem, 'codigo': 'entrada_invalida',
+                        'erros': [{'campo': '', 'mensagem': mensagem}]}), 400
     preoperatorio.aplicar_exames_anteriores(p, anteriores)
     resultado = preoperatorio.avaliar(p)
     pas, pad = p.get('pas'), p.get('pad')

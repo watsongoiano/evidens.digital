@@ -189,7 +189,11 @@ SANGRAMENTOS = {'minimo': 'Mínimo (catarata, dentária ou pele simples)',
 # ── Leitura ──────────────────────────────────────────────────────────────────
 
 class EntradaInvalida(ValueError):
-    pass
+    """Dado da tela recusado. ``mensagem`` é o texto que vai para o usuário (escrito aqui, sem rastro da exceção)."""
+
+    def __init__(self, mensagem):
+        super().__init__(mensagem)
+        self.mensagem = mensagem
 
 
 def _num(valor, nome, minimo, maximo, obrigatorio=False):
