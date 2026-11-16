@@ -1,54 +1,45 @@
 """Recomendações A e B do USPSTF que não geram exame: rastreio por pergunta ou questionário, aconselhamento e
-medicação preventiva. Cada uma só aparece para o perfil a que se aplica (idade, sexo, gestação, tabagismo, IMC,
-comorbidades, história familiar).
+medicação preventiva. Cada uma só aparece para quem está no quadro a que ela se refere, informado no formulário
+(fumante, consumo pesado de álcool, IMC de 30 ou mais, hipertensão ou dislipidemia, PrEP, história familiar de câncer
+de mama, gestação, aleitamento). Rastreios universais por pergunta (depressão, ansiedade, violência por parceiro
+íntimo, uso de drogas) e a prevenção de quedas (sem campo de risco de queda) ficam de fora, por decisão do Dr. Rodolfo.
+Questionário citado no texto leva o link no próprio nome (campo ``links``).
 
 Fonte única (lista oficial, com a população e o grau de cada item):
 https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations
-- Depressão: adultos, incluídos gestantes, puérperas e idosos (B, 2023). Ansiedade: adultos até 64 anos (B, 2023).
-- Uso de álcool (B, 2018) e de outras drogas (B, 2020): adultos a partir de 18 anos.
-- Tabagismo: perguntar a todos; a quem fuma, intervenção comportamental e, fora da gestação, farmacoterapia (A, 2021).
-- Violência por parceiro íntimo: mulheres em idade reprodutiva, incluídas gestantes e puérperas (B, 2025).
-- Quedas: exercício para quem tem 65 anos ou mais e risco aumentado (B, 2024).
+- Uso de álcool: rastreio e aconselhamento breve (B, 2018); aqui, só com consumo pesado informado. O AUDIT é o
+  questionário da OMS para estimar a gravidade.
+- Tabagismo: a quem fuma, intervenção comportamental e, fora da gestação, farmacoterapia (A, 2021).
 - Obesidade: intervenção comportamental intensiva com IMC de 30 ou mais (B, 2018).
 - Dieta e atividade física: adultos com fator de risco cardiovascular (B, 2020).
-- IST: aconselhamento comportamental para adultos com risco aumentado (B, 2020).
+- IST: aconselhamento comportamental para adultos com risco aumentado (B, 2020); aqui, em uso de PrEP.
 - Câncer de mama: medicação para reduzir o risco em mulheres de 35 anos ou mais com risco aumentado (B, 2019).
 - Gestação: aleitamento (B, 2025), ganho de peso (B, 2021) e prevenção da depressão perinatal com risco
   aumentado (B, 2019).
-
-O que o formulário não pergunta (risco de queda, pele clara, comportamento sexual) não é presumido: a orientação
-de quedas diz a quem se aplica, e o aconselhamento de câncer de pele (pele clara, até 24 anos) fica de fora.
 """
 REF = 'USPSTF A e B'
-IDADE_REPRODUTIVA = (18, 45)   # a mesma faixa que o sistema usa em "pode engravidar" (ácido fólico)
+AUDIT = ('AUDIT', 'https://www.who.int/publications/i/item/audit-the-alcohol-use-disorders-identification-test-guidelines-for-use-in-primary-health-care')
 FAMILIA_MAMA = {'cancer_mama', 'mama_ate_50', 'mama_bilateral', 'mama_masculino', 'mama_triplo_negativo', 'brca'}
 RISCO_CARDIOVASCULAR = {'hipertensao': 'hipertensão', 'dislipidemia': 'dislipidemia'}
 
 
 def orientacoes(idade, sexo, *, gestante=False, lactante=False, tabagismo=None, imc=None, comorbidades=(),
-                historia_familiar=(), medicacoes=(), prep=False):
+                historia_familiar=(), medicacoes=(), prep=False, alcool=None):
     """Lista de orientações {'titulo', 'descricao', 'referencia'} do perfil."""
     if idade is None or idade < 18:
         return []
     com, fam, o = set(comorbidades or ()), set(historia_familiar or ()), []
 
-    def orientar(titulo, descricao, ano):
-        o.append({'titulo': titulo, 'descricao': descricao, 'referencia': f'{REF} ({ano})'})   # sem vírgula: é um link só
+    def orientar(titulo, descricao, ano, links=()):
+        item = {'titulo': titulo, 'descricao': descricao, 'referencia': f'{REF} ({ano})'}   # sem vírgula: é um link só
+        if links:
+            item['links'] = [{'texto': t, 'url': u} for t, u in links]
+        o.append(item)
 
-    # Saúde mental: rastreio é para quem não tem o diagnóstico.
-    alvos = [nome for chave, nome, limite in (('depressao', 'depressão', 200), ('ansiedade', 'ansiedade', 64))
-             if chave not in com and idade <= limite]
-    if alvos:
-        orientar('Rastrear ' + ' e '.join(alvos),
-                 'Sugerimos rastrear ' + ' e '.join(alvos) + ' com questionário validado (por exemplo, '
-                 + ' e '.join({'depressão': 'PHQ-2/PHQ-9', 'ansiedade': 'GAD-7'}[x] for x in alvos) + '), com seguimento e tratamento para quem tiver '
-                 'resultado positivo.' + ('' if 'ansiedade' in alvos or 'ansiedade' in com else
-                                          ' A partir dos 65 anos, a evidência para rastrear ansiedade é insuficiente.'),
-                 'depressão e ansiedade 2023')
-    orientar('Perguntar sobre álcool e outras drogas',
-             'Sugerimos rastrear o uso nocivo de álcool (por exemplo, AUDIT-C) com aconselhamento breve para quem bebe '
-             'em padrão de risco, e perguntar sobre o uso de outras drogas quando houver como oferecer ou encaminhar '
-             'para diagnóstico e tratamento.', 'álcool 2018 e drogas 2020')
+    if alcool == 'pesado':
+        orientar('Consumo pesado de álcool: aconselhamento breve',
+                 'Com consumo pesado informado, sugerimos aplicar o AUDIT para estimar a gravidade, fazer aconselhamento '
+                 'breve e, com sinais de dependência, encaminhar para tratamento.', 'álcool 2018', links=[AUDIT])
     if tabagismo == 'atual':
         orientar('Tabagismo: oferecer tratamento para parar de fumar',
                  'Sugerimos aconselhar a parar e oferecer intervenção comportamental. ' +
@@ -56,16 +47,6 @@ def orientacoes(idade, sexo, *, gestante=False, lactante=False, tabagismo=None, 
                   'insuficiente.' if gestante else
                   'Fora da gestação, associar farmacoterapia aprovada (reposição de nicotina, bupropiona ou vareniclina).'),
                  'tabagismo 2021')
-    if sexo == 'feminino' and (gestante or lactante or IDADE_REPRODUTIVA[0] <= idade <= IDADE_REPRODUTIVA[1]):
-        orientar('Rastrear violência por parceiro íntimo',
-                 'Sugerimos perguntar sobre violência por parceiro íntimo às mulheres em idade reprodutiva, incluídas '
-                 'gestantes e puérperas, e oferecer ou encaminhar quem tiver rastreio positivo para suporte continuado.',
-                 'violência por parceiro íntimo 2025')
-    if idade >= 65:
-        orientar('Prevenção de quedas a partir dos 65 anos',
-                 'Para quem vive na comunidade e tem risco aumentado de quedas (queda prévia, alteração de marcha ou de '
-                 'equilíbrio), sugerimos exercício supervisionado (equilíbrio, marcha e força). Intervenção '
-                 'multifatorial fica para casos selecionados, por decisão individual.', 'quedas 2024')
     if (imc or 0) >= 30 or 'obesidade' in com:
         orientar('Obesidade: intervenção comportamental intensiva',
                  'Com IMC de 30 kg/m² ou mais, sugerimos oferecer ou encaminhar para intervenção comportamental '
