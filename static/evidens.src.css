@@ -90,7 +90,14 @@ html.lenis, html.lenis body { height: auto; }
   .exame-campos .campo input, .exame-campos .campo select { @apply h-11 px-3 text-[15px] bg-white; }
   .exame-campos .campo:has(.opcoes) { @apply col-span-2; }
   .exame-titulo[hidden], .exame-cartao [hidden], #examesComunsPainel .opcao[hidden] { display: none; }
-  .exames-comuns-grupo { @apply mt-6 first:mt-0; }
+  /* Cada grupo é o mesmo rótulo de antes (mono, maiúsculas, azul-petróleo), agora clicável; os botões dos exames
+     e os cartões mantêm o desenho anterior. */
+  .exames-comuns-grupo { @apply mt-1 first:mt-0; }
+  .exames-comuns-abrir { @apply w-full flex items-center gap-2 py-2.5 text-left font-mono text-[11px] tracking-[0.14em] uppercase text-teal-dark hover:text-teal transition; }
+  .exames-comuns-conta { @apply inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-teal text-white text-[10px] tracking-normal; }
+  .exames-comuns-conta[hidden], .exames-comuns-grupo .opcoes[hidden] { display: none; }
+  .exames-comuns-seta { @apply ml-auto text-[10px] text-teal-dark/60 transition-transform; }
+  .exames-comuns-abrir[aria-expanded="true"] .exames-comuns-seta { @apply rotate-180; }
   .exames-comuns-cartoes { @apply flex flex-col gap-3 mt-3 empty:mt-0; }
   .resultado-informado { @apply py-3 border-t border-ink/5 first-of-type:border-t-0; }
 
