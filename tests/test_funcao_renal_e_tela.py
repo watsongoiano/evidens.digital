@@ -90,7 +90,8 @@ def test_anos_sem_fumar_e_macos_ano_coerentes_com_a_idade(client):
 
 def test_tela_tem_limites_nos_campos_numericos():
     html = (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
-    for campo in ('idade', 'peso', 'altura', 'pas', 'pad', 'creatinina', 'hba1c', 'uacr', 'macos_ano', 'anos_parou_fumar'):
+    for campo in ('idade', 'peso', 'altura', 'pas', 'pad', 'creatinina', 'hba1c', 'uacr', 'cigarros_dia', 'anos_fumando',
+                  'anos_parou_fumar'):
         assert re.search(rf'<input type="number" id="{campo}"[^>]* min="[^"]+" max="[^"]+"', html), campo
     assert 'conferirNumeros()' in html
 
@@ -182,3 +183,23 @@ def test_resultado_de_hpv_depois_dos_65_segue_o_fluxo(client):
     """Sem sugerir rastreio depois dos 65, um HPV 16/18 já informado ainda leva à colposcopia."""
     r = _post(client, idade=70, sexo='feminino', hpv_resultado='hpv_16_18').get_json()
     assert any('olposcopia' in x['titulo'] for x in r['recommendations'])
+
+
+def test_carga_tabagica_calculada_do_consumo_e_do_tempo(client):
+    """20 cigarros/dia por 30 anos = 30 maços-ano: entra a TC de baixa dose (USPSTF 2021: 20 maços-ano ou mais)."""
+    from src.utils.validacao import validar_entrada
+    dados, _ = validar_entrada(dict(idade=60, sexo='masculino', tabagismo='atual', cigarros_dia=20, anos_fumando=30))
+    assert dados['macos_ano'] == 30
+    dados, _ = validar_entrada(dict(idade=60, sexo='masculino', tabagismo='atual', cigarros_dia=10, anos_fumando=30))
+    assert dados['macos_ano'] == 15
+    r = _post(client, idade=60, tabagismo='atual', cigarros_dia=20, anos_fumando=30)
+    assert any('baixa dose' in x['titulo'] for x in r.get_json()['recommendations'])
+    assert _post(client, idade=30, tabagismo='atual', cigarros_dia=10, anos_fumando=40).status_code == 400
+    assert _post(client, idade=40, tabagismo='ex', cigarros_dia=10, anos_fumando=30, anos_parou_fumar=10).status_code == 400
+
+
+def test_tela_calcula_a_carga_tabagica():
+    html = (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
+    assert 'function calcularCargaTabagica()' in html
+    assert '<input type="hidden" id="macos_ano" name="macos_ano">' in html
+    assert 'id="unidade_tabaco"' in html and 'id="cargaTabagica"' in html

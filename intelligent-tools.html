@@ -818,9 +818,23 @@
             <option value="pesado">Pesado (diário/excessivo)</option>
           </select>
         </div>
-        <div class="campo conditional-field" id="macos_ano_field" style="display: none;">
-          <label for="macos_ano">Maços-ano</label>
-          <input type="number" id="macos_ano" name="macos_ano" min="0" max="300" step="0.1" inputmode="decimal">
+        <!-- Carga tabágica: o médico informa quanto e por quanto tempo; os maços-ano são calculados (20 cigarros = 1 maço). -->
+        <div class="campo conditional-field sm:col-span-2" id="macos_ano_field" style="display: none;">
+          <div class="grade !mt-0">
+            <div class="campo">
+              <label for="cigarros_dia" data-rotulo-consumo>Quanto fuma por dia</label>
+              <div class="flex gap-2">
+                <input type="number" id="cigarros_dia" min="0" max="100" step="0.5" inputmode="decimal" class="flex-1 min-w-0">
+                <select id="unidade_tabaco" aria-label="Unidade" class="w-32 shrink-0"><option value="cigarros">cigarros</option><option value="macos">maços</option></select>
+              </div>
+            </div>
+            <div class="campo">
+              <label for="anos_fumando">Por quantos anos fumou</label>
+              <input type="number" id="anos_fumando" name="anos_fumando" min="0" max="90" step="1" inputmode="numeric">
+            </div>
+          </div>
+          <input type="hidden" id="macos_ano" name="macos_ano">
+          <p id="cargaTabagica" class="text-[14px] mt-2" aria-live="polite" hidden></p>
         </div>
         <div class="campo conditional-field" id="anos_parou_fumar_field" style="display: none;">
           <label for="anos_parou_fumar">Anos desde que parou de fumar</label>
@@ -1550,7 +1564,8 @@
             if (entrada.id === 'idade' && !Number.isInteger(v)) return T('use anos inteiros');
             const idade = Number(document.getElementById('idade').value);
             if (idade && entrada.id === 'anos_parou_fumar' && v > idade - 5) return T('incompatível com a idade');
-            if (idade && entrada.id === 'macos_ano' && v > Math.max(idade - 5, 0) * 5) return T('incompatível com a idade');
+            if (idade && entrada.id === 'anos_fumando' && v > Math.max(idade - 5, 0)) return T('incompatível com a idade');
+            if (entrada.id === 'cigarros_dia' && document.getElementById('unidade_tabaco').value === 'macos' && v > 5) return T('fora da faixa aceita') + ' (0 ' + T('a') + ' 5)';
             if (idade && entrada.id === 'anos_consumo_alcool' && v > idade) return T('incompatível com a idade');
             return '';
         }
@@ -1564,7 +1579,7 @@
         checkupForm.addEventListener('input', e => {
             const alvo = e.target;
             if (!alvo.matches('input[type="number"]')) return;
-            const campos = alvo.id === 'idade' ? ['idade', 'anos_parou_fumar', 'macos_ano', 'anos_consumo_alcool'] : [alvo.id];
+            const campos = alvo.id === 'idade' ? ['idade', 'anos_parou_fumar', 'anos_fumando', 'anos_consumo_alcool'] : [alvo.id];
             campos.map(id => document.getElementById(id)).filter(Boolean).forEach(entrada => {
                 let aviso = entrada.parentElement.querySelector('[data-aviso-numero]');
                 const problema = problemaDoNumero(entrada);
@@ -2642,6 +2657,25 @@
         checkupForm.addEventListener('click', () => setTimeout(atualizarDetalhesDaFamilia, 0));
         atualizarDetalhesDaFamilia();
 
+        // Carga tabágica (maços-ano) = cigarros por dia ÷ 20 × anos de tabagismo. Calculada aqui e mostrada ao médico;
+        // o servidor refaz a conta se só receber o consumo e o tempo.
+        function calcularCargaTabagica() {
+            const qtd = document.getElementById('cigarros_dia').value, anos = document.getElementById('anos_fumando').value;
+            const macos = document.getElementById('unidade_tabaco').value === 'macos';
+            const saida = document.getElementById('cargaTabagica'), oculto = document.getElementById('macos_ano');
+            if (qtd === '' || anos === '' || Number(qtd) < 0 || Number(anos) < 0) { oculto.value = ''; saida.hidden = true; return; }
+            const porDia = macos ? Number(qtd) : Number(qtd) / 20;
+            const carga = Math.round(porDia * Number(anos) * 10) / 10;
+            oculto.value = String(carga);
+            saida.replaceChildren(T('Carga tabágica:') + ' ', Object.assign(document.createElement('strong'), { textContent: carga.toLocaleString('pt-BR') + ' ' + T('maços-ano') }));
+            saida.hidden = false;
+        }
+        ['cigarros_dia', 'anos_fumando'].forEach(id => document.getElementById(id).addEventListener('input', calcularCargaTabagica));
+        document.getElementById('unidade_tabaco').addEventListener('change', () => {
+            document.getElementById('cigarros_dia').max = document.getElementById('unidade_tabaco').value === 'macos' ? '5' : '100';
+            calcularCargaTabagica();
+        });
+
         // Listener para tabagismo - mostrar campos condicionais
         document.getElementById('tabagismo').addEventListener('change', function(ev) {
             const tabagismo = ev.target.value;
@@ -2652,15 +2686,17 @@
                 // Ocultar ambos os campos
                 macosAnoField.style.display = 'none';
                 anosParouField.style.display = 'none';
-                document.getElementById('macos_ano').value = '';
-                document.getElementById('anos_parou_fumar').value = '';
+                ['macos_ano', 'cigarros_dia', 'anos_fumando', 'anos_parou_fumar'].forEach(id => { document.getElementById(id).value = ''; });
+                calcularCargaTabagica();
             } else if (tabagismo === 'atual') {
-                // Mostrar apenas maços-ano
+                // Mostrar consumo e tempo de tabagismo
+                document.querySelector('[data-rotulo-consumo]').textContent = T('Quanto fuma por dia');
                 macosAnoField.style.display = 'block';
                 anosParouField.style.display = 'none';
                 document.getElementById('anos_parou_fumar').value = '';
             } else if (tabagismo === 'ex') {
-                // Mostrar ambos os campos
+                // Mostrar consumo, tempo de tabagismo e anos sem fumar
+                document.querySelector('[data-rotulo-consumo]').textContent = T('Quanto fumava por dia');
                 macosAnoField.style.display = 'block';
                 anosParouField.style.display = 'block';
             }
