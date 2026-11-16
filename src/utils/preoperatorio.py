@@ -60,6 +60,24 @@ ASA_PS = _ref('ASA 2020 (classificação do estado físico)', 'https://www.asahq
                                                           'statement-on-asa-physical-status-classification-system')
 NSQIP_PANCREAS = _ref('Maggino 2018, NSQIP', 'https://doi.org/10.1016/j.jamcollsurg.2018.01.004')
 QUADRIL_TEMPO = _ref('Cantrell 2019', 'https://doi.org/10.2106/JBJS.OA.19.00047')
+TEMPO_COLECISTECTOMIA = _ref('Wang 2022', 'https://doi.org/10.1177/00031348221117032')
+TEMPO_HERNIA_HIATAL = _ref('Wyland 2025, NSQIP', 'https://doi.org/10.3389/fsurg.2025.1607633')
+TEMPO_ESPLENECTOMIA = _ref('Farooq 2026, NSQIP', 'https://doi.org/10.1007/s00464-026-12964-6')
+TEMPO_HERNIA = _ref('Sereysky 2019, NSQIP', 'https://doi.org/10.1007/s10029-019-02050-3')
+TEMPO_CAROTIDA = _ref('Perri 2017, VQI', 'https://doi.org/10.1016/j.jvs.2017.03.426')
+TEMPO_AORTA = _ref('Deery 2017', 'https://doi.org/10.1016/j.jvs.2016.08.100')
+TEMPO_COLUNA = _ref('Badhiwala 2021', 'https://doi.org/10.1097/BRS.0000000000003858')
+TEMPO_ARTRODESE = _ref('Nooh 2017, NSQIP', 'https://doi.org/10.1177/2192568217699193')
+TEMPO_HISTERECTOMIA = _ref('Stewart 2022, NSQIP', 'https://doi.org/10.1016/j.jmig.2022.04.009')
+TEMPO_ADRENAL = _ref('Kawashima 2025', 'https://doi.org/10.1007/s11701-025-02882-5')
+TEMPO_PONTE = _ref('Radtka 2024, VQI', 'https://doi.org/10.1016/j.jss.2024.05.023')
+TEMPO_FIGADO = _ref('Parente 2025, NSQIP', 'https://doi.org/10.1002/jso.70065')
+TEMPO_ESOFAGO = _ref('Jacobs 2024, NSQIP', 'https://doi.org/10.1016/j.surg.2024.06.021')
+TEMPO_CISTECTOMIA = _ref('Haeuser 2022', 'https://doi.org/10.1159/000522141')
+TEMPO_COLECTOMIA = _ref('Al-Temimi 2019, NSQIP', 'https://doi.org/10.1007/s00384-019-03334-x')
+TEMPO_LOBECTOMIA = _ref('Dexter 2022', 'https://doi.org/10.1016/j.athoracsur.2022.01.040')
+TEMPO_RTU = _ref('Jiang 2021, NSQIP', 'https://doi.org/10.1089/end.2020.0941')
+TEMPO_PROSTATECTOMIA = _ref('Xia 2018, NSQIP', 'https://doi.org/10.1089/end.2018.0210')
 SBD = _ref('SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91)', 'https://doi.org/10.1186/s13098-025-02060-5')
 
 # ── Cirurgias ────────────────────────────────────────────────────────────────
@@ -99,8 +117,14 @@ CIRURGIAS = {
     'angioplastia_periferica': _C('Angioplastia arterial periférica', 'intermediario', False, 'periferica',
                                   'intermediaria', vascular=True, mica='vascular_periferica'),
     'cabeca_pescoco': _C('Cabeça e pescoço', 'intermediario', False, 'periferica', 'maior', mica='orl'),
-    'colecistectomia': _C('Intraperitoneal: colecistectomia, hérnia hiatal, esplenectomia', 'intermediario', True,
-                          'abdome_superior', 'maior', mica='gbaas'),
+    # A linha "colecistectomia, hérnia hiatal, esplenectomia" da SBC/ESC fica em três: o risco cardíaco é o mesmo, mas
+    # o de sangramento e a duração não. MICA (Gupta 2011): vesícula e baço em GBAAS; hérnia hiatal em foregut.
+    'colecistectomia': _C('Intraperitoneal: colecistectomia', 'intermediario', True, 'abdome_superior', 'maior',
+                          mica='gbaas'),
+    'hernia_hiatal': _C('Intraperitoneal: hérnia hiatal', 'intermediario', True, 'abdome_superior', 'maior',
+                        mica='foregut_hpb'),
+    'esplenectomia': _C('Intraperitoneal: esplenectomia', 'intermediario', True, 'abdome_superior', 'maior',
+                        mica='gbaas'),
     'colectomia': _C('Intraperitoneal: colectomia ou outra cirurgia intestinal', 'intermediario', True,
                      'abdome_superior', 'maior', mica='intestinal'),
     'intratoracica': _C('Intratorácica não maior', 'intermediario', True, 'intratoracica', 'maior', mica='toracica'),
@@ -142,7 +166,7 @@ MICA_FUNCIONAL = {'independente': 0.0, 'parcial': 0.65, 'total': 1.03}
 ESTADOS_FUNCIONAIS = {'independente': 'Independente', 'parcial': 'Parcialmente dependente',
                       'total': 'Totalmente dependente'}
 
-CIRURGIAS_ABDOMINAIS = {'colecistectomia', 'colectomia', 'perfuracao_intestinal', 'pancreas', 'figado', 'cistectomia',
+CIRURGIAS_ABDOMINAIS = {'colecistectomia', 'hernia_hiatal', 'esplenectomia', 'colectomia', 'perfuracao_intestinal', 'pancreas', 'figado', 'cistectomia',
                         'ginecologica_maior', 'aorta_aberta', 'adrenal', 'urologica_maior', 'transplante_hepatico',
                         'esofagectomia'}
 
@@ -192,37 +216,85 @@ ASA_MINIMA = {
     'hipertensao': 2, 'diabetes': 2, 'diabetes_insulina': 2, 'tabagismo': 2, 'obesidade': 2,
 }
 
-# Duração típica (faixas do ARISCAT) só onde há série publicada; a tela sugere e o médico ajusta.
+# Duração típica (faixas do ARISCAT) só onde há série publicada com o tempo operatório; a tela preenche ao escolher a
+# cirurgia e o médico ajusta ao caso (a duração real depende da via, da equipe e do paciente).
 DURACAO_TIPICA = {
-    'pancreas': ('mais_3h', 'mediana de 358 min na duodenopancreatectomia', NSQIP_PANCREAS),
+    'rtu': ('menos_2h', 'mediana de 50 min nas cirurgias de hiperplasia prostática', TEMPO_RTU),
+    'hernia': ('menos_2h', 'mediana de 53 min na hernioplastia inguinal aberta', TEMPO_HERNIA),
+    'colecistectomia': ('menos_2h', 'mediana de 63 min na colecistectomia laparoscópica', TEMPO_COLECISTECTOMIA),
+    'hernia_hiatal': ('2_3h', 'mediana de 130 min no reparo laparoscópico (147 min com tela)', TEMPO_HERNIA_HIATAL),
+    'esplenectomia': ('2_3h', '130 min na esplenectomia laparoscópica (152 min na robótica)', TEMPO_ESPLENECTOMIA),
+    'colectomia': ('mais_3h', 'média de 189 min na colectomia esquerda laparoscópica (219 min na robótica)',
+                   TEMPO_COLECTOMIA),
+    'carotida_assintomatica': ('menos_2h', 'média de 114 min na endarterectomia de carótida', TEMPO_CAROTIDA),
+    'endarterectomia_sintomatica': ('menos_2h', 'média de 114 min na endarterectomia de carótida', TEMPO_CAROTIDA),
+    'evar': ('2_3h', 'mediana de 131 a 138 min no reparo endovascular', TEMPO_AORTA),
+    'aorta_aberta': ('mais_3h', 'mediana de 215 a 226 min no reparo aberto do aneurisma de aorta abdominal', TEMPO_AORTA),
+    'revascularizacao_mmii': ('mais_3h', 'mediana de 210 min na ponte femoropoplítea com veia (155 min com prótese)',
+                              TEMPO_PONTE),
+    'intratoracica': ('mais_3h', 'média de 185 min na lobectomia por vídeo (178 min na aberta, 214 min na robótica)',
+                      TEMPO_LOBECTOMIA),
+    'coluna': ('2_3h', 'média de 153 min na laminectomia lombar e de 170 min com artrodese', TEMPO_COLUNA),
     'quadril': ('menos_2h', 'média de 93 min na artroplastia total de quadril', QUADRIL_TEMPO),
+    'urologica_maior': ('mais_3h', '195 min na prostatectomia radical minimamente invasiva', TEMPO_PROSTATECTOMIA),
+    'ginecologica_maior': ('2_3h', 'mediana de 125 min na histerectomia por doença benigna', TEMPO_HISTERECTOMIA),
+    'adrenal': ('2_3h', 'mediana de 131 min na adrenalectomia robótica (168 min na laparoscópica)', TEMPO_ADRENAL),
+    'pancreas': ('mais_3h', 'mediana de 358 min na duodenopancreatectomia', NSQIP_PANCREAS),
+    'figado': ('mais_3h', 'média de 203 min na hepatectomia laparoscópica (221 min na robótica)', TEMPO_FIGADO),
+    'esofagectomia': ('mais_3h', 'mediana de 402 min na esofagectomia minimamente invasiva (321 min na aberta)',
+                      TEMPO_ESOFAGO),
+    'cistectomia': ('mais_3h', 'média de 5,5 h na cistectomia radical', TEMPO_CISTECTOMIA),
 }
+# Onde a mesma linha junta operações de durações diferentes, a dica avisa
+NOTA_DA_DURACAO = {'coluna': 'Artrodese lombar em série maior: média de 205 min, mais de 3 h (Nooh 2017, NSQIP).'}
 
-# Risco de sangramento típico da cirurgia, só onde a diretriz nomeia o procedimento; a tela sugere e o médico ajusta.
-# 'sbc': SBC 2024, Tabela 12 (alto: aneurisma de aorta, grande cirurgia > 45 min, urológica, cabeça e pescoço,
-# abdominal, neurocirurgia, laminectomia, RTU de próstata; baixo: hernioplastia, histerectomia abdominal, endoscopia
-# com ou sem biópsia, biópsias, curetagem, artroscopia) e a legenda do manejo dos DOAC (alto: neurocirurgia, torácica
-# maior, aorta, revascularização de membros inferiores, endarterectomia de carótida, abdominal e pélvica maior,
-# artroplastia de quadril ou joelho). 'aha': AHA/ACC, Tabela 13 (mínimo: catarata, odontologia, dermatologia menores).
+# Risco de sangramento de cada cirurgia: (classe que a tela marca, piso, fonte, nota). Toda cirurgia tem classe; abaixo
+# do piso a tela não deixa marcar e o motor sobe para o piso. O piso é a menor classe que a diretriz dá a um
+# procedimento daquela linha (ex.: mama é alto no câncer e baixo na biópsia: marca alto, aceita baixo, não aceita mínimo).
+# 'sbc': SBC 2024, Tabela 12 (alto: aneurisma de aorta, qualquer grande cirurgia > 45 min, urológica, cabeça e pescoço,
+# abdominal, neurocirurgia, câncer de mama, laminectomia, RTU de próstata; baixo: hernioplastia, histerectomia
+# abdominal, colecistectomia, endoscopia e broncoscopia com ou sem biópsia, biópsias de mama e de tireoide, dissecção
+# de nódulo axilar, curetagem, artroscopia, angiografia não coronariana) e a legenda do manejo dos DOAC (alto:
+# neurocirurgia, torácica maior, aorta, revascularização de membros inferiores, endarterectomia de carótida, abdominal
+# e pélvica maior, artroplastia de quadril ou joelho). 'aha': AHA/ACC, Tabela 13 (mínimo: catarata, odontologia,
+# dermatologia menores).
 FONTES_DO_SANGRAMENTO = {'sbc': ('SBC 2024 (Tabela 12 e manejo dos DOAC)', SBC['url']),
                          'aha': ('AHA/ACC 2026 (Tabela 13)', AHA['url'])}
-_ALTO_SBC = ('alto', 'sbc', '')
+_ALTO_SBC = ('alto', 'alto', 'sbc', '')
+_BAIXO_SBC = ('baixo_moderado', 'baixo_moderado', 'sbc', '')
+_MAIS_45_MIN = 'Alto em qualquer operação com mais de 45 min.'
+_SO_ANGIOGRAFIA = ('baixo_moderado', 'baixo_moderado', 'sbc',
+                   'A Tabela 12 lista a angiografia não coronariana; a angioplastia e o stent não são citados.')
 SANGRAMENTO_TIPICO = {
-    'catarata': ('minimo', 'aha', ''),
-    'odontologica': ('minimo', 'aha', ''),
-    'endoscopia': ('baixo_moderado', 'sbc', 'Com polipectomia: alto.'),
-    'pele': ('baixo_moderado', 'sbc', 'Procedimento dermatológico menor: mínimo (AHA).'),
-    'ginecologica_menor': ('baixo_moderado', 'sbc', ''),
-    'ortopedica_menor': ('baixo_moderado', 'sbc', ''),
-    'hernia': ('baixo_moderado', 'sbc', ''),
-    'ginecologica_maior': ('baixo_moderado', 'sbc', 'Câncer de endométrio ou de ovário: alto.'),
-    'quadril': ('alto', 'sbc', 'Divergência: a Tabela 12 da SBC (varfarina) lista a prótese de quadril ou joelho como '
-                               'baixo risco; nós optamos pelo alto, como no manejo dos DOAC da própria SBC.'),
+    'catarata': ('minimo', 'minimo', 'aha', ''),
+    'odontologica': ('minimo', 'minimo', 'aha', ''),
+    'endoscopia': ('baixo_moderado', 'baixo_moderado', 'sbc', 'Com polipectomia: alto.'),
+    'pele': ('baixo_moderado', 'minimo', 'sbc', 'Procedimento dermatológico menor: mínimo (AHA).'),
+    'mama': ('alto', 'baixo_moderado', 'sbc',
+             'Alto no câncer de mama; biópsia de mama ou dissecção de linfonodo axilar: baixo.'),
+    'tireoide': ('alto', 'baixo_moderado', 'sbc',
+                 'Alto na cirurgia de cabeça e pescoço e em qualquer operação com mais de 45 min; biópsia de tireoide: '
+                 'baixo.'),
+    'ginecologica_menor': _BAIXO_SBC,
+    'ortopedica_menor': _BAIXO_SBC,
+    'plastica': ('alto', 'baixo_moderado', 'sbc', _MAIS_45_MIN),
+    'vats_menor': ('alto', 'baixo_moderado', 'sbc', _MAIS_45_MIN),
+    'hernia': _BAIXO_SBC,
+    'angioplastia_periferica': _SO_ANGIOGRAFIA,
+    'stent_carotida_sintomatica': _SO_ANGIOGRAFIA,
+    'colecistectomia': _BAIXO_SBC,
+    'intratoracica': ('alto', 'baixo_moderado', 'sbc',
+                      'Alto na cirurgia torácica maior e em qualquer operação com mais de 45 min; broncoscopia com ou '
+                      'sem biópsia: baixo.'),
+    'ginecologica_maior': ('baixo_moderado', 'baixo_moderado', 'sbc', 'Câncer de endométrio ou de ovário: alto.'),
+    'quadril': ('alto', 'baixo_moderado', 'sbc',
+                'Divergência: a Tabela 12 da SBC (varfarina) lista a prótese de quadril ou joelho como '
+                'baixo risco; nós optamos pelo alto, como no manejo dos DOAC da própria SBC.'),
     **{k: _ALTO_SBC for k in (
-        'rtu', 'carotida_assintomatica', 'endarterectomia_sintomatica', 'evar', 'cabeca_pescoco', 'colectomia', 'coluna',
-        'neurocirurgia', 'urologica_maior', 'adrenal', 'aorta_aberta', 'revascularizacao_mmii', 'pancreas', 'figado',
-        'esofagectomia', 'pneumectomia', 'transplante_hepatico', 'transplante_pulmonar', 'perfuracao_intestinal',
-        'cistectomia')},
+        'rtu', 'carotida_assintomatica', 'endarterectomia_sintomatica', 'evar', 'cabeca_pescoco', 'hernia_hiatal',
+        'esplenectomia', 'colectomia', 'coluna', 'neurocirurgia', 'transplante_renal', 'urologica_maior', 'adrenal',
+        'aorta_aberta', 'revascularizacao_mmii', 'pancreas', 'figado', 'esofagectomia', 'pneumectomia',
+        'transplante_hepatico', 'transplante_pulmonar', 'perfuracao_intestinal', 'cistectomia')},
 }
 
 # O que uma condição grave já diz sobre os antecedentes (a tela marca sozinha; o motor garante o mesmo). SCA e angina
@@ -236,11 +308,14 @@ def sugestoes_da_tela():
     from src.utils import preop_medicamentos as pm
     return {
         'implica': INSTAVEL_IMPLICA,
-        'duracao': {k: {'faixa': faixa, 'texto': texto, 'fonte': ref['label'], 'url': ref['url']}
+        'duracao': {k: {'faixa': faixa, 'texto': texto, 'fonte': ref['label'], 'url': ref['url'],
+                        'nota': NOTA_DA_DURACAO.get(k, '')}
                     for k, (faixa, texto, ref) in DURACAO_TIPICA.items()},
-        'sangramento': {k: {'classe': classe, 'fonte': FONTES_DO_SANGRAMENTO[fonte][0],
+        # A duração só entra no ARISCAT: onde ele não se aplica, a tela nem pergunta
+        'sem_duracao': sorted(k for k, c in CIRURGIAS.items() if not c['ariscat']),
+        'sangramento': {k: {'classe': classe, 'piso': piso, 'fonte': FONTES_DO_SANGRAMENTO[fonte][0],
                             'url': FONTES_DO_SANGRAMENTO[fonte][1], 'nota': nota}
-                        for k, (classe, fonte, nota) in SANGRAMENTO_TIPICO.items()},
+                        for k, (classe, piso, fonte, nota) in SANGRAMENTO_TIPICO.items()},
         # AAS: com doença aterosclerótica ou inibidor de P2Y12 a indicação já é prevenção secundária (não se pergunta)
         'aas_secundaria': sorted(pm._SECUNDARIA), 'p2y12': sorted(pm._P2Y12),
         'asa_url': ASA_PS['url'],
@@ -401,6 +476,11 @@ def ler(dados, hoje=None):
     p['stent'] = stent
     # Diabetes com insulina é diabetes; IAM prévio e stent são doença coronária; FE reduzida é IC.
     c = p['condicoes']
+    # Risco de sangramento abaixo do que a diretriz dá àquela cirurgia não é aceito (a tela bloqueia; aqui sobe ao piso)
+    piso = SANGRAMENTO_TIPICO[p['cirurgia']][1]
+    ordem = list(SANGRAMENTOS)
+    if p['sangramento'] is not None and ordem.index(p['sangramento']) < ordem.index(piso):
+        p['sangramento'] = piso
     for instavel, antecedente in INSTAVEL_IMPLICA.items():
         if instavel in p['instaveis']:
             c.add(antecedente)
