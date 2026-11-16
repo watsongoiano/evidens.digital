@@ -106,7 +106,7 @@ _INSULINA_PRANDIAL = {'insulina_regular', 'insulina_asparte', 'insulina_lispro',
 _INSULINA_GLP1 = {'insulina_glargina_lixisenatida': ('insulina_glargina', 'lixisenatida'),
                   'insulina_degludeca_liraglutida': ('insulina_degludeca', 'liraglutida')}
 
-_OUTROS_ANTI_HAS = {'hidralazina', 'metildopa', 'minoxidil_oral', 'alisquireno'}
+_OUTROS_ANTI_HAS = {'hidralazina', 'metildopa', 'minoxidil_oral'}
 _CARDIO_IC = {'cardio_outro', 'amiodarona', 'digoxina', 'sotalol'}
 
 _DMARD_MANTER = {'metotrexato', 'leflunomida', 'hidroxicloroquina', 'sulfassalazina'}
@@ -124,10 +124,10 @@ _TIREOIDE = {'levotiroxina', 'metimazol_tiamazol', 'propiltiouracila'}
 _ANTIDIABETICOS = {'metformina', 'sulfonilureia', 'idpp4_pioglitazona', 'isglt2', 'aglp1', 'insulina'}
 
 # Condições que marcam prevenção secundária (AAS) e doença vascular (CHA₂DS₂-VASc)
-_SECUNDARIA = {'dac', 'stent', 'revascularizacao_cirurgica', 'avc_ait', 'avc_ait_recente',
+_SECUNDARIA = {'dac', 'iam_previo', 'stent', 'revascularizacao_cirurgica', 'avc_ait', 'avc_ait_recente',
                'doenca_arterial_periferica'}
-_VASCULAR = {'dac', 'stent', 'revascularizacao_cirurgica', 'doenca_arterial_periferica'}
-_DAC = {'dac', 'stent', 'revascularizacao_cirurgica'}
+_VASCULAR = {'dac', 'iam_previo', 'stent', 'revascularizacao_cirurgica', 'doenca_arterial_periferica'}
+_DAC = {'dac', 'iam_previo', 'stent', 'revascularizacao_cirurgica'}
 
 _ORDEM_RISCO = {'baixo': 0, 'moderado': 1, 'alto': 2}
 
@@ -276,7 +276,9 @@ def _risco_te_aha(ctx):
     if 'protese_mecanica_mitral' in cond:
         marca('alto', 'prótese mecânica mitral')
     elif 'protese_mecanica' in cond:
-        fatores = [f for f, c in (('FA', 'fa'), ('AVC/AIT prévio', 'avc_ait')) if c in cond]
+        # Fatores maiores (Tabela 14): FA, AVC/AIT múltiplos, AVC perioperatório prévio ou trombose de prótese. Um
+        # AVC/AIT isolado não basta; o recente (< 3 meses) já é alto risco por si.
+        fatores = [f for f, c in (('FA', 'fa'),) if c in cond]
         if fatores:
             marca('moderado', 'prótese aórtica mecânica de duplo folheto com fator maior: ' + ', '.join(fatores))
         else:
@@ -706,16 +708,18 @@ def _insulina(chave, ctx):
 # --- Anticoagulantes ----------------------------------------------------------------------------------------------
 def _esquema_aha_doac(farmaco, clcr, sang, neuraxial):
     """(última dose no D-x, dias sem dose, reinício no D+y) pela AHA (Tabela 13; texto do §7.6 na neuroaxial)."""
+    # Neuroaxial: interrupção completa por ≥ 5 meias-vidas (texto do §7.6): ≥ 3 dias sem dose para anti-Xa (72 h) e
+    # ≥ 4 dias para dabigatrana (5–6 com ClCr < 50; usamos 6, o limite conservador).
     if farmaco == 'dabigatrana':
         reduzida = clcr < 50
+        if neuraxial:
+            return (7, 6, 3) if reduzida else (5, 4, 3)
         if sang == 'alto':
-            if neuraxial and not reduzida:
-                return 4, 3, 3  # texto: ≥4 dias para dabigatrana quando se quer efeito mínimo
             return (5, 4, 3) if reduzida else (3, 2, 3)
         return (3, 2, 1) if reduzida else (2, 1, 1)
     reduzida = clcr < 30
-    if sang == 'alto':
-        return (4, 3, 3) if reduzida else (3, 2, 3)
+    if neuraxial or sang == 'alto':
+        return (4, 3, 3) if (reduzida or neuraxial) else (3, 2, 3)
     return (3, 2, 1) if reduzida else (2, 1, 1)
 
 
@@ -797,9 +801,12 @@ def _doac(chave, ctx):
         div = ('Apixabana com ClCr 15–50: a SBC pede ≥48 h antes mesmo no sangramento baixo (I-B); a AHA usa o '
                f'esquema de função normal (última dose no D-{ultima}). Nós optamos por seguir a SBC, mais '
                'conservadora.')
-    elif farmaco in _ANTI_XA and clcr < 30 and sang == 'alto':
+    elif farmaco in {'apixabana', 'rivaroxabana'} and clcr < 30 and sang == 'alto':
         div = ('Anti-Xa com ClCr <30 e sangramento alto: a AHA deixa 3 dias sem dose (última no D-4); a SBC pede "pelo '
                'menos 48 h". Nós optamos por seguir a AHA, mais conservadora.')
+    elif farmaco == 'edoxabana' and clcr < 30 and sang == 'alto':
+        div = ('Edoxabana com ClCr <30 e sangramento alto: a AHA deixa 3 dias sem dose (última no D-4); a SBC (texto, '
+               'sem quadro) fala em 48–72 h. Nós optamos por seguir a AHA, mais conservadora.')
     elif farmaco == 'edoxabana':
         div = ('A SBC não tem quadro para a edoxabana (só texto, sem classe); a AHA a agrupa com apixabana e '
                'rivaroxabana. Nós optamos por seguir a AHA.')
@@ -821,8 +828,10 @@ def _div_ponte(d):
         return (f'SBC: risco tromboembólico alto ({"; ".join(d["sbc_motivos"])}) e ponte com heparina (IIa-C). AHA: '
                 f'risco {d["aha"]} ({"; ".join(d["aha_motivos"])}), sem ponte, pois a ponte de rotina aumenta o '
                 'sangramento (3: Dano, C-LD). Nós optamos por seguir a AHA (Tabela 14).')
+    sbc = ('sem ponte (IIa-C)' if d['sbc'] == 'baixo' else
+           'conduta individualizada, sem classe (texto do 4.3.1.1)' if d['sbc'] == 'moderado' else 'sem ponte')
     return (f'AHA: risco alto ({"; ".join(d["aha_motivos"])}) e ponte com heparina (2a, C-LD). SBC: risco '
-            f'{d["sbc"] or "não classificado"}, sem ponte (IIa-C). Nós optamos por seguir a AHA (Tabela 14).')
+            f'{d["sbc"] or "não classificado"}, {sbc}. Nós optamos por seguir a AHA (Tabela 14).')
 
 
 def _varfarina(chave, ctx):
@@ -877,12 +886,11 @@ def _enoxaparina(chave, ctx):
 
 # --- Antiagregantes -----------------------------------------------------------------------------------------------
 def _indicacao_aas(ctx):
-    indicacao = ctx.get('aas_indicacao')
-    if indicacao:
-        return indicacao
+    # Doença vascular ou stent é prevenção secundária, mesmo que a tela tenha marcado "primária": nunca suspender o
+    # AAS de quem tem stent ou DAC por um erro de marcação.
     if _cond(ctx) & _SECUNDARIA or ctx.get('stent'):
         return 'secundaria'
-    return None
+    return ctx.get('aas_indicacao')
 
 
 def _aas(chave, ctx):
@@ -1099,7 +1107,7 @@ def _regra(chave, ctx, medicacoes):
         return _metformina(chave, ctx)
     if 'arni' in classes:
         return _arni(chave, ctx)
-    if 'ieca_bra' in classes:
+    if 'ieca_bra' in classes or chave == 'alisquireno':   # alisquireno: inibidor do SRAA, mesma regra
         return _ieca_bra(chave, ctx)
     if 'betabloqueador' in classes:
         return _betabloqueador(chave, ctx)
@@ -1248,7 +1256,7 @@ def condutas(medicacoes: list[str], ctx: dict) -> dict:
     ``medicacoes``: chaves de ``MEDICAMENTOS`` (chaves desconhecidas são ignoradas; repetidas contam uma vez).
     ``ctx`` (tudo opcional): idade, sexo ('masculino'|'feminino'), peso, clcr (mL/min, Cockcroft-Gault),
     sangramento ('minimo'|'baixo_moderado'|'alto'), cirurgia_risco_elevado, urgencia
-    ('eletiva'|'tempo_sensivel'|'urgencia'|'emergencia'), neuraxial, condicoes (set), stent
+    ('eletiva'|'tempo_sensivel'|'urgencia'|'emergencia'), neuraxial (aceita também 'neuroaxial'), condicoes (set), stent
     ({'tipo': 'farmacologico'|'convencional'|'balao', 'indicacao': 'sca'|'dac_cronica', 'meses': float}),
     aas_indicacao ('primaria'|'secundaria'), pa_controlada.
 
@@ -1258,6 +1266,8 @@ def condutas(medicacoes: list[str], ctx: dict) -> dict:
     """
     ctx = dict(ctx or {})
     ctx['condicoes'] = _cond(ctx)
+    if ctx.get('neuraxial') is None and 'neuroaxial' in ctx:
+        ctx['neuraxial'] = ctx['neuroaxial']
     meds = []
     for chave in medicacoes or ():
         if chave in MEDICAMENTOS and chave not in meds:

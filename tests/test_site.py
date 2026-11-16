@@ -628,8 +628,9 @@ def test_lista_nao_repete_o_que_ja_e_botao(pagina):
 
 
 def test_listas_suspensas_curtas_viram_botoes(pagina):
-    # todas as listas do formulário, menos a do plano de saúde (as opções dela vêm do cadastro do médico)
-    assert "checkupForm.querySelectorAll('select:not([data-plano])')" in pagina and "setAttribute('role', 'radio')" in pagina
+    # todas as listas do formulário, menos a do plano de saúde (as opções dela vêm do cadastro do médico) e as longas
+    # do pré-operatório marcadas com data-sem-botoes (cirurgia proposta e escala de fragilidade)
+    assert "checkupForm.querySelectorAll('select:not([data-plano]):not([data-sem-botoes])')" in pagina and "setAttribute('role', 'radio')" in pagina
 
 
 @pytest.mark.parametrize('dados, titulos', [

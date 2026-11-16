@@ -113,7 +113,7 @@
       <div class="grade">
         <div class="campo sm:col-span-2">
           <label for="po_cirurgia">Cirurgia proposta</label>
-          <select id="po_cirurgia" data-lista>
+          <select id="po_cirurgia" data-sem-botoes>
             <option value="">Selecione a mais parecida...</option>
             <optgroup label="Risco baixo (&lt; 1%)">
               <option value="catarata">Oftalmológica (catarata e outras)</option>
@@ -138,7 +138,8 @@
               <option value="colecistectomia">Intraperitoneal: colecistectomia, hérnia hiatal, esplenectomia</option>
               <option value="colectomia">Intraperitoneal: colectomia ou outra cirurgia intestinal</option>
               <option value="intratoracica">Intratorácica não maior</option>
-              <option value="coluna">Coluna ou neurocirurgia</option>
+              <option value="coluna">Coluna</option>
+              <option value="neurocirurgia">Neurocirurgia intracraniana</option>
               <option value="quadril">Ortopédica maior (quadril, joelho, artroplastia)</option>
               <option value="transplante_renal">Transplante renal</option>
               <option value="urologica_maior">Urológica maior (prostatectomia, nefrectomia)</option>
@@ -153,7 +154,8 @@
               <option value="figado">Ressecção hepática ou de vias biliares</option>
               <option value="esofagectomia">Esofagectomia</option>
               <option value="pneumectomia">Pneumectomia</option>
-              <option value="transplante_figado_pulmao">Transplante hepático ou pulmonar</option>
+              <option value="transplante_hepatico">Transplante hepático</option>
+              <option value="transplante_pulmonar">Transplante pulmonar</option>
               <option value="perfuracao_intestinal">Reparo de perfuração intestinal</option>
               <option value="cistectomia">Cistectomia total</option>
             </optgroup>
@@ -230,12 +232,13 @@
         <label class="opcao" for="po_c_revascularizacao_cirurgica"><input type="checkbox" id="po_c_revascularizacao_cirurgica" name="po_condicoes" value="revascularizacao_cirurgica">Cirurgia de revascularização</label>
         <label class="opcao" for="po_c_ic"><input type="checkbox" id="po_c_ic" name="po_condicoes" value="ic">Insuficiência cardíaca</label>
         <label class="opcao" for="po_c_ic_fe_reduzida"><input type="checkbox" id="po_c_ic_fe_reduzida" name="po_condicoes" value="ic_fe_reduzida">IC com fração de ejeção reduzida</label>
+        <label class="opcao" for="po_c_ic_recente"><input type="checkbox" id="po_c_ic_recente" name="po_condicoes" value="ic_recente">IC recente, tratamento ainda não otimizado</label>
         <label class="opcao" for="po_c_avc_ait"><input type="checkbox" id="po_c_avc_ait" name="po_condicoes" value="avc_ait">AVC ou AIT</label>
         <label class="opcao" for="po_c_avc_ait_recente"><input type="checkbox" id="po_c_avc_ait_recente" name="po_condicoes" value="avc_ait_recente">AVC ou AIT há menos de 3 meses</label>
         <label class="opcao" for="po_c_diabetes"><input type="checkbox" id="po_c_diabetes" name="po_condicoes" value="diabetes">Diabetes</label>
         <label class="opcao" for="po_c_diabetes_insulina"><input type="checkbox" id="po_c_diabetes_insulina" name="po_condicoes" value="diabetes_insulina">Diabetes em uso de insulina</label>
         <label class="opcao" for="po_c_hipertensao"><input type="checkbox" id="po_c_hipertensao" name="po_condicoes" value="hipertensao">Hipertensão</label>
-        <label class="opcao" for="po_c_fa"><input type="checkbox" id="po_c_fa" name="po_condicoes" value="fa">Fibrilação atrial</label>
+        <label class="opcao" for="po_c_fa"><input type="checkbox" id="po_c_fa" name="po_condicoes" value="fa">FA (fibrilação atrial)</label>
         <label class="opcao" for="po_c_valvopatia"><input type="checkbox" id="po_c_valvopatia" name="po_condicoes" value="valvopatia">Valvopatia moderada ou grave</label>
         <label class="opcao" for="po_c_protese_mecanica"><input type="checkbox" id="po_c_protese_mecanica" name="po_condicoes" value="protese_mecanica">Prótese valvar mecânica</label>
         <label class="opcao" for="po_c_protese_mecanica_mitral"><input type="checkbox" id="po_c_protese_mecanica_mitral" name="po_condicoes" value="protese_mecanica_mitral">Prótese mecânica mitral</label>
@@ -272,14 +275,15 @@
           </select>
         </div>
         <div class="campo">
-          <label for="po_stent_data">Mês e ano da angioplastia</label>
-          <input type="month" id="po_stent_data">
+          <label for="po_stent_data">Data da angioplastia</label>
+          <input type="date" id="po_stent_data">
         </div>
       </div>
       <p class="campo-rotulo mt-5">Sintomas e sinais</p>
       <div class="opcoes">
-        <label class="opcao" for="po_s_angina"><input type="checkbox" id="po_s_angina" name="po_sintomas" value="angina">Angina ou dor torácica</label>
-        <label class="opcao" for="po_s_dispneia"><input type="checkbox" id="po_s_dispneia" name="po_sintomas" value="dispneia">Dispneia nova ou em piora</label>
+        <label class="opcao" for="po_s_angina"><input type="checkbox" id="po_s_angina" name="po_sintomas" value="angina">Angina (dor opressiva aos esforços)</label>
+        <label class="opcao" for="po_s_dispneia"><input type="checkbox" id="po_s_dispneia" name="po_sintomas" value="dispneia">Dispneia aos esforços habituais</label>
+        <label class="opcao" for="po_s_dispneia_nova"><input type="checkbox" id="po_s_dispneia_nova" name="po_sintomas" value="dispneia_nova">Dispneia nova ou em piora</label>
         <label class="opcao" for="po_s_palpitacoes"><input type="checkbox" id="po_s_palpitacoes" name="po_sintomas" value="palpitacoes">Palpitações</label>
         <label class="opcao" for="po_s_sincope"><input type="checkbox" id="po_s_sincope" name="po_sintomas" value="sincope">Síncope</label>
         <label class="opcao" for="po_s_sopro"><input type="checkbox" id="po_s_sopro" name="po_sintomas" value="sopro">Sopro cardíaco</label>
@@ -924,6 +928,15 @@
       <h2 id="s-capacidade" class="secao-titulo"><span class="secao-num">06</span>Capacidade funcional e fragilidade</h2>
       <div class="grade">
         <div class="campo">
+          <label for="po_funcional">Estado funcional (atividades de vida diária)</label>
+          <select id="po_funcional">
+            <option value="">Não informado</option>
+            <option value="independente">Independente</option>
+            <option value="parcial">Parcialmente dependente</option>
+            <option value="total">Totalmente dependente</option>
+          </select>
+        </div>
+        <div class="campo">
           <label for="po_escadas">Sobe dois lances de escada sem parar?</label>
           <select id="po_escadas">
             <option value="">Não sei</option>
@@ -933,7 +946,7 @@
         </div>
         <div class="campo">
           <label for="po_cfs">Escala Clínica de Fragilidade (CFS)</label>
-          <select id="po_cfs" data-lista>
+          <select id="po_cfs" data-sem-botoes>
             <option value="">Não avaliada</option>
             <option value="1">1 — muito em forma</option>
             <option value="2">2 — em forma</option>
@@ -3487,7 +3500,7 @@
                 sel.insertAdjacentElement('afterend', grupo);
                 grupos.push([sel, grupo]);
             }
-            checkupForm.querySelectorAll('select:not([data-plano]):not([data-lista])').forEach(emBotoes);
+            checkupForm.querySelectorAll('select:not([data-plano]):not([data-sem-botoes])').forEach(emBotoes);
             // Resultados qualitativos dos cartões de exame (sorologias, FIT) são criados depois.
             window.selectEmBotoes = sel => { emBotoes(sel); sincronizar(); };
             function sincronizar() {
@@ -3613,6 +3626,7 @@
                 spo2: v('po_spo2') || null, infeccao_respiratoria: v('po_infeccao') === 'sim',
                 escadas: v('po_escadas') || null, dasi, dasi_respondido: dasi.length > 0,
                 cfs: v('po_cfs') || null, stop_bang: stop, aas_indicacao: v('po_aas') || null,
+                funcional: v('po_funcional') || null,
             };
             if (condicoes.includes('stent')) {
                 d.stent = { tipo: v('po_stent_tipo') || null, indicacao: v('po_stent_indicacao') || null,
@@ -3670,6 +3684,10 @@
         const textoSeguro = t => escapeHtml(T(t || ''));
         const classeTag = c => c ? `<span class="po-classe">${escapeHtml(c)}</span>` : '';
         const divergenciaHtml = t => t ? `<div class="po-divergencia"><strong>${textoSeguro('Divergência:')}</strong> ${textoSeguro(t)}</div>` : '';
+        // Escore calculado sem um dado ("item contado como ausente") ou não calculado (valor "—": falta o essencial).
+        const faltaHtml = e => !(e.falta && e.falta.length) ? '' : e.valor === '—'
+            ? `<p class="po-detalhe text-[#A0430A]">${textoSeguro('Para calcular, informe:')} ${e.falta.map(textoSeguro).join(', ')}.</p>`
+            : `<p class="po-detalhe text-[#A0430A]">${textoSeguro('Sem')} ${e.falta.map(textoSeguro).join(', ')}: ${textoSeguro('item contado como ausente.')}</p>`;
         const refsHtml = x => x && x.referencia_html ? `<p class="po-ref referencia-links">${x.referencia_html}</p>` : '';
         // Classes escritas por extenso: o Tailwind só gera o CSS das classes que encontra no arquivo.
         const CLASSE_DA_FAIXA = { baixo: 'po-faixa po-faixa-baixo', intermediario: 'po-faixa po-faixa-intermediario',
@@ -3695,6 +3713,12 @@
             document.getElementById('preopCirurgia').textContent =
                 [T(r.cirurgia.rotulo), T('Risco') + ' ' + T(r.cirurgia.risco).toLowerCase(), T(r.cirurgia.urgencia)].join(' · ');
             let h = '';
+            let detalhes = '';     // no resumo curto, os escores e o resto ficam recolhidos
+
+            if (r.resumido && r.resumo) {
+                h += `<div class="aviso aviso-info mt-6"><p><strong class="font-medium">${textoSeguro(r.resumo.titulo)}</strong></p>
+                    <p class="mt-1">${textoSeguro(r.resumo.texto)}</p>${refsHtml(r.resumo)}</div>`;
+            }
 
             if (r.adiar && r.adiar.length) {
                 h += `<h3 class="po-titulo">${textoSeguro('Antes de marcar a cirurgia')}</h3>`;
@@ -3704,6 +3728,7 @@
             }
 
             const ind = r.indicacao;
+            const inicioDosDetalhes = h.length;
             h += `<h3 class="po-titulo">${textoSeguro('A avaliação cardiológica está indicada?')}</h3>
                 <div class="risco-cartao !mt-0"><ol class="po-passos">${ind.passos.map(p => `<li class="po-passo">
                     <span class="${p.estado === 'ok' ? 'po-resposta po-resposta-ok' : 'po-resposta po-resposta-atencao'}">${textoSeguro(p.resposta)}</span>
@@ -3716,15 +3741,16 @@
                 <p class="po-escore-valor">${escapeHtml(e.valor)} ${faixaHtml(e)}</p>
                 ${e.itens && e.itens.length ? `<p class="po-detalhe">${e.itens.map(textoSeguro).join(' · ')}</p>` : ''}
                 ${e.nota ? `<p class="po-detalhe">${textoSeguro(e.nota)}</p>` : ''}
-                ${e.falta && e.falta.length ? `<p class="po-detalhe text-[#A0430A]">${textoSeguro('Sem')} ${e.falta.map(textoSeguro).join(', ')}: ${textoSeguro('item contado como ausente.')}</p>` : ''}
+                ${faltaHtml(e)}
                 ${refsHtml(e)}</div>`).join('');
             h += '</div>';
             if (r.clcr != null) h += `<p class="text-[13px] text-ink/60 mt-3">${textoSeguro('Depuração de creatinina (Cockcroft-Gault)')}: <strong>${escapeHtml(String(r.clcr).replace('.', ','))} mL/min</strong></p>`;
+            if (r.resumido) { detalhes += h.slice(inicioDosDetalhes); h = h.slice(0, inicioDosDetalhes); }
 
             const exames = r.exames || [];
             const sugeridos = exames.map((e, i) => [e, i]).filter(([e]) => e.estado !== 'nao_indicado');
             const naoIndicados = exames.filter(e => e.estado === 'nao_indicado');
-            h += `<h3 class="po-titulo">${textoSeguro('Exames antes da cirurgia')}</h3>`;
+            if (sugeridos.length || !r.resumido) h += `<h3 class="po-titulo">${textoSeguro('Exames antes da cirurgia')}</h3>`;
             if (sugeridos.length) {
                 h += `<div class="risco-cartao !mt-0"><p class="text-[13px] text-ink/55 mb-2">${textoSeguro('Os marcados entram nos PDFs. "Considerar" vem desmarcado: só se o resultado mudar a conduta.')}</p>`;
                 h += sugeridos.map(([e, i]) => {
@@ -3741,7 +3767,7 @@
                 }).join('');
                 h += '</div>';
             }
-            if (naoIndicados.length) {
+            if (naoIndicados.length && !r.resumido) {
                 h += `<details class="risco-cartao mt-3"><summary class="cursor-pointer text-[13px] text-teal">${textoSeguro('Não indicados')} (${naoIndicados.length})</summary>
                     ${naoIndicados.map(e => `<div class="po-item"><p><span class="font-medium">${textoSeguro(e.titulo)}</span> ${classesDoExame(e)}</p>
                     <p class="text-[13px] text-ink/60 mt-0.5">${textoSeguro(e.motivo)}</p>${refsHtml(e)}${divergenciaHtml(e.divergencia)}</div>`).join('')}</details>`;
@@ -3762,12 +3788,13 @@
             }
 
             const pul = r.pulmonar;
+            const inicioDoFim = h.length;
             h += `<h3 class="po-titulo">${textoSeguro('Risco pulmonar e apneia do sono')}</h3><div class="po-escores">`;
             h += [pul.escore, pul.stop_bang].map(e => `<div class="po-escore"><p class="po-escore-nome">${textoSeguro(e.nome)}</p>
                 <p class="po-escore-valor">${escapeHtml(e.valor)} ${faixaHtml(e)}</p>
                 ${e.itens && e.itens.length ? `<p class="po-detalhe">${e.itens.map(textoSeguro).join(' · ')}</p>` : ''}
                 ${e.nota ? `<p class="po-detalhe">${textoSeguro(e.nota)}</p>` : ''}
-                ${e.falta && e.falta.length ? `<p class="po-detalhe text-[#A0430A]">${textoSeguro('Sem')} ${e.falta.map(textoSeguro).join(', ')}: ${textoSeguro('item contado como ausente.')}</p>` : ''}
+                ${faltaHtml(e)}
                 ${refsHtml(e)}</div>`).join('') + '</div>';
             const outras = (pul.medidas || []).concat(r.orientacoes || []);
             if (outras.length) {
@@ -3781,6 +3808,10 @@
                     <p class="text-[13px] text-ink/60 mt-0.5">${textoSeguro(o.texto)}</p>${refsHtml(o)}</div>`);
             }
 
+            if (r.resumido) {
+                detalhes += h.slice(inicioDoFim);
+                h = h.slice(0, inicioDoFim) + `<details class="risco-cartao mt-6"><summary class="cursor-pointer text-[13px] text-teal">${textoSeguro('Ver escores e detalhes')}</summary>${detalhes}</details>`;
+            }
             alvo.innerHTML = h;
             alvo.querySelectorAll('[data-exame-preop]').forEach(caixa => caixa.addEventListener('change', sincronizarExamesDoPreop));
             sincronizarExamesDoPreop();

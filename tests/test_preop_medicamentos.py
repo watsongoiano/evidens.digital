@@ -275,11 +275,42 @@ def test_falta_risco_de_sangramento():
 def test_neuroaxial_conta_como_sangramento_alto_e_gera_aviso():
     r = pm.condutas(['dabigatrana'], {'clcr': 70, 'sangramento': 'baixo_moderado', 'neuraxial': True})
     i = r['itens'][0]
-    assert i['resumo'] == 'Última dose no D-4 (3 dias sem dose); reiniciar no D+3'
+    # Neuroaxial: ≥ 5 meias-vidas (AHA §7.6, texto): ≥ 4 dias sem dabigatrana com ClCr ≥ 50; 6 com ClCr < 50
+    assert i['resumo'] == 'Última dose no D-5 (4 dias sem dose); reiniciar no D+3'
     assert '≥6 h após retirar o cateter' in i['texto']
+    r = pm.condutas(['dabigatrana'], {'clcr': 40, 'sangramento': 'alto', 'neuraxial': True})
+    assert r['itens'][0]['resumo'] == 'Última dose no D-7 (6 dias sem dose); reiniciar no D+3'
     aviso = next(a for a in r['avisos'] if a['titulo'] == 'Anestesia neuroaxial e anticoagulantes')
     assert '≥5 meias-vidas' in aviso['texto']
-    assert item('apixabana', clcr=70, sangramento='minimo', neuraxial=True)['resumo'].startswith('Última dose no D-3')
+    assert item('apixabana', clcr=70, sangramento='minimo', neuraxial=True)['resumo'].startswith('Última dose no D-4')
+
+
+def test_aceita_a_grafia_neuroaxial():
+    r = pm.condutas(['apixabana'], {'clcr': 70, 'sangramento': 'baixo_moderado', 'neuroaxial': True})
+    # Anti-Xa com neuroaxial: ≥ 3 dias sem dose (72 h)
+    assert r['itens'][0]['resumo'] == 'Última dose no D-4 (3 dias sem dose); reiniciar no D+3'
+    assert 'Anestesia neuroaxial e anticoagulantes' in [a['titulo'] for a in r['avisos']]
+
+
+def test_correcoes_da_revisao_clinica():
+    # AAS marcado como "primária" em quem tem stent: continua prevenção secundária (nunca suspender por erro de marcação)
+    r = pm.condutas(['aas_acido_acetilsalicilico'], {'aas_indicacao': 'primaria', 'condicoes': {'stent'},
+                                                     'stent': {'tipo': 'farmacologico', 'indicacao': 'sca', 'meses': 3}})
+    assert r['itens'][0]['conduta'] == 'manter'
+    # Alisquireno segue a regra dos IECA/BRA
+    r = pm.condutas(['alisquireno'], {'condicoes': {'hipertensao'}, 'pa_controlada': True, 'cirurgia_risco_elevado': True})
+    assert r['itens'][0]['resumo'].startswith('Omitir')
+    # Edoxabana com ClCr < 30 e sangramento alto: divergência própria (SBC 48–72 h)
+    r = pm.condutas(['edoxabana'], {'clcr': 25, 'sangramento': 'alto'})
+    assert '48–72 h' in r['itens'][0]['divergencia']
+
+
+def test_stent_com_campos_vazios_pede_os_dados():
+    ctx = {'sangramento': 'alto', 'condicoes': {'stent', 'dac'},
+           'stent': {'tipo': None, 'indicacao': None, 'meses': None}}
+    r = pm.condutas(['aas_acido_acetilsalicilico', 'ticagrelor'], ctx)
+    assert r['itens'][0]['resumo'] == 'Manter (75–100 mg)'
+    assert r['itens'][1]['conduta'] == 'individualizar' and 'Falta tipo do stent' in r['itens'][1]['texto']
 
 
 def test_doac_na_urgencia():
@@ -295,6 +326,7 @@ def test_cha2ds2vasc_e_chads2():
     assert pm.cha2ds2vasc(dict(idade=70, sexo='masculino', condicoes=set())) == 1
     assert pm.cha2ds2vasc({}) == 0
     assert pm.cha2ds2vasc(dict(idade=60, condicoes={'doenca_arterial_periferica'})) == 1
+    assert pm.cha2ds2vasc(dict(idade=60, condicoes={'iam_previo'})) == 1
 
 
 def test_varfarina_baixo_risco_sem_ponte():

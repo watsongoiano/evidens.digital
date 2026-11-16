@@ -114,7 +114,7 @@ def test_cirurgia_de_baixo_risco_nao_indica_avaliacao_nem_exames_cardiacos():
     assert r['indicacao']['tipo'] == 'nao_indicada'
     assert _exame(r, 'Eletrocardiograma de repouso')['estado'] == 'nao_indicado'
     assert _exame(r, 'Troponina, soro')['estado'] == 'nao_indicado'
-    assert _exame(r, 'Peptídeo natriurético BNP/PROBNP') is None
+    assert _exame(r, 'Peptídeo natriurético BNP/PROBNP')['estado'] == 'nao_indicado'
 
 
 def test_risco_baixo_pelos_escores_libera():
@@ -133,7 +133,7 @@ def test_caso_completo_da_previa():
            stent={'tipo': 'farmacologico', 'indicacao': 'dac_cronica', 'data': '2026-03'}, asa=3, duracao='2_3h',
            spo2=97, escadas='nao', dasi=['cuidar_de_si', 'andar_em_casa', 'andar_quarteiroes', 'subir_lance',
                                          'domestico_leve', 'domestico_moderado', 'relacoes_sexuais'],
-           creatinina=1.6, hemoglobina=11.5, hba1c_meses=3)
+           creatinina=1.6, hemoglobina=11.5, hba1c_dias=80)
     r = po.avaliar(p)
     assert r['indicacao']['tipo'] == 'indicada'
     assert [e['valor'] for e in r['escores'][:2]] == [3, 2]
@@ -155,7 +155,17 @@ def test_caso_completo_da_previa():
 def test_prazos_depois_da_angioplastia():
     def adiar(tipo, indicacao, data):
         return po.adiamentos(_p(condicoes=['stent'], stent={'tipo': tipo, 'indicacao': indicacao, 'data': data}))
-    assert 'menos de 30 dias' in adiar('farmacologico', 'dac_cronica', '2026-11')[0]['titulo']
+    assert '30 dias ou menos' in adiar('farmacologico', 'dac_cronica', '2026-11-01')[0]['titulo']
+    assert 'menos de 14 dias' in adiar('balao', 'dac_cronica', '2026-11-10')[0]['titulo']
+    assert adiar('balao', 'dac_cronica', '2026-10-20')[0].get('ok')
+    # Stent convencional por SCA segue o prazo da indicação (SBC), não fica liberado por ser convencional
+    assert 'SBC IIb' in adiar('convencional', 'sca', '2026-08-01')[0]['classe']
+    # Sem indicação: prazo mais longo (SCA)
+    assert 'SBC IIa' in po.adiamentos(_p(condicoes=['stent'], stent={'tipo': 'farmacologico', 'data': '2026-03-01'}))[0]['classe']
+    # Urgência: nada é adiado; conduta da SBC
+    urg = po.adiamentos(_p(urgencia='urgencia', condicoes=['stent'],
+                           stent={'tipo': 'farmacologico', 'indicacao': 'sca', 'data': '2026-10-01'}))
+    assert urg[0]['classe'] == 'SBC I-C' and 'hemodinâmica' in urg[0]['texto']
     assert 'SBC IIb' in adiar('farmacologico', 'dac_cronica', '2026-09')[0]['classe']    # 2 meses
     assert 'SBC IIa' in adiar('farmacologico', 'dac_cronica', '2026-07')[0]['classe']    # 4 meses
     assert 'SBC IIa' in adiar('farmacologico', 'sca', '2026-03')[0]['classe']            # 8 meses por SCA
@@ -176,11 +186,14 @@ def test_divergencias_ecg_e_eco():
     ecg = _exame(r, 'Eletrocardiograma de repouso')
     assert ecg['sbc'] == 'I' and ecg['aha'].startswith('3') and ecg['estado'] == 'indicado' and ecg['divergencia']
     # Assintomático antes de cirurgia de alto risco: eco IIb na SBC, sem benefício na AHA
-    r = po.avaliar(_p(cirurgia='pancreas', condicoes=['dac', 'ic']))
+    r = po.avaliar(_p(cirurgia='pancreas', condicoes=['dac']))
     eco = _exame(r, 'Ecocardiograma transtorácico')
     assert eco['estado'] == 'considerar' and eco['sbc'] == 'IIb' and eco['divergencia']
+    # IC conhecida, sem eco no último ano, em cirurgia de risco intermediário ou alto: SBC I-B; AHA sem benefício
+    eco = _exame(po.avaliar(_p(cirurgia='quadril', condicoes=['ic'])), 'Ecocardiograma transtorácico')
+    assert eco['estado'] == 'indicado' and eco['sbc'] == 'I' and eco['aha'].startswith('3') and eco['divergencia']
     # Dispneia nova: eco classe 1 na AHA
-    r = po.avaliar(_p(sintomas=['dispneia']))
+    r = po.avaliar(_p(sintomas=['dispneia_nova']))
     assert _exame(r, 'Ecocardiograma transtorácico')['aha'] == '1'
 
 
@@ -246,3 +259,15 @@ def test_rota_do_preoperatorio(app, contas):
     assert 'itens' in dados['medicamentos']
     assert cliente.post('/api/preoperatorio', json=dict(corpo, cirurgia='')).status_code == 400
     assert app.test_client().post('/api/preoperatorio', json=corpo).status_code == 401
+
+
+def test_jovem_sem_comorbidade_em_cirurgia_de_baixo_risco_recebe_orientacao_curta():
+    r = po.avaliar(_p(idade=28, sexo='feminino', cirurgia='pele'))
+    assert r['resumido'] and r['resumo']['titulo'] == 'Avaliação cardiológica não indicada'
+    assert 'cirurgia de baixo risco' in r['resumo']['texto'] and r['resumo']['referencias']
+    assert not any(e['estado'] == 'indicado' for e in r['exames'])
+    # Com doença cardiovascular ou sintomas, mesmo em cirurgia de baixo risco, o resultado completo continua.
+    assert not po.avaliar(_p(idade=28, cirurgia='pele', condicoes=['fa']))['resumido']
+    assert not po.avaliar(_p(idade=28, cirurgia='pele', sintomas=['sincope']))['resumido']
+    # Risco elevado pelo escore com boa capacidade não é o resumo curto.
+    assert not po.avaliar(_p(condicoes=['dac'], escadas='sim'))['resumido']
