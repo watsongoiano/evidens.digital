@@ -412,29 +412,60 @@ def test_fa_com_fc_acima_de_120_entra_como_condicao_grave():
     assert 'fa_alta_resposta' not in _p(fc=140)['instaveis']          # taquicardia sem FA não é este item
 
 
-def test_tela_traz_a_asa_minima_e_a_duracao_tipica_do_motor():
-    """Os vínculos automáticos da tela saem das tabelas do motor (ASA 2020; séries de tempo cirúrgico)."""
+def test_tela_gerada_das_tabelas_do_motor():
+    """As condições (grupos e sub-itens) e as sugestões automáticas saem de scripts/gerar_preop.py."""
+    import importlib.util
     import re
+    spec = importlib.util.spec_from_file_location('gerar_preop', 'scripts/gerar_preop.py')
+    gerador = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gerador)
     html = open('intelligent-tools.html', encoding='utf-8').read()
+    assert gerador.aplicar(html) == html, 'rode: python scripts/gerar_preop.py'
+    # Classe ASA mínima de cada item (ASA 2020), nos atributos que a tela lê
     na_tela = {m[0]: int(m[1]) for m in re.findall(r'name="po_(?:condicoes|instaveis)" value="([a-z_0-9]+)" data-asa="(\d)"', html)}
     assert na_tela == po.ASA_MINIMA
-    for chave, (faixa, texto, ref) in po.DURACAO_TIPICA.items():
-        assert f'<option value="{chave}" data-duracao="{faixa}">' in html
-        assert texto in html and ref['url'] in html
-    assert po.ASA_PS['url'] in html
+    # Quadro grave como sub-item da própria doença: o motor implica o mesmo antecedente
+    for bloco, dentro in re.findall(r'data-detalhe-de="po_c_([a-z_]+)" hidden>(.*?)</span>', html):
+        for instavel in re.findall(r'name="po_instaveis" value="([a-z_]+)"', dentro):
+            assert po.INSTAVEL_IMPLICA[instavel] == bloco, instavel
     # SpO₂ e frequência cardíaca ficam nos dados clínicos; o histórico do colo é só do check-up
     clinicos = html[html.index('id="s-clinicos"'):html.index('id="s-cirurgia"')]
     assert 'id="po_spo2"' in clinicos and 'id="po_fc"' in clinicos
     assert '<div data-modo="checkup">\n      <div class="grade mt-4" id="colo-historico"' in html
 
 
+def test_sugestoes_da_tela_tem_fonte_e_chaves_validas():
+    s = po.sugestoes_da_tela()
+    assert set(s['duracao']) <= set(po.CIRURGIAS) and set(s['sangramento']) <= set(po.CIRURGIAS)
+    assert all(d['faixa'] in po.DURACOES and d['url'].startswith('https://') for d in s['duracao'].values())
+    assert all(d['classe'] in po.SANGRAMENTOS and d['url'].startswith('https://') for d in s['sangramento'].values())
+    # Onde a SBC diverge de si mesma (prótese de quadril ou joelho), a sugestão avisa
+    assert s['sangramento']['quadril']['classe'] == 'alto' and s['sangramento']['quadril']['nota'].startswith('Divergência:')
+    # Mínimo só onde a AHA nomeia (catarata e odontologia)
+    assert {k for k, d in s['sangramento'].items() if d['classe'] == 'minimo'} == {'catarata', 'odontologica'}
+    assert set(s['aas_secundaria']) <= set(po.CONDICOES) and 'dac' in s['aas_secundaria']
+    assert set(s['implica'].values()) <= set(po.CONDICOES) and set(s['implica']) <= set(po.INSTAVEIS)
+    # Tudo o que a tela mostra dessas sugestões tem par em inglês
+    from src.utils import i18n
+    textos = ([d['texto'] for d in s['duracao'].values()] + [d['fonte'] for d in s['duracao'].values()]
+              + [d['fonte'] for d in s['sangramento'].values()] + [d['nota'] for d in s['sangramento'].values() if d['nota']])
+    assert not [t for t in textos if not i18n.coberto(t)]
+
+
 def test_condicao_grave_implica_o_antecedente():
     """SCA e angina CCS III/IV são dor isquêmica atual (doença coronária em Lee 1999); IC descompensada é IC."""
-    import json
     assert _p(instaveis=['sca'])['condicoes'] >= {'dac'}
     assert _p(instaveis=['ic_descompensada'])['condicoes'] >= {'ic'}
     assert _p(condicoes=['fa'], fc=130)['condicoes'] >= {'fa'}
     r = po.rcri(_p(instaveis=['angina_grave', 'edema_choque'], urgencia='urgencia', creatinina=1.0))
     assert {'Doença coronária', 'Insuficiência cardíaca'} <= set(r['itens'])
-    html = open('intelligent-tools.html', encoding='utf-8').read()
-    assert 'const INSTAVEL_IMPLICA = ' + json.dumps(po.INSTAVEL_IMPLICA) + ';' in html
+
+
+def test_peso_e_altura_dizem_a_obesidade_e_o_item_do_stop_bang():
+    p = _p(peso=118, altura=165)                       # IMC 43
+    assert 'obesidade' in p['condicoes'] and 'imc_35' in p['stop_bang']
+    p = _p(peso=90, altura=170)                        # IMC 31
+    assert 'obesidade' in p['condicoes'] and 'imc_35' not in p['stop_bang']
+    p = _p(peso=70, altura=170)
+    assert 'obesidade' not in p['condicoes']
+    assert 'obesidade' not in _p(peso=118)['condicoes']   # sem altura não há IMC

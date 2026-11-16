@@ -142,7 +142,7 @@
               <option value="intratoracica">Intratorácica não maior</option>
               <option value="coluna">Coluna</option>
               <option value="neurocirurgia">Neurocirurgia intracraniana</option>
-              <option value="quadril" data-duracao="menos_2h">Ortopédica maior (quadril, joelho, artroplastia)</option>
+              <option value="quadril">Ortopédica maior (quadril, joelho, artroplastia)</option>
               <option value="transplante_renal">Transplante renal</option>
               <option value="urologica_maior">Urológica maior (prostatectomia, nefrectomia)</option>
               <option value="ginecologica_maior">Ginecológica maior (histerectomia abdominal)</option>
@@ -152,7 +152,7 @@
               <option value="aorta_aberta">Aorta ou cirurgia vascular maior aberta</option>
               <option value="stent_carotida_sintomatica">Stent de carótida sintomática</option>
               <option value="revascularizacao_mmii">Revascularização aberta de membro inferior ou amputação</option>
-              <option value="pancreas" data-duracao="mais_3h">Duodenopancreatectomia</option>
+              <option value="pancreas">Duodenopancreatectomia</option>
               <option value="figado">Ressecção hepática ou de vias biliares</option>
               <option value="esofagectomia">Esofagectomia</option>
               <option value="pneumectomia">Pneumectomia</option>
@@ -168,21 +168,23 @@
           <label for="po_urgencia">Urgência</label>
           <select id="po_urgencia">
             <option value="eletiva">Eletiva</option>
-            <option value="tempo_sensivel">Tempo-sensível (pode esperar até 3 meses)</option>
-            <option value="urgencia">Urgência (2 a 24 h)</option>
-            <option value="emergencia">Emergência (&lt; 2 h)</option>
+            <option value="tempo_sensivel">Tempo-sensível</option>
+            <option value="urgencia">Urgência</option>
+            <option value="emergencia">Emergência</option>
           </select>
+          <p class="text-[12px] text-ink/55 mt-1.5">Tempo-sensível: até 3 meses · Urgência: 2 a 24 h · Emergência: menos de 2 h</p>
         </div>
         <div class="campo">
           <label for="po_asa">Classe ASA</label>
           <select id="po_asa">
             <option value="">Não sei</option>
-            <option value="1">ASA I — saudável</option>
-            <option value="2">ASA II — doença sistêmica leve</option>
-            <option value="3">ASA III — doença sistêmica grave</option>
-            <option value="4">ASA IV — ameaça constante à vida</option>
-            <option value="5">ASA V — moribundo</option>
+            <option value="1">I</option>
+            <option value="2">II</option>
+            <option value="3">III</option>
+            <option value="4">IV</option>
+            <option value="5">V</option>
           </select>
+          <p class="text-[12px] text-ink/55 mt-1.5">I saudável · II doença leve · III doença grave · IV ameaça constante à vida · V moribundo</p>
           <p id="po_asa_dica" class="text-[12px] text-ink/55 mt-1.5" hidden></p>
         </div>
         <div class="campo">
@@ -199,10 +201,12 @@
           <label for="po_sangramento">Risco de sangramento da cirurgia</label>
           <select id="po_sangramento">
             <option value="">Não sei</option>
-            <option value="minimo">Mínimo (catarata, dentária ou pele simples)</option>
-            <option value="baixo_moderado">Baixo ou moderado (&lt; 2% em 30 dias)</option>
-            <option value="alto">Alto (≥ 2% em 30 dias)</option>
+            <option value="minimo">Mínimo</option>
+            <option value="baixo_moderado">Baixo ou moderado</option>
+            <option value="alto">Alto</option>
           </select>
+          <p class="text-[12px] text-ink/55 mt-1.5">Sangramento maior em 30 dias: mínimo, cerca de 0% · baixo ou moderado, menos de 2% · alto, 2% ou mais</p>
+          <p id="po_sangramento_dica" class="text-[12px] text-ink/55 mt-1" hidden></p>
         </div>
         <div class="campo">
           <label for="po_neuroaxial">Anestesia neuroaxial ou cateter peridural</label>
@@ -216,38 +220,40 @@
 
     <section class="secao" aria-labelledby="s-condicoes" data-modo="preop" hidden>
       <h2 id="s-condicoes" class="secao-titulo"><span class="secao-num">04</span>Condições clínicas</h2>
-      <p class="secao-nota">Toque em um grupo para abrir e marque o que se aplica. FA com FC acima de 120 bpm e PA a partir de 180 × 110 mmHg entram sozinhas pelos dados clínicos.</p>
+      <p class="secao-nota">Marque o que se aplica. Cada item abre só os detalhes que mudam a conduta.</p>
+      <!-- preop:condicoes:inicio -->
       <details class="po-grupo" id="po_g_instaveis">
         <summary><span>Grave ou instável agora</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
+        <p class="po-nota-do-grupo">IC descompensada, estenose importante sintomática, FA rápida, hipertensão pulmonar sintomática e angina CCS III/IV abrem dentro do item da doença.</p>
         <div class="opcoes">
-        <label class="opcao" for="po_i_sca"><input type="checkbox" id="po_i_sca" name="po_instaveis" value="sca" data-asa="4">Síndrome coronariana aguda</label>
-        <label class="opcao" for="po_i_ic_descompensada"><input type="checkbox" id="po_i_ic_descompensada" name="po_instaveis" value="ic_descompensada" data-asa="4">Insuficiência cardíaca descompensada (NYHA III/IV)</label>
-        <label class="opcao" for="po_i_angina_grave"><input type="checkbox" id="po_i_angina_grave" name="po_instaveis" value="angina_grave" data-asa="4">Angina CCS III/IV</label>
-        <label class="opcao" for="po_i_valvopatia_grave_sintomatica"><input type="checkbox" id="po_i_valvopatia_grave_sintomatica" name="po_instaveis" value="valvopatia_grave_sintomatica" data-asa="4">Estenose aórtica ou mitral importante sintomática</label>
-        <label class="opcao" for="po_i_arritmia_grave"><input type="checkbox" id="po_i_arritmia_grave" name="po_instaveis" value="arritmia_grave">Bradi ou taquiarritmia grave (BAVT, TV)</label>
-        <label class="opcao" for="po_i_fa_alta_resposta"><input type="checkbox" id="po_i_fa_alta_resposta" name="po_instaveis" value="fa_alta_resposta">FA com FC &gt; 120 bpm</label>
-        <label class="opcao" for="po_i_hap_sintomatica"><input type="checkbox" id="po_i_hap_sintomatica" name="po_instaveis" value="hap_sintomatica">Hipertensão arterial pulmonar sintomática</label>
-        <label class="opcao" for="po_i_aorta_instavel"><input type="checkbox" id="po_i_aorta_instavel" name="po_instaveis" value="aorta_instavel">Doença instável da aorta torácica</label>
-        <label class="opcao" for="po_i_edema_choque"><input type="checkbox" id="po_i_edema_choque" name="po_instaveis" value="edema_choque" data-asa="4">Edema agudo de pulmão ou choque cardiogênico</label>
+          <label class="opcao" for="po_i_sca"><input type="checkbox" id="po_i_sca" name="po_instaveis" value="sca" data-asa="4">Síndrome coronariana aguda</label>
+          <label class="opcao" for="po_i_arritmia_grave"><input type="checkbox" id="po_i_arritmia_grave" name="po_instaveis" value="arritmia_grave">Bradi ou taquiarritmia grave (BAVT, TV)</label>
+          <label class="opcao" for="po_i_aorta_instavel"><input type="checkbox" id="po_i_aorta_instavel" name="po_instaveis" value="aorta_instavel">Doença instável da aorta torácica</label>
+          <label class="opcao" for="po_i_edema_choque"><input type="checkbox" id="po_i_edema_choque" name="po_instaveis" value="edema_choque" data-asa="4">Edema agudo de pulmão ou choque cardiogênico</label>
         </div>
       </details>
-      <details class="po-grupo" id="po_g_coracao">
-        <summary><span>Coração e vasos</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
+      <details class="po-grupo" id="po_g_cardiovascular">
+        <summary><span>Cardiovascular</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
         <div class="opcoes">
-        <label class="opcao" for="po_c_dac"><input type="checkbox" id="po_c_dac" name="po_condicoes" value="dac" data-asa="3">Doença coronária (angina, prova funcional positiva, nitrato, onda Q)</label>
-        <label class="opcao" for="po_c_iam_previo"><input type="checkbox" id="po_c_iam_previo" name="po_condicoes" value="iam_previo" data-asa="3">IAM prévio</label>
-        <label class="opcao" for="po_c_stent"><input type="checkbox" id="po_c_stent" name="po_condicoes" value="stent" data-asa="3">Angioplastia ou stent</label>
-        <label class="opcao" for="po_c_revascularizacao_cirurgica"><input type="checkbox" id="po_c_revascularizacao_cirurgica" name="po_condicoes" value="revascularizacao_cirurgica" data-asa="3">Cirurgia de revascularização</label>
-        <label class="opcao" for="po_c_ic"><input type="checkbox" id="po_c_ic" name="po_condicoes" value="ic">Insuficiência cardíaca</label>
-        <span class="po-detalhe-de" data-detalhe-de="po_c_ic" hidden><label class="opcao po-filho" for="po_c_ic_fe_reduzida"><input type="checkbox" id="po_c_ic_fe_reduzida" name="po_condicoes" value="ic_fe_reduzida" data-asa="3">Fração de ejeção reduzida</label><label class="opcao po-filho" for="po_c_ic_recente"><input type="checkbox" id="po_c_ic_recente" name="po_condicoes" value="ic_recente">Diagnóstico recente, tratamento ainda não otimizado</label></span>
-        <label class="opcao" for="po_c_fa"><input type="checkbox" id="po_c_fa" name="po_condicoes" value="fa">FA (fibrilação atrial)</label>
-        <label class="opcao" for="po_c_valvopatia"><input type="checkbox" id="po_c_valvopatia" name="po_condicoes" value="valvopatia">Valvopatia moderada ou grave</label>
-        <label class="opcao" for="po_c_protese_mecanica"><input type="checkbox" id="po_c_protese_mecanica" name="po_condicoes" value="protese_mecanica">Prótese valvar mecânica</label>
-        <span class="po-detalhe-de" data-detalhe-de="po_c_protese_mecanica" hidden><label class="opcao po-filho" for="po_c_protese_mecanica_mitral"><input type="checkbox" id="po_c_protese_mecanica_mitral" name="po_condicoes" value="protese_mecanica_mitral">Em posição mitral</label></span>
-        <label class="opcao" for="po_c_marcapasso_cdi"><input type="checkbox" id="po_c_marcapasso_cdi" name="po_condicoes" value="marcapasso_cdi" data-asa="3">Marca-passo ou CDI</label>
-        <label class="opcao" for="po_c_hipertensao"><input type="checkbox" id="po_c_hipertensao" name="po_condicoes" value="hipertensao" data-asa="2">Hipertensão</label>
-        <label class="opcao" for="po_c_doenca_arterial_periferica"><input type="checkbox" id="po_c_doenca_arterial_periferica" name="po_condicoes" value="doenca_arterial_periferica">Doença arterial periférica</label>
-        <label class="opcao" for="po_c_hipertensao_pulmonar"><input type="checkbox" id="po_c_hipertensao_pulmonar" name="po_condicoes" value="hipertensao_pulmonar">Hipertensão pulmonar</label>
+          <label class="opcao" for="po_c_dac"><input type="checkbox" id="po_c_dac" name="po_condicoes" value="dac" data-asa="3">Doença coronária</label>
+          <span class="po-detalhe-de" data-detalhe-de="po_c_dac" hidden><label class="opcao po-filho" for="po_c_iam_previo"><input type="checkbox" id="po_c_iam_previo" name="po_condicoes" value="iam_previo" data-asa="3">IAM prévio</label></span>
+          <label class="opcao" for="po_c_stent"><input type="checkbox" id="po_c_stent" name="po_condicoes" value="stent" data-asa="3">Angioplastia ou stent</label>
+          <label class="opcao" for="po_c_revascularizacao_cirurgica"><input type="checkbox" id="po_c_revascularizacao_cirurgica" name="po_condicoes" value="revascularizacao_cirurgica" data-asa="3">Cirurgia de revascularização</label>
+          <label class="opcao" for="po_c_ic"><input type="checkbox" id="po_c_ic" name="po_condicoes" value="ic">Insuficiência cardíaca</label>
+          <span class="po-detalhe-de" data-detalhe-de="po_c_ic" hidden><label class="opcao po-filho" for="po_c_ic_fe_reduzida"><input type="checkbox" id="po_c_ic_fe_reduzida" name="po_condicoes" value="ic_fe_reduzida" data-asa="3">Fração de ejeção reduzida</label><label class="opcao po-filho" for="po_c_ic_recente"><input type="checkbox" id="po_c_ic_recente" name="po_condicoes" value="ic_recente">Recente, tratamento não otimizado</label><label class="opcao po-filho po-grave" for="po_i_ic_descompensada"><input type="checkbox" id="po_i_ic_descompensada" name="po_instaveis" value="ic_descompensada" data-asa="4">Descompensada (NYHA III/IV)</label></span>
+          <label class="opcao" for="po_c_fa"><input type="checkbox" id="po_c_fa" name="po_condicoes" value="fa">FA (fibrilação atrial)</label>
+          <span class="po-detalhe-de" data-detalhe-de="po_c_fa" hidden><label class="opcao po-filho po-grave" for="po_i_fa_alta_resposta"><input type="checkbox" id="po_i_fa_alta_resposta" name="po_instaveis" value="fa_alta_resposta">FC &gt; 120 bpm</label></span>
+          <label class="opcao" for="po_c_valvopatia"><input type="checkbox" id="po_c_valvopatia" name="po_condicoes" value="valvopatia">Valvopatia moderada ou grave</label>
+          <span class="po-detalhe-de" data-detalhe-de="po_c_valvopatia" hidden><label class="opcao po-filho po-grave" for="po_i_valvopatia_grave_sintomatica"><input type="checkbox" id="po_i_valvopatia_grave_sintomatica" name="po_instaveis" value="valvopatia_grave_sintomatica" data-asa="4">Estenose aórtica ou mitral importante sintomática</label></span>
+          <label class="opcao" for="po_c_protese_mecanica"><input type="checkbox" id="po_c_protese_mecanica" name="po_condicoes" value="protese_mecanica">Prótese valvar mecânica</label>
+          <span class="po-detalhe-de" data-detalhe-de="po_c_protese_mecanica" hidden><label class="opcao po-filho" for="po_c_protese_mecanica_mitral"><input type="checkbox" id="po_c_protese_mecanica_mitral" name="po_condicoes" value="protese_mecanica_mitral">Em posição mitral</label></span>
+          <label class="opcao" for="po_c_marcapasso_cdi"><input type="checkbox" id="po_c_marcapasso_cdi" name="po_condicoes" value="marcapasso_cdi" data-asa="3">Marca-passo ou CDI</label>
+          <label class="opcao" for="po_c_hipertensao"><input type="checkbox" id="po_c_hipertensao" name="po_condicoes" value="hipertensao" data-asa="2">Hipertensão</label>
+          <label class="opcao" for="po_c_avc_ait"><input type="checkbox" id="po_c_avc_ait" name="po_condicoes" value="avc_ait" data-asa="3">AVC ou AIT</label>
+          <span class="po-detalhe-de" data-detalhe-de="po_c_avc_ait" hidden><label class="opcao po-filho" for="po_c_avc_ait_recente"><input type="checkbox" id="po_c_avc_ait_recente" name="po_condicoes" value="avc_ait_recente" data-asa="4">Há menos de 3 meses</label></span>
+          <label class="opcao" for="po_c_doenca_arterial_periferica"><input type="checkbox" id="po_c_doenca_arterial_periferica" name="po_condicoes" value="doenca_arterial_periferica">Doença arterial periférica</label>
+          <label class="opcao" for="po_c_hipertensao_pulmonar"><input type="checkbox" id="po_c_hipertensao_pulmonar" name="po_condicoes" value="hipertensao_pulmonar">Hipertensão pulmonar</label>
+          <span class="po-detalhe-de" data-detalhe-de="po_c_hipertensao_pulmonar" hidden><label class="opcao po-filho po-grave" for="po_i_hap_sintomatica"><input type="checkbox" id="po_i_hap_sintomatica" name="po_instaveis" value="hap_sintomatica">Sintomática</label></span>
         </div>
         <div id="po_stent" class="bloco-condicional grade" hidden>
           <div class="campo">
@@ -273,72 +279,44 @@
           </div>
         </div>
       </details>
-      <details class="po-grupo" id="po_g_cerebro">
-        <summary><span>Cérebro</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
+      <details class="po-grupo" id="po_g_outras">
+        <summary><span>Outras doenças</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
         <div class="opcoes">
-        <label class="opcao" for="po_c_avc_ait"><input type="checkbox" id="po_c_avc_ait" name="po_condicoes" value="avc_ait" data-asa="3">AVC ou AIT</label>
-        <span class="po-detalhe-de" data-detalhe-de="po_c_avc_ait" hidden><label class="opcao po-filho" for="po_c_avc_ait_recente"><input type="checkbox" id="po_c_avc_ait_recente" name="po_condicoes" value="avc_ait_recente" data-asa="4">Há menos de 3 meses</label></span>
-        </div>
-      </details>
-      <details class="po-grupo" id="po_g_metabolicas">
-        <summary><span>Metabólicas</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
-        <div class="opcoes">
-        <label class="opcao" for="po_c_diabetes"><input type="checkbox" id="po_c_diabetes" name="po_condicoes" value="diabetes" data-asa="2">Diabetes</label>
-        <span class="po-detalhe-de" data-detalhe-de="po_c_diabetes" hidden><label class="opcao po-filho" for="po_c_diabetes_insulina"><input type="checkbox" id="po_c_diabetes_insulina" name="po_condicoes" value="diabetes_insulina" data-asa="2">Em uso de insulina</label></span>
-        <label class="opcao" for="po_c_obesidade"><input type="checkbox" id="po_c_obesidade" name="po_condicoes" value="obesidade" data-asa="2">Obesidade</label>
-        </div>
-      </details>
-      <details class="po-grupo" id="po_g_pulmao">
-        <summary><span>Pulmão</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
-        <div class="opcoes">
-        <label class="opcao" for="po_c_dpoc"><input type="checkbox" id="po_c_dpoc" name="po_condicoes" value="dpoc" data-asa="3">DPOC</label>
-        <label class="opcao" for="po_c_tabagismo"><input type="checkbox" id="po_c_tabagismo" name="po_condicoes" value="tabagismo" data-asa="2">Tabagismo atual</label>
-        </div>
-      </details>
-      <details class="po-grupo" id="po_g_trombose">
-        <summary><span>Trombose e câncer</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
-        <div class="opcoes">
-        <label class="opcao" for="po_c_tev"><input type="checkbox" id="po_c_tev" name="po_condicoes" value="tev">Trombose venosa ou TEP prévio</label>
-        <span class="po-detalhe-de" data-detalhe-de="po_c_tev" hidden><label class="opcao po-filho" for="po_c_tev_recente_3m"><input type="checkbox" id="po_c_tev_recente_3m" name="po_condicoes" value="tev_recente_3m">Há menos de 3 meses</label><label class="opcao po-filho" for="po_c_tev_3_12m"><input type="checkbox" id="po_c_tev_3_12m" name="po_condicoes" value="tev_3_12m">Entre 3 e 12 meses</label></span>
-        <label class="opcao" for="po_c_trombofilia_grave"><input type="checkbox" id="po_c_trombofilia_grave" name="po_condicoes" value="trombofilia_grave">Trombofilia grave ou antifosfolípide</label>
-        <label class="opcao" for="po_c_cancer_ativo"><input type="checkbox" id="po_c_cancer_ativo" name="po_condicoes" value="cancer_ativo">Câncer ativo</label>
-        </div>
-      </details>
-      <details class="po-grupo" id="po_g_rim">
-        <summary><span>Rim e fígado</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
-        <div class="opcoes">
-        <label class="opcao" for="po_c_doenca_renal"><input type="checkbox" id="po_c_doenca_renal" name="po_condicoes" value="doenca_renal">Doença renal crônica</label>
-        <label class="opcao" for="po_c_hepatopatia"><input type="checkbox" id="po_c_hepatopatia" name="po_condicoes" value="hepatopatia">Hepatopatia crônica</label>
+          <label class="opcao" for="po_c_diabetes"><input type="checkbox" id="po_c_diabetes" name="po_condicoes" value="diabetes" data-asa="2">Diabetes</label>
+          <span class="po-detalhe-de" data-detalhe-de="po_c_diabetes" hidden><label class="opcao po-filho" for="po_c_diabetes_insulina"><input type="checkbox" id="po_c_diabetes_insulina" name="po_condicoes" value="diabetes_insulina" data-asa="2">Em uso de insulina</label></span>
+          <label class="opcao" for="po_c_obesidade"><input type="checkbox" id="po_c_obesidade" name="po_condicoes" value="obesidade" data-asa="2">Obesidade</label>
+          <label class="opcao" for="po_c_dpoc"><input type="checkbox" id="po_c_dpoc" name="po_condicoes" value="dpoc" data-asa="3">DPOC</label>
+          <label class="opcao" for="po_c_tabagismo"><input type="checkbox" id="po_c_tabagismo" name="po_condicoes" value="tabagismo" data-asa="2">Tabagismo atual</label>
+          <label class="opcao" for="po_c_doenca_renal"><input type="checkbox" id="po_c_doenca_renal" name="po_condicoes" value="doenca_renal">Doença renal crônica</label>
+          <label class="opcao" for="po_c_hepatopatia"><input type="checkbox" id="po_c_hepatopatia" name="po_condicoes" value="hepatopatia">Hepatopatia crônica</label>
+          <label class="opcao" for="po_c_tev"><input type="checkbox" id="po_c_tev" name="po_condicoes" value="tev">Trombose venosa ou TEP prévio</label>
+          <span class="po-detalhe-de" data-detalhe-de="po_c_tev" hidden><label class="opcao po-filho" for="po_c_tev_recente_3m"><input type="checkbox" id="po_c_tev_recente_3m" name="po_condicoes" value="tev_recente_3m">Há menos de 3 meses</label><label class="opcao po-filho" for="po_c_tev_3_12m"><input type="checkbox" id="po_c_tev_3_12m" name="po_condicoes" value="tev_3_12m">Entre 3 e 12 meses</label></span>
+          <label class="opcao" for="po_c_trombofilia_grave"><input type="checkbox" id="po_c_trombofilia_grave" name="po_condicoes" value="trombofilia_grave">Trombofilia grave ou antifosfolípide</label>
+          <label class="opcao" for="po_c_cancer_ativo"><input type="checkbox" id="po_c_cancer_ativo" name="po_condicoes" value="cancer_ativo">Câncer ativo</label>
         </div>
       </details>
       <details class="po-grupo" id="po_g_sintomas">
         <summary><span>Sintomas e sinais</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
         <div class="opcoes">
-        <label class="opcao" for="po_s_angina"><input type="checkbox" id="po_s_angina" name="po_sintomas" value="angina">Angina (dor opressiva aos esforços)</label>
-        <label class="opcao" for="po_s_dispneia"><input type="checkbox" id="po_s_dispneia" name="po_sintomas" value="dispneia">Dispneia aos esforços habituais</label>
-        <label class="opcao" for="po_s_dispneia_nova"><input type="checkbox" id="po_s_dispneia_nova" name="po_sintomas" value="dispneia_nova">Dispneia nova ou em piora</label>
-        <label class="opcao" for="po_s_palpitacoes"><input type="checkbox" id="po_s_palpitacoes" name="po_sintomas" value="palpitacoes">Palpitações</label>
-        <label class="opcao" for="po_s_sincope"><input type="checkbox" id="po_s_sincope" name="po_sintomas" value="sincope">Síncope</label>
-        <label class="opcao" for="po_s_sopro"><input type="checkbox" id="po_s_sopro" name="po_sintomas" value="sopro">Sopro cardíaco</label>
-        <label class="opcao" for="po_s_sinais_ic"><input type="checkbox" id="po_s_sinais_ic" name="po_sintomas" value="sinais_ic">Sinais de insuficiência cardíaca ao exame (estertores, B3, turgência jugular)</label>
+          <label class="opcao" for="po_s_angina"><input type="checkbox" id="po_s_angina" name="po_sintomas" value="angina">Angina</label>
+          <span class="po-detalhe-de" data-detalhe-de="po_s_angina" hidden><label class="opcao po-filho po-grave" for="po_i_angina_grave"><input type="checkbox" id="po_i_angina_grave" name="po_instaveis" value="angina_grave" data-asa="4">CCS III/IV</label></span>
+          <label class="opcao" for="po_s_dispneia"><input type="checkbox" id="po_s_dispneia" name="po_sintomas" value="dispneia">Dispneia aos esforços</label>
+          <span class="po-detalhe-de" data-detalhe-de="po_s_dispneia" hidden><label class="opcao po-filho" for="po_s_dispneia_nova"><input type="checkbox" id="po_s_dispneia_nova" name="po_sintomas" value="dispneia_nova">Nova ou em piora</label></span>
+          <label class="opcao" for="po_s_palpitacoes"><input type="checkbox" id="po_s_palpitacoes" name="po_sintomas" value="palpitacoes">Palpitações</label>
+          <label class="opcao" for="po_s_sincope"><input type="checkbox" id="po_s_sincope" name="po_sintomas" value="sincope">Síncope</label>
+          <label class="opcao" for="po_s_sopro"><input type="checkbox" id="po_s_sopro" name="po_sintomas" value="sopro">Sopro cardíaco</label>
+          <label class="opcao" for="po_s_sinais_ic"><input type="checkbox" id="po_s_sinais_ic" name="po_sintomas" value="sinais_ic">Sinais de insuficiência cardíaca ao exame (estertores, B3, turgência jugular)</label>
+          <label class="opcao" for="po_infeccao"><input type="checkbox" id="po_infeccao" value="sim">Infecção respiratória no último mês</label>
         </div>
       </details>
-      <div class="grade mt-5">
-        <div class="campo">
-          <label for="po_infeccao">Infecção respiratória no último mês</label>
-          <select id="po_infeccao">
-            <option value="">Não</option>
-            <option value="sim">Sim</option>
-          </select>
-        </div>
-        <div class="campo" id="po_aas_campo" hidden>
-          <label for="po_aas">AAS: indicação</label>
-          <select id="po_aas">
-            <option value="">Selecione...</option>
-            <option value="secundaria">Prevenção secundária</option>
-            <option value="primaria">Prevenção primária</option>
-          </select>
-        </div>
+      <!-- preop:condicoes:fim -->
+      <div class="campo mt-5" id="po_aas_campo" hidden>
+        <label for="po_aas">AAS: indicação</label>
+        <select id="po_aas">
+          <option value="">Selecione...</option>
+          <option value="secundaria">Prevenção secundária</option>
+          <option value="primaria">Prevenção primária</option>
+        </select>
       </div>
     </section>
 
@@ -990,7 +968,8 @@
           </select>
         </div>
       </div>
-      <p class="campo-rotulo mt-5">DASI — marque o que o paciente consegue fazer</p>
+      <details class="po-grupo mt-5" id="po_g_dasi">
+        <summary><span>DASI: o que o paciente consegue fazer</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
       <div class="opcoes">
         <label class="opcao" for="po_d_cuidar_de_si"><input type="checkbox" id="po_d_cuidar_de_si" name="po_dasi" value="cuidar_de_si">Cuidar de si (comer, vestir-se, tomar banho)</label>
         <label class="opcao" for="po_d_andar_em_casa"><input type="checkbox" id="po_d_andar_em_casa" name="po_dasi" value="andar_em_casa">Andar dentro de casa</label>
@@ -1005,8 +984,10 @@
         <label class="opcao" for="po_d_recreacao_moderada"><input type="checkbox" id="po_d_recreacao_moderada" name="po_dasi" value="recreacao_moderada">Recreação moderada (dança, tênis em duplas)</label>
         <label class="opcao" for="po_d_esporte_extenuante"><input type="checkbox" id="po_d_esporte_extenuante" name="po_dasi" value="esporte_extenuante">Esporte extenuante (natação, futebol)</label>
       </div>
-      <p id="po_dasi_valor" class="text-[14px] mt-3" aria-live="polite" hidden></p>
-      <p class="campo-rotulo mt-5">STOP-Bang (apneia do sono)</p>
+      </details>
+      <p id="po_dasi_valor" class="text-[14px] mb-3" aria-live="polite" hidden></p>
+      <details class="po-grupo" id="po_g_stopbang">
+        <summary><span>STOP-Bang (apneia do sono)</span><span class="exames-comuns-conta" data-conta hidden></span><i class="fa-solid fa-chevron-down exames-comuns-seta"></i></summary>
       <div class="opcoes">
         <label class="opcao" for="po_b_ronco"><input type="checkbox" id="po_b_ronco" name="po_stop_bang" value="ronco">Ronco alto</label>
         <label class="opcao" for="po_b_cansaco"><input type="checkbox" id="po_b_cansaco" name="po_stop_bang" value="cansaco">Cansaço ou sonolência diurna</label>
@@ -1014,7 +995,8 @@
         <label class="opcao" for="po_b_imc_35"><input type="checkbox" id="po_b_imc_35" name="po_stop_bang" value="imc_35">IMC &gt; 35 kg/m²</label>
         <label class="opcao" for="po_b_pescoco_40"><input type="checkbox" id="po_b_pescoco_40" name="po_stop_bang" value="pescoco_40">Pescoço &gt; 40 cm</label>
       </div>
-      <p class="text-[12px] text-ink/55 mt-2">Hipertensão, idade acima de 50 anos e sexo masculino entram sozinhos. O IMC acima de 35 é calculado quando há peso e altura.</p>
+      <p class="po-nota-do-grupo">Hipertensão, idade acima de 50 anos, sexo masculino e IMC acima de 35 entram sozinhos.</p>
+      </details>
     </section>
 
     <section class="secao" aria-labelledby="s-familia" data-modo="checkup">
@@ -1187,7 +1169,7 @@
 
     <section class="secao" aria-labelledby="s-exames">
       <h2 id="s-exames" class="secao-titulo"><span class="secao-num">08</span>Exames já realizados</h2>
-      <p class="secao-nota">Opcional. Escolha entre os exames mais comuns, adicione outro do catálogo ou anexe o laudo em PDF; informe a data e, se quiser, o resultado. O que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. Colesterol, HDL, creatinina, HbA1c, relação albumina/creatinina e DNA-HPV entram nos cálculos (PREVENT, TFG pela CKD-EPI, risco renal e colo do útero); os outros ficam registrados no cartão do exame. O laudo é lido e descartado; nada é guardado.</p>
+      <p class="secao-nota"><span data-modo="checkup">Opcional. Escolha entre os exames mais comuns, adicione outro do catálogo ou anexe o laudo em PDF; informe a data e, se quiser, o resultado. O que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. Colesterol, HDL, creatinina, HbA1c, relação albumina/creatinina e DNA-HPV entram nos cálculos (PREVENT, TFG pela CKD-EPI, risco renal e colo do útero); os outros ficam registrados no cartão do exame. O laudo é lido e descartado; nada é guardado.</span><span data-modo="preop" hidden>Opcional. Creatinina, hemoglobina e HbA1c entram nos escores; ECG e ecocardiograma recentes não são pedidos de novo.</span></p>
       <!-- Exames mais comuns: o cartão de cada exame abre logo abaixo do grupo do botão tocado. -->
       <div id="examesComunsPainel" class="exames-comuns" aria-label="Exames mais comuns"></div>
       <div class="flex flex-wrap gap-3 mt-6">
@@ -1743,7 +1725,7 @@
             document.querySelectorAll('#examesComunsPainel [data-grupo]').forEach(grupo => {
                 const n = grupo.querySelectorAll('[data-exame-comum][aria-checked="true"]').length;
                 const conta = grupo.querySelector('[data-conta-do-grupo]');
-                conta.textContent = String(n); conta.hidden = !n;
+                if (conta) { conta.textContent = String(n); conta.hidden = !n; }
             });
         }
         // Cartão de um exame da lista: logo abaixo dos botões do seu grupo. Os outros: no fim da seção.
@@ -1763,12 +1745,16 @@
         }
         async function desenharExamesComuns() {
             const painel = document.getElementById('examesComunsPainel');
-            const [{ exames }] = await Promise.all([carregarExamesComuns(), carregarExamesConhecidos()]);
+            const [{ exames, preop_imagem: imagemDoPreop }] = await Promise.all([carregarExamesComuns(), carregarExamesConhecidos()]);
             painel.replaceChildren();
             const grupos = [];
             exames.forEach(e => { let g = grupos.find(x => x.nome === e.grupo); if (!g) grupos.push(g = { nome: e.grupo, itens: [] }); g.itens.push(e); });
+            // ECG e ecocardiograma: botões só da aba Pré-operatório (sem campo de resultado; o cartão vai para o fim da seção).
+            if (imagemDoPreop && imagemDoPreop.length) grupos.push({ nome: 'Pré-operatório', soPreop: true, itens: imagemDoPreop.map(e => ({ ...e, preop: true })) });
             grupos.forEach(g => {
                 const bloco = document.createElement('div'); bloco.className = 'exames-comuns-grupo'; bloco.setAttribute('data-grupo', g.nome);
+                if (g.itens.some(e => e.preop)) bloco.setAttribute('data-tem-preop', '');
+                if (g.soPreop) bloco.setAttribute('data-so-preop', '');
                 // O grupo é um botão: fechado mostra só o nome e quantos exames já têm cartão; aberto, os botões dos exames.
                 const rotulo = document.createElement('button');
                 rotulo.type = 'button'; rotulo.className = 'exames-comuns-abrir'; rotulo.setAttribute('aria-expanded', 'false');
@@ -1786,6 +1772,7 @@
                     const b = document.createElement('button');
                     b.type = 'button'; b.className = 'opcao'; b.setAttribute('role', 'checkbox'); b.setAttribute('aria-checked', 'false');
                     b.setAttribute('data-exame-comum', e.titulo);
+                    if (e.preop) b.setAttribute('data-preop', '');
                     if (/Papilomav/.test(e.titulo)) b.setAttribute('data-so-feminino', '');
                     b.textContent = T(e.curto);
                     b.addEventListener('click', () => {
@@ -3615,16 +3602,14 @@
         // Campos que dependem de outros
         const marcadosPreop = nome => [...checkupForm.querySelectorAll(`input[name="${nome}"]:checked`)].map(i => i.value);
         function atualizarCamposPreop() {
+            atualizarVinculosPreop();
             document.getElementById('po_stent').hidden = !marcadosPreop('po_condicoes').includes('stent');
-            const usaAas = [...checkupForm.querySelectorAll('input[name="medicacoes"]:checked')].some(i => i.value === 'aas_acido_acetilsalicilico');
-            document.getElementById('po_aas_campo').hidden = !usaAas;
             const cirurgia = document.getElementById('po_cirurgia');
             const grupo = cirurgia.selectedOptions[0] && cirurgia.selectedOptions[0].parentElement;
             const nota = document.getElementById('po_cirurgia_risco');
             nota.textContent = grupo && grupo.tagName === 'OPTGROUP'
                 ? T(grupo.label) + ' ' + T('de morte cardiovascular, IAM ou AVC em 30 dias.')
                 : T('Risco intrínseco de morte cardiovascular, IAM ou AVC em 30 dias (SBC 2024 e ESC 2022).');
-            atualizarVinculosPreop();
             const dasi = marcadosPreop('po_dasi');
             const pesos = { cuidar_de_si: 2.75, andar_em_casa: 1.75, andar_quarteiroes: 2.75, subir_lance: 5.5, correr: 8,
                             domestico_leve: 2.7, domestico_moderado: 3.5, domestico_pesado: 8, jardinagem: 4.5,
@@ -3637,17 +3622,13 @@
             saida.hidden = false;
         }
         // Vínculos automáticos: sub-itens, FA com FC > 120, classe ASA mínima e duração típica. Tudo fica editável.
-        const DURACAO_DICA = {
-            pancreas: ['Mediana de 358 min na duodenopancreatectomia e de 213 min na pancreatectomia distal (NSQIP, 10.157 pacientes).', 'Maggino 2018 (NSQIP, pancreatectomias)', 'https://doi.org/10.1016/j.jamcollsurg.2018.01.004'],
-            quadril: ['Média de 93 min na artroplastia total de quadril (revisão de 630.675 procedimentos).', 'Cantrell 2019 (artroplastia de quadril)', 'https://doi.org/10.2106/JBJS.OA.19.00047']
-        };
-        const INSTAVEL_IMPLICA = {"sca": "dac", "angina_grave": "dac", "ic_descompensada": "ic", "edema_choque": "ic", "valvopatia_grave_sintomatica": "valvopatia", "hap_sintomatica": "hipertensao_pulmonar", "fa_alta_resposta": "fa"};
-        const URL_ASA = 'https://www.asahq.org/standards-and-practice-parameters/statement-on-asa-physical-status-classification-system';
-        function dicaComLink(alvo, texto, rotulo, url) {
-            alvo.replaceChildren(texto + ' ');
+        // preop:sugestoes:inicio
+        const PO_SUGESTOES = {"implica":{"sca":"dac","angina_grave":"dac","ic_descompensada":"ic","edema_choque":"ic","valvopatia_grave_sintomatica":"valvopatia","hap_sintomatica":"hipertensao_pulmonar","fa_alta_resposta":"fa"},"duracao":{"pancreas":{"faixa":"mais_3h","texto":"mediana de 358 min na duodenopancreatectomia","fonte":"Maggino 2018, NSQIP","url":"https://doi.org/10.1016/j.jamcollsurg.2018.01.004"},"quadril":{"faixa":"menos_2h","texto":"média de 93 min na artroplastia total de quadril","fonte":"Cantrell 2019","url":"https://doi.org/10.2106/JBJS.OA.19.00047"}},"sangramento":{"catarata":{"classe":"minimo","fonte":"AHA/ACC 2026 (Tabela 13)","url":"https://professional.heart.org/en/science-news/2026-guideline-for-perioperative-cardiovascular-management-for-noncardiac-surgery","nota":""},"odontologica":{"classe":"minimo","fonte":"AHA/ACC 2026 (Tabela 13)","url":"https://professional.heart.org/en/science-news/2026-guideline-for-perioperative-cardiovascular-management-for-noncardiac-surgery","nota":""},"endoscopia":{"classe":"baixo_moderado","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":"Com polipectomia: alto."},"pele":{"classe":"baixo_moderado","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":"Procedimento dermatológico menor: mínimo (AHA)."},"ginecologica_menor":{"classe":"baixo_moderado","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"ortopedica_menor":{"classe":"baixo_moderado","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"hernia":{"classe":"baixo_moderado","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"ginecologica_maior":{"classe":"baixo_moderado","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":"Câncer de endométrio ou de ovário: alto."},"quadril":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":"Divergência: a Tabela 12 da SBC (varfarina) lista a prótese de quadril ou joelho como baixo risco; nós optamos pelo alto, como no manejo dos DOAC da própria SBC."},"rtu":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"carotida_assintomatica":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"endarterectomia_sintomatica":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"evar":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"cabeca_pescoco":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"colectomia":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"coluna":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"neurocirurgia":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"urologica_maior":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"adrenal":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"aorta_aberta":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"revascularizacao_mmii":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"pancreas":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"figado":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"esofagectomia":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"pneumectomia":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"transplante_hepatico":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"transplante_pulmonar":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"perfuracao_intestinal":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""},"cistectomia":{"classe":"alto","fonte":"SBC 2024 (Tabela 12 e manejo dos DOAC)","url":"https://doi.org/10.36660/abc.20240590","nota":""}},"aas_secundaria":["avc_ait","avc_ait_recente","dac","doenca_arterial_periferica","iam_previo","revascularizacao_cirurgica","stent"],"p2y12":["clopidogrel","prasugrel","ticagrelor"],"asa_url":"https://www.asahq.org/standards-and-practice-parameters/statement-on-asa-physical-status-classification-system"};
+        // preop:sugestoes:fim
+        function dicaComLink(alvo, antes, rotulo, url, depois) {
             const a = Object.assign(document.createElement('a'), { href: url, target: '_blank', rel: 'noopener', textContent: rotulo });
             a.className = 'text-teal-dark underline underline-offset-2';
-            alvo.append(a); alvo.hidden = false;
+            alvo.replaceChildren(antes, a, depois || ''); alvo.hidden = false;
         }
         function sugerir(campo, valor) {
             // Só preenche o campo vazio ou o que a própria tela preencheu; o que o médico escolheu não muda.
@@ -3655,10 +3636,20 @@
             campo.value = valor || ''; campo.dataset.auto = valor ? '1' : '';
             return !!valor;
         }
-        ['po_asa', 'po_duracao'].forEach(id => document.getElementById(id).addEventListener('change', e => { if (e.isTrusted || e.doUsuario) e.target.dataset.auto = ''; }));
+        ['po_asa', 'po_duracao', 'po_sangramento'].forEach(id => document.getElementById(id).addEventListener('change', e => { if (e.isTrusted || e.doUsuario) e.target.dataset.auto = ''; }));
+        function arrumarSubitens() {
+            checkupForm.querySelectorAll('[data-detalhe-de]').forEach(bloco => {
+                const pai = document.getElementById(bloco.dataset.detalheDe);
+                bloco.hidden = !pai.checked;
+                if (!pai.checked) bloco.querySelectorAll('input').forEach(i => { i.checked = false; i.dataset.auto = ''; });
+            });
+        }
         function atualizarVinculosPreop() {
             const num = id => parseFloat((document.getElementById(id).value || '').replace(',', '.'));
+            const marcado = id => document.getElementById(id).checked;
             const peso = num('peso'), altura = num('altura'), imc = peso && altura ? peso / Math.pow(altura / 100, 2) : 0;
+            const meds = [...checkupForm.querySelectorAll('input[name="medicacoes"]:checked')].map(i => i.value);
+            arrumarSubitens();
             // Um dado já informado marca o item que ele implica (e desmarca, se foi a própria tela que marcou).
             const vincular = (id, vale) => {
                 const alvo = document.getElementById(id);
@@ -3670,48 +3661,54 @@
                     alvo.dataset.auto = '';
                 }
             };
-            const marcado = id => document.getElementById(id).checked;
-            vincular('po_i_fa_alta_resposta', marcado('po_c_fa') && num('po_fc') > 120);   // FA com FC > 120 bpm medida
             vincular('po_c_obesidade', imc >= 30);
             vincular('po_b_imc_35', imc > 35);
+            const insulina = meds.some(m => m.startsWith('insulina'));                      // conta no RCRI e no VSG-CRI
+            vincular('po_c_diabetes', insulina);
             const implicados = {};
-            Object.entries(INSTAVEL_IMPLICA).forEach(([instavel, antecedente]) => { implicados[antecedente] = implicados[antecedente] || marcado('po_i_' + instavel); });
-            implicados.dac = implicados.dac || marcado('po_c_iam_previo');                 // IAM prévio é doença coronária
-            Object.entries(implicados).forEach(([antecedente, vale]) => vincular('po_c_' + antecedente, vale));
-            checkupForm.querySelectorAll('[data-detalhe-de]').forEach(bloco => {
-                const pai = document.getElementById(bloco.dataset.detalheDe);
-                bloco.hidden = !pai.checked;
-                if (!pai.checked) bloco.querySelectorAll('input').forEach(i => { i.checked = false; });
+            Object.entries(PO_SUGESTOES.implica).forEach(([instavel, antecedente]) => {
+                const caixa = document.getElementById('po_i_' + instavel);
+                if (caixa.closest('[data-detalhe-de="po_c_' + antecedente + '"]')) return;  // já é sub-item da própria doença
+                implicados[antecedente] = implicados[antecedente] || caixa.checked;
             });
+            Object.entries(implicados).forEach(([antecedente, vale]) => vincular('po_c_' + antecedente, vale));
+            arrumarSubitens();
+            vincular('po_c_diabetes_insulina', insulina);
+            vincular('po_i_fa_alta_resposta', marcado('po_c_fa') && num('po_fc') > 120);    // FA com FC > 120 bpm medida
             checkupForm.querySelectorAll('details.po-grupo').forEach(g => {
                 const n = g.querySelectorAll('input:checked').length, conta = g.querySelector('[data-conta]');
                 conta.textContent = String(n); conta.hidden = !n;
             });
+            // AAS: com doença aterosclerótica ou inibidor de P2Y12 a indicação já é prevenção secundária; só se pergunta sem elas.
+            const secundaria = PO_SUGESTOES.aas_secundaria.some(k => marcado('po_c_' + k)) || meds.some(m => PO_SUGESTOES.p2y12.includes(m));
+            document.getElementById('po_aas_campo').hidden = !meds.includes('aas_acido_acetilsalicilico') || secundaria;
             // Classe ASA mínima pelos exemplos da ASA (tabela ASA_MINIMA do motor, nos atributos data-asa)
             let asa = 0, motivo = '';
             const sobe = (classe, texto) => { if (classe > asa) { asa = classe; motivo = texto; } };
             checkupForm.querySelectorAll('input[data-asa]:checked').forEach(i => {
                 const bloco = i.closest('[data-detalhe-de]');   // sub-item: o motivo leva o nome do item de cima
                 const pai = bloco ? document.querySelector('label[for="' + bloco.dataset.detalheDe + '"]').textContent.trim() + ': ' : '';
-                sobe(+i.dataset.asa, pai + i.parentElement.textContent.trim().replace(/^./, c => pai ? c.toLowerCase() : c));
+                sobe(+i.dataset.asa, pai + i.parentElement.textContent.trim().replace(/^.(?=[a-zà-ú])/, c => pai ? c.toLowerCase() : c));   // sigla fica como está
             });
             if (imc >= 40) sobe(3, T('IMC ≥ 40 kg/m²')); else if (imc >= 30) sobe(2, T('IMC entre 30 e 40 kg/m²'));
             if (num('pas') >= 180 || num('pad') >= 110) sobe(3, T('PA ≥ 180 × 110 mmHg'));
             const dataStent = document.getElementById('po_stent_data').value;
-            if (document.getElementById('po_c_stent').checked && dataStent && (Date.now() - new Date(dataStent).getTime()) < 90 * 864e5)
+            if (marcado('po_c_stent') && dataStent && (Date.now() - new Date(dataStent).getTime()) < 90 * 864e5)
                 sobe(4, T('angioplastia há menos de 3 meses'));
             const campoAsa = document.getElementById('po_asa'), dicaAsa = document.getElementById('po_asa_dica');
             const romano = ['', 'I', 'II', 'III', 'IV'][asa];
             const preencheu = sugerir(campoAsa, asa ? String(asa) : '');
             if (!asa || (!preencheu && +campoAsa.value >= asa)) dicaAsa.hidden = true;
-            else dicaComLink(dicaAsa, (preencheu ? T('Sugerida pelos exemplos da ASA:') : T('Os exemplos da ASA sugerem pelo menos:'))
-                             + ' ASA ' + romano + ' (' + T(motivo) + '). ' + T('Ajuste se o quadro for outro.'), T('ASA 2020'), URL_ASA);
-            // Duração típica da cirurgia escolhida, quando há série publicada
-            const opcao = document.getElementById('po_cirurgia').selectedOptions[0];
-            const campoDur = document.getElementById('po_duracao'), dicaDur = document.getElementById('po_duracao_dica');
-            const tipica = opcao && opcao.dataset.duracao, fonte = opcao && DURACAO_DICA[opcao.value];
-            if (sugerir(campoDur, tipica || '') && fonte) dicaComLink(dicaDur, T('Sugerida:') + ' ' + T(fonte[0]) + ' ' + T('Ajuste se for outra.'), T(fonte[1]), fonte[2]);
+            else dicaComLink(dicaAsa, (preencheu ? T('Sugerida pela') : T('Pelo menos') + ' ASA ' + romano + ' ' + T('pela')) + ' ',
+                             'ASA 2020', PO_SUGESTOES.asa_url, ': ' + motivo + '.');
+            // Duração e risco de sangramento típicos da cirurgia escolhida, onde há fonte que nomeia o procedimento
+            const cirurgia = document.getElementById('po_cirurgia').value;
+            const dur = PO_SUGESTOES.duracao[cirurgia], dicaDur = document.getElementById('po_duracao_dica');
+            if (sugerir(document.getElementById('po_duracao'), dur ? dur.faixa : '')) dicaComLink(dicaDur, T('Sugerida:') + ' ' + T(dur.texto) + ' (', T(dur.fonte), dur.url, ').');
             else dicaDur.hidden = true;
+            const sang = PO_SUGESTOES.sangramento[cirurgia], dicaSang = document.getElementById('po_sangramento_dica');
+            if (sugerir(document.getElementById('po_sangramento'), sang ? sang.classe : '')) dicaComLink(dicaSang, T('Sugerido pela') + ' ', T(sang.fonte), sang.url, sang.nota ? '. ' + T(sang.nota) : '.');
+            else dicaSang.hidden = true;
         }
         checkupForm.addEventListener('change', atualizarCamposPreop);
         checkupForm.addEventListener('input', e => { if (['po_fc', 'peso', 'altura', 'pas', 'pad'].includes(e.target.id)) atualizarVinculosPreop(); });
@@ -3719,16 +3716,13 @@
 
         function lerPreop() {
             const v = id => (document.getElementById(id).value || '').trim();
+            atualizarVinculosPreop();          // os itens que os dados implicam, mesmo se o valor veio sem evento da tela
             const dados = lerFormulario();
-            const peso = parseFloat(dados.peso), altura = parseFloat(dados.altura);
-            const imc = peso && altura ? peso / Math.pow(altura / 100, 2) : null;
-            const condicoes = marcadosPreop('po_condicoes');
-            if (imc && imc >= 30 && !condicoes.includes('obesidade')) condicoes.push('obesidade');
-            const stop = marcadosPreop('po_stop_bang');
-            if (imc && imc > 35 && !stop.includes('imc_35')) stop.push('imc_35');
+            // O IMC (obesidade e STOP-Bang) é calculado pelo motor, com o peso e a altura.
+            const condicoes = marcadosPreop('po_condicoes'), stop = marcadosPreop('po_stop_bang');
             const dasi = marcadosPreop('po_dasi');
             const d = {
-                idade: dados.idade || null, sexo: dados.sexo || null, peso: dados.peso || null,
+                idade: dados.idade || null, sexo: dados.sexo || null, peso: dados.peso || null, altura: dados.altura || null,
                 pas: dados.pas || null, pad: dados.pad || null,
                 // Creatinina digitada no cartão do exame é campo do motor (name="creatinina"); a data vem do cartão.
                 creatinina: dados.creatinina || null,
@@ -3738,9 +3732,9 @@
                 duracao: v('po_duracao') || null, sangramento: v('po_sangramento') || null,
                 neuroaxial: v('po_neuroaxial') === 'sim',
                 instaveis: marcadosPreop('po_instaveis'), condicoes, sintomas: marcadosPreop('po_sintomas'),
-                spo2: v('po_spo2') || null, fc: v('po_fc') || null, infeccao_respiratoria: v('po_infeccao') === 'sim',
+                spo2: v('po_spo2') || null, fc: v('po_fc') || null, infeccao_respiratoria: document.getElementById('po_infeccao').checked,
                 escadas: v('po_escadas') || null, dasi, dasi_respondido: dasi.length > 0,
-                cfs: v('po_cfs') || null, stop_bang: stop, aas_indicacao: v('po_aas') || null,
+                cfs: v('po_cfs') || null, stop_bang: stop, aas_indicacao: document.getElementById('po_aas_campo').hidden ? null : (v('po_aas') || null),
                 funcional: v('po_funcional') || null,
             };
             if (condicoes.includes('stent')) {

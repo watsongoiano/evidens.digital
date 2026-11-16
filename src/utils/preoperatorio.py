@@ -58,8 +58,8 @@ BULA_RIVAROXABANA = _ref('Rivaroxabana: ClCr dos estudos com peso real (J&J Medi
                          'xarelto-creatinine-clearance-or-estimated-glomerular-filtration-rate-in-adults')
 ASA_PS = _ref('ASA 2020 (classificação do estado físico)', 'https://www.asahq.org/standards-and-practice-parameters/'
                                                           'statement-on-asa-physical-status-classification-system')
-NSQIP_PANCREAS = _ref('Maggino 2018 (NSQIP, pancreatectomias)', 'https://doi.org/10.1016/j.jamcollsurg.2018.01.004')
-QUADRIL_TEMPO = _ref('Cantrell 2019 (artroplastia de quadril)', 'https://doi.org/10.2106/JBJS.OA.19.00047')
+NSQIP_PANCREAS = _ref('Maggino 2018, NSQIP', 'https://doi.org/10.1016/j.jamcollsurg.2018.01.004')
+QUADRIL_TEMPO = _ref('Cantrell 2019', 'https://doi.org/10.2106/JBJS.OA.19.00047')
 SBD = _ref('SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91)', 'https://doi.org/10.1186/s13098-025-02060-5')
 
 # ── Cirurgias ────────────────────────────────────────────────────────────────
@@ -194,10 +194,35 @@ ASA_MINIMA = {
 
 # Duração típica (faixas do ARISCAT) só onde há série publicada; a tela sugere e o médico ajusta.
 DURACAO_TIPICA = {
-    'pancreas': ('mais_3h', 'Mediana de 358 min na duodenopancreatectomia e de 213 min na pancreatectomia distal '
-                            '(NSQIP, 10.157 pacientes).', NSQIP_PANCREAS),
-    'quadril': ('menos_2h', 'Média de 93 min na artroplastia total de quadril (revisão de 630.675 procedimentos).',
-                QUADRIL_TEMPO),
+    'pancreas': ('mais_3h', 'mediana de 358 min na duodenopancreatectomia', NSQIP_PANCREAS),
+    'quadril': ('menos_2h', 'média de 93 min na artroplastia total de quadril', QUADRIL_TEMPO),
+}
+
+# Risco de sangramento típico da cirurgia, só onde a diretriz nomeia o procedimento; a tela sugere e o médico ajusta.
+# 'sbc': SBC 2024, Tabela 12 (alto: aneurisma de aorta, grande cirurgia > 45 min, urológica, cabeça e pescoço,
+# abdominal, neurocirurgia, laminectomia, RTU de próstata; baixo: hernioplastia, histerectomia abdominal, endoscopia
+# com ou sem biópsia, biópsias, curetagem, artroscopia) e a legenda do manejo dos DOAC (alto: neurocirurgia, torácica
+# maior, aorta, revascularização de membros inferiores, endarterectomia de carótida, abdominal e pélvica maior,
+# artroplastia de quadril ou joelho). 'aha': AHA/ACC, Tabela 13 (mínimo: catarata, odontologia, dermatologia menores).
+FONTES_DO_SANGRAMENTO = {'sbc': ('SBC 2024 (Tabela 12 e manejo dos DOAC)', SBC['url']),
+                         'aha': ('AHA/ACC 2026 (Tabela 13)', AHA['url'])}
+_ALTO_SBC = ('alto', 'sbc', '')
+SANGRAMENTO_TIPICO = {
+    'catarata': ('minimo', 'aha', ''),
+    'odontologica': ('minimo', 'aha', ''),
+    'endoscopia': ('baixo_moderado', 'sbc', 'Com polipectomia: alto.'),
+    'pele': ('baixo_moderado', 'sbc', 'Procedimento dermatológico menor: mínimo (AHA).'),
+    'ginecologica_menor': ('baixo_moderado', 'sbc', ''),
+    'ortopedica_menor': ('baixo_moderado', 'sbc', ''),
+    'hernia': ('baixo_moderado', 'sbc', ''),
+    'ginecologica_maior': ('baixo_moderado', 'sbc', 'Câncer de endométrio ou de ovário: alto.'),
+    'quadril': ('alto', 'sbc', 'Divergência: a Tabela 12 da SBC (varfarina) lista a prótese de quadril ou joelho como '
+                               'baixo risco; nós optamos pelo alto, como no manejo dos DOAC da própria SBC.'),
+    **{k: _ALTO_SBC for k in (
+        'rtu', 'carotida_assintomatica', 'endarterectomia_sintomatica', 'evar', 'cabeca_pescoco', 'colectomia', 'coluna',
+        'neurocirurgia', 'urologica_maior', 'adrenal', 'aorta_aberta', 'revascularizacao_mmii', 'pancreas', 'figado',
+        'esofagectomia', 'pneumectomia', 'transplante_hepatico', 'transplante_pulmonar', 'perfuracao_intestinal',
+        'cistectomia')},
 }
 
 # O que uma condição grave já diz sobre os antecedentes (a tela marca sozinha; o motor garante o mesmo). SCA e angina
@@ -205,6 +230,22 @@ DURACAO_TIPICA = {
 INSTAVEL_IMPLICA = {'sca': 'dac', 'angina_grave': 'dac', 'ic_descompensada': 'ic', 'edema_choque': 'ic',
                     'valvopatia_grave_sintomatica': 'valvopatia', 'hap_sintomatica': 'hipertensao_pulmonar',
                     'fa_alta_resposta': 'fa'}
+
+def sugestoes_da_tela():
+    """O que a tela preenche sozinha a partir do que já foi informado (scripts/gerar_preop.py grava na página)."""
+    from src.utils import preop_medicamentos as pm
+    return {
+        'implica': INSTAVEL_IMPLICA,
+        'duracao': {k: {'faixa': faixa, 'texto': texto, 'fonte': ref['label'], 'url': ref['url']}
+                    for k, (faixa, texto, ref) in DURACAO_TIPICA.items()},
+        'sangramento': {k: {'classe': classe, 'fonte': FONTES_DO_SANGRAMENTO[fonte][0],
+                            'url': FONTES_DO_SANGRAMENTO[fonte][1], 'nota': nota}
+                        for k, (classe, fonte, nota) in SANGRAMENTO_TIPICO.items()},
+        # AAS: com doença aterosclerótica ou inibidor de P2Y12 a indicação já é prevenção secundária (não se pergunta)
+        'aas_secundaria': sorted(pm._SECUNDARIA), 'p2y12': sorted(pm._P2Y12),
+        'asa_url': ASA_PS['url'],
+    }
+
 
 SINTOMAS = {'angina': 'Angina (dor opressiva aos esforços)', 'dispneia': 'Dispneia aos esforços habituais',
             'dispneia_nova': 'Dispneia nova ou em piora', 'palpitacoes': 'Palpitações',
@@ -307,6 +348,7 @@ def ler(dados, hoje=None):
         'idade': int(_num(dados.get('idade'), 'a idade', 18, 120, obrigatorio=True)),
         'sexo': _escolha(dados.get('sexo'), ('masculino', 'feminino'), 'o sexo', obrigatorio=True),
         'peso': _num(dados.get('peso'), 'o peso (kg)', 25, 350),
+        'altura': _num(dados.get('altura'), 'a altura (cm)', 100, 250),
         'cirurgia': _escolha(dados.get('cirurgia'), CIRURGIAS, 'a cirurgia proposta', obrigatorio=True),
         'urgencia': _escolha(dados.get('urgencia'), URGENCIAS, 'a urgência', obrigatorio=True),
         'asa': _num(dados.get('asa'), 'a classe ASA', 1, 5),
@@ -341,6 +383,13 @@ def ler(dados, hoje=None):
     # FA com FC > 120 bpm medida: condição grave da SBC (Tabela 2), mesmo que o item não tenha sido marcado
     if 'fa' in p['condicoes'] and (p['fc'] or 0) > 120:
         p['instaveis'].add('fa_alta_resposta')
+    # Peso e altura já dizem a obesidade (IMC ≥ 30) e o item do STOP-Bang (IMC > 35)
+    if p['peso'] and p['altura']:
+        imc = p['peso'] / (p['altura'] / 100) ** 2
+        if imc >= 30:
+            p['condicoes'].add('obesidade')
+        if imc > 35:
+            p['stop_bang'].add('imc_35')
     stent = None
     if 'stent' in p['condicoes']:
         bruto = dados.get('stent') if isinstance(dados.get('stent'), dict) else {}

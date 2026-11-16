@@ -155,7 +155,21 @@ html.lenis, html.lenis body { height: auto; }
   .po-detalhe-de[hidden] { display: none; }
   .grade[hidden] { display: none; }   /* .grade (display: grid) vencia o atributo hidden */
   .opcao.po-filho { @apply border-dashed border-teal/40 bg-mist/40; }
-  body[data-aba="preop"] #examesComunsPainel [data-grupo="Sorologias e rastreio"] { display: none; }
+  .po-grupo > .po-nota-do-grupo { @apply text-[12px] text-ink/55 leading-relaxed -mt-1 mb-3; }
+  .opcao.po-grave { @apply border-[#C76A1F]/50 bg-[#FBF1E8]; }
+  .opcao.po-grave:has(input:checked) { @apply border-[#B5540F] bg-[#B5540F] text-white; }
+  body:not([data-aba="preop"]) #examesComunsPainel [data-so-preop] { display: none; }
+  /* Pré-operatório: só os exames que o motor lê, sem os grupos; cartões abaixo dos botões */
+  body[data-aba="preop"] #examesComunsPainel { @apply flex flex-wrap gap-2; }
+  body[data-aba="preop"] #examesComunsPainel [data-grupo] { display: none; }
+  body[data-aba="preop"] #examesComunsPainel [data-grupo][data-tem-preop],
+  body[data-aba="preop"] #examesComunsPainel [data-grupo]:has(.exame-anterior),
+  body[data-aba="preop"] #examesComunsPainel .opcoes,
+  body[data-aba="preop"] #examesComunsPainel .opcoes[hidden] { display: contents; }
+  body[data-aba="preop"] #examesComunsPainel .exames-comuns-abrir,
+  body[data-aba="preop"] #examesComunsPainel [data-exame-comum]:not([data-preop]),
+  body[data-aba="preop"] #examesComunsPainel .exames-comuns-cartoes:empty { display: none; }
+  body[data-aba="preop"] #examesComunsPainel .exames-comuns-cartoes { order: 2; flex-basis: 100%; margin-top: 0; }
   .po-faixa-intermediario { @apply bg-[#D35400] text-white; }
   .po-faixa-alto { @apply bg-[#C0392B] text-white; }
   .po-detalhe { @apply text-[13px] text-ink/60 mt-1 leading-snug; }
