@@ -96,7 +96,7 @@
       const resumo = document.querySelector('[data-resumo]');
       if (resumo) resumo.textContent = `${perfis[usuario.perfil] || ''} · ${usuario.registro} · ${usuario.email}`;
       if (usuario.administrador) document.querySelectorAll('[data-so-admin]').forEach(el => { el.style.display = 'block'; });
-      if (usuario.perfil === 'medico' || usuario.perfil === 'residente') { abrirPlanos(usuario); abrirTimbrado(); abrirAssinatura(); }
+      if (usuario.perfil === 'medico' || usuario.perfil === 'residente') { abrirPlanos(usuario); abrirTimbrado(usuario); abrirAssinatura(); }
     }).catch(() => {});
   }
 
@@ -150,61 +150,145 @@
     });
   }
 
-  // Papel timbrado: o PDF do consultório vira o fundo dos pedidos (só de quem assina)
-  function abrirTimbrado() {
+  // Receituário: modelo do Evidēns, modelo enviado, montado na tela ou papel já timbrado (só de quem assina)
+  function abrirTimbrado(usuario) {
     const secao = document.querySelector('[data-timbrado]');
     if (!secao) return;
     secao.style.display = 'block';
+    const T = t => (window.evidensIdioma ? window.evidensIdioma.traduzir(t) : t);
     const erro = secao.querySelector('[data-erro]'), ok = secao.querySelector('[data-ok]');
-    const atual = secao.querySelector('[data-timbrado-atual]');
     const entrada = document.getElementById('timbradoPdf');
     const topo = document.getElementById('margem_topo'), base = document.getElementById('margem_base');
+    const form = secao.querySelector('form[data-bloco="montado"]');
+    const ajuste = secao.querySelector('[data-ajuste]');
+    const folha = secao.querySelector('[data-folha]'), img = secao.querySelector('[data-folha-img]');
+    let estado = null, aberto = null;
 
-    function mostrarTimbrado(t) {
-      atual.style.display = t ? 'flex' : 'none';
-      if (!t) return;
-      secao.querySelector('[data-timbrado-nome]').textContent =
-        `${t.nome} · ${t.largura} × ${t.altura} mm · enviado em ${new Date(t.enviado_em * 1000).toLocaleDateString('pt-BR')}`;
-      topo.value = Math.round(t.margem_topo); base.value = Math.round(t.margem_base);
-      topo.max = base.max = Math.floor(t.altura * 0.4);
-      secao.querySelector('[data-timbrado-previa]').href = '/api/auth/timbrado/previa?v=' + Date.now();
+    // [hidden] perde para as classes de display (flex) do Tailwind: mostrar e esconder pelo style.
+    const ver = (el, sim) => { el.hidden = false; el.style.display = sim ? '' : 'none'; };
+    function limpar() { mostrar(erro, ''); mostrar(ok, ''); }
+    function falhou(dados, padrao) { mostrar(erro, T((dados && dados.error) || padrao)); }
+
+    function desenharLinhas() {
+      const a = estado && estado.ativo;
+      if (!a) return;
+      const t = Math.max(0, Number(topo.value) || 0), b = Math.max(0, Number(base.value) || 0);
+      const pt = (t / a.altura) * 100, pb = (b / a.altura) * 100;
+      secao.querySelector('[data-sombra="topo"]').style.height = pt + '%';
+      secao.querySelector('[data-sombra="base"]').style.height = pb + '%';
+      secao.querySelector('[data-linha="topo"]').style.top = pt + '%';
+      const linhaBase = secao.querySelector('[data-linha="base"]');
+      linhaBase.style.bottom = pb + '%';
+      secao.querySelector('[data-linha="topo"]').setAttribute('aria-valuenow', Math.round(t));
+      linhaBase.setAttribute('aria-valuenow', Math.round(b));
     }
+
+    function aplicar(novo) {
+      estado = novo;
+      const modo = estado.modo;
+      aberto = aberto || modo;
+      secao.querySelectorAll('[data-modo]').forEach(b => b.setAttribute('aria-checked', b.dataset.modo === aberto ? 'true' : 'false'));
+      secao.querySelectorAll('[data-modo]').forEach(b => b.classList.toggle('bg-teal', b.dataset.modo === modo));
+      secao.querySelectorAll('[data-modo]').forEach(b => b.classList.toggle('text-white', b.dataset.modo === modo));
+      secao.querySelectorAll('[data-bloco]').forEach(el => ver(el, el.dataset.bloco === aberto));
+      const t = estado.timbrado;
+      ver(secao.querySelector('[data-timbrado-atual]'), !!t);
+      if (t) secao.querySelector('[data-timbrado-nome]').textContent =
+        `${t.nome} · ${t.largura} × ${t.altura} mm · ${T('enviado em')} ${new Date(t.enviado_em * 1000).toLocaleDateString(document.documentElement.lang || 'pt-BR')}`;
+      const m = estado.montado;
+      if (m) ['nome', 'registro', 'especialidade', 'endereco', 'contato', 'tema', 'alinhamento', 'cor'].forEach(c => { if (m[c] !== undefined) form.elements[c].value = m[c]; });
+      else if (!form.elements.nome.value && usuario) { form.elements.nome.value = usuario.nome; form.elements.registro.value = usuario.registro || ''; }
+      ver(secao.querySelector('[data-tem-logo]'), !!(m && m.tem_logo));
+      document.getElementById('rec_remover_logo').checked = false;
+      document.getElementById('rec_logo').value = '';
+      // O ajuste dos espaços aparece para o receituário que está valendo, quando é o que está aberto.
+      const comAjuste = modo !== 'padrao' && modo === aberto && estado.ativo;
+      ver(ajuste, !!comAjuste);
+      if (comAjuste) {
+        topo.value = Math.round(estado.ativo.margem_topo); base.value = Math.round(estado.ativo.margem_base);
+        topo.max = base.max = Math.floor(estado.ativo.altura * 0.4);
+        img.src = '/api/auth/timbrado/imagem?v=' + Date.now();
+        secao.querySelector('[data-timbrado-previa]').href = '/api/auth/timbrado/previa?v=' + Date.now();
+        desenharLinhas();
+      }
+    }
+
+    async function postar(caminho, corpo, mensagem) {
+      limpar();
+      try {
+        const r = await fetch(caminho, corpo instanceof FormData
+          ? { method: 'POST', body: corpo, credentials: 'same-origin' }
+          : { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(corpo || {}) });
+        const dados = await r.json().catch(() => ({}));
+        if (!r.ok) { falhou(dados, 'Não foi possível salvar.'); return false; }
+        aplicar(dados);
+        if (mensagem) mostrar(ok, T(mensagem));
+        return true;
+      } catch (e) { mostrar(erro, T('Sem conexão com o servidor. Tente de novo.')); return false; }
+    }
+
+    // Escolher o modo: o que já tem conteúdo passa a valer na hora; o que falta preencher só abre.
+    secao.querySelectorAll('[data-modo]').forEach(botao => botao.addEventListener('click', () => {
+      const modo = botao.dataset.modo;
+      aberto = modo;
+      const pronto = modo === 'padrao' || modo === 'papel' || (modo === 'modelo' && estado.timbrado) || (modo === 'montado' && estado.montado);
+      if (pronto && modo !== estado.modo) {
+        const msg = { padrao: 'Os pedidos saem no modelo do Evidēns.', papel: 'Os pedidos saem sem fundo, para o seu papel timbrado. Ajuste os espaços abaixo.',
+                      modelo: 'Os pedidos voltam a sair no seu modelo.', montado: 'Os pedidos saem no receituário que você montou.' }[modo];
+        postar('/api/auth/timbrado/modo', { modo }, msg);
+      } else { limpar(); aplicar(estado); }
+    }));
 
     async function enviarArquivo(arquivo) {
-      mostrar(erro, ''); mostrar(ok, '');
       if (!arquivo) return;
       const corpo = new FormData(); corpo.append('arquivo', arquivo);
-      mostrar(ok, 'Enviando…');
-      try {
-        const r = await fetch('/api/auth/timbrado', { method: 'POST', body: corpo, credentials: 'same-origin' });
-        const dados = await r.json();
-        if (!r.ok) { mostrar(ok, ''); mostrar(erro, dados.error || 'Não foi possível enviar o timbrado.'); return; }
-        mostrarTimbrado(dados.timbrado);
-        mostrar(ok, 'Timbrado salvo. Confira a prévia: os próximos pedidos já saem nele.');
-      } catch (e) { mostrar(ok, ''); mostrar(erro, 'Sem conexão com o servidor. Tente de novo.'); }
+      mostrar(ok, T('Enviando…'));
+      await postar('/api/auth/timbrado', corpo, 'Modelo salvo. Confira os espaços e a prévia: os próximos pedidos já saem nele.');
     }
-
     entrada.addEventListener('change', () => { enviarArquivo(entrada.files[0]); entrada.value = ''; });
     const soltar = secao.querySelector('[data-soltar]');
     ['dragenter', 'dragover'].forEach(n => soltar.addEventListener(n, e => { e.preventDefault(); soltar.classList.add('border-teal'); }));
     ['dragleave', 'drop'].forEach(n => soltar.addEventListener(n, e => { e.preventDefault(); soltar.classList.remove('border-teal'); }));
     soltar.addEventListener('drop', e => enviarArquivo(e.dataTransfer.files[0]));
+    secao.querySelector('[data-timbrado-remover]').addEventListener('click', () =>
+      postar('/api/auth/timbrado/remover', {}, 'Modelo removido.'));
 
-    secao.querySelector('[data-timbrado-margens]').addEventListener('click', async () => {
-      mostrar(erro, ''); mostrar(ok, '');
-      const { resposta, dados } = await enviar('/api/auth/timbrado/margens', { margem_topo: topo.value, margem_base: base.value });
-      if (!resposta.ok) { mostrar(erro, dados.error || 'Não foi possível salvar.'); return; }
-      mostrarTimbrado(dados.timbrado);
-      mostrar(ok, 'Espaços salvos. Confira a prévia.');
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      if (!form.elements.nome.value.trim()) { mostrar(erro, T('Informe o nome que vai no cabeçalho.')); return; }
+      postar('/api/auth/timbrado/montado', new FormData(form), 'Receituário salvo. Confira os espaços e a prévia: os próximos pedidos já saem nele.');
     });
-    secao.querySelector('[data-timbrado-remover]').addEventListener('click', async () => {
-      mostrar(erro, ''); mostrar(ok, '');
-      const { resposta } = await enviar('/api/auth/timbrado/remover');
-      if (!resposta.ok) { mostrar(erro, 'Não foi possível remover.'); return; }
-      mostrarTimbrado(null);
-      mostrar(ok, 'Timbrado removido: os pedidos voltam ao modelo do Evidēns.');
-    });
-    fetch('/api/auth/timbrado', { credentials: 'same-origin' }).then(r => r.json()).then(d => mostrarTimbrado(d.timbrado)).catch(() => {});
+
+    // Arrastar as linhas (mouse, toque e setas do teclado)
+    function arrastar(qual) {
+      const linha = secao.querySelector(`[data-linha="${qual}"]`);
+      const campo = qual === 'topo' ? topo : base;
+      function mover(ev) {
+        const caixa = folha.getBoundingClientRect();
+        const y = Math.min(Math.max(ev.clientY - caixa.top, 0), caixa.height);
+        const mm = (qual === 'topo' ? y : caixa.height - y) / caixa.height * estado.ativo.altura;
+        campo.value = Math.round(mm);
+        desenharLinhas();
+      }
+      linha.addEventListener('pointerdown', ev => {
+        ev.preventDefault(); linha.setPointerCapture(ev.pointerId);
+        linha.addEventListener('pointermove', mover);
+        linha.addEventListener('pointerup', () => linha.removeEventListener('pointermove', mover), { once: true });
+      });
+      linha.addEventListener('keydown', ev => {
+        const passo = { ArrowDown: 1, ArrowUp: -1 }[ev.key];
+        if (!passo) return;
+        ev.preventDefault();
+        campo.value = Math.max(0, (Number(campo.value) || 0) + (qual === 'topo' ? passo : -passo));
+        desenharLinhas();
+      });
+    }
+    arrastar('topo'); arrastar('base');
+    [topo, base].forEach(c => c.addEventListener('input', desenharLinhas));
+    secao.querySelector('[data-timbrado-margens]').addEventListener('click', () =>
+      postar('/api/auth/timbrado/margens', { margem_topo: topo.value, margem_base: base.value }, 'Espaços salvos. Confira a prévia.'));
+
+    fetch('/api/auth/timbrado', { credentials: 'same-origin' }).then(r => r.json()).then(d => { if (d.disponivel) aplicar(d); }).catch(() => {});
   }
 
   // Planos de saúde em que o médico é credenciado (dados da guia SP/SADT)

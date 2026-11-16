@@ -1484,15 +1484,17 @@ def _ler_guia_do_plano(usuario):
 
 
 def _timbrado_do_medico(usuario):
-    """{'timbrado': ...} se o médico enviou o papel timbrado; um timbrado que não abre não impede o pedido."""
-    from src.utils import contas, timbrado
+    """{'timbrado': ...} com o receituário do médico (modelo, montado ou papel já timbrado); um receituário
+    que não abre não impede o pedido (sai no modelo do Evidēns)."""
+    from src.utils import contas, receituario
     if not usuario or not contas.pode_ter_credenciamento(usuario):
         return {}
     try:
-        registro = contas.timbrado_de(usuario['id'])
-        return {'timbrado': timbrado.para_o_pdf(registro)} if registro else {}
-    except timbrado.TimbradoInvalido:
+        config = receituario.para_o_pdf(contas, usuario['id'])
+    except Exception as exc:
+        print(f"⚠️ Receituário do médico não abriu ({type(exc).__name__}); pedido no modelo do Evidēns")
         return {}
+    return {'timbrado': config} if config else {}
 
 
 MSG_SEM_SESSAO_DE_ASSINATURA = 'Abra a sessão de assinatura digital para assinar este pedido.'
