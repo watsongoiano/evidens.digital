@@ -143,6 +143,7 @@ html.lenis, html.lenis body { height: auto; }
   .po-escore-valor { @apply text-[30px] font-light tracking-tight leading-tight mt-1; }
   .po-faixa { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium align-middle ml-1.5; }
   .po-faixa-baixo { @apply bg-mist text-ink; }
+  .po-faixa-indefinido { @apply bg-ink/5 text-ink/60; }
   .po-faixa-intermediario { @apply bg-[#D35400] text-white; }
   .po-faixa-alto { @apply bg-[#C0392B] text-white; }
   .po-detalhe { @apply text-[13px] text-ink/60 mt-1 leading-snug; }

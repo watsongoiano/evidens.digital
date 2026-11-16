@@ -3694,10 +3694,11 @@
         const refsHtml = x => x && x.referencia_html ? `<p class="po-ref referencia-links">${x.referencia_html}</p>` : '';
         // Classes escritas por extenso: o Tailwind só gera o CSS das classes que encontra no arquivo.
         const CLASSE_DA_FAIXA = { baixo: 'po-faixa po-faixa-baixo', intermediario: 'po-faixa po-faixa-intermediario',
-                                  alto: 'po-faixa po-faixa-alto' };
+                                  alto: 'po-faixa po-faixa-alto', indefinido: 'po-faixa po-faixa-indefinido' };
         const CLASSE_DA_CONDUTA = { manter: 'po-conduta-manter', suspender: 'po-conduta-suspender',
                                     ajustar: 'po-conduta-ajustar', individualizar: 'po-conduta-individualizar' };
-        const faixaHtml = e => e.faixa ? `<span class="${CLASSE_DA_FAIXA[e.nivel] || CLASSE_DA_FAIXA.baixo}">${textoSeguro(e.faixa)}</span>` : '';
+        // Sem nível (escore que não se calculou por falta de dado): faixa neutra, nunca "baixo".
+        const faixaHtml = e => e.faixa ? `<span class="${CLASSE_DA_FAIXA[e.nivel] || CLASSE_DA_FAIXA.indefinido}">${textoSeguro(e.faixa)}</span>` : '';
 
         function classesDoExame(e) {
             const partes = [];
@@ -3750,10 +3751,11 @@
                 ${e.itens && e.itens.length ? `<p class="po-detalhe">${e.itens.map(textoSeguro).join(' · ')}</p>` : ''}
                 ${e.nota ? `<p class="po-detalhe">${textoSeguro(e.nota)}</p>` : ''}
                 ${faltaHtml(e)}
-                ${refsHtml(e)}</div>`).join('');
+                ${refsHtml(e)}${divergenciaHtml(e.divergencia)}</div>`).join('');
             h += '</div>';
             if (r.clcr != null) h += `<p class="text-[13px] text-ink/60 mt-3">${textoSeguro('Depuração de creatinina (Cockcroft-Gault)')}: <strong>${escapeHtml(String(r.clcr).replace('.', ','))} mL/min</strong></p>`;
             if (r.tfg != null) h += `<p class="text-[13px] text-ink/60 mt-1">${textoSeguro('TFG estimada (CKD-EPI 2021)')}: <strong>${escapeHtml(String(r.tfg))} mL/min/1,73 m²</strong> <span class="text-ink/45">${textoSeguro('· ClCr para as doses dos anticoagulantes; TFG para a metformina')}</span></p>`;
+            (r.notas_renais || []).forEach(n => { h += `<p class="po-detalhe">${textoSeguro(n.texto)}</p>${refsHtml(n)}`; });
             if (r.resumido) { detalhes += h.slice(inicioDosDetalhes); h = h.slice(0, inicioDosDetalhes); }
 
             const exames = r.exames || [];
