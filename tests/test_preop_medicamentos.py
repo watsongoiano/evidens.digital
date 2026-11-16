@@ -181,9 +181,13 @@ def test_metformina_nao_tomada_no_dia_com_divergencia_aha():
     assert SBD in _urls(i)
 
 
-def test_metformina_com_clcr_abaixo_de_30_e_suspensa():
-    i = item('metformina', clcr=22.0)
-    assert i['conduta'] == 'suspender' and 'ClCr < 30' in i['resumo'] and 'KDIGO' in i['classe']
+def test_metformina_usa_a_tfg_e_nao_o_clcr():
+    # O limite é de TFG (CKD-EPI, mL/min/1,73 m²); ClCr baixo com TFG ≥ 30 não suspende.
+    i = item('metformina', clcr=22.0, tfg=25)
+    assert i['conduta'] == 'suspender' and 'TFG < 30' in i['resumo'] and 'KDIGO' in i['classe']
+    assert 'TFG < 30' not in item('metformina', clcr=22.0, tfg=38)['resumo']
+    assert '1.000 mg/dia' in item('metformina', tfg=38)['texto']
+    assert 'confira a TFG' in item('metformina')['texto']
 
 
 @pytest.mark.parametrize('chave', ['glibenclamida', 'gliclazida', 'glimepirida'])
@@ -322,7 +326,7 @@ def test_neuroaxial_conta_como_sangramento_alto_e_gera_aviso():
     i = r['itens'][0]
     # Neuroaxial: ≥ 5 meias-vidas (AHA §7.6, texto): ≥ 4 dias sem dabigatrana com ClCr ≥ 50; 6 com ClCr < 50
     assert i['resumo'] == 'Última dose no D-5 (4 dias sem dose); reiniciar no D+3'
-    assert '≥6 h após retirar o cateter' in i['texto']
+    assert '≥24 h após a punção ou a retirada do cateter' in i['texto'] and 'ASRA' in i['divergencia']
     r = pm.condutas(['dabigatrana'], {'clcr': 40, 'sangramento': 'alto', 'neuraxial': True})
     assert r['itens'][0]['resumo'] == 'Última dose no D-7 (6 dias sem dose); reiniciar no D+3'
     aviso = next(a for a in r['avisos'] if a['titulo'] == 'Anestesia neuroaxial e anticoagulantes')

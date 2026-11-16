@@ -223,7 +223,7 @@ def _frases_do_preop(valor, dentro=False):
 def _ctx_dos_medicamentos(p, resultado):
     """O mesmo contexto que a rota /api/preoperatorio monta para preop_medicamentos.condutas."""
     pas, pad = p.get('pas'), p.get('pad')
-    return {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr'], 'cirurgia': p['cirurgia'],
+    return {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr'], 'tfg': resultado['tfg'], 'cirurgia': p['cirurgia'],
             'sangramento': p['sangramento'], 'cirurgia_risco_elevado': resultado['contexto']['cir_elev'],
             'urgencia': p['urgencia'], 'neuroaxial': p['neuroaxial'], 'condicoes': set(p['condicoes']),
             'stent': p['stent'], 'aas_indicacao': p['aas_indicacao'],

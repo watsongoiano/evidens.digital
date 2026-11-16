@@ -3732,12 +3732,17 @@
 
             const ind = r.indicacao;
             const inicioDosDetalhes = h.length;
-            h += `<h3 class="po-titulo">${textoSeguro('A avaliação cardiológica está indicada?')}</h3>
-                <div class="risco-cartao !mt-0"><ol class="po-passos">${ind.passos.map(p => `<li class="po-passo">
+            const detalheDaConclusao = ind.detalhe != null ? ind.detalhe : (ind.tipo === 'nao_indicada' ? ind.nota : ind.conclusao);
+            h += `<h3 class="po-titulo">${textoSeguro('Quando solicitar o risco cardiológico?')}</h3>
+                <div class="risco-cartao !mt-0">
+                <div class="aviso ${ind.tipo === 'nao_indicada' ? 'aviso-info' : 'aviso-atencao'} !mt-0"><strong class="font-medium">${textoSeguro(ind.titulo || ind.conclusao)}</strong>
+                    ${detalheDaConclusao ? `<p class="mt-1">${textoSeguro(detalheDaConclusao)}</p>` : ''}</div>
+                ${recolhivel('Quando o médico deve solicitar', 'Ver critérios', 'Fechar critérios',
+                    `<p class="text-[13px] text-ink/60 mt-3">${textoSeguro('O risco cardiológico é indicado quando nenhum destes passos libera o paciente; ao lado, a resposta para este paciente.')}</p>
+                    <ol class="po-passos mt-2">${ind.passos.map(p => `<li class="po-passo">
                     <span class="${p.estado === 'ok' ? 'po-resposta po-resposta-ok' : 'po-resposta po-resposta-atencao'}">${textoSeguro(p.resposta)}</span>
                     <div><p class="font-medium">${textoSeguro(p.pergunta)}</p><p class="text-ink/60 mt-0.5">${textoSeguro(p.texto)}</p></div></li>`).join('')}</ol>
-                <div class="aviso ${ind.tipo === 'nao_indicada' ? 'aviso-info' : 'aviso-atencao'} mt-4"><strong class="font-medium">${textoSeguro(ind.conclusao)}</strong></div>
-                ${refsHtml(ind)}${divergenciaHtml(ind.divergencia)}</div>`;
+                    ${refsHtml(ind)}${divergenciaHtml(ind.divergencia)}`, 'mt-4')}</div>`;
 
             h += `<h3 class="po-titulo">${textoSeguro('Risco cardiovascular')}</h3><div class="po-escores">`;
             h += r.escores.map(e => `<div class="po-escore"><p class="po-escore-nome">${textoSeguro(e.nome)}</p>
@@ -3748,28 +3753,15 @@
                 ${refsHtml(e)}</div>`).join('');
             h += '</div>';
             if (r.clcr != null) h += `<p class="text-[13px] text-ink/60 mt-3">${textoSeguro('Depuração de creatinina (Cockcroft-Gault)')}: <strong>${escapeHtml(String(r.clcr).replace('.', ','))} mL/min</strong></p>`;
+            if (r.tfg != null) h += `<p class="text-[13px] text-ink/60 mt-1">${textoSeguro('TFG estimada (CKD-EPI 2021)')}: <strong>${escapeHtml(String(r.tfg))} mL/min/1,73 m²</strong> <span class="text-ink/45">${textoSeguro('· ClCr para as doses dos anticoagulantes; TFG para a metformina')}</span></p>`;
             if (r.resumido) { detalhes += h.slice(inicioDosDetalhes); h = h.slice(0, inicioDosDetalhes); }
 
             const exames = r.exames || [];
-            const sugeridos = exames.map((e, i) => [e, i]).filter(([e]) => e.estado !== 'nao_indicado');
             const naoIndicados = exames.filter(e => e.estado === 'nao_indicado');
-            if (sugeridos.length || !r.resumido) h += `<h3 class="po-titulo">${textoSeguro('Exames antes da cirurgia')}</h3>`;
-            if (sugeridos.length) {
-                h += `<div class="risco-cartao !mt-0"><p class="text-[13px] text-ink/55 mb-2">${textoSeguro('Os marcados entram nos PDFs. "Considerar" vem desmarcado: só se o resultado mudar a conduta.')}</p>`;
-                h += sugeridos.map(([e, i]) => {
-                    const podePedir = e.categoria !== 'outro';
-                    const marcado = e.estado === 'indicado';
-                    const rotulo = { indicado: 'Indicado', considerar: 'Considerar', ja_feito: 'Já realizado' }[e.estado] || '';
-                    return `<div class="po-item"><label class="po-exame">
-                        ${podePedir ? `<input type="checkbox" data-exame-preop="${i}" ${marcado ? 'checked' : ''}>` : '<span class="w-4"></span>'}
-                        <span class="min-w-0"><span class="font-medium">${textoSeguro(e.titulo)}</span>
-                        <span class="text-[12px] text-ink/50 ml-1">${textoSeguro(rotulo)}</span> ${classesDoExame(e)}
-                        <span class="block text-[13px] text-ink/60 mt-0.5">${textoSeguro(e.motivo)}</span>
-                        ${e.ultimo ? `<span class="block text-[12px] text-teal-dark mt-0.5">${textoSeguro(e.ultimo)}</span>` : ''}</span></label>
-                        ${refsHtml(e)}${divergenciaHtml(e.divergencia)}</div>`;
-                }).join('');
-                h += '</div>';
-            }
+            incluidosPreop = new Set(exames.map((e, i) => [e, i]).filter(([e]) => e.estado === 'indicado' && examePedivel(e)).map(([, i]) => i));
+            const temSugestao = exames.some(e => e.estado !== 'nao_indicado');
+            if (temSugestao || !r.resumido) h += `<h3 class="po-titulo">${textoSeguro('Exames antes da cirurgia')}</h3>`;
+            if (temSugestao) h += '<div id="preopExames"></div>';
             if (naoIndicados.length && !r.resumido) {
                 h += `<details class="risco-cartao mt-3"><summary class="cursor-pointer text-[13px] text-teal">${textoSeguro('Não indicados')} (${naoIndicados.length})</summary>
                     ${naoIndicados.map(e => `<div class="po-item"><p><span class="font-medium">${textoSeguro(e.titulo)}</span> ${classesDoExame(e)}</p>
@@ -3799,11 +3791,6 @@
                 ${e.nota ? `<p class="po-detalhe">${textoSeguro(e.nota)}</p>` : ''}
                 ${faltaHtml(e)}
                 ${refsHtml(e)}</div>`).join('') + '</div>';
-            const outras = (pul.medidas || []).concat(r.orientacoes || []);
-            if (outras.length) {
-                h += cartaoDeItens(outras, o => `<div class="po-item"><p><span class="font-medium">${textoSeguro(o.titulo)}</span> ${classeTag(o.classe)}</p>
-                    <p class="text-[13px] text-ink/60 mt-0.5">${textoSeguro(o.texto)}</p>${refsHtml(o)}${divergenciaHtml(o.divergencia)}</div>`).replace('!mt-0', 'mt-3');
-            }
 
             if (r.pos_operatorio && r.pos_operatorio.length) {
                 h += `<h3 class="po-titulo">${textoSeguro('No pós-operatório')}</h3>`;
@@ -3815,19 +3802,79 @@
                 detalhes += h.slice(inicioDoFim);
                 h = h.slice(0, inicioDoFim) + `<details class="risco-cartao mt-6"><summary class="cursor-pointer text-[13px] text-teal">${textoSeguro('Ver escores e detalhes')}</summary>${detalhes}</details>`;
             }
+            // Orientações perioperatórias, recolhidas como no check-up e sempre à mão (também no resumo curto)
+            const orientacoes = (pul.medidas || []).concat(r.orientacoes || []);
+            if (orientacoes.length) {
+                h += `<h3 class="po-titulo">${textoSeguro('Orientações')}</h3>`;
+                h += `<div class="risco-cartao !mt-0">${recolhivel(T('Orientações') + ' <span class="text-ink/40">' + orientacoes.length + '</span>', 'Ver orientações', 'Fechar orientações',
+                    '<div class="mt-3">' + orientacoes.map(o => `<div class="py-2.5 border-t border-ink/5 first:border-0"><p class="text-[14px] font-medium">${textoSeguro(o.titulo)} ${classeTag(o.classe)}</p>
+                    <p class="text-[13px] text-ink/65 mt-0.5">${textoSeguro(o.texto)}</p>${refsHtml(o)}${divergenciaHtml(o.divergencia)}</div>`).join('') + '</div>', '', true)}</div>`;
+            }
             alvo.innerHTML = h;
-            alvo.querySelectorAll('[data-exame-preop]').forEach(caixa => caixa.addEventListener('change', sincronizarExamesDoPreop));
-            sincronizarExamesDoPreop();
+            alvo.querySelectorAll('[data-recolhivel]').forEach(caixa => caixa.addEventListener('toggle', () => {
+                caixa.querySelector('[data-rotulo-abrir]').textContent = T(caixa.open ? caixa.dataset.fechar : caixa.dataset.abrir);
+                caixa.querySelector('.fa-chevron-down').style.transform = caixa.open ? 'rotate(180deg)' : '';
+            }));
+            desenharExamesPreop();
             preopResultado.style.display = 'block';
             preopResultado.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         // Os exames marcados viram a lista dos PDFs (mesmo diálogo do check-up: acréscimo, justificativa, guia, APAC).
+        // Bloco que abre com um clique (critérios do risco cardiológico, orientações), no mesmo desenho do check-up.
+        // ``rotulo`` já vem traduzido e escapado quando ``rotuloPronto``.
+        function recolhivel(rotulo, abrir, fechar, conteudo, classeExtra, rotuloPronto) {
+            return `<details class="orientacoes-recolhidas ${classeExtra || ''}" data-recolhivel data-abrir="${escapeHtml(abrir)}" data-fechar="${escapeHtml(fechar)}">
+                <summary class="flex items-center justify-between gap-4 cursor-pointer list-none">
+                  <span class="campo-rotulo !mb-0">${rotuloPronto ? rotulo : textoSeguro(rotulo)}</span>
+                  <span class="text-[13px] text-teal flex items-center gap-1.5 shrink-0"><span data-rotulo-abrir>${textoSeguro(abrir)}</span><i class="fa-solid fa-chevron-down text-[11px] transition-transform"></i></span>
+                </summary>${conteudo}</details>`;
+        }
+
+        // Exames do pré-operatório como no check-up: os indicados já entram nos pedidos (× retira); os demais, com +.
+        let incluidosPreop = new Set();
+        const examePedivel = e => e.categoria === 'laboratorio' || e.categoria === 'imagem';
+        function desenharExamesPreop() {
+            const alvo = document.getElementById('preopExames');
+            if (!alvo || !resultadoPreop) { sincronizarExamesDoPreop(); return; }
+            const exames = (resultadoPreop.exames || []).map((e, i) => [e, i]).filter(([e]) => e.estado !== 'nao_indicado');
+            const rotulo = { indicado: 'Indicado', considerar: 'Considerar', ja_feito: 'Já realizado' };
+            const linha = ([e, i]) => {
+                const dentro = incluidosPreop.has(i);
+                const botao = !examePedivel(e) ? '<span></span>'
+                    : dentro ? `<button type="button" class="rec-remover" data-preop-tirar="${i}" aria-label="${escapeHtml(T('Retirar este exame'))}"><i class="fa-solid fa-xmark"></i></button>`
+                             : `<button type="button" class="rec-remover" data-preop-incluir="${i}" aria-label="${escapeHtml(T('Incluir este exame'))}"><i class="fa-solid fa-plus"></i></button>`;
+                return `<div class="recommendation-card rec-linha !items-start">
+                    <span class="rec-prioridade mt-1.5 ${dentro ? 'bg-teal' : 'bg-ink/20'}"></span>
+                    <div class="min-w-0"><h5 class="rec-titulo">${textoSeguro(e.titulo)} <span class="text-[12px] text-ink/50 font-normal">${textoSeguro(rotulo[e.estado] || '')}</span></h5>
+                      <p class="rec-sub">${textoSeguro(e.motivo)}</p>
+                      <p class="mt-1">${classesDoExame(e)}</p>
+                      ${e.ultimo ? `<p class="text-[12px] text-teal-dark mt-0.5">${textoSeguro(e.ultimo)}</p>` : ''}
+                      ${refsHtml(e)}${divergenciaHtml(e.divergencia)}</div>
+                    <span></span>${botao}</div>`;
+            };
+            const dentro = exames.filter(([e, i]) => incluidosPreop.has(i) || (!examePedivel(e) && e.estado === 'indicado'));
+            const fora = exames.filter(par => !dentro.includes(par));
+            let h = '';
+            if (dentro.length) h += `<div class="risco-cartao !mt-0"><p class="campo-rotulo">${textoSeguro('Nos pedidos')} <span class="text-ink/40">${dentro.filter(([e]) => examePedivel(e)).length}</span></p>
+                <p class="text-[13px] text-ink/55 mb-2">${textoSeguro('Os indicados já entram nos PDFs; toque no × para retirar.')}</p>${dentro.map(linha).join('')}</div>`;
+            if (fora.length) h += `<div class="risco-cartao ${dentro.length ? 'mt-3' : '!mt-0'}"><p class="campo-rotulo">${textoSeguro('A considerar ou já realizados')} <span class="text-ink/40">${fora.length}</span></p>
+                <p class="text-[13px] text-ink/55 mb-2">${textoSeguro('Ficam fora dos pedidos; toque no + para incluir.')}</p>${fora.map(linha).join('')}</div>`;
+            alvo.innerHTML = h;
+            sincronizarExamesDoPreop();
+        }
+        document.getElementById('preopConteudo').addEventListener('click', evento => {
+            const botao = evento.target.closest('[data-preop-tirar], [data-preop-incluir]');
+            if (!botao) return;
+            const i = Number(botao.dataset.preopTirar ?? botao.dataset.preopIncluir);
+            if (botao.dataset.preopTirar !== undefined) incluidosPreop.delete(i); else incluidosPreop.add(i);
+            desenharExamesPreop();
+        });
+
         function sincronizarExamesDoPreop() {
             if (!resultadoPreop) { currentRecommendations = []; return; }
-            const marcados = new Set([...document.querySelectorAll('[data-exame-preop]:checked')].map(c => Number(c.dataset.examePreop)));
             currentRecommendations = (resultadoPreop.exames || [])
-                .filter((e, i) => marcados.has(i) && (e.categoria === 'laboratorio' || e.categoria === 'imagem'))
+                .filter((e, i) => incluidosPreop.has(i) && examePedivel(e))
                 .map(e => ({ titulo: e.titulo, categoria: e.categoria }));
         }
 

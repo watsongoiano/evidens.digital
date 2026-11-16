@@ -3997,7 +3997,50 @@
   "andexanet alfa ou complexo protrombínico": "andexanet alfa or prothrombin complex concentrate",
   "SBC: texto do 4.1.3 (exceção do Quadro 20)": "SBC: text of 4.1.3 (exception to Box 20)",
   "Ver o aviso sobre o momento da cirurgia após ICP.": "See the note on timing of surgery after PCI.",
-  "Stent há ≤30 dias: cirurgia eletiva que exija interromper antiplaquetário é potencialmente danosa; adiar e manter a DAPT.": "Stent ≤30 days ago: elective surgery requiring antiplatelet interruption is potentially harmful; postpone and continue DAPT."
+  "Stent há ≤30 dias: cirurgia eletiva que exija interromper antiplaquetário é potencialmente danosa; adiar e manter a DAPT.": "Stent ≤30 days ago: elective surgery requiring antiplatelet interruption is potentially harmful; postpone and continue DAPT.",
+  "Neuroaxial: interrupção completa por ≥5 meias-vidas (≥3 dias para anti-Xa; ≥4 dias para dabigatrana, 5–6 se ClCr <50).": "Neuraxial: complete interruption for ≥5 half-lives (≥3 days for anti-Xa agents; ≥4 days for dabigatran, 5–6 if CrCl <50).",
+  "Em dose terapêutica, a primeira dose só ≥24 h após a punção ou a retirada do cateter (ASRA 2025); as 6 h valem só para dose profilática.": "At a therapeutic dose, the first dose only ≥24 h after the puncture or catheter removal (ASRA 2025); the 6 h interval applies only to a prophylactic dose.",
+  "Reinício após a punção ou a retirada do cateter: a SBC fala em ≥6 h (I-B), sem distinguir a dose; a ASRA 2025 pede ≥24 h na dose terapêutica e 6 h só na profilática.": "Restart after the puncture or catheter removal: the SBC states ≥6 h (I-B), without distinguishing the dose; ASRA 2025 requires ≥24 h at a therapeutic dose and 6 h only at a prophylactic dose.",
+  "Nós optamos por seguir a ASRA, mais segura para quem usa dose terapêutica.": "We chose to follow ASRA, which is safer for patients on a therapeutic dose.",
+  "A AHA trata a anestesia neuroaxial como procedimento de maior risco de sangramento: interrupção completa do anticoagulante (≥5 meias-vidas: ≥3 dias para anti-Xa; ≥4 dias para dabigatrana, 5–6 se ClCr <50) e decisão de equipe. ASRA 2025, antes da punção, em dose terapêutica: anti-Xa ≥72 h; dabigatrana 72–120 h conforme o ClCr, e não fazer o bloqueio com ClCr <30; HBPM ≥24 h após dose plena e ≥12 h após dose profilática; clopidogrel e ticagrelor 5–7 dias, prasugrel 7–10 dias; AAS isolado não impede o bloqueio. Depois da punção ou da retirada do cateter, DOAC em dose terapêutica só após ≥24 h (6 h só na dose profilática).": "The AHA treats neuraxial anesthesia as a higher-bleeding-risk procedure: complete interruption of the anticoagulant (≥5 half-lives: ≥3 days for anti-Xa agents; ≥4 days for dabigatran, 5–6 if CrCl <50) and team decision. ASRA 2025, before the puncture, at a therapeutic dose: anti-Xa agents ≥72 h; dabigatran 72–120 h depending on CrCl, and no block with CrCl <30; LMWH ≥24 h after a full dose and ≥12 h after a prophylactic dose; clopidogrel and ticagrelor 5–7 days, prasugrel 7–10 days; aspirin alone does not prevent the block. After the puncture or catheter removal, a DOAC at a therapeutic dose only after ≥24 h (6 h only at a prophylactic dose).",
+  "A SBC (I-B) fala em ≥6 h após a retirada do cateter para o DOAC, sem distinguir a dose; a ASRA 2025 pede ≥24 h na dose terapêutica. Nós optamos por seguir a ASRA.": "The SBC (I-B) states ≥6 h after catheter removal for a DOAC, without distinguishing the dose; ASRA 2025 requires ≥24 h at a therapeutic dose. We chose to follow ASRA.",
+  "AHA 2a (A)": "AHA 2a (A)",
+  "AHA 2a (B-R)": "AHA 2a (B-R)",
+  "AHA 2a (tratamento)": "AHA 2a (treatment)",
+  "ASA 2017 (jejum pré-operatório)": "ASA 2017 (preoperative fasting)",
+  "ASA 2017 e 2023: diretriz de prática": "ASA 2017 and 2023: practice guideline",
+  "ASA 2023 (líquidos com carboidrato)": "ASA 2023 (carbohydrate-containing liquids)",
+  "ASRA 2025 (5ª ed.), anestesia regional e antitrombóticos (Reg Anesth Pain Med)": "ASRA 2025 (5th ed.), regional anesthesia and antithrombotic therapy (Reg Anesth Pain Med)",
+  "Bochecho com 15 mL de clorexidina 0,2% (ou iodopovidona 5%) por 30 a 60 s antes e depois da cirurgia, para reduzir infecção; tratar doença periodontal ou dentária antes da eletiva.": "Rinse with 15 mL of 0.2% chlorhexidine (or 5% povidone-iodine) for 30 to 60 s before and after surgery to reduce infection; treat periodontal or dental disease before elective surgery.",
+  "Cirurgia de emergência: operar sem exames que atrasem.": "Emergency surgery: operate without tests that cause delay.",
+  "Cochrane 2015 (goma de mascar)": "Cochrane 2015 (chewing gum)",
+  "Cochrane 2015: evidência de qualidade baixa": "Cochrane 2015: low-quality evidence",
+  "Estabilizar e adiar a cirurgia eletiva; risco cardiológico indicado.": "Stabilize and postpone elective surgery; cardiac risk assessment indicated.",
+  "Higiene oral com antisséptico": "Oral hygiene with antiseptic",
+  "Jejum antes da anestesia": "Fasting before anesthesia",
+  "Líquidos claros (água, chá, café sem leite, suco sem polpa) até 2 h antes; refeição leve até 6 h antes; frituras, gordura ou carne até 8 h antes. Bebida clara com carboidrato pode ser tomada até 2 h antes por adultos. Em uso de aGLP-1 ou tirzepatida, vale a orientação própria (dieta líquida nas 24 h antes e jejum de 8 a 12 h).": "Clear liquids (water, tea, coffee without milk, pulp-free juice) up to 2 h before; a light meal up to 6 h before; fried or fatty foods or meat up to 8 h before. Adults may drink a clear carbohydrate drink up to 2 h before. Patients on GLP-1 RAs or tirzepatide follow their own guidance (liquid diet in the 24 h before and 8 to 12 h of fasting).",
+  "Sem creatinina: confira a TFG, porque a metformina é contraindicada abaixo de 30 mL/min/1,73 m².": "No creatinine: check the eGFR, because metformin is contraindicated below 30 mL/min/1.73 m².",
+  "Manter até a véspera e não tomar no dia da cirurgia. Reintroduzir com o paciente estável, com função renal preservada e sem complicação que leve a hipóxia tecidual.": "Continue until the day before and do not take it on the day of surgery. Restart once the patient is stable, with preserved kidney function and no complication that causes tissue hypoxia.",
+  "Suspender (TFG < 30)": "Stop (eGFR < 30)",
+  "Mascar chiclete depois da cirurgia abdominal": "Chew gum after abdominal surgery",
+  "Mascar goma é uma \"alimentação simulada\": estimula o nervo vago e o reflexo cefálico, que aceleram o retorno do intestino e ajudam a evitar o íleo paralítico. Em 81 ensaios (9.072 pacientes), antecipou os flatos em cerca de 10 h e a evacuação em cerca de 13 h e encurtou a internação em cerca de 0,7 dia, sem mais complicações. Ensaios pequenos e de qualidade baixa; o efeito é menor dentro de protocolos de recuperação acelerada (ERAS).": "Chewing gum is \"sham feeding\": it stimulates the vagus nerve and the cephalic reflex, which speed the return of bowel function and help prevent paralytic ileus. In 81 trials (9,072 patients), it brought first flatus about 10 h earlier and the first bowel movement about 13 h earlier, and shortened the hospital stay by about 0.7 day, with no more complications. Small, low-quality trials; the effect is smaller within enhanced recovery (ERAS) protocols.",
+  "Pesquisar ferropenia: ferritina < 100 ng/mL, saturação de transferrina < 20% ou microcitose. Se ferropriva, ferro antes da cirurgia eletiva reduz transfusão e eleva a hemoglobina; com menos de 2 semanas até a cirurgia, o ferro venoso funciona melhor que o oral.": "Test for iron deficiency: ferritin < 100 ng/mL, transferrin saturation < 20% or microcytosis. If iron-deficient, iron before elective surgery reduces transfusion and raises hemoglobin; with less than 2 weeks to surgery, intravenous iron works better than oral iron.",
+  "Reduz o sangramento, a transfusão e a anemia pós-operatória; decisão da equipe cirúrgica e da anestesia, pesando as contraindicações.": "Reduces bleeding, transfusion and postoperative anemia; decision of the surgical and anesthesia teams, weighing contraindications.",
+  "Risco cardiológico indicado para este paciente.": "Cardiac risk assessment indicated for this patient.",
+  "Risco cardiológico não indicado para este paciente.": "Cardiac risk assessment not indicated for this patient.",
+  "Ácido tranexâmico se houver perda sanguínea esperada": "Tranexamic acid if blood loss is expected",
+  "A considerar ou já realizados": "To consider or already done",
+  "Ficam fora dos pedidos; toque no + para incluir.": "Left out of the orders; tap + to include.",
+  "Incluir este exame": "Include this test",
+  "Nos pedidos": "In the orders",
+  "O risco cardiológico é indicado quando nenhum destes passos libera o paciente; ao lado, a resposta para este paciente.": "Cardiac risk assessment is indicated when none of these steps clears the patient; next to each, the answer for this patient.",
+  "Os indicados já entram nos PDFs; toque no × para retirar.": "Indicated tests are already in the PDFs; tap × to remove.",
+  "Quando solicitar o risco cardiológico?": "When to request a cardiac risk assessment?",
+  "Quando o médico deve solicitar": "When the physician should request it",
+  "Ver critérios": "See criteria",
+  "Fechar critérios": "Close criteria",
+  "TFG estimada (CKD-EPI 2021)": "Estimated GFR (CKD-EPI 2021)",
+  "· ClCr para as doses dos anticoagulantes; TFG para a metformina": "· CrCl for anticoagulant doses; eGFR for metformin"
  },
  "padroes": [
   [
@@ -4819,6 +4862,26 @@
   [
    "^Anestesia neuroaxial: com o (clopidogrel|ticagrelor|prasugrel) mantido, o bloqueio fica contraindicado \\(a ASRA pede (\\d+–\\d+) dias sem ele\\); preferir outra técnica, em decisão com a anestesia\\.$",
    "Neuraxial anesthesia: with %1 continued, the block is contraindicated (ASRA requires %2 days off it); prefer another technique, decided with the anesthesia team."
+  ],
+  [
+   "^Motivo: (.+)\\.$",
+   "Reason: $1."
+  ],
+  [
+   "^Anemia \\(hemoglobina ([\\d,]+) g/dL\\)$",
+   "Anemia (hemoglobin %1 g/dL)"
+  ],
+  [
+   "^Anemia \\(hemoglobina ([\\d,]+) g/dL\\): pesquisar ferropenia, que se trata com ferro antes da cirurgia eletiva\\.$",
+   "Anemia (hemoglobin %1 g/dL): test for iron deficiency, which is treated with iron before elective surgery."
+  ],
+  [
+   "^TFG (\\d+) mL/min/1,73 m²: dose máxima de 1\\.000 mg/dia \\(KDIGO 2022\\)\\.$",
+   "eGFR %1 mL/min/1.73 m²: maximum dose 1,000 mg/day (KDIGO 2022)."
+  ],
+  [
+   "^TFG (\\d+) mL/min/1,73 m² \\(CKD-EPI 2021\\): a metformina é contraindicada abaixo de 30\\. Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir sem função renal estável\\.$",
+   "eGFR %1 mL/min/1.73 m² (CKD-EPI 2021): metformin is contraindicated below 30. Stop it and review treatment with the attending physician; after surgery, do not restart without stable kidney function."
   ]
  ],
  "manter": [

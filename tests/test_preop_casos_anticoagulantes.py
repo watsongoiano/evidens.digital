@@ -662,7 +662,10 @@ def verifica_doac(p, it, r):
     assert 'Sem ponte' in it['texto'] and 'Ponte com HBPM' not in it['texto']
     assert not any(t.startswith('Varfarina') for t in _titulos(r))
     if p['neuro']:
-        assert re.search(r'≥6 h após retirar o cateter', it['texto']), 'neuroaxial sem o intervalo do cateter (SBC I-B)'
+        # ASRA 2025: dose terapêutica só ≥24 h após a punção ou a retirada do cateter (6 h só na profilática); a SBC
+        # (I-B) fala em 6 h sem distinguir a dose, e a diferença tem de aparecer como divergência.
+        assert re.search(r'≥24 h após a punção ou a retirada do cateter', it['texto']), 'neuroaxial sem o reinício da ASRA'
+        assert 'SBC' in it['divergencia'] and '≥24 h' in it['divergencia'], 'falta a divergência SBC × ASRA no reinício'
         verifica_aviso_neuro(r)
 
 

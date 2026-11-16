@@ -247,9 +247,9 @@ def oraculo(chave, ctx):
                         divergencia=(r'SBD', r'caso a caso'), dias_antes=d, ultima_dose=d + 1,
                         fonte_desc='AHA §7.8 rec. 2 (1, C-LD); SBD R6 (I-B: 3–4 dias em cirurgia maior/restrição)')
     if chave == 'metformina':
-        clcr = ctx.get('clcr')
-        if clcr is not None and clcr < 30:
-            return Esperado('suspender', (KDIGO,), resumo=(r'ClCr < 30',), fonte_desc='KDIGO 2022 (TFG < 30)')
+        tfg = ctx.get('tfg')   # KDIGO 2022: o limite é de TFG estimada, não de ClCr por Cockcroft-Gault
+        if tfg is not None and tfg < 30:
+            return Esperado('suspender', (KDIGO,), resumo=(r'TFG < 30',), fonte_desc='KDIGO 2022 (TFG < 30)')
         return Esperado('suspender', (SBD, AHA), resumo=(r'não tomar no dia',), classe=(r'IIa-B',),
                         divergencia=(r'AHA', r'2a'), fonte_desc='SBD R5 (IIa-B) e Tabela 2 × AHA §7.8 rec. 3 (2a)')
     if chave in SECRETAGOGOS:
@@ -594,7 +594,9 @@ CASOS = [
     Caso('P076 metformina ClCr 92 50a', ['metformina'], ctx(50, clcr=92.0, cond=DM)),
     Caso('P077 metformina ClCr 45 70a', ['metformina'], ctx(70, sexo='feminino', clcr=45.0, cond=DM)),
     Caso('P078 metformina ClCr 31 76a', ['metformina'], ctx(76, clcr=31.0, cond=DM)),
-    Caso('P079 metformina ClCr 22 81a', ['metformina'], ctx(81, sexo='feminino', clcr=22.0, cond=DM)),
+    Caso('P079 metformina TFG 24 81a', ['metformina'], dict(ctx(81, sexo='feminino', clcr=22.0, cond=DM), tfg=24)),
+    Caso('P079b metformina ClCr 26 com TFG 34 (peso baixo) 84a', ['metformina'],
+         dict(ctx(84, sexo='feminino', clcr=26.0, cond=DM), tfg=34)),
     Caso('P080 glibenclamida DM2 67a', ['glibenclamida'], ctx(67, cond=DM)),
     Caso('P081 gliclazida DM2 59a', ['gliclazida'], ctx(59, sexo='feminino', cond=DM)),
     Caso('P082 glimepirida DM2 72a', ['glimepirida'], ctx(72, cond=DM)),
