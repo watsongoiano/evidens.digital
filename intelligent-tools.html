@@ -3663,7 +3663,12 @@
             const vincular = (id, vale) => {
                 const alvo = document.getElementById(id);
                 if (vale && !alvo.checked) { alvo.checked = true; alvo.dataset.auto = '1'; }
-                else if (!vale && alvo.dataset.auto === '1') { alvo.checked = false; alvo.dataset.auto = ''; }
+                else if (!vale && alvo.dataset.auto === '1') {
+                    // Um sub-item marcado pelo médico sustenta o item: ele passa a ser escolha do médico e fica.
+                    const filhos = checkupForm.querySelector('[data-detalhe-de="' + id + '"]');
+                    if (!(filhos && filhos.querySelector('input:checked'))) alvo.checked = false;
+                    alvo.dataset.auto = '';
+                }
             };
             const marcado = id => document.getElementById(id).checked;
             vincular('po_i_fa_alta_resposta', marcado('po_c_fa') && num('po_fc') > 120);   // FA com FC > 120 bpm medida
