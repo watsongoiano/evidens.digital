@@ -2019,7 +2019,7 @@
                                                                       && !retirados.has(rec.titulo));
             const presentes = new Set(base.map(r => (r.titulo || '').trim().toLowerCase()));
             const extras = acrescentados[categoria]
-                .filter(t => !presentes.has(t.toLowerCase()))
+                .filter(t => !presentes.has(t.toLowerCase()) && !retirados.has(t))
                 .map(t => ({ titulo: t, categoria: categoria, acrescentado: true }));
             return base.concat(extras);
         }
@@ -2036,7 +2036,7 @@
                 chip.className = 'inline-flex items-center gap-2 rounded-full bg-mist/70 border border-teal/20 pl-3 pr-1.5 py-1 text-[13px]';
                 const texto = document.createElement('span'); texto.textContent = titulo;
                 const x = document.createElement('button'); x.type = 'button'; x.className = 'w-6 h-6 rounded-full text-ink/40 hover:text-ink hover:bg-white'; x.setAttribute('aria-label', 'Retirar'); x.innerHTML = '<i class="fa-solid fa-xmark text-[11px]"></i>';
-                x.addEventListener('click', () => { acrescentados[categoria].splice(i, 1); desenharAcrescentados(categoria); });
+                x.addEventListener('click', () => { acrescentados[categoria].splice(i, 1); desenharAcrescentados(categoria); desenharConflitos(); });
                 chip.append(texto, x);
                 caixa.appendChild(chip);
             });
@@ -2050,8 +2050,10 @@
             const lista = acrescentados[categoriaDoDialogo];
             const jaTem = itensDaCategoria(categoriaDoDialogo).some(r => (r.titulo || '').trim().toLowerCase() === titulo.toLowerCase());
             if (!jaTem) lista.push(titulo);
+            retirados.delete(titulo);   // acrescentado à mão depois de retirado: o médico quer o exame
             campo.value = '';
             desenharAcrescentados(categoriaDoDialogo);
+            desenharConflitos();
             campo.focus();
         }
 
@@ -2766,8 +2768,9 @@
             const marcada = v => !!document.querySelector(`input[name="comorbidades"][value="${v}"]:checked`);
             const imuno = document.getElementById('imunossupressao').value === 'sim' || marcada('hiv');
             // Com histerectomia o resultado de HPV continua: um resultado positivo segue o fluxo (colo_utero.recomendar).
-            // Depois dos 65 anos não há rastreio (USPSTF 2018, D; ACOG 2026), exceto com HIV ou imunossupressão.
-            const hpv = feminino && (imuno || (idade >= 25 && idade <= 65));
+            // Depois dos 65 anos o motor não sugere o teste (USPSTF 2018, D; ACOG 2026), mas o resultado de um teste já
+            // feito continua valendo para o seguimento (ex.: HPV 16/18 → colposcopia); o campo só aparece na linha do teste.
+            const hpv = feminino && (imuno || idade >= 25);
             const historico = feminino && !marcada('histerectomia_total') && !imuno && idade >= 60;
             document.getElementById('hpv-item').style.display = hpv ? 'block' : 'none';
             document.getElementById('colo-historico').style.display = historico ? '' : 'none';

@@ -118,7 +118,7 @@ def test_campos_do_colo_dependem_da_idade_e_do_risco():
     html = (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
     corpo = html[html.index('function atualizarCamposDoColo()'):]
     corpo = corpo[:corpo.index('\n        }\n')]
-    assert "(imuno || (idade >= 25 && idade <= 65))" in corpo and "idade >= 60" in corpo and "histerectomia_total" in corpo
+    assert "(imuno || idade >= 25)" in corpo and "idade >= 60" in corpo and "histerectomia_total" in corpo
 
 
 def test_exames_ja_feitos_usam_a_lista_do_catalogo():
@@ -169,3 +169,16 @@ def test_drc_sem_opcoes_de_estagio_na_tela():
     html = (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
     bloco = html.split('id="detalhes-doenca_renal"')[1].split('</div>')[0]
     assert 'det_drc_' not in bloco and 'Exames já realizados' in bloco
+
+
+def test_conflito_vale_para_itens_acrescentados_e_e_redesenhado():
+    html = (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
+    assert "!presentes.has(t.toLowerCase()) && !retirados.has(t)" in html
+    trecho = html[html.index('function adicionarDoCampo()'):]
+    assert 'desenharConflitos();' in trecho[:1200]
+
+
+def test_resultado_de_hpv_depois_dos_65_segue_o_fluxo(client):
+    """Sem sugerir rastreio depois dos 65, um HPV 16/18 já informado ainda leva à colposcopia."""
+    r = _post(client, idade=70, sexo='feminino', hpv_resultado='hpv_16_18').get_json()
+    assert any('olposcopia' in x['titulo'] for x in r['recommendations'])
