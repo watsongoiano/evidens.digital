@@ -843,7 +843,7 @@
           <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200" inputmode="numeric"></div>
           <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" placeholder="Ex: 45" inputmode="numeric"></div>
           <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
-          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5%: critério de diabetes (ADA). Confirme com um segundo exame se não houver hiperglicemia inequívoca e marque o tipo de diabetes.</p></div>
+          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5% isolada não confirma diabetes (ADA 2026): o motor pede um segundo exame (HbA1c ou glicemia de jejum) e não marca a caixa. Com diagnóstico confirmado ou hiperglicemia inequívoca, marque o tipo de diabetes.</p></div>
         </div>
       </div>
       <p class="campo-rotulo mt-6">Exames já feitos e datas</p>
@@ -2148,14 +2148,15 @@
                     if (r.hipertensao) r.hipertensao.unshift({ fonte: 'has_resistente', motivo: 'HAS resistente marcada' });
                     else pedir('hipertensao', 'has_resistente', 'HAS resistente marcada');
                 }
-                // HbA1c ≥ 6,5% é critério de diabetes, mas não diz o tipo: não marca caixa (o aviso sob o campo pede o tipo).
+                // HbA1c ≥ 6,5% isolada não confirma diabetes (mesma regra de coerencia.diabetes_a_confirmar): não marca caixa
+                // e não conta como diabetes; o aviso sob o campo explica que o motor pede a confirmação.
                 const hb = num('hba1c');
                 // Antidiabético também não diz o tipo: com outro tipo de diabetes marcado, o tipo 2 não entra.
                 const outroTipo = OUTROS_TIPOS_DE_DIABETES.some(marcada);
                 if (outroTipo) delete r.diabetes;
                 // 5,7 a 6,4% em quem não tem diabetes é pré-diabetes (no diabético tratado, é só bom controle)
                 // (caixa de diabetes marcada à mão, ou pedida agora por outra regra; a automática de uma rodada anterior não conta)
-                const diabetico = outroTipo || usaInsulina() || (hb !== null && hb >= 6.5) || (r.diabetes && !recusados.has('diabetes')) || (document.getElementById('diabetes').checked && !auto.has('diabetes'));
+                const diabetico = outroTipo || usaInsulina() || (r.diabetes && !recusados.has('diabetes')) || (document.getElementById('diabetes').checked && !auto.has('diabetes'));
                 if (hb !== null && hb >= 5.7 && hb < 6.5 && !diabetico) pedir('pre_diabetes', 'hba1c', 'HbA1c de 5,7 a 6,4% (ADA)');
                 const peso = num('peso'), alt = num('altura');
                 if (peso && alt && peso / Math.pow(alt / 100, 2) >= 30) pedir('obesidade', 'imc', 'IMC ≥ 30 kg/m²');

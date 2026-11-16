@@ -52,7 +52,7 @@ def _recs(client, **dados):
 
 
 @pytest.mark.parametrize('dados', [
-    dict(comorbidades=['diabetes']), dict(hba1c='7.4'), dict(medicacoes=['insulina_nph']), dict(comorbidades=['diabetes_tipo_1']),
+    dict(comorbidades=['diabetes']), dict(hba1c='7.4', comorbidades=['diabetes']), dict(medicacoes=['insulina_nph']), dict(comorbidades=['diabetes_tipo_1']),
     dict(comorbidades=['diabetes_monogenico']), dict(comorbidades=['diabetes_pancreatico']), dict(comorbidades=['diabetes_medicamentoso']),
     dict(medicacoes=['glibenclamida']), dict(medicacoes_continuo='gliclazida 30 mg'),
 ], ids=['caixa', 'hba1c', 'insulina', 'tipo1', 'monogenico', 'pancreatico', 'medicamentoso', 'sulfonilureia', 'texto'])

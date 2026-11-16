@@ -51,7 +51,8 @@ def test_sem_falso_positivo_por_pedaco_de_palavra():
 def test_hba1c_imc_tfg_e_has_resistente():
     com, _, _ = coerencia.inferir({'hba1c': 6.5, 'peso': 95, 'altura': 170,
                                    'comorbidades': ['has_resistente']}, egfr=52)
-    assert {'obesidade', 'doenca_renal', 'hipertensao'} <= set(com)
+    assert {'obesidade', 'hipertensao'} <= set(com)
+    assert 'doenca_renal' not in com     # TFG < 60 isolada não marca DRC (KDIGO 2024: cronicidade ≥ 3 meses)
     assert not {'diabetes', 'diabetes_tipo_1'} & set(com)   # HbA1c ≥ 6,5% não diz o tipo: nenhuma caixa de diabetes
     com, _, inf = coerencia.inferir({'hba1c': 5.6, 'peso': 80, 'altura': 170}, egfr=75)
     assert com == [] and inf == []
@@ -348,3 +349,30 @@ def test_has_resistente_recusada_pelo_medico_nao_volta():
     com, _, _ = coerencia.inferir({'pas': 150, 'pad': 95, 'medicacoes': medicamentos.classes_de(TRIPLA)},
                                   recusados=('has_resistente',), escolhidas=TRIPLA)
     assert 'has_resistente' not in com
+
+
+# ── Exame isolado não confirma doença (revisão externa REN-01 e DM-02) ─────────────────────
+
+@pytest.mark.parametrize('egfr, comorbidades, a_confirmar', [
+    (59.9, [], True), (45, [], True), (60, [], False), (75, [], False), (None, [], False),
+    (45, ['doenca_renal'], False),          # DRC marcada pelo médico: não é "a confirmar"
+])
+def test_tfg_abaixo_de_60_isolada_fica_a_confirmar(egfr, comorbidades, a_confirmar):
+    com, _, inf = coerencia.inferir({'comorbidades': list(comorbidades)}, egfr=egfr)
+    assert ('doenca_renal' in com) is ('doenca_renal' in comorbidades)
+    assert not [i for i in inf if i['valor'] == 'doenca_renal']
+    assert coerencia.drc_a_confirmar(egfr, com) is a_confirmar
+
+
+@pytest.mark.parametrize('dados, a_confirmar', [
+    (dict(hba1c=6.4), False), (dict(hba1c=6.5), True), (dict(hba1c=9.8), True), (dict(), False),
+    (dict(hba1c=7.0, comorbidades=['diabetes']), False), (dict(hba1c=7.0, comorbidades=['diabetes_tipo_1']), False),
+    (dict(hba1c=7.0, medicacoes=['insulina']), False),
+    (dict(hba1c=7.0, medicacoes_continuo='gliclazida 30 mg'), False),   # antidiabético marca diabetes
+    (dict(hba1c=7.0, medicacoes_continuo='metformina 850 mg'), True),  # metformina não prova diabetes
+])
+def test_hba1c_isolada_fica_a_confirmar(dados, a_confirmar):
+    com, med, inf = coerencia.inferir(dados)
+    assert coerencia.diabetes_a_confirmar(dados.get('hba1c'), com, med) is a_confirmar
+    if a_confirmar:
+        assert not set(coerencia.DIABETES) & set(com) and not [i for i in inf if i['valor'].startswith('diabetes')]

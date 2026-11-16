@@ -338,3 +338,54 @@ def test_anti_hcv_sem_idade_limite_com_aviso_depois_dos_79(client):
     assert HCV in _recs(client, idade=85)
     assert 'Divergência entre diretrizes: anti-HCV depois dos 79 anos' in _orientacoes(client, idade=80)
     assert 'Divergência entre diretrizes: anti-HCV depois dos 79 anos' not in _orientacoes(client, idade=79)
+
+
+# ── Revisão externa: exame isolado não confirma doença ───────────────────────────
+# REN-01: TFG < 60 isolada (KDIGO 2024, PP 1.1.3.1 e 1.1.3.2). DM-02: HbA1c ≥ 6,5% isolada (ADA 2026, seção 2).
+
+@pytest.mark.parametrize('creatinina, a_confirmar', [('1.6', True), ('1.3', False)])   # H 50: TFG ~52 e ~66
+def test_tfg_abaixo_de_60_isolada_pede_repeticao_em_3_meses(client, creatinina, a_confirmar):
+    r = _resposta(client, idade=50, creatinina=creatinina)
+    assert r['drc_a_confirmar'] is a_confirmar
+    assert not [i for i in r['inferencias'] if i['valor'] == 'doenca_renal']
+    recs = {x['titulo']: x for x in r['recommendations']}
+    titulos_o = [o['titulo'] for o in r['orientacoes']]
+    if a_confirmar:
+        for exame in (CREATININA, UACR):
+            assert recs[exame]['subtitulo'] == 'TFG < 60 isolada, DRC a confirmar | Repetir em 3 meses'
+        assert 'TFG < 60: confirmar a doença renal crônica' in titulos_o
+    else:
+        assert CREATININA not in recs and 'TFG < 60: confirmar a doença renal crônica' not in titulos_o
+
+
+def test_tfg_baixa_com_drc_marcada_nao_pede_confirmacao(client):
+    r = _resposta(client, idade=50, creatinina='1.6', comorbidades=['doenca_renal'])
+    assert r['drc_a_confirmar'] is False
+    assert 'TFG < 60: confirmar a doença renal crônica' not in [o['titulo'] for o in r['orientacoes']]
+
+
+def test_tfg_a_confirmar_soma_ao_risco_de_drc_sem_perder_a_confirmacao(client):
+    recs = _recs(client, idade=50, creatinina='1.6', comorbidades=['hipertensao'])
+    assert recs[CREATININA]['subtitulo'].startswith('TFG < 60 isolada, DRC a confirmar | Repetir em 3 meses')
+
+
+@pytest.mark.parametrize('hba1c, a_confirmar', [('6.4', False), ('6.5', True), ('11', True)])
+def test_hba1c_isolada_pede_so_a_confirmacao(client, hba1c, a_confirmar):
+    r = _resposta(client, idade=40, hba1c=hba1c)
+    assert r['diabetes_a_confirmar'] is a_confirmar
+    recs = {x['titulo']: x for x in r['recommendations']}
+    if a_confirmar:
+        assert 'Para confirmar o diagnóstico' in recs[HBA1C]['subtitulo'] and 'glicemia de jejum' in recs[HBA1C]['descricao']
+        assert not {UACR, 'Fundoscopia (Exame de fundo de olho)', 'Cálcio iônico, soro'} & set(recs)
+        assert GLICOSE not in recs
+    else:
+        assert 'Para confirmar o diagnóstico' not in recs[HBA1C]['subtitulo']   # 6,4: rastreio/pré-diabetes
+
+
+@pytest.mark.parametrize('extra', [dict(comorbidades=['diabetes']), dict(medicacoes=['insulina_nph']),
+                                   dict(medicacoes_continuo='glibenclamida 5 mg')], ids=['marcado', 'insulina', 'antidiabetico'])
+def test_hba1c_alta_com_diabetes_conhecido_segue_o_acompanhamento(client, extra):
+    r = _resposta(client, idade=40, hba1c='8.0', **extra)
+    assert r['diabetes_a_confirmar'] is False
+    recs = {x['titulo']: x for x in r['recommendations']}
+    assert recs[HBA1C]['subtitulo'].startswith('Diabéticos | A cada 3-6 meses') and UACR in recs

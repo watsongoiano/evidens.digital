@@ -1,7 +1,8 @@
 """Coerência entre campos do formulário.
 
 Um dado implica outro: estatina implica dislipidemia, anti-hipertensivo implica
-hipertensão, IMC ≥ 30 implica obesidade etc. (HbA1c ≥ 6,5% indica diabetes sem dizer o tipo) Sem
+hipertensão, IMC ≥ 30 implica obesidade etc. Um exame isolado não confirma doença: PA de
+consultório, TFG < 60 e HbA1c ≥ 6,5% pedem confirmação, sem marcar a caixa. Sem
 isso, o médico marca "sinvastatina" no texto e o motor (e o PREVENT) tratam o
 paciente como se não usasse estatina.
 
@@ -275,15 +276,36 @@ def inferir(data, egfr=None, gestante=False, recusados=(), escolhidas=()):
     if 'antidiabeticos' in texto:
         marcar(comorbidades, 'comorbidades', 'diabetes', 'antidiabético citado em "Outras medicações"')
     hba1c = data.get('hba1c')
-    # HbA1c ≥ 6,5% é critério de diabetes, mas não diz o tipo: não marca caixa nenhuma (o motor trata o
-    # paciente como diabético e pede o tipo; ver a rota do check-up).
+    # HbA1c ≥ 6,5% isolada não marca caixa nenhuma: sem diabetes marcado, pede confirmação (diabetes_a_confirmar).
     # 5,7 a 6,4% em quem não tem diabetes é pré-diabetes (no diabético tratado, é só bom controle)
     if hba1c is not None and 5.7 <= float(hba1c) < 6.5 and not set(DIABETES) & set(comorbidades) and 'insulina' not in medicacoes:
         marcar(comorbidades, 'comorbidades', 'pre_diabetes', 'HbA1c de 5,7 a 6,4% (ADA)')
     peso, altura = data.get('peso'), data.get('altura')
     if peso and altura and float(peso) / (float(altura) / 100) ** 2 >= 30:
         marcar(comorbidades, 'comorbidades', 'obesidade', 'IMC ≥ 30 kg/m²')
-    if egfr is not None and egfr < 60:
-        marcar(comorbidades, 'comorbidades', 'doenca_renal',
-               f'TFG estimada {egfr} mL/min/1,73 m² (< 60; confirmar cronicidade > 3 meses)')
+    # TFG < 60 e HbA1c ≥ 6,5% isoladas não marcam DRC nem diabetes: a rota pede a confirmação
+    # (drc_a_confirmar, diabetes_a_confirmar).
     return comorbidades, medicacoes, inferencias
+
+
+def drc_a_confirmar(egfr, comorbidades):
+    """TFG estimada < 60 sem DRC marcada pelo médico: estado "DRC a confirmar".
+
+    KDIGO 2024, Practice Points 1.1.3.1 e 1.1.3.2: a cronicidade (≥ 3 meses) tem de ser provada, e não se presume
+    a partir de um único resultado de TFG ou de albuminúria (pode ser lesão renal aguda). A comorbidade não é
+    marcada; a rota pede creatinina/TFG e uACR em 3 meses (PP 1.1.1.2: repetir o exame para confirmar).
+    """
+    return egfr is not None and egfr < 60 and 'doenca_renal' not in comorbidades
+
+
+def diabetes_a_confirmar(hba1c, comorbidades, medicacoes):
+    """HbA1c ≥ 6,5% sem diabetes marcado pelo médico e sem antidiabético: estado "diabetes a confirmar".
+
+    ADA 2026 (seção 2): sem hiperglicemia inequívoca, o diagnóstico exige dois resultados alterados (do mesmo
+    exame repetido ou de dois exames diferentes). O formulário não registra sintomas nem glicemia casual, então
+    não há como saber se a hiperglicemia é inequívoca: o motor só pede a confirmação e o médico marca o diabetes.
+    Antidiabético que só se usa no diabetes já marca a caixa (``inferir``); insulina em uso também conta.
+    """
+    if hba1c in (None, '') or float(hba1c) < 6.5:
+        return False
+    return not (set(DIABETES) & set(comorbidades)) and 'insulina' not in medicacoes

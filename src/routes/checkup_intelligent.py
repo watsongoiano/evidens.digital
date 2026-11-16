@@ -14,7 +14,8 @@ from src.utils.validacao import EntradaInvalida, SIM, ler_numero, normalizar_tri
 checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
 
 def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False, is_pregnant=False, tabagismo='nunca_fumou', macos_ano=0, has_dpoc=False, has_cardiopatia_cronica=False,
-                                     pa_alterada=False, rastreio_dm=None, risco_drc=False, rastrear_hbv=False, prep=False, fatores_osso=False):
+                                     pa_alterada=False, rastreio_dm=None, risco_drc=False, rastrear_hbv=False, prep=False, fatores_osso=False,
+                                     confirmar_drc=False, confirmar_dm=False):
     """Gera recomendações baseadas em idade, sexo e condições clínicas
     
     Args:
@@ -29,6 +30,8 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         rastrear_hbv: painel de hepatite B de rastreio
         prep: uso de PrEP (teste de sífilis)
         fatores_osso: mulher de 50-64 anos com fator de risco para fratura
+        confirmar_drc: TFG < 60 isolada sem DRC marcada (repetir creatinina/TFG e uACR em 3 meses)
+        confirmar_dm: HbA1c ≥ 6,5% isolada sem diabetes marcado (repetir HbA1c ou glicemia de jejum)
     """
     recommendations = []
 
@@ -71,6 +74,20 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'categoria': 'laboratorio',
             'prioridade': 'alta',
             'referencia': 'ADA 2026 / USPSTF 2021',
+            'grau_evidencia': 'B'
+        })
+
+    # HbA1c ≥ 6,5% isolada, sem diabetes marcado: confirmar antes de rotular (ADA 2026, seção 2).
+    if confirmar_dm:
+        _add_rec({
+            'titulo': 'Hemoglobina glicada (HbA1c), soro',
+            'descricao': 'HbA1c ≥ 6,5% sem diagnóstico de diabetes: repetir a HbA1c ou, como alternativa, dosar a glicemia '
+                         'de jejum. Sem hiperglicemia inequívoca, o diagnóstico exige dois resultados alterados (na mesma '
+                         'amostra ou em amostras separadas).',
+            'subtitulo': 'HbA1c ≥ 6,5% sem diagnóstico de diabetes | Para confirmar o diagnóstico',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'ADA 2026',
             'grau_evidencia': 'B'
         })
 
@@ -139,6 +156,24 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # DRC: não há rastreio universal. Quem tem fator de risco faz TFG estimada e albuminúria juntas
     # (KDIGO 2024, Practice Point 1.1.1.1). O diabetes tem regra própria (ADA), e as medicações nefrotóxicas
     # ou que mexem no potássio, a delas (src/utils/condicoes.py).
+    # TFG < 60 isolada, sem DRC marcada: confirmar a cronicidade antes de rotular (KDIGO 2024, PP 1.1.3.1-1.1.3.2).
+    if confirmar_drc:
+        for titulo, descricao in (
+                ('Creatinina, soro', 'TFG estimada < 60 sem diagnóstico de DRC: repetir a creatinina com TFG estimada '
+                                     '(CKD-EPI 2021) em 3 meses. Um resultado isolado pode ser lesão renal aguda; a DRC '
+                                     'exige alteração por 3 meses ou mais.'),
+                ('Relação albumina/creatinina urinária (uACR)', 'TFG estimada < 60 sem diagnóstico de DRC: albuminúria junto '
+                                                                'da TFG repetida em 3 meses, para confirmar e estadiar a DRC.')):
+            _add_rec({
+                'titulo': titulo,
+                'descricao': descricao,
+                'subtitulo': 'TFG < 60 isolada, DRC a confirmar | Repetir em 3 meses',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'KDIGO 2024',
+                'grau_evidencia': 'PP'
+            })
+
     if risco_drc:
         for titulo, descricao in (
                 ('Creatinina, soro', 'Creatinina com TFG estimada (CKD-EPI 2021), junto da albuminúria, em quem tem fator de '
@@ -690,7 +725,7 @@ def criterio_rastreio_dm(idade, imc, fatores):
 
 def orientacoes_de_rastreio(idade, sexo, *, gestante, pa_informada, pa_classificacao, pa_alterada, has_hypertension,
                             has_resistant_hypertension, is_diabetic, rastreio_dm, imc, hiv, prep, rastrear_hbv, tabagismo,
-                            fatores_osso):
+                            fatores_osso, drc_a_confirmar=False, dm_a_confirmar=False):
     """Orientações do rastreamento geral, incluídos os avisos de divergência entre diretrizes (só quando a
     conduta divergente vale para este paciente). Cada aviso diz qual diretriz o motor seguiu e qual diverge."""
     o = []
@@ -714,6 +749,17 @@ def orientacoes_de_rastreio(idade, sexo, *, gestante, pa_informada, pa_classific
                      'Com PA de 130-139/80-89 mmHg, o motor segue a AHA/ACC 2025 (HAS estágio 1, a confirmar com MRPA ou '
                      'MAPA). A SBC 2025 chama essa faixa de pré-hipertensão e só considera HAS a partir de 140/90 mmHg.',
                      'AHA 2025 / SBC 2025')
+    if drc_a_confirmar:
+        orientar('TFG < 60: confirmar a doença renal crônica',
+                 'Uma TFG estimada < 60 isolada não confirma DRC: a cronicidade (3 meses ou mais) tem de ser provada, e um '
+                 'resultado único pode ser lesão renal aguda. Rever TFG e albuminúria anteriores; sem elas, repetir '
+                 'creatinina/TFG e uACR em 3 meses. Confirmada, marque "Doença renal crônica".', 'KDIGO 2024')
+    if dm_a_confirmar:
+        orientar('HbA1c ≥ 6,5%: confirmar o diagnóstico de diabetes',
+                 'Sem diabetes marcado e sem antidiabético, uma HbA1c ≥ 6,5% isolada não confirma diabetes: sem hiperglicemia '
+                 'inequívoca são necessários dois resultados alterados. Repetir a HbA1c ou dosar a glicemia de jejum. Com '
+                 'hiperglicemia inequívoca (glicemia ≥ 200 mg/dL com sintomas clássicos ou crise hiperglicêmica), que o '
+                 'formulário não registra, marque o diabetes e o tipo.', 'ADA 2026')
     if has_hypertension and not has_resistant_hypertension:
         orientar('Divergência entre diretrizes: ecocardiograma na HAS',
                  'O motor segue a AHA/ACC 2025: ecocardiograma só com indicação (ECG com sobrecarga ventricular esquerda, '
@@ -1081,10 +1127,12 @@ def generate_intelligent_recommendations():
         imc = None
         if weight and height:
             imc = weight / ((height / 100) ** 2)
-        ja_diabetico = (bool(set(condicoes.TIPOS_DE_DIABETES) & set(comorbidades)) or 'insulina' in medicacoes_checkboxes
-                        or (data.get('hba1c') is not None and float(data['hba1c']) >= 6.5))
+        ja_diabetico = bool(set(condicoes.TIPOS_DE_DIABETES) & set(comorbidades)) or 'insulina' in medicacoes_checkboxes
         pa_alterada = coerencia.pa_a_confirmar(pa_classificacao, comorbidades, gestante=is_pregnant)
-        rastreio_dm = None if ja_diabetico else criterio_rastreio_dm(
+        # Exame isolado não confirma doença: TFG < 60 (KDIGO 2024) e HbA1c ≥ 6,5% (ADA 2026) pedem confirmação.
+        drc_a_confirmar = coerencia.drc_a_confirmar(egfr_inferencia, comorbidades)
+        dm_a_confirmar = coerencia.diabetes_a_confirmar(data.get('hba1c'), comorbidades, medicacoes_checkboxes)
+        rastreio_dm = None if (ja_diabetico or dm_a_confirmar) else criterio_rastreio_dm(
             age, imc, fatores_risco_dm(data, comorbidades, medicacoes_checkboxes, familia, has_hypertension))
         risco_drc = has_hypertension or has_dcv_aterosclerotica or has_ic or 'rim_policistico' in familia
         prep = 'hiv' not in comorbidades and bool({'tenofovir_entricitabina', 'cabotegravir'} & set(escolhidas))
@@ -1103,6 +1151,7 @@ def generate_intelligent_recommendations():
                                                          has_cardiopatia_cronica=has_dcv_aterosclerotica or has_ic,
                                                          pa_alterada=pa_alterada, rastreio_dm=rastreio_dm,
                                                          risco_drc=risco_drc, prep=prep, fatores_osso=fatores_osso,
+                                                         confirmar_drc=drc_a_confirmar, confirmar_dm=dm_a_confirmar,
                                                          rastrear_hbv=not is_pregnant and 'hepatite_b_cronica' not in comorbidades)
         recommendations.extend(age_sex_recs)
 
@@ -1144,21 +1193,14 @@ def generate_intelligent_recommendations():
         # Qualquer tipo de diabetes (ADA 2026); insulina em uso indica diabetes mesmo sem o tipo marcado.
         is_diabetic = bool(set(condicoes.TIPOS_DE_DIABETES) & set(comorbidades)) or 'insulina' in medicacoes_checkboxes
         
-        # Verificar HbA1C se fornecido
-        hba1c = float(data.get('hba1c', 0)) if data.get('hba1c') else None
+        # HbA1c ≥ 6,5% sem diabetes marcado e sem antidiabético não faz do paciente um diabético: o motor pede a
+        # confirmação (ADA 2026, seção 2; ver coerencia.diabetes_a_confirmar). Campo mantido por compatibilidade.
         diabetes_por_hba1c = False
-        if hba1c is not None and hba1c >= 6.5 and not set(condicoes.TIPOS_DE_DIABETES) & set(comorbidades):
-            # ADA: HbA1c ≥ 6,5% é critério diagnóstico de diabetes (confirmar com 2º exame se não houver
-            # hiperglicemia inequívoca), mas não diz o tipo: o paciente é tratado como diabético sem marcar
-            # tipo 1, tipo 2 ou outro. "diabetes_sem_tipo" é só um marcador interno, não existe na tela.
-            diabetes_por_hba1c = True
-            is_diabetic = True
-            comorbidades.append('diabetes_sem_tipo')
-        
+
         # TOTG só com indicação: glicemia ou HbA1c limítrofes (pré-diabetes marcado ou HbA1c de 5,7 a 6,4%),
         # para confirmar o diagnóstico. Não entra no check-up de rotina e nunca em quem já tem diabetes
         # (tipo 1, tipo 2, em uso de insulina ou antidiabético). O TOTG da gestação é o do pré-natal.
-        if is_diabetic or 'pre_diabetes' not in comorbidades:
+        if is_diabetic or dm_a_confirmar or 'pre_diabetes' not in comorbidades:
             recommendations = [r for r in recommendations if not (r.get('titulo') or '').startswith('TOTG-75g')]
         if is_diabetic:
             # Quem já tem diabetes não faz rastreamento: glicemia e HbA1c passam a ser acompanhamento do controle.
@@ -1547,13 +1589,15 @@ def generate_intelligent_recommendations():
         response['nao_incluidas'] = nao_incluidas
         response['adiados_gestacao'] = adiados_gestacao
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
+        response['diabetes_a_confirmar'] = dm_a_confirmar
+        response['drc_a_confirmar'] = drc_a_confirmar
         response['inferencias'] = inferencias
         orientacoes_rastreio = orientacoes_de_rastreio(
             age, sex, gestante=is_pregnant, pa_informada=bool(sbp or dbp), pa_classificacao=pa_classificacao or {},
             pa_alterada=pa_alterada, has_hypertension=has_hypertension, has_resistant_hypertension=has_resistant_hypertension,
             is_diabetic=is_diabetic, rastreio_dm=rastreio_dm, imc=imc, hiv=is_hiv_positive, prep=prep,
             rastrear_hbv=not is_pregnant and 'hepatite_b_cronica' not in comorbidades, tabagismo=tabagismo,
-            fatores_osso=fatores_osso)
+            fatores_osso=fatores_osso, drc_a_confirmar=drc_a_confirmar, dm_a_confirmar=dm_a_confirmar)
         response['orientacoes'] = orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_hiv + orientacoes_rastreio
         aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
         if aviso_exames:

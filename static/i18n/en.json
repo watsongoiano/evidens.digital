@@ -2243,7 +2243,18 @@
   "4 de 27": "4 of 27",
   "27 recomendações": "27 recommendations",
   "148 recomendações mapeadas": "148 recommendations mapped",
-  "148 recomendações": "148 recommendations"
+  "148 recomendações": "148 recommendations",
+  "HbA1c ≥ 6,5% sem diagnóstico de diabetes: repetir a HbA1c ou, como alternativa, dosar a glicemia de jejum. Sem hiperglicemia inequívoca, o diagnóstico exige dois resultados alterados (na mesma amostra ou em amostras separadas).": "HbA1c ≥ 6.5% without a diagnosis of diabetes: repeat the HbA1c or, as an alternative, measure fasting plasma glucose. Without unequivocal hyperglycemia, the diagnosis requires two abnormal results (in the same sample or in separate samples).",
+  "HbA1c ≥ 6,5% sem diagnóstico de diabetes": "HbA1c ≥ 6.5% without a diagnosis of diabetes",
+  "TFG estimada < 60 sem diagnóstico de DRC: repetir a creatinina com TFG estimada (CKD-EPI 2021) em 3 meses. Um resultado isolado pode ser lesão renal aguda; a DRC exige alteração por 3 meses ou mais.": "Estimated GFR < 60 without a diagnosis of CKD: repeat creatinine with estimated GFR (CKD-EPI 2021) in 3 months. A single result may be acute kidney injury; CKD requires an abnormality lasting 3 months or more.",
+  "TFG estimada < 60 sem diagnóstico de DRC: albuminúria junto da TFG repetida em 3 meses, para confirmar e estadiar a DRC.": "Estimated GFR < 60 without a diagnosis of CKD: albuminuria together with the repeat GFR in 3 months, to confirm and stage CKD.",
+  "TFG < 60 isolada, DRC a confirmar": "Isolated GFR < 60, CKD to be confirmed",
+  "Repetir em 3 meses": "Repeat in 3 months",
+  "TFG < 60: confirmar a doença renal crônica": "GFR < 60: confirm chronic kidney disease",
+  "Uma TFG estimada < 60 isolada não confirma DRC: a cronicidade (3 meses ou mais) tem de ser provada, e um resultado único pode ser lesão renal aguda. Rever TFG e albuminúria anteriores; sem elas, repetir creatinina/TFG e uACR em 3 meses. Confirmada, marque \"Doença renal crônica\".": "A single estimated GFR < 60 does not confirm CKD: chronicity (3 months or more) must be shown, and a single result may be acute kidney injury. Review previous GFR and albuminuria; without them, repeat creatinine/GFR and uACR in 3 months. Once confirmed, check \"Chronic kidney disease\".",
+  "HbA1c ≥ 6,5%: confirmar o diagnóstico de diabetes": "HbA1c ≥ 6.5%: confirm the diagnosis of diabetes",
+  "Sem diabetes marcado e sem antidiabético, uma HbA1c ≥ 6,5% isolada não confirma diabetes: sem hiperglicemia inequívoca são necessários dois resultados alterados. Repetir a HbA1c ou dosar a glicemia de jejum. Com hiperglicemia inequívoca (glicemia ≥ 200 mg/dL com sintomas clássicos ou crise hiperglicêmica), que o formulário não registra, marque o diabetes e o tipo.": "Without diabetes checked and without an antidiabetic drug, a single HbA1c ≥ 6.5% does not confirm diabetes: without unequivocal hyperglycemia, two abnormal results are needed. Repeat the HbA1c or measure fasting plasma glucose. With unequivocal hyperglycemia (glucose ≥ 200 mg/dL with classic symptoms or a hyperglycemic crisis), which the form does not record, check diabetes and its type.",
+  "HbA1c ≥ 6,5% isolada não confirma diabetes (ADA 2026): o motor pede um segundo exame (HbA1c ou glicemia de jejum) e não marca a caixa. Com diagnóstico confirmado ou hiperglicemia inequívoca, marque o tipo de diabetes.": "A single HbA1c ≥ 6.5% does not confirm diabetes (ADA 2026): the engine asks for a second test (HbA1c or fasting glucose) and does not check the box. With a confirmed diagnosis or unequivocal hyperglycemia, check the type of diabetes."
  },
  "padroes": [
   [

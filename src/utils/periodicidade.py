@@ -53,6 +53,7 @@ SEM_INTERVALO = {
     'para confirmar o diagnóstico', 'rastreio em cascata', 'conforme uso de medicações', 'após teste de hpv positivo',
     'antes de iniciar a tarv', 'após 8 semanas do início ou mudança de tarv', 'após 4-8 semanas do início',
     'antes de cada ciclo', 'conforme protocolo de prep',
+    'repetir em 3 meses',  # confirmação de DRC: a data do exame alterado não adia a repetição
     # a critério clínico
     'conforme necessidade', 'conforme indicação clínica', 'fator de risco', 'adulto em risco',
     'repetir conforme o resultado (t-score)', 'decisão individual (expectativa de vida, prevenção secundária)',
