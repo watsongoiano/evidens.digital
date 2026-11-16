@@ -385,7 +385,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Densitometria óssea (DEXA)',
             'descricao': 'Mulher pós-menopausa com menos de 65 anos e fator de risco para fratura: calcular o FRAX (Brasil) '
-                         'e pedir a densitometria se o risco estiver elevado. Confirme que a paciente está na pós-menopausa.',
+                         'e pedir a densitometria se o risco estiver elevado. Sugerimos confirmar que a paciente está na pós-menopausa.',
             'subtitulo': 'Pós-menopausa <65 anos com fator de risco | Fator de risco',
             'categoria': 'imagem',
             'prioridade': 'media',
@@ -704,7 +704,7 @@ def orientacoes_de_rastreio(idade, sexo, *, gestante, pa_informada, pa_classific
                  'SBC 2025 / AHA 2025')
         if (pa_classificacao.get('sbc') or {}).get('categoria') == 'pre_hipertensao':
             orientar('Divergência entre diretrizes: classificação da PA',
-                     'Com PA de 130-139/80-89 mmHg, o motor segue a AHA/ACC 2025 (HAS estágio 1, a confirmar com MRPA ou '
+                     'Com PA de 130-139/80-89 mmHg, nós optamos por seguir a referência da AHA/ACC 2025 (HAS estágio 1, a confirmar com MRPA ou '
                      'MAPA). A SBC 2025 chama essa faixa de pré-hipertensão e só considera HAS a partir de 140/90 mmHg.',
                      'AHA 2025 / SBC 2025')
     if drc_a_confirmar:
@@ -720,28 +720,28 @@ def orientacoes_de_rastreio(idade, sexo, *, gestante, pa_informada, pa_classific
                  'formulário não registra, marque o diabetes e o tipo.', 'ADA 2026')
     if has_hypertension and not has_resistant_hypertension:
         orientar('Divergência entre diretrizes: ecocardiograma na HAS',
-                 'O motor segue a AHA/ACC 2025: ecocardiograma só com indicação (ECG com sobrecarga ventricular esquerda, '
+                 'Nós optamos por seguir a referência da AHA/ACC 2025: ecocardiograma só com indicação (ECG com sobrecarga ventricular esquerda, '
                  'suspeita de insuficiência cardíaca, HAS de difícil controle). A SBC 2025 inclui o ecocardiograma na '
                  'avaliação de lesão de órgão-alvo cardíaca.', 'AHA 2025 / SBC 2025')
     if is_diabetic and not has_hypertension:
         orientar('Divergência entre diretrizes: ECG no diabetes',
-                 'Sem HAS, o motor não pede ECG ao diabético assintomático (ADA 2026: não rastrear doença coronariana em '
+                 'Sem HAS, não sugerimos ECG ao diabético assintomático (ADA 2026: não rastrear doença coronariana em '
                  'assintomático). A ACCF/AHA 2010 considera razoável um ECG basal (IIa): pedir se o médico optar por ele.',
                  'ADA 2026 (seção 10) / ACCF/AHA 2010')
     if not is_diabetic:
         if rastreio_dm == 'Adultos 35-70 anos' and (imc is None or imc < 25):
             orientar('Divergência entre diretrizes: rastreio de diabetes sem sobrepeso',
-                     'O motor segue a ADA 2026 (rastreio a partir dos 35 anos, qualquer que seja o peso). A USPSTF 2021 '
+                     'Nós optamos por seguir a referência da ADA 2026 (rastreio a partir dos 35 anos, qualquer que seja o peso). A USPSTF 2021 '
                      'restringe o rastreio dos 35 aos 70 anos a quem tem sobrepeso ou obesidade.', 'ADA 2026 / USPSTF 2021')
         elif rastreio_dm is None and idade > 70:
             orientar('Divergência entre diretrizes: rastreio de diabetes depois dos 70 anos',
-                     'Acima de 70 anos o motor só rastreia com IMC ≥ 25 e fator de risco (USPSTF 2021: rastreio dos 35 aos 70 '
+                     'Acima de 70 anos, só sugerimos rastrear com IMC ≥ 25 e fator de risco (USPSTF 2021: rastreio dos 35 aos 70 '
                      'anos). A ADA 2026 não tem idade de parada: considerar se a expectativa de vida justificar.',
                      'USPSTF 2021 / ADA 2026')
     if not hiv:
         if idade <= 30 and not gestante:
             orientar('Divergência entre diretrizes: frequência do teste de HIV',
-                     'Até 30 anos o motor segue o PCDT-IST 2022 (teste anual). A USPSTF 2019 pede pelo menos um teste dos 15 '
+                     'Até 30 anos, nós optamos por seguir a referência do PCDT-IST 2022 (teste anual). A USPSTF 2019 pede pelo menos um teste dos 15 '
                      'aos 65 anos e repetição só com risco aumentado.', 'PCDT-IST MS 2022 / USPSTF 2019')
         elif idade > 65:
             orientar('HIV depois dos 65 anos',
@@ -755,11 +755,11 @@ def orientacoes_de_rastreio(idade, sexo, *, gestante, pa_informada, pa_classific
                      'PCDT-IST MS 2022 / USPSTF 2022')
     if idade >= 80:
         orientar('Divergência entre diretrizes: anti-HCV depois dos 79 anos',
-                 'O motor segue o MS 2026 (PCDT Hepatite C), sem idade limite para o teste único. A USPSTF 2020 recomenda '
+                 'Nós optamos por seguir a referência do MS 2026 (PCDT Hepatite C), sem idade limite para o teste único. A USPSTF 2020 recomenda '
                  'rastrear hepatite C dos 18 aos 79 anos.', 'MS 2026 (PCDT Hepatite C) / USPSTF 2020')
     if rastrear_hbv and adulto:
         orientar('Divergência entre diretrizes: rastreio de hepatite B',
-                 'O motor segue o CDC 2023 e o MS (painel uma vez em adulto sem vacinação documentada). A USPSTF 2020 '
+                 'Nós optamos por seguir a referência do CDC 2023 e do MS (painel uma vez em adulto sem vacinação documentada). A USPSTF 2020 '
                  'recomenda rastrear só quem tem risco aumentado (B).', 'CDC 2023 (hepatite B) / USPSTF 2020')
     if sexo == 'masculino' and 65 <= idade <= 75 and tabagismo == 'nunca':
         orientar('Aneurisma de aorta: homem que nunca fumou',
@@ -767,7 +767,7 @@ def orientacoes_de_rastreio(idade, sexo, *, gestante, pa_informada, pa_classific
                  'familiar de aneurisma, outros aneurismas, DPOC ou doença cardiovascular.', 'USPSTF 2019')
     if sexo == 'masculino' and idade >= 70:
         orientar('Divergência entre diretrizes: densitometria no homem',
-                 'O motor não pede densitometria ao homem sem fator de risco (USPSTF 2025: evidência insuficiente). A BHOF '
+                 'Não sugerimos densitometria ao homem sem fator de risco (USPSTF 2025: evidência insuficiente). A BHOF '
                  '2022 recomenda a partir dos 70 anos, e dos 50 aos 69 com fator de risco: decisão compartilhada.',
                  'USPSTF 2025 / BHOF 2022')
     if sexo == 'feminino' and 50 <= idade < 65 and not fatores_osso and not gestante:
@@ -930,12 +930,13 @@ def calcular_risco_cardiovascular(data, comorbidades, medicacoes, is_diabetic, i
     egfr = prevent.egfr_ckd_epi_2021(float(data['creatinina']), idade, sexo)
     imc_valor = round(prevent.imc(float(data['peso']), float(data['altura'])), 1)
     hba1c = float(data['hba1c']) if data.get('hba1c') else None
+    uacr = float(data['uacr']) if data.get('uacr') else None
     try:
         r = prevent.estimar(
             idade=idade, sexo=sexo, colesterol_total=float(data['colesterol']), hdl=float(data['hdl']),
             pas=float(data['pas']), diabetes=is_diabetic, fumante=data.get('tabagismo') == 'atual',
             imc_valor=imc_valor, egfr=egfr, anti_hipertensivo='anti_hipertensivos' in medicacoes,
-            estatina='estatinas' in medicacoes, hba1c=hba1c)
+            estatina='estatinas' in medicacoes, hba1c=hba1c, uacr=uacr)
     except prevent.EntradaForaDaFaixa as exc:
         return {'status': 'fora_da_faixa', 'problemas': exc.problemas,
                 'motivo': 'Valores fora da faixa em que o PREVENT foi derivado: ' + '; '.join(exc.problemas) + '.'}
@@ -1280,7 +1281,7 @@ def generate_intelligent_recommendations():
             if 'tenofovir_alafenamida' in medicacoes_checkboxes:
                 orientacoes_hiv.append({
                     'titulo': 'Tenofovir alafenamida: intervalo da função renal',
-                    'descricao': 'O motor seguiu o PCDT do MS para todo tenofovir (creatinina e EAS a cada 3-6 meses). A HIVMA/IDSA '
+                    'descricao': 'Nós optamos por seguir a referência do PCDT do MS para todo tenofovir (creatinina e EAS a cada 3-6 meses). A HIVMA/IDSA '
                                  'aceita intervalos maiores com o tenofovir alafenamida (TAF), menos nefrotóxico que o fumarato (TDF).',
                     'referencia': 'MS 2024 (PCDT HIV) / HIVMA/IDSA 2024'})
 
@@ -1321,7 +1322,8 @@ def generate_intelligent_recommendations():
                                         creatinina=data.get('creatinina'), peso=weight, hipertensao=has_hypertension,
                                         imunossuprimido=triagem.get('imunossupressao') == SIM,
                                         cd4=data.get('cd4') if is_hiv_positive else None,
-                                        idade_ccr_familiar=data.get('idade_ccr_familiar'))
+                                        idade_ccr_familiar=data.get('idade_ccr_familiar'),
+                                        uacr=float(data['uacr']) if data.get('uacr') else None)
         # Rastreio de câncer: divergências entre diretrizes e o que vale depois da idade de parada.
         mais_orientacoes, mais_nao_incluidas = rastreio_cancer.finalizar(recommendations, age, sex, familia)
         orientacoes_cancer += mais_orientacoes
@@ -1444,6 +1446,10 @@ def generate_intelligent_recommendations():
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['diabetes_a_confirmar'] = dm_a_confirmar
         response['drc_a_confirmar'] = drc_a_confirmar
+        # Função renal (CKD-EPI 2021, categorias KDIGO e KFRE na DRC marcada): cartão ao lado do PREVENT.
+        from src.utils import funcao_renal
+        response['funcao_renal'] = funcao_renal.avaliar(data.get('creatinina'), age, sex, data.get('uacr'),
+                                                       drc='doenca_renal' in comorbidades)
         response['inferencias'] = inferencias
         orientacoes_rastreio = orientacoes_de_rastreio(
             age, sex, gestante=is_pregnant, pa_informada=bool(sbp or dbp), pa_classificacao=pa_classificacao or {},

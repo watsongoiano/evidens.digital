@@ -325,5 +325,5 @@ def orientacao_dos_nao_reconhecidos(exames_anteriores):
         return None
     return {'titulo': 'Exame já realizado não reconhecido',
             'descricao': 'A periodicidade não foi conferida para: ' + '; '.join(soltos) + '. '
-                         'Escolha o nome do exame na lista de sugestões para que ele entre na conferência.',
+                         'Para entrar na conferência, o nome do exame precisa ser escolhido na lista do catálogo.',
             'referencia': ''}

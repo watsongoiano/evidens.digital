@@ -256,7 +256,7 @@ class _Minuta(FPDF):
 # operadora e do prestador executante, e ficam em branco.
 
 LINHAS_POR_GUIA = 5      # a guia impressa do padrão tem 5 linhas de procedimentos solicitados
-CARATER_ELETIVO = '1 - Eletivo'
+CARATER_ELETIVO = '1'   # Caráter do atendimento, tabela TISS: 1 = eletivo
 
 
 def indicacao_clinica(texto):
@@ -300,15 +300,30 @@ def _encaixar(pdf, x, y, largura, altura, valor, tamanho=9, estilo=''):
         pdf.cell(largura, altura_da_linha, linha)
 
 
+def _rotulo(pdf, x, y, largura, rotulo):
+    """Rótulo do campo dentro da largura: diminui a letra até 4,6 e, se ainda não couber, quebra em duas linhas.
+    Devolve a altura ocupada."""
+    pdf.set_text_color(70, 80, 84)
+    tamanho = 5.6
+    pdf.set_font('DejaVu', '', tamanho)
+    while pdf.get_string_width(rotulo) > largura and tamanho > 4.2:
+        tamanho -= 0.2
+        pdf.set_font('DejaVu', '', tamanho)
+    pdf.set_xy(x, y)
+    if pdf.get_string_width(rotulo) <= largura:
+        pdf.cell(largura, 2.6, rotulo)
+        return 2.6
+    pdf.multi_cell(largura, 1.6, rotulo, align='L')
+    return 3.2
+
+
 def _campo(pdf, x, y, largura, altura, rotulo, valor='', tamanho=9):
     pdf.set_draw_color(20, 41, 47)
     pdf.rect(x, y, largura, altura)
-    pdf.set_xy(x + 0.8, y + 0.5)
-    pdf.set_font('DejaVu', '', 5.6)
-    pdf.set_text_color(70, 80, 84)
-    pdf.cell(largura - 1.6, 2.6, rotulo)
+    ocupado = _rotulo(pdf, x + 0.8, y + 0.5, largura - 1.6, rotulo)
     if valor:
-        _encaixar(pdf, x + 1.2, y + 3.2, largura - 2.4, altura - 3.6, valor, tamanho)
+        livre = max(altura - 1.0 - ocupado, 2.6)   # rótulo em duas linhas: o valor encolhe, mas fica dentro da caixa
+        _encaixar(pdf, x + 1.2, y + altura - 0.4 - livre, largura - 2.4, livre, valor, tamanho)
 
 
 def _faixa(pdf, y, texto):
@@ -320,80 +335,161 @@ def _faixa(pdf, y, texto):
     return y + 4
 
 
+# Posições copiadas da guia SP/SADT impressa do padrão TISS 4 (modelo 2023, com os campos 89 a 92): a medida
+# está em unidades do modelo (1 unidade = 0,1715 mm em A4 paisagem) para a guia sair com a mesma geometria.
+_ESCALA_GUIA = 0.168
+_X0_GUIA, _Y0_GUIA = 18.3, 4.0
+# O quadro dos procedimentos solicitados ganha 25 unidades de altura (descrições longas cabem inteiras);
+# tudo o que vem abaixo dele desce o mesmo tanto.
+_FIM_SOLICITADOS, _ACRESCIMO = 566, 25
+
+
+def _g(x, y=None):
+    """Converte posições do modelo para milímetros na página."""
+    if y is None:
+        return x * _ESCALA_GUIA
+    if y >= _FIM_SOLICITADOS:
+        y += _ACRESCIMO
+    return _X0_GUIA + (x - 30) * _ESCALA_GUIA, _Y0_GUIA + (y - 15) * _ESCALA_GUIA
+
+
+def _campo_guia(pdf, x1, y1, x2, y2, rotulo, valor='', tamanho=8.5):
+    x, y = _g(x1, y1)
+    _campo(pdf, x, y, _g(x2 - x1), _g(y2 - y1), rotulo, valor, tamanho)
+
+
+def _faixa_guia(pdf, y1, texto):
+    x, y = _g(30, y1)
+    pdf.set_fill_color(225, 232, 234)
+    pdf.set_xy(x, y)
+    pdf.set_font('DejaVu', 'B', 6.2)
+    pdf.set_text_color(20, 41, 47)
+    pdf.cell(_g(1550), _g(14), texto, fill=True)
+
+
+def _tabela_guia(pdf, y1, y2, colunas, linhas, valores=None, numerar=True):
+    """Quadro com cabeçalho de colunas (x1, x2, rótulo) e ``linhas`` linhas; ``valores``: lista de tuplas."""
+    x, y = _g(30, y1)
+    altura = _g(y2 - y1)
+    pdf.set_draw_color(20, 41, 47)
+    pdf.rect(x, y, _g(1550), altura)
+    cabecalho = max(_rotulo(pdf, _g(c1, y1)[0] + 0.4, y + 0.5, _g(c2 - c1) - 0.6, rotulo) for c1, c2, rotulo in colunas)
+    topo = y + cabecalho + 0.8
+    passo = (altura - cabecalho - 1.2) / linhas
+    for n in range(linhas):
+        base = topo + passo * (n + 1) - 0.8
+        if numerar:
+            pdf.set_font('DejaVu', '', 5.4)
+            pdf.set_text_color(70, 80, 84)
+            pdf.set_xy(x + 0.4, base - 2.6)
+            pdf.cell(3, 2.6, f'{n + 1}-')
+        pdf.set_draw_color(160, 170, 172)
+        for c1, c2, _ in colunas:
+            pdf.line(_g(c1, 0)[0] + (2.4 if numerar and c1 == colunas[0][0] else 0), base, _g(c2, 0)[0], base)
+        if valores and n < len(valores):
+            for (c1, c2, _), valor in zip(colunas, valores[n]):
+                if valor:
+                    inicio = _g(c1, 0)[0] + (2.6 if numerar and c1 == colunas[0][0] else 0.4)
+                    _encaixar(pdf, inicio, base - passo + 0.3, _g(c2, 0)[0] - inicio - 0.4, passo - 0.5, valor, 7.5)
+    pdf.set_draw_color(20, 41, 47)
+
+
 def _pagina_da_guia(pdf, dados_paciente, guia, linhas, parte, partes):
     pdf.add_page(orientation='L', format='A4')   # a guia é sempre A4, com ou sem papel timbrado
     cred, resp = guia['credenciamento'], guia.get('responsavel') or {}
     uf, numero = _numero_do_crm(resp.get('crm'))
-    _encaixar(pdf, 10, 8, 58, 9, cred['operadora'], 11, estilo='B')
+    # Cabeçalho: o nome da operadora (sem logotipo), o título do padrão e o nº da guia no prestador
+    x, y = _g(30, 20)
+    _encaixar(pdf, x, y, _g(230), _g(70), cred['operadora'], 12, estilo='B')
     pdf.set_text_color(20, 41, 47)
-    pdf.set_font('DejaVu', 'B', 8.5)
-    pdf.set_xy(70, 9)
-    pdf.cell(160, 7, 'GUIA DE SERVIÇO PROFISSIONAL / SERVIÇO AUXILIAR DE DIAGNÓSTICO E TERAPIA - SP/SADT', align='C')
-    _campo(pdf, 232, 8, 55, 9, '2 - Nº Guia no Prestador')
-    y = 19
-    _campo(pdf, 10, y, 30, 9, '1 - Registro ANS', cred.get('registro_ans'))
-    _campo(pdf, 40, y, 52, 9, '3 - Nº Guia Principal')
-    _campo(pdf, 92, y, 35, 9, '4 - Data da Autorização')
-    _campo(pdf, 127, y, 55, 9, '5 - Senha')
-    _campo(pdf, 182, y, 40, 9, '6 - Data de Validade da Senha')
-    _campo(pdf, 222, y, 65, 9, '7 - Nº da Guia Atribuído pela Operadora')
-    y = _faixa(pdf, y + 10, 'Dados do Beneficiário')
+    pdf.set_font('DejaVu', 'B', 9.5)
+    x, y = _g(470, 28)
+    pdf.set_xy(x, y)
+    pdf.multi_cell(_g(660), 4.4, 'GUIA DE SERVIÇO PROFISSIONAL / SERVIÇO AUXILIAR DE\nDIAGNÓSTICO E TERAPIA - SP/SADT', align='C')
+    _campo_guia(pdf, 1240, 32, 1580, 62, '2 - Nº Guia no Prestador')
+    # Operadora e autorização
+    _campo_guia(pdf, 30, 102, 168, 140, '1 - Registro ANS', cred.get('registro_ans'))
+    _campo_guia(pdf, 175, 102, 594, 140, '3 - Número da Guia Principal')
+    _campo_guia(pdf, 30, 144, 228, 182, '4 - Data da Autorização')
+    _campo_guia(pdf, 243, 144, 655, 182, '5 - Senha')
+    _campo_guia(pdf, 673, 144, 865, 182, '6 - Data de Validade da Senha')
+    _campo_guia(pdf, 878, 144, 1288, 182, '7 - Número da Guia Atribuído pela Operadora')
+    # Beneficiário
+    _faixa_guia(pdf, 185, 'Dados do Beneficiário')
     nome = dados_paciente.get('nome') or ''
-    _campo(pdf, 10, y, 62, 9, '8 - Número da Carteira', guia.get('carteira'))
-    _campo(pdf, 72, y, 30, 9, '9 - Validade da Carteira')
-    _campo(pdf, 102, y, 120, 9, '10 - Nome', '' if nome in ('Paciente', 'Não informado') else nome)
-    _campo(pdf, 222, y, 45, 9, '11 - Cartão Nacional de Saúde')
-    _campo(pdf, 267, y, 20, 9, '12 - Atend. a RN', 'N')
-    y = _faixa(pdf, y + 10, 'Dados do Solicitante')
-    _campo(pdf, 10, y, 62, 9, '13 - Código na Operadora', cred['codigo_prestador'])
-    _campo(pdf, 72, y, 215, 9, '14 - Nome do Contratado', cred['nome_contratado'])
-    y += 9
-    _campo(pdf, 10, y, 92, 9, '15 - Nome do Profissional Solicitante', resp.get('nome'))
-    _campo(pdf, 102, y, 32, 9, '16 - Conselho Profissional', 'CRM' if numero else '')
-    _campo(pdf, 134, y, 34, 9, '17 - Número no Conselho', numero)
-    _campo(pdf, 168, y, 14, 9, '18 - UF', uf)
-    _campo(pdf, 182, y, 30, 9, '19 - Código CBO', cred.get('cbo'))
-    _campo(pdf, 212, y, 75, 9, '20 - Assinatura do Profissional Solicitante',
-           'Assinado digitalmente (ICP-Brasil)' if pdf.assinante else '')
-    y = _faixa(pdf, y + 10, 'Dados da Solicitação / Procedimentos ou Itens Assistenciais Solicitados')
-    _campo(pdf, 10, y, 40, 9, '21 - Caráter do Atendimento', CARATER_ELETIVO)
-    _campo(pdf, 50, y, 40, 9, '22 - Data da Solicitação', data_de_emissao('pt'))
-    _campo(pdf, 90, y, 197, 9, '23 - Indicação Clínica', guia['indicacao'])
-    y += 9
-    colunas = ((10, 18, '24 - Tabela'), (28, 34, '25 - Código do Procedimento'), (62, 177, '26 - Descrição'),
-               (239, 24, '27 - Qtde. Solic.'), (263, 24, '28 - Qtde. Aut.'))
-    pdf.set_font('DejaVu', '', 5.6)
+    _campo_guia(pdf, 30, 201, 403, 239, '8 - Número da Carteira', guia.get('carteira'))
+    _campo_guia(pdf, 412, 201, 607, 239, '9 - Validade da Carteira')
+    _campo_guia(pdf, 614, 201, 1430, 239, '89 - Nome Social')
+    _campo_guia(pdf, 1437, 201, 1580, 239, '12 - Atendimento a RN', 'N')
+    _campo_guia(pdf, 30, 242, 1580, 280, '10 - Nome', '' if nome in ('Paciente', 'Não informado') else nome)
+    # Solicitante
+    _faixa_guia(pdf, 284, 'Dados do Solicitante')
+    _campo_guia(pdf, 30, 299, 327, 338, '13 - Código na Operadora', cred['codigo_prestador'])
+    _campo_guia(pdf, 336, 299, 1580, 338, '14 - Nome do Contratado', cred['nome_contratado'])
+    _campo_guia(pdf, 30, 342, 466, 381, '15 - Nome do Profissional Solicitante', resp.get('nome'))
+    _campo_guia(pdf, 472, 342, 583, 381, '16 - Conselho Profissional', 'CRM' if numero else '')
+    _campo_guia(pdf, 590, 342, 897, 381, '17 - Número no Conselho', numero)
+    _campo_guia(pdf, 904, 342, 956, 381, '18 - UF', uf)
+    _campo_guia(pdf, 962, 342, 1090, 381, '19 - Código CBO', cred.get('cbo'))
+    _campo_guia(pdf, 1097, 342, 1580, 381, '20 - Assinatura do Profissional Solicitante',
+                'Assinado digitalmente (ICP-Brasil)' if pdf.assinante else '')
+    # Solicitação
+    _faixa_guia(pdf, 386, 'Dados da Solicitação / Procedimentos ou Itens Assistenciais Solicitados')
+    _campo_guia(pdf, 30, 402, 140, 440, '21 - Caráter do Atendimento', CARATER_ELETIVO)
+    _campo_guia(pdf, 146, 402, 315, 440, '22 - Data da Solicitação', data_de_emissao('pt'))
+    _campo_guia(pdf, 322, 402, 1246, 440, '23 - Indicação Clínica', guia['indicacao'])
+    _campo_guia(pdf, 1252, 402, 1453, 440, '90 - Indicador de Cobertura Especial')
+    valores = [(TABELA_TUSS if l['codigo'] else '', l['codigo'], l['descricao'], str(l['quantidade']), '') for l in linhas]
+    _tabela_guia(pdf, 445, 565 + _ACRESCIMO, ((30, 95, '24 - Tabela'), (97, 300, '25 - Código do Procedimento ou Item Assistencial'),
+                                 (303, 1335, '26 - Descrição'), (1345, 1412, '27 - Qtde. Solic.'),
+                                 (1430, 1497, '28 - Qtde. Aut.')), LINHAS_POR_GUIA, valores)
+    # Executante e atendimento (preenchidos por quem executa)
+    _faixa_guia(pdf, 567, 'Dados do Contratado Executante')
+    _campo_guia(pdf, 30, 583, 341, 622, '29 - Código na Operadora')
+    _campo_guia(pdf, 348, 583, 1400, 622, '30 - Nome do Contratado')
+    _campo_guia(pdf, 1407, 583, 1578, 622, '31 - Código CNES')
+    _faixa_guia(pdf, 625, 'Dados do Atendimento')
+    for x1, x2, rotulo in ((30, 158, '32 - Tipo de Atendimento'), (163, 473, '33 - Indicação de Acidente'),
+                           (482, 597, '34 - Tipo de Consulta'), (604, 835, '35 - Motivo de Encerramento'),
+                           (842, 1002, '91 - Regime de Atendimento'), (1009, 1139, '92 - Saúde Ocupacional')):
+        _campo_guia(pdf, x1, 641, x2, 681, rotulo)
+    _faixa_guia(pdf, 684, 'Dados da Execução / Procedimentos e Exames Realizados')
+    _tabela_guia(pdf, 701, 835, ((30, 215, '36 - Data'), (220, 300, '37 - Hora Inicial'), (300, 368, '38 - Hora Final'),
+                                 (372, 418, '39 - Tabela'), (422, 567, '40 - Código do Procedimento'),
+                                 (572, 930, '41 - Descrição'), (936, 997, '42 - Qtde.'), (1000, 1032, '43 - Via'),
+                                 (1035, 1068, '44 - Téc.'), (1075, 1180, '45 - Fator Red./Acresc.'),
+                                 (1195, 1360, '46 - Valor Unitário (R$)'), (1368, 1538, '47 - Valor Total (R$)')), 5)
+    _faixa_guia(pdf, 838, 'Identificação do(s) Profissional(is) Executante(s)')
+    _tabela_guia(pdf, 854, 962, ((30, 88, '48 - Seq. Ref.'), (92, 155, '49 - Grau Part.'),
+                                 (160, 445, '50 - Código na Operadora/CPF'), (452, 1000, '51 - Nome do Profissional'),
+                                 (1000, 1062, '52 - Conselho'), (1066, 1365, '53 - Número no Conselho'),
+                                 (1370, 1415, '54 - UF'), (1420, 1540, '55 - Código CBO')), 4, numerar=False)
+    # Procedimentos em série (datas e assinaturas do beneficiário)
+    x, y = _g(30, 966)
+    pdf.rect(x, y, _g(1550), _g(62))
+    pdf.set_font('DejaVu', '', 5.4)
     pdf.set_text_color(70, 80, 84)
-    for x, largura, rotulo in colunas:
-        pdf.rect(x, y, largura, 4.5)
-        pdf.set_xy(x + 0.8, y + 0.9)
-        pdf.cell(largura - 1.6, 2.6, rotulo)
-    y += 4.5
-    pdf.set_text_color(20, 41, 47)
-    for n in range(LINHAS_POR_GUIA):
-        linha = linhas[n] if n < len(linhas) else None
-        valores = ((TABELA_TUSS if linha['codigo'] else '', linha['codigo'], linha['descricao'], str(linha['quantidade']), '')
-                   if linha else ('', '', '', '', ''))
-        for (x, largura, _), valor in zip(colunas, valores):
-            pdf.rect(x, y, largura, 7)
-            if valor:
-                _encaixar(pdf, x + 1.2, y + 0.4, largura - 2.4, 6.2, valor, 8)
-        y += 7
-    y = _faixa(pdf, y + 1, 'Dados do Contratado Executante')
-    _campo(pdf, 10, y, 62, 9, '29 - Código na Operadora')
-    _campo(pdf, 72, y, 170, 9, '30 - Nome do Contratado')
-    _campo(pdf, 242, y, 45, 9, '31 - Código CNES')
-    y += 11
-    _campo(pdf, 10, y, 277, 18, 'Observação / Justificativa')
-    pdf.set_xy(10, y + 20)
-    pdf.set_font('DejaVu', '', 6.5)
-    pdf.set_text_color(90, 100, 103)
-    pdf.multi_cell(277, 3.4,
-                   f'Guia {parte} de {partes} deste pedido. Solicitação preenchida pelo Evidēns no padrão TISS (ANS), com os códigos da '
-                   'TUSS (tabela 22); linha sem código deve ser completada conforme a tabela da operadora. '
-                   'Senha, validade e autorização são emitidas pela operadora. '
-                   + ('Assinada digitalmente com certificado ICP-Brasil; confira em validar.iti.gov.br.' if pdf.assinante
-                      else 'Válida somente com assinatura e carimbo do médico solicitante.'))
+    pdf.set_xy(x + 0.6, y + 0.6)
+    pdf.cell(_g(1500), 2.4, '56 - Data de Realização de Procedimentos em Série     57 - Assinatura do Beneficiário ou Responsável')
+    pdf.set_draw_color(160, 170, 172)
+    for n in range(10):
+        coluna, linha_ = divmod(n, 2)
+        cx, cy = _g(30 + coluna * 303, 0)[0] + 0.8, y + 5.6 + linha_ * 4.6
+        pdf.set_xy(cx, cy - 2.4)
+        pdf.cell(3, 2.4, f'{n + 1} -')
+        pdf.line(cx + 3.6, cy, cx + 16, cy)
+        pdf.line(cx + 18, cy, cx + _g(290) - 1.6, cy)
+    pdf.set_draw_color(20, 41, 47)
+    _campo_guia(pdf, 30, 1032, 1580, 1095, '58 - Observação / Justificativa',
+                f'Guia {parte} de {partes} deste pedido.' if partes > 1 else '', tamanho=7.5)
+    for x1, x2, rotulo in ((30, 245, '59 - Total de Procedimentos (R$)'), (252, 468, '60 - Total de Taxas e Aluguéis (R$)'),
+                           (475, 690, '61 - Total de Materiais (R$)'), (697, 912, '62 - Total de OPME (R$)'),
+                           (919, 1128, '63 - Total de Medicamentos (R$)'), (1135, 1352, '64 - Total de Gases Medicinais (R$)'),
+                           (1359, 1580, '65 - Total Geral (R$)')):
+        _campo_guia(pdf, x1, 1100, x2, 1138, rotulo)
+    _campo_guia(pdf, 30, 1142, 558, 1185, '66 - Assinatura do Responsável pela Autorização')
+    _campo_guia(pdf, 566, 1142, 1083, 1185, '67 - Assinatura do Beneficiário ou Responsável')
+    _campo_guia(pdf, 1090, 1142, 1580, 1185, '68 - Assinatura do Contratado')
 
 
 TABELA_TUSS = '22'

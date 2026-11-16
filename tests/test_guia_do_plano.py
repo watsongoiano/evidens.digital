@@ -162,7 +162,7 @@ def test_guia_sai_depois_do_pedido_com_os_dados_do_medico_e_do_plano(app, contas
     texto = '\n'.join(guias)
     for esperado in ('SP/SADT', 'Unimed Goiânia', '123456', '0012345', 'Clínica de Teste Ltda.', '225125',
                      medico['nome'], 'CRM', medico['registro'].split()[-1], 'GO', 'Maria de Teste',
-                     '0064 0012 3456 7890', 'Check-up — 65 anos, diabetes tipo 2', '1 - Eletivo'):
+                     '0064 0012 3456 7890', 'Check-up — 65 anos, diabetes tipo 2', 'Caráter do'):
         assert esperado in texto, esperado
     if 'laboratoriais' in rota:
         # 8 códigos (hemograma, creatinina, TGO, TGP e os 4 do perfil lipídico): 5 por guia = 2 guias

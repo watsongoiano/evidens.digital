@@ -255,4 +255,6 @@ def test_formulario_tem_o_campo_so_para_o_sexo_feminino():
     for valor in C.RESULTADOS:
         assert f'<option value="{valor}">' in html
     assert tuple(validacao.RESULTADOS_HPV) == tuple(C.RESULTADOS)
-    assert "getElementById('hpv-item').style.display = feminino ? 'block' : 'none'" in html
+    # Só para mulheres com colo, a partir dos 25 anos ou com HIV/imunossupressão (MS 2025, rec. 11)
+    assert "const hpv = comColo && (imuno || idade >= 25);" in html
+    assert "getElementById('hpv-item').style.display = hpv ? 'block' : 'none'" in html

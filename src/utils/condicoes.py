@@ -421,13 +421,16 @@ def _detalhe_drc(chave):
     return 'drc_' + chave.lower().replace('-', '_')
 
 
-def estagio_drc(com, tfg=None):
-    """(estágio G, categoria A) da DRC; o pior entre a TFG calculada e o detalhe marcado. None se não se sabe."""
+def estagio_drc(com, tfg=None, uacr=None):
+    """(estágio G, categoria A) da DRC; o pior entre o calculado (TFG, uACR em mg/g) e o detalhe marcado.
+    None se não se sabe."""
     marcados = [g for g in ESTAGIOS_G if _detalhe_drc(g) in com]
     if tfg is not None:
         marcados.append('G1-G2' if tfg >= 60 else 'G3a' if tfg >= 45 else 'G3b' if tfg >= 30 else 'G4' if tfg >= 15 else 'G5')
     g = max(marcados, key=ESTAGIOS_G.index) if marcados else None
     categorias = [a for a in CATEGORIAS_A if _detalhe_drc(a) in com]
+    if uacr is not None:
+        categorias.append('A1' if uacr < 30 else 'A2' if uacr <= 300 else 'A3')   # KDIGO 2024, Tabela 3
     return g, (max(categorias, key=CATEGORIAS_A.index) if categorias else None)
 
 
@@ -490,7 +493,7 @@ def _garantir(recs, nova):
 
 def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False, tabagismo=None, imc=None,
             tfg=None, creatinina=None, peso=None, hipertensao=False, imunossuprimido=None, cd4=None,
-            idade_ccr_familiar=None):
+            idade_ccr_familiar=None, uacr=None):
     """Soma às recomendações o que as listas disparam. Devolve as orientações (sem pedido/receita).
 
     ``tfg`` (CKD-EPI 2021), ``creatinina`` e ``peso`` vêm dos exames informados; ``hipertensao`` é a HAS que
@@ -498,6 +501,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     ``imunossuprimido``: resposta "Sim" da triagem de imunossupressão (inclui a implicada pelas listas); sem ela,
     vale só o que as listas implicam. ``cd4``: LT-CD4+ da pessoa vivendo com HIV (imunodeficiência grave < 200).
     ``idade_ccr_familiar``: idade do diagnóstico do familiar mais jovem com câncer colorretal (opcional).
+    ``uacr``: relação albumina/creatinina urinária (mg/g), que define a categoria A da DRC.
     """
     com, med, fam = set(comorbidades), set(medicacoes), set(familia)
     orient = []
@@ -539,7 +543,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                         f'{quem} | A cada 3-12 meses', ACC_AHA_COLESTEROL + (' / ' + SBC_DISLIPIDEMIA if dcv else ''), 'A', 'alta')
         if diabetico and hipolipemiante:
             orientar('Perfil lipídico no diabetes em uso de estatina: diretrizes divergem',
-                     'O motor seguiu a ACC/AHA 2018 (4-12 semanas após iniciar ou ajustar e depois a cada 3-12 meses). A ADA '
+                     'Nós optamos por seguir a referência da ACC/AHA 2018 (4-12 semanas após iniciar ou ajustar e depois a cada 3-12 meses). A ADA '
                      '2026 aceita, depois do controle de 4-12 semanas, um perfil lipídico por ano.',
                      ACC_AHA_COLESTEROL + ' / ' + ADA_LIPIDIOS)
     elif diabetico:
@@ -576,7 +580,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             orientar('Colonoscopia por história familiar de câncer colorretal',
                      'Parente de 1º grau com câncer colorretal antes dos 60 anos (ou 2 ou mais parentes): colonoscopia a cada '
                      '5 anos, começando aos 40 anos ou 10 anos antes da idade do diagnóstico do familiar mais jovem (o que '
-                     'vier primeiro). Informe a idade do familiar na história familiar para o motor calcular o início.', USMSTF)
+                     'vier primeiro). Com a idade do familiar informada na história familiar, calculamos o início.', USMSTF)
     elif 'cancer_colorretal' in fam:
         if 40 <= idade <= FIM_VIGILANCIA:
             add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
@@ -923,7 +927,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'semanal nas 18 primeiras semanas e mensal depois.', 'Em uso de clozapina | A cada 1-4 semanas',
             FDA_CLOZAPINA + ' / ' + ANVISA_CLOZAPINA, 'B', 'alta')
         orientar('Clozapina: neutrófilos e miocardite',
-                 'O motor seguiu a bula americana para os neutrófilos (semanal até 6 meses, quinzenal até 12 meses e mensal '
+                 'Nós optamos por seguir a referência da bula americana para os neutrófilos (semanal até 6 meses, quinzenal até 12 meses e mensal '
                  'depois); a bula brasileira pede semanal até 18 semanas e mensal depois. Miocardite: troponina e PCR antes de '
                  'iniciar e nos dias 7, 14, 21 e 28; troponina acima de 2 vezes o limite ou PCR acima de 100 mg/L indicam '
                  'suspender.', FDA_CLOZAPINA + ' / ' + ANVISA_CLOZAPINA + ' / ' + RONALDSON)
@@ -974,9 +978,9 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Corticoide sistêmico por 3 meses ou mais: manter vitamina D adequada (prevenção de osteoporose induzida por corticoide).',
             f'{quem} | Basal', ACR_GIOP + ' / ' + SPARLING, 'B')
         orientar('Vitamina D no corticoide crônico: diretrizes divergem',
-                 'O motor pede a 25(OH)D basal no uso de corticoide por 3 meses ou mais (Sparling 2024). A ACR 2022 recomenda '
+                 'Sugerimos a 25(OH)D basal no uso de corticoide por 3 meses ou mais (Sparling 2024). A ACR 2022 recomenda '
                  'otimizar cálcio e vitamina D sem exigir a dosagem, e a Endocrine Society 2024 sugere não dosar de rotina em '
-                 'adultos sem indicação. Retire o exame se for suplementar empiricamente.',
+                 'adultos sem indicação. Se a opção for suplementar empiricamente, o exame pode ser retirado.',
                  SPARLING + ' / ' + ACR_GIOP + ' / ' + ENDO_VITAMINA_D)
     if cronico or imunossupressor:
         painel = ('Hemograma completo com plaquetas', 'Albumina, soro', 'Creatinina, soro', 'Ureia, soro', 'Sódio, soro',
@@ -1292,13 +1296,13 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     if 'diabetes_sem_tipo' in com:
         orientar('HbA1c ≥ 6,5%: informe o tipo de diabetes',
                  'HbA1c ≥ 6,5% é critério de diabetes (confirmar com um segundo exame se não houver hiperglicemia inequívoca), '
-                 'mas não define o tipo. As recomendações foram montadas como para uma pessoa com diabetes. Marque o tipo '
-                 'para refinar (por exemplo, TSH no tipo 1).', 'ADA 2026')
+                 'mas não define o tipo. As recomendações foram montadas como para uma pessoa com diabetes. Com o tipo marcado, '
+                 'elas ficam mais precisas (por exemplo, TSH no tipo 1).', 'ADA 2026')
     if 'insulina' in med and not com_tipo:
         orientar('Insulina em uso: informe o tipo de diabetes',
                  'A insulina é usada no diabetes tipo 1, no tipo 2, no gestacional e em outros tipos; por isso não marca um tipo '
-                 'sozinha. As recomendações foram montadas como para uma pessoa com diabetes. Marque o tipo para refinar '
-                 '(por exemplo, TSH no tipo 1).', 'ADA 2026')
+                 'sozinha. As recomendações foram montadas como para uma pessoa com diabetes. Com o tipo marcado, elas ficam '
+                 'mais precisas (por exemplo, TSH no tipo 1).', 'ADA 2026')
     if 'diabetes_gestacional_previo' in com and sexo == 'feminino' and not gestante and not diabetico:
         for titulo in ('Glicose, soro', 'Hemoglobina glicada (HbA1c), soro'):
             add(titulo, 'laboratorio',
@@ -1344,8 +1348,8 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  'perda de sensibilidade, deformidade ou úlcera prévia.', ADA_PES)
     if so_dm1:
         orientar('Diabetes tipo 1: quando começar a uACR',
-                 'No tipo 1, a uACR e a TFG anuais começam 5 anos após o diagnóstico (no tipo 2, desde o diagnóstico). O motor não '
-                 'sabe a duração do diabetes: retire a uACR se o diagnóstico tiver menos de 5 anos e não houver outra indicação.',
+                 'No tipo 1, a uACR e a TFG anuais começam 5 anos após o diagnóstico (no tipo 2, desde o diagnóstico). Não temos '
+                 'como saber a duração do diabetes: a uACR pode ser retirada se o diagnóstico tiver menos de 5 anos e não houver outra indicação.',
                  'ADA 2026 (seção 11)')
     if 'diabetes_tipo_1' in com:
         for titulo in ('Anticorpo antitransglutaminase tecidual IgA, soro', 'Imunoglobulina A (IgA), soro'):
@@ -1384,8 +1388,8 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     if 'gota' in com:
         add('Creatinina, soro', 'laboratorio', 'Gota: função renal para a dose do hipouricemiante e para a escolha do '
             'anti-inflamatório da crise.', 'Gota | Periódico', 'ACR 2020', 'B')
-        orientar('Gota: comorbidades', 'Rastrear e tratar hipertensão, diabetes, dislipidemia, obesidade e doença renal, '
-                 'frequentes na gota. Evitar diurético para tratar a hipertensão quando houver alternativa.', 'ACR 2020 / ' + EULAR_CV_DRM)
+        orientar('Gota: comorbidades', 'Sugerimos rastrear e tratar hipertensão, diabetes, dislipidemia, obesidade e doença renal, '
+                 'frequentes na gota, e evitar diurético para tratar a hipertensão quando houver alternativa.', 'ACR 2020 / ' + EULAR_CV_DRM)
 
     # ---------------- Doenças inflamatórias imunomediadas: cada uma com o seu acompanhamento ----------------
     articulares = [c for c in ('artrite_reumatoide', 'artrite_psoriasica', 'espondiloartrite') if c in com]
@@ -1476,7 +1480,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             orientar(f'{nome}: colonoscopia de vigilância',
                      'Primeira colonoscopia de vigilância 8 anos após o início dos sintomas (logo no diagnóstico, se houver '
                      f'colangite esclerosante primária) quando houver {extensao}; o intervalo seguinte depende do risco. '
-                     'Marque os detalhes do item para o sistema calcular.', BSG_DII)
+                     'Com os detalhes do item marcados, calculamos o intervalo.', BSG_DII)
         if chave == 'doenca_crohn' and 'crohn_delgado' in com:
             for titulo in ('Vitamina B12, soro', 'Ácido fólico, soro'):
                 add(titulo, 'laboratorio', 'Crohn de intestino delgado ou ressecção ileal: vitamina B12 e ácido fólico pelo '
@@ -1499,7 +1503,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Esclerose sistêmica | Avaliação inicial', ACR_CHEST_DPI, 'B', 'alta')
     if LEGADO_AUTOIMUNE in com:
         orientar('Doença inflamatória autoimune: especifique',
-                 'O item antigo reunia doenças com acompanhamento diferente. Escolha na lista a doença (artrite reumatoide, '
+                 'O item antigo reunia doenças com acompanhamento diferente. Sugerimos escolher na lista a doença (artrite reumatoide, '
                  'lúpus, psoríase, artrite psoriásica, espondiloartrite, Crohn, retocolite ou esclerose sistêmica).', EULAR_CV_ARTRITES)
 
     # ---------------- Hepatites virais crônicas ----------------
@@ -1554,7 +1558,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
 
     # ---------------- Doença renal crônica (relatório D, D-01; relatório A, M-03) ----------------
     if 'doenca_renal' in com:
-        g, a = estagio_drc(com, tfg)
+        g, a = estagio_drc(com, tfg, uacr)
         if g:
             vezes = VEZES_POR_ANO[g][CATEGORIAS_A.index(a) if a else 0]
         else:
@@ -1568,9 +1572,10 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                 'A uACR também define a categoria A e a indicação de iSGLT2 e de IECA ou BRA.',
                 f'{grupo} | {freq}', KDIGO_DRC, 'E', 'alta')
         if not g or not a:
-            orientar('Doença renal crônica: informe o estágio',
-                     'A frequência de TFG e albuminúria depende do estágio G (TFG) e da categoria A (albuminúria). Informe a '
-                     'creatinina e marque os detalhes do item para o sistema ajustar; sem eles, o mínimo é uma vez por ano.', KDIGO_DRC)
+            orientar('Doença renal crônica: estágio incompleto',
+                     'A frequência de TFG e albuminúria depende do estágio G (TFG) e da categoria A (albuminúria). Com a '
+                     'creatinina e a relação albumina/creatinina informadas, ou com os detalhes do item marcados, ajustamos a '
+                     'frequência; sem eles, o mínimo é uma vez por ano.', KDIGO_DRC)
         if g in ('G3a', 'G3b', 'G4', 'G5'):
             g3 = g in ('G3a', 'G3b')
             add('Hemograma completo com plaquetas', 'laboratorio',
@@ -1619,7 +1624,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                 ACC_AHA_HAS_2017 + ' / AHA 2025', 'B')
         orientar('Ácido úrico na hipertensão: diretrizes divergem',
                  'A SBC 2025 inclui o ácido úrico nos exames de rotina do hipertenso; a AHA/ACC o trata como exame opcional, sem '
-                 'repetição seriada. O motor pede uma dosagem na avaliação inicial.', 'SBC 2025 / AHA 2025')
+                 'repetição seriada. Sugerimos uma dosagem na avaliação inicial.', 'SBC 2025 / AHA 2025')
         resistente = 'has_resistente' in com
         if 'apneia_sono' in com and not resistente:
             add('Relação Aldosterona/Renina (A/R)', 'laboratorio',
@@ -1627,8 +1632,8 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                 'pela manhã e sentado; corrigir a hipocalemia; interpretar pelos cortes do método do laboratório).',
                 'HAS com apneia do sono | Avaliação inicial', ENDO_PA_2016 + ' / ' + ENDO_PA_2025, 'C')
         orientar('Hiperaldosteronismo primário: diretrizes divergem',
-                 'O motor pede a relação aldosterona/renina na HAS resistente (AHA/ACC 2025, classe 1, com qualquer potássio) e na '
-                 'HAS com apneia do sono (Endocrine Society 2016). Rastreie também com hipocalemia espontânea ou por diurético, '
+                 'Sugerimos a relação aldosterona/renina na HAS resistente (AHA/ACC 2025, classe 1, com qualquer potássio) e na '
+                 'HAS com apneia do sono (Endocrine Society 2016). Sugerimos rastrear também com hipocalemia espontânea ou por diurético, '
                  'incidentaloma adrenal, PA ≥ 150/100 persistente ou história familiar de HAS ou AVC antes dos 40 anos. A '
                  'Endocrine Society 2025 sugere rastrear todos os hipertensos (recomendação condicional, certeza baixa).',
                  'AHA 2025 / ' + ENDO_PA_2016 + ' / ' + ENDO_PA_2025)
@@ -1729,7 +1734,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Comorbidade de risco | Dose única | PNI: CRIE', SBIM + ' / ' + SBIM_ESPECIAIS, 'A', 'alta')
     elif tabagismo == 'atual' and 19 <= idade < 50:
         orientar('Pneumocócica no tabagismo antes dos 50 anos: diretrizes divergem',
-                 'O motor seguiu a SBIm e os CRIE, que não listam o tabagismo como risco, e não incluiu a VPC20. O ACIP indica '
+                 'Nós optamos por seguir a referência da SBIm e dos CRIE, que não listam o tabagismo como risco, e não incluímos a VPC20. O ACIP indica '
                  'a VPC20 de 19 a 49 anos em fumantes de cigarro (e no etilismo).',
                  SBIM_ESPECIAIS + ' / CDC/ACIP 2025 (pneumocócica)')
 
@@ -1811,12 +1816,12 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  'VSR (dose única) a critério médico. Não entrou na receita automática.', SBIM + ' / ' + SBIM_ESPECIAIS)
     if tem_vsr and not gestante and (18 <= idade < 50 or 70 <= idade < 75):
         orientar('VSR: diretrizes divergem',
-                 'O motor seguiu a SBIm (a partir de 18 anos na doença cardiopulmonar crônica e na imunodeficiência moderada '
+                 'Nós optamos por seguir a referência da SBIm (a partir de 18 anos na doença cardiopulmonar crônica e na imunodeficiência moderada '
                  'ou grave; rotina a partir de 70 anos). O ACIP indica a vacina a partir de 75 anos e, de 50 a 74, só com risco '
                  'aumentado.', SBIM + ' / CDC/ACIP 2025 (VSR)')
     if gestante and sexo == 'feminino':
         orientar('VSR na gestação (Abrysvo®): diretrizes divergem',
-                 'O motor seguiu a SBIm e o PNI: a partir de 28 semanas, sem limite superior, 1 dose a cada gestação. O ACIP e o '
+                 'Nós optamos por seguir a referência da SBIm e do PNI: a partir de 28 semanas, sem limite superior, 1 dose a cada gestação. O ACIP e o '
                  'ACOG indicam de 32 a 36 semanas, na sazonalidade, e não repetem a dose em gestação seguinte.',
                  SBIM + ' / CVE-SP/PNI 2025 (VSR na gestante) / CDC/ACIP 2025 (esquema adulto) / ACOG 2023')
 
@@ -1842,17 +1847,17 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             esquema='asplenia')
         orientar('Meningocócica B na asplenia: diretrizes divergem',
                  'ACIP e SBIm concordam no esquema de 3 doses (0, 1-2 e 6 meses) e no primeiro reforço 1 ano depois. Divergem nos '
-                 'reforços seguintes: a cada 2-3 anos pelo ACIP e a cada 3 anos pela SBIm. O motor mostra os dois intervalos.',
+                 'reforços seguintes: a cada 2-3 anos pelo ACIP e a cada 3 anos pela SBIm. Mostramos os dois intervalos.',
                  MENB_ACIP_REFORCO + ' / ' + SBIM_ESPECIAIS)
     elif 'meningocócica b (bexsero®)' in titulos():
         # Cartão de rotina (SBIm): 2 doses com intervalo mínimo de 1 mês. O ACIP difere no esquema e na indicação.
         orientar('Meningocócica B de rotina: diretrizes divergem',
-                 'O motor seguiu a SBIm: 2 doses com intervalo mínimo de 1 mês. O ACIP indica a MenB-4C (Bexsero®) de 16 a 23 '
+                 'Nós optamos por seguir a referência da SBIm: 2 doses com intervalo mínimo de 1 mês. O ACIP indica a MenB-4C (Bexsero®) de 16 a 23 '
                  'anos por decisão compartilhada, em 2 doses a 0 e 6 meses, e fora dessa faixa só com risco aumentado.',
                  SBIM + ' / ' + MENB_ACIP)
     if hiv or {'asplenia', 'anemia_falciforme'} & com:
         orientar('Hib no adulto: diretrizes divergem',
-                 'O motor seguiu a SBIm: 2 doses com 2 meses de intervalo no adulto não vacinado com asplenia ou HIV. O ACIP indica '
+                 'Nós optamos por seguir a referência da SBIm: 2 doses com 2 meses de intervalo no adulto não vacinado com asplenia ou HIV. O ACIP indica '
                  'dose única na asplenia e não indica Hib no adulto com HIV.', SBIM_ESPECIAIS + ' / ' + ACIP)
 
     if 'transplante' in com:
