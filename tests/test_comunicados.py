@@ -44,10 +44,37 @@ def test_envio_em_lote_uma_vez_so_para_aprovados(contas, aprovados, resend, monk
     assert comunicados.enviar(CHAVE, 'https://evidens.life', contas)[0] == 0 and len(resend) == 1
 
 
-def test_falha_devolve_as_contas_a_fila(contas, aprovados, monkeypatch):
-    monkeypatch.setattr(notificacoes, 'enviar_lote', lambda mensagens: (False, 'HTTP 500'))
+def test_recusa_da_resend_devolve_as_contas_a_fila(contas, aprovados, monkeypatch):
+    monkeypatch.setattr(notificacoes, 'enviar_lote', lambda mensagens: (False, 'HTTP 422 inválido', False))
     enviados, falha, restantes = comunicados.enviar(CHAVE, 'https://evidens.life', contas)
-    assert enviados == 0 and falha == 'HTTP 500' and restantes == 2
+    assert enviados == 0 and falha == 'HTTP 422 inválido' and restantes == 2
+
+
+@pytest.mark.parametrize('detalhe', ['TimeoutError', 'HTTP 502'])
+def test_resultado_incerto_nao_reenvia(contas, aprovados, monkeypatch, detalhe):
+    """Rede caiu ou erro 5xx: o lote pode ter saído; as contas ficam marcadas para não receber duas vezes."""
+    monkeypatch.setattr(notificacoes, 'enviar_lote', lambda mensagens: (False, detalhe, True))
+    enviados, falha, restantes = comunicados.enviar(CHAVE, 'https://evidens.life', contas)
+    assert enviados == 0 and falha.startswith(detalhe) and 'incerto' in falha and restantes == 0
+
+
+def test_enviar_lote_distingue_recusa_de_incerteza(monkeypatch):
+    import io
+    import urllib.error
+    monkeypatch.setenv('RESEND_API_KEY', 're_teste')
+
+    def falhar(erro):
+        def abrir(*a, **k):
+            raise erro
+        return abrir
+    mensagens = [('a@exemplo.test', 'Assunto', 'Texto')]
+    monkeypatch.setattr(notificacoes.urllib.request, 'urlopen', falhar(urllib.error.HTTPError(
+        'u', 422, 'x', {}, io.BytesIO(b'{"message": "invalido"}'))))
+    assert notificacoes.enviar_lote(mensagens) == (False, 'HTTP 422 invalido', False)
+    monkeypatch.setattr(notificacoes.urllib.request, 'urlopen', falhar(urllib.error.HTTPError('u', 503, 'x', {}, io.BytesIO(b''))))
+    assert notificacoes.enviar_lote(mensagens)[2] is True
+    monkeypatch.setattr(notificacoes.urllib.request, 'urlopen', falhar(TimeoutError()))
+    assert notificacoes.enviar_lote(mensagens) == (False, 'TimeoutError', True)
 
 
 def test_cron_exige_o_segredo(anonimo, monkeypatch):

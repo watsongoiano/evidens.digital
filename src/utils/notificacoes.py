@@ -188,12 +188,13 @@ def mensagem_de_novidades(usuario, url_site):
 
 def enviar_lote(mensagens):
     """Envia vários e-mails numa chamada (API de lote da Resend, até 100). ``mensagens``: (para, assunto, texto).
-    Devolve ``(ok, detalhe)``; nunca levanta exceção."""
+    Devolve ``(ok, detalhe, incerto)``; nunca levanta exceção. ``incerto``: a falha não garante que nada saiu
+    (rede caiu, tempo esgotado ou erro 5xx depois de a Resend receber o lote)."""
     chave = (os.environ.get('RESEND_API_KEY') or '').strip()
     if not chave:
-        return False, 'RESEND_API_KEY não configurada.'
+        return False, 'RESEND_API_KEY não configurada.', False
     if not mensagens:
-        return True, 'nada a enviar'
+        return True, 'nada a enviar', False
     remetente = (os.environ.get('AVISO_CADASTRO_DE') or '').strip() or REMETENTE_PADRAO
     contato = email_de_contato()
     corpo = json.dumps([{'from': remetente, 'to': [para], 'subject': assunto, 'text': texto,
@@ -202,15 +203,16 @@ def enviar_lote(mensagens):
         'Authorization': f'Bearer {chave}', 'Content-Type': 'application/json', 'User-Agent': 'evidens-digital/1.0'})
     try:
         with urllib.request.urlopen(pedido, timeout=15) as resposta:
-            return 200 <= resposta.status < 300, f'HTTP {resposta.status}'
+            return 200 <= resposta.status < 300, f'HTTP {resposta.status}', False
     except urllib.error.HTTPError as erro:
         try:
             detalhe = json.loads(erro.read().decode('utf-8', 'replace')).get('message', '')
         except Exception:
             detalhe = ''
-        return False, f'HTTP {erro.code} {detalhe}'.strip()[:300]
-    except Exception as erro:  # rede, tempo esgotado
-        return False, type(erro).__name__
+        # 4xx: a Resend recusou o lote (nada saiu). 5xx: pode ter saído.
+        return False, f'HTTP {erro.code} {detalhe}'.strip()[:300], erro.code >= 500
+    except Exception as erro:  # rede, tempo esgotado: o lote pode ter chegado à Resend
+        return False, type(erro).__name__, True
 
 
 def mensagem_de_aprovacao(usuario, url_site, reativada=False):
