@@ -127,6 +127,11 @@ _ESQUEMA = [
         usuario_id BIGINT PRIMARY KEY, arquivo {blob} NOT NULL, nome TEXT NOT NULL, enviado_em BIGINT NOT NULL,
         margem_topo REAL NOT NULL, margem_base REAL NOT NULL
     )""",
+    # Receituário da conta (src/utils/receituario.py): qual modo vale (padrão do Evidēns, modelo enviado, montado
+    # na tela ou papel já timbrado) e os dados do modo montado/papel (JSON). O PDF do modelo fica em "timbrados".
+    """CREATE TABLE IF NOT EXISTS receituarios (
+        usuario_id BIGINT PRIMARY KEY, modo TEXT NOT NULL, dados TEXT NOT NULL, logo {blob}
+    )""",
     # Sessão de assinatura digital (src/utils/assinatura.py): uma por conta, enquanto o médico a mantém aberta
     # no provedor do certificado. O token fica cifrado; o certificado é público. Nada do paciente é guardado.
     """CREATE TABLE IF NOT EXISTS assinatura_sessoes (
@@ -615,3 +620,35 @@ def salvar_preferencias_de_assinatura(uid, provedor, horas, assinar):
         executar('DELETE FROM assinatura_preferencias WHERE usuario_id = ?', (int(uid),))
         executar('INSERT INTO assinatura_preferencias (usuario_id, provedor, horas, assinar) VALUES (?, ?, ?, ?)',
                  (int(uid), str(provedor), int(horas), 1 if assinar else 0))
+
+
+# ── Receituário (modo e dados do receituário montado ou do papel já timbrado) ─
+
+def receituario_de(uid):
+    """{'modo', 'dados' (dict), 'logo' (bytes ou None)} ou None."""
+    import json
+    with _conexao() as executar:
+        linha = executar('SELECT modo, dados, logo FROM receituarios WHERE usuario_id = ?', (int(uid),)).fetchone()
+    if not linha:
+        return None
+    try:
+        dados = json.loads(linha[1] or '{}')
+    except ValueError:
+        dados = {}
+    return {'modo': linha[0], 'dados': dados if isinstance(dados, dict) else {},
+            'logo': bytes(linha[2]) if linha[2] is not None else None}
+
+
+_MANTER = object()
+
+
+def salvar_receituario(uid, modo, dados=None, logo=_MANTER):
+    """Grava o modo; `dados` None mantém os dados; `logo` omitido mantém o logo (None apaga)."""
+    import json
+    atual = receituario_de(uid) or {'dados': {}, 'logo': None}
+    dados = atual['dados'] if dados is None else dados
+    logo = atual['logo'] if logo is _MANTER else logo
+    with _conexao() as executar:
+        executar('DELETE FROM receituarios WHERE usuario_id = ?', (int(uid),))
+        executar('INSERT INTO receituarios (usuario_id, modo, dados, logo) VALUES (?, ?, ?, ?)',
+                 (int(uid), str(modo), json.dumps(dados, ensure_ascii=False), bytes(logo) if logo else None))
