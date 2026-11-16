@@ -259,7 +259,9 @@ def test_formulario_tem_o_campo_so_para_o_sexo_feminino():
     assert "const hpv = feminino && (imuno || idade >= 25);" in html
     assert "getElementById('hpv-item').style.display = hpv ? 'block' : 'none'" in html
     # O resultado fica na linha do teste de HPV em "Exames já realizados" (um só lugar)
-    assert "if (/papilomavirus|dna-hpv/.test(t)) return ['hpv_resultado'];" in html
+    from src.utils import exames_comuns
+    assert exames_comuns.apelidos()['Pesquisa do Papilomavírus Humano (HPV), por técnica molecular'][1] == ['hpv_resultado']
+    assert "querySelectorAll('[data-so-feminino]')" in html
 
 
 def test_sem_rastreio_depois_dos_65_sem_indicacao(client):

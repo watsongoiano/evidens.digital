@@ -497,8 +497,13 @@ def test_resultados_dos_exames_ficam_na_linha_do_exame(pagina):
     for campo in ('colesterol', 'hdl', 'creatinina', 'uacr', 'hba1c', 'hpv_resultado'):
         assert f'id="{campo}"' in guardados and f'data-resultado="{campo}"' in guardados
     assert 'name="tem_exames"' not in pagina and 'id="exames-bloco"' not in pagina
-    for trecho in ("return ['colesterol', 'hdl']", "return ['creatinina']", "return ['uacr']", "return ['hba1c']"):
-        assert trecho in pagina
+    # Os campos de cada exame vêm de src/utils/exames_comuns.py (mesmos nomes do motor).
+    from src.utils import exames_comuns
+    assert 'camposDoExame(titulo)' in pagina
+    assert exames_comuns.apelidos()['Colesterol total e frações, soro'][1][:2] == ['colesterol', 'hdl']
+    for titulo, campo in (('Creatinina, soro', 'creatinina'), ('Relação albumina/creatinina urinária (uACR)', 'uacr'),
+                          ('Hemoglobina glicada (HbA1c), soro', 'hba1c')):
+        assert exames_comuns.apelidos()[titulo][1] == [campo]
 
 
 def test_campo_tem_exames_e_aceito_pela_api(client):
