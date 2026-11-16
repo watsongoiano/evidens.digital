@@ -146,3 +146,13 @@ def test_cid_automatico_pelas_comorbidades():
 def test_tela_envia_comorbidades_para_o_cid():
     html = open('intelligent-tools.html', encoding='utf-8').read()
     assert "cid: v('apacCid').toUpperCase(), comorbidades" in html
+
+
+def test_dados_da_apac_somem_quando_muda_o_paciente():
+    """Nome ou dados clínicos novos depois de um resultado, ou "limpar guia": o laudo do paciente anterior é apagado."""
+    html = open('intelligent-tools.html', encoding='utf-8').read()
+    for campo in ('apacCns', 'apacNascimento', 'apacMae', 'apacCid', 'apacEndereco'):
+        assert f"'{campo}'" in html.split('const CAMPOS_DA_APAC')[1].split(';')[0]
+    confirmacao = html.split('function pedirConfirmacaoDoPlano()')[1].split('\n        }')[0]
+    limpeza = html.split('function limparGuia()')[1].split('\n        }')[0]
+    assert 'limparApac()' in confirmacao and 'limparApac()' in limpeza

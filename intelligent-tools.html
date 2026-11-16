@@ -2064,9 +2064,17 @@
             document.getElementById('guiaConfirmar').style.display = pendente ? '' : 'none';
         }
 
+        // Dados do paciente no laudo de APAC: identificam uma pessoa e não podem passar para a próxima.
+        const CAMPOS_DA_APAC = ['apacCns', 'apacNascimento', 'apacMae', 'apacTelefone', 'apacCid', 'apacEndereco',
+                                'apacMunicipio', 'apacUf', 'apacCep'];
+        function limparApac() {
+            CAMPOS_DA_APAC.forEach(id => { document.getElementById(id).value = ''; });
+        }
+
         function pedirConfirmacaoDoPlano() {
             if (campoPlano().value || campoCarteira().value) planoAConfirmar = true;
             document.getElementById('guiaIndicacao').value = '';     // a sugestão é refeita com os dados novos
+            limparApac();                                             // outro paciente: o laudo do anterior não serve
             mostrarCamposDoPlano();
         }
 
@@ -2082,6 +2090,7 @@
             document.getElementById('guiaPlano').value = '';
             document.getElementById('guiaCarteira').value = '';
             document.getElementById('guiaIndicacao').value = '';
+            limparApac();
             mostrarCamposDoPlano();
             mostrarCamposDaGuia();
         }
