@@ -144,7 +144,9 @@ def test_enviar_ajustar_previa_e_remover(app, contas):
     assert 'Clinica Exemplo Timbrado' in PdfReader(io.BytesIO(previa.data)).pages[0].extract_text()
     assert cliente.post('/api/auth/timbrado/remover').status_code == 200
     assert cliente.get('/api/auth/timbrado').get_json()['timbrado'] is None
-    assert cliente.get('/api/auth/timbrado/previa').status_code == 404
+    sem = cliente.get('/api/auth/timbrado/previa')        # volta ao modelo do Evidēns
+    assert sem.status_code == 200 and 'Clinica Exemplo Timbrado' not in PdfReader(io.BytesIO(sem.data)).pages[0].extract_text()
+    assert cliente.get('/api/auth/timbrado').get_json()['modo'] == 'padrao'
 
 
 def test_timbrado_e_so_da_conta_de_quem_enviou(app, contas):

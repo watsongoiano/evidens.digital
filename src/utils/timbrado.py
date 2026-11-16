@@ -19,7 +19,8 @@ AREA_MINIMA = 120.0       # mm livres para o pedido entre o cabeçalho e o rodap
 MARGEM_MINIMA, FRACAO_MAXIMA = 10.0, 0.4   # cada margem: de 10 mm até 40% da altura da página
 
 MENSAGENS = {
-    'nao_pdf': 'Envie o timbrado em PDF.',
+    'nao_pdf': 'Envie o timbrado em PDF, PNG ou JPG.',
+    'imagem': 'Não foi possível abrir a imagem do timbrado.',
     'grande': 'O timbrado passa de 3 MB.',
     'senha': 'O PDF do timbrado está protegido por senha.',
     'invalido': 'Não foi possível abrir o PDF do timbrado.',
@@ -115,13 +116,78 @@ def _desenhado(pagina):
     return faixas
 
 
+# ── Timbrado em imagem (PNG ou JPG): vira uma página A4 em PDF e segue o mesmo caminho ──────────────
+A4 = (210.0, 297.0)
+
+
+def eh_imagem(conteudo):
+    return bool(conteudo) and (conteudo[:8] == b'\x89PNG\r\n\x1a\n' or conteudo[:3] == b'\xff\xd8\xff')
+
+
+def imagem_para_pdf(conteudo):
+    """PDF de uma página A4 com a imagem do timbrado ocupando a página (proporção mantida, centralizada)."""
+    if len(conteudo) > TAMANHO_MAXIMO:
+        raise TimbradoInvalido('grande')
+    try:
+        from PIL import Image
+        imagem = Image.open(io.BytesIO(conteudo))
+        imagem.load()
+        largura_px, altura_px = imagem.size
+        if not (100 <= largura_px <= 10000 and 100 <= altura_px <= 10000):
+            raise TimbradoInvalido('imagem')
+        if imagem.mode not in ('RGB', 'L'):
+            fundo = Image.new('RGB', imagem.size, 'white')       # transparência vira branco
+            fundo.paste(imagem.convert('RGBA'), mask=imagem.convert('RGBA').split()[-1])
+            imagem = fundo
+    except TimbradoInvalido:
+        raise
+    except Exception:
+        raise TimbradoInvalido('imagem')
+    from fpdf import FPDF
+    pdf = FPDF(unit='mm', format='A4')
+    pdf.set_auto_page_break(False)
+    pdf.set_margins(0, 0, 0)
+    pdf.add_page()
+    escala = min(A4[0] / largura_px, A4[1] / altura_px)
+    w, h = largura_px * escala, altura_px * escala
+    pdf.image(imagem, x=(A4[0] - w) / 2, y=(A4[1] - h) / 2, w=w, h=h)
+    return bytes(pdf.output())
+
+
+def _faixas_por_pixels(conteudo, altura_mm):
+    """Faixas (em pt, origem embaixo) das linhas da página com tinta, lidas na página renderizada.
+
+    Para timbrado que é uma imagem só (escaneado, foto, PNG): o desenho vetorial não diz onde fica o
+    cabeçalho. Tons claros (marca-d'água, fundo de cor suave) não contam como tinta.
+    """
+    import pypdfium2
+    documento = pypdfium2.PdfDocument(conteudo)
+    try:
+        imagem = documento[0].render(scale=50 / 72).to_pil().convert('L')
+    finally:
+        documento.close()
+    largura, altura = imagem.size
+    minimo = max(2, largura // 200)       # alguns pixels escuros na linha (não um ponto de sujeira)
+    pixels = imagem.load()
+    escuras = [sum(1 for x in range(largura) if pixels[x, y] < 170) >= minimo for y in range(altura)]
+    por_px = (altura_mm / PT_EM_MM) / altura
+    return [((altura - y - 1) * por_px, (altura - y) * por_px) for y, tinta in enumerate(escuras) if tinta]
+
+
+def _imagem_de_pagina_inteira(faixas, altura):
+    return any(y1 - y0 > altura * 0.6 for y0, y1 in faixas)
+
+
 def margens_sugeridas(conteudo):
     """(topo, base) em mm: abaixo do cabeçalho e acima do rodapé desenhados no timbrado."""
     pagina = _pagina(conteudo)
     _, altura_mm = dimensoes(conteudo)
     altura = altura_mm / PT_EM_MM
+    faixas = _desenhado(pagina)
+    if _imagem_de_pagina_inteira(faixas, altura):
+        faixas = _faixas_por_pixels(conteudo, altura_mm)
     topo = base = None
-    for y0, y1 in _desenhado(pagina):
+    for y0, y1 in faixas:
         if y1 > altura * 0.55:          # metade de cima: cabeçalho
             topo = max(topo or 0, (altura - y0) * PT_EM_MM)
         elif y0 < altura * 0.45:        # metade de baixo: rodapé
@@ -141,7 +207,10 @@ def margens_sugeridas(conteudo):
 
 def conferir_margens(conteudo, topo, base):
     """Margens dentro dos limites e com espaço para o pedido (assinatura incluída)."""
-    _, altura = dimensoes(conteudo)
+    return conferir_margens_na_altura(dimensoes(conteudo)[1], topo, base)
+
+
+def conferir_margens_na_altura(altura, topo, base):
     try:
         topo, base = float(topo), float(base)
     except (TypeError, ValueError):
