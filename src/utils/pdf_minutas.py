@@ -78,9 +78,15 @@ POSOLOGIA_PADRAO = 'Aplicar conforme orientação médica e bula do fabricante.'
 ESQUEMAS_DE_RISCO = {
     'asplenia': {
         'acwy': 'Asplenia: aplicar duas doses (0,5 ml), INTRAMUSCULAR, com 8 semanas de intervalo. Reforço a cada 5 anos.',
-        'meningocócica b': 'Asplenia: aplicar duas doses (0,5 ml), INTRAMUSCULAR, com 1 mês de intervalo (Bexsero®). '
-                           'Reforço 1 ano após o esquema e, depois, a cada 2-3 anos.',
-        'hib': 'Asplenia: aplicar uma dose (0,5 ml), INTRAMUSCULAR, dose única se não vacinado previamente.',
+        'meningocócica b': 'Asplenia: aplicar três doses (0,5 ml), INTRAMUSCULAR, a 0, 1-2 e 6 meses (Bexsero®). '
+                           'Reforço 1 ano após o esquema e, depois, a cada 2-3 anos (ACIP) ou 3 anos (SBIm).',
+        'hib': 'Asplenia: aplicar duas doses (0,5 ml), INTRAMUSCULAR, com 2 meses de intervalo, se não vacinado '
+               'previamente (SBIm/CRIE; o ACIP indica dose única).',
+    },
+    # Pessoa vivendo com HIV (SBIm Pacientes Especiais 2026/2027; Manual dos CRIE)
+    'hiv': {
+        'acwy': 'HIV: aplicar duas doses (0,5 ml), INTRAMUSCULAR, com 8 semanas de intervalo. Reforço a cada 5 anos.',
+        'hib': 'HIV: aplicar duas doses (0,5 ml), INTRAMUSCULAR, com 2 meses de intervalo, se não vacinado previamente.',
     },
 }
 

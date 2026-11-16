@@ -48,11 +48,20 @@ HPV = 'hpv'
 ATENUADAS = (TRIPLICE_VIRAL, VARICELA, FEBRE_AMARELA, DENGUE, ATENUADA_NAO_CLASSIFICADA)
 
 CD4_MINIMO_ATENUADAS = 200
+CD4_IMUNOSSUPRESSAO_LEVE = 350
 IDADE_PRECAUCAO_FEBRE_AMARELA = 60
+
+# Classes internas de medicação (src/utils/doses.py e condicoes.MEDICACOES) que mudam a triagem das
+# vacinas de vírus vivo sem implicar, sozinhas, "Imunossupressão: Sim".
+CORTICOIDE_DOSE_DESCONHECIDA = 'corticoide_dose_desconhecida'
+IMUNOSSUPRESSAO_BAIXO_GRAU = 'imunossupressao_baixo_grau'
+TRATAMENTO_ONCOLOGICO = 'oncologico'
 
 REF_SBIM = 'SBIm 2026/2027'
 REF_MS_FA = 'Ministério da Saúde/PNI; SBIm 2026/2027'
 REF_CRIE = 'Manual dos CRIE (MS, 2023)'
+REF_ESPECIAIS = 'SBIm Pacientes Especiais 2026/2027'
+REF_DENGUE_IMUNO = 'SBIm Pacientes Especiais 2026/2027 / IN CNV 2026 (MS)'
 
 # Reconhecimento pelo título. É usado quando o item não traz o atributo
 # `viva_atenuada` — por exemplo, a lista que o navegador devolve ao pedir o PDF.
@@ -85,7 +94,7 @@ def avaliar_vacina(tipo, triagem, contexto):
 
     `triagem`: {'gestante', 'lactante', 'imunossupressao'} com os valores de
     `src.utils.validacao`. Chave ausente vale como "desconhecido".
-    `contexto`: {'idade', 'hiv' (bool), 'cd4' (float ou None)}.
+    `contexto`: {'idade', 'hiv' (bool), 'cd4' (float ou None), 'classes' (classes de medicação em uso)}.
 
     Devolve None quando a vacina pode seguir na lista de recomendações; caso
     contrário, um dicionário com `estado`, `motivo` e `referencia`.
@@ -144,6 +153,14 @@ def avaliar_vacina(tipo, triagem, contexto):
                 f'LT-CD4+ abaixo de {CD4_MINIMO_ATENUADAS} células/mm³.',
                 REF_CRIE,
             )
+        if cd4 >= CD4_IMUNOSSUPRESSAO_LEVE:
+            return _resultado(
+                PRECAUCAO,
+                f'Vacina de vírus vivo atenuado em pessoa vivendo com HIV com LT-CD4+ a partir de '
+                f'{CD4_IMUNOSSUPRESSAO_LEVE} células/mm³: a SBIm considera imunossupressão leve ou ausente e a '
+                f'vacina pode ser feita; fica fora da lista automática para o médico confirmar.',
+                REF_ESPECIAIS + ' / ' + REF_CRIE,
+            )
         return _resultado(
             PRECAUCAO,
             f'Vacina de vírus vivo atenuado em pessoa vivendo com HIV com LT-CD4+ a partir de '
@@ -176,7 +193,37 @@ def avaliar_vacina(tipo, triagem, contexto):
             REF_SBIM,
         )
 
-    # 5. Triagem incompleta: desconhecido não é "não"
+    # 5. Medicações que a triagem não capta sozinha. Na dúvida, o item sai da lista automática.
+    classes = set(contexto.get('classes') or ())
+    if CORTICOIDE_DOSE_DESCONHECIDA in classes:
+        return _resultado(
+            DADOS_INSUFICIENTES,
+            'Corticoide sistêmico sem dose e duração: informe as duas para liberar vacinas de vírus vivo '
+            '(≥ 20 mg/dia de prednisona por 14 dias ou mais é imunossupressão; só 1 mês depois de suspender).',
+            REF_ESPECIAIS + ' / IDSA 2013',
+        )
+    if IMUNOSSUPRESSAO_BAIXO_GRAU in classes:
+        if tipo == DENGUE:
+            return _resultado(
+                CONTRAINDICADA,
+                'Dengue: contraindicada em qualquer terapia imunossupressora, inclusive a de baixo grau.',
+                REF_DENGUE_IMUNO,
+            )
+        return _resultado(
+            PRECAUCAO,
+            'Imunossupressão de baixo grau (metotrexato ≤ 0,4 mg/kg/semana ou azatioprina ≤ 3 mg/kg/dia): avaliar '
+            'caso a caso. A SBIm pede 1 a 3 meses sem metotrexato e 3 meses sem azatioprina antes de vacina viva.',
+            REF_ESPECIAIS + ' / IDSA 2013',
+        )
+    if TRATAMENTO_ONCOLOGICO in classes:
+        return _resultado(
+            PRECAUCAO,
+            'Vacina de vírus vivo atenuado durante o tratamento sistêmico do câncer: decidir com a equipe de oncologia. '
+            'O ideal é aplicar 3 a 4 semanas antes de iniciar o tratamento (mínimo de 15 dias).',
+            REF_ESPECIAIS + ' / IDSA 2013',
+        )
+
+    # 6. Triagem incompleta: desconhecido não é "não"
     faltam = []
     if gestante == DESCONHECIDO:
         faltam.append('gestação')
@@ -192,7 +239,7 @@ def avaliar_vacina(tipo, triagem, contexto):
             REF_SBIM,
         )
 
-    # 6. Febre amarela a partir dos 60 anos
+    # 7. Febre amarela a partir dos 60 anos
     idade = contexto.get('idade')
     if tipo == FEBRE_AMARELA and idade is not None and idade >= IDADE_PRECAUCAO_FEBRE_AMARELA:
         return _resultado(

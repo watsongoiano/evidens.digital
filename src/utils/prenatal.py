@@ -768,10 +768,13 @@ def ajustar_textos(recomendacoes, diabetica=False):
         if r.get('categoria') == 'vacina' and t.startswith('dTpa'):
             r.update({'subtitulo': 'Gestante | 1 dose a cada gestação a partir de 20 semanas',
                       'descricao': '1 dose de dTpa em toda gestação a partir de 20 semanas, qualquer que seja o intervalo '
-                                   'desde a última dose. Se não for vacinada na gestação, vacinar no puerpério o quanto antes.'})
+                                   'desde a última dose. Se não for vacinada na gestação, vacinar no puerpério o quanto antes, '
+                                   'até 45 dias após o parto (PNI).'})
         elif r.get('categoria') == 'vacina' and t.startswith('COVID-19'):
-            r.update({'subtitulo': 'Gestante | 1 dose a cada gestação, em qualquer idade gestacional',
-                      'descricao': '1 dose em cada gestação, em qualquer idade gestacional (PNI/SBIm).'})
+            # O cartão da gestante já vem de condicoes.aplicar (intervalo mínimo e PNI); aqui só o subtítulo.
+            if not (r.get('subtitulo') or '').startswith('Gestante'):
+                r['descricao'] = '1 dose em cada gestação, em qualquer idade gestacional (PNI/SBIm).'
+            r['subtitulo'] = 'Gestante | 1 dose a cada gestação, em qualquer idade gestacional'
         elif diabetica and t.startswith('Fundoscopia'):
             r.update({'subtitulo': 'DM pré-gestacional | 1º trimestre, a cada trimestre e até 1 ano pós-parto',
                       'descricao': 'Retinopatia pode progredir na gestação: fundo de olho com dilatação no 1º trimestre, a '

@@ -1521,7 +1521,11 @@
         function dadosDoPacienteParaPdf() {
             const data = lerFormulario();
             const comorbidades = [].concat(data.comorbidades || []);
-            return {
+            // Comorbidades, medicações, dose/duração e peso: o servidor confere de novo a triagem das vacinas de
+            // vírus vivo com a imunossupressão que as listas implicam (não só a resposta da triagem).
+            const detalhes = {};
+            Object.keys(data).filter(k => /^(dose|duracao)__/.test(k)).forEach(k => { detalhes[k] = data[k]; });
+            return Object.assign({
                 nome: (data.nome_paciente || '').trim() || 'Paciente',
                 idade: data.idade,
                 sexo: data.sexo,
@@ -1529,8 +1533,11 @@
                 lactante: data.lactante,
                 imunossupressao: data.imunossupressao,
                 hiv: comorbidades.indexOf('hiv') !== -1,
-                cd4: data.cd4 || null
-            };
+                cd4: data.cd4 || null,
+                comorbidades: comorbidades,
+                medicacoes: [].concat(data.medicacoes || []),
+                peso: data.peso || null
+            }, detalhes);
         }
 
         // ── Guia do plano de saúde (SP/SADT) junto com o pedido de exames ──
