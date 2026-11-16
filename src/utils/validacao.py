@@ -237,7 +237,7 @@ def validar_entrada(bruto):
     # Carga tabágica: cigarros por dia ÷ 20 × anos de tabagismo (o médico informa o consumo e o tempo; o maço tem
     # 20 cigarros). Se a tela já mandou os maços-ano, valem os dela.
     if dados.get('macos_ano') is None and dados.get('cigarros_dia') is not None and dados.get('anos_fumando') is not None:
-        dados['macos_ano'] = round(dados['cigarros_dia'] / 20 * dados['anos_fumando'], 1)
+        dados['macos_ano'] = round(dados['cigarros_dia'] / 20 * dados['anos_fumando'], 4)  # sem arredondar para 1 casa: mudaria a elegibilidade
     if idade is not None:
         macos = dados.get('macos_ano')
         if macos is not None and macos > max(idade - 5, 0) * 5:

@@ -2665,9 +2665,12 @@
             const saida = document.getElementById('cargaTabagica'), oculto = document.getElementById('macos_ano');
             if (qtd === '' || anos === '' || Number(qtd) < 0 || Number(anos) < 0) { oculto.value = ''; saida.hidden = true; return; }
             const porDia = macos ? Number(qtd) : Number(qtd) / 20;
-            const carga = Math.round(porDia * Number(anos) * 10) / 10;
-            oculto.value = String(carga);
-            saida.replaceChildren(T('Carga tabágica:') + ' ', Object.assign(document.createElement('strong'), { textContent: carga.toLocaleString('pt-BR') + ' ' + T('maços-ano') }));
+            // O valor exato vai para a decisão clínica; arredondar antes mudaria a elegibilidade
+            // (8,5 cigarros × 47 anos = 19,975 não pode virar 20). A tela mostra o valor truncado.
+            const carga = porDia * Number(anos);
+            oculto.value = String(Math.round(carga * 10000) / 10000);
+            const exibida = Math.floor(carga * 10 + 1e-9) / 10;
+            saida.replaceChildren(T('Carga tabágica:') + ' ', Object.assign(document.createElement('strong'), { textContent: exibida.toLocaleString('pt-BR') + ' ' + T('maços-ano') }));
             saida.hidden = false;
         }
         ['cigarros_dia', 'anos_fumando'].forEach(id => document.getElementById(id).addEventListener('input', calcularCargaTabagica));

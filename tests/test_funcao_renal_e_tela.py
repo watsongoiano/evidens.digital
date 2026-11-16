@@ -203,3 +203,18 @@ def test_tela_calcula_a_carga_tabagica():
     assert 'function calcularCargaTabagica()' in html
     assert '<input type="hidden" id="macos_ano" name="macos_ano">' in html
     assert 'id="unidade_tabaco"' in html and 'id="cargaTabagica"' in html
+
+
+def test_carga_tabagica_nao_arredonda_antes_da_elegibilidade(client):
+    """8,5 cigarros/dia por 47 anos = 19,975 maços-ano: abaixo de 20, sem TC de baixa dose."""
+    from src.utils.validacao import validar_entrada
+    dados, _ = validar_entrada(dict(idade=70, sexo='masculino', tabagismo='atual', cigarros_dia=8.5, anos_fumando=47))
+    assert dados['macos_ano'] < 20
+    r = _post(client, idade=70, tabagismo='atual', cigarros_dia=8.5, anos_fumando=47)
+    assert not any('baixa dose' in x['titulo'] for x in r.get_json()['recommendations'])
+
+
+def test_tela_nao_arredonda_a_carga_que_vai_para_o_motor():
+    html = open('intelligent-tools.html', encoding='utf-8').read()
+    assert 'Math.round(porDia * Number(anos) * 10)' not in html
+    assert 'Math.floor(carga * 10' in html
