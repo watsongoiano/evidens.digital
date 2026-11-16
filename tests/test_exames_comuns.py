@@ -120,7 +120,7 @@ def test_tela_tem_os_cartoes_e_o_resumo():
     assert 'montagemDosComuns' in html                                             # montado uma vez só
     assert 'exames-comuns-abrir' in html and 'opcoes.hidden = true' in html        # cada grupo recolhido num botão
     assert "fetch('/api/exames-comuns'" in html
-    assert 'id="resultadosInformados"' in html and 'function exibirResultadosInformados' in html
+    assert '<div id="resultadosInformados" hidden>' in html                       # resumo oculto a pedido
     for nome in E.DO_MOTOR:
         assert f'data-campo="{nome}"' in html
 
