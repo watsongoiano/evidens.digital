@@ -21,7 +21,7 @@ import logging
 import re
 from datetime import date
 
-from src.utils import tuss
+from src.utils import exames_comuns, tuss
 from src.utils.periodicidade import TITULO_HBA1C, hoje
 
 logging.getLogger('pypdf').setLevel(logging.ERROR)   # avisos de layout do pypdf não interessam no log
@@ -260,21 +260,22 @@ def _eh_titulo(linhas, i):
 
 
 def extrair(textos, hoje_=None):
-    """Exames do laudo: {'exames': [{'exame', 'data', 'nome_no_laudo'}], 'nao_reconhecidos': [...], 'sem_data': [...]}.
+    """Exames do laudo: {'exames': [{'exame', 'data', 'nome_no_laudo', 'resultados'}], 'nao_reconhecidos': [...], 'sem_data': [...]}.
 
     'data' em AAAA-MM-DD. Exame repetido fica com a coleta mais recente.
     """
     hoje_ = hoje_ or hoje()
     achados, nao_reconhecidos, sem_data = {}, [], []
 
-    def guardar(titulo, linha, data_exame):
+    def guardar(titulo, linha, data_exame, resultados=None):
         if data_exame is None:
             if linha not in sem_data:
                 sem_data.append(linha)
             return
         anterior = achados.get(titulo)
         if anterior is None or data_exame > anterior['data']:
-            achados[titulo] = {'exame': titulo, 'data': data_exame, 'nome_no_laudo': linha}
+            achados[titulo] = {'exame': titulo, 'data': data_exame, 'nome_no_laudo': linha,
+                               'resultados': resultados or {}}
 
     pendente = None   # exame do fim da página anterior cujo "Coletado(...)" ficou na página seguinte
     for texto in textos:
@@ -284,7 +285,7 @@ def extrair(textos, hoje_=None):
         if pendente:
             antes = linhas[:titulos[0]] if titulos else linhas
             m = next((m for m in map(_COLETADO.search, antes) if m), None)
-            guardar(pendente[0], pendente[1], _data(*m.groups(), hoje_) if m else pendente[2])
+            guardar(pendente[0], pendente[1], _data(*m.groups(), hoje_) if m else pendente[2], pendente[3])
             pendente = None
         # Data da página: só a do cabeçalho (antes do primeiro exame), nunca a de um exame da página.
         cabecalho = ' '.join(linhas[:titulos[0]] if titulos else linhas)
@@ -310,10 +311,11 @@ def extrair(textos, hoje_=None):
                 if linha not in nao_reconhecidos:
                     nao_reconhecidos.append(linha)
                 continue
+            resultados = exames_comuns.do_laudo(titulo, linhas[i + 1:fim])
             if not explicita and n + 1 == len(titulos):
-                pendente = (titulo, linha, data_exame)   # o fim do exame pode estar na próxima página
+                pendente = (titulo, linha, data_exame, resultados)   # o fim do exame pode estar na próxima página
                 continue
-            guardar(titulo, linha, data_exame)
+            guardar(titulo, linha, data_exame, resultados)
     if pendente:
         guardar(*pendente)
     exames = sorted(achados.values(), key=lambda e: tuss._chave(e['exame']))
@@ -339,7 +341,11 @@ def ler(conteudo, hoje_=None):
     for exame in lido['exames']:
         nome = _como_na_lista(exame['exame'])
         if nome in vistos:  # dois nomes do laudo para o mesmo exame: fica a coleta mais recente
-            vistos[nome]['data'] = max(vistos[nome]['data'], exame['data'])
+            visto = vistos[nome]
+            if exame['data'] > visto['data']:
+                visto['data'], visto['resultados'] = exame['data'], dict(visto['resultados'], **exame['resultados'])
+            else:
+                visto['resultados'] = dict(exame['resultados'], **visto['resultados'])
             continue
         vistos[nome] = dict(exame, exame=nome)
         exames.append(vistos[nome])

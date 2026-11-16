@@ -1461,6 +1461,7 @@ def generate_intelligent_recommendations():
                  + orientacoes_hiv + orientacoes_cancer + orientacoes_rastreio)
         # Urgências (PA em faixa grave na gestação) no topo; depois as da gestação (alto risco, AAS, divergências).
         response['orientacoes'] = [o for o in todas if o.get('urgente')] + [o for o in todas if not o.get('urgente')]
+        response['resultados_informados'] = periodicidade.resultados_informados(exames_anteriores)
         aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
         if aviso_exames:
             response['orientacoes'] = response['orientacoes'] + [aviso_exames]
@@ -1796,6 +1797,13 @@ def exames_conhecidos_endpoint():
     """Nomes de exame para a seção "Exames já realizados" do formulário."""
     from src.utils import periodicidade
     return jsonify({'exames': periodicidade.exames_conhecidos()})
+
+
+@checkup_intelligent_bp.route('/exames-comuns')
+def exames_comuns_endpoint():
+    """Os exames mais pedidos, com os campos de resultado de cada um (seção "Exames já realizados")."""
+    from src.utils import exames_comuns
+    return jsonify(exames_comuns.para_a_tela())
 
 
 @checkup_intelligent_bp.route('/laudos/ler', methods=['POST'])

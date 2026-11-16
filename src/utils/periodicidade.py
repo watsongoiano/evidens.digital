@@ -178,10 +178,12 @@ def _br(data):
 # ── Entrada: exames que o paciente já fez ────────────────────────────────────
 
 def ler_exames_anteriores(bruto, hoje_=None):
-    """Valida `exames_anteriores` do pedido: [{'exame': título, 'data': 'AAAA-MM-DD'}].
+    """Valida `exames_anteriores` do pedido: [{'exame': título, 'data': 'AAAA-MM-DD', 'resultados': {...}}].
 
     Devolve (lista normalizada, erros). Linha em branco é ignorada; data futura ou impossível é erro.
+    'resultados' (opcional) vira a lista de itens para mostrar (exames_comuns.ler_resultados).
     """
+    from src.utils import exames_comuns
     hoje_ = hoje_ or hoje()
     if bruto in (None, '', []):
         return [], []
@@ -197,7 +199,8 @@ def ler_exames_anteriores(bruto, hoje_=None):
         exame, quando = item.get('exame'), item.get('data')
         exame = ' '.join(exame.split()) if isinstance(exame, str) else ''
         quando = quando.strip() if isinstance(quando, str) else ''
-        if not exame and not quando:
+        resultados = item.get('resultados')
+        if not exame and not quando and not resultados:
             continue
         if not exame or len(exame) > 300:
             erros.append({'campo': campo, 'mensagem': 'Informe o nome de cada exame já realizado.'})
@@ -212,8 +215,19 @@ def ler_exames_anteriores(bruto, hoje_=None):
         elif data.year < 1900:
             erros.append({'campo': campo, 'mensagem': f'Confira a data do exame: {exame}.'})
         else:
-            lidos.append({'exame': exame, 'data': data})
+            itens, erros_resultado = exames_comuns.ler_resultados(exame, resultados)
+            erros.extend({'campo': campo, 'mensagem': m} for m in erros_resultado)
+            lido = {'exame': exame, 'data': data}
+            if itens:
+                lido['resultados'] = itens
+            lidos.append(lido)
     return lidos, erros
+
+
+def resultados_informados(exames_anteriores):
+    """Exames com resultado digitado ou lido do laudo, para o cartão "Resultados informados"."""
+    return [{'exame': e['exame'], 'data': _br(e['data']), 'itens': e['resultados']}
+            for e in sorted(exames_anteriores or [], key=lambda e: e['data'], reverse=True) if e.get('resultados')]
 
 
 # ── Identidade do exame ──────────────────────────────────────────────────────

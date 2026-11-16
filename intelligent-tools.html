@@ -864,24 +864,26 @@
 
     <section class="secao" aria-labelledby="s-exames">
       <h2 id="s-exames" class="secao-titulo"><span class="secao-num">08</span>Exames já realizados</h2>
-      <p class="secao-nota">Opcional. Informe cada exame já feito e a data, digitando ou anexando o laudo em PDF: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. Em colesterol, HDL, creatinina, HbA1c, relação albumina/creatinina e teste de DNA-HPV, o resultado aparece ao lado do exame e entra nos cálculos (PREVENT, TFG pela CKD-EPI, risco renal e colo do útero). O laudo é lido e descartado; nada é guardado.</p>
-      <div id="examesAnteriores" class="flex flex-col gap-4"></div>
-      <div class="flex flex-wrap gap-3 mt-4">
-        <button type="button" id="adicionarExameAnterior" class="btn-claro"><i class="fa-solid fa-plus text-[11px]"></i> Adicionar exame</button>
+      <p class="secao-nota">Opcional. Escolha entre os exames mais comuns, adicione outro do catálogo ou anexe o laudo em PDF; informe a data e, se quiser, o resultado. O que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. Colesterol, HDL, creatinina, HbA1c, relação albumina/creatinina e DNA-HPV entram nos cálculos (PREVENT, TFG pela CKD-EPI, risco renal e colo do útero); os outros resultados aparecem no resumo. O laudo é lido e descartado; nada é guardado.</p>
+      <div class="flex flex-wrap gap-3">
+        <button type="button" id="abrirExamesComuns" class="btn-claro" aria-expanded="false" aria-controls="examesComunsPainel"><i class="fa-solid fa-list-check text-[11px]"></i> Exames mais comuns</button>
+        <button type="button" id="adicionarExameAnterior" class="btn-claro"><i class="fa-solid fa-plus text-[11px]"></i> Outro exame</button>
         <label for="laudoPdf" class="btn-claro cursor-pointer"><i class="fa-solid fa-file-arrow-up text-[11px]"></i> Anexar laudo (PDF)</label>
         <input type="file" id="laudoPdf" accept="application/pdf,.pdf" multiple class="sr-only">
       </div>
+      <div id="examesComunsPainel" class="bloco-condicional" hidden></div>
       <div id="laudoStatus" role="status" class="aviso aviso-atencao mt-4" style="display: none;"></div>
+      <div id="examesAnteriores" class="flex flex-col gap-3 mt-4"></div>
       <!-- Resultados que entram nos cálculos: cada campo vai para a linha do exame correspondente (um só lugar). -->
       <div id="resultadosGuardados" hidden>
-        <div class="campo" data-resultado="colesterol"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" min="50" max="1000" placeholder="Ex: 200" inputmode="numeric"></div>
-        <div class="campo" data-resultado="hdl"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" min="5" max="200" placeholder="Ex: 45" inputmode="numeric"></div>
-        <div class="campo" data-resultado="creatinina"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" min="0.1" max="25" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
-        <div class="campo" data-resultado="uacr"><label for="uacr">Relação albumina/creatinina urinária (mg/g)</label><input type="number" id="uacr" name="uacr" min="0.1" max="25000" step="0.1" placeholder="Ex: 30" inputmode="decimal"></div>
-        <div class="campo" data-resultado="hba1c"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" min="3" max="20" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5% isolada não confirma diabetes (ADA 2026): sugerimos um segundo exame (HbA1c ou glicemia de jejum) e a caixa não é marcada. Com diagnóstico confirmado ou hiperglicemia inequívoca, o tipo de diabetes pode ser marcado.</p></div>
+        <div class="campo" data-resultado="colesterol"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" data-campo="colesterol" min="50" max="1000" placeholder="Ex: 200" inputmode="numeric"></div>
+        <div class="campo" data-resultado="hdl"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" data-campo="hdl" min="5" max="200" placeholder="Ex: 45" inputmode="numeric"></div>
+        <div class="campo" data-resultado="creatinina"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" data-campo="creatinina" min="0.1" max="25" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
+        <div class="campo" data-resultado="uacr"><label for="uacr">Relação albumina/creatinina urinária (mg/g)</label><input type="number" id="uacr" name="uacr" data-campo="uacr" min="0.1" max="25000" step="0.1" placeholder="Ex: 30" inputmode="decimal"></div>
+        <div class="campo" data-resultado="hba1c"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" data-campo="hba1c" min="3" max="20" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5% isolada não confirma diabetes (ADA 2026): sugerimos um segundo exame (HbA1c ou glicemia de jejum) e a caixa não é marcada. Com diagnóstico confirmado ou hiperglicemia inequívoca, o tipo de diabetes pode ser marcado.</p></div>
         <div class="campo" id="hpv-item" data-resultado="hpv_resultado" style="display: none;">
           <label for="hpv_resultado">Resultado (colo do útero)</label>
-          <select id="hpv_resultado" name="hpv_resultado">
+          <select id="hpv_resultado" name="hpv_resultado" data-campo="hpv_resultado">
             <option value="">Não sabe</option>
             <option value="nao_detectado">Não detectado</option>
             <option value="hpv_16_18">HPV 16 ou 18</option>
@@ -942,6 +944,7 @@
 
     <div id="riscoContent"></div>
     <div id="renalContent" class="mt-4"></div>
+    <div id="resultadosInformados" class="mt-4"></div>
     <div id="orientacoesContent"></div>
     <p class="text-[12px] text-ink/50 mt-6 flex flex-wrap gap-x-5 gap-y-1"><span><span class="inline-block w-2 h-2 rounded-full bg-teal align-middle mr-1"></span>prioridade alta</span><span><span class="inline-block w-2 h-2 rounded-full bg-aqua align-middle mr-1"></span>média</span><span><span class="inline-block w-2 h-2 rounded-full bg-ink/20 align-middle mr-1"></span>baixa</span><span><span class="rec-grau align-middle mr-1">A</span>grau de evidência</span></p>
     <div id="recommendationsContent"></div>
@@ -1146,17 +1149,56 @@
                 } else if (e.key === 'Escape') fechar();
             });
         }
-        // Resultados que entram nos cálculos ficam ao lado do exame correspondente (um só lugar no formulário).
-        function resultadosDoExame(titulo) {
-            const t = semAcentoBusca(titulo);
-            if (/^colesterol total e fracoes|^perfil lipidico/.test(t)) return ['colesterol', 'hdl'];
-            if (/^colesterol total/.test(t)) return ['colesterol'];
-            if (/^colesterol \(hdl\)|^hdl/.test(t)) return ['hdl'];
-            if (/^creatinina, soro/.test(t)) return ['creatinina'];
-            if (/^relacao albumina\/creatinina|microalbumin/.test(t)) return ['uacr'];
-            if (/^hemoglobina glicada/.test(t)) return ['hba1c'];
-            if (/papilomavirus|dna-hpv/.test(t)) return ['hpv_resultado'];
-            return [];
+        // Resultados de cada exame: os campos dos ~40 exames mais pedidos (src/utils/exames_comuns.py) ficam no cartão do
+        // exame, como os do PREVENT. Os seis que entram nos cálculos (colesterol, HDL, creatinina, uACR, HbA1c e DNA-HPV)
+        // são os mesmos campos de sempre, levados para o cartão (um só lugar); os outros são criados no cartão.
+        let examesComuns = null, campoComum = {};
+        async function carregarExamesComuns() {
+            if (examesComuns) return examesComuns;
+            try {
+                const r = await fetch('/api/exames-comuns', { credentials: 'same-origin' });
+                examesComuns = r.ok ? await r.json() : null;
+            } catch (e) { examesComuns = null; }
+            if (!examesComuns) { const vazio = { exames: [], apelidos: {}, livre: { nome: 'resultado', rotulo: 'Resultado', texto: true, max: 80 } }; return vazio; }
+            examesComuns.exames.forEach(e => e.campos.forEach(c => { campoComum[c.nome] = c; }));
+            return examesComuns;
+        }
+        function camposDoExame(titulo) {
+            const def = examesComuns && examesComuns.apelidos[titulo];
+            if (def && def.campos.length) return def.campos.map(n => campoComum[n]).filter(Boolean);
+            return titulo ? [(examesComuns && examesComuns.livre) || { nome: 'resultado', rotulo: 'Resultado', texto: true, max: 80 }] : [];
+        }
+        // Mesmo exame com outro nome ("Glicemia de jejum" e "Glicose, soro"); o HDL dosado sozinho é outro exame.
+        function chaveDoExame(titulo) {
+            const def = examesComuns && examesComuns.apelidos[titulo];
+            return def ? def.titulo + '|' + def.campos.join() : titulo;
+        }
+        function tituloDaLinha(linha) {
+            const digitado = linha.querySelector('[data-exame-anterior]').value.trim();
+            return nomeDoExame[digitado.toLowerCase()] || digitado;
+        }
+        let camposCriados = 0;
+        function criarCampo(def) {
+            const id = `resultadoExame${++camposCriados}`;
+            const div = document.createElement('div'); div.className = 'campo';
+            const label = document.createElement('label'); label.htmlFor = id;
+            label.textContent = T(def.rotulo) + (def.unidade ? ` (${def.unidade})` : '');
+            let entrada;
+            if (def.opcoes) {
+                entrada = document.createElement('select');
+                def.opcoes.forEach(([valor, rotulo]) => { const o = document.createElement('option'); o.value = valor; o.textContent = T(rotulo); entrada.appendChild(o); });
+            } else if (def.texto) {
+                entrada = document.createElement('input');
+                Object.assign(entrada, { type: 'text', maxLength: def.max || 80, autocomplete: 'off', placeholder: T('Ex: 210 U/L') });
+            } else {
+                entrada = document.createElement('input');
+                Object.assign(entrada, { type: 'number', min: def.min, max: def.max, step: 'any', inputMode: 'decimal' });
+            }
+            entrada.id = id;
+            entrada.setAttribute('data-campo', def.nome);
+            div.setAttribute('data-campo-criado', def.nome);
+            div.append(label, entrada);
+            return div;
         }
         function soltarResultados(linha) {
             const guardados = document.getElementById('resultadosGuardados');
@@ -1165,21 +1207,46 @@
                 if (entrada && entrada.value !== '') { entrada.value = ''; entrada.dispatchEvent(new Event('input', { bubbles: true })); }
                 guardados.appendChild(campo);
             });
+            linha.querySelectorAll('[data-campo-criado]').forEach(c => c.remove());
         }
         function ligarResultados(linha) {
-            const digitado = linha.querySelector('[data-exame-anterior]').value.trim();
-            const titulo = nomeDoExame[digitado.toLowerCase()] || digitado;
-            const querem = resultadosDoExame(titulo);
+            const titulo = tituloDaLinha(linha);
+            const querem = camposDoExame(titulo).map(c => c.nome);
             const caixa = linha.querySelector('[data-resultados-da-linha]');
-            const atuais = [...caixa.querySelectorAll('[data-resultado]')].map(c => c.dataset.resultado);
+            const atuais = [...caixa.querySelectorAll('[data-resultado], [data-campo-criado]')].map(c => c.dataset.resultado || c.dataset.campoCriado);
+            mostrarTitulo(linha, titulo);
             if (querem.join() === atuais.join()) return;
             soltarResultados(caixa);
             querem.forEach(chave => {
-                const campo = document.querySelector(`#resultadosGuardados [data-resultado="${chave}"]`);
-                if (campo) caixa.appendChild(campo);   // já está em outra linha: fica lá
+                const guardado = document.querySelector(`#resultadosGuardados [data-resultado="${chave}"]`);
+                if (guardado) { caixa.appendChild(guardado); return; }
+                if (document.querySelector(`#examesAnteriores [data-resultado="${chave}"]`)) return;   // já está em outro cartão
+                const criado = criarCampo(campoComum[chave] || (examesComuns && examesComuns.livre) || { nome: chave, rotulo: 'Resultado', texto: true });
+                caixa.appendChild(criado);
+                const lista = criado.querySelector('select');
+                if (lista && window.selectEmBotoes && linha.isConnected) window.selectEmBotoes(lista);
             });
-            caixa.hidden = !caixa.children.length;
             atualizarCamposDoColo();
+            marcarComuns();
+        }
+        function preencherResultados(linha, resultados) {
+            let algum = false;
+            Object.entries(resultados || {}).forEach(([nome, valor]) => {
+                const entrada = linha.querySelector(`[data-campo="${nome}"]`) || document.querySelector(`#examesAnteriores [data-campo="${nome}"]`);
+                if (!entrada || valor === null || valor === undefined) return;
+                entrada.value = String(valor);
+                entrada.dispatchEvent(new Event(entrada.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
+                algum = true;
+            });
+            return algum;
+        }
+        // Exame reconhecido: o nome vira o título do cartão (toque para trocar); digitado à mão, fica o campo de texto.
+        function mostrarTitulo(linha, titulo) {
+            const reconhecido = !!titulo && Object.values(nomeDoExame).includes(titulo);
+            const botao = linha.querySelector('[data-titulo-exame]');
+            linha.querySelector('[data-nome-exame]').hidden = reconhecido;
+            botao.hidden = !reconhecido;
+            if (reconhecido) botao.querySelector('span').textContent = T(titulo);
         }
 
         async function examesDoCatalogo(categorias) {
@@ -1189,9 +1256,12 @@
 
         function examesAnterioresDoFormulario() {
             return Array.from(document.querySelectorAll('#examesAnteriores .exame-anterior')).map(linha => {
-                const digitado = linha.querySelector('[data-exame-anterior]').value.trim();
-                return { exame: nomeDoExame[digitado.toLowerCase()] || digitado, data: linha.querySelector('[data-data-anterior]').value };
-            }).filter(item => item.exame || item.data);
+                const resultados = {};
+                linha.querySelectorAll('[data-campo]').forEach(e => { if (e.value.trim() !== '') resultados[e.dataset.campo] = e.value.trim(); });
+                const item = { exame: tituloDaLinha(linha), data: linha.querySelector('[data-data-anterior]').value };
+                if (Object.keys(resultados).length) item.resultados = resultados;
+                return item;
+            }).filter(item => item.exame || item.data || item.resultados);
         }
 
         function hojeNoFormato() {
@@ -1199,10 +1269,11 @@
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
-        function adicionarExameAnterior(exame, data) {
+        // Cada exame é um cartão, no desenho do antigo bloco do PREVENT: título, "Feito em" e os resultados lado a lado.
+        function adicionarExameAnterior(exame, data, resultados) {
             const n = ++linhasDeExame;
             const linha = document.createElement('div');
-            linha.className = 'exame-anterior flex flex-wrap items-end gap-3';
+            linha.className = 'exame-anterior exame-cartao';
             // Campos montados nó a nó: nenhum texto é interpretado como HTML.
             const campo = (classe, rotulo, entrada) => {
                 const div = document.createElement('div'); div.className = 'campo ' + classe;
@@ -1211,34 +1282,52 @@
                 return div;
             };
             const nome = document.createElement('input');
-            Object.assign(nome, { type: 'text', id: `exameAnterior${n}`, maxLength: 300, autocomplete: 'off' });
+            Object.assign(nome, { type: 'text', id: `exameAnterior${n}`, maxLength: 300, autocomplete: 'off', placeholder: T('Digite para buscar no catálogo') });
             nome.setAttribute('data-exame-anterior', '');
             const quando = document.createElement('input');
             Object.assign(quando, { type: 'date', id: `dataAnterior${n}`, max: hojeNoFormato() });
             quando.setAttribute('data-data-anterior', '');
             const retirar = document.createElement('button');
-            retirar.type = 'button'; retirar.className = 'btn-claro shrink-0'; retirar.setAttribute('aria-label', T('Retirar este exame'));
+            retirar.type = 'button'; retirar.className = 'exame-retirar'; retirar.setAttribute('aria-label', T('Retirar este exame'));
             const icone = document.createElement('i'); icone.className = 'fa-solid fa-xmark';
-            const texto = document.createElement('span'); texto.className = 'sm:hidden'; texto.textContent = T('Retirar');
-            retirar.append(icone, texto);
-            const resultados = document.createElement('div');
-            resultados.className = 'basis-full grade'; resultados.hidden = true;
-            resultados.setAttribute('data-resultados-da-linha', '');
-            linha.append(campo('basis-full sm:basis-0 sm:flex-1', 'Exame', nome), campo('flex-1 sm:flex-none sm:w-44', 'Feito em', quando), retirar, resultados);
+            retirar.appendChild(icone);
+            // Título do exame reconhecido; tocar volta ao campo de busca para trocar o exame.
+            const titulo = document.createElement('button');
+            titulo.type = 'button'; titulo.className = 'exame-titulo'; titulo.hidden = true;
+            titulo.setAttribute('data-titulo-exame', ''); titulo.setAttribute('aria-label', T('Trocar o exame'));
+            const tituloTexto = document.createElement('span');
+            const lapis = document.createElement('i'); lapis.className = 'fa-solid fa-pen text-[10px] text-ink/35 ml-2';
+            titulo.append(tituloTexto, lapis);
+            const campoNome = campo('flex-1 min-w-0 !mb-0', 'Exame', nome);
+            campoNome.setAttribute('data-nome-exame', '');
+            const topo = document.createElement('div');
+            topo.className = 'flex items-start gap-3';
+            const esquerda = document.createElement('div'); esquerda.className = 'flex-1 min-w-0';
+            esquerda.append(titulo, campoNome);
+            topo.append(esquerda, retirar);
+            const resultadosCaixa = document.createElement('div');
+            resultadosCaixa.className = 'exame-campos';
+            resultadosCaixa.setAttribute('data-resultados-da-linha', '');
+            resultadosCaixa.appendChild(campo('', 'Feito em', quando));
+            linha.append(topo, resultadosCaixa);
             nome.addEventListener('change', () => ligarResultados(linha));
-            listaDeBusca(nome, () => examesDoCatalogo(['laboratorio', 'imagem']), titulo => {
-                nomeDoExame[T(titulo).toLowerCase()] = titulo;
+            titulo.addEventListener('click', () => { titulo.hidden = true; campoNome.hidden = false; nome.select(); nome.focus(); });
+            listaDeBusca(nome, () => examesDoCatalogo(['laboratorio', 'imagem']), escolhido => {
+                nomeDoExame[T(escolhido).toLowerCase()] = escolhido;
                 nome.dispatchEvent(new Event('change', { bubbles: true }));   // os resultados deixam de valer
                 quando.focus();
             });
-            if (exame) { linha.querySelector('[data-exame-anterior]').value = exame; setTimeout(() => ligarResultados(linha)); }
-            if (data) linha.querySelector('[data-data-anterior]').value = data;
-            linha.querySelector('button').addEventListener('click', () => {
+            if (exame) nome.value = exame;
+            if (data) quando.value = data;
+            retirar.addEventListener('click', () => {
                 soltarResultados(linha);
                 linha.remove();
+                marcarComuns();
                 checkupForm.dispatchEvent(new Event('change', { bubbles: true }));   // os resultados deixam de valer
             });
             document.getElementById('examesAnteriores').appendChild(linha);
+            if (exame) ligarResultados(linha);
+            if (resultados) preencherResultados(linha, resultados);
             return linha;
         }
 
@@ -1249,15 +1338,60 @@
 
         document.getElementById('adicionarExameAnterior').addEventListener('click', () => {
             carregarExamesConhecidos();
+            carregarExamesComuns();
             adicionarExameAnterior().querySelector('[data-exame-anterior]').focus();
+        });
+
+        // "Exames mais comuns": um toque abre o cartão do exame já com os campos de resultado.
+        function marcarComuns() {
+            const presentes = new Set([...document.querySelectorAll('#examesAnteriores .exame-anterior')].map(l => chaveDoExame(tituloDaLinha(l))));
+            document.querySelectorAll('#examesComunsPainel [data-exame-comum]').forEach(b => {
+                b.setAttribute('aria-checked', presentes.has(chaveDoExame(b.dataset.exameComum)) ? 'true' : 'false');
+            });
+        }
+        async function montarExamesComuns() {
+            const painel = document.getElementById('examesComunsPainel');
+            if (painel.dataset.montado) return;
+            const { exames } = await carregarExamesComuns();
+            await carregarExamesConhecidos();
+            painel.dataset.montado = '1';
+            const grupos = [];
+            exames.forEach(e => { let g = grupos.find(x => x.nome === e.grupo); if (!g) grupos.push(g = { nome: e.grupo, itens: [] }); g.itens.push(e); });
+            grupos.forEach(g => {
+                const rotulo = document.createElement('p'); rotulo.className = 'campo-rotulo text-teal-dark mt-4 first:mt-0'; rotulo.textContent = T(g.nome);
+                const opcoes = document.createElement('div'); opcoes.className = 'opcoes';
+                g.itens.forEach(e => {
+                    const b = document.createElement('button');
+                    b.type = 'button'; b.className = 'opcao'; b.setAttribute('role', 'checkbox'); b.setAttribute('aria-checked', 'false');
+                    b.setAttribute('data-exame-comum', e.titulo);
+                    if (/Papilomav/.test(e.titulo)) b.setAttribute('data-so-feminino', '');
+                    b.textContent = T(e.curto);
+                    b.addEventListener('click', () => {
+                        const existente = linhaDoExame(e.titulo);
+                        if (existente) { existente.scrollIntoView({ block: 'center', behavior: 'smooth' }); existente.querySelector('[data-data-anterior]').focus({ preventScroll: true }); return; }
+                        nomeDoExame[T(e.titulo).toLowerCase()] = e.titulo;
+                        const linha = adicionarExameAnterior(T(e.titulo));
+                        linha.querySelector('[data-data-anterior]').focus();
+                        checkupForm.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                    opcoes.appendChild(b);
+                });
+                painel.append(rotulo, opcoes);
+            });
+            marcarComuns();
+            atualizarCamposDoColo();
+        }
+        document.getElementById('abrirExamesComuns').addEventListener('click', async e => {
+            const botao = e.currentTarget, painel = document.getElementById('examesComunsPainel');
+            await montarExamesComuns();
+            painel.hidden = !painel.hidden;
+            botao.setAttribute('aria-expanded', painel.hidden ? 'false' : 'true');
         });
 
         // Laudo em PDF: o servidor lê os exames e as datas de coleta; aqui eles viram linhas para o médico conferir.
         function linhaDoExame(exame) {
-            return Array.from(document.querySelectorAll('#examesAnteriores .exame-anterior')).find(linha => {
-                const digitado = linha.querySelector('[data-exame-anterior]').value.trim();
-                return (nomeDoExame[digitado.toLowerCase()] || digitado) === exame;
-            });
+            const chave = chaveDoExame(exame);
+            return Array.from(document.querySelectorAll('#examesAnteriores .exame-anterior')).find(linha => chaveDoExame(tituloDaLinha(linha)) === chave);
         }
 
         function mostrarLeituraDoLaudo(partes) {
@@ -1279,8 +1413,9 @@
             const arquivos = Array.from(entrada.files || []);
             if (!arquivos.length) return;
             await carregarExamesConhecidos();
+            const comuns = await carregarExamesComuns();
             mostrarLeituraDoLaudo([[T('Lendo o laudo…')]]);
-            let incluidos = 0, atualizados = 0;
+            let incluidos = 0, atualizados = 0, comValor = 0;
             const naoReconhecidos = [], semData = [], falhas = [];
             for (const arquivo of arquivos) {
                 const corpo = new FormData(); corpo.append('arquivo', arquivo);
@@ -1290,11 +1425,30 @@
                     dados = await r.json();
                 } catch (e) { falhas.push(arquivo.name + ': ' + T('sem conexão com o servidor.')); continue; }
                 if (!r.ok) { falhas.push(arquivo.name + ': ' + T(dados.error || 'não foi possível ler.')); continue; }
-                (dados.exames || []).forEach(({ exame, data }) => {
+                // Painéis antes dos componentes: o HDL dosado sozinho vai para o cartão do perfil lipídico, se houver.
+                const tamanho = e => ((comuns.apelidos[e.exame] || {}).campos || []).length;
+                [...(dados.exames || [])].sort((a, b) => tamanho(b) - tamanho(a)).forEach(({ exame, data, resultados }) => {
+                    const temValor = resultados && Object.keys(resultados).length;
+                    const def = comuns.apelidos[exame];
+                    const componente = def && def.titulo !== exame && def.campos.length < ((comuns.apelidos[def.titulo] || {}).campos || []).length;
+                    const painel = componente && linhaDoExame(def.titulo);
+                    if (painel && def.campos.every(c => painel.querySelector(`[data-campo="${c}"]`))) {
+                        const vazios = Object.fromEntries(Object.entries(resultados || {}).filter(([c]) => !painel.querySelector(`[data-campo="${c}"]`).value));
+                        if (preencherResultados(painel, vazios)) comValor++;
+                        return;
+                    }
                     const existente = linhaDoExame(exame);
-                    if (!existente) { adicionarExameAnterior(T(exame), data); incluidos++; return; }
+                    if (!existente) {
+                        nomeDoExame[T(exame).toLowerCase()] = exame;
+                        adicionarExameAnterior(T(exame), data, resultados); incluidos++;
+                        if (temValor) comValor++;
+                        return;
+                    }
                     const campo = existente.querySelector('[data-data-anterior]');
-                    if (!campo.value || campo.value < data) { campo.value = data; atualizados++; }
+                    if (!campo.value || campo.value <= data) {
+                        if (campo.value !== data) { campo.value = data; atualizados++; }
+                        if (temValor && preencherResultados(existente, resultados)) comValor++;
+                    }
                 });
                 (dados.nao_reconhecidos || []).forEach(n => { if (!naoReconhecidos.includes(n)) naoReconhecidos.push(n); });
                 (dados.sem_data || []).forEach(n => { if (!semData.includes(n)) semData.push(n); });
@@ -1303,7 +1457,8 @@
             const partes = [];
             if (incluidos || atualizados) {
                 partes.push([T('Exames lidos do laudo:') + ' ' + incluidos + ' ' + T('incluídos') +
-                    (atualizados ? ', ' + atualizados + ' ' + T('com data atualizada') : '') + '. ' + T('Confira nomes e datas antes de gerar.')]);
+                    (atualizados ? ', ' + atualizados + ' ' + T('com data atualizada') : '') +
+                    (comValor ? ', ' + comValor + ' ' + T('com resultado preenchido') : '') + '. ' + T('Confira nomes, datas e resultados antes de gerar.')]);
             } else if (!falhas.length) {
                 partes.push([T('Nenhum exame conhecido foi encontrado no laudo. Digite os exames e as datas.')]);
             }
@@ -1389,6 +1544,7 @@
             document.getElementById('naoIncluidasContent').innerHTML = '';
             document.getElementById('riscoContent').innerHTML = '';
             document.getElementById('renalContent').innerHTML = '';
+            document.getElementById('resultadosInformados').innerHTML = '';
             document.getElementById('orientacoesContent').innerHTML = '';
             recommendationsDiv.style.display = 'none';
         }
@@ -1456,6 +1612,7 @@
                 displayRecommendations(currentRecommendations, (result.nao_incluidas || []).concat(result.adiados_gestacao || [], result.proximas_gestacao || []));
                 exibirRisco(result.risco_cardiovascular);
                 exibirFuncaoRenal(result.funcao_renal);
+                exibirResultadosInformados(result.resultados_informados);
                 exibirOrientacoes(result.orientacoes || []);
 
             } catch (error) {
@@ -1532,6 +1689,35 @@
         }
 
         // Função renal: TFG (CKD-EPI 2021), categorias KDIGO e, na DRC marcada, o KFRE (src/utils/funcao_renal.py).
+        // Resultados digitados ou lidos do laudo, no mesmo cartão do PREVENT e da função renal.
+        function exibirResultadosInformados(lista) {
+            const alvo = document.getElementById('resultadosInformados');
+            alvo.replaceChildren();
+            if (!lista || !lista.length) return;
+            const cartao = document.createElement('div'); cartao.className = 'risco-cartao';
+            const titulo = document.createElement('p'); titulo.className = 'campo-rotulo'; titulo.textContent = T('Resultados informados');
+            cartao.appendChild(titulo);
+            lista.forEach(exame => {
+                const bloco = document.createElement('div'); bloco.className = 'resultado-informado';
+                const topo = document.createElement('div'); topo.className = 'flex flex-wrap items-baseline justify-between gap-x-3';
+                const nome = document.createElement('p'); nome.className = 'text-[14px] font-medium'; nome.textContent = T(exame.exame);
+                const data = document.createElement('p'); data.className = 'font-mono text-[11px] text-ink/45'; data.textContent = exame.data;
+                topo.append(nome, data);
+                const itens = document.createElement('div'); itens.className = 'flex flex-wrap gap-x-5 gap-y-1 mt-1 text-[13px] text-ink/70';
+                exame.itens.forEach(item => {
+                    const span = document.createElement('span');
+                    const rotulo = exame.itens.length === 1 || item.campo === 'resultado' || item.rotulo === 'Resultado' ? '' : T(item.rotulo) + ': ';
+                    const valor = document.createElement('strong'); valor.className = 'font-medium text-ink';
+                    valor.textContent = (item.campo === 'resultado' ? item.valor : T(item.valor)) + (item.unidade ? ' ' + item.unidade : '');
+                    span.append(rotulo, valor);
+                    itens.appendChild(span);
+                });
+                bloco.append(topo, itens);
+                cartao.appendChild(bloco);
+            });
+            alvo.appendChild(cartao);
+        }
+
         function exibirFuncaoRenal(renal) {
             const alvo = document.getElementById('renalContent');
             alvo.replaceChildren();
@@ -2773,6 +2959,7 @@
             const hpv = feminino && (imuno || idade >= 25);
             const historico = feminino && !marcada('histerectomia_total') && !imuno && idade >= 60;
             document.getElementById('hpv-item').style.display = hpv ? 'block' : 'none';
+            document.querySelectorAll('[data-so-feminino]').forEach(b => { b.hidden = !hpv; });
             document.getElementById('colo-historico').style.display = historico ? '' : 'none';
             if (!hpv) document.getElementById('hpv_resultado').value = '';
             if (!historico) ['colo_rastreio_adequado', 'colo_nic2_previa'].forEach(id => { document.getElementById(id).value = ''; });
@@ -2787,7 +2974,7 @@
         (function () {
             const grupos = [];
             // O plano de saúde fica como lista suspensa: as opções vêm do cadastro do médico e podem ser muitas.
-            checkupForm.querySelectorAll('select:not([data-plano])').forEach(sel => {
+            function emBotoes(sel) {
                 const rotulo = checkupForm.querySelector('label[for="' + sel.id + '"]');
                 const grupo = document.createElement('div');
                 grupo.className = 'opcoes'; grupo.setAttribute('role', 'radiogroup'); grupo.id = sel.id + '-botoes';
@@ -2816,7 +3003,10 @@
                 sel.hidden = true;
                 sel.insertAdjacentElement('afterend', grupo);
                 grupos.push([sel, grupo]);
-            });
+            }
+            checkupForm.querySelectorAll('select:not([data-plano])').forEach(emBotoes);
+            // Resultados qualitativos dos cartões de exame (sorologias, FIT) são criados depois.
+            window.selectEmBotoes = sel => { emBotoes(sel); sincronizar(); };
             function sincronizar() {
                 grupos.forEach(([sel, grupo]) => {
                     const marcado = [...grupo.children].find(b => b.dataset.valor === sel.value);
