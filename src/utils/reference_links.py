@@ -126,6 +126,8 @@ _FONTES_DIRETAS = [
     ('in cnv 2026', 'https://www.prefeitura.poa.br/sites/default/files/usu_doc/hotsites/sms/vigilancia-em-saude/INSTRU%C3%87%C3%83O%20NORMATIVA%20CNV%204a%20versao%20site%20TIMBRADO%2008102026%20(1).pdf'),
     ('manual dos crie', 'https://goias.gov.br/saude/wp-content/uploads/sites/34/2019/12/manual-crie-6-edicao-f97.pdf'),
     ('cve-sp/pni 2025 (vsr na gestante)', 'https://www.saude.sp.gov.br/resources/cve-centro-de-vigilancia-epidemiologica/areas-de-vigilancia/imunizacao/2025/vsr_gestante_esp_031225.pdf'),
+    ('cdc/acip 2024 (menb-4c)', 'https://www.cdc.gov/mmwr/volumes/73/wr/mm7349a3.htm'),
+    ('cdc/acip 2020 (meningocócicas)', 'https://www.cdc.gov/mmwr/volumes/69/rr/pdfs/rr6909a1-H.pdf'),
     ('cdc/acip 2025 (vsr)', 'https://www.cdc.gov/rsv/hcp/vaccine-clinical-guidance/adults.html'),
     ('cdc/acip 2025 (pneumocócica)', 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html'),
     ('cdc/acip 2025 (esquema adulto)', 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/adult/adult-combined-schedule.pdf'),

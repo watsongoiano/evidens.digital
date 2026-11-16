@@ -236,6 +236,8 @@ SBIM_ESPECIAIS = 'SBIm Pacientes Especiais 2026/2027'
 IN_CNV = 'IN CNV 2026 (MS)'
 CRIE = 'Manual dos CRIE (MS, 2023)'
 ACIP = 'CDC/ACIP 2025'
+MENB_ACIP = 'CDC/ACIP 2024 (MenB-4C)'
+MENB_ACIP_REFORCO = 'CDC/ACIP 2020 (meningocócicas)'
 HEPATITE_B_60 = 'Hepatite B (Engerix-B® ou Euvax B®)'
 HEPATITES_A_B = 'Hepatites A e B (Twinrix® ou vacinas isoladas)'
 HPV9 = 'Gardasil 9® (Vacina HPV 9-Valente)'
@@ -1275,14 +1277,18 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add(MENACWY, 'vacina',
             'Asplenia: 2 doses com 8 semanas de intervalo e reforço a cada 5 anos.', 'Asplenia | 2 doses + reforço 5/5 anos',
             'CDC/ACIP 2025 / ' + SBIM, 'A', 'alta', substituir=True, esquema='asplenia')
-        add('Meningocócica B (Bexsero®)', 'vacina', 'Asplenia: 2 doses com 1 mês de intervalo; reforço 1 ano depois e a cada 2-3 anos.',
-            'Asplenia | 2 doses + reforços', 'CDC/ACIP 2025 / ' + SBIM, 'A', 'alta', substituir=True, esquema='asplenia')
+        # MenB-4C no alto risco: 3 doses (0, 1-2, 6 meses) pelo ACIP (out/2024, após a bula da FDA de ago/2024) e pela SBIm.
+        add('Meningocócica B (Bexsero®)', 'vacina', 'Asplenia: 3 doses (0, 1-2 e 6 meses); reforço 1 ano depois do esquema e, '
+            'depois, a cada 2-3 anos (ACIP) ou a cada 3 anos (SBIm). Todas as doses do mesmo fabricante. Licenciada até 50 anos.',
+            'Asplenia | 3 doses (0, 1-2, 6m) + reforços', MENB_ACIP + ' / ' + MENB_ACIP_REFORCO + ' / ' + SBIM_ESPECIAIS,
+            'A', 'alta', substituir=True, esquema='asplenia')
         add(HIB, 'vacina', 'Asplenia, não vacinado: SBIm e CRIE indicam 2 doses com 2 meses de intervalo; o ACIP, dose única.',
             'Asplenia | SBIm/CRIE: 2 doses (0-2m); ACIP: 1 dose', SBIM_ESPECIAIS + ' / ' + ACIP, 'B', 'alta', substituir=True,
             esquema='asplenia')
         orientar('Meningocócica B na asplenia: diretrizes divergem',
-                 'O motor seguiu o ACIP: Bexsero® em 2 doses com 1 mês de intervalo, reforço 1 ano depois e a cada 2-3 anos. A SBIm '
-                 'indica 3 doses (0, 1-2 e 6 meses) até 50 anos, reforço 1 ano depois e a cada 3 anos.', ACIP + ' / ' + SBIM_ESPECIAIS)
+                 'ACIP e SBIm concordam no esquema de 3 doses (0, 1-2 e 6 meses) e no primeiro reforço 1 ano depois. Divergem nos '
+                 'reforços seguintes: a cada 2-3 anos pelo ACIP e a cada 3 anos pela SBIm. O motor mostra os dois intervalos.',
+                 MENB_ACIP_REFORCO + ' / ' + SBIM_ESPECIAIS)
     if hiv or {'asplenia', 'anemia_falciforme'} & com:
         orientar('Hib no adulto: diretrizes divergem',
                  'O motor seguiu a SBIm: 2 doses com 2 meses de intervalo no adulto não vacinado com asplenia ou HIV. O ACIP indica '

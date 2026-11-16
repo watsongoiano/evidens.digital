@@ -225,6 +225,27 @@ def test_hib_na_asplenia_traz_as_duas_posicoes(client):
     assert 'Meningocócica B na asplenia: diretrizes divergem' in _orientacoes(dados)
 
 
+def test_menb_na_asplenia_em_tres_doses_com_os_dois_reforcos(client):
+    """VAC-01: MenB-4C no alto risco em 3 doses (ACIP out/2024, bula FDA ago/2024; SBIm Pacientes Especiais)."""
+    dados = _consultar(client, idade=30, sexo='masculino', comorbidades=['anemia_falciforme'])
+    menb = _vacinas(dados)['Meningocócica B (Bexsero®)']
+    assert menb['subtitulo'].startswith('Asplenia | 3 doses (0, 1-2, 6m)') and menb['esquema_pdf'] == 'asplenia'
+    assert '2-3 anos (ACIP)' in menb['descricao'] and '3 anos (SBIm)' in menb['descricao']
+    assert 'CDC/ACIP 2024 (MenB-4C)' in menb['referencia']
+    assert 'reforços seguintes' in _orientacoes(dados)['Meningocócica B na asplenia: diretrizes divergem']['descricao']
+
+
+def test_menb_sem_asplenia_segue_o_cartao_de_rotina(client):
+    menb = _vacinas(_consultar(client, idade=30, sexo='masculino'))['Meningocócica B (Bexsero®)']
+    assert 'Asplenia' not in menb['subtitulo'] and 'esquema_pdf' not in menb
+
+
+def test_posologia_da_menb_no_pdf_da_asplenia():
+    from src.utils.pdf_minutas import posologia_da_vacina
+    texto = posologia_da_vacina('Meningocócica B (Bexsero®)', 'asplenia')
+    assert 'três doses' in texto and '0, 1-2 e 6 meses' in texto and 'duas doses' not in texto
+
+
 def test_hib_nao_entra_sem_asplenia_nem_hiv(client):
     dados = _consultar(client, idade=30, sexo='masculino')
     assert HIB not in _vacinas(dados) and 'Hib no adulto: diretrizes divergem' not in _orientacoes(dados)

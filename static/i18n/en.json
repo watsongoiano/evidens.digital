@@ -2223,7 +2223,13 @@
   "HIV: aplicar duas doses (0,5 ml), INTRAMUSCULAR, com 8 semanas de intervalo. Reforço a cada 5 anos.": "HIV: give two doses (0.5 mL), INTRAMUSCULAR, 8 weeks apart. Booster every 5 years.",
   "HIV: aplicar duas doses (0,5 ml), INTRAMUSCULAR, com 2 meses de intervalo, se não vacinado previamente.": "HIV: give two doses (0.5 mL), INTRAMUSCULAR, 2 months apart, if not previously vaccinated.",
   "Corticoide sistêmico sem dose ou duração informadas": "Systemic corticosteroid without dose or duration entered",
-  "Metotrexato ou azatioprina em dose de baixo grau": "Methotrexate or azathioprine at a low-level dose"
+  "Metotrexato ou azatioprina em dose de baixo grau": "Methotrexate or azathioprine at a low-level dose",
+  "Asplenia: 3 doses (0, 1-2 e 6 meses); reforço 1 ano depois do esquema e, depois, a cada 2-3 anos (ACIP) ou a cada 3 anos (SBIm). Todas as doses do mesmo fabricante. Licenciada até 50 anos.": "Asplenia: 3 doses (0, 1-2 and 6 months); a booster 1 year after the series and then every 2-3 years (ACIP) or every 3 years (SBIm). All doses from the same manufacturer. Licensed up to 50 years.",
+  "Asplenia | 3 doses (0, 1-2, 6m) + reforços": "Asplenia | 3 doses (0, 1-2, 6m) + boosters",
+  "ACIP e SBIm concordam no esquema de 3 doses (0, 1-2 e 6 meses) e no primeiro reforço 1 ano depois. Divergem nos reforços seguintes: a cada 2-3 anos pelo ACIP e a cada 3 anos pela SBIm. O motor mostra os dois intervalos.": "ACIP and SBIm agree on the 3-dose series (0, 1-2 and 6 months) and on the first booster 1 year later. They differ on later boosters: every 2-3 years per ACIP and every 3 years per SBIm. The engine shows both intervals.",
+  "CDC/ACIP 2024 (MenB-4C)": "CDC/ACIP 2024 (MenB-4C)",
+  "CDC/ACIP 2020 (meningocócicas)": "CDC/ACIP 2020 (meningococcal)",
+  "Asplenia: aplicar três doses (0,5 ml), INTRAMUSCULAR, a 0, 1-2 e 6 meses (Bexsero®). Reforço 1 ano após o esquema e, depois, a cada 2-3 anos (ACIP) ou 3 anos (SBIm).": "Asplenia: give three doses (0.5 mL), INTRAMUSCULAR, at 0, 1-2 and 6 months (Bexsero®). Booster 1 year after the series and then every 2-3 years (ACIP) or 3 years (SBIm)."
  },
  "padroes": [
   [
