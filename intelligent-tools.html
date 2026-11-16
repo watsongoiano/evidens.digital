@@ -865,13 +865,13 @@
     <section class="secao" aria-labelledby="s-exames">
       <h2 id="s-exames" class="secao-titulo"><span class="secao-num">08</span>Exames já realizados</h2>
       <p class="secao-nota">Opcional. Escolha entre os exames mais comuns, adicione outro do catálogo ou anexe o laudo em PDF; informe a data e, se quiser, o resultado. O que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. Colesterol, HDL, creatinina, HbA1c, relação albumina/creatinina e DNA-HPV entram nos cálculos (PREVENT, TFG pela CKD-EPI, risco renal e colo do útero); os outros resultados aparecem no resumo. O laudo é lido e descartado; nada é guardado.</p>
-      <div class="flex flex-wrap gap-3">
-        <button type="button" id="abrirExamesComuns" class="btn-claro" aria-expanded="false" aria-controls="examesComunsPainel"><i class="fa-solid fa-list-check text-[11px]"></i> Exames mais comuns</button>
+      <!-- Exames mais comuns: o cartão de cada exame abre logo abaixo do grupo do botão tocado. -->
+      <div id="examesComunsPainel" class="exames-comuns" aria-label="Exames mais comuns"></div>
+      <div class="flex flex-wrap gap-3 mt-6">
         <button type="button" id="adicionarExameAnterior" class="btn-claro"><i class="fa-solid fa-plus text-[11px]"></i> Outro exame</button>
         <label for="laudoPdf" class="btn-claro cursor-pointer"><i class="fa-solid fa-file-arrow-up text-[11px]"></i> Anexar laudo (PDF)</label>
         <input type="file" id="laudoPdf" accept="application/pdf,.pdf" multiple class="sr-only">
       </div>
-      <div id="examesComunsPainel" class="bloco-condicional" hidden></div>
       <div id="laudoStatus" role="status" class="aviso aviso-atencao mt-4" style="display: none;"></div>
       <div id="examesAnteriores" class="flex flex-col gap-3 mt-4"></div>
       <!-- Resultados que entram nos cálculos: cada campo vai para a linha do exame correspondente (um só lugar). -->
@@ -1263,7 +1263,7 @@
         }
 
         function examesAnterioresDoFormulario() {
-            return Array.from(document.querySelectorAll('#examesAnteriores .exame-anterior')).map(linha => {
+            return Array.from(document.querySelectorAll('.exame-anterior')).map(linha => {
                 const resultados = {};
                 linha.querySelectorAll('[data-campo]').forEach(e => { if (e.value.trim() !== '') resultados[e.dataset.campo] = e.value.trim(); });
                 const item = { exame: tituloDaLinha(linha), data: linha.querySelector('[data-data-anterior]').value };
@@ -1318,7 +1318,22 @@
             resultadosCaixa.setAttribute('data-resultados-da-linha', '');
             resultadosCaixa.appendChild(campo('', 'Feito em', quando));
             linha.append(topo, resultadosCaixa);
-            nome.addEventListener('change', () => ligarResultados(linha));
+            nome.addEventListener('change', () => {
+                if (!linha.isConnected) return;
+                const titulo = tituloDaLinha(linha);
+                // O mesmo exame em dois cartões: fica o que já existia.
+                const outro = [...document.querySelectorAll('.exame-anterior')].find(l => l !== linha && titulo && chaveDoExame(tituloDaLinha(l)) === chaveDoExame(titulo));
+                if (outro && cartaoEmBranco(linha)) {
+                    nome.blur();   // fecha a lista de busca antes de o cartão sair
+                    soltarResultados(linha); if (linha.isConnected) linha.remove(); marcarComuns();
+                    outro.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                    outro.querySelector('[data-data-anterior]').focus({ preventScroll: true });
+                    return;
+                }
+                ligarResultados(linha);
+                const destino = destinoDoCartao(titulo);
+                if (linha.isConnected && linha.parentElement !== destino) destino.appendChild(linha);   // perto do botão do grupo
+            });
             titulo.addEventListener('click', () => { titulo.hidden = true; campoNome.hidden = false; nome.select(); nome.focus(); });
             listaDeBusca(nome, () => examesDoCatalogo(['laboratorio', 'imagem']), escolhido => {
                 nomeDoExame[T(escolhido).toLowerCase()] = escolhido;
@@ -1333,7 +1348,7 @@
                 marcarComuns();
                 checkupForm.dispatchEvent(new Event('change', { bubbles: true }));   // os resultados deixam de valer
             });
-            document.getElementById('examesAnteriores').appendChild(linha);
+            destinoDoCartao(exame ? (nomeDoExame[String(exame).toLowerCase()] || exame) : '').appendChild(linha);
             if (exame) ligarResultados(linha);
             if (resultados) preencherResultados(linha, resultados);
             return linha;
@@ -1352,22 +1367,37 @@
 
         // "Exames mais comuns": um toque abre o cartão do exame já com os campos de resultado.
         function marcarComuns() {
-            const presentes = new Set([...document.querySelectorAll('#examesAnteriores .exame-anterior')].map(l => chaveDoExame(tituloDaLinha(l))));
+            const presentes = new Set([...document.querySelectorAll('.exame-anterior')].map(l => chaveDoExame(tituloDaLinha(l))));
             document.querySelectorAll('#examesComunsPainel [data-exame-comum]').forEach(b => {
                 b.setAttribute('aria-checked', presentes.has(chaveDoExame(b.dataset.exameComum)) ? 'true' : 'false');
             });
         }
-        async function montarExamesComuns() {
+        // Cartão de um exame da lista: logo abaixo dos botões do seu grupo. Os outros: no fim da seção.
+        function destinoDoCartao(titulo) {
+            const def = titulo && examesComuns && examesComuns.apelidos[titulo];
+            const botao = def && [...document.querySelectorAll('#examesComunsPainel [data-exame-comum]')].find(b => b.dataset.exameComum === def.titulo);
+            return (botao && botao.closest('[data-grupo]').querySelector('[data-cartoes-do-grupo]')) || document.getElementById('examesAnteriores');
+        }
+        function cartaoEmBranco(linha) {
+            return !linha.querySelector('[data-data-anterior]').value && ![...linha.querySelectorAll('[data-campo]')].some(e => e.value);
+        }
+        // Montado uma vez só, mesmo com dois toques ou internet lenta (antes saíam os botões em dobro).
+        let montagemDosComuns = null;
+        function montarExamesComuns() {
+            if (!montagemDosComuns) montagemDosComuns = desenharExamesComuns();
+            return montagemDosComuns;
+        }
+        async function desenharExamesComuns() {
             const painel = document.getElementById('examesComunsPainel');
-            if (painel.dataset.montado) return;
-            const { exames } = await carregarExamesComuns();
-            await carregarExamesConhecidos();
-            painel.dataset.montado = '1';
+            const [{ exames }] = await Promise.all([carregarExamesComuns(), carregarExamesConhecidos()]);
+            painel.replaceChildren();
             const grupos = [];
             exames.forEach(e => { let g = grupos.find(x => x.nome === e.grupo); if (!g) grupos.push(g = { nome: e.grupo, itens: [] }); g.itens.push(e); });
             grupos.forEach(g => {
-                const rotulo = document.createElement('p'); rotulo.className = 'campo-rotulo text-teal-dark mt-4 first:mt-0'; rotulo.textContent = T(g.nome);
+                const bloco = document.createElement('div'); bloco.className = 'exames-comuns-grupo'; bloco.setAttribute('data-grupo', g.nome);
+                const rotulo = document.createElement('p'); rotulo.className = 'campo-rotulo text-teal-dark'; rotulo.textContent = T(g.nome);
                 const opcoes = document.createElement('div'); opcoes.className = 'opcoes';
+                const cartoes = document.createElement('div'); cartoes.className = 'exames-comuns-cartoes'; cartoes.setAttribute('data-cartoes-do-grupo', '');
                 g.itens.forEach(e => {
                     const b = document.createElement('button');
                     b.type = 'button'; b.className = 'opcao'; b.setAttribute('role', 'checkbox'); b.setAttribute('aria-checked', 'false');
@@ -1376,30 +1406,34 @@
                     b.textContent = T(e.curto);
                     b.addEventListener('click', () => {
                         const existente = linhaDoExame(e.titulo);
-                        if (existente) { existente.scrollIntoView({ block: 'center', behavior: 'smooth' }); existente.querySelector('[data-data-anterior]').focus({ preventScroll: true }); return; }
+                        if (existente) {
+                            // Segundo toque: cartão ainda vazio sai; com data ou resultado, só mostra onde está.
+                            if (cartaoEmBranco(existente)) { existente.querySelector('.exame-retirar').click(); return; }
+                            existente.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                            existente.querySelector('[data-data-anterior]').focus({ preventScroll: true });
+                            return;
+                        }
                         nomeDoExame[T(e.titulo).toLowerCase()] = e.titulo;
                         const linha = adicionarExameAnterior(T(e.titulo));
-                        linha.querySelector('[data-data-anterior]').focus();
+                        linha.querySelector('[data-data-anterior]').focus({ preventScroll: true });
+                        linha.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                         checkupForm.dispatchEvent(new Event('change', { bubbles: true }));
                     });
                     opcoes.appendChild(b);
                 });
-                painel.append(rotulo, opcoes);
+                bloco.append(rotulo, opcoes, cartoes);
+                painel.appendChild(bloco);
             });
             marcarComuns();
             atualizarCamposDoColo();
         }
-        document.getElementById('abrirExamesComuns').addEventListener('click', async e => {
-            const botao = e.currentTarget, painel = document.getElementById('examesComunsPainel');
-            await montarExamesComuns();
-            painel.hidden = !painel.hidden;
-            botao.setAttribute('aria-expanded', painel.hidden ? 'false' : 'true');
-        });
+        // Depois que o resto da página está pronto (a montagem usa funções declaradas mais abaixo).
+        setTimeout(() => montarExamesComuns().catch(() => { montagemDosComuns = null; }), 0);
 
         // Laudo em PDF: o servidor lê os exames e as datas de coleta; aqui eles viram linhas para o médico conferir.
         function linhaDoExame(exame) {
             const chave = chaveDoExame(exame);
-            return Array.from(document.querySelectorAll('#examesAnteriores .exame-anterior')).find(linha => chaveDoExame(tituloDaLinha(linha)) === chave);
+            return Array.from(document.querySelectorAll('.exame-anterior')).find(linha => chaveDoExame(tituloDaLinha(linha)) === chave);
         }
 
         function mostrarLeituraDoLaudo(partes) {
@@ -1422,6 +1456,7 @@
             if (!arquivos.length) return;
             await carregarExamesConhecidos();
             const comuns = await carregarExamesComuns();
+            await montarExamesComuns();
             mostrarLeituraDoLaudo([[T('Lendo o laudo…')]]);
             let incluidos = 0, atualizados = 0, comValor = 0;
             const naoReconhecidos = [], semData = [], falhas = [];

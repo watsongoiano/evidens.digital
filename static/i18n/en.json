@@ -3001,7 +3001,15 @@
   "Trocar o exame": "Change the test",
   "Resultados informados": "Reported results",
   "com resultado preenchido": "with result filled in",
-  "Confira nomes, datas e resultados antes de gerar.": "Check names, dates and results before generating."
+  "Confira nomes, datas e resultados antes de gerar.": "Check names, dates and results before generating.",
+  "Metabolismo": "Metabolism",
+  "Rim e eletrólitos": "Kidney and electrolytes",
+  "Sangue, ferro e vitaminas": "Blood, iron and vitamins",
+  "Hormônios e inflamação": "Hormones and inflammation",
+  "Sorologias e rastreio": "Serology and screening",
+  "Albumina/creatinina (urina)": "Albumin/creatinine (urine)",
+  "Albumina sérica": "Serum albumin",
+  "Hepatite B": "Hepatitis B"
  },
  "padroes": [
   [
