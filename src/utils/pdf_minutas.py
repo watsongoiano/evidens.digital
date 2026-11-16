@@ -503,6 +503,115 @@ def _pagina_da_guia(pdf, dados_paciente, guia, linhas, parte, partes):
 TABELA_TUSS = '22'
 
 
+# ── Laudo de solicitação de APAC (SUS) ──────────────────────────────────────
+# Formulário do Ministério da Saúde "APAC – Laudo de Solicitação/Autorização", A4 retrato. O Evidēns preenche a
+# solicitação (estabelecimento solicitante, paciente, procedimento, justificativa e profissional solicitante);
+# autorização e estabelecimento executante ficam em branco, para a regulação.
+_X_APAC, _L_APAC = 12.0, 186.0
+
+
+def _faixa_apac(pdf, y, texto):
+    pdf.set_fill_color(225, 232, 234)
+    pdf.set_draw_color(20, 41, 47)
+    pdf.set_xy(_X_APAC, y)
+    pdf.set_font('DejaVu', 'B', 7.5)
+    pdf.set_text_color(20, 41, 47)
+    pdf.cell(_L_APAC, 5, texto, fill=True, align='C', border=1)
+    return y + 5
+
+
+def _linha_apac(pdf, y, altura, campos):
+    """campos: [(largura, rótulo, valor)], da esquerda para a direita, ocupando a largura do formulário."""
+    x = _X_APAC
+    for largura, rotulo, valor in campos:
+        _campo(pdf, x, y, largura, altura, rotulo, valor, 8.5)
+        x += largura
+    return y + altura
+
+
+def _pagina_da_apac(pdf, dados_paciente, exame, apac):
+    from src.utils import sigtap
+    pdf.add_page(orientation='P', format='A4')
+    vinculo, paciente, resp = apac['vinculo'], apac.get('paciente') or {}, apac.get('responsavel') or {}
+    titulo = exame.get('titulo') or ''
+    codigo = sigtap.formatado(sigtap.codigo(titulo))
+    sexo = {'feminino': 'Feminino', 'masculino': 'Masculino', 'F': 'Feminino', 'M': 'Masculino'}.get(
+        dados_paciente.get('sexo'), '')
+    # Cabeçalho
+    pdf.set_draw_color(20, 41, 47)
+    pdf.rect(_X_APAC, 10, 58, 16)
+    pdf.rect(_X_APAC + 60, 10, _L_APAC - 60, 16)
+    pdf.set_text_color(20, 41, 47)
+    pdf.set_font('DejaVu', 'B', 9)
+    pdf.set_xy(_X_APAC + 2, 12.5)
+    pdf.multi_cell(54, 4.5, 'MINISTÉRIO DA SAÚDE\nSUS – Sistema Único de Saúde', align='C')
+    pdf.set_font('DejaVu', 'B', 11.5)
+    pdf.set_xy(_X_APAC + 62, 11.5)
+    pdf.cell(_L_APAC - 64, 6, 'APAC – Autorização de Procedimentos Ambulatoriais', align='C')
+    pdf.set_font('DejaVu', '', 10)
+    pdf.set_xy(_X_APAC + 62, 18)
+    pdf.cell(_L_APAC - 64, 6, 'Laudo de Solicitação / Autorização', align='C')
+
+    y = _faixa_apac(pdf, 28, 'IDENTIFICAÇÃO DO ESTABELECIMENTO DE SAÚDE (SOLICITANTE)')
+    y = _linha_apac(pdf, y, 10, [(150, 'Nome do estabelecimento de saúde solicitante', vinculo['nome']),
+                                 (36, 'CNES', vinculo['cnes'])])
+    y = _faixa_apac(pdf, y + 1.5, 'IDENTIFICAÇÃO DO PACIENTE')
+    nome = dados_paciente.get('nome') or ''
+    if nome in ('Paciente', 'Não informado'):
+        nome = ''
+    y = _linha_apac(pdf, y, 10, [(150, 'Nome do paciente', _texto(nome, 150)), (36, 'Nº do prontuário', paciente.get('prontuario'))])
+    y = _linha_apac(pdf, y, 10, [(76, 'Cartão Nacional de Saúde (CNS)', paciente.get('cns')),
+                                 (34, 'Data de nascimento', paciente.get('nascimento')), (30, 'Sexo', sexo),
+                                 (23, 'Raça/cor', paciente.get('raca')), (23, 'Etnia', '')])
+    y = _linha_apac(pdf, y, 10, [(130, 'Nome da mãe', paciente.get('mae')), (56, 'Telefone celular', paciente.get('telefone'))])
+    y = _linha_apac(pdf, y, 10, [(130, 'Nome do responsável', paciente.get('responsavel')), (56, 'Telefone de contato', '')])
+    y = _linha_apac(pdf, y, 10, [(186, 'Endereço (rua, nº, bairro)', paciente.get('endereco'))])
+    y = _linha_apac(pdf, y, 10, [(96, 'Município de residência', paciente.get('municipio')),
+                                 (34, 'Cód. IBGE município', paciente.get('ibge')), (16, 'UF', paciente.get('uf')),
+                                 (40, 'CEP', paciente.get('cep'))])
+    y = _faixa_apac(pdf, y + 1.5, 'PROCEDIMENTO SOLICITADO')
+    y = _linha_apac(pdf, y, 11, [(42, 'Código do procedimento principal', codigo), (16, 'Serviço', ''),
+                                 (16, 'Class.', ''), (96, 'Nome do procedimento principal', pdf.t(titulo)),
+                                 (16, 'Qtde.', '1')])
+    y = _faixa_apac(pdf, y + 1.5, 'PROCEDIMENTO(S) SECUNDÁRIO(S)')
+    for _ in range(3):
+        y = _linha_apac(pdf, y, 8, [(42, 'Código do procedimento secundário', ''),
+                                    (128, 'Nome do procedimento secundário', ''), (16, 'Qtde.', '')])
+    y = _faixa_apac(pdf, y + 1.5, 'JUSTIFICATIVA DO(S) PROCEDIMENTO(S) SOLICITADO(S)')
+    y = _linha_apac(pdf, y, 12, [(108, 'Descrição do diagnóstico', apac.get('diagnostico')),
+                                 (26, 'CID-10 principal', apac.get('cid')), (26, 'CID-10 secundário', apac.get('cid_secundario')),
+                                 (26, 'CID-10 causas associadas', '')])
+    y = _linha_apac(pdf, y, 14, [(186, 'Observações', apac.get('observacoes'))])
+    y = _faixa_apac(pdf, y + 1.5, 'SOLICITAÇÃO')
+    profissional = resp.get('nome', '') + (f" – {resp['crm']}" if resp.get('crm') else '')
+    _campo(pdf, _X_APAC + 140, y, 46, 20, 'Assinatura e carimbo (nº do registro do conselho)')
+    _linha_apac(pdf, y, 10, [(110, 'Nome do profissional solicitante', profissional),
+                             (30, 'Data da solicitação', data_de_emissao())])
+    _linha_apac(pdf, y + 10, 10, [(140, 'Cartão Nacional de Saúde (CNS) do profissional solicitante', vinculo.get('cns'))])
+    y = _faixa_apac(pdf, y + 21.5, 'AUTORIZAÇÃO')
+    _campo(pdf, _X_APAC + 140, y, 46, 20, 'Nº da autorização (APAC)')
+    _linha_apac(pdf, y, 10, [(110, 'Nome do profissional autorizador', ''), (30, 'Cód. órgão emissor', '')])
+    _linha_apac(pdf, y + 10, 10, [(140, 'Cartão Nacional de Saúde (CNS) do profissional autorizador', '')])
+    y = _linha_apac(pdf, y + 20, 10, [(40, 'Data da autorização', ''),
+                                      (100, 'Assinatura e carimbo (nº do registro do conselho)', ''),
+                                      (46, 'Período de validade da APAC', '')])
+    y = _faixa_apac(pdf, y + 1.5, 'IDENTIFICAÇÃO DO ESTABELECIMENTO DE SAÚDE (EXECUTANTE)')
+    _linha_apac(pdf, y, 10, [(150, 'Nome fantasia do estabelecimento de saúde executante', ''), (36, 'CNES', '')])
+
+
+def _anexar_apacs(pdf, dados_paciente, exames, apac):
+    """Um laudo de APAC por exame que a regulação pede em APAC (src/utils/sigtap.py). Devolve quantos."""
+    from src.utils import sigtap
+    alvos = [e for e in exames if sigtap.vai_em_apac(e.get('titulo'))]
+    pdf.em_guia = True
+    pdf.set_auto_page_break(auto=False)
+    for exame in alvos:
+        principal, secundario = sigtap.cid_do_exame(exame.get('titulo'), apac.get('comorbidades') or (),
+                                                    apac.get('cid') or '')
+        _pagina_da_apac(pdf, dados_paciente, exame, dict(apac, cid=principal, cid_secundario=secundario))
+    return len(alvos)
+
+
 def _anexar_guias(pdf, dados_paciente, exames, guia):
     """Acrescenta ao pedido as guias SP/SADT (5 procedimentos por guia)."""
     from src.utils import tuss
@@ -566,7 +675,7 @@ def _com_timbrado(pdf, timbrado, paginas=None):
 
 
 def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='pt', guia=None, timbrado=None,
-                   assinatura=None, justificativa=''):
+                   assinatura=None, justificativa='', apac=None):
     pdf = _Minuta(TITULOS[categoria], idioma, timbrado, assinatura)
     pdf.responsavel = responsavel
     if categoria == 'imagem':
@@ -578,6 +687,9 @@ def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='
     paginas_do_pedido = pdf.page_no()
     if guia:
         _anexar_guias(pdf, dados_paciente, exames, dict(guia, responsavel=responsavel))
+    elif apac:
+        _anexar_apacs(pdf, dados_paciente, exames, dict(apac, responsavel=responsavel,
+                                                         diagnostico=apac.get('diagnostico') or justificativa))
     return _com_timbrado(pdf, timbrado, paginas_do_pedido)
 
 
@@ -587,8 +699,9 @@ def gerar_pdf_exames_laboratoriais(dados_paciente, exames, responsavel=None, idi
 
 
 def gerar_pdf_exames_imagem(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None,
-                            assinatura=None, justificativa=''):
-    return _pdf_de_exames(dados_paciente, exames, 'imagem', responsavel, idioma, guia, timbrado, assinatura, justificativa)
+                            assinatura=None, justificativa='', apac=None):
+    return _pdf_de_exames(dados_paciente, exames, 'imagem', responsavel, idioma, guia, timbrado, assinatura,
+                          justificativa, apac)
 
 
 def gerar_pdf_vacinas(dados_paciente, vacinas, responsavel=None, idioma='pt', timbrado=None, assinatura=None):

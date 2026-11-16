@@ -1005,6 +1005,20 @@
         <div class="campo sm:col-span-2"><label for="guiaPlano">Plano do paciente</label><select id="guiaPlano"><option value="">Particular (sem guia)</option></select></div>
         <div class="campo sm:col-span-2" data-guia-campo style="display: none;"><label for="guiaCarteira">Número da carteira</label><input type="text" id="guiaCarteira" maxlength="30" autocomplete="off" inputmode="numeric"></div>
       </div>
+      <!-- SUS: laudo de APAC dos exames que a regulação pede em APAC (src/utils/sigtap.py). Nada disto é guardado. -->
+      <div id="apacCampos" class="mt-3" style="display: none;">
+        <p class="text-[13px] text-ink/60 mb-3">Tomografia, ressonância, endoscopia, colonoscopia e densitometria saem com o laudo de solicitação de APAC, logo depois do pedido. Os campos abaixo são opcionais (o que ficar em branco é preenchido à mão) e não são guardados.</p>
+        <div class="grade">
+          <div class="campo"><label for="apacCns">CNS do paciente</label><input type="text" id="apacCns" maxlength="20" inputmode="numeric" autocomplete="off"></div>
+          <div class="campo"><label for="apacNascimento">Data de nascimento</label><input type="text" id="apacNascimento" maxlength="10" inputmode="numeric" placeholder="dd/mm/aaaa" autocomplete="off"></div>
+          <div class="campo sm:col-span-2"><label for="apacMae">Nome da mãe</label><input type="text" id="apacMae" maxlength="120" autocomplete="off"></div>
+          <div class="campo"><label for="apacTelefone">Telefone</label><input type="text" id="apacTelefone" maxlength="20" inputmode="tel" autocomplete="off"></div>
+          <div class="campo"><label for="apacCid">CID-10 principal (opcional)</label><input type="text" id="apacCid" maxlength="6" placeholder="Automático pelas comorbidades" autocomplete="off"></div>
+          <div class="campo sm:col-span-2"><label for="apacEndereco">Endereço (rua, nº, bairro)</label><input type="text" id="apacEndereco" maxlength="150" autocomplete="off"></div>
+          <div class="campo"><label for="apacMunicipio">Município</label><input type="text" id="apacMunicipio" maxlength="60" autocomplete="off"></div>
+          <div class="campo"><div class="grade !mt-0 grid-cols-2"><div class="campo"><label for="apacUf">UF</label><input type="text" id="apacUf" maxlength="2" autocomplete="off"></div><div class="campo"><label for="apacCep">CEP</label><input type="text" id="apacCep" maxlength="9" inputmode="numeric" autocomplete="off"></div></div></div>
+        </div>
+      </div>
       <p data-guia-campo class="text-[13px] text-ink/55 mt-3" style="display: none;">A guia SP/SADT sai no mesmo PDF, logo depois do pedido, com os seus dados no plano e os códigos TUSS. O número da carteira não é guardado.</p>
       <div id="guiaConfirmar" role="alert" class="aviso aviso-info mt-3" style="display: none;">
         <p>Os dados do paciente mudaram depois que o plano foi informado. Confira o plano e a carteira antes de gerar a guia.</p>
@@ -2039,17 +2053,28 @@
         const campoPlano = () => document.getElementById('pacientePlano');
         const campoCarteira = () => document.getElementById('pacienteCarteira');
 
+        // Opções do SUS (laudo de APAC) usam o valor "sus:<id do vínculo>"; as demais são planos (guia SP/SADT).
+        const ehSus = valor => String(valor || '').startsWith('sus:');
+
         function mostrarCamposDoPlano() {
-            const comPlano = !!campoPlano().value;
+            const comPlano = !!campoPlano().value && !ehSus(campoPlano().value);
             document.querySelectorAll('[data-plano-campo]').forEach(el => { el.style.display = comPlano ? '' : 'none'; });
             const pendente = planoAConfirmar && comPlano;
             document.getElementById('planoConfirmar').style.display = pendente ? '' : 'none';
             document.getElementById('guiaConfirmar').style.display = pendente ? '' : 'none';
         }
 
+        // Dados do paciente no laudo de APAC: identificam uma pessoa e não podem passar para a próxima.
+        const CAMPOS_DA_APAC = ['apacCns', 'apacNascimento', 'apacMae', 'apacTelefone', 'apacCid', 'apacEndereco',
+                                'apacMunicipio', 'apacUf', 'apacCep'];
+        function limparApac() {
+            CAMPOS_DA_APAC.forEach(id => { document.getElementById(id).value = ''; });
+        }
+
         function pedirConfirmacaoDoPlano() {
             if (campoPlano().value || campoCarteira().value) planoAConfirmar = true;
             document.getElementById('guiaIndicacao').value = '';     // a sugestão é refeita com os dados novos
+            limparApac();                                             // outro paciente: o laudo do anterior não serve
             mostrarCamposDoPlano();
         }
 
@@ -2065,6 +2090,7 @@
             document.getElementById('guiaPlano').value = '';
             document.getElementById('guiaCarteira').value = '';
             document.getElementById('guiaIndicacao').value = '';
+            limparApac();
             mostrarCamposDoPlano();
             mostrarCamposDaGuia();
         }
@@ -2091,7 +2117,12 @@
                 const o = document.createElement('option'); o.value = String(plano.id); o.textContent = plano.operadora;
                 seletor.appendChild(o);
             });
-            seletor.value = lista.some(p => String(p.id) === atual) ? atual : '';
+            (planosDoMedico && planosDoMedico.sus || []).forEach(v => {
+                const o = document.createElement('option'); o.value = 'sus:' + v.id;
+                o.textContent = T('SUS (APAC)') + ' — ' + v.nome;
+                seletor.appendChild(o);
+            });
+            seletor.value = [...seletor.options].some(o => o.value === atual) ? atual : '';
         }
 
         // Mostra o bloco do plano na identificação para quem assina pedidos (médico e residente).
@@ -2104,7 +2135,7 @@
         function aplicarPlanosNaIdentificacao(planos) {
             if (!planos.disponivel) return;
             document.getElementById('planoDoPaciente').style.display = '';
-            const temPlanos = planos.lista.length > 0;
+            const temPlanos = planos.lista.length > 0 || (planos.sus || []).length > 0;
             document.getElementById('planoCampos').style.display = temPlanos ? '' : 'none';
             document.getElementById('planoConvite').style.display = temPlanos ? 'none' : '';
             if (temPlanos) preencherPlanos(campoPlano(), planos.lista);
@@ -2114,9 +2145,11 @@
         async function carregarPlanos() {
             if (planosDoMedico) return planosDoMedico;
             try {
-                const r = await fetch('/api/auth/credenciamentos', { credentials: 'same-origin' });
+                const [r, rs] = await Promise.all([fetch('/api/auth/credenciamentos', { credentials: 'same-origin' }),
+                                                   fetch('/api/auth/vinculos-sus', { credentials: 'same-origin' })]);
                 const dados = r.ok ? await r.json() : {};
-                planosDoMedico = { disponivel: !!dados.disponivel, lista: dados.credenciamentos || [] };
+                const sus = rs.ok ? await rs.json() : {};
+                planosDoMedico = { disponivel: !!dados.disponivel, lista: dados.credenciamentos || [], sus: sus.vinculos || [] };
             } catch (e) {
                 return { disponivel: false, lista: [] };   // sem rede: tenta de novo no próximo diálogo
             }
@@ -2144,8 +2177,11 @@
         }
 
         function mostrarCamposDaGuia() {
-            const comGuia = !!document.getElementById('guiaPlano').value;
+            const valor = document.getElementById('guiaPlano').value;
+            const comGuia = !!valor && !ehSus(valor);
             document.querySelectorAll('[data-guia-campo]').forEach(el => { el.style.display = comGuia ? '' : 'none'; });
+            // O laudo de APAC é dos exames de imagem e procedimentos; o pedido de laboratório pelo SUS sai sem anexo.
+            document.getElementById('apacCampos').style.display = ehSus(valor) && categoriaDoDialogo === 'imagem' ? '' : 'none';
         }
 
         function prepararJustificativa(categoria) {
@@ -2166,7 +2202,7 @@
             if (categoria === 'vacina') return;
             const planos = await carregarPlanos();
             if (!planos.disponivel) return;
-            if (!planos.lista.length) { convite.style.display = ''; return; }
+            if (!planos.lista.length && !(planos.sus || []).length) { convite.style.display = ''; return; }
             // O diálogo espelha o que está na identificação do paciente.
             aplicarPlanosNaIdentificacao(planos);
             const seletor = document.getElementById('guiaPlano');
@@ -2178,10 +2214,24 @@
             mostrarCamposDoPlano();
         }
 
+        function apacDoDialogo(categoria) {
+            const painel = document.getElementById('guiaPainel');
+            const plano = document.getElementById('guiaPlano').value;
+            if (categoria !== 'imagem' || painel.style.display === 'none' || !ehSus(plano)) return null;
+            const v = id => document.getElementById(id).value.trim();
+            const paciente = {};
+            [['cns', 'apacCns'], ['nascimento', 'apacNascimento'], ['mae', 'apacMae'], ['telefone', 'apacTelefone'],
+             ['endereco', 'apacEndereco'], ['municipio', 'apacMunicipio'], ['uf', 'apacUf'], ['cep', 'apacCep']]
+                .forEach(([campo, id]) => { if (v(id)) paciente[campo] = campo === 'uf' ? v(id).toUpperCase() : v(id); });
+            // CID: em branco, o servidor escolhe por exame a partir das comorbidades marcadas (src/utils/sigtap.py).
+            const comorbidades = [...checkupForm.querySelectorAll('input[name="comorbidades"]:checked')].map(c => c.value);
+            return { vinculo_id: Number(plano.slice(4)), paciente, cid: v('apacCid').toUpperCase(), comorbidades };
+        }
+
         function guiaDoDialogo() {
             const painel = document.getElementById('guiaPainel');
             const plano = document.getElementById('guiaPlano').value;
-            if (painel.style.display === 'none' || !plano) return null;
+            if (painel.style.display === 'none' || !plano || ehSus(plano)) return null;
             return {
                 credenciamento_id: Number(plano),
                 carteira: document.getElementById('guiaCarteira').value.trim(),
@@ -2189,7 +2239,7 @@
             };
         }
 
-        async function baixarPdf(endpoint, itens, prefixoArquivo, descricao, guia, assinar, justificativa) {
+        async function baixarPdf(endpoint, itens, prefixoArquivo, descricao, guia, assinar, justificativa, apac) {
             try {
                 if (!currentRecommendations || currentRecommendations.length === 0) {
                     alert(T('Gere as recomendações primeiro!'));
@@ -2204,7 +2254,7 @@
                     body: JSON.stringify(Object.assign({
                         dados_paciente: dadosDoPacienteParaPdf(),
                         recomendacoes: itens
-                    }, guia ? { guia } : {}, assinar ? { assinar: true } : {}, justificativa ? { justificativa } : {}))
+                    }, guia ? { guia } : {}, assinar ? { assinar: true } : {}, justificativa ? { justificativa } : {}, apac ? { apac } : {}))
                 });
 
                 if (!response.ok) {
@@ -2419,7 +2469,8 @@
             }
             const assinar = querAssinar();
             const justificativa = justificativaDoDialogo(categoria);
-            const gerar = () => { fecharDialogo(); baixarPdf(doc.endpoint, itens, doc.arquivo, doc.descricao, guia, assinar, justificativa); };
+            const apac = categoria === 'vacina' ? null : apacDoDialogo(categoria);
+            const gerar = () => { fecharDialogo(); baixarPdf(doc.endpoint, itens, doc.arquivo, doc.descricao, guia, assinar, justificativa, apac); };
             if (assinar && !assinatura.sessao) { abrirSessaoDeAssinatura(gerar); return; }
             gerar();
         });

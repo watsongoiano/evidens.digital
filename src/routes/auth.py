@@ -274,6 +274,71 @@ def credenciamentos_excluir(cid):
     return jsonify({'ok': True})
 
 
+# ── SUS: estabelecimentos (CNES, cadastro compartilhado) e vínculo do médico (laudo de APAC) ──
+# Nome e CNES são públicos (CNES/DATASUS) e ficam disponíveis para todos os médicos; o CNS do profissional fica
+# só na conta dele.
+
+MSG_SO_QUEM_ASSINA_SUS = 'O laudo de APAC é só para médicos e residentes.'
+
+
+@auth_bp.route('/auth/estabelecimentos')
+@exigir_login
+def estabelecimentos_buscar():
+    u = usuario_atual()
+    if not contas.pode_ter_credenciamento(u):
+        return jsonify({'estabelecimentos': []})
+    cnes = request.args.get('cnes')
+    if cnes is not None:
+        achado = contas.estabelecimento_por_cnes(cnes)
+        return jsonify({'estabelecimentos': [achado] if achado else []})
+    return jsonify({'estabelecimentos': contas.buscar_estabelecimentos(request.args.get('q', ''))})
+
+
+@auth_bp.route('/auth/estabelecimentos/<int:eid>/nome', methods=['POST'])
+@exigir_login
+def estabelecimentos_renomear(eid):
+    u = usuario_atual()
+    try:
+        if not contas.renomear_estabelecimento(eid, _corpo().get('nome'), u):
+            return jsonify({'error': 'Estabelecimento não encontrado.'}), 404
+    except PermissionError:
+        return jsonify({'error': 'Só quem cadastrou o estabelecimento (ou o administrador) corrige o nome.'}), 403
+    except contas.DadosInvalidos as e:
+        return jsonify({'error': 'Confira os dados informados.', 'erros': e.erros}), 400
+    return jsonify({'ok': True})
+
+
+@auth_bp.route('/auth/vinculos-sus')
+@exigir_login
+def vinculos_sus():
+    u = usuario_atual()
+    if not contas.pode_ter_credenciamento(u):
+        return jsonify({'vinculos': [], 'disponivel': False})
+    return jsonify({'vinculos': contas.vinculos_sus_de(u['id']), 'disponivel': True})
+
+
+@auth_bp.route('/auth/vinculos-sus', methods=['POST'])
+@exigir_login
+def vinculos_sus_criar():
+    u = usuario_atual()
+    if not contas.pode_ter_credenciamento(u):
+        return jsonify({'error': MSG_SO_QUEM_ASSINA_SUS}), 403
+    try:
+        novo = contas.criar_vinculo_sus(u['id'], _corpo())
+    except contas.DadosInvalidos as e:
+        return jsonify({'error': 'Confira os dados informados.', 'erros': e.erros}), 400
+    return jsonify({'ok': True, 'vinculo': novo, 'mensagem': 'Estabelecimento do SUS salvo.'}), 201
+
+
+@auth_bp.route('/auth/vinculos-sus/<int:vid>/excluir', methods=['POST'])
+@exigir_login
+def vinculos_sus_excluir(vid):
+    u = usuario_atual()
+    if not contas.excluir_vinculo_sus(u['id'], vid):
+        return jsonify({'error': 'Estabelecimento não encontrado.'}), 404
+    return jsonify({'ok': True})
+
+
 # ── Receituário: modelo enviado, montado na tela ou papel já timbrado (só de quem assina) ─────
 # src/utils/receituario.py decide o fundo e as margens de cada modo; src/utils/timbrado.py lê o modelo.
 
