@@ -142,6 +142,20 @@ def _casos_do_motor():
                           fator_rh=rh, toxoplasmose=toxo, totg_feito='nao' if ig % 2 else 'sim',
                           gestacao_condicoes=['pe_previa', 'dmg_previo', 'prematuro_previo', 'gemelar'] if ig % 2 else [],
                           comorbidades=['hipertensao'] if ig > 30 else (['diabetes'] if ig < 10 else (['hiv'] if ig == 20 else []))))
+    # gestação: PA por faixa e idade gestacional, fatores de risco de pré-eclâmpsia, HIV, DM e fim da gestação
+    for ig, (pas, pad), extra in itertools.product((12, 18, 26, 34, 37, 40), (('', ''), ('145', '95'), ('165', '112')), (
+            dict(), dict(comorbidades=['hipertensao']), dict(comorbidades=['lupus', 'saf', 'doenca_renal', 'les_nefrite']),
+            dict(gestacao_condicoes=['nulipara', 'pe_familiar', 'fiv', 'intervalo_10_anos', 'desfecho_adverso_previo'], peso='95', altura='160'),
+            dict(gestacao_condicoes=['monocorionica', 'rastreio_pe_alto', 'dmg_atual']), dict(comorbidades=['diabetes_tipo_1']),
+            dict(comorbidades=['hiv'], cd4='600', carga_viral='0', em_tarv='sim', supressao_viral='sim'), dict(fator_rh='desconhecido'))):
+        casos.append(dict(base, idade=36, sexo='feminino', tabagismo='nunca', gestante='sim', idade_gestacional=ig,
+                          primeira_consulta='sim' if ig < 20 else 'nao', pas=pas, pad=pad, **{'fator_rh': 'negativo', **extra}))
+    for idade, ativa, lactante, com in itertools.product((22, 30, 50), ('sim', 'nao', 'desconhecido'), ('sim_menor_6m', 'nao'),
+                                                         ([], ['diabetes_gestacional_previo'])):
+        casos.append(dict(base, idade=idade, sexo='feminino', tabagismo='nunca', sexualmente_ativa=ativa, lactante=lactante,
+                          comorbidades=com))
+    casos += [dict(idade=16, sexo='feminino', tabagismo='nunca', gestante='sim'), dict(base, idade=22, sexo='feminino',
+                                                                                       tabagismo='nunca', sexualmente_ativa='x')]
     for med, (dose, duracao) in itertools.product(doses.POR_MEDICAMENTO, (('5', '2'), ('20', '4'), ('40', '30'), ('', ''))):
         casos.append(dict(base, idade=55, sexo='feminino', tabagismo='nunca', medicacoes=[med], peso='70', **{f'dose__{med}': dose, f'duracao__{med}': duracao}))
     casos += [dict(), dict(idade='abc'), dict(idade=5, sexo='x', tabagismo='y'), dict(idade=30, sexo='masculino', tabagismo='nunca', gestante='sim'),

@@ -9,7 +9,11 @@ def _split_refs(ref: str) -> List[str]:
     """
     if not ref:
         return []
-    
+
+    # Referências somadas por regras diferentes vêm unidas por ' | ' (src/utils/condicoes.py): cada uma tem o seu link.
+    if ' | ' in ref:
+        return [p for parte in ref.split(' | ') for p in _split_refs(parte)]
+
     # Tentar separar por ' / ' primeiro (preserva ACC/AHA, ESC/EAS, etc)
     if ' / ' in ref:
         parts = [p.strip() for p in ref.split(' / ')]
@@ -47,8 +51,10 @@ def _uspstf_url_by_title(title_lc: str) -> str:
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening'
     if _contains_any(title_lc, ['brca']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/brca-related-cancer-risk-assessment-genetic-counseling-and-genetic-testing'
-    if _contains_any(title_lc, ['colonoscopia', 'colorretal']):
+    if _contains_any(title_lc, ['colonoscopia', 'colorretal', 'sangue oculto']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening'
+    if _contains_any(title_lc, ['melanoma', 'pele']):
+        return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/skin-cancer-screening'
     if _contains_any(title_lc, ['cervical', 'papanicolaou', 'pap', 'hpv']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening'
     if _contains_any(title_lc, ['psa', 'próstata', 'prostata']):
@@ -118,9 +124,31 @@ _FONTES_DIRETAS = [
     ('nccn (saúde óssea', 'https://www.nccn.org/guidelines/category_3'),
     ('ms 2024 (pcdt hiv)', 'https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf'),
     ('hivma/idsa 2024', 'https://doi.org/10.1093/cid/ciae479'),
+    # Gestação (src/utils/prenatal.py): as específicas antes das genéricas ("acog pb 222", "ada 2026", "ata")
+    ('acog co 767', 'https://doi.org/10.1097/AOG.0000000000003075'),
+    ('acog co 797', 'https://doi.org/10.1097/AOG.0000000000003668'),
+    ('acog co 495', 'https://doi.org/10.1097/AOG.0b013e318227f06b'),
+    ('acog pb 201', 'https://doi.org/10.1097/AOG.0000000000002961'),
+    ('acog pb 234', 'https://doi.org/10.1097/AOG.0000000000004479'),
+    ('aha 2014 (ecocardiograma fetal)', 'https://doi.org/10.1161/01.cir.0000437597.44550.5d'),
+    ('febrasgo 2023 (pré-eclâmpsia)', 'https://www.febrasgo.org.br/images/pec/FPS---N1---Janeiro-2023---portugues-1.pdf'),
+    ('febrasgo/sbem 2022', 'https://www.febrasgo.org.br/images/pec/posicionamentos-febrasgo/FPS-N10-Outubro-2022-portugues.pdf'),
+    ('febrasgo 2025 (hiv na gestação)', 'https://www.febrasgo.org.br/images/pec/posicionamentos-febrasgo/2025/novo/FPS---2025---N10---portugues.pdf'),
+    ('conitec 2026 (aas', 'https://www.gov.br/conitec/pt-br/midias/consultas/relatorios/2026/relatorio-preliminar-acido-acetilsalicilico-pre-eclampsia-cp-53/@@display-file/file'),
+    ('uspstf 2021 (aas', 'https://www.uspreventiveservicestaskforce.org/uspstf/document/RecommendationStatementFinal/low-dose-aspirin-use-for-the-prevention-of-morbidity-and-mortality-from-preeclampsia-preventive-medication'),
+    ('uspstf 2021 (clamídia', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/chlamydia-and-gonorrhea-screening'),
+    ('uspstf 2023 (ácido fólico', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/folic-acid-for-the-prevention-of-neural-tube-defects-preventive-medication'),
+    ('ms nt 8/2025', 'https://www.gov.br/aids/pt-br/central-de-conteudo/notas-tecnicas/2025/nota-tecnica-no-8-2025-cgist-dathi-svsa-ms.pdf/@@download/file'),
+    ('ms 2022 (gestação de alto risco)', 'https://bvsms.saude.gov.br/bvs/publicacoes/manual_gestacao_alto_risco.pdf'),
+    ('pcdt tv ms 2022', 'https://portaldeboaspraticas.iff.fiocruz.br/biblioteca/pcdt-2022-transmissao-vertical-do-hiv-sifilis-e-hepatites-virais'),
+    ('ms 2013 (suplementação de ferro)', 'https://portaldeboaspraticas.iff.fiocruz.br/biblioteca/programa-nacional-de-suplementacao-de-ferro-manual-de-condutas-gerais/'),
+    ('cochrane 2015 (doppler', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6464774'),
+    ('ata 2017 (tireoide na gestação)', 'https://doi.org/10.1089/thy.2016.0457'),
+    ('isuog 2025 (gemelar)', 'https://doi.org/10.1002/uog.29166'),
+    ('ada 2026 (seção 15)', 'https://doi.org/10.2337/dc26-S015'),  # gestação
     ('einstein pré-natal', 'https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf'),
     ('ms 2012-2016', 'https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf'),
-    ('williams 26e', 'https://www.mheducation.com/highered/mhp/product/williams-obstetrics-27e.html?viewOption=student'),
+    ('williams 26e', 'https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html'),
     ('sbd 2024', 'https://doi.org/10.29327/5412848.2024-1'),
     ('ada 2026 (seção 4)', 'https://doi.org/10.2337/dc26-S004'),  # avaliação médica e comorbidades
     ('ada 2026 (seção 10)', 'https://doi.org/10.2337/dc26-S010'),  # doença cardiovascular e manejo de risco
@@ -129,9 +157,31 @@ _FONTES_DIRETAS = [
     ('drugs aging 2024 (sparling)', 'https://doi.org/10.1007/s40266-024-01143-8'),
     ('consenso brasileiro de dmg', 'https://iris.paho.org/handle/10665.2/34278'),
     ('acog pb 222', 'https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia'),
-    ('acog 2025', 'https://www.acog.org/clinical/clinical-guidance/practice-advisory/articles/2023/09/maternal-respiratory-syncytial-virus-vaccination'),
+    ('acog 2023', 'https://www.acog.org/clinical/clinical-guidance/practice-advisory/articles/2023/09/maternal-respiratory-syncytial-virus-vaccination'),
+    # Vacinação (calendários, PNI e divergências entre diretrizes)
+    ('sbim pacientes especiais', 'https://sbim.org.br/images/calend-vacinacao-pacientes-especiais-2026-27-260626.pdf_2026-06-29.pdf'),
+    ('in cnv 2026', 'https://www.prefeitura.poa.br/sites/default/files/usu_doc/hotsites/sms/vigilancia-em-saude/INSTRU%C3%87%C3%83O%20NORMATIVA%20CNV%204a%20versao%20site%20TIMBRADO%2008102026%20(1).pdf'),
+    ('manual dos crie', 'https://goias.gov.br/saude/wp-content/uploads/sites/34/2019/12/manual-crie-6-edicao-f97.pdf'),
+    ('cve-sp/pni 2025 (vsr na gestante)', 'https://www.saude.sp.gov.br/resources/cve-centro-de-vigilancia-epidemiologica/areas-de-vigilancia/imunizacao/2025/vsr_gestante_esp_031225.pdf'),
+    ('cdc/acip 2024 (menb-4c)', 'https://www.cdc.gov/mmwr/volumes/73/wr/mm7349a3.htm'),
+    ('cdc/acip 2020 (meningocócicas)', 'https://www.cdc.gov/mmwr/volumes/69/rr/pdfs/rr6909a1-H.pdf'),
+    ('cdc/acip 2025 (vsr)', 'https://www.cdc.gov/rsv/hcp/vaccine-clinical-guidance/adults.html'),
+    ('cdc/acip 2025 (pneumocócica)', 'https://www.cdc.gov/pneumococcal/hcp/vaccine-recommendations/risk-indications.html'),
+    ('cdc/acip 2025 (esquema adulto)', 'https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/adult/adult-combined-schedule.pdf'),
+    ('anvisa 2025 (butantan-dv)', 'https://site.cff.org.br/noticia/Noticias-gerais/01/12/2025/brasil-aprova-a-primeira-vacina-de-dose-unica-do-mundo-contra-a-dengue'),
     ('pcdt-ist', 'https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts'),
     ('nccn', 'https://www.nccn.org/guidelines/category_2'),
+    # Rastreio de câncer (src/utils/rastreio_cancer.py)
+    ('cbr/sbm/febrasgo 2023', 'https://doi.org/10.1590/0100-3984.2023.0064-en'),
+    ('ms nt 626/2025', 'https://ninho.inca.gov.br/jspui/bitstream/123456789/17713/1/SEI_0050548355_Nota_Tecnica_626.pdf'),
+    ('ms/inca nt 9/2023', 'https://antigo.inca.gov.br/sites/ufu.sti.inca.local/files//media/document//notatecnica_rastreio_cancer_de_prostata_2023.pdf'),
+    ('sbu/sboc/sbrt', 'https://portaldaurologia.org.br/files/arquivos/filee4e2d7e8d48f92bae5f8f445d4e71e43.pdf'),
+    ('ms/inca 2026', 'https://www.gov.br/inca/pt-br/assuntos/noticias/2026/sus-adota-novo-exame-para-detectar-cancer-de-intestino-antes-dos-sintomas'),
+    ('usmstf 2022', 'https://doi.org/10.1053/j.gastro.2021.10.007'),
+    ('sbct-sbpt-cbr 2024', 'https://dx.doi.org/10.36416/1806-3756/e20230233'),
+    ('acs 2023', 'https://doi.org/10.3322/caac.21811'),
+    ('acog co 723', 'https://pubmed.ncbi.nlm.nih.gov/28937575/'),
+    ('asge 2012', 'https://pubmed.ncbi.nlm.nih.gov/22579258/'),
     ('acs 2007', 'https://doi.org/10.3322/canjclin.57.2.75'),
     ('kratz 2017', 'https://doi.org/10.1158/1078-0432.CCR-17-0408'),
     ('igclc 2020', 'https://doi.org/10.1016/S1470-2045(20)30219-9'),

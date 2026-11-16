@@ -42,6 +42,8 @@ COMORBIDADES = {
                            'busca': 'ar autoimune doenca inflamatoria reumatismo'},
     'lupus': {'rotulo': 'Lúpus eritematoso sistêmico', 'agravante': 'doença inflamatória crônica',
               'busca': 'les autoimune doenca inflamatoria colagenose'},
+    # Fator de alto risco de pré-eclâmpsia (USPSTF 2021; src/utils/prenatal.py); sem exame próprio fora da gestação.
+    'saf': {'rotulo': 'Síndrome antifosfolípide', 'busca': 'saf sindrome do anticorpo antifosfolipide trombofilia autoimune'},
     'psoriase': {'rotulo': 'Psoríase', 'agravante': 'doença inflamatória crônica', 'busca': 'pele autoimune doenca inflamatoria'},
     'artrite_psoriasica': {'rotulo': 'Artrite psoriásica', 'agravante': 'doença inflamatória crônica',
                            'busca': 'aps psoriase espondiloartrite autoimune doenca inflamatoria'},
@@ -112,6 +114,9 @@ MEDICACOES = {
     # Definidas pela dose e pela duração (src/utils/doses.py)
     'corticoide_imunossupressor': {'rotulo': 'Corticoide em dose imunossupressora', 'imunossupressao': True},
     'rastreio_tb_latente': {'rotulo': 'Corticoide ≥ 15 mg/dia por ≥ 1 mês'},
+    # Sem marca de imunossupressão: só mudam a triagem das vacinas de vírus vivo (src/utils/seguranca_vacinas.py)
+    'corticoide_dose_desconhecida': {'rotulo': 'Corticoide sistêmico sem dose ou duração informadas'},
+    'imunossupressao_baixo_grau': {'rotulo': 'Metotrexato ou azatioprina em dose de baixo grau'},
     'metotrexato': {'rotulo': 'Metotrexato'},
     'azatioprina': {'rotulo': 'Azatioprina'},
     'leflunomida': {'rotulo': 'Leflunomida'},
@@ -201,6 +206,15 @@ FAMILIA_DETALHES = {
 NCCN_GENETICA = 'NCCN 2026 (risco genético mama/ovário/pâncreas/próstata)'
 USPSTF_BRCA = 'USPSTF 2019 (BRCA)'
 USMSTF = 'USMSTF 2017'
+USMSTF_2022 = 'USMSTF 2022'
+# Vigilância por história familiar e por síndrome hereditária de câncer: até 75 anos (USMSTF 2017/2022 para o
+# colorretal; NCCN, que não fixa idade de parada para o portador e manda individualizar pela expectativa de vida).
+# Depois disso, só orientação. A mamografia por história familiar segue a do risco habitual: até 74 anos.
+FIM_VIGILANCIA = 75
+FIM_MAMOGRAFIA_FAMILIAR = 74
+FIM_PSA = 69  # USPSTF 2018: grau D a partir de 70 anos
+SINDROMES_DE_CANCER = {'brca': 'BRCA1/2', 'li_fraumeni': 'Li-Fraumeni', 'lynch': 'Lynch', 'paf': 'PAF', 'cdh1': 'CDH1',
+                       'cowden': 'Cowden', 'nem1': 'NEM1', 'nem2': 'NEM2'}
 
 
 def criterios_teste_genetico(familia):
@@ -210,7 +224,7 @@ def criterios_teste_genetico(familia):
     if 'mama_ate_50' in fam:
         criterios.append('câncer de mama aos 50 anos ou antes em parente próximo')
     if 'mama_triplo_negativo' in fam:
-        criterios.append('câncer de mama triplo-negativo em parente próximo (até 60 anos)')
+        criterios.append('câncer de mama triplo-negativo em parente próximo, em qualquer idade')
     if 'mama_masculino' in fam:
         criterios.append('câncer de mama em homem da família')
     if 'cancer_ovario' in fam:
@@ -229,6 +243,20 @@ PNEUMO = 'Pneumocócica conjugada 20-valente (Prevenar 20®)'
 ZOSTER = 'Herpes Zóster (Shingrix®)'
 VSR = 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)'
 SBIM = 'SBIm 2026/2027'
+SBIM_ESPECIAIS = 'SBIm Pacientes Especiais 2026/2027'
+IN_CNV = 'IN CNV 2026 (MS)'
+CRIE = 'Manual dos CRIE (MS, 2023)'
+ACIP = 'CDC/ACIP 2025'
+MENB_ACIP = 'CDC/ACIP 2024 (MenB-4C)'
+MENB_ACIP_REFORCO = 'CDC/ACIP 2020 (meningocócicas)'
+HEPATITE_B_60 = 'Hepatite B (Engerix-B® ou Euvax B®)'
+HEPATITES_A_B = 'Hepatites A e B (Twinrix® ou vacinas isoladas)'
+HPV9 = 'Gardasil 9® (Vacina HPV 9-Valente)'
+MENACWY = 'Meningocócica ACWY (Menactra® ou Menveo®)'
+HIB = 'Haemophilus influenzae tipo b (Hib)'
+COVID = 'COVID-19 (Comirnaty®, Spikevax® ou outras)'
+INFLUENZA = 'Influenza (trivalente ou quadrivalente)'
+HEPATOPATIAS = ('cirrose', 'hepatite_b_cronica', 'hepatite_c')
 CGH_CORTICOIDE = 'CGH 2025 (Feuerstein)'
 SPARLING = 'Drugs Aging 2024 (Sparling)'
 # Fontes das comorbidades (links em src/utils/reference_links.py)
@@ -332,8 +360,14 @@ def _garantir(recs, nova):
     recs.append(nova)
 
 
-def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False, tabagismo=None, imc=None):
-    """Soma às recomendações o que as listas disparam. Devolve as orientações (sem pedido/receita)."""
+def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False, tabagismo=None, imc=None,
+            imunossuprimido=None, cd4=None, idade_ccr_familiar=None):
+    """Soma às recomendações o que as listas disparam. Devolve as orientações (sem pedido/receita).
+
+    ``imunossuprimido``: resposta "Sim" da triagem de imunossupressão (inclui a implicada pelas listas); sem ela,
+    vale só o que as listas implicam. ``cd4``: LT-CD4+ da pessoa vivendo com HIV (imunodeficiência grave < 200).
+    ``idade_ccr_familiar``: idade do diagnóstico do familiar mais jovem com câncer colorretal (opcional).
+    """
     com, med, fam = set(comorbidades), set(medicacoes), set(familia)
     orient = []
 
@@ -343,42 +377,59 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     def orientar(titulo, descricao, referencia):
         orient.append({'titulo': titulo, 'descricao': descricao, 'referencia': referencia})
 
+    def vacina_hepatopatia_60():
+        # 60+: um cartão só de hepatite (o de rotina, hepatite B), com a hepatite A para os suscetíveis (SBIm Idoso).
+        add(HEPATITE_B_60, 'vacina',
+            'Hepatopatia crônica: vacinar os suscetíveis contra hepatite A (2 doses, 0-6 meses) e contra hepatite B '
+            '(3 doses, 0-1-6 meses; não se aplica a quem já tem hepatite B crônica). A combinada A+B (3 doses, 0-1-6 meses) '
+            'pode substituir as isoladas.', 'Hepatopatia crônica | Suscetíveis | Hepatite A: rede privada', SBIM, 'A', 'alta',
+            substituir=True)
+
     # ---------------- História familiar ----------------
     # Colorretal (USMSTF 2017): parente de 1º grau antes dos 60 anos, ou 2 ou mais parentes → colonoscopia a cada
-    # 5 anos a partir dos 40 (ou 10 anos antes do caso mais jovem); 1 parente com 60 anos ou mais → rastreio de
-    # risco habitual, mas começando aos 40.
-    if 'ccr_antes_60' in fam:
-        if idade >= 40:
+    # 5 anos a partir dos 40 (ou 10 anos antes do caso mais jovem, o que vier primeiro); 1 parente com 60 anos ou mais
+    # → rastreio de risco habitual, mas começando aos 40. Até 75 anos (USMSTF 2017/2022); depois, decisão individual
+    # (orientação em src/utils/rastreio_cancer.py).
+    antes_60 = 'ccr_antes_60' in fam or (idade_ccr_familiar is not None and idade_ccr_familiar < 60)
+    if antes_60:
+        inicio = 40 if idade_ccr_familiar is None else int(min(40, idade_ccr_familiar - 10))
+        if inicio <= idade <= FIM_VIGILANCIA:
+            quando = ('a partir dos 40 anos, ou 10 anos antes da idade do diagnóstico do familiar mais jovem (o que vier '
+                      'primeiro)' if idade_ccr_familiar is None else
+                      f'a partir dos {inicio} anos (familiar mais jovem diagnosticado aos {int(idade_ccr_familiar)}; início aos '
+                      '40 anos ou 10 anos antes dessa idade, o que vier primeiro)')
             add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
                 'Parente de 1º grau com câncer colorretal antes dos 60 anos (ou 2 ou mais parentes de 1º grau): '
-                'colonoscopia a cada 5 anos a partir dos 40 anos, ou 10 anos antes da idade do diagnóstico do familiar '
-                'mais jovem (o que vier primeiro).',
-                'História familiar de CCR antes dos 60 anos | A partir de 40 anos | A cada 5 anos',
+                f'colonoscopia a cada 5 anos, {quando}, até os 75 anos.',
+                'História familiar de CCR antes dos 60 anos | ' + ('A partir de 40 anos | ' if inicio == 40 else '') + 'A cada 5 anos',
                 USMSTF, 'B', 'alta', substituir=True)
-        else:
+        elif idade < inicio:
             orientar('Colonoscopia por história familiar de câncer colorretal',
                      'Parente de 1º grau com câncer colorretal antes dos 60 anos (ou 2 ou mais parentes): colonoscopia a cada '
                      '5 anos, começando aos 40 anos ou 10 anos antes da idade do diagnóstico do familiar mais jovem (o que '
-                     'vier primeiro).', USMSTF)
+                     'vier primeiro). Informe a idade do familiar na história familiar para o motor calcular o início.', USMSTF)
     elif 'cancer_colorretal' in fam:
-        if idade >= 40:
+        if 40 <= idade <= FIM_VIGILANCIA:
             add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
                 'Um parente de 1º grau com câncer colorretal diagnosticado aos 60 anos ou mais: rastreio de risco habitual '
                 '(colonoscopia a cada 10 anos ou pesquisa de sangue oculto anual), começando aos 40 anos.',
                 'História familiar de CCR aos 60 anos ou mais | A partir de 40 anos | A cada 10 anos',
                 USMSTF, 'B', 'alta', substituir=True)
-        orientar('Câncer colorretal na família: idade do familiar',
-                 'Se o diagnóstico do familiar foi antes dos 60 anos, ou se há 2 ou mais parentes de 1º grau, marque o detalhe '
-                 'na história familiar: a colonoscopia passa a cada 5 anos, a partir dos 40 anos ou 10 anos antes do caso mais '
-                 'jovem.', USMSTF)
+        if idade <= FIM_VIGILANCIA:
+            orientar('Câncer colorretal na família: idade do familiar',
+                     'Se o diagnóstico do familiar foi antes dos 60 anos, ou se há 2 ou mais parentes de 1º grau, marque o detalhe '
+                     'na história familiar: a colonoscopia passa a cada 5 anos, a partir dos 40 anos ou 10 anos antes do caso mais '
+                     'jovem.', USMSTF)
     tem_mama = bool({'cancer_mama', 'mama_ate_50', 'mama_bilateral', 'mama_masculino', 'mama_triplo_negativo'} & fam)
+    # Anual só com parente de 1º grau (a caixa "Câncer de mama"); os detalhes aceitam também o 2º grau, que muda o risco
+    # calculado, não o intervalo. Até 74 anos, como no risco habitual; depois, decisão individual (rastreio_cancer.py).
     if tem_mama and sexo == 'feminino':
-        if idade >= 40:
+        if 'cancer_mama' in fam and 40 <= idade <= FIM_MAMOGRAFIA_FAMILIAR:
             add('Mamografia Digital - Bilateral', 'imagem',
-                'Parente de 1º grau com câncer de mama: risco acima do habitual; mamografia anual a partir dos 40 anos. '
+                'Câncer de mama em parente de 1º grau: risco acima do habitual; mamografia anual dos 40 aos 74 anos. '
                 'Calcular o risco de câncer de mama ao longo da vida (Tyrer-Cuzick/IBIS): 20% ou mais indica ressonância '
-                'anual associada.', 'História familiar de câncer de mama | Anual', 'ACR 2023', 'B', 'alta', substituir=True)
-        elif idade >= 25:
+                'anual associada.', 'Câncer de mama na família | Anual', 'ACR 2023', 'B', 'alta', substituir=True)
+        elif 25 <= idade < 40:
             orientar('Rastreio de câncer de mama por história familiar',
                      'Calcular o risco de câncer de mama ao longo da vida (Tyrer-Cuzick/IBIS) até os 25 anos. Com risco de '
                      '20% ou mais: ressonância anual a partir de 25-30 anos e mamografia anual a partir de 30. Abaixo disso: '
@@ -408,9 +459,10 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         orientar('História familiar de DCV prematura',
                  'Agravante de risco cardiovascular (já considerado na categoria SBC). Em risco intermediário, o escore '
                  'de cálcio coronário pode reclassificar.', 'SBC 2025')
-    if 'cancer_prostata' in fam and sexo == 'masculino' and 45 <= idade < 50:
+    if 'cancer_prostata' in fam and sexo == 'masculino' and 45 <= idade <= FIM_PSA:
         add('PSA total, soro', 'laboratorio',
-            'Pai ou irmão com câncer de próstata: oferecer rastreamento a partir dos 45 anos, com decisão compartilhada.',
+            'Pai ou irmão com câncer de próstata: oferecer rastreamento a partir dos 45 anos, com decisão compartilhada '
+            '(conversa sobre benefícios e danos), até os 69 anos.',
             'História familiar de câncer de próstata | A partir de 45 anos', 'AUA/SUO 2023 / EAU 2024', 'B')
     # Mulher pós-menopausa < 65 anos com fator de risco: USPSTF 2025 (B). Homem: a USPSTF 2025 é I (evidência
     # insuficiente); o apoio vem só da BHOF 2022 (50 a 69 anos com fator de risco), em decisão compartilhada.
@@ -459,26 +511,28 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             add('Mamografia Digital - Bilateral', 'imagem', f'{motivo}: mamografia anual a partir de {inicio} anos.',
                 f'{motivo} | {QUEM} | Anual a partir de {inicio} anos', ref, 'A', 'alta', substituir=True)
 
-    def colonoscopia(inicio, intervalo, ref, motivo, grau='A'):
-        if idade >= inicio:
+    vigilancia = idade <= FIM_VIGILANCIA
+
+    def colonoscopia(inicio, intervalo, ref, motivo, grau='A', detalhe=''):
+        if inicio <= idade <= FIM_VIGILANCIA:
             add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
-                f'{motivo}: colonoscopia {intervalo}, a partir de {inicio} anos.',
+                f'{motivo}: colonoscopia {intervalo}, a partir de {inicio} anos{detalhe}.',
                 f'{motivo} | {QUEM} | {intervalo.capitalize()}', ref, grau, 'alta', substituir=True)
 
     if 'brca' in fam:
         rm_mamas(25, 'NCCN 2025 / ACS 2007', 'BRCA1/2 na família')
         mamografia_anual(30, 'NCCN 2025', 'BRCA1/2 na família')
-        if homem and idade >= 40:
+        if homem and 40 <= idade <= FIM_PSA:
             add('PSA total, soro', 'laboratorio',
                 'BRCA1/2 na família: rastreamento de câncer de próstata a partir dos 40 anos no portador de BRCA2 '
-                '(considerar em BRCA1).', f'BRCA1/2 na família | {QUEM} | A partir de 40 anos', 'NCCN 2025', 'B')
+                '(considerar em BRCA1), com decisão compartilhada, até os 69 anos.', f'BRCA1/2 na família | {QUEM} | A partir de 40 anos', 'NCCN 2025', 'B')
         orientar('Mutação BRCA1/2 na família',
                  CASCATA + ' Portadoras: discutir salpingo-ooforectomia redutora de risco (35-40 anos em BRCA1, 40-45 em '
                  'BRCA2) e mastectomia redutora. Homens portadores: exame clínico das mamas a partir de 35 anos. '
                  'Pâncreas: rastrear o portador que também tem caso de câncer de pâncreas na família.', 'NCCN 2025')
     if 'li_fraumeni' in fam:
         rm_mamas(20, 'NCCN 2025 / Kratz 2017', 'Li-Fraumeni na família')
-        for titulo in ('Ressonância magnética de corpo inteiro', 'Ressonância magnética de crânio'):
+        for titulo in ('Ressonância magnética de corpo inteiro', 'Ressonância magnética de crânio') if vigilancia else ():
             add(titulo, 'imagem', 'Li-Fraumeni (protocolo de Toronto): ressonância de corpo inteiro e de crânio anuais, '
                 'sem contraste quando possível.', f'Li-Fraumeni na família | {QUEM} | Anual', 'NCCN 2025 / Kratz 2017', 'B', 'alta')
         colonoscopia(25, 'a cada 2-5 anos', 'NCCN 2025 / Kratz 2017', 'Li-Fraumeni na família', 'B')
@@ -487,8 +541,10 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  'endoscopia digestiva alta junto com a colonoscopia. Evitar radiação ionizante sempre que houver alternativa.',
                  'NCCN 2025 / Kratz 2017')
     if 'lynch' in fam:
-        colonoscopia(20, 'a cada 1-2 anos', 'NCCN 2025 / ACG 2015', 'Síndrome de Lynch na família')
-        if idade >= 30:
+        colonoscopia(20, 'a cada 1-2 anos', 'NCCN 2025 / ACG 2015', 'Síndrome de Lynch na família',
+                     detalhe=' (MLH1, MSH2 e EPCAM: a partir de 20-25 anos, a cada 1-2 anos; MSH6 e PMS2: a partir de 30-35 '
+                             'anos, a cada 1-3 anos)')
+        if 30 <= idade <= FIM_VIGILANCIA:
             add('Endoscopia digestiva alta', 'imagem',
                 'Síndrome de Lynch: endoscopia digestiva alta com biópsias e pesquisa de H. pylori a cada 2-4 anos, a partir de 30-40 anos.',
                 f'Síndrome de Lynch na família | {QUEM} | A cada 2-4 anos', 'NCCN 2025', 'B')
@@ -498,14 +554,17 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  '30-35 anos e discutir histerectomia com salpingo-ooforectomia após prole constituída.', 'NCCN 2025 / ACG 2015')
     if 'paf' in fam:
         colonoscopia(18, 'anual', 'NCCN 2025 / ACG 2015', 'Polipose adenomatosa familiar')
-        if idade >= 20:
+        if 20 <= idade <= FIM_VIGILANCIA:
             add('Endoscopia digestiva alta', 'imagem',
                 'Polipose adenomatosa familiar: endoscopia digestiva alta com avaliação da papila a partir de 20-25 anos; '
                 'intervalo conforme o estágio de Spigelman.', f'PAF na família | {QUEM}', 'NCCN 2025 / ACG 2015', 'B')
         orientar('Polipose adenomatosa familiar na família',
                  CASCATA + ' No portador, a colonoscopia começa aos 10-15 anos; discutir colectomia conforme a carga de pólipos. '
-                 'Considerar ultrassonografia de tireoide.', 'NCCN 2025 / ACG 2015')
-    if 'cdh1' in fam:
+                 'Considerar ultrassonografia de tireoide.' + (
+                     ' Parente não testado com mais de 50 anos: a penetrância da PAF chega a quase 100% antes dos 40-50 anos; '
+                     'sem polipose nas colonoscopias anteriores, a chance de ser portador é baixa. Fazer o teste em cascata '
+                     'antes de continuar a vigilância anual.' if idade > 50 else ''), 'NCCN 2025 / ACG 2015')
+    if 'cdh1' in fam and vigilancia:
         add('Endoscopia digestiva alta', 'imagem',
             'CDH1: endoscopia digestiva alta anual com múltiplas biópsias (protocolo de Cambridge) para quem adia a gastrectomia.',
             f'CDH1 na família | {QUEM} | Anual', 'IGCLC 2020 / NCCN 2025', 'B', 'alta')
@@ -516,10 +575,11 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     if 'cowden' in fam:
         rm_mamas(30, 'NCCN 2025', 'Síndrome de Cowden na família')
         mamografia_anual(30, 'NCCN 2025', 'Síndrome de Cowden na família')
-        add('Ultrassonografia de tireoide', 'imagem', 'Síndrome de Cowden (PTEN): ultrassonografia de tireoide anual.',
-            f'Síndrome de Cowden na família | {QUEM} | Anual', 'NCCN 2025', 'B')
+        if vigilancia:
+            add('Ultrassonografia de tireoide', 'imagem', 'Síndrome de Cowden (PTEN): ultrassonografia de tireoide anual.',
+                f'Síndrome de Cowden na família | {QUEM} | Anual', 'NCCN 2025', 'B')
         colonoscopia(35, 'a cada 5 anos', 'NCCN 2025', 'Síndrome de Cowden na família', 'B')
-        if idade >= 40:
+        if 40 <= idade <= FIM_VIGILANCIA:
             add('Ultrassonografia de rins e vias urinárias', 'imagem',
                 'Síndrome de Cowden (PTEN): ultrassonografia renal a cada 1-2 anos a partir dos 40 anos.',
                 f'Síndrome de Cowden na família | {QUEM} | A cada 1-2 anos', 'NCCN 2025', 'C')
@@ -527,21 +587,29 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  CASCATA + ' Mulheres: orientar sobre sangramento uterino anormal e considerar rastreamento de endométrio a partir de 35 anos.',
                  'NCCN 2025')
     if 'nem1' in fam:
-        for titulo in ('Cálcio iônico, soro', 'Paratormônio (PTH), soro', 'Prolactina, soro'):
+        for titulo in ('Cálcio iônico, soro', 'Paratormônio (PTH), soro', 'Prolactina, soro') if vigilancia else ():
             add(titulo, 'laboratorio', 'NEM1: cálcio, PTH e prolactina anuais.', f'NEM1 na família | {QUEM} | Anual',
                 'Endocrine Society 2012', 'B')
         orientar('Neoplasia endócrina múltipla tipo 1 na família',
                  CASCATA + ' No portador: gastrina e imagem pancreática anuais; ressonância de hipófise a cada 3-5 anos.',
                  'Endocrine Society 2012')
     if 'nem2' in fam:
-        for titulo in ('Calcitonina, soro', 'Metanefrinas, plasma ou urina de 24h', 'Cálcio iônico, soro'):
+        for titulo in ('Calcitonina, soro', 'Metanefrinas, plasma ou urina de 24h', 'Cálcio iônico, soro') if vigilancia else ():
             add(titulo, 'laboratorio', 'NEM2 / carcinoma medular de tireoide familiar: calcitonina, metanefrinas e cálcio anuais.',
                 f'NEM2 na família | {QUEM} | Anual', 'ATA 2015', 'B', 'alta')
-        add('Ultrassonografia de tireoide', 'imagem', 'NEM2 / carcinoma medular de tireoide familiar: ultrassonografia cervical.',
-            f'NEM2 na família | {QUEM}', 'ATA 2015', 'B')
+        if vigilancia:
+            add('Ultrassonografia de tireoide', 'imagem', 'NEM2 / carcinoma medular de tireoide familiar: ultrassonografia cervical.',
+                f'NEM2 na família | {QUEM}', 'ATA 2015', 'B')
         orientar('NEM2 / carcinoma medular de tireoide na família',
                  CASCATA + ' O teste do gene RET define a conduta: no portador, tireoidectomia profilática na idade indicada pelo '
                  'risco da mutação.', 'ATA 2015')
+    sindromes = [nome for chave, nome in SINDROMES_DE_CANCER.items() if chave in fam]
+    if sindromes and not vigilancia:
+        orientar('Síndrome hereditária de câncer depois dos 75 anos: decisão individual',
+                 f'A vigilância por {", ".join(sindromes)} na família vai até os 75 anos. Depois disso, individualizar pela '
+                 'expectativa de vida e pelas comorbidades: o NCCN não fixa idade de parada para o portador confirmado. No parente '
+                 'ainda não testado, fazer primeiro o teste em cascata: teste negativo para a variante da família dispensa a '
+                 'vigilância.', 'NCCN 2025 / ' + USMSTF_2022)
     if 'cardiomiopatia_hipertrofica' in fam or 'cardiomiopatia_dilatada' in fam:
         qual = 'cardiomiopatia hipertrófica' if 'cardiomiopatia_hipertrofica' in fam else 'cardiomiopatia dilatada familiar'
         ref = 'AHA/ACC 2024' if 'cardiomiopatia_hipertrofica' in fam else 'AHA/ACC/HFSA 2022'
@@ -590,16 +658,20 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  'síndrome de Lynch e encaminhar para aconselhamento genético.', 'NCCN 2024 / ACG 2015')
     if 'cancer_pancreas' in fam:
         orientar('Câncer de pâncreas na família',
-                 'Dois ou mais parentes de 1º grau acometidos, ou síndrome hereditária conhecida, indicam avaliação em '
-                 'centro de referência (ressonância ou ecoendoscopia). Um parente isolado não indica rastreamento.',
+                 'Indicam avaliação em centro de referência (ressonância ou ecoendoscopia): dois ou mais parentes acometidos do '
+                 'mesmo ramo da família, com pelo menos um de 1º grau; ou variante patogênica de risco (BRCA1, BRCA2, PALB2, ATM, '
+                 'síndrome de Lynch) com parente acometido; ou síndrome de alto risco (Peutz-Jeghers, CDKN2A). Um parente '
+                 'isolado, sem variante conhecida, não indica rastreamento.',
                  'AGA 2020 / CAPS 2020')
     if 'cancer_gastrico' in fam:
         orientar('Câncer gástrico na família',
                  'Pesquisar e tratar Helicobacter pylori; endoscopia conforme sintomas e risco individual.',
                  'Maastricht VI 2022 / ACG 2024')
     if 'melanoma' in fam:
-        orientar('Melanoma na família', 'Exame dermatológico de corpo inteiro periódico e orientação de fotoproteção.',
-                 'AAD 2019')
+        orientar('Melanoma na família',
+                 'Parente com melanoma aumenta o risco, mas a evidência para o exame da pele em pessoa assintomática é '
+                 'insuficiente (USPSTF, grau I): individualizar o exame dermatológico de corpo inteiro periódico e orientar '
+                 'fotoproteção.', 'USPSTF 2023')
     if 'trombose' in fam:
         orientar('Trombose venosa na família',
                  'Pesar o risco antes de prescrever estrogênio (anticoncepcional combinado, terapia hormonal). Pesquisa de '
@@ -876,9 +948,12 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             add(titulo, 'laboratorio', 'Após cirurgia bariátrica: rastreamento anual de deficiências nutricionais '
                 '(ferro, B12, folato, vitamina D, cálcio e PTH).', 'Cirurgia bariátrica prévia | Anual', 'ASMBS 2019', 'B')
     if 'hepatite_c' in com or 'hepatite_b_cronica' in com:
-        add('Hepatites A e B (Twinrix® ou vacinas isoladas)', 'vacina',
-            'Hepatite viral crônica: vacinar os suscetíveis contra hepatite A (e contra hepatite B, na hepatite C).',
-            'Hepatopatia crônica | Suscetíveis', SBIM, 'A', 'alta')
+        if idade >= 60:
+            vacina_hepatopatia_60()
+        else:
+            add('Hepatites A e B (Twinrix® ou vacinas isoladas)', 'vacina',
+                'Hepatite viral crônica: vacinar os suscetíveis contra hepatite A (e contra hepatite B, na hepatite C).',
+                'Hepatopatia crônica | Suscetíveis', SBIM, 'A', 'alta')
     if 'masld' in com:
         for titulo in ('Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro', 'Hemograma completo com plaquetas'):
             add(titulo, 'laboratorio', 'Para o cálculo do FIB-4 (idade, AST, ALT, plaquetas): estratifica risco de fibrose '
@@ -887,9 +962,12 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Ultrassonografia de abdome superior', 'imagem',
             'Cirrose: rastreamento de carcinoma hepatocelular com ultrassonografia a cada 6 meses (com ou sem alfafetoproteína).',
             'Cirrose | A cada 6 meses', 'AASLD 2023', 'A', 'alta')
-        add('Hepatites A e B (Twinrix® ou vacinas isoladas)', 'vacina',
-            'Hepatopatia crônica: vacinar contra hepatites A e B os suscetíveis, em qualquer idade.',
-            'Hepatopatia crônica | Suscetíveis', SBIM, 'A', 'alta')
+        if idade >= 60:
+            vacina_hepatopatia_60()
+        else:
+            add('Hepatites A e B (Twinrix® ou vacinas isoladas)', 'vacina',
+                'Hepatopatia crônica: vacinar contra hepatites A e B os suscetíveis, em qualquer idade.',
+                'Hepatopatia crônica | Suscetíveis', SBIM, 'A', 'alta')
     if 'osteoporose' in com:
         add('Densitometria óssea (DEXA)', 'imagem', 'Seguimento de osteoporose em tratamento.', 'Osteoporose | A cada 1-2 anos',
             'BHOF 2022', 'B')
@@ -1120,31 +1198,174 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Síndrome dos ovários policísticos: perfil lipídico no diagnóstico; depois, conforme o risco cardiovascular.',
             'Síndrome dos ovários policísticos | Avaliação inicial', PCOS, 'B')
 
-    # Vacinas por condição de risco (SBIm: comorbidade de risco em qualquer idade)
+    # ---------------- Vacinas por condição de risco ----------------
+    # SBIm 2026/2027 (adulto, idoso, gestante) e SBIm Pacientes Especiais 2026/2027; esquemas do PNI pela IN CNV 2026.
+    imuno_listas = imunossupressao_implicada(com, med)
+    imuno = imuno_listas or bool(imunossuprimido)
+    hiv = 'hiv' in com
+    cd4_baixo = hiv and cd4 is not None and cd4 < 200
+    onco = 'oncologico' in med                       # tratamento sistêmico do câncer (inclui imunoterapia e anti-HER2)
+    imunocomprometido = imuno or hiv or onco
+    tem_diabetes = bool(set(TIPOS_DE_DIABETES) & com) or 'diabetes_sem_tipo' in com
+    drc = 'doenca_renal' in com
+    hepatopatia = bool(set(HEPATOPATIAS) & com)
+    obeso = 'obesidade' in com or (imc or 0) >= 30
+    titulos = lambda: {(r.get('titulo') or '').strip().lower() for r in recs}
+
+    # Pneumocócica (VPC20) em qualquer idade com comorbidade de risco para doença pneumocócica invasiva:
+    # HIV, DRC, diabetes, imunossupressão e câncer em tratamento entram (SBIm Pacientes Especiais; CRIE).
     risco_pneumo = {'cirrose', 'asma_grave', 'asplenia', 'anemia_falciforme', 'transplante', 'neoplasia_ativa',
                     'artrite_reumatoide', 'lupus', 'artrite_psoriasica', 'espondiloartrite', 'esclerose_sistemica',
-                    LEGADO_AUTOIMUNE, 'hepatite_b_cronica', 'hepatite_c'} & com or {'imunossupressor', 'corticoide_cronico', 'corticoide_imunossupressor'} & med
+                    LEGADO_AUTOIMUNE, 'hepatite_b_cronica', 'hepatite_c', 'hiv', 'doenca_renal'} & com or \
+        {'imunossupressor', 'corticoide_cronico', 'corticoide_imunossupressor', 'oncologico'} & med or tem_diabetes or imuno
     if risco_pneumo and idade < 50:
-        add(PNEUMO, 'vacina', 'Dose única. Indicada em qualquer idade com comorbidade de risco para doença pneumocócica invasiva.',
-            'Comorbidade de risco | Dose única | PNI: CRIE', SBIM, 'A', 'alta')
-    imuno = imunossupressao_implicada(com, med)
-    if imuno and 18 <= idade < 50 and not gestante:
-        add(ZOSTER, 'vacina', 'Vacina inativada: 2 doses (0-2 meses; 1-2 meses de intervalo se imunossupressão). '
-            'Indicada a partir de 18 anos em imunocomprometidos.', 'Imunocomprometidos ≥ 18 anos | 2 doses',
-            'CDC/ACIP 2022 / ' + SBIM, 'A', 'alta')
+        add(PNEUMO, 'vacina', 'Dose única. Indicada em qualquer idade com comorbidade de risco para doença pneumocócica invasiva '
+            '(inclusive HIV, doença renal crônica, diabetes e imunossupressão). Já recebeu VPP23: aguardar 1 ano.',
+            'Comorbidade de risco | Dose única | PNI: CRIE', SBIM + ' / ' + SBIM_ESPECIAIS, 'A', 'alta')
+    elif tabagismo == 'atual' and 19 <= idade < 50:
+        orientar('Pneumocócica no tabagismo antes dos 50 anos: diretrizes divergem',
+                 'O motor seguiu a SBIm e os CRIE, que não listam o tabagismo como risco, e não incluiu a VPC20. O ACIP indica '
+                 'a VPC20 de 19 a 49 anos em fumantes de cigarro (e no etilismo).',
+                 SBIM_ESPECIAIS + ' / CDC/ACIP 2025 (pneumocócica)')
+
+    # Herpes-zóster recombinante a partir de 18 anos: imunocomprometidos e toda pessoa vivendo com HIV, qualquer que
+    # seja o CD4 (o HIV não marca "imunossupressão": as vivas seguem pela faixa de CD4 em seguranca_vacinas.py).
+    if imunocomprometido and 18 <= idade < 50 and not gestante:
+        add(ZOSTER, 'vacina', 'Vacina inativada: 2 doses (0-2 meses; intervalo mínimo de 1 mês), mesmo após herpes-zóster. '
+            'Indicada a partir de 18 anos em imunocomprometidos, no câncer (de preferência antes do tratamento) e em toda '
+            'pessoa vivendo com HIV, qualquer que seja o LT-CD4+.', 'HIV ou imunocomprometidos ≥ 18 anos | 2 doses (0-2m)',
+            'CDC/ACIP 2022 / ' + SBIM_ESPECIAIS, 'A', 'alta')
+
+    # HPV: 3 doses em qualquer idade no imunossuprimido e no HIV (o PNI oferece HPV4 de 9 a 45 anos).
+    if (imuno or hiv) and idade <= 45:
+        add(HPV9, 'vacina', '3 doses (0-2-6 meses) em qualquer idade para imunossuprimidos e pessoas vivendo com HIV. Preferir '
+            'HPV9 e revacinar quem recebeu HPV2/HPV4. Contraindicada na gestação. PNI: HPV4 em 3 doses de 9 a 45 anos para '
+            'imunocomprometidos.', 'Imunossuprimido ou HIV | 3 doses (0-2-6m) em qualquer idade | PNI: HPV4 9-45 anos (CRIE)',
+            SBIM_ESPECIAIS + ' / ' + IN_CNV, 'A', 'alta', substituir=True)
+
+    # Hepatite B: esquema especial na DRC/diálise, no HIV e na imunossupressão (4 doses com o dobro do volume e sorologia).
+    if drc or hiv or imuno:
+        add(HEPATITE_B_60 if idade >= 60 else HEPATITES_A_B, 'vacina',
+            'DRC, diálise, HIV ou imunossupressão: hepatite B em 4 doses (0-1-2-6 meses) com o dobro do volume da dose para a '
+            'idade, com a vacina isolada. Anti-HBs 1 a 2 meses depois da última dose; abaixo de 10 mUI/mL, repetir o esquema '
+            'uma vez. Em hemodiálise, anti-HBs anual e reforço se abaixo de 10 mUI/mL.'
+            + (' Hepatite A, se suscetível: 2 doses (0-6 meses).' if idade < 60 or hepatopatia else ''),
+            'DRC/HIV/imunossupressão | 4 doses dobradas + sorologia | PNI: CRIE',
+            SBIM_ESPECIAIS + ' / ' + CRIE + ' / ' + IN_CNV, 'A', 'alta', substituir=True)
+
+    # Influenza: na imunossupressão grave abaixo de 60 anos, a SBIm sugere a HD3V (off-label), sem dose extra.
+    grave = bool({'transplante', 'neoplasia_ativa'} & com or {'antraciclina', 'fluoropirimidina'} & med or cd4_baixo)
+    if grave and idade < 60:
+        add(INFLUENZA, 'vacina', 'Dose única anual. Imunossupressão grave (transplante, quimioterapia, HIV com LT-CD4+ abaixo de '
+            '200): a SBIm sugere considerar a HD3V (alta concentração, off-label abaixo de 60 anos), sem dose adicional.',
+            'Imunossupressão grave | Dose anual | Considerar HD3V (off-label)', SBIM_ESPECIAIS, 'A', 'alta', substituir=True)
+
+    # COVID-19 (IN CNV 2026): gestante > imunocomprometido > 60+ (já no calendário por idade) > comorbidade > demais.
+    comorbidade_covid = bool({'dcv_aterosclerotica', 'cardiopatia', 'insuficiencia_cardiaca', 'dpoc', 'doenca_renal'} & com) \
+        or tem_diabetes or obeso
+    if gestante:
+        add(COVID, 'vacina', '1 dose a cada gestação, em qualquer idade gestacional (mínimo de 6 meses desde a última dose). '
+            'Conferir vacinas disponíveis no PNI (gov.br/saude).', 'Gestante | 1 dose a cada gestação',
+            IN_CNV + ' / ' + SBIM, 'A', 'alta', substituir=True)
+    elif imuno or hiv:
+        add(COVID, 'vacina', '1 dose a cada 6 meses. Conferir vacinas disponíveis no PNI (gov.br/saude).',
+            'Imunocomprometido | 1 dose a cada 6 meses', IN_CNV + ' / ' + SBIM, 'A', 'alta', substituir=True)
+    elif idade < 60 and comorbidade_covid:
+        add(COVID, 'vacina', '1 dose por ano. Conferir vacinas disponíveis no PNI (gov.br/saude).', 'Comorbidade | 1 dose/ano',
+            IN_CNV + ' / ' + SBIM, 'A', 'alta', substituir=True)
+
+    # VSR (SBIm 2026/2027 e SBIm Pacientes Especiais 2026/2027)
     if 'asma_grave' in com and 18 <= idade < 60 and not gestante:
         add(VSR, 'vacina', 'Dose única para adultos com asma moderada ou grave.', 'Asma moderada/grave | Dose única', SBIM, 'B')
+    so_corticoide = 'corticoide_imunossupressor' in med and not imunossupressao_implicada(com, med - {'corticoide_imunossupressor'}) \
+        and not cd4_baixo
+    if (imuno or cd4_baixo) and not so_corticoide and 18 <= idade < 60 and not gestante:
+        add(VSR, 'vacina', 'Dose única a partir de 18 anos na imunodeficiência moderada ou grave (transplante, quimioterapia, '
+            'imunobiológico ou imunossupressor, HIV com LT-CD4+ abaixo de 200).',
+            'Imunodeficiência moderada/grave | Dose única | Rede privada', SBIM_ESPECIAIS, 'B')
+    if (tem_diabetes or drc or hepatopatia) and 50 <= idade < 60:
+        add(VSR, 'vacina', 'Dose única a partir de 50 anos em diabetes, nefropatia ou hepatopatia crônica, pelo risco de evolução '
+            'grave ou descompensação.', 'Diabetes, nefropatia ou hepatopatia ≥ 50 anos | Dose única | Rede privada',
+            SBIM_ESPECIAIS, 'B')
+    if 60 <= idade < 70:
+        risco_vsr = bool({'dpoc', 'asma_grave', 'dcv_aterosclerotica', 'cardiopatia', 'insuficiencia_cardiaca'} & com) \
+            or tem_diabetes or drc or hepatopatia or obeso or imuno or hiv
+        if risco_vsr:
+            add(VSR, 'vacina', 'Dose única para 60-69 anos com maior risco: cardiopatia, pneumopatia, diabetes, obesidade, '
+                'nefropatia, hepatopatia, imunossupressão, fragilidade ou institucionalização.',
+                '60-69 anos com fator de risco | Dose única | Rede privada', SBIM, 'A')
+        else:
+            orientar('VSR de 60 a 69 anos: só com fator de risco',
+                     'Sem fator de risco nas listas, a vacina VSR não entrou na receita. De 60 a 69 anos, a SBIm a indica com '
+                     'cardiopatia, pneumopatia, diabetes, obesidade, nefropatia, hepatopatia, imunossupressão, fragilidade ou '
+                     'institucionalização; a rotina começa aos 70 anos.', SBIM)
+    tem_vsr = VSR.lower() in titulos()
+    if not tem_vsr and not gestante and ((tem_diabetes or drc or hepatopatia) and 18 <= idade < 50 or obeso and 18 <= idade < 60):
+        orientar('VSR a critério médico',
+                 'Diabetes, nefropatia ou hepatopatia crônica de 18 a 49 anos e obesidade de 18 a 59 anos: a SBIm deixa a vacina '
+                 'VSR (dose única) a critério médico. Não entrou na receita automática.', SBIM + ' / ' + SBIM_ESPECIAIS)
+    if tem_vsr and not gestante and (18 <= idade < 50 or 70 <= idade < 75):
+        orientar('VSR: diretrizes divergem',
+                 'O motor seguiu a SBIm (a partir de 18 anos na doença cardiopulmonar crônica e na imunodeficiência moderada '
+                 'ou grave; rotina a partir de 70 anos). O ACIP indica a vacina a partir de 75 anos e, de 50 a 74, só com risco '
+                 'aumentado.', SBIM + ' / CDC/ACIP 2025 (VSR)')
+    if gestante and sexo == 'feminino':
+        orientar('VSR na gestação (Abrysvo®): diretrizes divergem',
+                 'O motor seguiu a SBIm e o PNI: a partir de 28 semanas, sem limite superior, 1 dose a cada gestação. O ACIP e o '
+                 'ACOG indicam de 32 a 36 semanas, na sazonalidade, e não repetem a dose em gestação seguinte.',
+                 SBIM + ' / CVE-SP/PNI 2025 (VSR na gestante) / CDC/ACIP 2025 (esquema adulto) / ACOG 2023')
+
+    # Meningocócica ACWY no HIV: 2 doses com 8 semanas de intervalo e reforço a cada 5 anos (CRIE)
+    if hiv:
+        add(MENACWY, 'vacina', 'Pessoa vivendo com HIV: 2 doses de ACWY conjugada com 8 semanas de intervalo e reforço a cada '
+            '5 anos.', 'HIV | 2 doses (8 sem) + reforço 5/5 anos | PNI: CRIE', SBIM_ESPECIAIS + ' / ' + CRIE + ' / ' + ACIP,
+            'A', 'alta', substituir=True, esquema='hiv')
+        add(HIB, 'vacina', 'Pessoa vivendo com HIV não vacinada: 2 doses com 2 meses de intervalo.',
+            'HIV, não vacinado | 2 doses (0-2m)', SBIM_ESPECIAIS, 'B', esquema='hiv')
     if {'asplenia', 'anemia_falciforme'} & com:
         # Asplenia anatômica ou funcional (doença falciforme). Esquema de risco substitui o de rotina na tela e no PDF (esquema_pdf)
-        add('Meningocócica ACWY (Menactra® ou Menveo®)', 'vacina',
+        add(MENACWY, 'vacina',
             'Asplenia: 2 doses com 8 semanas de intervalo e reforço a cada 5 anos.', 'Asplenia | 2 doses + reforço 5/5 anos',
             'CDC/ACIP 2025 / ' + SBIM, 'A', 'alta', substituir=True, esquema='asplenia')
-        add('Meningocócica B (Bexsero®)', 'vacina', 'Asplenia: 2 doses com 1 mês de intervalo; reforço 1 ano depois e a cada 2-3 anos.',
-            'Asplenia | 2 doses + reforços', 'CDC/ACIP 2025 / ' + SBIM, 'A', 'alta', substituir=True, esquema='asplenia')
-        add('Haemophilus influenzae tipo b (Hib)', 'vacina', 'Asplenia: dose única se não vacinado.', 'Asplenia | Dose única',
-            'CDC/ACIP 2025 / ' + SBIM, 'B', 'alta', substituir=True, esquema='asplenia')
-    if imuno:
+        # MenB-4C no alto risco: 3 doses (0, 1-2, 6 meses) pelo ACIP (out/2024, após a bula da FDA de ago/2024) e pela SBIm.
+        add('Meningocócica B (Bexsero®)', 'vacina', 'Asplenia: 3 doses (0, 1-2 e 6 meses); reforço 1 ano depois do esquema e, '
+            'depois, a cada 2-3 anos (ACIP) ou a cada 3 anos (SBIm). Todas as doses do mesmo fabricante. Licenciada até 50 anos.',
+            'Asplenia | 3 doses (0, 1-2, 6m) + reforços', MENB_ACIP + ' / ' + MENB_ACIP_REFORCO + ' / ' + SBIM_ESPECIAIS,
+            'A', 'alta', substituir=True, esquema='asplenia')
+        add(HIB, 'vacina', 'Asplenia, não vacinado: SBIm e CRIE indicam 2 doses com 2 meses de intervalo; o ACIP, dose única.',
+            'Asplenia | SBIm/CRIE: 2 doses (0-2m); ACIP: 1 dose', SBIM_ESPECIAIS + ' / ' + ACIP, 'B', 'alta', substituir=True,
+            esquema='asplenia')
+        orientar('Meningocócica B na asplenia: diretrizes divergem',
+                 'ACIP e SBIm concordam no esquema de 3 doses (0, 1-2 e 6 meses) e no primeiro reforço 1 ano depois. Divergem nos '
+                 'reforços seguintes: a cada 2-3 anos pelo ACIP e a cada 3 anos pela SBIm. O motor mostra os dois intervalos.',
+                 MENB_ACIP_REFORCO + ' / ' + SBIM_ESPECIAIS)
+    elif 'meningocócica b (bexsero®)' in titulos():
+        # Cartão de rotina (SBIm): 2 doses com intervalo mínimo de 1 mês. O ACIP difere no esquema e na indicação.
+        orientar('Meningocócica B de rotina: diretrizes divergem',
+                 'O motor seguiu a SBIm: 2 doses com intervalo mínimo de 1 mês. O ACIP indica a MenB-4C (Bexsero®) de 16 a 23 '
+                 'anos por decisão compartilhada, em 2 doses a 0 e 6 meses, e fora dessa faixa só com risco aumentado.',
+                 SBIM + ' / ' + MENB_ACIP)
+    if hiv or {'asplenia', 'anemia_falciforme'} & com:
+        orientar('Hib no adulto: diretrizes divergem',
+                 'O motor seguiu a SBIm: 2 doses com 2 meses de intervalo no adulto não vacinado com asplenia ou HIV. O ACIP indica '
+                 'dose única na asplenia e não indica Hib no adulto com HIV.', SBIM_ESPECIAIS + ' / ' + ACIP)
+
+    if 'transplante' in com:
+        orientar('Transplante de medula óssea (TCTH): revacinação',
+                 'Se o transplante foi de células-tronco hematopoéticas, todas as vacinas feitas antes devem ser repetidas: '
+                 'inativadas a partir de 3 a 6 meses, influenza a partir de 3 a 4 meses e vacinas de vírus vivo só depois de '
+                 '24 meses, sem doença do enxerto contra o hospedeiro e com reconstituição imune. Seguir o protocolo da equipe de '
+                 'transplante.', SBIM_ESPECIAIS)
+    if idade >= 60:
+        orientar('Vacinas em situações especiais (60+)',
+                 'Hepatite A depois de sorologia negativa, exposição ou surto; meningocócica ACWY (ou C) em surto ou viagem a área '
+                 'de risco; tríplice viral em situação de risco aumentado (contraindicada no imunodeprimido).', SBIM)
+    if imuno_listas:
         orientar('Imunossupressão',
                  'Item marcado implica imunossupressão: a triagem de vacinas foi tratada como "Sim" e as vacinas de vírus '
                  'vivo atenuado não entram.', SBIM)
+    elif imuno:
+        orientar('Imunossupressão informada na triagem',
+                 'Imunossupressão informada na triagem: indicadas as vacinas inativadas do imunocomprometido. Defina a causa na '
+                 'lista de comorbidades ou de medicações.', SBIM_ESPECIAIS)
     return orient

@@ -246,17 +246,14 @@ def inferir(data, egfr=None, gestante=False, recusados=(), escolhidas=()):
         marcar(comorbidades, 'comorbidades', 'dislipidemia', 'uso de hipolipemiante')
     if 'anti_hipertensivos' in medicacoes:
         marcar(comorbidades, 'comorbidades', 'hipertensao', 'uso de anti-hipertensivo')
-    pa = classificar_pa(data.get('pas'), data.get('pad'))
+    # Na gestação a PA não marca hipertensão: antes de 20 semanas é provável HAS crônica a confirmar; depois,
+    # hipertensão gestacional ou pré-eclâmpsia (ACOG PB 222). As orientações vêm de src/utils/prenatal.py.
+    pa = None if gestante else classificar_pa(data.get('pas'), data.get('pad'))
     if pa:
         # Uma PA de consultório isolada não rotula HAS (SBC 2025 e AHA/ACC 2025: confirmar em 2 ou mais consultas
         # ou com MRPA/MAPA). Fora da gestação, só a PA ≥ 180/110 marca a caixa; de 130/80 a 179/109 a rota pede
-        # MRPA ou MAPA (estado "PA alterada, HAS a confirmar", ver pa_a_confirmar). Na gestação continua ≥ 140/90.
-        # (estágio 1 com um componente faltando pode ser 2 na gestação; só marca o que é certo)
-        if gestante:
-            if pa['categoria'] == 'estagio2':
-                marcar(comorbidades, 'comorbidades', 'hipertensao',
-                       f"PA {_pa_texto(data)} = {pa['rotulo']} (AHA/ACC 2025); confirmar com MRPA ou MAPA")
-        elif pa_grave(data.get('pas'), data.get('pad')):
+        # MRPA ou MAPA (estado "PA alterada, HAS a confirmar", ver pa_a_confirmar).
+        if pa_grave(data.get('pas'), data.get('pad')):
             marcar(comorbidades, 'comorbidades', 'hipertensao',
                    f"PA {_pa_texto(data)} ≥ 180/110 mmHg = HAS estágio 3 (SBC 2025); confirmar com MRPA ou MAPA")
     resistente = hipertensao_resistente(escolhidas, 'hipertensao' in comorbidades, data.get('pas'), data.get('pad'), gestante)

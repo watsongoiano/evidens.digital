@@ -150,9 +150,12 @@ def test_pa_alterada_sem_has_fica_a_confirmar(pas, pad, a_confirmar):
     assert coerencia.pa_a_confirmar(c, com, gestante=True) is False
 
 
-def test_pa_na_gestacao_usa_140_90():
+def test_pa_na_gestacao_nao_marca_hipertensao():
+    """Na gestação, PA ≥ 140/90 é hipertensão gestacional/pré-eclâmpsia (≥ 20 sem) ou provável HAS crônica a
+    confirmar (< 20 sem): o pré-natal orienta, a caixa de HAS não é marcada (ACOG PB 222)."""
     assert 'hipertensao' not in coerencia.inferir({'pas': 134, 'pad': 84}, gestante=True)[0]
-    assert 'hipertensao' in coerencia.inferir({'pas': 142, 'pad': 84}, gestante=True)[0]
+    assert 'hipertensao' not in coerencia.inferir({'pas': 142, 'pad': 84}, gestante=True)[0]
+    assert 'hipertensao' not in coerencia.inferir({'pas': 165, 'pad': 112}, gestante=True)[0]
 
 
 def test_api_pa_alterada_pede_so_mrpa_ou_mapa(client):

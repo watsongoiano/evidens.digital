@@ -156,6 +156,14 @@
             <option value="sim">Sim</option>
           </select>
         </div>
+        <div class="campo sm:max-w-[320px] mt-4">
+          <label for="sexualmente_ativa">Vida sexual ativa</label>
+          <select id="sexualmente_ativa" name="sexualmente_ativa">
+            <option value="desconhecido">Não informado</option>
+            <option value="nao">Não</option>
+            <option value="sim">Sim</option>
+          </select>
+        </div>
         <div id="gestacao-bloco" class="bloco-condicional" style="display: none;">
           <p class="campo-rotulo text-teal-dark">Dados da gestação</p>
           <p class="text-[13px] text-ink/55 -mt-1 mb-4">Obrigatórios: definem quais exames são para agora. Os das próximas semanas aparecem só como lembrete e não entram nos PDFs.</p>
@@ -201,6 +209,16 @@
             <label class="opcao" for="gc_dmg_previo"><input type="checkbox" id="gc_dmg_previo" name="gestacao_condicoes" value="dmg_previo">DMG prévio</label>
             <label class="opcao" for="gc_dmg_atual"><input type="checkbox" id="gc_dmg_atual" name="gestacao_condicoes" value="dmg_atual">DMG nesta gestação</label>
             <label class="opcao" for="gc_prematuro_previo"><input type="checkbox" id="gc_prematuro_previo" name="gestacao_condicoes" value="prematuro_previo">Parto prematuro prévio</label>
+            <label class="opcao" for="gc_monocorionica"><input type="checkbox" id="gc_monocorionica" name="gestacao_condicoes" value="monocorionica">Gemelar monocoriônica</label>
+          </div>
+          <p class="campo-rotulo mt-4">Risco de pré-eclâmpsia (fatores moderados e rastreio combinado)</p>
+          <div class="opcoes">
+            <label class="opcao" for="gc_nulipara"><input type="checkbox" id="gc_nulipara" name="gestacao_condicoes" value="nulipara">Nulípara</label>
+            <label class="opcao" for="gc_pe_familiar"><input type="checkbox" id="gc_pe_familiar" name="gestacao_condicoes" value="pe_familiar">Mãe ou irmã com pré-eclâmpsia</label>
+            <label class="opcao" for="gc_fiv"><input type="checkbox" id="gc_fiv" name="gestacao_condicoes" value="fiv">Fertilização in vitro</label>
+            <label class="opcao" for="gc_intervalo_10_anos"><input type="checkbox" id="gc_intervalo_10_anos" name="gestacao_condicoes" value="intervalo_10_anos">Mais de 10 anos desde a última gestação</label>
+            <label class="opcao" for="gc_desfecho_adverso_previo"><input type="checkbox" id="gc_desfecho_adverso_previo" name="gestacao_condicoes" value="desfecho_adverso_previo">Desfecho adverso prévio (baixo peso, PIG, óbito fetal)</label>
+            <label class="opcao" for="gc_rastreio_pe_alto"><input type="checkbox" id="gc_rastreio_pe_alto" name="gestacao_condicoes" value="rastreio_pe_alto">Rastreio combinado de 11-14 semanas ≥ 1:100</label>
           </div>
         </div>
       </div>
@@ -224,6 +242,7 @@
             <li role="option" data-valor="hepatite_c" data-busca="hepatite c figado hcv ">Hepatite C</li>
             <li role="option" data-valor="artrite_reumatoide" data-busca="artrite reumatoide ar autoimune doenca inflamatoria reumatismo ">Artrite reumatoide</li>
             <li role="option" data-valor="lupus" data-busca="lupus eritematoso sistemico les autoimune doenca inflamatoria colagenose ">Lúpus eritematoso sistêmico</li>
+            <li role="option" data-valor="saf" data-busca="sindrome antifosfolipide saf sindrome do anticorpo antifosfolipide trombofilia autoimune ">Síndrome antifosfolípide</li>
             <li role="option" data-valor="psoriase" data-busca="psoriase pele autoimune doenca inflamatoria ">Psoríase</li>
             <li role="option" data-valor="artrite_psoriasica" data-busca="artrite psoriasica aps psoriase espondiloartrite autoimune doenca inflamatoria ">Artrite psoriásica</li>
             <li role="option" data-valor="espondiloartrite" data-busca="espondiloartrite axial (espondilite anquilosante) ea espondilite anquilosante autoimune doenca inflamatoria ">Espondiloartrite axial (espondilite anquilosante)</li>
@@ -706,6 +725,11 @@
         <div class="opcoes">
           <label class="opcao" for="fam_ccr_antes_60"><input type="checkbox" id="fam_ccr_antes_60" name="historia_familiar" value="ccr_antes_60">Parente de 1º grau antes dos 60 anos, ou 2 ou mais parentes de 1º grau</label>
         </div>
+        <div class="campo mt-4">
+          <label for="idade_ccr_familiar">Idade do familiar mais jovem ao diagnóstico</label>
+          <input type="number" id="idade_ccr_familiar" name="idade_ccr_familiar" min="10" max="110" step="1" inputmode="numeric">
+          <p class="text-[12px] text-ink/55 mt-1.5">Opcional. Antes dos 60 anos, a colonoscopia começa aos 40 ou 10 anos antes dessa idade, o que vier primeiro.</p>
+        </div>
       </div>
 
       <!-- lista:familia:inicio -->
@@ -866,6 +890,26 @@
           <option value="colposcopia_negativa">Colposcopia sem doença</option>
         </select>
         <p class="text-[12px] text-ink/55 mt-1.5">Opcional. Define o passo seguinte: novo teste em 5 anos, em 1 ano, ou colposcopia. Para adiar o pedido pela data, informe também a data do teste acima.</p>
+      </div>
+      <div class="grade mt-4" id="colo-historico" style="display: none;">
+        <div class="campo">
+          <label for="colo_rastreio_adequado">Rastreio anterior do colo adequado e negativo?</label>
+          <select id="colo_rastreio_adequado" name="colo_rastreio_adequado">
+            <option value="">Não sei</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+          <p class="text-[12px] text-ink/55 mt-1.5">3 citologias negativas seguidas ou 2 testes negativos nos últimos 10 anos. Define se o rastreio pode parar depois dos 65 anos.</p>
+        </div>
+        <div class="campo">
+          <label for="colo_nic2_previa">Já tratou NIC 2, NIC 3 ou adenocarcinoma in situ?</label>
+          <select id="colo_nic2_previa" name="colo_nic2_previa">
+            <option value="">Não sei</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+          <p class="text-[12px] text-ink/55 mt-1.5">Com tratamento prévio, o rastreio continua por 25 anos após o tratamento.</p>
+        </div>
       </div>
     </section>
 
@@ -1314,7 +1358,7 @@
             const alvo = document.getElementById('orientacoesContent');
             if (!itens.length) { alvo.innerHTML = ''; return; }
             alvo.innerHTML = `<div class="risco-cartao"><p class="campo-rotulo">Orientações · não entram nos PDFs</p>` + itens.map(o =>
-                `<div class="py-2.5 border-t border-ink/5 first:border-0"><p class="text-[14px] font-medium">${escapeHtml(o.titulo)}</p>
+                `<div class="py-2.5 border-t border-ink/5 first:border-0">${o.urgente ? `<span class="selo bg-[#C0392B] text-white">${T('Urgente')}</span>` : ''}<p class="text-[14px] font-medium">${escapeHtml(o.titulo)}</p>
                  <p class="text-[13px] text-ink/65 mt-0.5">${escapeHtml(o.descricao)}</p>
                  <p class="text-[11px] text-ink/45 mt-1 font-mono referencia-links">${o.referencia_html || escapeHtml(o.referencia || '')}</p></div>`).join('') + `</div>`;
         }
@@ -1348,7 +1392,18 @@
                 </tbody></table>
                 ${t ? '' : '<p class="text-[12px] text-ink/45 mt-2">Risco em 30 anos só de 30 a 59 anos.</p>'}
                 <p class="text-[12px] text-ink/55 mt-3">${escapeHtml(risco.observacao)}</p>
+                ${risco.limitacao ? `<p class="text-[12px] text-ink/55 mt-2" data-limitacao><i class="fa-solid fa-circle-info text-teal mr-1"></i>${escapeHtml(T(risco.limitacao.texto))} </p>` : ''}
               </div>`;
+            // Fontes do limite de aplicabilidade: links montados pelo DOM (só https)
+            const limite = alvo.querySelector('[data-limitacao]');
+            if (limite) (risco.limitacao.fontes || []).forEach((f, i) => {
+                if (!/^https:\/\//.test(f.link || '')) return;
+                if (i) limite.append(' · ');
+                const a = document.createElement('a');
+                a.href = f.link; a.target = '_blank'; a.rel = 'noopener';
+                a.className = 'text-teal underline underline-offset-2'; a.textContent = T(f.rotulo);
+                limite.append(a);
+            });
         }
 
         function displayRecommendations(recomendacoes, naoIncluidas) {
@@ -1429,6 +1484,7 @@
             contraindicada: { texto: 'Contraindicada', classe: 'bg-[#C0392B] text-white', borda: 'border-[#E5B7B1]' },
             precaucao: { texto: 'Precaução', classe: 'bg-[#D35400] text-white', borda: 'border-[#EDC9A8]' },
             dados_insuficientes: { texto: 'Dados insuficientes', classe: 'bg-ink/15 text-ink', borda: 'border-ink/15' },
+            nao_recomendado: { texto: 'Não recomendado', classe: 'bg-ink/15 text-ink', borda: 'border-ink/15' },
             adiado_gestacao: { texto: 'Adiado na gestação', classe: 'bg-sand text-ink', borda: 'border-[#E6DCC0]' },
             proxima_janela: { texto: 'Próxima etapa', classe: 'bg-mist text-teal-dark', borda: 'border-teal/20' },
             etapa_anterior: { texto: 'Etapa anterior', classe: 'bg-ink/10 text-ink', borda: 'border-ink/15' },
@@ -1465,7 +1521,11 @@
         function dadosDoPacienteParaPdf() {
             const data = lerFormulario();
             const comorbidades = [].concat(data.comorbidades || []);
-            return {
+            // Comorbidades, medicações, dose/duração e peso: o servidor confere de novo a triagem das vacinas de
+            // vírus vivo com a imunossupressão que as listas implicam (não só a resposta da triagem).
+            const detalhes = {};
+            Object.keys(data).filter(k => /^(dose|duracao)__/.test(k)).forEach(k => { detalhes[k] = data[k]; });
+            return Object.assign({
                 nome: (data.nome_paciente || '').trim() || 'Paciente',
                 idade: data.idade,
                 sexo: data.sexo,
@@ -1473,8 +1533,11 @@
                 lactante: data.lactante,
                 imunossupressao: data.imunossupressao,
                 hiv: comorbidades.indexOf('hiv') !== -1,
-                cd4: data.cd4 || null
-            };
+                cd4: data.cd4 || null,
+                comorbidades: comorbidades,
+                medicacoes: [].concat(data.medicacoes || []),
+                peso: data.peso || null
+            }, detalhes);
         }
 
         // ── Guia do plano de saúde (SP/SADT) junto com o pedido de exames ──
@@ -2034,6 +2097,7 @@
                 const aberto = marcados.includes(bloco.dataset.familia);
                 bloco.hidden = !aberto;
                 if (!aberto) bloco.querySelectorAll('input:checked').forEach(c => { c.checked = false; });
+                if (!aberto) bloco.querySelectorAll('input[type="number"]').forEach(c => { c.value = ''; });
             });
             // "3 ou mais casos de mama e/ou próstata" aparece nos dois blocos: uma caixa só vale (a do bloco da mama
             // vai no formulário; a da próstata só espelha). Sem o bloco da mama aberto, a da próstata envia o valor.
@@ -2131,12 +2195,13 @@
                     i.dataset.marca.split(' ').forEach(id => pedir(id, 'med:' + i.value, 'uso de ' + i.dataset.rotulo)));
                 // PA de consultório (mesmas regras de coerencia.inferir): uma PA isolada não rotula HAS. Fora da gestação,
                 // só a PA ≥ 180/110 (HAS estágio 3 da SBC 2025) marca a caixa; de 130/80 a 179/109 o motor pede MRPA ou MAPA
-                // para confirmar (a dica abaixo explica). Na gestação, ≥ 140/90.
+                // para confirmar (a dica abaixo explica). Na gestação a PA não marca.
                 const pas = num('pas') || 0, pad = num('pad') || 0;
                 const gest = document.getElementById('gestante').value === 'sim';
-                const est2 = pas >= 140 || pad >= 90, grave = pas >= 180 || pad >= 110;
-                if (gest && est2) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg = HAS estágio 2 (AHA/ACC 2025); confirmar com MRPA ou MAPA`);
-                else if (!gest && grave) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg ≥ 180/110 mmHg = HAS estágio 3 (SBC 2025); confirmar com MRPA ou MAPA`);
+                const grave = pas >= 180 || pad >= 110;
+                // Na gestação a PA não marca a caixa: antes de 20 semanas é provável HAS crônica a confirmar; depois,
+                // hipertensão gestacional ou pré-eclâmpsia (ACOG PB 222). As orientações vêm do motor.
+                if (!gest && grave) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg ≥ 180/110 mmHg = HAS estágio 3 (SBC 2025); confirmar com MRPA ou MAPA`);
                 // HAS resistente (AHA 2018; AHA/ACC 2025): PA acima da meta com 3 classes, ou 4 ou mais classes.
                 // Só conta hipertensão pedida agora ou marcada à mão: a automática de uma rodada anterior, cuja regra
                 // já não vale (PA corrigida), não pode sustentar a si mesma pela HAS resistente.
@@ -2213,6 +2278,9 @@
                 }
                 if (gest && pas !== null && pad !== null && (pas >= 130 || pad >= 80) && pas < 140 && pad < 90 && !document.getElementById('hipertensao').checked) {
                     frases.push(`PA ${pas}/${pad} mmHg na gestação: hipertensão só a partir de 140/90; a caixa não é marcada.`);
+                }
+                if (gest && ((pas !== null && pas >= 140) || (pad !== null && pad >= 90)) && !document.getElementById('hipertensao').checked) {
+                    frases.push(`PA ${pas ?? '–'}/${pad ?? '–'} mmHg na gestação: a caixa de hipertensão não é marcada. Antes de 20 semanas, provável HAS crônica a confirmar; depois, hipertensão gestacional ou pré-eclâmpsia (veja as orientações).`);
                 }
                 return frases;
             }
@@ -2444,9 +2512,11 @@
                     document.getElementById(campo).value = 'desconhecido';
                 }
             });
+            if (!feminino) document.getElementById('sexualmente_ativa').value = 'desconhecido';
             // Resultado do último teste de HPV: só para o sexo feminino.
             document.getElementById('hpv-item').style.display = feminino ? 'block' : 'none';
-            if (!feminino) document.getElementById('hpv_resultado').value = '';
+            document.getElementById('colo-historico').style.display = feminino ? '' : 'none';
+            if (!feminino) ['hpv_resultado', 'colo_rastreio_adequado', 'colo_nic2_previa'].forEach(id => { document.getElementById(id).value = ''; });
             atualizarBlocoGestacao();
         });
 

@@ -33,7 +33,9 @@ def test_vsr_rotina_a_partir_de_70_e_por_risco_antes():
     recs = {r['titulo']: r for r in generate_age_sex_recommendations(72, 'masculino')}
     vsr = next(r for t, r in recs.items() if 'Sincicial' in t)
     assert vsr['prioridade'] == 'alta'
-    recs = {r['titulo']: r for r in generate_age_sex_recommendations(64, 'masculino')}
+    # 60-69 anos: só com fator de risco (SBIm Idoso). Sem fator, nada no calendário por idade.
+    assert not any('Sincicial' in t for t in _vacinas(64, 'masculino'))
+    recs = {r['titulo']: r for r in generate_age_sex_recommendations(64, 'masculino', has_dpoc=True)}
     assert next(r for t, r in recs.items() if 'Sincicial' in t)['prioridade'] == 'media'
     assert not any('Sincicial' in t for t in _vacinas(45))
     assert any('Sincicial' in t for t in _vacinas(45, has_dpoc=True))

@@ -583,7 +583,11 @@ def test_hpv_a_cada_cinco_anos_e_citologia_a_cada_tres(client):
     assert '3 anos' in colo(22)['subtitulo'] and 'Papanicolaou' in colo(22)['titulo']
     for idade in (25, 40, 65):
         assert '5 anos' in colo(idade)['subtitulo'] and 'HPV' in colo(idade)['titulo'], idade
-    assert colo(20) is None and colo(66) is None
+    assert colo(20) is None
+    # depois dos 65, só para com rastreio anterior adequado e negativo (ACOG 2026)
+    assert colo(66)['subtitulo'].startswith('Mulheres acima de 65 anos sem rastreio anterior adequado')
+    recs = client.post('/api/checkup-intelligent', json=dict(base, idade=66, colo_rastreio_adequado='sim')).get_json()['recommendations']
+    assert not any(r['titulo'].startswith('Pesquisa do Papilomavírus') for r in recs)
 
 
 def test_botoes_de_pdf_ficam_abaixo_das_recomendacoes(pagina):
@@ -768,3 +772,15 @@ def test_medicacoes_anti_hipertensivas_levam_a_classe_para_a_has_resistente(pagi
         classes, _ = medicamentos.classes_anti_hipertensivas(chave)
         assert re.search(rf'value="{chave}"[^>]*data-classe-has="{"|".join(sorted(classes))}"', pagina), chave
     assert re.search(r'data-valor="carvedilol"[^>]*data-classe-has="betabloqueador" data-has-condicional="1"', pagina)
+
+
+def test_risco_prevent_declara_limite_de_aplicabilidade_com_fontes(client):
+    # O PREVENT foi derivado e validado nos EUA; não há validação em coorte brasileira.
+    r = client.post('/api/checkup-intelligent', json={
+        'idade': 55, 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao', 'pas': 128, 'pad': 78,
+        'colesterol': 200, 'hdl': 45, 'creatinina': 1.0, 'peso': 80, 'altura': 175}).get_json()
+    risco = r['risco_cardiovascular']
+    assert risco['status'] == 'calculado'
+    assert 'sem validação em coorte brasileira' in risco['limitacao']['texto']
+    assert {f['link'] for f in risco['limitacao']['fontes']} == {
+        'https://doi.org/10.1001/jamanetworkopen.2024.38311', 'https://doi.org/10.36660/abc.20240405'}

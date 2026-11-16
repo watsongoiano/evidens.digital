@@ -35,6 +35,7 @@ ARQUIVO_DA_TABELA = Path(__file__).resolve().parents[1] / 'data' / 'tuss_laborat
 DESCRICOES = {
     # Bioquímica
     '40301150': 'Ácido úrico - pesquisa e/ou dosagem',
+    '40301729': 'Desidrogenase láctica',
     '40301222': 'Albumina - pesquisa e/ou dosagem',
     '40301249': 'Alfa-1-antitripsina - pesquisa e/ou dosagem no soro',
     '40301362': 'Apolipoproteína B (Apo B) - pesquisa e/ou dosagem',
@@ -269,6 +270,7 @@ CODIGOS = {
     'Urocultura com antibiograma': ['40310213', '40310418'],
     'Vitamina B12, soro': ['40316572'],
     'Ácido úrico, soro': ['40301150'],
+    'Desidrogenase láctica (LDH), soro': ['40301729'],
     'Índice de saturação de transferrina, soro': ['40301842', '40301427'],
     # ── Laboratório (catálogo)
     'T4 livre, soro': ['40316491'],
@@ -351,6 +353,8 @@ SEM_CODIGO = {
         'o teste de fluxo lateral não tem código conferido; a TUSS traz a pesquisa por látex (40309053)',
     'Clamídia e gonococo, PCR (urina ou swab)':
         'são dois testes moleculares; só o de clamídia tem código conferido (40310396, Chlamydia - PCR)',
+    'Ecocardiograma fetal':
+        'código não conferido para esta minuta',
     'Relação proteína/creatinina, urina':
         'sem código específico conferido; operadoras usam "componente urinário" (40311180) ou tabela própria',
     'TOTG-75g gestacional (jejum, 1 h e 2 h), soro':

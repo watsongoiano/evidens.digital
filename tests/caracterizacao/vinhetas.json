@@ -136,6 +136,7 @@
         "HBsAg, soro",
         "Anti-HCV IgG, soro",
         "Rubéola IgG, soro",
+        "Hormônio Tireoestimulante (TSH), soro",
         "Citomegalovírus IgG e IgM, soro",
         "Parasitológico de fezes",
         "Tipagem sanguínea ABO e fator Rh",
@@ -197,7 +198,8 @@
         "Lipoproteína(a) - Lp(a), soro",
         "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
-        "HBsAg, anti-HBc total e anti-HBs"
+        "HBsAg, anti-HBc total e anti-HBs",
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
         "Colonoscopia de Rastreio com ou sem biópsia"
@@ -236,6 +238,7 @@
         "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
         "HBsAg, anti-HBc total e anti-HBs",
+        "Sangue oculto nas fezes (FIT)",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
@@ -281,7 +284,8 @@
         "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
         "HBsAg, anti-HBc total e anti-HBs",
-        "PSA total, soro"
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
         "MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)",
@@ -334,6 +338,7 @@
         "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)",
         "Aspartato aminotransferase, soro",
         "Alanina aminotransferase, soro",
         "Vitamina B12, soro",
@@ -395,7 +400,8 @@
         "Ácido úrico, soro",
         "EAS - Elementos Anormais e Sedimentoscopia",
         "Glicose, soro",
-        "PSA total, soro"
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -439,6 +445,7 @@
         "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
         "HBsAg, anti-HBc total e anti-HBs",
+        "Sangue oculto nas fezes (FIT)",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular",
         "Hemoglobina glicada (HbA1c), soro",
         "Glicose, soro",
@@ -490,7 +497,8 @@
         "Lipoproteína(a) - Lp(a), soro",
         "Anti-HCV IgG, soro",
         "HBsAg, anti-HBc total e anti-HBs",
-        "PSA total, soro"
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
         "Colonoscopia de Rastreio com ou sem biópsia",
@@ -502,8 +510,7 @@
         "Hepatite B (Engerix-B® ou Euvax B®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
-        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)"
       ]
     },
     "nao_incluidas": [
@@ -533,6 +540,7 @@
         "Anti-HCV IgG, soro",
         "HBsAg, anti-HBc total e anti-HBs",
         "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)",
         "Gasometria arterial, sangue arterial",
         "Sódio, soro",
         "Potássio, soro",
@@ -578,7 +586,9 @@
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
         "Anti-HCV IgG, soro",
-        "HBsAg, anti-HBc total e anti-HBs"
+        "HBsAg, anti-HBc total e anti-HBs",
+        "Sangue oculto nas fezes (FIT)",
+        "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
         "Mamografia Digital - Bilateral",
@@ -603,19 +613,61 @@
     ],
     "outras_recomendacoes": []
   },
-  "h88_higido": {
+  "h69_higido": {
     "entrada": {
-      "idade": 88,
+      "idade": 69,
       "sexo": "masculino",
       "tabagismo": "nunca",
       "imunossupressao": "nao"
     },
     "recomendacoes": {
       "laboratorio": [
+        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
         "Anti-HCV IgG, soro",
         "HBsAg, anti-HBc total e anti-HBs",
-        "PSA total, soro"
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
+      ],
+      "imagem": [
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h70_higido": {
+    "entrada": {
+      "idade": 70,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Hemoglobina glicada (HbA1c), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
+        "Sangue oculto nas fezes (FIT)"
+      ],
+      "imagem": [
+        "Colonoscopia de Rastreio com ou sem biópsia"
       ],
       "vacina": [
         "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
@@ -631,6 +683,123 @@
       [
         "Febre Amarela (Stamaril®)",
         "precaucao"
+      ],
+      [
+        "PSA total, soro",
+        "nao_recomendado"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h76_higido": {
+    "entrada": {
+      "idade": 76,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Colesterol total e frações, soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ],
+      [
+        "PSA total, soro",
+        "nao_recomendado"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h88_higido": {
+    "entrada": {
+      "idade": 88,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Colesterol total e frações, soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ],
+      [
+        "PSA total, soro",
+        "nao_recomendado"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h60_fumante_sem_macos_ano": {
+    "entrada": {
+      "idade": 60,
+      "sexo": "masculino",
+      "tabagismo": "atual",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Hemoglobina glicada (HbA1c), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Anti-HIV 1 e 2, soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
+      ],
+      "imagem": [
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "Dengue (Qdenga®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ],
+      [
+        "Tomografia computadorizada de tórax de baixa dose (LDCT)",
+        "dados_insuficientes"
       ]
     ],
     "outras_recomendacoes": []
@@ -681,7 +850,11 @@
         "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "Herpes Zóster (Shingrix®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)",
+        "Haemophilus influenzae tipo b (Hib)"
       ],
       "imagem": [
         "Radiografia de tórax"
@@ -754,7 +927,10 @@
         "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "Herpes Zóster (Shingrix®)",
+        "Haemophilus influenzae tipo b (Hib)"
       ],
       "imagem": [
         "Radiografia de tórax"
@@ -803,7 +979,10 @@
         "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "Herpes Zóster (Shingrix®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
       ]
     },
     "nao_incluidas": [

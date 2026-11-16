@@ -12,11 +12,17 @@ Regra de escolha: o PCDT do MS é a base (é o protocolo do SUS e o que os plano
 entra com o que o PCDT não cobre (eletrólitos, teste de gravidez antes da TARV, clamídia/gonococo,
 tricomonas, rastreio anal). Onde as duas divergem, vale o MS e a descrição diz o que a HIVMA faria.
 O colo do útero fica em src/utils/colo_utero.py (MS 2025: DNA-HPV a cada 3 anos com HIV).
+- Gestante: FEBRASGO Position Statement nº 10/2025 (segue o PCDT de Transmissão Vertical, MS 2022): carga viral
+  pelo menos 3 vezes (1ª consulta, 2-4 semanas após iniciar ou trocar a TARV e a partir de 34 semanas, que define a
+  via de parto); CD4 na 1ª consulta e com 34 semanas em quem já está em TARV com carga viral indetectável, e pelo
+  menos a cada 3 meses em quem inicia o tratamento.
 """
 
 MS = 'MS 2024 (PCDT HIV)'
 HIVMA = 'HIVMA/IDSA 2024'
 AMBOS = f'{MS} / {HIVMA}'
+FEBRASGO_HIV = 'FEBRASGO 2025 (HIV na gestação)'
+GESTANTE = 'Gestante com HIV'
 
 CV_GENOTIPAGEM = 500          # MS: falha confirmada com a última carga viral > 500 cópias/mL
 CD4_TB = 350                  # MS: PT/IGRA só acima de 350; abaixo, avaliar TPT sem teste
@@ -74,18 +80,31 @@ def recomendar(idade, sexo, cd4=None, carga_viral=None, em_tarv=False, supressao
     recs, orient = [], []
     add = recs.append
 
-    # ---- Exames do HIV (MS 2024, Quadros 8 e 9) ----
-    add(_rec('Contagem de linfócitos T CD4+',
-             (f'CD4 atual: {cd4} células/mm³. ' if cd4 is not None else 'Sem CD4 anterior: pedir agora. ') + 'Em TARV, assintomático e com carga viral '
-             'indetectável: abaixo de 350 a cada 6 meses; 350-500 anual; acima de 500 em 2 exames com 6 meses de intervalo, '
-             'não é mais necessário. Sem TARV, evento clínico ou falha virológica: a cada 6 meses. Em profilaxia ou com '
-             'infecção oportunista: a cada 3 meses.',
-             f'{GRUPO} | {_frequencia_cd4(cd4, em_tarv, suprimido)}', MS))
-    add(_rec('Carga Viral do HIV (HIV RNA)',
-             (f'Carga viral atual: {carga_viral} cópias/mL. ' if carga_viral is not None else 'Sem carga viral anterior: pedir agora. ') + 'Supressão viral com '
-             'estabilidade clínica e imunológica: a cada 6 meses. Início ou troca da TARV: 8 semanas depois. Carga viral '
-             'detectável: repetir em 4 semanas para confirmar a falha.',
-             f'{GRUPO} | {_frequencia_cv(carga_viral, em_tarv, suprimido)}', MS))
+    # ---- Exames do HIV (MS 2024, Quadros 8 e 9; na gestação, FEBRASGO 2025 / PCDT TV 2022) ----
+    if gestante:
+        add(_rec('Contagem de linfócitos T CD4+',
+                 (f'CD4 atual: {cd4} células/mm³. ' if cd4 is not None else 'Sem CD4 anterior: pedir agora. ') + 'Na gestação: '
+                 'na 1ª consulta; em TARV com carga viral indetectável, de novo com 34 semanas; em quem inicia o tratamento, '
+                 'pelo menos a cada 3 meses.',
+                 f'{GESTANTE} | ' + ('1ª consulta e com 34 semanas' if suprimido else '1ª consulta e pelo menos a cada 3 meses'),
+                 FEBRASGO_HIV))
+        add(_rec('Carga Viral do HIV (HIV RNA)',
+                 (f'Carga viral atual: {carga_viral} cópias/mL. ' if carga_viral is not None else 'Sem carga viral anterior: pedir agora. ')
+                 + 'Na gestação, pelo menos 3 vezes: na 1ª consulta, 2-4 semanas após iniciar ou trocar a TARV e a partir de 34 '
+                 'semanas (define a via de parto).',
+                 f'{GESTANTE} | 1ª consulta, 2-4 semanas após iniciar ou trocar a TARV e a partir de 34 semanas', FEBRASGO_HIV))
+    else:
+        add(_rec('Contagem de linfócitos T CD4+',
+                 (f'CD4 atual: {cd4} células/mm³. ' if cd4 is not None else 'Sem CD4 anterior: pedir agora. ') + 'Em TARV, assintomático e com carga viral '
+                 'indetectável: abaixo de 350 a cada 6 meses; 350-500 anual; acima de 500 em 2 exames com 6 meses de intervalo, '
+                 'não é mais necessário. Sem TARV, evento clínico ou falha virológica: a cada 6 meses. Em profilaxia ou com '
+                 'infecção oportunista: a cada 3 meses.',
+                 f'{GRUPO} | {_frequencia_cd4(cd4, em_tarv, suprimido)}', MS))
+        add(_rec('Carga Viral do HIV (HIV RNA)',
+                 (f'Carga viral atual: {carga_viral} cópias/mL. ' if carga_viral is not None else 'Sem carga viral anterior: pedir agora. ') + 'Supressão viral com '
+                 'estabilidade clínica e imunológica: a cada 6 meses. Início ou troca da TARV: 8 semanas depois. Carga viral '
+                 'detectável: repetir em 4 semanas para confirmar a falha.',
+                 f'{GRUPO} | {_frequencia_cv(carga_viral, em_tarv, suprimido)}', MS))
 
     # Genotipagem: na falha confirmada (MS 9.3) ou, antes da TARV, só nas indicações do Quadro 4.
     if em_tarv and carga_viral is not None and carga_viral > CV_GENOTIPAGEM:
@@ -186,8 +205,16 @@ def recomendar(idade, sexo, cd4=None, carga_viral=None, em_tarv=False, supressao
                          'preventivo da tuberculose (TPT) direto, depois de afastar TB ativa (rastreio de sintomas em toda '
                          'consulta e radiografia de tórax).',
             'referencia': MS})
-    add(_rec('Radiografia de tórax', 'Na abordagem inicial; também para afastar TB ativa antes do tratamento da infecção latente.',
-             f'{GRUPO} | Avaliação inicial', MS, 'B', categoria='imagem'))
+    if gestante:
+        # Na gestante, radiação só com indicação: sintomas respiratórios ou afastar TB ativa antes do TPT.
+        orient.append({
+            'titulo': 'HIV na gestação: radiografia de tórax',
+            'descricao': 'Só com sintomas respiratórios ou para afastar tuberculose ativa antes do tratamento da infecção '
+                         'latente (com proteção abdominal); não entra como exame de rotina na gestação.',
+            'referencia': f'{MS} / {FEBRASGO_HIV}'})
+    else:
+        add(_rec('Radiografia de tórax', 'Na abordagem inicial; também para afastar TB ativa antes do tratamento da infecção latente.',
+                 f'{GRUPO} | Avaliação inicial', MS, 'B', categoria='imagem'))
 
     if cd4 is not None and cd4 < CD4_CRIPTOCOCO:
         add(_rec('Antígeno criptocócico (LF-CrAg), soro',
