@@ -2995,7 +2995,6 @@
   "Ácido úrico": "Uric acid",
   "Exames mais comuns": "Most common tests",
   "Outro exame": "Other test",
-  "Opcional. Escolha entre os exames mais comuns, adicione outro do catálogo ou anexe o laudo em PDF; informe a data e, se quiser, o resultado. O que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. Colesterol, HDL, creatinina, HbA1c, relação albumina/creatinina e DNA-HPV entram nos cálculos (PREVENT, TFG pela CKD-EPI, risco renal e colo do útero); os outros resultados aparecem no resumo. O laudo é lido e descartado; nada é guardado.": "Optional. Pick from the most common tests, add another one from the catalog or attach the lab report as a PDF; enter the date and, if you wish, the result. Anything still within the guideline interval is not ordered again. Cholesterol, HDL, creatinine, HbA1c, albumin/creatinine ratio and HPV DNA feed the calculations (PREVENT, eGFR by CKD-EPI, kidney risk and cervical screening); the other results appear in the summary. The report is read and discarded; nothing is stored.",
   "Ex: 210 U/L": "E.g. 210 U/L",
   "Digite para buscar no catálogo": "Type to search the catalog",
   "Trocar o exame": "Change the test",
@@ -3009,7 +3008,8 @@
   "Sorologias e rastreio": "Serology and screening",
   "Albumina/creatinina (urina)": "Albumin/creatinine (urine)",
   "Albumina sérica": "Serum albumin",
-  "Hepatite B": "Hepatitis B"
+  "Hepatite B": "Hepatitis B",
+  "Opcional. Escolha entre os exames mais comuns, adicione outro do catálogo ou anexe o laudo em PDF; informe a data e, se quiser, o resultado. O que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. Colesterol, HDL, creatinina, HbA1c, relação albumina/creatinina e DNA-HPV entram nos cálculos (PREVENT, TFG pela CKD-EPI, risco renal e colo do útero); os outros ficam registrados no cartão do exame. O laudo é lido e descartado; nada é guardado.": "Optional. Pick from the most common tests, add another one from the catalog or attach the lab report as a PDF; enter the date and, if you wish, the result. Anything still within the guideline interval is not ordered again. Cholesterol, HDL, creatinine, HbA1c, albumin/creatinine ratio and HPV DNA feed the calculations (PREVENT, eGFR by CKD-EPI, kidney risk and cervical screening); the others stay recorded on the test card. The report is read and discarded; nothing is stored."
  },
  "padroes": [
   [
