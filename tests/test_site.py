@@ -351,16 +351,16 @@ def test_caso_de_exemplo_da_home_e_a_saida_real_do_motor(client):
     por_tipo = {}
     for rec in recs:
         por_tipo[rec['categoria']] = por_tipo.get(rec['categoria'], 0) + 1
-    assert (len(recs), por_tipo['laboratorio'], por_tipo['imagem'], por_tipo['vacina']) == (26, 11, 4, 11)
+    assert (len(recs), por_tipo['laboratorio'], por_tipo['imagem'], por_tipo['vacina']) == (27, 13, 3, 11)
     assert r['nao_incluidas'] == []
     html = client.get('/').get_data(as_text=True)
-    for trecho in ('4 de 26', '26 recomendações<br>', 'px-3 py-1">4</span>', 'px-3 py-1">11</span>'):
+    for trecho in ('4 de 27', '27 recomendações<br>', 'px-3 py-1">13</span>', 'px-3 py-1">3</span>', 'px-3 py-1">11</span>'):
         assert trecho in html, trecho
     # As quatro linhas da tabela de conduta: item, fonte e grau de evidência como o motor devolve.
     def achar(pedaco):
         return next(rec for rec in recs if pedaco in rec['titulo'])
-    for pedaco, fonte, grau in (('Colonoscopia', 'USPSTF 2021', 'B'), ('Glicose, soro', 'ADA 2024', 'A'),
-                                ('Razão albumina/creatinina', 'SBC 2025', 'A'), ('Herpes Zóster', 'SBIm 2026/2027', 'A')):
+    for pedaco, fonte, grau in (('Colonoscopia', 'USPSTF 2021', 'B'), ('Hemoglobina glicada', 'ADA 2026', 'B'),
+                                ('Eletrocardiograma', 'SBC 2025', 'B'), ('Herpes Zóster', 'SBIm 2026/2027', 'A')):
         rec = achar(pedaco)
         assert fonte in rec['referencia'] and rec['grau_evidencia'] == grau, pedaco
 
@@ -461,27 +461,34 @@ def test_dcv_aterosclerotica_nao_vira_hipertensao(client):
     assert not any('MAPA' in t for t in com)
 
 
-@pytest.mark.parametrize('hba1c, diabetico', [('6.4', False), ('6.5', True), ('8.1', True)])
-def test_hba1c_a_partir_de_6_5_conta_como_diabetes(client, hba1c, diabetico):
+@pytest.mark.parametrize('hba1c, a_confirmar', [('6.4', False), ('6.5', True), ('8.1', True)])
+def test_hba1c_a_partir_de_6_5_pede_confirmacao(client, hba1c, a_confirmar):
+    """ADA 2026: sem hiperglicemia inequívoca, o diagnóstico exige dois resultados alterados (revisão externa DM-02)."""
     corpo = {'idade': '50', 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao', 'hba1c': hba1c}
     r = client.post('/api/checkup-intelligent', json=corpo).get_json()
-    assert r['diabetes_por_hba1c'] is diabetico
+    assert r['diabetes_a_confirmar'] is a_confirmar and r['diabetes_por_hba1c'] is False
 
 
-def test_hba1c_alta_pede_o_tipo_de_diabetes_sem_marcar_caixa(client, pagina):
-    """HbA1c ≥ 6,5% é critério de diabetes, mas não diz o tipo: nem a tela nem o servidor marcam "tipo 2"."""
+def test_hba1c_alta_isolada_so_pede_confirmacao_sem_marcar_caixa(client, pagina):
+    """HbA1c ≥ 6,5% isolada: nem a tela nem o servidor marcam diabetes; o motor pede um segundo exame."""
     assert "pedir('diabetes', 'hba1c'" not in pagina and 'marque o tipo de diabetes' in pagina
+    assert '(hb !== null && hb >= 6.5)' not in pagina          # na tela, a HbA1c sozinha não conta como diabetes
     corpo = {'idade': '50', 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao', 'hba1c': '7.2'}
     r = client.post('/api/checkup-intelligent', json=corpo).get_json()
     assert not [i for i in r['inferencias'] if i['valor'].startswith('diabetes')]
-    assert any(o['titulo'] == 'HbA1c ≥ 6,5%: informe o tipo de diabetes' for o in r['orientacoes'])
-    titulos = [x['titulo'] for x in r['recommendations']]
-    assert 'Relação albumina/creatinina urinária (uACR)' in titulos and not any(t.startswith('TOTG') for t in titulos)
-    assert 'Hormônio Tireoestimulante (TSH), soro' not in titulos      # TSH é do tipo 1 (ADA)
-    # com o tipo marcado, vale o tipo e a orientação some
+    assert any(o['titulo'] == 'HbA1c ≥ 6,5%: confirmar o diagnóstico de diabetes' for o in r['orientacoes'])
+    recs = {x['titulo']: x for x in r['recommendations']}
+    assert recs['Hemoglobina glicada (HbA1c), soro']['subtitulo'] == 'HbA1c ≥ 6,5% sem diagnóstico de diabetes | Para confirmar o diagnóstico'
+    # sem o seguimento do diabetes
+    for exame in ('Relação albumina/creatinina urinária (uACR)', 'Fundoscopia (Exame de fundo de olho)',
+                  'Aspartato aminotransferase, soro', 'Hemograma completo com plaquetas'):
+        assert exame not in recs, exame
+    assert not any(t.startswith('TOTG') for t in recs) and 'Hormônio Tireoestimulante (TSH), soro' not in recs
+    # com o tipo marcado pelo médico, vale o diabetes e a confirmação some
     r1 = client.post('/api/checkup-intelligent', json={**corpo, 'comorbidades': ['diabetes_tipo_1']}).get_json()
-    assert r1['diabetes_por_hba1c'] is False and not any('informe o tipo' in o['titulo'] for o in r1['orientacoes'])
-    assert 'Hormônio Tireoestimulante (TSH), soro' in [x['titulo'] for x in r1['recommendations']]
+    assert r1['diabetes_a_confirmar'] is False and not any('confirmar o diagnóstico de diabetes' in o['titulo'] for o in r1['orientacoes'])
+    titulos1 = [x['titulo'] for x in r1['recommendations']]
+    assert 'Hormônio Tireoestimulante (TSH), soro' in titulos1 and 'Relação albumina/creatinina urinária (uACR)' in titulos1
 
 
 def test_exames_laboratoriais_so_aparecem_se_houver(pagina):

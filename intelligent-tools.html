@@ -867,7 +867,7 @@
           <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200" inputmode="numeric"></div>
           <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" placeholder="Ex: 45" inputmode="numeric"></div>
           <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
-          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5%: critério de diabetes (ADA). Confirme com um segundo exame se não houver hiperglicemia inequívoca e marque o tipo de diabetes.</p></div>
+          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5% isolada não confirma diabetes (ADA 2026): o motor pede um segundo exame (HbA1c ou glicemia de jejum) e não marca a caixa. Com diagnóstico confirmado ou hiperglicemia inequívoca, marque o tipo de diabetes.</p></div>
         </div>
       </div>
       <p class="campo-rotulo mt-6">Exames já feitos e datas</p>
@@ -2193,13 +2193,15 @@
                 // medicação escolhida (botão ou lista) aponta a comorbidade que implica
                 document.querySelectorAll('input[data-marca]:checked').forEach(i =>
                     i.dataset.marca.split(' ').forEach(id => pedir(id, 'med:' + i.value, 'uso de ' + i.dataset.rotulo)));
-                // PA de consultório, AHA/ACC 2025: estágio 1 ≥ 130/80, estágio 2 ≥ 140/90 (na gestação, só ≥ 140/90)
+                // PA de consultório (mesmas regras de coerencia.inferir): uma PA isolada não rotula HAS. Fora da gestação,
+                // só a PA ≥ 180/110 (HAS estágio 3 da SBC 2025) marca a caixa; de 130/80 a 179/109 o motor pede MRPA ou MAPA
+                // para confirmar (a dica abaixo explica). Na gestação a PA não marca.
                 const pas = num('pas') || 0, pad = num('pad') || 0;
                 const gest = document.getElementById('gestante').value === 'sim';
-                const est2 = pas >= 140 || pad >= 90, est1 = pas >= 130 || pad >= 80;
+                const grave = pas >= 180 || pad >= 110;
                 // Na gestação a PA não marca a caixa: antes de 20 semanas é provável HAS crônica a confirmar; depois,
                 // hipertensão gestacional ou pré-eclâmpsia (ACOG PB 222). As orientações vêm do motor.
-                if (!gest && (est2 || est1)) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg = HAS estágio ${est2 ? 2 : 1} (AHA/ACC 2025); confirmar com MRPA ou MAPA`);
+                if (!gest && grave) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg ≥ 180/110 mmHg = HAS estágio 3 (SBC 2025); confirmar com MRPA ou MAPA`);
                 // HAS resistente (AHA 2018; AHA/ACC 2025): PA acima da meta com 3 classes, ou 4 ou mais classes.
                 // Só conta hipertensão pedida agora ou marcada à mão: a automática de uma rodada anterior, cuja regra
                 // já não vale (PA corrigida), não pode sustentar a si mesma pela HAS resistente.
@@ -2211,14 +2213,15 @@
                     if (r.hipertensao) r.hipertensao.unshift({ fonte: 'has_resistente', motivo: 'HAS resistente marcada' });
                     else pedir('hipertensao', 'has_resistente', 'HAS resistente marcada');
                 }
-                // HbA1c ≥ 6,5% é critério de diabetes, mas não diz o tipo: não marca caixa (o aviso sob o campo pede o tipo).
+                // HbA1c ≥ 6,5% isolada não confirma diabetes (mesma regra de coerencia.diabetes_a_confirmar): não marca caixa
+                // e não conta como diabetes; o aviso sob o campo explica que o motor pede a confirmação.
                 const hb = num('hba1c');
                 // Antidiabético também não diz o tipo: com outro tipo de diabetes marcado, o tipo 2 não entra.
                 const outroTipo = OUTROS_TIPOS_DE_DIABETES.some(marcada);
                 if (outroTipo) delete r.diabetes;
                 // 5,7 a 6,4% em quem não tem diabetes é pré-diabetes (no diabético tratado, é só bom controle)
                 // (caixa de diabetes marcada à mão, ou pedida agora por outra regra; a automática de uma rodada anterior não conta)
-                const diabetico = outroTipo || usaInsulina() || (hb !== null && hb >= 6.5) || (r.diabetes && !recusados.has('diabetes')) || (document.getElementById('diabetes').checked && !auto.has('diabetes'));
+                const diabetico = outroTipo || usaInsulina() || (r.diabetes && !recusados.has('diabetes')) || (document.getElementById('diabetes').checked && !auto.has('diabetes'));
                 if (hb !== null && hb >= 5.7 && hb < 6.5 && !diabetico) pedir('pre_diabetes', 'hba1c', 'HbA1c de 5,7 a 6,4% (ADA)');
                 const peso = num('peso'), alt = num('altura');
                 if (peso && alt && peso / Math.pow(alt / 100, 2) >= 30) pedir('obesidade', 'imc', 'IMC ≥ 30 kg/m²');
@@ -2263,6 +2266,16 @@
                     else if (pad < 80) frases.push(`PA ${pas}/${pad} mmHg: elevada pela AHA/ACC 2025 (120-129 e < 80). Não é hipertensão; a caixa não é marcada.`);
                 }
                 const gest = document.getElementById('gestante').value === 'sim';
+                // PA alterada sem HAS conhecida (mesma regra de coerencia.pa_a_confirmar): AHA/ACC 2025 a partir de
+                // 130/80, com a categoria da SBC 2025 ao lado (lá, 130-139/80-89 é pré-hipertensão).
+                const altaAha = (pas !== null && pas >= 130) || (pad !== null && pad >= 80);
+                const graveAgora = (pas !== null && pas >= 180) || (pad !== null && pad >= 110);
+                if (!gest && altaAha && !graveAgora && !document.getElementById('hipertensao').checked) {
+                    const est2Aha = (pas !== null && pas >= 140) || (pad !== null && pad >= 90);
+                    const sbc = (pas !== null && pas >= 160) || (pad !== null && pad >= 100) ? 'HAS estágio 2'
+                        : est2Aha ? 'HAS estágio 1' : 'pré-hipertensão';
+                    frases.push(`PA ${pas ?? '–'}/${pad ?? '–'} mmHg: HAS estágio ${est2Aha ? 2 : 1} pela AHA/ACC 2025 e ${sbc} pela SBC 2025. Uma medida isolada não confirma HAS: a caixa não é marcada e o motor pede MRPA ou MAPA.`);
+                }
                 if (gest && pas !== null && pad !== null && (pas >= 130 || pad >= 80) && pas < 140 && pad < 90 && !document.getElementById('hipertensao').checked) {
                     frases.push(`PA ${pas}/${pad} mmHg na gestação: hipertensão só a partir de 140/90; a caixa não é marcada.`);
                 }

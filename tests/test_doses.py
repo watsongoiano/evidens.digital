@@ -133,8 +133,9 @@ def test_azatioprina_depende_do_peso(client):
 
 def test_imunobiologico_rastreia_tuberculose_e_hepatite_b(client):
     t = _titulos(_pedir(client, medicacoes=['adalimumabe']))
-    for esperado in ('Prova tuberculínica (PPD) ou IGRA', 'Antígeno HBs, soro', 'Anticorpos anti-HBc total, soro'):
-        assert esperado in t
+    assert 'Prova tuberculínica (PPD) ou IGRA' in t
+    # HBsAg e anti-HBc: pedidos sozinhos ou dentro do painel de hepatite B (um pedido por código TUSS)
+    assert 'HBsAg, anti-HBc total e anti-HBs' in t or {'Antígeno HBs, soro', 'Anticorpos anti-HBc total, soro'} <= set(t)
 
 
 def test_hidroxicloroquina_por_5_anos_ou_dose_alta(client):

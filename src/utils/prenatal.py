@@ -732,6 +732,8 @@ FORA_DA_GESTACAO = (
                         'plaquetas, creatinina e transaminases).'),
     ('Adultos com suspeita de HAS', 'Na gestação, PA ≥ 140/90 é avaliada pelo pré-natal (hipertensão gestacional ou '
                                     'pré-eclâmpsia), não pela confirmação de HAS ambulatorial.'),
+    ('PA de consultório alterada, HAS a confirmar', 'Na gestação, PA ≥ 140/90 é avaliada pelo pré-natal (hipertensão '
+                                                    'gestacional ou pré-eclâmpsia), não pela confirmação de HAS ambulatorial.'),
 )
 OSSEO_DO_DIABETICO = {'cálcio iônico, soro', '25-hidroxivitamina d, soro', 'fósforo, soro'}
 # Rastreios gerais que o pré-natal decide (calendário próprio de HIV, hepatites e toxoplasmose na gestação; PCDT TV 2022).
@@ -748,7 +750,9 @@ def fora_da_gestacao(recomendacoes):
             continue
         titulo = (r.get('titulo') or '').strip().lower()
         sub = r.get('subtitulo') or ''
-        motivo = next((m for prefixo, m in FORA_DA_GESTACAO if sub.startswith(prefixo + ' |')), None)
+        motivo = next((m for prefixo, m in FORA_DA_GESTACAO if sub.startswith((prefixo + ' |', prefixo + ' ('))), None)
+        if motivo and titulo in ADIAR_SEM_INDICACAO:
+            motivo = None     # ECG e creatinina na HAS crônica continuam (avaliação basal do pré-natal de alto risco)
         if not motivo and titulo in OSSEO_DO_DIABETICO and sub.startswith('Diabéticos') and 'Também:' not in sub:
             motivo = 'Metabolismo ósseo do diabético não se rastreia na gestação (vitamina D: ACOG CO 495).'
         if not motivo and titulo in DO_PRE_NATAL:

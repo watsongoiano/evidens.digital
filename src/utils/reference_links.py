@@ -65,7 +65,7 @@ def _uspstf_url_by_title(title_lc: str) -> str:
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening'
     if _contains_any(title_lc, ['densitometria', 'osteoporose', 'dexa']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening'
-    if _contains_any(title_lc, ['pré-diabetes', 'prediabetes', 'diabetes tipo 2']):
+    if _contains_any(title_lc, ['pré-diabetes', 'prediabetes', 'diabetes', 'glicada', 'hba1c', 'glicose', 'glicemia']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes'
     if _contains_any(title_lc, ['carótida', 'carotida']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/carotid-artery-stenosis-screening'
@@ -80,6 +80,14 @@ def _uspstf_url_by_title(title_lc: str) -> str:
 # Fontes citadas pelo pré-natal, pelas listas e pelas síndromes hereditárias: (trecho do rótulo, URL).
 # A ordem importa: o primeiro trecho contido no rótulo vence.
 _FONTES_DIRETAS = [
+    # Rastreamento geral (relatório de auditoria A)
+    ('acc/aha 2026', 'https://doi.org/10.1161/CIR.0000000000001423'),  # dislipidemia
+    ('accf/aha 2010', 'https://doi.org/10.1161/CIR.0b013e3182051b4c'),  # risco CV em assintomáticos
+    ('uspstf 2018 (ecg)', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cardiovascular-disease-risk-screening-with-electrocardiography'),
+    ('uspstf 2021 (hipertensão)', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hypertension-in-adults-screening'),
+    ('uspstf 2022 (estatina)', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/statin-use-in-adults-preventive-medication'),
+    ('cdc 2023 (hepatite b)', 'https://doi.org/10.15585/mmwr.rr7201a1'),
+    ('ms 2026 (pcdt hepatite c)', 'https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes'),
     # Comorbidades (src/utils/condicoes.py): as específicas antes das genéricas ("acg", "aasld")
     ('eular 2016 (risco cv', 'https://doi.org/10.1136/annrheumdis-2016-209775'),
     ('eular 2022 (risco cv', 'https://doi.org/10.1136/annrheumdis-2021-221733'),
@@ -143,6 +151,7 @@ _FONTES_DIRETAS = [
     ('williams 26e', 'https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html'),
     ('sbd 2024', 'https://doi.org/10.29327/5412848.2024-1'),
     ('ada 2026 (seção 4)', 'https://doi.org/10.2337/dc26-S004'),  # avaliação médica e comorbidades
+    ('ada 2026 (seção 10)', 'https://doi.org/10.2337/dc26-S010'),  # doença cardiovascular e manejo de risco
     ('ada 2026', 'https://doi.org/10.2337/dc26-S002'),  # diagnóstico e classificação
     ('cgh 2025 (feuerstein)', 'https://doi.org/10.1016/j.cgh.2025.05.019'),
     ('drugs aging 2024 (sparling)', 'https://doi.org/10.1007/s40266-024-01143-8'),

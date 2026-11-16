@@ -464,11 +464,19 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Pai ou irmão com câncer de próstata: oferecer rastreamento a partir dos 45 anos, com decisão compartilhada '
             '(conversa sobre benefícios e danos), até os 69 anos.',
             'História familiar de câncer de próstata | A partir de 45 anos', 'AUA/SUO 2023 / EAU 2024', 'B')
-    if 'osteoporose_fratura' in fam and ((sexo == 'feminino' and 50 <= idade < 65) or (sexo == 'masculino' and 50 <= idade < 70)):
+    # Mulher pós-menopausa < 65 anos com fator de risco: USPSTF 2025 (B). Homem: a USPSTF 2025 é I (evidência
+    # insuficiente); o apoio vem só da BHOF 2022 (50 a 69 anos com fator de risco), em decisão compartilhada.
+    if 'osteoporose_fratura' in fam and sexo == 'feminino' and 50 <= idade < 65:
         add('Densitometria óssea (DEXA)', 'imagem',
             'Fratura de quadril em pai ou mãe é fator de risco maior para fratura: rastrear antes dos 65 anos '
-            '(mulher pós-menopausa) e homens de 50 a 69 anos com fator de risco.',
+            '(mulher pós-menopausa).',
             'Fratura de quadril em pai ou mãe | Fator de risco', 'USPSTF 2025 / BHOF 2022', 'B')
+    if 'osteoporose_fratura' in fam and sexo == 'masculino' and 50 <= idade < 70:
+        add('Densitometria óssea (DEXA)', 'imagem',
+            'Fratura de quadril em pai ou mãe é fator de risco maior para fratura: a BHOF indica densitometria em homens '
+            'de 50 a 69 anos com fator de risco. Decisão compartilhada: para homens, a USPSTF considera a evidência '
+            'insuficiente.',
+            'Fratura de quadril em pai ou mãe | Fator de risco', 'BHOF 2022', 'C')
     if 'hipercolesterolemia_familiar' in fam:
         add('Colesterol total e frações, soro', 'laboratorio',
             'Hipercolesterolemia familiar em parente de 1º grau: perfil lipídico em qualquer idade (rastreio em cascata). '

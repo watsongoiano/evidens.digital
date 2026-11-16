@@ -100,11 +100,13 @@ def test_sem_exames_informados_nada_muda(client):
 def test_exame_dentro_do_intervalo_sai_do_pedido_com_a_data_do_proximo(client):
     pedidos, em_dia = _pedir(client, [_feito('Hemoglobina glicada (HbA1c), soro', '2026-10-01'),
                                       _feito('Densitometria óssea (DEXA)', '2025-06-10')])
-    assert 'Hemoglobina glicada (HbA1c), soro' not in pedidos and 'Densitometria óssea (DEXA)' not in pedidos
+    assert 'Hemoglobina glicada (HbA1c), soro' not in pedidos
     hba1c = em_dia['Hemoglobina glicada (HbA1c), soro']
     assert hba1c['motivo'] == 'Feito em 01/10/2026. Periodicidade: A cada 3-6 meses. Próximo a partir de 01/01/2027.'
     assert hba1c['categoria'] == 'laboratorio' and hba1c['referencia'].startswith('ADA')
-    assert em_dia['Densitometria óssea (DEXA)']['motivo'].endswith('Próximo a partir de 10/06/2027.')
+    # Densitometria da mulher ≥ 65 anos: a USPSTF 2025 não define intervalo (repetir conforme o T-score), então a
+    # data informada não adia o exame; o médico decide (relatório de auditoria A, M-07).
+    assert 'não tem intervalo definido' in pedidos['Densitometria óssea (DEXA)']['ultimo_exame']
 
 
 def test_intervalo_vencido_continua_no_pedido_e_avisa(client):
