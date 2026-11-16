@@ -1348,7 +1348,18 @@
                 </tbody></table>
                 ${t ? '' : '<p class="text-[12px] text-ink/45 mt-2">Risco em 30 anos só de 30 a 59 anos.</p>'}
                 <p class="text-[12px] text-ink/55 mt-3">${escapeHtml(risco.observacao)}</p>
+                ${risco.limitacao ? `<p class="text-[12px] text-ink/55 mt-2" data-limitacao><i class="fa-solid fa-circle-info text-teal mr-1"></i>${escapeHtml(T(risco.limitacao.texto))} </p>` : ''}
               </div>`;
+            // Fontes do limite de aplicabilidade: links montados pelo DOM (só https)
+            const limite = alvo.querySelector('[data-limitacao]');
+            if (limite) (risco.limitacao.fontes || []).forEach((f, i) => {
+                if (!/^https:\/\//.test(f.link || '')) return;
+                if (i) limite.append(' · ');
+                const a = document.createElement('a');
+                a.href = f.link; a.target = '_blank'; a.rel = 'noopener';
+                a.className = 'text-teal underline underline-offset-2'; a.textContent = T(f.rotulo);
+                limite.append(a);
+            });
         }
 
         function displayRecommendations(recomendacoes, naoIncluidas) {

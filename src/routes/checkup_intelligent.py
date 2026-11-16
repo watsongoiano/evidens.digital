@@ -586,7 +586,22 @@ def calcular_risco_cardiovascular(data, comorbidades, medicacoes, is_diabetic, i
         'observacao': 'Categoria SBC pelo escore, pela idade no DM2 e pelos agravantes informados (história familiar '
                       'de DCV prematura, obesidade, MASLD, doença inflamatória crônica, HIV). Lp(a), PCR-us, fatores '
                       'femininos, estratificadores do DM2, LDL ≥ 190 e CAC também reclassificam e ficam a cargo do médico.',
+        'limitacao': PREVENT_LIMITACAO,
     }
+
+
+# Limite de aplicabilidade: o PREVENT foi derivado e validado em população dos EUA. A validação externa no NHANES
+# mostrou boa discriminação (C 0,89) e calibração só moderadamente imperfeita; não há validação em coorte
+# brasileira, e no Brasil os escores de risco concordam pouco entre si.
+PREVENT_LIMITACAO = {
+    'texto': 'Equações derivadas e validadas em população dos EUA, sem validação em coorte brasileira: use o '
+             'resultado como estimativa. No Brasil, os escores de risco cardiovascular concordam pouco entre si.',
+    'fontes': [
+        {'rotulo': 'Validação externa (JAMA Netw Open 2024)',
+         'link': 'https://doi.org/10.1001/jamanetworkopen.2024.38311'},
+        {'rotulo': 'Escores no Brasil (Arq Bras Cardiol 2025)', 'link': 'https://doi.org/10.36660/abc.20240405'},
+    ],
+}
 
 
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
