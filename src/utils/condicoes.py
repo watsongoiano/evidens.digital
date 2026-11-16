@@ -1289,6 +1289,12 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  'ACIP e SBIm concordam no esquema de 3 doses (0, 1-2 e 6 meses) e no primeiro reforço 1 ano depois. Divergem nos '
                  'reforços seguintes: a cada 2-3 anos pelo ACIP e a cada 3 anos pela SBIm. O motor mostra os dois intervalos.',
                  MENB_ACIP_REFORCO + ' / ' + SBIM_ESPECIAIS)
+    elif 'meningocócica b (bexsero®)' in titulos():
+        # Cartão de rotina (SBIm): 2 doses com intervalo mínimo de 1 mês. O ACIP difere no esquema e na indicação.
+        orientar('Meningocócica B de rotina: diretrizes divergem',
+                 'O motor seguiu a SBIm: 2 doses com intervalo mínimo de 1 mês. O ACIP indica a MenB-4C (Bexsero®) de 16 a 23 '
+                 'anos por decisão compartilhada, em 2 doses a 0 e 6 meses, e fora dessa faixa só com risco aumentado.',
+                 SBIM + ' / ' + MENB_ACIP)
     if hiv or {'asplenia', 'anemia_falciforme'} & com:
         orientar('Hib no adulto: diretrizes divergem',
                  'O motor seguiu a SBIm: 2 doses com 2 meses de intervalo no adulto não vacinado com asplenia ou HIV. O ACIP indica '

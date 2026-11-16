@@ -240,6 +240,20 @@ def test_menb_sem_asplenia_segue_o_cartao_de_rotina(client):
     assert 'Asplenia' not in menb['subtitulo'] and 'esquema_pdf' not in menb
 
 
+@pytest.mark.parametrize('idade', [18, 23, 35, 50])
+def test_menb_de_rotina_traz_o_aviso_de_divergencia(client, idade):
+    dados = _consultar(client, idade=idade, sexo='feminino')
+    assert '2 doses' in _vacinas(dados)['Meningocócica B (Bexsero®)']['subtitulo']   # recomendação SBIm mantida
+    aviso = _orientacoes(dados)['Meningocócica B de rotina: diretrizes divergem']
+    assert '0 e 6 meses' in aviso['descricao'] and 'CDC/ACIP 2024 (MenB-4C)' in aviso['referencia']
+
+
+def test_aviso_da_menb_de_rotina_some_sem_o_cartao_e_na_asplenia(client):
+    titulo = 'Meningocócica B de rotina: diretrizes divergem'
+    assert titulo not in _orientacoes(_consultar(client, idade=51, sexo='feminino'))      # B licenciada até 50 anos
+    assert titulo not in _orientacoes(_consultar(client, idade=30, sexo='masculino', comorbidades=['asplenia']))
+
+
 def test_posologia_da_menb_no_pdf_da_asplenia():
     from src.utils.pdf_minutas import posologia_da_vacina
     texto = posologia_da_vacina('Meningocócica B (Bexsero®)', 'asplenia')

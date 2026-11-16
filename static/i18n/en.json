@@ -2229,7 +2229,10 @@
   "ACIP e SBIm concordam no esquema de 3 doses (0, 1-2 e 6 meses) e no primeiro reforço 1 ano depois. Divergem nos reforços seguintes: a cada 2-3 anos pelo ACIP e a cada 3 anos pela SBIm. O motor mostra os dois intervalos.": "ACIP and SBIm agree on the 3-dose series (0, 1-2 and 6 months) and on the first booster 1 year later. They differ on later boosters: every 2-3 years per ACIP and every 3 years per SBIm. The engine shows both intervals.",
   "CDC/ACIP 2024 (MenB-4C)": "CDC/ACIP 2024 (MenB-4C)",
   "CDC/ACIP 2020 (meningocócicas)": "CDC/ACIP 2020 (meningococcal)",
-  "Asplenia: aplicar três doses (0,5 ml), INTRAMUSCULAR, a 0, 1-2 e 6 meses (Bexsero®). Reforço 1 ano após o esquema e, depois, a cada 2-3 anos (ACIP) ou 3 anos (SBIm).": "Asplenia: give three doses (0.5 mL), INTRAMUSCULAR, at 0, 1-2 and 6 months (Bexsero®). Booster 1 year after the series and then every 2-3 years (ACIP) or 3 years (SBIm)."
+  "Asplenia: aplicar três doses (0,5 ml), INTRAMUSCULAR, a 0, 1-2 e 6 meses (Bexsero®). Reforço 1 ano após o esquema e, depois, a cada 2-3 anos (ACIP) ou 3 anos (SBIm).": "Asplenia: give three doses (0.5 mL), INTRAMUSCULAR, at 0, 1-2 and 6 months (Bexsero®). Booster 1 year after the series and then every 2-3 years (ACIP) or 3 years (SBIm).",
+  "Meningocócica B de rotina: diretrizes divergem": "Routine meningococcal B: guidelines differ",
+  "O motor seguiu a SBIm: 2 doses com intervalo mínimo de 1 mês. O ACIP indica a MenB-4C (Bexsero®) de 16 a 23 anos por decisão compartilhada, em 2 doses a 0 e 6 meses, e fora dessa faixa só com risco aumentado.": "The engine followed SBIm: 2 doses at least 1 month apart. ACIP recommends MenB-4C (Bexsero®) from 16 to 23 years by shared clinical decision-making, in 2 doses at 0 and 6 months, and outside that range only with increased risk.",
+  "SBIm 2026/2027 / CDC/ACIP 2024 (MenB-4C)": "SBIm 2026/2027 / CDC/ACIP 2024 (MenB-4C)"
  },
  "padroes": [
   [
