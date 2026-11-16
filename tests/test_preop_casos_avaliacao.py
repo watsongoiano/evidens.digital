@@ -189,7 +189,7 @@ class Paciente:
                  'ic' in self.cond or 'sinais_ic' in self.sint,          # Lee: estertores/B3 contam como IC
                  'avc_ait' in self.cond,
                  'diabetes_insulina' in self.cond,
-                 (self.cr or 0) > 2.0,
+                 self.cr is not None and self.cr >= 2.0,          # AHA Tabela 4 (≥ 2,0)
                  self.rcri_cir]
         pts = sum(itens)
         classe = ('I', 'II', 'III', 'IV')[min(pts, 3)]
@@ -218,6 +218,15 @@ class Paciente:
     def pac_ia(self):
         v = self.vsg()
         return self.rcri()[0] >= 2 or self.aub()[0] >= 2 or (v is not None and v[0] >= 5)
+
+    def faltam(self):
+        """Dado ausente que pode levar o escore ao risco elevado: não se assume normal (auditoria PREOP-04)."""
+        f, v = set(), self.vsg()
+        if self.cr is None and (self.rcri()[0] == 1 or (v is not None and 3 <= v[0] <= 4)):
+            f.add('creatinina')
+        if self.hb is None and self.aub()[0] == 1:
+            f.add('hemoglobina')
+        return f
 
     def nivel_algoritmo(self):
         """Nível mais alto entre os escores (para a UTI, SBC Quadro 30)."""
@@ -275,7 +284,8 @@ class Paciente:
         if self.risco == B:
             return 'nao_indicada'
         if not self.pac_ia():
-            return 'nao_indicada'
+            # Sem o dado, o risco não é "baixo": com boa capacidade libera de qualquer jeito; sem ela, falta o exame.
+            return 'incompleto' if self.faltam() and self.capacidade() != 'boa' else 'nao_indicada'
         # AHA: boa capacidade dispensa prova funcional (recomendações de estresse e CCTA, 3: sem benefício). Sintoma
         # novo é avaliado à parte (eco classe 1); a conclusão não pode negar esse exame (checado abaixo).
         if self.capacidade() == 'boa':
@@ -618,6 +628,21 @@ CASOS = [
           escadas='sim', asa=3, anteriores=[_ecg('2026-08-16')], **LAB_OK),
     _caso('y04_f72_quadril_dac_capacidade_desconhecida', 72, 'feminino', 'quadril', condicoes=['dac'], asa=3,
           **LAB_OK),
+    # Z. Dados ausentes e fronteira da creatinina (auditoria pós-merge: PREOP-03 e PREOP-04)
+    _caso('z01_m60_colectomia_sem_creatinina_escadas_nao', 60, 'masculino', 'colectomia', escadas='nao', asa=2),
+    _caso('z02_m60_colectomia_sem_creatinina_escadas_sim', 60, 'masculino', 'colectomia', escadas='sim', asa=2),
+    _caso('z03_f78_quadril_sem_hemoglobina', 78, 'feminino', 'quadril', escadas='nao_sabe', asa=2,
+          creatinina=0.8, peso=60),
+    _caso('z04_m70_colectomia_dac_sem_laboratorio', 70, 'masculino', 'colectomia', condicoes=['dac'], escadas='nao',
+          asa=3),
+    _caso('z05_m66_hernia_sem_laboratorio', 66, 'masculino', 'hernia', escadas='nao', asa=2),
+    _caso('z06_m60_colectomia_creatinina_2_0', 60, 'masculino', 'colectomia', escadas='nao', asa=2,
+          **dict(LAB_OK, creatinina=2.0)),
+    _caso('z07_m60_colectomia_creatinina_1_99', 60, 'masculino', 'colectomia', escadas='nao', asa=2,
+          **dict(LAB_OK, creatinina=1.99)),
+    _caso('z08_m72_aorta_vsg3_sem_creatinina', 72, 'masculino', 'evar', escadas='nao', asa=3, hemoglobina=13.5),
+    _caso('z09_f60_colectomia_sem_creatinina_dispneia_nova', 60, 'feminino', 'colectomia', sintomas=['dispneia_nova'],
+          escadas='nao', asa=2),
     _caso('y05_m58_perfuracao_emergencia_choque', 58, 'masculino', 'perfuracao_intestinal', urgencia='emergencia',
           instaveis=['edema_choque'], condicoes=['ic'], **dict(LAB_OK, duracao='2_3h')),
     _caso('y06_f45_hernia_urgencia_pa200', 45, 'feminino', 'hernia', urgencia='urgencia', pas=200, pad=115,
@@ -879,6 +904,11 @@ def _esperado_exames(pac):
         poe('Creatinina, soro', 'indicado')
     elif pac.meds & DOAC:
         poe('Creatinina, soro', 'indicado')      # SBC Quadro 26: suspensão do DOAC depende da depuração
+    if pac.tipo() == 'incompleto':
+        if 'creatinina' in pac.faltam():
+            poe('Creatinina, soro', 'indicado')
+        if 'hemoglobina' in pac.faltam():
+            poe('Hemograma completo com plaquetas', 'indicado')
     if 'varfarina' in pac.meds:
         poe('Tempo de protrombina (TP/INR), plasma', 'indicado')
     elif 'hepatopatia' in cond and asa and asa >= 3 and pac.porte in ('intermediaria', 'maior'):
@@ -917,7 +947,7 @@ def _check_exames(c, r, pac, erros):
             erros.append(f'{titulo}: divergência AHA × SBC não sinalizada')
     # Provas de isquemia: só risco elevado + capacidade baixa/desconhecida + cirurgia que pode esperar
     isq = [e for e in r['exames'] if e.get('grupo') == 'isquemia' and e['estado'] != 'nao_indicado']
-    quer = pac.tipo() == 'indicada' and pac.capacidade() != 'boa' and pac.eletiva and pac.cir_ia
+    quer = pac.tipo() == 'indicada' and pac.pac_ia() and pac.capacidade() != 'boa' and pac.eletiva and pac.cir_ia
     if quer:
         titulos = {e['titulo']: e for e in isq}
         for t, aha, sbc in (('Cintilografia de perfusão miocárdica (estresse e repouso)', '2b', 'IIa'),

@@ -4040,7 +4040,26 @@
   "Ver critérios": "See criteria",
   "Fechar critérios": "Close criteria",
   "TFG estimada (CKD-EPI 2021)": "Estimated GFR (CKD-EPI 2021)",
-  "· ClCr para as doses dos anticoagulantes; TFG para a metformina": "· CrCl for anticoagulant doses; eGFR for metformin"
+  "· ClCr para as doses dos anticoagulantes; TFG para a metformina": "· CrCl for anticoagulant doses; eGFR for metformin",
+  "A creatinina falta para fechar o escore e pode mudar a indicação do risco cardiológico.": "Creatinine is missing to complete the score and may change whether a cardiac risk assessment is indicated.",
+  "A hemoglobina falta para fechar o AUB-HAS2 e pode mudar a indicação do risco cardiológico.": "Hemoglobin is missing to complete the AUB-HAS2 and may change whether a cardiac risk assessment is indicated.",
+  "Creatinina de exatamente 2,0 mg/dL: a AHA (Tabela 4) conta o ponto (≥ 2,0); o estudo original de Lee e a SBC só contam acima de 2,0. Nós optamos por seguir a AHA, mais conservadora.": "Creatinine of exactly 2.0 mg/dL: the AHA (Table 4) counts the point (≥ 2.0); the original Lee study and the SBC count it only above 2.0. We chose to follow the AHA, the more conservative option.",
+  "Creatinina ≥ 2,0 mg/dL": "Creatinine ≥ 2.0 mg/dL",
+  "Faltam dados para decidir o risco cardiológico.": "Data are missing to decide on the cardiac risk assessment.",
+  "creatinina (com ≥ 2,0 mg/dL, o RCRI passa a 2)": "creatinine (at ≥ 2.0 mg/dL, the RCRI becomes 2)",
+  "creatinina (com > 1,8 mg/dL, o VSG-CRI passa a 5 ou mais)": "creatinine (at > 1.8 mg/dL, the VSG-CRI becomes 5 or more)",
+  "creatinina (com ≥ 2,0 mg/dL, o RCRI passa a 2 e com > 1,8 mg/dL, o VSG-CRI passa a 5 ou mais)": "creatinine (at ≥ 2.0 mg/dL, the RCRI becomes 2, and at > 1.8 mg/dL, the VSG-CRI becomes 5 or more)",
+  "hemoglobina (com < 12 g/dL, o AUB-HAS2 passa a 2)": "hemoglobin (at < 12 g/dL, the AUB-HAS2 becomes 2)",
+  "Gupta MICA não calculado: falta a classe ASA.": "Gupta MICA not calculated: the ASA class is missing.",
+  "Gupta MICA não calculado: falta o estado funcional.": "Gupta MICA not calculated: the functional status is missing.",
+  "Gupta MICA não calculado: faltam a classe ASA e o estado funcional.": "Gupta MICA not calculated: the ASA class and the functional status are missing.",
+  "Risco do paciente incompleto, mas boa capacidade funcional: liberar sem prova funcional.": "Patient risk incomplete, but good functional capacity: clear without stress testing.",
+  "Incompleto": "Incomplete",
+  "KDIGO 2024 (avaliação da DRC)": "KDIGO 2024 (CKD evaluation)",
+  "O ClCr e a TFG supõem creatinina estável: na lesão renal aguda, não valem.": "CrCl and eGFR assume stable creatinine: they do not apply in acute kidney injury.",
+  "Obesidade: o Cockcroft-Gault com peso real superestima a depuração; o peso ajustado erra menos. Nós optamos pelo peso real, o mesmo do Cockcroft-Gault dos estudos dos anticoagulantes (por exemplo, ROCKET AF e EINSTEIN); com o ClCr perto de um limiar de dose ou de suspensão, decida com cautela.": "Obesity: Cockcroft-Gault with actual body weight overestimates clearance; adjusted body weight is less biased. We chose actual body weight, the same used for Cockcroft-Gault in the anticoagulant trials (for example, ROCKET AF and EINSTEIN); with CrCl near a dose or interruption threshold, decide with caution.",
+  "Rivaroxabana: ClCr dos estudos com peso real (J&J Medical Information)": "Rivaroxaban: trial CrCl with actual body weight (J&J Medical Information)",
+  "Winter 2012 (Cockcroft-Gault e peso)": "Winter 2012 (Cockcroft-Gault and body weight)"
  },
  "padroes": [
   [
@@ -4882,6 +4901,14 @@
   [
    "^TFG (\\d+) mL/min/1,73 m² \\(CKD-EPI 2021\\): a metformina é contraindicada abaixo de 30\\. Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir sem função renal estável\\.$",
    "eGFR %1 mL/min/1.73 m² (CKD-EPI 2021): metformin is contraindicated below 30. Stop it and review treatment with the attending physician; after surgery, do not restart without stable kidney function."
+  ],
+  [
+   "^Faltam dados para fechar o risco do paciente: (.+?)\\. Com o resultado: risco elevado, avaliação cardiológica indicada; risco baixo, liberar sem investigação de isquemia\\.$",
+   "Data are missing to complete the patient's risk: $1. With the result: elevated risk, cardiac evaluation indicated; low risk, clear without ischemia testing."
+  ],
+  [
+   "^Faltam dados que podem mudar o escore: (.+)\\.$",
+   "Data that may change the score are missing: $1."
   ]
  ],
  "manter": [

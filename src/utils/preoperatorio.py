@@ -51,6 +51,11 @@ CAROTIDA_ESVS = _ref('ESVS 2023 (doença carotídea)', 'https://doi.org/10.1016/
 ASA_JEJUM = _ref('ASA 2017 (jejum pré-operatório)', 'https://doi.org/10.1097/ALN.0000000000001452')
 ASA_JEJUM_2023 = _ref('ASA 2023 (líquidos com carboidrato)', 'https://doi.org/10.1097/ALN.0000000000004381')
 COCHRANE_GOMA = _ref('Cochrane 2015 (goma de mascar)', 'https://doi.org/10.1002/14651858.CD006506.pub3')
+WINTER = _ref('Winter 2012 (Cockcroft-Gault e peso)', 'https://doi.org/10.1002/j.1875-9114.2012.01098.x')
+KDIGO_DRC = _ref('KDIGO 2024 (avaliação da DRC)', 'https://doi.org/10.1016/j.kint.2023.10.018')
+BULA_RIVAROXABANA = _ref('Rivaroxabana: ClCr dos estudos com peso real (J&J Medical Information)',
+                         'https://www.jnjmedicalconnect.com/products/xarelto/medical-content/'
+                         'xarelto-creatinine-clearance-or-estimated-glomerular-filtration-rate-in-adults')
 SBD = _ref('SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91)', 'https://doi.org/10.1186/s13098-025-02060-5')
 
 # ── Cirurgias ────────────────────────────────────────────────────────────────
@@ -138,6 +143,7 @@ CIRURGIAS_ABDOMINAIS = {'colecistectomia', 'colectomia', 'perfuracao_intestinal'
                         'esofagectomia'}
 
 TITULO_DA_CONCLUSAO = {'nao_indicada': 'Risco cardiológico não indicado para este paciente.',
+                       'incompleto': 'Faltam dados para decidir o risco cardiológico.',
                        'indicada': 'Risco cardiológico indicado para este paciente.',
                        'adiar': 'Estabilizar e adiar a cirurgia eletiva; risco cardiológico indicado.',
                        'emergencia': 'Cirurgia de emergência: operar sem exames que atrasem.'}
@@ -349,7 +355,7 @@ def rcri(p):
     # Lee 1999: doença isquêmica inclui angina atual; IC inclui sinais (edema pulmonar, B3, estertores, DPN).
     itens = [('Doença coronária', 'dac' in c or 'angina' in sint), ('Insuficiência cardíaca', 'ic' in c or 'sinais_ic' in sint),
              ('AVC ou AIT', 'avc_ait' in c), ('Diabetes com insulina', 'diabetes_insulina' in c),
-             ('Creatinina > 2,0 mg/dL', (p['creatinina'] or 0) > 2.0),
+             ('Creatinina ≥ 2,0 mg/dL', p['creatinina'] is not None and p['creatinina'] >= 2.0),
              ('Cirurgia intraperitoneal, intratorácica ou vascular suprainguinal', cir['rcri'])]
     pontos = sum(1 for _, sim in itens if sim)
     classe = ('I', 'II', 'III', 'IV')[min(pontos, 3)]
@@ -359,6 +365,10 @@ def rcri(p):
             'elevado_aha': pontos > 1,
             'itens': [n for n, sim in itens if sim],
             'falta': [] if p['creatinina'] is not None else ['creatinina'],
+            # Lee 1999 e SBC 2024 (Tabela 4): "> 2,0"; AHA/ACC 2024–2026 (Tabela 4): "≥ 2,0". Só difere em 2,0 exato.
+            'divergencia': ('Creatinina de exatamente 2,0 mg/dL: a AHA (Tabela 4) conta o ponto (≥ 2,0); o estudo '
+                            'original de Lee e a SBC só contam acima de 2,0. Nós optamos por seguir a AHA, mais '
+                            'conservadora.') if p['creatinina'] is not None and abs(p['creatinina'] - 2.0) < 1e-9 else '',
             'referencias': [LEE, SBC, AHA]}
 
 
@@ -426,7 +436,7 @@ def mica(p):
                     nota='Procedimento sem categoria no NSQIP (oftalmologia, odontologia, endoscopia ou transplante).')
     falta = [nome for nome, valor in (('classe ASA', p['asa']), ('estado funcional', p['funcional'])) if valor is None]
     if falta:
-        return dict(base, valor='—', nivel='baixo', faixa='Faltam dados', itens=[], falta=falta, risco=None)
+        return dict(base, valor='—', nivel=None, faixa='Faltam dados', itens=[], falta=falta, risco=None)
     creat = p['creatinina']
     x = (-5.25 + 0.02 * p['idade'] + MICA_ASA[int(p['asa'])] + MICA_FUNCIONAL[p['funcional']]
          + (-0.10 if creat is None else 0.61 if creat >= 1.5 else 0.0) + MICA_PROCEDIMENTO[categoria])
@@ -871,9 +881,14 @@ def exames(p, ctx):
     asa, porte = p['asa'], cir['porte']
     renal = 'doenca_renal' in c
     meds = ctx['classes_medicacoes']
+    faltam = ctx.get('faltam_para_o_risco') or set()
     if porte == 'maior':
         saida.append(_item('Hemograma completo com plaquetas', 'laboratorio', 'indicado', 'Cirurgia de grande porte.',
                            outra='NICE', refs=[NICE]))
+    elif 'hemoglobina' in faltam:
+        saida.append(_item('Hemograma completo com plaquetas', 'laboratorio', 'indicado',
+                           'A hemoglobina falta para fechar o AUB-HAS2 e pode mudar a indicação do risco cardiológico.',
+                           outra='Escores', refs=[AUB, SBC]))
     elif porte == 'intermediaria' and asa and asa >= 3 and (dcv or renal):
         saida.append(_item('Hemograma completo com plaquetas', 'laboratorio', 'considerar',
                            'ASA ≥ 3 com doença cardiovascular ou renal.', outra='NICE', refs=[NICE]))
@@ -891,6 +906,9 @@ def exames(p, ctx):
         estado_renal, motivo_renal, ref_renal = 'considerar', 'Necessária para o RCRI e a depuração (Cockcroft-Gault).', [LEE, CG]
     else:
         estado_renal = None
+    if 'creatinina' in faltam and estado_renal != 'indicado':
+        estado_renal, ref_renal = 'indicado', [LEE, SBC]
+        motivo_renal = 'A creatinina falta para fechar o escore e pode mudar a indicação do risco cardiológico.'
     if estado_renal:
         saida.append(_item('Creatinina, soro', 'laboratorio', estado_renal, motivo_renal, outra='NICE', refs=ref_renal))
         saida.append(_item('Sódio e potássio, soro', 'laboratorio', estado_renal, 'Junto da função renal.',
@@ -1131,6 +1149,20 @@ def avaliar(p):
     cir_ia = cir['risco'] != 'baixo'
     emergencia = p['urgencia'] == 'emergencia'
     adiar = adiamentos(p)
+    # Dado ausente não é dado normal: se o que falta pode levar o escore ao risco elevado, o risco do paciente fica
+    # "incompleto" em vez de "baixo" (creatinina no RCRI e no VSG-CRI; hemoglobina no AUB-HAS2).
+    faltam_para_o_risco = []
+    if not risco_elevado:
+        rcri_sobe = p['creatinina'] is None and escore_rcri['valor'] == 1
+        vsg_sobe = p['creatinina'] is None and escore_vsg is not None and 3 <= escore_vsg['valor'] <= 4
+        if rcri_sobe or vsg_sobe:
+            efeito = ' e '.join(x for x in ('com ≥ 2,0 mg/dL, o RCRI passa a 2' if rcri_sobe else '',
+                                            'com > 1,8 mg/dL, o VSG-CRI passa a 5 ou mais' if vsg_sobe else '') if x)
+            faltam_para_o_risco.append(('creatinina', f'creatinina ({efeito})'))
+        if p['hemoglobina'] is None and escore_aub['valor'] == 1:
+            faltam_para_o_risco.append(('hemoglobina', 'hemoglobina (com < 12 g/dL, o AUB-HAS2 passa a 2)'))
+    incompleto = bool(faltam_para_o_risco)
+    mica_sem_dados = escore_mica.get('risco') is None and bool(escore_mica.get('falta'))
     sint_isq_novo = bool(p['sintomas'] & {'angina', 'dispneia_nova'})
 
     passos, conclusao, nota_conclusao = [], None, ''
@@ -1161,10 +1193,18 @@ def avaliar(p):
             conclusao = ('nao_indicada', 'Cirurgia de baixo risco em paciente estável: avaliação cardiológica e '
                                          'exames cardíacos de rotina não indicados. Pode operar.')
     if not conclusao:
-        passos.append(_passo('Risco do paciente pelos escores', 'Elevado' if risco_elevado else 'Baixo',
-                             'atencao' if risco_elevado else 'ok',
-                             'RCRI 0–1, AUB-HAS2 0–1 e Gupta MICA < 1%: risco baixo; liberar sem testes de isquemia.'))
-        if not risco_elevado:
+        texto_passo = 'RCRI 0–1, AUB-HAS2 0–1 e Gupta MICA < 1%: risco baixo; liberar sem testes de isquemia.'
+        if incompleto:
+            texto_passo += ' Faltam dados que podem mudar o escore: ' + '; '.join(t for _, t in faltam_para_o_risco) + '.'
+        if mica_sem_dados and not risco_elevado:
+            artigos = [{'classe ASA': 'a classe ASA', 'estado funcional': 'o estado funcional'}.get(x, x)
+                       for x in escore_mica['falta']]
+            texto_passo += (' Gupta MICA não calculado: ' + ('faltam ' if len(artigos) > 1 else 'falta ')
+                            + ' e '.join(artigos) + '.')
+        passos.append(_passo('Risco do paciente pelos escores',
+                             'Elevado' if risco_elevado else 'Incompleto' if incompleto else 'Baixo',
+                             'atencao' if risco_elevado or incompleto else 'ok', texto_passo))
+        if not risco_elevado and not incompleto:
             conclusao = ('nao_indicada', 'Risco baixo pelos escores: liberar sem investigação de isquemia.')
     investigar = False
     if not conclusao:
@@ -1173,12 +1213,18 @@ def avaliar(p):
                              '≥ 4 METs (sobe 2 lances) ou DASI > 34, com sintomas estáveis: liberar sem prova funcional. '
                              'Baixa ou desconhecida: biomarcadores e, só se mudar a conduta, prova funcional.'))
         if estado == 'boa':
-            texto = 'Risco elevado, mas boa capacidade funcional: liberar sem prova funcional.'
+            texto = ('Risco do paciente incompleto, mas boa capacidade funcional: liberar sem prova funcional.'
+                     if incompleto else 'Risco elevado, mas boa capacidade funcional: liberar sem prova funcional.')
             if sint_isq_novo:
                 nota_conclusao = ('Angina ou dispneia nova ou em mudança: investigar como fora do contexto cirúrgico, '
                                   'pelas diretrizes de dor torácica e doença coronária.')
                 texto += ' ' + nota_conclusao
             conclusao = ('nao_indicada', texto)
+        elif incompleto:
+            # Sem o dado, não se sabe se o risco é elevado: o exame que falta vem antes de qualquer teste de isquemia.
+            conclusao = ('incompleto', 'Faltam dados para fechar o risco do paciente: '
+                         + '; '.join(t for _, t in faltam_para_o_risco) + '. Com o resultado: risco elevado, avaliação '
+                         'cardiológica indicada; risco baixo, liberar sem investigação de isquemia.')
         else:
             investigar = p['urgencia'] in ('eletiva', 'tempo_sensivel', 'urgencia')
             motivos = [f'cirurgia de risco {RISCO_DA_CIRURGIA[cir["risco"]].split(" (")[0].lower()}',
@@ -1186,16 +1232,17 @@ def avaliar(p):
             conclusao = ('indicada', 'Avaliação cardiológica indicada: ' + '; '.join(m for m in motivos if m) + '.')
     # Dispneia nova, sinais de IC ou sopro: avaliar o VE ou a valva antes de qualquer cirurgia eletiva (AHA §4.2, 1;
     # §6.5, 1), qualquer que seja o escore ou a capacidade.
-    if conclusao[0] == 'nao_indicada' and p['sintomas'] & {'dispneia_nova', 'sinais_ic', 'sopro'} \
+    if conclusao[0] in ('nao_indicada', 'incompleto') and p['sintomas'] & {'dispneia_nova', 'sinais_ic', 'sopro'} \
             and p['urgencia'] in ('eletiva', 'tempo_sensivel'):
         conclusao = ('indicada', 'Dispneia nova, sinais de insuficiência cardíaca ou sopro: avaliar a função '
                                  'ventricular ou a valva (ecocardiograma) antes de operar.')
-    if any(not a.get('ok') for a in adiar) and conclusao[0] in ('nao_indicada', 'indicada'):
+    if any(not a.get('ok') for a in adiar) and conclusao[0] in ('nao_indicada', 'indicada', 'incompleto'):
         conclusao = (conclusao[0], conclusao[1] + ' Antes, veja o que pede adiamento.')
 
     classes_meds = set(classes_de(p['medicacoes']))
     ctx = {'cir_elev': cir_ia, 'pac_ia': pac_ia, 'dcv': dcv, 'investigar_isquemia': investigar,
-           'classes_medicacoes': classes_meds, 'capacidade': cap['estado']}
+           'classes_medicacoes': classes_meds, 'capacidade': cap['estado'],
+           'faltam_para_o_risco': {k for k, _ in faltam_para_o_risco} if conclusao[0] == 'incompleto' else set()}
     lista_exames = exames(p, ctx)
 
     escores = [escore_rcri, escore_aub]
@@ -1210,6 +1257,16 @@ def avaliar(p):
     from src.utils import prevent
     tfg = (round(prevent.egfr_ckd_epi_2021(float(p['creatinina']), p['idade'], p['sexo']))
            if p['creatinina'] else None)
+    notas_renais = []
+    if depuracao is not None and ('obesidade' in c or 'imc_35' in p['stop_bang']):
+        notas_renais.append({'texto': 'Obesidade: o Cockcroft-Gault com peso real superestima a depuração; o peso '
+                                      'ajustado erra menos. Nós optamos pelo peso real, o mesmo do Cockcroft-Gault dos '
+                                      'estudos dos anticoagulantes (por exemplo, ROCKET AF e EINSTEIN); com o ClCr perto '
+                                      'de um limiar de dose ou de suspensão, decida com cautela.',
+                             'referencias': [WINTER, BULA_RIVAROXABANA]})
+    if depuracao is not None or tfg is not None:
+        notas_renais.append({'texto': 'O ClCr e a TFG supõem creatinina estável: na lesão renal aguda, não valem.',
+                             'referencias': [KDIGO_DRC]})
 
     orientacoes = []
     if p['idade'] >= 65 and cir_ia and frag is None:
@@ -1305,5 +1362,7 @@ def avaliar(p):
         'orientacoes': orientacoes,
         'pulmonar': {'escore': pulmonar, 'stop_bang': sb, 'medidas': medidas_pulmonares},
         'pos_operatorio': pos,
-        'contexto': {'cir_elev': cir_ia, 'pac_ia': pac_ia, 'risco_elevado': risco_elevado, 'dcv': dcv},
+        'notas_renais': notas_renais,
+        'contexto': {'cir_elev': cir_ia, 'pac_ia': pac_ia, 'risco_elevado': risco_elevado, 'dcv': dcv,
+                     'risco_incompleto': incompleto},
     }

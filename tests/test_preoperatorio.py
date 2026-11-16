@@ -120,8 +120,56 @@ def test_cirurgia_de_baixo_risco_nao_indica_avaliacao_nem_exames_cardiacos():
 
 
 def test_risco_baixo_pelos_escores_libera():
-    r = po.avaliar(_p(idade=50, condicoes=[]))
+    r = po.avaliar(_p(idade=50, condicoes=[], creatinina=0.9, hemoglobina=14))
     assert r['indicacao']['tipo'] == 'nao_indicada' and r['indicacao']['passos'][-1]['resposta'] == 'Baixo'
+
+
+def test_dado_ausente_nao_vira_risco_baixo():
+    """Auditoria PREOP-04: sem creatinina, RCRI 1 pode ser 2; o risco fica incompleto, não baixo."""
+    r = po.avaliar(_p(idade=50, escadas='nao'))
+    ind = r['indicacao']
+    assert ind['tipo'] == 'incompleto' and ind['titulo'] == 'Faltam dados para decidir o risco cardiológico.'
+    passo = next(x for x in ind['passos'] if x['pergunta'] == 'Risco do paciente pelos escores')
+    assert passo['resposta'] == 'Incompleto' and passo['estado'] == 'atencao'
+    assert 'creatinina (com ≥ 2,0 mg/dL, o RCRI passa a 2)' in ind['conclusao']
+    assert _exame(r, 'Creatinina, soro')['estado'] == 'indicado'
+    assert not any(e.get('grupo') == 'isquemia' and e['estado'] != 'nao_indicado' for e in r['exames'])
+    # Com boa capacidade, o dado que falta não muda a conduta: libera
+    r = po.avaliar(_p(idade=50, escadas='sim'))
+    assert r['indicacao']['tipo'] == 'nao_indicada' and 'incompleto' in r['indicacao']['conclusao']
+    # RCRI 0 sem creatinina não sobe a 2: continua baixo
+    assert po.avaliar(_p(idade=50, cirurgia='hernia', escadas='nao'))['indicacao']['tipo'] == 'nao_indicada'
+    # Hemoglobina no AUB-HAS2 (idade ≥ 75 já soma 1)
+    r = po.avaliar(_p(idade=78, sexo='feminino', cirurgia='quadril', creatinina=0.8))
+    assert r['indicacao']['tipo'] == 'incompleto' and 'hemoglobina' in r['indicacao']['conclusao']
+    assert r['contexto']['risco_incompleto']
+
+
+def test_mica_sem_dados_nao_e_risco_baixo():
+    m = po.mica(_p(asa=None))
+    assert m['risco'] is None and m['nivel'] is None and m['faixa'] == 'Faltam dados'
+    r = po.avaliar(_p(idade=50, creatinina=0.9, hemoglobina=14))
+    passo = next(x for x in r['indicacao']['passos'] if x['pergunta'] == 'Risco do paciente pelos escores')
+    assert 'Gupta MICA não calculado: faltam a classe ASA e o estado funcional.' in passo['texto']
+
+
+def test_creatinina_de_2_conta_no_rcri_como_na_aha():
+    """Auditoria PREOP-03: AHA Tabela 4 "≥ 2,0"; Lee e SBC "> 2,0". Seguimos a AHA, com aviso só na fronteira."""
+    r = po.rcri(_p(creatinina=2.0))
+    assert 'Creatinina ≥ 2,0 mg/dL' in r['itens'] and r['valor'] == 2 and 'AHA' in r['divergencia']
+    r = po.rcri(_p(creatinina=1.99))
+    assert r['valor'] == 1 and not r['divergencia']
+    assert po.rcri(_p(creatinina=2.3))['divergencia'] == ''
+
+
+def test_notas_sobre_clcr_e_tfg():
+    r = po.avaliar(_p(peso=120, creatinina=1.0, condicoes=['obesidade']))
+    textos = [n['texto'] for n in r['notas_renais']]
+    assert any(t.startswith('Obesidade: o Cockcroft-Gault com peso real') for t in textos)
+    assert any('lesão renal aguda' in t for t in textos)
+    r = po.avaliar(_p(peso=70, creatinina=1.0))
+    assert [n['texto'] for n in r['notas_renais']] == ['O ClCr e a TFG supõem creatinina estável: na lesão renal aguda, não valem.']
+    assert po.avaliar(_p())['notas_renais'] == []
 
 
 def test_risco_elevado_com_boa_capacidade_libera_sem_prova_funcional():
@@ -221,7 +269,7 @@ def test_exames_anteriores_alimentam_o_motor():
     po.aplicar_exames_anteriores(p, anteriores, hoje=HOJE)
     assert p['creatinina'] == 2.3 and p['hemoglobina'] == 10.5
     r = po.avaliar(p)
-    assert 'Creatinina > 2,0 mg/dL' in r['escores'][0]['itens']
+    assert 'Creatinina ≥ 2,0 mg/dL' in r['escores'][0]['itens']
     ecg = _exame(r, 'Eletrocardiograma de repouso')
     # RCRI 3 em cirurgia intraperitoneal: ECG de base para o 1º e 2º dia (SBC Quadro 30), mesmo com um recente
     assert ecg['estado'] == 'indicado' and 'linha de base' in ecg['motivo']
