@@ -293,7 +293,7 @@ def test_toda_saida_tem_referencia_com_link():
 def test_tela_tem_as_opcoes_do_motor():
     html = open('intelligent-tools.html', encoding='utf-8').read()
     for chave in po.CIRURGIAS:
-        assert f'<option value="{chave}">' in html
+        assert f'<option value="{chave}"' in html
     for chave in list(po.CONDICOES) + list(po.INSTAVEIS) + list(po.SINTOMAS) + list(po.DASI_ITENS) + list(po.STOP_BANG_ITENS):
         assert f'value="{chave}"' in html, chave
     assert 'data-aba="preop"' in html and "fetch('/api/preoperatorio'" in html
@@ -402,3 +402,39 @@ def test_tfg_pela_ckd_epi_ao_lado_do_clcr():
     r = po.avaliar(_p(idade=80, sexo='feminino', peso=45, creatinina=1.2))
     assert r['tfg'] is not None and r['clcr'] is not None and r['tfg'] != r['clcr']
     assert po.avaliar(_p())['tfg'] is None
+
+
+def test_fa_com_fc_acima_de_120_entra_como_condicao_grave():
+    p = _p(condicoes=['fa'], fc=132)
+    assert 'fa_alta_resposta' in p['instaveis']
+    assert po.avaliar(p)['indicacao']['tipo'] == 'adiar'
+    assert 'fa_alta_resposta' not in _p(condicoes=['fa'], fc=120)['instaveis']
+    assert 'fa_alta_resposta' not in _p(fc=140)['instaveis']          # taquicardia sem FA não é este item
+
+
+def test_tela_traz_a_asa_minima_e_a_duracao_tipica_do_motor():
+    """Os vínculos automáticos da tela saem das tabelas do motor (ASA 2020; séries de tempo cirúrgico)."""
+    import re
+    html = open('intelligent-tools.html', encoding='utf-8').read()
+    na_tela = {m[0]: int(m[1]) for m in re.findall(r'name="po_(?:condicoes|instaveis)" value="([a-z_0-9]+)" data-asa="(\d)"', html)}
+    assert na_tela == po.ASA_MINIMA
+    for chave, (faixa, texto, ref) in po.DURACAO_TIPICA.items():
+        assert f'<option value="{chave}" data-duracao="{faixa}">' in html
+        assert texto in html and ref['url'] in html
+    assert po.ASA_PS['url'] in html
+    # SpO₂ e frequência cardíaca ficam nos dados clínicos; o histórico do colo é só do check-up
+    clinicos = html[html.index('id="s-clinicos"'):html.index('id="s-cirurgia"')]
+    assert 'id="po_spo2"' in clinicos and 'id="po_fc"' in clinicos
+    assert '<div data-modo="checkup">\n      <div class="grade mt-4" id="colo-historico"' in html
+
+
+def test_condicao_grave_implica_o_antecedente():
+    """SCA e angina CCS III/IV são dor isquêmica atual (doença coronária em Lee 1999); IC descompensada é IC."""
+    import json
+    assert _p(instaveis=['sca'])['condicoes'] >= {'dac'}
+    assert _p(instaveis=['ic_descompensada'])['condicoes'] >= {'ic'}
+    assert _p(condicoes=['fa'], fc=130)['condicoes'] >= {'fa'}
+    r = po.rcri(_p(instaveis=['angina_grave', 'edema_choque'], urgencia='urgencia', creatinina=1.0))
+    assert {'Doença coronária', 'Insuficiência cardíaca'} <= set(r['itens'])
+    html = open('intelligent-tools.html', encoding='utf-8').read()
+    assert 'const INSTAVEL_IMPLICA = ' + json.dumps(po.INSTAVEL_IMPLICA) + ';' in html

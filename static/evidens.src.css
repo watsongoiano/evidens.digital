@@ -144,6 +144,18 @@ html.lenis, html.lenis body { height: auto; }
   .po-faixa { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium align-middle ml-1.5; }
   .po-faixa-baixo { @apply bg-mist text-ink; }
   .po-faixa-indefinido { @apply bg-ink/5 text-ink/60; }
+  .po-grupo { @apply border-t border-ink/5; }
+  .po-grupo:first-of-type { @apply border-t-0; }
+  .po-grupo > summary { @apply flex items-center gap-2 py-3 cursor-pointer list-none font-mono text-[11px] tracking-[0.14em] uppercase text-teal-dark hover:text-teal transition; }
+  .po-grupo > summary::-webkit-details-marker { display: none; }
+  .po-grupo[open] > summary .exames-comuns-seta { @apply rotate-180; }
+  .po-grupo > .opcoes { @apply pb-4; }
+  .po-grupo > .bloco-condicional { @apply mt-0 mb-4; }
+  .po-detalhe-de { @apply contents; }
+  .po-detalhe-de[hidden] { display: none; }
+  .grade[hidden] { display: none; }   /* .grade (display: grid) vencia o atributo hidden */
+  .opcao.po-filho { @apply border-dashed border-teal/40 bg-mist/40; }
+  body[data-aba="preop"] #examesComunsPainel [data-grupo="Sorologias e rastreio"] { display: none; }
   .po-faixa-intermediario { @apply bg-[#D35400] text-white; }
   .po-faixa-alto { @apply bg-[#C0392B] text-white; }
   .po-detalhe { @apply text-[13px] text-ink/60 mt-1 leading-snug; }

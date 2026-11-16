@@ -56,6 +56,10 @@ KDIGO_DRC = _ref('KDIGO 2024 (avaliação da DRC)', 'https://doi.org/10.1016/j.k
 BULA_RIVAROXABANA = _ref('Rivaroxabana: ClCr dos estudos com peso real (J&J Medical Information)',
                          'https://www.jnjmedicalconnect.com/products/xarelto/medical-content/'
                          'xarelto-creatinine-clearance-or-estimated-glomerular-filtration-rate-in-adults')
+ASA_PS = _ref('ASA 2020 (classificação do estado físico)', 'https://www.asahq.org/standards-and-practice-parameters/'
+                                                          'statement-on-asa-physical-status-classification-system')
+NSQIP_PANCREAS = _ref('Maggino 2018 (NSQIP, pancreatectomias)', 'https://doi.org/10.1016/j.jamcollsurg.2018.01.004')
+QUADRIL_TEMPO = _ref('Cantrell 2019 (artroplastia de quadril)', 'https://doi.org/10.2106/JBJS.OA.19.00047')
 SBD = _ref('SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91)', 'https://doi.org/10.1186/s13098-025-02060-5')
 
 # ── Cirurgias ────────────────────────────────────────────────────────────────
@@ -175,6 +179,33 @@ CONDICOES = ('dac', 'iam_previo', 'stent', 'revascularizacao_cirurgica', 'ic', '
              'protese_mecanica_mitral', 'dpoc', 'doenca_arterial_periferica', 'marcapasso_cdi', 'hipertensao_pulmonar',
              'tev', 'tev_recente_3m', 'tev_3_12m', 'cancer_ativo', 'trombofilia_grave', 'tabagismo', 'obesidade',
              'hepatopatia', 'doenca_renal')
+# Classe ASA mínima sugerida pelos exemplos aprovados pela ASA (2014, emenda de 2020). É só o ponto de partida do
+# campo "Classe ASA": o médico ajusta. IV: IAM, AVC, AIT ou stent há menos de 3 meses, isquemia em curso, disfunção
+# valvar grave, choque; a IC descompensada entra pela definição (ameaça constante à vida), não por exemplo listado.
+# III: história (> 3 meses) de IAM, AVC, AIT ou DAC/stent, DPOC, marca-passo, fração de ejeção reduzida.
+# II: hipertensão ou diabetes controlados, tabagismo, obesidade (IMC 30–40; ≥ 40 é III, calculado na tela).
+ASA_MINIMA = {
+    'sca': 4, 'angina_grave': 4, 'valvopatia_grave_sintomatica': 4, 'edema_choque': 4, 'ic_descompensada': 4,
+    'avc_ait_recente': 4,
+    'dac': 3, 'iam_previo': 3, 'stent': 3, 'revascularizacao_cirurgica': 3, 'avc_ait': 3, 'dpoc': 3,
+    'marcapasso_cdi': 3, 'ic_fe_reduzida': 3,
+    'hipertensao': 2, 'diabetes': 2, 'diabetes_insulina': 2, 'tabagismo': 2, 'obesidade': 2,
+}
+
+# Duração típica (faixas do ARISCAT) só onde há série publicada; a tela sugere e o médico ajusta.
+DURACAO_TIPICA = {
+    'pancreas': ('mais_3h', 'Mediana de 358 min na duodenopancreatectomia e de 213 min na pancreatectomia distal '
+                            '(NSQIP, 10.157 pacientes).', NSQIP_PANCREAS),
+    'quadril': ('menos_2h', 'Média de 93 min na artroplastia total de quadril (revisão de 630.675 procedimentos).',
+                QUADRIL_TEMPO),
+}
+
+# O que uma condição grave já diz sobre os antecedentes (a tela marca sozinha; o motor garante o mesmo). SCA e angina
+# CCS III/IV são dor isquêmica atual, critério de doença coronária de Lee 1999; IC descompensada e edema agudo são IC.
+INSTAVEL_IMPLICA = {'sca': 'dac', 'angina_grave': 'dac', 'ic_descompensada': 'ic', 'edema_choque': 'ic',
+                    'valvopatia_grave_sintomatica': 'valvopatia', 'hap_sintomatica': 'hipertensao_pulmonar',
+                    'fa_alta_resposta': 'fa'}
+
 SINTOMAS = {'angina': 'Angina (dor opressiva aos esforços)', 'dispneia': 'Dispneia aos esforços habituais',
             'dispneia_nova': 'Dispneia nova ou em piora', 'palpitacoes': 'Palpitações',
             'sincope': 'Síncope', 'sopro': 'Sopro cardíaco', 'sinais_ic': 'Sinais de insuficiência cardíaca'}
@@ -289,6 +320,7 @@ def ler(dados, hoje=None):
         'pas': _num(dados.get('pas'), 'a pressão sistólica', 50, 300),
         'pad': _num(dados.get('pad'), 'a pressão diastólica', 20, 200),
         'spo2': _num(dados.get('spo2'), 'a SpO₂', 50, 100),
+        'fc': _num(dados.get('fc'), 'a frequência cardíaca', 20, 300),
         'infeccao_respiratoria': dados.get('infeccao_respiratoria') in (True, 'sim'),
         'escadas': _escolha(dados.get('escadas'), ('sim', 'nao', 'nao_sabe'), 'a pergunta das escadas'),
         'dasi': _lista(dados.get('dasi'), DASI_ITENS, 'DASI'),
@@ -306,6 +338,9 @@ def ler(dados, hoje=None):
         raise EntradaInvalida('A pressão diastólica tem de ser menor que a sistólica.')
     # PA ≥ 180 × 110 (sistólica OU diastólica): hipertensão não controlada, condição grave da SBC (Tabela 2)
     p['pa_descontrolada'] = bool((p['pas'] or 0) >= 180 or (p['pad'] or 0) >= 110)
+    # FA com FC > 120 bpm medida: condição grave da SBC (Tabela 2), mesmo que o item não tenha sido marcado
+    if 'fa' in p['condicoes'] and (p['fc'] or 0) > 120:
+        p['instaveis'].add('fa_alta_resposta')
     stent = None
     if 'stent' in p['condicoes']:
         bruto = dados.get('stent') if isinstance(dados.get('stent'), dict) else {}
@@ -317,6 +352,9 @@ def ler(dados, hoje=None):
     p['stent'] = stent
     # Diabetes com insulina é diabetes; IAM prévio e stent são doença coronária; FE reduzida é IC.
     c = p['condicoes']
+    for instavel, antecedente in INSTAVEL_IMPLICA.items():
+        if instavel in p['instaveis']:
+            c.add(antecedente)
     from src.utils.medicamentos import MEDICAMENTOS
     if any('insulina' in MEDICAMENTOS.get(m, {}).get('classes', ()) for m in p['medicacoes']):
         c.add('diabetes_insulina')   # insulina em uso conta no RCRI e no VSG-CRI
