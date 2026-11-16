@@ -379,6 +379,12 @@ SEM_CODIGO = {
         'a biologia molecular conferida vai até 40314030; o código do HBV-DNA quantitativo não foi conferido',
     'Carga viral da hepatite C (HCV-RNA quantitativo), plasma':
         'a biologia molecular conferida vai até 40314030; o código do HCV-RNA quantitativo não foi conferido',
+    'Anticorpo anti-JCV (vírus JC), soro':
+        'sem código conferido na TUSS; costuma ser feito por programa do fabricante do natalizumabe',
+    'Atividade da TPMT ou genotipagem TPMT/NUDT15':
+        'teste farmacogenético sem código conferido na TUSS',
+    'Sirolimo ou everolimo, sangue total (nível de vale)':
+        'a planilha de laboratório conferida não traz a dosagem de sirolimo nem de everolimo',
 }
 
 

@@ -339,13 +339,13 @@
         "Hemoglobina glicada (HbA1c), soro",
         "PSA total, soro",
         "Sangue oculto nas fezes (FIT)",
+        "Hemograma completo com plaquetas",
+        "Vitamina B12, soro",
         "Aspartato aminotransferase, soro",
         "Alanina aminotransferase, soro",
-        "Vitamina B12, soro",
-        "Hemograma completo com plaquetas",
+        "Hormônio Tireoestimulante (TSH), soro",
         "Cálcio iônico, soro",
-        "25-hidroxivitamina D, soro",
-        "Fósforo, soro"
+        "Sódio, soro"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -401,7 +401,11 @@
         "EAS - Elementos Anormais e Sedimentoscopia",
         "Glicose, soro",
         "PSA total, soro",
-        "Sangue oculto nas fezes (FIT)"
+        "Sangue oculto nas fezes (FIT)",
+        "Hormônio Tireoestimulante (TSH), soro",
+        "Cálcio iônico, soro",
+        "Sódio, soro",
+        "Hemograma completo com plaquetas"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -449,14 +453,11 @@
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular",
         "Hemoglobina glicada (HbA1c), soro",
         "Glicose, soro",
-        "Aspartato aminotransferase, soro",
-        "Alanina aminotransferase, soro",
         "Relação albumina/creatinina urinária (uACR)",
         "Creatinina, soro",
         "Hemograma completo com plaquetas",
-        "Cálcio iônico, soro",
-        "25-hidroxivitamina D, soro",
-        "Fósforo, soro"
+        "Aspartato aminotransferase, soro",
+        "Alanina aminotransferase, soro"
       ],
       "imagem": [
         "Mamografia Digital - Bilateral",
@@ -541,11 +542,9 @@
         "HBsAg, anti-HBc total e anti-HBs",
         "PSA total, soro",
         "Sangue oculto nas fezes (FIT)",
+        "Alfa-1 antitripsina, soro",
         "Gasometria arterial, sangue arterial",
-        "Sódio, soro",
-        "Potássio, soro",
-        "Cloreto, soro",
-        "Hemograma completo, sangue total"
+        "Hemograma completo com plaquetas"
       ],
       "imagem": [
         "Colonoscopia de Rastreio com ou sem biópsia",

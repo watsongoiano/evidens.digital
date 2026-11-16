@@ -25,6 +25,7 @@ FEBRASGO_HIV = 'FEBRASGO 2025 (HIV na gestação)'
 GESTANTE = 'Gestante com HIV'
 
 CV_GENOTIPAGEM = 500          # MS: falha confirmada com a última carga viral > 500 cópias/mL
+CV_INDETECTAVEL = 50          # MS 9.1: supressão = abaixo do limite mínimo do teste (50 cópias/mL na maioria)
 CD4_TB = 350                  # MS: PT/IGRA só acima de 350; abaixo, avaliar TPT sem teste
 CD4_CRIPTOCOCO = 200          # MS: LF-CrAg abaixo de 200 (HIVMA: abaixo de 100)
 IDADE_FERTIL_FIM = 50         # "potencial de engravidar": aproximação pela idade
@@ -58,7 +59,9 @@ def _frequencia_cd4(cd4, em_tarv, suprimido):
         return 'A cada 6 meses'
     if cd4 <= 500:
         return 'Anual'
-    return 'Não solicitar se >500 em 2 exames consecutivos com intervalo de 6 meses'
+    # Quadro 8: só se deixa de pedir com 2 exames consecutivos acima de 500, com 6 meses de intervalo. O motor conhece
+    # uma contagem: repete em 6 meses para confirmar (revisão externa, HIV-03).
+    return 'A cada 6 meses'
 
 
 def _frequencia_cv(carga_viral, em_tarv, suprimido):
@@ -69,6 +72,8 @@ def _frequencia_cv(carga_viral, em_tarv, suprimido):
         return 'Antes de iniciar a TARV'
     if suprimido:
         return 'A cada 6 meses'
+    if carga_viral > CV_INDETECTAVEL:
+        return 'Após 4 semanas da primeira carga viral detectável'   # Quadro 9: confirmar a falha
     return 'Após 8 semanas do início ou mudança de TARV'
 
 
@@ -76,7 +81,8 @@ def recomendar(idade, sexo, cd4=None, carga_viral=None, em_tarv=False, supressao
                gestante=False, tenofovir=False, risco_renal=False):
     """Devolve (recomendações, orientações) para uma PVHA adulta."""
     cd4, carga_viral = _inteiro(cd4), _inteiro(carga_viral)
-    suprimido = bool(em_tarv and (supressao_viral or carga_viral == 0))
+    # A carga viral informada prevalece sobre a caixa "supressão viral" (revisão externa, HIV-02).
+    suprimido = bool(em_tarv and (carga_viral <= CV_INDETECTAVEL if carga_viral is not None else supressao_viral))
     recs, orient = [], []
     add = recs.append
 
@@ -96,8 +102,8 @@ def recomendar(idade, sexo, cd4=None, carga_viral=None, em_tarv=False, supressao
     else:
         add(_rec('Contagem de linfócitos T CD4+',
                  (f'CD4 atual: {cd4} células/mm³. ' if cd4 is not None else 'Sem CD4 anterior: pedir agora. ') + 'Em TARV, assintomático e com carga viral '
-                 'indetectável: abaixo de 350 a cada 6 meses; 350-500 anual; acima de 500 em 2 exames com 6 meses de intervalo, '
-                 'não é mais necessário. Sem TARV, evento clínico ou falha virológica: a cada 6 meses. Em profilaxia ou com '
+                 'indetectável: abaixo de 350 a cada 6 meses; 350-500 anual; acima de 500, repetir em 6 meses, e com 2 exames '
+                 'consecutivos acima de 500 (6 meses de intervalo) não é mais necessário. Sem TARV, evento clínico ou falha virológica: a cada 6 meses. Em profilaxia ou com '
                  'infecção oportunista: a cada 3 meses.',
                  f'{GRUPO} | {_frequencia_cd4(cd4, em_tarv, suprimido)}', MS))
         add(_rec('Carga Viral do HIV (HIV RNA)',
@@ -106,13 +112,18 @@ def recomendar(idade, sexo, cd4=None, carga_viral=None, em_tarv=False, supressao
                  'detectável: repetir em 4 semanas para confirmar a falha.',
                  f'{GRUPO} | {_frequencia_cv(carga_viral, em_tarv, suprimido)}', MS))
 
-    # Genotipagem: na falha confirmada (MS 9.3) ou, antes da TARV, só nas indicações do Quadro 4.
-    if em_tarv and carga_viral is not None and carga_viral > CV_GENOTIPAGEM:
-        add(_rec('Genotipagem do HIV (Teste de Resistência)',
-                 'Falha virológica confirmada (duas cargas virais detectáveis, a última acima de 500 cópias/mL): pedir a '
-                 'genotipagem o quanto antes. Abaixo de 500 cópias/mL o teste não é liberado no SUS.',
-                 f'{GRUPO} em TARV com carga viral >500 | Avaliação inicial ou falha virológica', MS))
-    elif not em_tarv and gestante:
+    # Genotipagem: na falha confirmada (MS 9.3: duas cargas virais consecutivas detectáveis, a última > 500 cópias/mL)
+    # ou, antes da TARV, só nas indicações do Quadro 4. O motor recebe uma carga viral: com ela detectável, repetir em
+    # 4 semanas (Quadro 9) e só então decidir a genotipagem (revisão externa, HIV-01).
+    if em_tarv and carga_viral is not None and carga_viral > CV_INDETECTAVEL:
+        orient.append({
+            'titulo': 'HIV: carga viral detectável em TARV',
+            'descricao': 'Uma carga viral detectável não define falha: reforçar a adesão, rever interações e repetir a carga viral '
+                         '4 semanas depois. Falha confirmada (duas cargas consecutivas detectáveis, a última acima de 500 '
+                         'cópias/mL): pedir a genotipagem (acrescente pelo catálogo). Entre 200 e 500 cópias/mL, o teste não é '
+                         'liberado no SUS: carga viral a cada 3 meses.',
+            'referencia': MS})
+    if not em_tarv and gestante:
         add(_rec('Genotipagem do HIV (Teste de Resistência)',
                  'Genotipagem pré-tratamento indicada na gestação (MS 2024, Quadro 4).',
                  f'{GRUPO} gestante | Antes de iniciar a TARV', MS))

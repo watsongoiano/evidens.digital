@@ -245,28 +245,8 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'grau_evidencia': 'B'
         })
 
-    # Sífilis: o PCDT-IST 2022 (Quadro 5) não deixa clara a periodicidade fora da gestação e das populações-chave;
-    # o motor indica o teste só com risco que o formulário identifica (uso de PrEP) e orienta nos demais casos.
-    if prep:
-        _add_rec({
-            'titulo': 'Anti-HIV 1 e 2, soro',
-            'descricao': 'Uso de PrEP: teste de HIV a cada retorno, na periodicidade do protocolo de PrEP do serviço.',
-            'subtitulo': 'Em uso de PrEP | Conforme protocolo de PrEP',
-            'categoria': 'laboratorio',
-            'prioridade': 'alta',
-            'referencia': 'PCDT-IST MS 2022',
-            'grau_evidencia': 'A'
-        })
-        _add_rec({
-            'titulo': 'Sífilis: teste treponêmico ou VDRL, soro',
-            'descricao': 'Uso de PrEP é risco aumentado de IST: oferecer teste para sífilis junto do teste de HIV, na '
-                         'periodicidade do protocolo de PrEP do serviço.',
-            'subtitulo': 'Em uso de PrEP | Conforme protocolo de PrEP',
-            'categoria': 'laboratorio',
-            'prioridade': 'alta',
-            'referencia': 'PCDT-IST MS 2022 / USPSTF 2022',
-            'grau_evidencia': 'A'
-        })
+    # PrEP (HIV, sífilis, hepatites e IST na periodicidade do PCDT PrEP 2024, Quadro 5): src/utils/condicoes.py.
+    # Sem PrEP, a sífilis fica como orientação para quem tem risco aumentado (orientacoes_de_rastreio).
 
     # Hipertensão (SBC 2025 / AHA/ACC 2025). Uma PA de consultório isolada não rotula HAS: o bloco de HAS só
     # entra com HAS marcada pelo médico, anti-hipertensivo em uso ou PA ≥ 180/110 (has_hypertension). PA
@@ -284,22 +264,22 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
 
         _add_rec({
             'titulo': 'Ácido úrico, soro',
-            'descricao': 'Avaliação de risco cardiovascular e renal em pacientes hipertensos',
-            'subtitulo': 'Adultos com HAS | Anual',
+            'descricao': 'Avaliação inicial do hipertenso: a SBC 2025 o inclui na rotina; na AHA/ACC é exame opcional, não seriado.',
+            'subtitulo': 'Adultos com HAS | Avaliação inicial',
             'categoria': 'laboratorio',
-            'prioridade': 'media',
-            'referencia': 'AHA 2025 / SBC 2025',
-            'grau_evidencia': 'B'
+            'prioridade': 'baixa',
+            'referencia': 'SBC 2025 / AHA 2025',
+            'grau_evidencia': 'C'
         })
 
         _add_rec({
             'titulo': 'EAS - Elementos Anormais e Sedimentoscopia',
-            'descricao': 'Análise de urina para avaliação de lesão renal e investigação de hipertensão secundária',
-            'subtitulo': 'Adultos com HAS | Anual',
+            'descricao': 'Análise de urina na avaliação inicial do hipertenso (lesão renal e hipertensão secundária).',
+            'subtitulo': 'Adultos com HAS | Avaliação inicial',
             'categoria': 'laboratorio',
-            'prioridade': 'alta',
+            'prioridade': 'media',
             'referencia': 'AHA 2025 / SBC 2025',
-            'grau_evidencia': 'A'
+            'grau_evidencia': 'B'
         })
 
         _add_rec({
@@ -646,11 +626,11 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         
         _add_rec({
             'titulo': 'Relação Aldosterona/Renina (A/R)',
-            'descricao': 'Rastreamento de hiperaldosteronismo primário, causa importante de hipertensão resistente. Coletar pela manhã após 2 horas em pé. Relação >20-30 sugere hiperaldosteronismo.',
+            'descricao': 'Rastreamento de hiperaldosteronismo primário, causa importante de hipertensão resistente. Aldosterona e renina (atividade ou concentração) com potássio sérico, coletados pela manhã, sentado e sem garrote prolongado; corrigir a hipocalemia antes. Pode ser feito em uso da maioria dos anti-hipertensivos; betabloqueador e agonista alfa-2 central podem dar falso-positivo. Interpretar pelos cortes do método do laboratório (imunoensaio ou espectrometria de massa; atividade ou concentração de renina): renina suprimida com aldosterona elevada.',
             'subtitulo': 'Adultos com HAS resistente | Conforme necessidade',
             'categoria': 'laboratorio',
             'prioridade': 'alta',
-            'referencia': 'AHA 2025 / SBC 2025',
+            'referencia': 'AHA 2025 / Endocrine Society 2025 (hiperaldosteronismo)',
             'grau_evidencia': 'A'
         })
         
@@ -868,7 +848,10 @@ def _unir(recs, chave, preferido, sexo):
     # (a gestação tem regras próprias), depois o título preferido do catálogo e, por fim, o mais completo.
     completos = [r for r in recs if _identidade_do_exame(r, sexo) == chave]
     def ordem(r):
-        return (not r.get('gestacao'), (r.get('titulo') or '').strip() != preferido, -len(r.get('titulo') or ''))
+        # Entre itens do mesmo título, o motivo de grupo de risco (PrEP, medicação, doença) vem antes do rastreio
+        # populacional ("Adultos ..."), que passa a "Também: ...".
+        return (not r.get('gestacao'), (r.get('titulo') or '').strip() != preferido, -len(r.get('titulo') or ''),
+                condicoes.eh_rastreio_populacional(r.get('subtitulo')))
     base = min(completos or recs, key=ordem)
     melhor = dict(base)
     outros = [r for r in recs if r is not base]
@@ -895,6 +878,13 @@ def _unir(recs, chave, preferido, sexo):
     # retirado antes de responder; src/utils/periodicidade.py usa o menor intervalo).
     subtitulo = base.get('subtitulo') or ''
     unidos = list(base.get('_subtitulos') or [])
+    # O motivo de grupo de risco (PrEP, medicação, doença) abre o subtítulo; o rastreio populacional ("Adultos ...")
+    # passa a "Também: ...". O título que fica continua sendo o do exame combinado.
+    risco = next((r for r in outros if r.get('subtitulo') and not condicoes.eh_rastreio_populacional(r['subtitulo'])), None)
+    if condicoes.eh_rastreio_populacional(subtitulo) and risco is not None:
+        outros = [r for r in outros if r is not risco] + [base]
+        subtitulo = risco['subtitulo']
+        unidos = list(risco.get('_subtitulos') or [])
     for r in outros:
         outro = r.get('subtitulo') or ''
         unidos += [outro] + list(r.get('_subtitulos') or [])
@@ -1192,10 +1182,10 @@ def generate_intelligent_recommendations():
                 'Hemoglobina glicada (HbA1c), soro': {
                     'descricao': 'Controle glicêmico no diabetes: pelo menos 2 vezes ao ano em quem está na meta e a cada '
                                  '3 meses após mudança de tratamento ou fora da meta.',
-                    'subtitulo': 'Diabéticos | A cada 3-6 meses', 'referencia': 'ADA 2025', 'grau_evidencia': 'A'},
+                    'subtitulo': 'Diabéticos | A cada 3-6 meses', 'referencia': 'ADA 2026 (seção 6)', 'grau_evidencia': 'A'},
                 'Glicose, soro': {
                     'descricao': 'Glicemia de jejum no acompanhamento do diabetes, junto da HbA1c.',
-                    'subtitulo': 'Diabéticos | Junto da HbA1c', 'referencia': 'ADA 2025', 'grau_evidencia': 'B'},
+                    'subtitulo': 'Diabéticos | Junto da HbA1c', 'referencia': 'ADA 2026 (seção 6)', 'grau_evidencia': 'B'},
             }
             for titulo, campos in controle.items():
                 rec = next((r for r in recommendations if r.get('titulo') == titulo), None)
@@ -1207,40 +1197,9 @@ def generate_intelligent_recommendations():
 
         # EXAMES PARA DIABÉTICOS (ADA 2024 - Laboratory Evaluation)
         if is_diabetic:
-            # Perfil lipídico (ADA 2026, seção 10): na avaliação inicial; sem estatina e < 40 anos, a cada 5 anos;
-            # com estatina, 4-12 semanas após iniciar ou ajustar e depois anualmente. Soma o motivo ao item que já existe.
-            if 'estatinas' in medicacoes_checkboxes:
-                condicoes._garantir(recommendations, condicoes._rec(
-                    'Colesterol total e frações, soro', 'laboratorio',
-                    'Diabetes em uso de estatina: perfil lipídico 4-12 semanas após iniciar ou ajustar a dose e depois anualmente.',
-                    'Diabéticos em uso de estatina | Anual', 'ADA 2026 (seção 10)', 'A', 'alta'))
-            else:
-                condicoes._garantir(recommendations, condicoes._rec(
-                    'Colesterol total e frações, soro', 'laboratorio',
-                    'Diabetes: perfil lipídico no diagnóstico e na avaliação inicial; sem estatina e com menos de 40 anos, a '
-                    'cada 5 anos. Ao iniciar ou ajustar a estatina, repetir em 4-12 semanas e depois anualmente.',
-                    'Diabéticos | Avaliação inicial', 'ADA 2026 (seção 10)', 'A', 'alta'))
+            # TGO e TGP: rastreio de fibrose pelo FIB-4 (DM2/pré-diabetes; DM1 só com obesidade ou MASLD), em
+            # src/utils/condicoes.py (relatório D, D-22).
 
-            # Função hepática (TGO, TGP)
-            recommendations.append({
-                'titulo': 'Aspartato aminotransferase, soro',
-                'descricao': 'Avaliação da função hepática em pacientes diabéticos. Importante antes de iniciar estatinas e para rastreamento de esteatose hepática não alcoólica (NAFLD).',
-                'subtitulo': 'Diabéticos | Anual',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': '<a href="https://diabetesjournals.org/care/article/47/Supplement_1/S1/153904/Standards-of-Care-in-Diabetes-2024" target="_blank">ADA 2024</a>',
-                'grau_evidencia': 'A'
-            })
-            recommendations.append({
-                'titulo': 'Alanina aminotransferase, soro',
-                'descricao': 'Avaliação da função hepática em pacientes diabéticos. Importante antes de iniciar estatinas e para rastreamento de esteatose hepática não alcoólica (NAFLD).',
-                'subtitulo': 'Diabéticos | Anual',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': 'ADA 2024',
-                'grau_evidencia': 'B'
-            })
-            
             # Relação albumina/creatinina urinária (microalbuminúria)
             recommendations.append({
                 'titulo': 'Relação albumina/creatinina urinária (uACR)',
@@ -1248,7 +1207,7 @@ def generate_intelligent_recommendations():
                 'subtitulo': 'Diabéticos | Anual',
                 'categoria': 'laboratorio',
                 'prioridade': 'alta',
-                'referencia': 'ADA 2024',
+                'referencia': 'ADA 2026 (seção 11)',
                 'grau_evidencia': 'A'
             })
             
@@ -1270,85 +1229,32 @@ def generate_intelligent_recommendations():
                     'grau_evidencia': 'E'
                 })
             
-            # Vitamina B12 (se em uso de metformina)
-            medicacoes_continuo_lower = medicacoes_continuo.lower()
-            if 'metformina' in medicacoes_continuo_lower or 'metformin' in medicacoes_continuo_lower:
-                recommendations.append({
-                    'titulo': 'Vitamina B12, soro',
-                    'descricao': 'Monitoramento de deficiência de vitamina B12 em pacientes em uso de metformina. A metformina pode reduzir a absorção de B12, especialmente em uso prolongado.',
-                    'subtitulo': 'Diabéticos em uso de metformina | Periódico',
-                    'categoria': 'laboratorio',
-                    'prioridade': 'media',
-                    'referencia': 'ADA 2024',
-                    'grau_evidencia': 'B'
-                })
-            
-            # Hemograma completo
+            # Vitamina B12 com metformina e potássio com IECA/BRA/diurético: src/utils/condicoes.py (fonte única).
+            # Cálcio, vitamina D e fósforo: só com indicação (DRC G3a+, osteoporose, bariátrica, doença celíaca), pelos
+            # próprios módulos; a ADA os lista "conforme apropriado" e a Endocrine Society 2024 é contra a 25(OH)D de
+            # rotina (relatório D, D-09 e D-10; relatório A, M-08).
+
+            # Hemograma completo (ADA 2026, seção 4, Tabela 4.1): plaquetas para o FIB-4 e anemia (DRC, metformina)
             recommendations.append({
                 'titulo': 'Hemograma completo com plaquetas',
-                'descricao': 'Avaliação hematológica em pacientes diabéticos. Importante para detectar anemia, infecções e outras alterações hematológicas.',
+                'descricao': 'Diabetes: hemograma com plaquetas na avaliação anual (plaquetas para o FIB-4; anemia da doença renal e por deficiência de B12 com metformina).',
                 'subtitulo': 'Diabéticos | Anual',
                 'categoria': 'laboratorio',
                 'prioridade': 'media',
-                'referencia': 'ADA 2024',
+                'referencia': 'ADA 2026 (seção 4)',
                 'grau_evidencia': 'E'
             })
-            
-            # Potássio sérico (se em uso de IECA/BRA/diuréticos)
-            # Palavra inteira: "bra" por substring casava com "brasil", "cobra" etc.
-            usa_ieca_bra = bool(re.search(r'\b(enalapril|captopril|ramipril|lisinopril|losartan[a]?|valsartan[a]?|olmesartana|candesartana|telmisartana|ieca|bra)\b', medicacoes_continuo_lower))
-            usa_diuretico = any(keyword in medicacoes_continuo_lower for keyword in ['hidroclorotiazida', 'furosemida', 'espironolactona', 'diurético', 'diuretico'])
-            
-            if usa_ieca_bra or usa_diuretico:
-                recommendations.append({
-                    'titulo': 'Potássio, soro',
-                    'descricao': 'Monitoramento de potássio em pacientes diabéticos em uso de IECA, BRA ou diuréticos. Importante para prevenir hiper ou hipocalemia.',
-                    'subtitulo': 'Diabéticos em uso de IECA/BRA/diuréticos | Periódico',
-                    'categoria': 'laboratorio',
-                    'prioridade': 'alta',
-                    'referencia': 'ADA 2024',
-                    'grau_evidencia': 'E'
-                })
-            
-            # Cálcio, vitamina D e fósforo (para pacientes apropriados)
-            recommendations.append({
-                'titulo': 'Cálcio iônico, soro',
-                'descricao': 'Avaliação do metabolismo ósseo e risco de osteoporose em pacientes diabéticos.',
-                'subtitulo': 'Diabéticos | Anual',
-                'categoria': 'laboratorio',
-                'prioridade': 'media',
-                'referencia': '<a href="https://diabetesjournals.org/care/article/47/Supplement_1/S1/153904/Standards-of-Care-in-Diabetes-2024" target="_blank">ADA 2024</a>',
-                'grau_evidencia': 'B'
-            })
-            recommendations.append({
-                'titulo': '25-hidroxivitamina D, soro',
-                'descricao': 'Avaliação do metabolismo ósseo e risco de osteoporose em pacientes diabéticos.',
-                'subtitulo': 'Diabéticos | Anual',
-                'categoria': 'laboratorio',
-                'prioridade': 'media',
-                'referencia': '<a href="https://diabetesjournals.org/care/article/47/Supplement_1/S1/153904/Standards-of-Care-in-Diabetes-2024" target="_blank">ADA 2024</a>',
-                'grau_evidencia': 'B'
-            })
-            recommendations.append({
-                'titulo': 'Fósforo, soro',
-                'descricao': 'Avaliação do metabolismo ósseo em pacientes diabéticos, especialmente com doença renal ou osteoporose. Deficiência de vitamina D é comum em diabéticos.',
-                'subtitulo': 'Diabéticos com doença renal ou osteoporose | Conforme necessidade',
-                'categoria': 'laboratorio',
-                'prioridade': 'media',
-                'referencia': 'ADA 2024',
-                'grau_evidencia': 'E'
-            })
-            
+
             # EXAMES DE IMAGEM PARA DIABÉTICOS
             
             # Fundoscopia (exame oftalmológico)
             recommendations.append({
                 'titulo': 'Fundoscopia (Exame de fundo de olho)',
-                'descricao': 'Rastreamento de retinopatia diabética. Realizar exame oftalmológico completo com dilatação pupilar anualmente. A retinopatia diabética é a principal causa de cegueira em adultos.',
-                'subtitulo': 'Diabéticos | Anual',
+                'descricao': 'Rastreamento de retinopatia diabética com exame de fundo de olho sob dilatação: anual; a cada 1-2 anos se não houver retinopatia em um ou mais exames e a glicemia estiver controlada. No tipo 1, o primeiro exame em até 5 anos do diagnóstico; no tipo 2, no diagnóstico.',
+                'subtitulo': 'Diabéticos | A cada 1-2 anos',
                 'categoria': 'imagem',
                 'prioridade': 'alta',
-                'referencia': 'ADA 2024',
+                'referencia': 'ADA 2026 (seção 12)',
                 'grau_evidencia': 'A'
             })
             
@@ -1360,111 +1266,48 @@ def generate_intelligent_recommendations():
         orientacoes_hiv = []
         if is_hiv_positive:
             hiv_data = data.get('hiv_data') or {}
-            meds_texto = (medicacoes_continuo + ' ' + ' '.join(str(m) for m in medicacoes_checkboxes)).lower()
+            # Tenofovir pela classe do princípio ativo escolhido (src/utils/medicamentos.py); antes se procurava a palavra
+            # "tenofovir" entre as classes, e a regra nunca disparava (relatório D, D-06).
+            usa_tenofovir = 'tenofovir' in medicacoes_checkboxes or 'tenofovir' in medicacoes_continuo
             recs_hiv, orientacoes_hiv = hiv.recomendar(
                 age, sex, cd4=hiv_data.get('cd4') or data.get('cd4'),
                 carga_viral=hiv_data.get('carga_viral') or data.get('carga_viral'),
                 em_tarv='sim' in (hiv_data.get('em_tarv'), data.get('em_tarv')),
                 supressao_viral='sim' in (hiv_data.get('supressao_viral'), data.get('supressao_viral')),
-                gestante=is_pregnant, tenofovir='tenofovir' in meds_texto,
-                risco_renal=any(c in comorbidades for c in ('diabetes', 'hipertensao', 'doenca_renal')))
+                gestante=is_pregnant, tenofovir=usa_tenofovir,
+                risco_renal=is_diabetic or has_hypertension or 'doenca_renal' in comorbidades)
             recommendations.extend(recs_hiv)
+            if 'tenofovir_alafenamida' in medicacoes_checkboxes:
+                orientacoes_hiv.append({
+                    'titulo': 'Tenofovir alafenamida: intervalo da função renal',
+                    'descricao': 'O motor seguiu o PCDT do MS para todo tenofovir (creatinina e EAS a cada 3-6 meses). A HIVMA/IDSA '
+                                 'aceita intervalos maiores com o tenofovir alafenamida (TAF), menos nefrotóxico que o fumarato (TDF).',
+                    'referencia': 'MS 2024 (PCDT HIV) / HIVMA/IDSA 2024'})
 
-        # ========== DPOC MANAGEMENT (GOLD COPD 2023) ==========
-        
+        # ========== DPOC (GOLD 2026; relatório D, D-25 e D-38) ==========
+        # Graus: o GOLD não gradua a monitorização; "E" é consenso. Sódio, potássio e cloreto saíram (sem base no GOLD;
+        # o diurético já os pede em src/utils/condicoes.py).
         is_dpoc = 'dpoc' in comorbidades
-        
+
         if is_dpoc:
-            # Espirometria - exame fundamental para diagnóstico e monitoramento
-            recommendations.append({
-                'titulo': 'Espirometria, com broncodilatador',
-                'descricao': 'Exame essencial para confirmar o diagnóstico de DPOC, avaliar gravidade da obstrução do fluxo aéreo e monitorar progressão da doença. Deve ser realizada após broncodilatador.',
-                'subtitulo': 'DPOC | Anual ou conforme sintomas',
-                'categoria': 'imagem',
-                'prioridade': 'alta',
-                'referencia': 'GOLD COPD 2023',
-                'link': 'https://goldcopd.org/2023-gold-report-2/',
-                'grau_evidencia': 'A'
-            })
-            
-            # Teste de caminhada de 6 minutos
-            recommendations.append({
-                'titulo': 'Teste de caminhada de 6 minutos',
-                'descricao': 'Avalia capacidade funcional e tolerância ao exercício em pacientes com DPOC. Útil para avaliar resposta ao tratamento e prognóstico.',
-                'subtitulo': 'DPOC | Anual ou conforme indicação',
-                'categoria': 'imagem',
-                'prioridade': 'media',
-                'referencia': 'GOLD COPD 2023',
-                'link': 'https://goldcopd.org/2023-gold-report-2/',
-                'grau_evidencia': 'B'
-            })
-            
-            # Gasometria arterial
-            recommendations.append({
-                'titulo': 'Gasometria arterial, sangue arterial',
-                'descricao': 'Avalia oxigenação e ventilação em pacientes com DPOC, especialmente em exacerbações ou doença avançada. Indica necessidade de oxigenoterapia.',
-                'subtitulo': 'DPOC | Conforme indicação clínica',
-                'categoria': 'laboratorio',
-                'prioridade': 'alta',
-                'referencia': 'GOLD COPD 2023',
-                'link': 'https://goldcopd.org/2023-gold-report-2/',
-                'grau_evidencia': 'A'
-            })
-            
-            # Eletrólitos
-            recommendations.append({
-                'titulo': 'Sódio, soro',
-                'descricao': 'Avaliação de distúrbios eletrolíticos. Importante em pacientes com DPOC grave ou em uso de diuréticos.',
-                'subtitulo': 'DPOC | Anual ou conforme indicação',
-                'categoria': 'laboratorio',
-                'prioridade': 'media',
-                'referencia': '<a href="https://goldcopd.org/2023-gold-report/" target="_blank">GOLD COPD 2023</a>',
-                'grau_evidencia': 'B'
-            })
-            recommendations.append({
-                'titulo': 'Potássio, soro',
-                'descricao': 'Avaliação de distúrbios eletrolíticos. Importante em pacientes com DPOC grave ou em uso de diuréticos.',
-                'subtitulo': 'DPOC | Anual ou conforme indicação',
-                'categoria': 'laboratorio',
-                'prioridade': 'media',
-                'referencia': '<a href="https://goldcopd.org/2023-gold-report/" target="_blank">GOLD COPD 2023</a>',
-                'grau_evidencia': 'B'
-            })
-            recommendations.append({
-                'titulo': 'Cloreto, soro',
-                'descricao': 'Monitoramento de eletrólitos em pacientes com DPOC, especialmente aqueles em uso de diuréticos ou corticosteroides. Hipocalemia pode ocorrer com beta-agonistas.',
-                'subtitulo': 'DPOC | Conforme uso de medicações',
-                'categoria': 'laboratorio',
-                'prioridade': 'media',
-                'referencia': 'GOLD COPD 2023',
-                'link': 'https://goldcopd.org/2023-gold-report-2/',
-                'grau_evidencia': 'B'
-            })
-            
-            # Radiografia de tórax
-            recommendations.append({
-                'titulo': 'Radiografia de tórax',
-                'descricao': 'Exame de imagem para avaliar complicações (pneumonia, pneumotórax, insuficiência cardíaca) e excluir outros diagnósticos diferenciais.',
-                'subtitulo': 'DPOC | Conforme indicação clínica',
-                'categoria': 'imagem',
-                'prioridade': 'media',
-                'referencia': 'GOLD COPD 2023',
-                'link': 'https://goldcopd.org/2023-gold-report-2/',
-                'grau_evidencia': 'B'
-            })
-            
-            # Hemograma completo
-            recommendations.append({
-                'titulo': 'Hemograma completo, sangue total',
-                'descricao': 'Avaliar policitemia secundária à hipoxemia crônica e descartar anemia que pode agravar dispneia.',
-                'subtitulo': 'DPOC | Anual',
-                'categoria': 'laboratorio',
-                'prioridade': 'media',
-                'referencia': 'GOLD COPD 2023',
-                'link': 'https://goldcopd.org/2023-gold-report-2/',
-                'grau_evidencia': 'B'
-            })
-        
+            for rec in (
+                    ('Espirometria, com broncodilatador', 'imagem', 'Espirometria pós-broncodilatador para confirmar o diagnóstico e '
+                     'acompanhar a evolução, pelo menos uma vez por ano.', 'DPOC | Anual ou conforme sintomas', 'alta', 'E'),
+                    ('Alfa-1 antitripsina, soro', 'laboratorio', 'Toda pessoa com DPOC deve dosar a alfa-1 antitripsina uma vez '
+                     '(recomendação da OMS adotada pelo GOLD); nível baixo pede genotipagem e rastreio familiar.', 'DPOC | Uma vez', 'alta', 'E'),
+                    ('Teste de caminhada de 6 minutos', 'imagem', 'Capacidade funcional e tolerância ao exercício; útil para a '
+                     'reabilitação pulmonar e para o prognóstico.', 'DPOC | Anual ou conforme indicação', 'media', 'E'),
+                    ('Gasometria arterial, sangue arterial', 'laboratorio', 'Indicada se a saturação de O2 em repouso for ≤ 92% ou na '
+                     'DPOC grave, para avaliar hipoxemia e hipercapnia e indicar oxigenoterapia.',
+                     'DPOC | Se SpO2 ≤ 92% ou DPOC grave', 'media', 'E'),
+                    ('Radiografia de tórax', 'imagem', 'Não confirma a DPOC, mas afasta diagnósticos alternativos e comorbidades '
+                     '(bronquiectasias, câncer, insuficiência cardíaca).', 'DPOC | Conforme indicação clínica', 'media', 'E'),
+                    ('Hemograma completo com plaquetas', 'laboratorio', 'Eosinófilos no sangue para decidir o corticoide inalatório '
+                     '(≥ 300/µL favorece; < 100/µL desfavorece) e anemia ou policitemia, que mudam a dispneia.', 'DPOC | Anual', 'media', 'A')):
+                titulo, categoria, descricao, subtitulo, prioridade, grau = rec
+                recommendations.append({'titulo': titulo, 'descricao': descricao, 'subtitulo': subtitulo, 'categoria': categoria,
+                                        'prioridade': prioridade, 'referencia': 'GOLD 2026', 'grau_evidencia': grau})
+
         # Nenhum dado do paciente é gravado: a consulta é calculada e descartada.
 
         # Uso do sistema (painel /analytics): quem gerou o check-up, sem dado do paciente
@@ -1474,7 +1317,8 @@ def generate_intelligent_recommendations():
         
         # Listas de comorbidades, medicações e história familiar (src/utils/condicoes.py)
         orientacoes = condicoes.aplicar(recommendations, age, sex, comorbidades, medicacoes_checkboxes, familia,
-                                        gestante=is_pregnant, tabagismo=tabagismo, imc=imc,
+                                        gestante=is_pregnant, tabagismo=tabagismo, imc=imc, tfg=egfr_inferencia,
+                                        creatinina=data.get('creatinina'), peso=weight, hipertensao=has_hypertension,
                                         imunossuprimido=triagem.get('imunossupressao') == SIM,
                                         cd4=data.get('cd4') if is_hiv_positive else None,
                                         idade_ccr_familiar=data.get('idade_ccr_familiar'))

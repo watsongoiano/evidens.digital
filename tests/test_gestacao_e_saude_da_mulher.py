@@ -258,15 +258,15 @@ def test_dm_pre_gestacional_na_gestacao(client):
     assert 'Ecocardiograma fetal' in t
     assert _rec(r, 'Fundoscopia (Exame de fundo de olho)')['subtitulo'].startswith('DM pré-gestacional | 1º trimestre')
     for fora in ('Cálcio iônico, soro', '25-hidroxivitamina D, soro', 'Fósforo, soro'):
-        assert fora not in t and fora in {a['titulo'] for a in r['adiados_gestacao']}
+        assert fora not in t   # saíram da rotina do diabetes (ADA 2026; auditoria D) e não aparecem na gestação
     cedo = _api(client, idade=30, idade_gestacional=12, comorbidades=['diabetes_tipo_1'])
     assert any(p['titulo'] == 'Ecocardiograma fetal' and p['semana'] == 20 for p in cedo['proximas_gestacao'])
     assert 'Ecocardiograma fetal' not in _titulos(_api(client, idade=30, idade_gestacional=22))
 
 
-def test_vitamina_d_do_diabetico_continua_fora_da_gestacao(client):
+def test_vitamina_d_nao_e_rotina_do_diabetico_fora_da_gestacao(client):
     r = _mulher(client, idade=40, comorbidades=['diabetes_tipo_1'])
-    assert '25-hidroxivitamina D, soro' in _titulos(r)
+    assert '25-hidroxivitamina D, soro' not in _titulos(r)   # ADA 2026: sem dosagem de rotina (auditoria D)
 
 
 # ---------------------------------------------------------------------------

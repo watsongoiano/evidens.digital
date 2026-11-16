@@ -59,7 +59,7 @@ GRUPOS = [
     ]),
     ('Insuficiência cardíaca, arritmia e angina', ['cardio_outro'], 'coracao', [
         ('Sacubitril + valsartana|entresto', ['arni']), ('Amiodarona', ['amiodarona']),
-        ('Digoxina', ['cardio_outro', 'digoxina']), 'Ivabradina', 'Propafenona', 'Sotalol', 'Mononitrato de isossorbida', 'Dinitrato de isossorbida',
+        ('Digoxina', ['cardio_outro', 'digoxina']), 'Ivabradina', 'Propafenona', ('Sotalol', ['cardio_outro', 'sotalol']), 'Mononitrato de isossorbida', 'Dinitrato de isossorbida',
         'Trimetazidina', 'Ranolazina',
     ]),
     ('Antiagregantes', ['antiagregante'], 'antiplaquetario', [
@@ -110,7 +110,8 @@ GRUPOS = [
         'Clonazepam|rivotril', 'Alprazolam', 'Bromazepam', 'Diazepam', 'Lorazepam', 'Zolpidem', 'Eszopiclona', 'Zopiclona',
     ]),
     ('Antipsicóticos e estabilizadores de humor', ['antipsicotico_atipico'], 'antipsicotico', [
-        'Quetiapina', 'Olanzapina', 'Risperidona', 'Aripiprazol', 'Clozapina', 'Paliperidona', 'Ziprasidona',
+        'Quetiapina', 'Olanzapina', 'Risperidona', 'Aripiprazol', ('Clozapina', ['antipsicotico_atipico', 'clozapina']),
+        'Paliperidona', 'Ziprasidona',
         'Lurasidona', 'Brexpiprazol', 'Amissulprida',
         ('Haloperidol', ['antipsicotico_tipico']), ('Clorpromazina', ['antipsicotico_tipico']),
         ('Levomepromazina', ['antipsicotico_tipico']), ('Lítio|carbolitium', ['litio']),
@@ -130,8 +131,9 @@ GRUPOS = [
     ('Imunossupressores e imunobiológicos', ['imunossupressor'], 'imunossupressor imunobiologico biologico', [
         ('Metotrexato', ['imunossupressor', 'metotrexato']), ('Azatioprina', ['imunossupressor', 'azatioprina']),
         ('Leflunomida', ['imunossupressor', 'leflunomida']),
-        'Micofenolato', ('Ciclosporina', ['imunossupressor', 'inibidor_calcineurina', 'ciclosporina']),
-        ('Tacrolimo', ['imunossupressor', 'inibidor_calcineurina', 'tacrolimo']), 'Sirolimo', 'Everolimo',
+        ('Micofenolato', ['imunossupressor', 'micofenolato']), ('Ciclosporina', ['imunossupressor', 'inibidor_calcineurina', 'ciclosporina']),
+        ('Tacrolimo', ['imunossupressor', 'inibidor_calcineurina', 'tacrolimo']),
+        ('Sirolimo', ['imunossupressor', 'inibidor_mtor']), ('Everolimo', ['imunossupressor', 'inibidor_mtor']),
         ('Tofacitinibe|inibidor de jak', ['imunossupressor', 'biologico', 'inibidor_jak']),
         ('Upadacitinibe|inibidor de jak', ['imunossupressor', 'biologico', 'inibidor_jak']),
         ('Baricitinibe|inibidor de jak', ['imunossupressor', 'biologico', 'inibidor_jak']),
@@ -143,14 +145,19 @@ GRUPOS = [
         ('Abatacepte', ['imunossupressor', 'biologico']), ('Secuquinumabe|anti-il-17', ['imunossupressor', 'biologico']),
         ('Ixequizumabe|anti-il-17', ['imunossupressor', 'biologico']), ('Vedolizumabe', ['imunossupressor', 'biologico']),
         ('Ustequinumabe', ['imunossupressor', 'biologico']), ('Risanquizumabe', ['imunossupressor', 'biologico']),
-        ('Guselcumabe', ['imunossupressor', 'biologico']), 'Natalizumabe', 'Ocrelizumabe', 'Fingolimode',
+        ('Guselcumabe', ['imunossupressor', 'biologico']),
+        ('Natalizumabe', ['imunossupressor', 'biologico', 'natalizumabe']),
+        ('Ocrelizumabe|anti-cd20', ['imunossupressor', 'biologico', 'ocrelizumabe']),
+        ('Fingolimode', ['imunossupressor', 'fingolimode']),
     ]),
     ('Reumatologia e gota', ['reumato_outro'], 'reumatismo gota', [
-        ('Hidroxicloroquina', ['hidroxicloroquina']), 'Sulfassalazina', 'Mesalazina', 'Alopurinol', 'Colchicina',
+        ('Hidroxicloroquina', ['hidroxicloroquina']), ('Sulfassalazina', ['reumato_outro', 'sulfassalazina']),
+        ('Mesalazina', ['reumato_outro', 'aminossalicilato']), ('Alopurinol', ['reumato_outro', 'alopurinol']), 'Colchicina',
         'Benzbromarona',
     ]),
     ('Osteoporose', ['antiosteoporose'], 'osso osteoporose', [
-        'Alendronato', 'Risedronato', 'Ibandronato', 'Ácido zoledrônico', 'Denosumabe', 'Teriparatida',
+        'Alendronato', 'Risedronato', 'Ibandronato', ('Ácido zoledrônico', ['antiosteoporose', 'zoledronico']),
+        ('Denosumabe', ['antiosteoporose', 'denosumabe']), 'Teriparatida',
         'Cálcio + vitamina D', 'Colecalciferol (vitamina D)',
     ]),
     ('Urologia', ['urologico'], 'prostata bexiga', [
@@ -159,7 +166,7 @@ GRUPOS = [
     ]),
     ('Hormônios e oncologia hormonal', ['hormonio'], 'hormonio anticoncepcional reposicao', [
         'Anticoncepcional combinado', 'Anticoncepcional só com progestagênio', 'Terapia hormonal da menopausa',
-        'Tibolona', 'Testosterona', 'Tamoxifeno', 'Fludrocortisona',
+        'Tibolona', ('Testosterona', ['hormonio', 'testosterona']), ('Tamoxifeno', ['hormonio', 'tamoxifeno']), 'Fludrocortisona',
         ('Anastrozol', ['inibidor_aromatase']), ('Letrozol', ['inibidor_aromatase']),
         ('Exemestano', ['inibidor_aromatase']),
     ]),
@@ -184,8 +191,12 @@ GRUPOS = [
         ('Degarelix|antagonista gnrh bloqueio androgenico', ['oncologico', 'bloqueio_hormonal']),
     ]),
     ('Antirretrovirais', ['tarv'], 'hiv tarv prep', [
-        'Tenofovir + lamivudina + dolutegravir', 'Dolutegravir', 'Tenofovir + entricitabina',
-        'Bictegravir + entricitabina + tenofovir alafenamida', 'Darunavir + ritonavir', 'Cabotegravir',
+        # tenofovir (TDF e TAF): creatinina e EAS a cada 3-6 meses na PVHA (MS 2024, Quadro 10). Tenofovir +
+        # entricitabina e cabotegravir sem HIV marcado são PrEP (PCDT PrEP, Portaria SECTICS/MS nº 55/2024).
+        ('Tenofovir + lamivudina + dolutegravir', ['tarv', 'tenofovir']), 'Dolutegravir',
+        ('Tenofovir + entricitabina', ['tarv', 'tenofovir', 'prep']),
+        ('Bictegravir + entricitabina + tenofovir alafenamida', ['tarv', 'tenofovir', 'tenofovir_alafenamida']),
+        'Darunavir + ritonavir', ('Cabotegravir', ['tarv', 'prep']),
     ]),
 ]
 

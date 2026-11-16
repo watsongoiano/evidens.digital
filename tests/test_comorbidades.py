@@ -137,7 +137,7 @@ def test_sop_rastreia_glicemia_independente_do_imc():
     ('fibrilacao_atrial', 'Ecocardiograma transtorácico'),
     ('doenca_celiaca', 'Anticorpo antitransglutaminase tecidual IgA, soro'),
     ('neoplasia_ativa', 'HBsAg, anti-HBc total e anti-HBs'),
-    ('osteoporose', 'Paratormônio (PTH), soro'),
+    ('osteoporose', 'Densitometria óssea (DEXA)'),
     ('cirurgia_bariatrica', 'Ácido fólico, soro'),
     ('gota', 'Creatinina, soro'),
 ])

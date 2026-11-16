@@ -312,6 +312,27 @@
           <label class="opcao" for="det_rcu_cep"><input type="checkbox" id="det_rcu_cep" name="comorbidades" value="rcu_cep">Colangite esclerosante primária</label>
         </div>
       </div>
+      <div id="detalhes-doenca_renal" class="bloco-condicional" data-comorbidade="doenca_renal" hidden>
+        <p class="campo-rotulo text-teal-dark">Doença renal crônica: estágio</p>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Define a frequência de TFG, albuminúria e dos exames de G3a em diante (KDIGO 2024). Com a creatinina informada, o estágio G é calculado.</p>
+        <div class="opcoes">
+          <label class="opcao" for="det_drc_g1_g2"><input type="checkbox" id="det_drc_g1_g2" name="comorbidades" value="drc_g1_g2">TFG ≥ 60 (G1-G2, com albuminúria ou lesão renal)</label>
+          <label class="opcao" for="det_drc_g3a"><input type="checkbox" id="det_drc_g3a" name="comorbidades" value="drc_g3a">TFG 45-59 (G3a)</label>
+          <label class="opcao" for="det_drc_g3b"><input type="checkbox" id="det_drc_g3b" name="comorbidades" value="drc_g3b">TFG 30-44 (G3b)</label>
+          <label class="opcao" for="det_drc_g4"><input type="checkbox" id="det_drc_g4" name="comorbidades" value="drc_g4">TFG 15-29 (G4)</label>
+          <label class="opcao" for="det_drc_g5"><input type="checkbox" id="det_drc_g5" name="comorbidades" value="drc_g5">TFG &lt; 15 (G5)</label>
+          <label class="opcao" for="det_drc_a1"><input type="checkbox" id="det_drc_a1" name="comorbidades" value="drc_a1">uACR &lt; 30 mg/g (A1)</label>
+          <label class="opcao" for="det_drc_a2"><input type="checkbox" id="det_drc_a2" name="comorbidades" value="drc_a2">uACR 30-300 mg/g (A2)</label>
+          <label class="opcao" for="det_drc_a3"><input type="checkbox" id="det_drc_a3" name="comorbidades" value="drc_a3">uACR &gt; 300 mg/g (A3)</label>
+        </div>
+      </div>
+      <div id="detalhes-osteoporose" class="bloco-condicional" data-comorbidade="osteoporose" hidden>
+        <p class="campo-rotulo text-teal-dark">Osteoporose: o que se aplica</p>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Define a investigação de causas secundárias (BHOF 2022).</p>
+        <div class="opcoes">
+          <label class="opcao" for="det_osteoporose_diagnostico"><input type="checkbox" id="det_osteoporose_diagnostico" name="comorbidades" value="osteoporose_diagnostico">Diagnóstico recente, causas secundárias ainda não investigadas</label>
+        </div>
+      </div>
       <div id="detalhes-hepatite_b_cronica" class="bloco-condicional" data-comorbidade="hepatite_b_cronica" hidden>
         <p class="campo-rotulo text-teal-dark">Hepatite B: o que se aplica</p>
         <p class="text-[12px] text-ink/55 -mt-1 mb-3">Define o rastreio de carcinoma hepatocelular sem cirrose (AASLD 2018).</p>
@@ -619,7 +640,7 @@
             <li role="option" data-valor="risanquizumabe" data-busca="risanquizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Risanquizumabe</li>
             <li role="option" data-valor="guselcumabe" data-busca="guselcumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Guselcumabe</li>
             <li role="option" data-valor="natalizumabe" data-busca="natalizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Natalizumabe</li>
-            <li role="option" data-valor="ocrelizumabe" data-busca="ocrelizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Ocrelizumabe</li>
+            <li role="option" data-valor="ocrelizumabe" data-busca="ocrelizumabe imunossupressores e imunobiologicos imunossupressor imunobiologico biologico anti-cd20" data-imuno="1">Ocrelizumabe</li>
             <li role="option" data-valor="fingolimode" data-busca="fingolimode imunossupressores e imunobiologicos imunossupressor imunobiologico biologico " data-imuno="1">Fingolimode</li>
             <li class="combo-grupo" role="presentation">Reumatologia e gota</li>
             <li role="option" data-valor="hidroxicloroquina" data-busca="hidroxicloroquina reumatologia e gota reumatismo gota " data-detalhe="hidroxicloroquina">Hidroxicloroquina</li>
@@ -769,6 +790,7 @@
             <li role="option" data-valor="osteoporose_fratura" data-busca="fratura de quadril em pai ou mae osteoporose ">Fratura de quadril em pai ou mãe</li>
             <li role="option" data-valor="trombose" data-busca="trombose venosa ou trombofilia tvp tep embolia ">Trombose venosa ou trombofilia</li>
             <li role="option" data-valor="glaucoma" data-busca="glaucoma olho ">Glaucoma</li>
+            <li role="option" data-valor="barrett_esofago" data-busca="esofago de barrett ou adenocarcinoma de esofago refluxo esofago ">Esôfago de Barrett ou adenocarcinoma de esôfago</li>
             <li class="combo-vazio" role="presentation" hidden>Nada encontrado.</li>
           </ul>
         </div>

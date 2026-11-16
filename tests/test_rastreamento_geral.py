@@ -206,7 +206,7 @@ def test_sifilis_com_prep_e_orientacao_nos_demais(client):
     assert SIFILIS not in _recs(client, idade=25)
     assert 'Sífilis: testar com risco aumentado' in _orientacoes(client, idade=25)
     recs = _recs(client, idade=25, medicacoes=['tenofovir_entricitabina'])
-    assert recs[SIFILIS]['subtitulo'] == 'Em uso de PrEP | Conforme protocolo de PrEP'
+    assert recs[SIFILIS]['subtitulo'] == 'PrEP | A cada 4 meses'   # PCDT PrEP 2024, Quadro 5 (src/utils/condicoes.py)
     assert 'Sífilis: testar com risco aumentado' not in _orientacoes(client, idade=25, medicacoes=['tenofovir_entricitabina'])
 
 
@@ -310,10 +310,12 @@ def test_lipidios_depois_dos_75_sao_decisao_individual(client):
 # ── B-07: o motivo do diabetes entra no perfil lipídico ──────────────────────────
 
 def test_perfil_lipidico_do_diabetico(client):
+    # Regra única em src/utils/condicoes.py (auditoria D, D-11): ADA 2026 sem estatina; ACC/AHA 2018 com tratamento.
     sem = _recs(client, idade=55, comorbidades=['diabetes'])[LIPIDIOS]
-    assert 'Também: Diabéticos | Avaliação inicial' in sem['subtitulo'] and 'ADA 2026 (seção 10)' in sem['referencia']
+    assert sem['subtitulo'] == 'Diabéticos | Anual' and 'ADA 2026 (seção 10)' in sem['referencia']
+    assert _recs(client, idade=35, comorbidades=['diabetes'])[LIPIDIOS]['subtitulo'].endswith('A cada 5 anos')
     com = _recs(client, idade=55, comorbidades=['diabetes'], medicacoes_continuo='atorvastatina 20 mg')[LIPIDIOS]
-    assert 'Diabéticos em uso de estatina | Anual' in com['subtitulo']
+    assert com['subtitulo'].endswith('A cada 3-12 meses')
     assert 'Diabéticos' not in _recs(client, idade=55)[LIPIDIOS]['subtitulo']
 
 
