@@ -340,3 +340,21 @@ def test_imagem_com_guia_do_plano_tem_as_folhas_e_depois_as_guias():
     paginas = [p.extract_text() for p in PdfReader(io.BytesIO(
         pdf_minutas.gerar_pdf_exames_imagem({'nome': 'Paciente', 'sexo': 'feminino', 'idade': 60}, imagem, guia=guia))).pages]
     assert len(paginas) == 3 and 'SP/SADT' not in paginas[0] + paginas[1] and 'SP/SADT' in paginas[2]
+
+
+def test_assinatura_encosta_no_rodape_e_pagina_fica_no_canto():
+    """O bloco da assinatura termina logo acima do número da página, que fica no canto inferior direito."""
+    import io
+    from src.utils import pdf_minutas
+    pdf = pdf_minutas.gerar_pdf_exames_laboratoriais(
+        {'nome': 'Paciente Fictício', 'idade': 50, 'sexo': 'masculino'}, [{'titulo': 'Creatinina, soro'}],
+        responsavel={'nome': 'Dra. Exemplo Teste', 'crm': 'CRM-GO 00000'})
+    pagina = PdfReader(io.BytesIO(pdf)).pages[0]
+    trechos = []
+    pagina.extract_text(visitor_text=lambda texto, cm, tm, fonte, tamanho: trechos.append((texto.strip(), tm[4], tm[5])))
+    mm = 72 / 25.4
+    x_numero, y_numero = next((x, y) for t, x, y in trechos if 'Página 1/1' in t or t.endswith('1/1'))
+    y_aviso = next(y for t, x, y in trechos if 'Documento sem assinatura digital' in t)
+    assert y_numero <= 9 * mm                                        # perto da borda de baixo
+    assert x_numero >= float(pagina.mediabox.width) - 40 * mm         # à direita
+    assert 0 < y_aviso - y_numero <= 8 * mm                          # assinatura logo acima, sem faixa em branco
