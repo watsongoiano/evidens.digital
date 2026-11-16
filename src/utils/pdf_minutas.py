@@ -28,7 +28,7 @@ CONFIRA = 'Confira a assinatura em validar.iti.gov.br'
 TITULOS = {'laboratorio': 'SOLICITAÇÃO DE EXAMES LABORATORIAIS', 'imagem': 'SOLICITAÇÃO DE EXAMES DE IMAGEM',
            'vacina': 'RECEITA DE VACINAS'}
 # Textos fixos das minutas (os testes conferem que cada um tem par em inglês).
-FIXOS = ('Solicito:', 'Prescrevo:', 'Data de emissão', 'Paciente', 'Sexo', 'Idade', 'anos', 'Página', 'Feminino', 'Masculino',
+FIXOS = ('Solicito:', 'Indicação clínica:', 'Prescrevo:', 'Data de emissão', 'Paciente', 'Sexo', 'Idade', 'anos', 'Página', 'Feminino', 'Masculino',
          'Não informado', 'Não informada', 'Minuta preparada por', 'estudante de medicina', 'Vacina', 'Obs.:',
          ASSINADO_POR, CERTIFICADO, CONFIRA)
 MESES_EN = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
@@ -524,8 +524,8 @@ def _anexar_guias(pdf, dados_paciente, exames, guia):
                         parte + 1, partes)
 
 
-def _folha_de_pedido(pdf, dados_paciente, exames, numerar=True):
-    """Uma folha de pedido: dados do paciente, "Solicito:", os exames e a assinatura."""
+def _folha_de_pedido(pdf, dados_paciente, exames, numerar=True, justificativa=''):
+    """Uma folha de pedido: dados do paciente, "Solicito:", os exames, a justificativa e a assinatura."""
     pdf.set_auto_page_break(auto=True, margin=pdf.margem_inferior)    # a assinatura da folha anterior desliga
     pdf.add_page()
     pdf.dados_do_paciente(dados_paciente)
@@ -546,6 +546,13 @@ def _folha_de_pedido(pdf, dados_paciente, exames, numerar=True):
             pdf.set_x(30)
             pdf.multi_cell(0, 5, _texto(pdf.t('Obs.:') + ' ' + pdf.t(quando.strip()[:160])))
             pdf.set_text_color(20, 41, 47)
+    if justificativa:
+        pdf.ln(3)
+        pdf.set_font('DejaVu', 'B', 10)
+        pdf.cell(0, 6, pdf.t('Indicação clínica:'), new_x='LMARGIN', new_y='NEXT')
+        pdf.set_font('DejaVu', '', 10)
+        pdf.set_x(24)
+        pdf.multi_cell(0, 5.5, _texto(justificativa, 150))
     pdf.assinatura()
 
 
@@ -559,15 +566,15 @@ def _com_timbrado(pdf, timbrado, paginas=None):
 
 
 def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='pt', guia=None, timbrado=None,
-                   assinatura=None):
+                   assinatura=None, justificativa=''):
     pdf = _Minuta(TITULOS[categoria], idioma, timbrado, assinatura)
     pdf.responsavel = responsavel
     if categoria == 'imagem':
         # Exames de imagem: um pedido por folha (cada serviço de imagem fica com o seu), no mesmo PDF.
         for exame in exames:
-            _folha_de_pedido(pdf, dados_paciente, [exame], numerar=False)
+            _folha_de_pedido(pdf, dados_paciente, [exame], numerar=False, justificativa=justificativa)
     else:
-        _folha_de_pedido(pdf, dados_paciente, exames)
+        _folha_de_pedido(pdf, dados_paciente, exames, justificativa=justificativa)
     paginas_do_pedido = pdf.page_no()
     if guia:
         _anexar_guias(pdf, dados_paciente, exames, dict(guia, responsavel=responsavel))
@@ -575,13 +582,13 @@ def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='
 
 
 def gerar_pdf_exames_laboratoriais(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None,
-                                   assinatura=None):
-    return _pdf_de_exames(dados_paciente, exames, 'laboratorio', responsavel, idioma, guia, timbrado, assinatura)
+                                   assinatura=None, justificativa=''):
+    return _pdf_de_exames(dados_paciente, exames, 'laboratorio', responsavel, idioma, guia, timbrado, assinatura, justificativa)
 
 
 def gerar_pdf_exames_imagem(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None,
-                            assinatura=None):
-    return _pdf_de_exames(dados_paciente, exames, 'imagem', responsavel, idioma, guia, timbrado, assinatura)
+                            assinatura=None, justificativa=''):
+    return _pdf_de_exames(dados_paciente, exames, 'imagem', responsavel, idioma, guia, timbrado, assinatura, justificativa)
 
 
 def gerar_pdf_vacinas(dados_paciente, vacinas, responsavel=None, idioma='pt', timbrado=None, assinatura=None):

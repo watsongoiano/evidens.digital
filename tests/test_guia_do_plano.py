@@ -316,3 +316,38 @@ def test_nome_da_operadora_no_cabecalho_so_na_guia_unimed(app, contas):
     assert 'Unimed Goiânia' in textos['Unimed Goiânia']
     assert 'Bradesco' not in textos['Bradesco Saúde'] and 'Unimed' not in textos['Bradesco Saúde']
     assert 'SP/SADT' in textos['Bradesco Saúde']
+
+
+# --- Justificativa (campo do diálogo "Deseja acrescentar algum exame?") ---------
+
+def test_justificativa_sai_no_pedido_e_vira_a_indicacao_da_guia(app, contas):
+    cliente, _ = _conta(app, contas)
+    cid = cliente.post('/api/auth/credenciamentos', json=PLANO).get_json()['credenciamento']['id']
+    justificativa = 'Dor torácica atípica, hipertensão'
+    resposta = cliente.post('/api/gerar-pdf-exames-laboratoriais', json={
+        'dados_paciente': PACIENTE, 'recomendacoes': EXAMES, 'justificativa': justificativa,
+        'guia': {'credenciamento_id': cid, 'carteira': '123'}})
+    assert resposta.status_code == 200
+    pedido, *guias = _paginas(resposta.data)
+    assert 'Indicação clínica:' in pedido and justificativa in pedido
+    assert justificativa in '\n'.join(guias)
+
+
+def test_justificativa_sem_guia_e_recusa_da_longa(app, contas):
+    cliente, _ = _conta(app, contas)
+    resposta = cliente.post('/api/gerar-pdf-exames-imagem', json={
+        'dados_paciente': PACIENTE, 'recomendacoes': [{'titulo': 'Eletrocardiograma de repouso', 'categoria': 'imagem'}],
+        'justificativa': 'Check-up — 65 anos'})
+    assert resposta.status_code == 200 and 'Check-up — 65 anos' in _paginas(resposta.data)[0]
+    sem = cliente.post('/api/gerar-pdf-exames-laboratoriais', json={'dados_paciente': PACIENTE, 'recomendacoes': EXAMES})
+    assert 'Indicação clínica' not in _paginas(sem.data)[0]
+    longa = cliente.post('/api/gerar-pdf-exames-laboratoriais', json={
+        'dados_paciente': PACIENTE, 'recomendacoes': EXAMES, 'justificativa': 'x' * 301})
+    assert longa.status_code == 400
+
+
+def test_campo_da_justificativa_fica_no_dialogo_de_acrescimo():
+    from pathlib import Path
+    html = (Path(__file__).resolve().parent.parent / 'intelligent-tools.html').read_text(encoding='utf-8')
+    dialogo = html[html.index('id="dialogoAcrescimo"'):html.index('id="guiaPainel"')]
+    assert 'id="justificativaPainel"' in dialogo and 'id="guiaIndicacao"' in dialogo

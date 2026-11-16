@@ -3009,7 +3009,10 @@
   "Sorologias e rastreio": "Serology and screening",
   "Albumina/creatinina (urina)": "Albumin/creatinine (urine)",
   "Albumina sérica": "Serum albumin",
-  "Hepatite B": "Hepatitis B"
+  "Hepatite B": "Hepatitis B",
+  "Indicação clínica:": "Clinical indication:",
+  "Justificativa (indicação clínica)": "Justification (clinical indication)",
+  "Justificativa inválida ou longa demais": "Invalid or overly long justification"
  },
  "padroes": [
   [
