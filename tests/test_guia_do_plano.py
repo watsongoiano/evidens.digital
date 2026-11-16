@@ -243,7 +243,7 @@ def test_valores_no_limite_saem_inteiros_na_guia(app, contas):
     assert resposta.status_code == 200
     texto = ' '.join(' '.join(_paginas(resposta.data)[1:]).split())
     esperados = [carteira, indicacao, paciente['nome'], plano['codigo_prestador'], plano['nome_contratado'],
-                 plano['operadora'], tuss.DESCRICOES['40310418'], itens[1]['titulo'].strip()]
+                 tuss.DESCRICOES['40310418'], itens[1]['titulo'].strip()]
     for esperado in esperados:
         assert ' '.join(esperado.split()) in texto, esperado
     assert '…' not in texto
@@ -302,3 +302,17 @@ def test_dialogo_preenche_tambem_a_identificacao_se_a_primeira_carga_falhou():
     tela = _tela()
     guia = re.search(r'async function prepararGuia\(categoria\) \{(.*?)\n        \}', tela, re.S).group(1)
     assert guia.index('aplicarPlanosNaIdentificacao(planos)') < guia.index("preencherPlanos(seletor, planos.lista)")
+
+
+def test_nome_da_operadora_no_cabecalho_so_na_guia_unimed(app, contas):
+    """O canto do logotipo leva o nome só nas guias Unimed; nas outras operadoras fica em branco."""
+    cliente, _ = _conta(app, contas)
+    textos = {}
+    for operadora in ('Unimed Goiânia', 'Bradesco Saúde'):
+        cid = cliente.post('/api/auth/credenciamentos', json=dict(PLANO, operadora=operadora)).get_json()['credenciamento']['id']
+        r = cliente.post('/api/gerar-pdf-exames-laboratoriais', json={'dados_paciente': PACIENTE, 'recomendacoes': EXAMES,
+                                                                       'guia': {'credenciamento_id': cid, 'carteira': '1'}})
+        textos[operadora] = ' '.join(_paginas(r.data)[1:])
+    assert 'Unimed Goiânia' in textos['Unimed Goiânia']
+    assert 'Bradesco' not in textos['Bradesco Saúde'] and 'Unimed' not in textos['Bradesco Saúde']
+    assert 'SP/SADT' in textos['Bradesco Saúde']

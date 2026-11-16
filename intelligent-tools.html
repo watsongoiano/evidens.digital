@@ -1208,6 +1208,7 @@
             linha.append(campo('basis-full sm:basis-0 sm:flex-1', 'Exame', nome), campo('flex-1 sm:flex-none sm:w-44', 'Feito em', quando), retirar);
             listaDeBusca(nome, () => examesDoCatalogo(['laboratorio', 'imagem']), titulo => {
                 nomeDoExame[T(titulo).toLowerCase()] = titulo;
+                nome.dispatchEvent(new Event('change', { bubbles: true }));   // os resultados deixam de valer
                 quando.focus();
             });
             if (exame) linha.querySelector('[data-exame-anterior]').value = exame;
@@ -2698,17 +2699,17 @@
         });
 
         // Colo do útero (src/utils/colo_utero.py): o resultado do último teste de HPV só conta a partir dos 25 anos
-        // (MS 2025, recomendação 11) ou, com HIV ou imunossupressão, em qualquer idade; sem colo (histerectomia
-        // total), não há rastreio. O rastreio anterior adequado e a NIC 2+ tratada só decidem depois dos 60 anos
+        // (MS 2025, recomendação 11) ou, com HIV ou imunossupressão, em qualquer idade. Sem colo (histerectomia
+        // total), o histórico de rastreio não se aplica. O rastreio anterior adequado e a NIC 2+ tratada só decidem depois dos 60 anos
         // (MS: teste negativo depois dos 60 encerra; ACOG: parar depois dos 65 com rastreio adequado).
         function atualizarCamposDoColo() {
             const feminino = document.getElementById('sexo').value === 'feminino';
             const idade = parseInt(document.getElementById('idade').value, 10);
             const marcada = v => !!document.querySelector(`input[name="comorbidades"][value="${v}"]:checked`);
             const imuno = document.getElementById('imunossupressao').value === 'sim' || marcada('hiv');
-            const comColo = feminino && !marcada('histerectomia_total');
-            const hpv = comColo && (imuno || idade >= 25);
-            const historico = comColo && !imuno && idade >= 60;
+            // Com histerectomia o resultado de HPV continua: um resultado positivo segue o fluxo (colo_utero.recomendar).
+            const hpv = feminino && (imuno || idade >= 25);
+            const historico = feminino && !marcada('histerectomia_total') && !imuno && idade >= 60;
             document.getElementById('hpv-item').style.display = hpv ? 'block' : 'none';
             document.getElementById('colo-historico').style.display = historico ? '' : 'none';
             if (!hpv) document.getElementById('hpv_resultado').value = '';

@@ -133,3 +133,9 @@ def test_uacr_define_a_categoria_a_da_drc(client):
     uacr = next(x for x in r['recommendations'] if x['titulo'] == 'Relação albumina/creatinina urinária (uACR)')
     assert 'G3b A3' in uacr['subtitulo']
     assert 'Doença renal crônica: estágio incompleto' not in [o['titulo'] for o in r['orientacoes']]
+
+
+def test_selecionar_exame_na_lista_invalida_o_resultado():
+    html = (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
+    trecho = html[html.index("listaDeBusca(nome, () => examesDoCatalogo"):]
+    assert "nome.dispatchEvent(new Event('change', { bubbles: true }))" in trecho[:400]

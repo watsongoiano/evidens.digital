@@ -398,9 +398,11 @@ def _pagina_da_guia(pdf, dados_paciente, guia, linhas, parte, partes):
     pdf.add_page(orientation='L', format='A4')   # a guia é sempre A4, com ou sem papel timbrado
     cred, resp = guia['credenciamento'], guia.get('responsavel') or {}
     uf, numero = _numero_do_crm(resp.get('crm'))
-    # Cabeçalho: o nome da operadora (sem logotipo), o título do padrão e o nº da guia no prestador
-    x, y = _g(30, 20)
-    _encaixar(pdf, x, y, _g(230), _g(70), cred['operadora'], 12, estilo='B')
+    # Cabeçalho: o título do padrão e o nº da guia no prestador. O canto do logotipo leva o nome da operadora só
+    # nas guias Unimed (pedido do médico responsável); nas demais operadoras fica em branco.
+    if re.search(r'\bunimed\b', cred['operadora'] or '', re.IGNORECASE):
+        x, y = _g(30, 20)
+        _encaixar(pdf, x, y, _g(230), _g(70), cred['operadora'], 12, estilo='B')
     pdf.set_text_color(20, 41, 47)
     pdf.set_font('DejaVu', 'B', 9.5)
     x, y = _g(470, 28)
