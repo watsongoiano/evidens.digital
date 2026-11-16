@@ -135,6 +135,8 @@ def responsavel_de(usuario):
 
 
 MARGEM_INFERIOR = 42      # mm reservados à assinatura e ao rodapé de cada folha
+PISO_DA_PAGINA = 8        # mm da borda de baixo (ou do rodapé do timbrado) até o número da página
+FOLGA_DO_RODAPE = 2       # mm entre o fim da assinatura e o número da página
 
 
 class _Minuta(FPDF):
@@ -180,10 +182,13 @@ class _Minuta(FPDF):
     def footer(self):
         if getattr(self, 'em_guia', False):
             return
-        self.set_y(-14 - self.base)
+        # Número da página no canto inferior direito da folha (com timbrado, logo acima do rodapé dele).
+        self.set_y(-(PISO_DA_PAGINA + self.base))
         self.set_font('DejaVu', '', 7.5)
         self.set_text_color(90, 100, 103)
-        self.cell(0, 5, f'{self.t("Página")} {self.page_no()}/{{nb}}', align='R')
+        texto = f'{self.t("Página")} {self.page_no()}/{{nb}}'
+        self.set_x(self.w - 8 - 40)
+        self.cell(40, 4, texto, align='R')
 
     def dados_do_paciente(self, dados):
         idade = dados.get('idade')
@@ -200,50 +205,51 @@ class _Minuta(FPDF):
         self.ln(5)
 
     def assinatura(self):
-        """Linha de assinatura no fim da última página (nova página se não couber)."""
+        """Assinatura no fim da última página (nova página se não couber), encostada no rodapé: o bloco é medido
+        e termina logo acima do número da página, sem faixa em branco entre os dois."""
         if self.get_y() > self.h - self.margem_inferior - 31:
             self.add_page()
         # A assinatura fica dentro da margem reservada à quebra automática: desligá-la aqui.
         self.set_auto_page_break(auto=False)
-        self.set_y(-52 - self.base)
         resp = getattr(self, 'responsavel', None)
-        if self.assinante:
-            return self._assinatura_digital(resp)
-        self.set_draw_color(20, 41, 47)
-        self.line(self.w / 2 - 45, self.get_y(), self.w / 2 + 45, self.get_y())
-        self.set_font('DejaVu', '', 9.5)
-        self.set_text_color(20, 41, 47)
-        if resp and not resp.get('estudante'):
-            self.set_font('DejaVu', 'B', 9.5)
-            self.cell(0, 5, resp['nome'], align='C', new_x='LMARGIN', new_y='NEXT')
-            self.set_font('DejaVu', '', 9.5)
-            if resp.get('crm'):
-                self.cell(0, 5, resp['crm'], align='C', new_x='LMARGIN', new_y='NEXT')
-            self.set_font('DejaVu', '', 8.5)
-        self.cell(0, 5, self.t(LINHA_ASSINATURA), align='C', new_x='LMARGIN', new_y='NEXT')
-        self.set_font('DejaVu', '', 8)
-        self.set_text_color(90, 100, 103)
-        if resp and resp.get('estudante'):
-            self.multi_cell(0, 4.5, f"{self.t('Minuta preparada por')} {resp['nome']} ({self.t('estudante de medicina')}).",
-                            align='C', new_x='LMARGIN', new_y='NEXT')
-        self.multi_cell(0, 4.5, self.t(AVISO), align='C')
+        linhas = self._linhas_da_assinatura(resp)   # (estilo, tamanho, altura, texto, cinza)
+        largura = self.w - self.l_margin - self.r_margin
+        altura = 0
+        for estilo, tamanho, h, texto, _ in linhas:
+            self.set_font('DejaVu', estilo, tamanho)
+            altura += len(self.multi_cell(largura, h, texto, align='C', dry_run=True, output='LINES')) * h
+        fim = self.h - self.base - PISO_DA_PAGINA - FOLGA_DO_RODAPE
+        self.set_y(fim - altura - (0 if self.assinante else 1))
+        if not self.assinante:
+            self.set_draw_color(20, 41, 47)
+            self.line(self.w / 2 - 45, self.get_y(), self.w / 2 + 45, self.get_y())
+            self.ln(1)
+        for estilo, tamanho, h, texto, cinza in linhas:
+            self.set_font('DejaVu', estilo, tamanho)
+            self.set_text_color(*((90, 100, 103) if cinza else (20, 41, 47)))
+            self.multi_cell(largura, h, texto, align='C', new_x='LMARGIN', new_y='NEXT')
 
-    def _assinatura_digital(self, resp):
-        """No lugar da linha para caneta e carimbo: quem assinou, com que certificado e onde conferir."""
-        self.set_text_color(20, 41, 47)
-        if resp:
-            self.set_font('DejaVu', 'B', 9.5)
-            self.cell(0, 5, resp['nome'], align='C', new_x='LMARGIN', new_y='NEXT')
-            self.set_font('DejaVu', '', 9.5)
+    def _linhas_da_assinatura(self, resp):
+        t, linhas = self.t, []
+        if self.assinante:
+            # No lugar da linha para caneta e carimbo: quem assinou, com que certificado e onde conferir.
+            if resp:
+                linhas.append(('B', 9.5, 5, resp['nome'], False))
+                if resp.get('crm'):
+                    linhas.append(('', 9.5, 5, resp['crm'], False))
+            linhas.append(('', 8.5, 4.5, f"{t(ASSINADO_POR)} {_texto(self.assinante['titular'], 150)}", False))
+            linhas.append(('', 8, 4.5, f'{t(CERTIFICADO)} · {t(CONFIRA)}', True))
+            return linhas
+        medico = resp and not resp.get('estudante')
+        if medico:
+            linhas.append(('B', 9.5, 5, resp['nome'], False))
             if resp.get('crm'):
-                self.cell(0, 5, resp['crm'], align='C', new_x='LMARGIN', new_y='NEXT')
-        self.ln(1)
-        self.set_font('DejaVu', '', 8.5)
-        self.multi_cell(0, 4.5, f"{self.t(ASSINADO_POR)} {_texto(self.assinante['titular'], 150)}",
-                        align='C', new_x='LMARGIN', new_y='NEXT')
-        self.set_font('DejaVu', '', 8)
-        self.set_text_color(90, 100, 103)
-        self.multi_cell(0, 4.5, f'{self.t(CERTIFICADO)} · {self.t(CONFIRA)}', align='C')
+                linhas.append(('', 9.5, 5, resp['crm'], False))
+        linhas.append(('', 8.5 if medico else 9.5, 5, t(LINHA_ASSINATURA), False))
+        if resp and resp.get('estudante'):
+            linhas.append(('', 8, 4.5, f"{t('Minuta preparada por')} {resp['nome']} ({t('estudante de medicina')}).", True))
+        linhas.append(('', 8, 4.5, t(AVISO), True))
+        return linhas
 
     def bytes(self):
         return bytes(self.output())
