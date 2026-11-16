@@ -8,16 +8,11 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HIV 1 e 2, soro",
-        "Anti-HCV IgG, soro"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso"
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -47,17 +42,12 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -84,17 +74,12 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -151,19 +136,18 @@
         "HBsAg, soro",
         "Anti-HCV IgG, soro",
         "Rubéola IgG, soro",
+        "Hormônio Tireoestimulante (TSH), soro",
         "Citomegalovírus IgG e IgM, soro",
         "Parasitológico de fezes",
         "Tipagem sanguínea ABO e fator Rh",
         "Coombs indireto, soro",
         "Toxoplasmose IgG e IgM, soro",
         "Clamídia e gonococo, PCR (urina ou swab)",
-        "Creatinina, soro",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
         "Ultrassonografia morfológica de 2º trimestre",
-        "Ultrassonografia transvaginal para medida do colo uterino",
-        "Eletrocardiograma de repouso"
+        "Ultrassonografia transvaginal para medida do colo uterino"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -209,15 +193,15 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
-        "Anti-HCV IgG, soro"
+        "Anti-HIV 1 e 2, soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "Colonoscopia de Rastreio com ou sem biópsia"
       ],
       "vacina": [
@@ -248,16 +232,16 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
+        "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
+        "Sangue oculto nas fezes (FIT)",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "Mamografia Digital - Bilateral",
         "Colonoscopia de Rastreio com ou sem biópsia"
       ],
@@ -294,26 +278,17 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
+        "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
-        "Potássio, soro",
-        "Ácido úrico, soro",
-        "EAS - Elementos Anormais e Sedimentoscopia",
-        "Razão albumina/creatinina, urina",
+        "HBsAg, anti-HBc total e anti-HBs",
         "PSA total, soro",
-        "Hormônio Tireoestimulante (TSH), soro",
-        "Cálcio iônico, soro",
-        "Sódio, soro",
-        "Hemograma completo com plaquetas"
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)",
-        "Ecocardiograma transtorácico",
         "Colonoscopia de Rastreio com ou sem biópsia",
         "Tomografia computadorizada de tórax de baixa dose (LDCT)"
       ],
@@ -350,18 +325,20 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
+        "Relação albumina/creatinina urinária (uACR)",
+        "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Potássio, soro",
         "Ácido úrico, soro",
         "EAS - Elementos Anormais e Sedimentoscopia",
-        "Razão albumina/creatinina, urina",
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
         "PSA total, soro",
-        "Relação albumina/creatinina urinária (uACR)",
+        "Sangue oculto nas fezes (FIT)",
         "Hemograma completo com plaquetas",
         "Vitamina B12, soro",
         "Aspartato aminotransferase, soro",
@@ -373,7 +350,6 @@
       "imagem": [
         "Eletrocardiograma de repouso",
         "MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)",
-        "Ecocardiograma transtorácico",
         "Colonoscopia de Rastreio com ou sem biópsia",
         "Tomografia computadorizada de tórax de baixa dose (LDCT)",
         "Fundoscopia (Exame de fundo de olho)"
@@ -412,17 +388,20 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
+        "Relação albumina/creatinina urinária (uACR)",
+        "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Potássio, soro",
         "Ácido úrico, soro",
         "EAS - Elementos Anormais e Sedimentoscopia",
-        "Razão albumina/creatinina, urina",
+        "Glicose, soro",
         "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)",
         "Hormônio Tireoestimulante (TSH), soro",
         "Cálcio iônico, soro",
         "Sódio, soro",
@@ -431,7 +410,6 @@
       "imagem": [
         "Eletrocardiograma de repouso",
         "MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)",
-        "Ecocardiograma transtorácico",
         "Colonoscopia de Rastreio com ou sem biópsia"
       ],
       "vacina": [
@@ -466,20 +444,22 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
+        "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
+        "Sangue oculto nas fezes (FIT)",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular",
+        "Hemoglobina glicada (HbA1c), soro",
+        "Glicose, soro",
         "Relação albumina/creatinina urinária (uACR)",
+        "Creatinina, soro",
         "Hemograma completo com plaquetas",
         "Aspartato aminotransferase, soro",
         "Alanina aminotransferase, soro"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "Mamografia Digital - Bilateral",
         "Colonoscopia de Rastreio com ou sem biópsia",
         "Fundoscopia (Exame de fundo de olho)"
@@ -513,17 +493,17 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HCV IgG, soro",
-        "PSA total, soro"
+        "HBsAg, anti-HBc total e anti-HBs",
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
-        "Colonoscopia de Rastreio com ou sem biópsia"
+        "Colonoscopia de Rastreio com ou sem biópsia",
+        "Ultrassonografia com Doppler de Aorta Abdominal"
       ],
       "vacina": [
         "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
@@ -531,8 +511,7 @@
         "Hepatite B (Engerix-B® ou Euvax B®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
-        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)"
       ]
     },
     "nao_incluidas": [
@@ -556,19 +535,18 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)",
         "Alfa-1 antitripsina, soro",
         "Gasometria arterial, sangue arterial",
         "Hemograma completo com plaquetas"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "Colonoscopia de Rastreio com ou sem biópsia",
         "Ultrassonografia com Doppler de Aorta Abdominal",
         "Tomografia computadorizada de tórax de baixa dose (LDCT)",
@@ -603,15 +581,15 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
-        "Anti-HCV IgG, soro"
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
+        "Sangue oculto nas fezes (FIT)",
+        "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "Mamografia Digital - Bilateral",
         "Densitometria óssea (DEXA)",
         "Colonoscopia de Rastreio com ou sem biópsia"
@@ -634,25 +612,61 @@
     ],
     "outras_recomendacoes": []
   },
-  "h88_higido": {
+  "h69_higido": {
     "entrada": {
-      "idade": 88,
+      "idade": 69,
       "sexo": "masculino",
       "tabagismo": "nunca",
       "imunossupressao": "nao"
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HCV IgG, soro",
-        "PSA total, soro"
+        "HBsAg, anti-HBc total e anti-HBs",
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso"
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h70_higido": {
+    "entrada": {
+      "idade": 70,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Hemoglobina glicada (HbA1c), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
+        "Sangue oculto nas fezes (FIT)"
+      ],
+      "imagem": [
+        "Colonoscopia de Rastreio com ou sem biópsia"
       ],
       "vacina": [
         "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
@@ -668,6 +682,123 @@
       [
         "Febre Amarela (Stamaril®)",
         "precaucao"
+      ],
+      [
+        "PSA total, soro",
+        "nao_recomendado"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h76_higido": {
+    "entrada": {
+      "idade": 76,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Colesterol total e frações, soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ],
+      [
+        "PSA total, soro",
+        "nao_recomendado"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h88_higido": {
+    "entrada": {
+      "idade": 88,
+      "sexo": "masculino",
+      "tabagismo": "nunca",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Colesterol total e frações, soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ],
+      [
+        "PSA total, soro",
+        "nao_recomendado"
+      ]
+    ],
+    "outras_recomendacoes": []
+  },
+  "h60_fumante_sem_macos_ano": {
+    "entrada": {
+      "idade": 60,
+      "sexo": "masculino",
+      "tabagismo": "atual",
+      "imunossupressao": "nao"
+    },
+    "recomendacoes": {
+      "laboratorio": [
+        "Hemoglobina glicada (HbA1c), soro",
+        "Colesterol total e frações, soro",
+        "Lipoproteína(a) - Lp(a), soro",
+        "Anti-HIV 1 e 2, soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
+        "PSA total, soro",
+        "Sangue oculto nas fezes (FIT)"
+      ],
+      "imagem": [
+        "Colonoscopia de Rastreio com ou sem biópsia"
+      ],
+      "vacina": [
+        "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
+        "dTpa (Adacel® ou Boostrix®)",
+        "Hepatite B (Engerix-B® ou Euvax B®)",
+        "Dengue (Qdenga®)",
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Herpes Zóster (Shingrix®)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)"
+      ]
+    },
+    "nao_incluidas": [
+      [
+        "Febre Amarela (Stamaril®)",
+        "precaucao"
+      ],
+      [
+        "Tomografia computadorizada de tórax de baixa dose (LDCT)",
+        "dados_insuficientes"
       ]
     ],
     "outras_recomendacoes": []
@@ -686,15 +817,15 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
-        "Anti-HCV IgG, soro",
+        "Anticorpos anti-HCV, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Contagem de linfócitos T CD4+",
         "Carga Viral do HIV (HIV RNA)",
         "Hemograma completo com plaquetas",
+        "Creatinina, soro",
         "EAS - Elementos Anormais e Sedimentoscopia, urina",
         "Sódio, soro",
         "Potássio, soro",
@@ -703,20 +834,13 @@
         "Alanina aminotransferase, soro",
         "Fosfatase alcalina, soro",
         "Bilirrubinas totais e frações, soro",
+        "Glicose, soro",
         "Sífilis: teste treponêmico ou VDRL, soro",
         "Clamídia e gonococo, PCR (urina ou swab)",
-        "Anticorpos anti-HCV, soro",
-        "Antígeno HBs, soro",
-        "Anticorpos anti-HBc total, soro",
-        "Anticorpos anti-HBs, soro",
         "Anticorpos anti-HAV IgG, soro",
         "Toxoplasmose IgG, soro",
         "Sorologia para HTLV 1 e 2, soro",
         "Antígeno criptocócico (LF-CrAg), soro"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso",
-        "Radiografia de tórax"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -725,7 +849,14 @@
         "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "Herpes Zóster (Shingrix®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)",
+        "Haemophilus influenzae tipo b (Hib)"
+      ],
+      "imagem": [
+        "Radiografia de tórax"
       ]
     },
     "nao_incluidas": [
@@ -763,15 +894,15 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
-        "Anti-HCV IgG, soro",
+        "Anticorpos anti-HCV, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Contagem de linfócitos T CD4+",
         "Carga Viral do HIV (HIV RNA)",
         "Hemograma completo com plaquetas",
+        "Creatinina, soro",
         "EAS - Elementos Anormais e Sedimentoscopia, urina",
         "Sódio, soro",
         "Potássio, soro",
@@ -780,20 +911,13 @@
         "Alanina aminotransferase, soro",
         "Fosfatase alcalina, soro",
         "Bilirrubinas totais e frações, soro",
+        "Glicose, soro",
         "Sífilis: teste treponêmico ou VDRL, soro",
         "Clamídia e gonococo, PCR (urina ou swab)",
-        "Anticorpos anti-HCV, soro",
-        "Antígeno HBs, soro",
-        "Anticorpos anti-HBc total, soro",
-        "Anticorpos anti-HBs, soro",
         "Anticorpos anti-HAV IgG, soro",
         "Toxoplasmose IgG, soro",
         "Sorologia para HTLV 1 e 2, soro",
         "Prova tuberculínica (PPD) ou IGRA"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso",
-        "Radiografia de tórax"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -802,7 +926,13 @@
         "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "Herpes Zóster (Shingrix®)",
+        "Haemophilus influenzae tipo b (Hib)"
+      ],
+      "imagem": [
+        "Radiografia de tórax"
       ]
     },
     "nao_incluidas": [
@@ -834,15 +964,12 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
-        "Anti-HCV IgG, soro"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso"
+        "Anti-HIV 1 e 2, soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -851,7 +978,10 @@
         "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "Herpes Zóster (Shingrix®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
       ]
     },
     "nao_incluidas": [

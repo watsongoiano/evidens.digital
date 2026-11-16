@@ -51,7 +51,8 @@ def test_sem_falso_positivo_por_pedaco_de_palavra():
 def test_hba1c_imc_tfg_e_has_resistente():
     com, _, _ = coerencia.inferir({'hba1c': 6.5, 'peso': 95, 'altura': 170,
                                    'comorbidades': ['has_resistente']}, egfr=52)
-    assert {'obesidade', 'doenca_renal', 'hipertensao'} <= set(com)
+    assert {'obesidade', 'hipertensao'} <= set(com)
+    assert 'doenca_renal' not in com     # TFG < 60 isolada não marca DRC (KDIGO 2024: cronicidade ≥ 3 meses)
     assert not {'diabetes', 'diabetes_tipo_1'} & set(com)   # HbA1c ≥ 6,5% não diz o tipo: nenhuma caixa de diabetes
     com, _, inf = coerencia.inferir({'hba1c': 5.6, 'peso': 80, 'altura': 170}, egfr=75)
     assert com == [] and inf == []
@@ -116,28 +117,86 @@ def test_api_termos_para_a_tela(client):
     assert termos == coerencia.TERMOS
 
 
-@pytest.mark.parametrize('pas, pad, categoria, has', [
-    (118, 76, 'normal', False), (125, 78, 'elevada', False), (128, 82, 'estagio1', True),
-    (134, 70, 'estagio1', True), (138, 92, 'estagio2', True), (150, 85, 'estagio2', True),
+# Uma PA de consultório isolada não rotula HAS (decisão do responsável clínico; SBC 2025 e AHA/ACC 2025 pedem
+# confirmação em 2 ou mais consultas ou com MRPA/MAPA). A categoria AHA/ACC 2025 continua sendo a da medida;
+# fora da gestação, só PA ≥ 180/110 (HAS estágio 3 da SBC 2025) marca a caixa.
+@pytest.mark.parametrize('pas, pad, categoria, sbc, has', [
+    (118, 76, 'normal', 'normal', False), (125, 78, 'elevada', 'pre_hipertensao', False),
+    (128, 82, 'estagio1', 'pre_hipertensao', False), (134, 70, 'estagio1', 'pre_hipertensao', False),
+    (138, 92, 'estagio2', 'estagio1', False), (150, 85, 'estagio2', 'estagio1', False),
+    (165, 102, 'estagio2', 'estagio2', False), (179, 109, 'estagio2', 'estagio2', False),
+    (180, 95, 'estagio2', 'estagio3', True), (150, 110, 'estagio2', 'estagio3', True),
 ])
-def test_pa_pela_aha_2025(pas, pad, categoria, has):
-    assert coerencia.classificar_pa(pas, pad)['categoria'] == categoria
+def test_pa_isolada_so_marca_has_a_partir_de_180_110(pas, pad, categoria, sbc, has):
+    c = coerencia.classificar_pa(pas, pad)
+    assert c['categoria'] == categoria and c['sbc']['categoria'] == sbc
     com, _, inf = coerencia.inferir({'pas': pas, 'pad': pad})
     assert ('hipertensao' in com) is has
     if has:
-        assert 'MRPA ou MAPA' in inf[0]['motivo']
+        assert 'MRPA ou MAPA' in inf[0]['motivo'] and '180/110' in inf[0]['motivo']
 
 
-def test_pa_na_gestacao_usa_140_90():
+@pytest.mark.parametrize('pas, pad, a_confirmar', [
+    (129, 79, False), (130, 79, True), (129, 80, True), (150, 95, True), (179, 109, True), (180, 109, False),
+    (125, 78, False),
+])
+def test_pa_alterada_sem_has_fica_a_confirmar(pas, pad, a_confirmar):
+    c = coerencia.classificar_pa(pas, pad)
+    com, _, _ = coerencia.inferir({'pas': pas, 'pad': pad})
+    assert coerencia.pa_a_confirmar(c, com) is a_confirmar
+    # HAS marcada pelo médico ou anti-hipertensivo em uso: não é "a confirmar"; na gestação também não
+    assert coerencia.pa_a_confirmar(c, ['hipertensao']) is False
+    assert coerencia.pa_a_confirmar(c, coerencia.inferir({'pas': pas, 'pad': pad, 'medicacoes': ['anti_hipertensivos']})[0]) is False
+    assert coerencia.pa_a_confirmar(c, com, gestante=True) is False
+
+
+def test_pa_na_gestacao_nao_marca_hipertensao():
+    """Na gestação, PA ≥ 140/90 é hipertensão gestacional/pré-eclâmpsia (≥ 20 sem) ou provável HAS crônica a
+    confirmar (< 20 sem): o pré-natal orienta, a caixa de HAS não é marcada (ACOG PB 222)."""
     assert 'hipertensao' not in coerencia.inferir({'pas': 134, 'pad': 84}, gestante=True)[0]
-    assert 'hipertensao' in coerencia.inferir({'pas': 142, 'pad': 84}, gestante=True)[0]
+    assert 'hipertensao' not in coerencia.inferir({'pas': 142, 'pad': 84}, gestante=True)[0]
+    assert 'hipertensao' not in coerencia.inferir({'pas': 165, 'pad': 112}, gestante=True)[0]
 
 
-def test_api_devolve_classificacao_da_pa_e_pede_mapa(client):
+def test_api_pa_alterada_pede_so_mrpa_ou_mapa(client):
     corpo = {'idade': '45', 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao', 'pas': '132', 'pad': '78'}
     r = client.post('/api/checkup-intelligent', json=corpo).get_json()
     assert r['pa_classificacao']['categoria'] == 'estagio1'
-    assert any(t['titulo'].startswith('MAPA') for t in r['recommendations'])
+    assert r['pa_classificacao']['sbc']['categoria'] == 'pre_hipertensao'
+    assert not any(i['valor'] == 'hipertensao' for i in r['inferencias'])
+    recs = {t['titulo']: t for t in r['recommendations']}
+    mapa = recs['MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)']
+    assert 'Para confirmar o diagnóstico' in mapa['subtitulo'] and 'MRPA' in mapa['descricao']
+    for exame in ('Potássio, soro', 'Ácido úrico, soro', 'EAS - Elementos Anormais e Sedimentoscopia',
+                  'Relação albumina/creatinina urinária (uACR)', 'Eletrocardiograma de repouso', 'Ecocardiograma transtorácico'):
+        assert exame not in recs, exame
+    titulos = [o['titulo'] for o in r['orientacoes']]
+    assert 'PA alterada: confirmar antes de rotular HAS' in titulos
+    assert 'Divergência entre diretrizes: classificação da PA' in titulos   # 130-139/80-89: SBC chama de pré-hipertensão
+    # 150/95: HAS estágio 1 nas duas diretrizes; só a confirmação, sem aviso de divergência
+    r = client.post('/api/checkup-intelligent', json={**corpo, 'pas': '150', 'pad': '95'}).get_json()
+    titulos = [o['titulo'] for o in r['orientacoes']]
+    assert 'PA alterada: confirmar antes de rotular HAS' in titulos and 'Divergência entre diretrizes: classificação da PA' not in titulos
+    assert 'Potássio, soro' not in {t['titulo'] for t in r['recommendations']}
+    # 129/79: nada
+    r = client.post('/api/checkup-intelligent', json={**corpo, 'pas': '129', 'pad': '79'}).get_json()
+    assert not any(t['titulo'].startswith('MAPA') for t in r['recommendations'])
+
+
+@pytest.mark.parametrize('extra', [dict(pas='182', pad='100'), dict(comorbidades=['hipertensao']),
+                                   dict(medicacoes_continuo='losartana 50 mg')], ids=['pa_grave', 'marcada', 'anti_hipertensivo'])
+def test_api_bloco_de_has_so_com_has_confirmada(client, extra):
+    corpo = {'idade': '45', 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao', **extra}
+    r = client.post('/api/checkup-intelligent', json=corpo).get_json()
+    recs = {t['titulo']: t for t in r['recommendations']}
+    for exame in ('Potássio, soro', 'Ácido úrico, soro', 'Creatinina, soro', 'Relação albumina/creatinina urinária (uACR)',
+                  'Eletrocardiograma de repouso'):
+        assert exame in recs, exame
+    mapa = recs['MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)']
+    assert 'avaliar controle' in mapa['subtitulo'] and 'suspeita' not in mapa['subtitulo']
+    # ecocardiograma só com indicação (AHA/ACC 2025), com o aviso da divergência com a SBC 2025
+    assert 'Ecocardiograma transtorácico' not in recs
+    assert 'Divergência entre diretrizes: ecocardiograma na HAS' in [o['titulo'] for o in r['orientacoes']]
 
 
 @pytest.mark.parametrize('pas, pad, categoria', [
@@ -293,3 +352,30 @@ def test_has_resistente_recusada_pelo_medico_nao_volta():
     com, _, _ = coerencia.inferir({'pas': 150, 'pad': 95, 'medicacoes': medicamentos.classes_de(TRIPLA)},
                                   recusados=('has_resistente',), escolhidas=TRIPLA)
     assert 'has_resistente' not in com
+
+
+# ── Exame isolado não confirma doença (revisão externa REN-01 e DM-02) ─────────────────────
+
+@pytest.mark.parametrize('egfr, comorbidades, a_confirmar', [
+    (59.9, [], True), (45, [], True), (60, [], False), (75, [], False), (None, [], False),
+    (45, ['doenca_renal'], False),          # DRC marcada pelo médico: não é "a confirmar"
+])
+def test_tfg_abaixo_de_60_isolada_fica_a_confirmar(egfr, comorbidades, a_confirmar):
+    com, _, inf = coerencia.inferir({'comorbidades': list(comorbidades)}, egfr=egfr)
+    assert ('doenca_renal' in com) is ('doenca_renal' in comorbidades)
+    assert not [i for i in inf if i['valor'] == 'doenca_renal']
+    assert coerencia.drc_a_confirmar(egfr, com) is a_confirmar
+
+
+@pytest.mark.parametrize('dados, a_confirmar', [
+    (dict(hba1c=6.4), False), (dict(hba1c=6.5), True), (dict(hba1c=9.8), True), (dict(), False),
+    (dict(hba1c=7.0, comorbidades=['diabetes']), False), (dict(hba1c=7.0, comorbidades=['diabetes_tipo_1']), False),
+    (dict(hba1c=7.0, medicacoes=['insulina']), False),
+    (dict(hba1c=7.0, medicacoes_continuo='gliclazida 30 mg'), False),   # antidiabético marca diabetes
+    (dict(hba1c=7.0, medicacoes_continuo='metformina 850 mg'), True),  # metformina não prova diabetes
+])
+def test_hba1c_isolada_fica_a_confirmar(dados, a_confirmar):
+    com, med, inf = coerencia.inferir(dados)
+    assert coerencia.diabetes_a_confirmar(dados.get('hba1c'), com, med) is a_confirmar
+    if a_confirmar:
+        assert not set(coerencia.DIABETES) & set(com) and not [i for i in inf if i['valor'].startswith('diabetes')]

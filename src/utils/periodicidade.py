@@ -54,8 +54,11 @@ SEM_INTERVALO = {
     'antes de iniciar a tarv', 'após 8 semanas do início ou mudança de tarv', 'após 4-8 semanas do início',
     'antes de cada ciclo', 'antes de cada dose', 'no início e a cada ajuste de dose', '3-4 meses após o início',
     '3-12 meses após o início', 'se spo2 ≤ 92% ou dpoc grave', 'após 4 semanas da primeira carga viral detectável', 'em cada consulta, no máximo mensal',
+    'conforme protocolo de prep',
+    'repetir em 3 meses',  # confirmação de DRC: a data do exame alterado não adia a repetição
     # a critério clínico
     'conforme necessidade', 'conforme indicação clínica', 'fator de risco', 'adulto em risco',
+    'repetir conforme o resultado (t-score)', 'decisão individual (expectativa de vida, prevenção secundária)',
     'alvo < 6 mg/dl', 'não solicitar se >500 em 2 exames consecutivos com intervalo de 6 meses',
     # quem e a partir de quando, sem dizer de quanto em quanto tempo
     'portador ou parente de 1º grau não testado', 'a partir de 40 anos', 'a partir de 45 anos', '65-75 anos',
@@ -64,6 +67,12 @@ SEM_INTERVALO = {
     '1ª consulta', '1ª consulta após 14 semanas', '7-9 semanas', '11-13+6 semanas', '20-24 semanas',
     '24-28 semanas', '28-36 semanas', '35-37 semanas', 'rh negativo: 28 semanas',
     'suscetível: a cada trimestre', 'não realizado com 24-28 semanas: fazer agora',
+    '36-37+6 semanas', 'investigação de pré-eclâmpsia', 'agora', 'alto risco', 'protocolo institucional',
+    'dm pré-gestacional', 'gemelar monocoriônica', 'a cada 2 semanas a partir de 16 semanas',
+    '1ª consulta e com 34 semanas', '1ª consulta e pelo menos a cada 3 meses',
+    '1ª consulta, 2-4 semanas após iniciar ou trocar a tarv e a partir de 34 semanas',
+    '1º trimestre, a cada trimestre e até 1 ano pós-parto', 'medida secundária na gestação',
+    '4-12 semanas após o parto',
 }
 
 _UNIDADES = {'semana': 'semanas', 'semanas': 'semanas', 'mês': 'meses', 'meses': 'meses', 'ano': 'anos', 'anos': 'anos'}

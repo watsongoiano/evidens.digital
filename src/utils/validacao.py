@@ -76,12 +76,13 @@ CAMPOS_NUMERICOS = {
     'hba1c': (('hba1c',), 3, 20, 'HbA1c (%)'),
     'macos_ano': (('macos_ano',), 0, 300, 'Maços-ano'),
     'anos_parou_fumar': (('anos_parou_fumar',), 0, 100, 'Anos desde que parou de fumar'),
+    'idade_ccr_familiar': (('idade_ccr_familiar',), 10, 110, 'Idade do familiar mais jovem com câncer colorretal'),
     'cd4': (('cd4',), 0, 5000, 'CD4 (células/mm³)'),
     'carga_viral': (('carga_viral',), 0, 100_000_000, 'Carga viral (cópias/mL)'),
 }
 
 CAMPOS_LISTA = ('comorbidades', 'medicacoes')
-CAMPOS_SIM_NAO_OPCIONAIS = ('em_tarv', 'supressao_viral', 'exames_hiv_previos')
+CAMPOS_SIM_NAO_OPCIONAIS = ('em_tarv', 'supressao_viral', 'exames_hiv_previos', 'colo_rastreio_adequado', 'colo_nic2_previa')
 TAMANHO_MAXIMO_TEXTO = 2000
 ITENS_MAXIMOS_LISTA = 50
 
@@ -174,7 +175,11 @@ def validar_entrada(bruto):
         if numero is None or numero != int(numero):
             erro('idade', 'Idade deve ser um número inteiro de anos.')
         elif not IDADE_MINIMA <= numero <= IDADE_MAXIMA:
-            erro('idade', f'Idade fora da faixa atendida ({IDADE_MINIMA} a {IDADE_MAXIMA} anos).')
+            if numero < IDADE_MINIMA and _SIM_NAO.get(str(entrada.get('gestante') or '').strip().lower()) == SIM:
+                erro('idade', f'Idade fora da faixa atendida ({IDADE_MINIMA} a {IDADE_MAXIMA} anos). O pré-natal de '
+                              'adolescentes não é coberto pelo Evidēns.')
+            else:
+                erro('idade', f'Idade fora da faixa atendida ({IDADE_MINIMA} a {IDADE_MAXIMA} anos).')
         else:
             idade = int(numero)
             dados['idade'] = idade
@@ -253,6 +258,16 @@ def validar_entrada(bruto):
             erro('hpv_resultado', 'Último teste de DNA-HPV: não se aplica ao sexo masculino.')
         else:
             dados['hpv_resultado'] = hpv
+
+    # Atividade sexual (opcional, só para o sexo feminino): decide o rastreio de clamídia e gonococo até 24 anos
+    # (USPSTF 2021). Sem resposta, vale "não informado", que não é tratado como "não".
+    sexual = entrada.get('sexualmente_ativa')
+    sexual = sexual.strip().lower() if isinstance(sexual, str) else sexual
+    resposta = _SIM_NAO.get(sexual) if isinstance(sexual, (str, bool, type(None))) else None
+    if resposta is None:
+        erro('sexualmente_ativa', 'Vida sexual ativa: resposta inválida.')
+    elif resposta != DESCONHECIDO and sexo == 'feminino':
+        dados['sexualmente_ativa'] = resposta
 
     atividade = entrada.get('atividade_fisica')
     if isinstance(atividade, str) and len(atividade) <= 40:

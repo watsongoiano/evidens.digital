@@ -4,6 +4,7 @@ import pytest
 
 from src.utils import condicoes, hiv, periodicidade, tuss
 from src.utils.reference_links import build_reference_links
+PAINEL_HBV = 'HBsAg, anti-HBc total e anti-HBs'
 
 
 def _resposta(client, **dados):
@@ -82,9 +83,13 @@ def test_drc_g1_g2_nao_pede_exames_de_g3():
     assert 'Doença renal crônica: encaminhar ao nefrologista' not in orient
 
 
-def test_tfg_baixa_inferida_marca_drc_e_pede_uacr(client):
-    recs, _ = _resposta(client, idade=50, creatinina='1.6')   # TFG < 60: coerencia marca doenca_renal
-    assert UACR in recs and 'G3' in recs[UACR]['subtitulo']
+def test_tfg_baixa_isolada_pede_uacr_para_confirmar_sem_estagiar_drc(client):
+    # REN-01 (KDIGO 2024, PP 1.1.3.1): uma TFG < 60 isolada não é DRC; repete em 3 meses antes de estagiar.
+    recs, _ = _resposta(client, idade=50, creatinina='1.6')
+    assert recs[UACR]['subtitulo'] == 'TFG < 60 isolada, DRC a confirmar | Repetir em 3 meses'
+    assert 'G3' not in recs[UACR]['subtitulo'] and 'Paratormônio (PTH), soro' not in recs
+    recs, _ = _resposta(client, idade=50, creatinina='1.6', comorbidades=['doenca_renal'])
+    assert 'G3' in recs[UACR]['subtitulo']
 
 
 def test_detalhes_da_drc_e_da_osteoporose_estao_na_tela(client):
@@ -143,11 +148,13 @@ def test_clozapina_pede_hemograma_frequente_e_orienta_miocardite(client):
 
 def test_prep_pede_hiv_a_cada_120_dias_e_o_seguimento_do_pcdt(client):
     recs, _ = _resposta(client, idade=35, medicacoes=['tenofovir_entricitabina'])
-    assert recs['Anti-HIV 1 e 2, soro']['subtitulo'] == 'PrEP | A cada 4 meses'
-    assert recs['Sífilis: teste treponêmico ou VDRL, soro']['subtitulo'] == 'PrEP | A cada 4 meses'
-    assert recs['Anticorpos anti-HCV, soro']['subtitulo'] == 'PrEP | A cada 4 meses'
-    assert recs['Antígeno HBs, soro']['subtitulo'] == 'PrEP | Anual'
-    assert recs['Clamídia e gonococo, PCR (urina ou swab)']['subtitulo'] == 'PrEP | A cada 6 meses'
+    assert recs['Anti-HIV 1 e 2, soro']['subtitulo'].startswith('PrEP | A cada 4 meses')
+    assert recs['Sífilis: teste treponêmico ou VDRL, soro']['subtitulo'].startswith('PrEP | A cada 4 meses')
+    assert recs['Anticorpos anti-HCV, soro']['subtitulo'].startswith('PrEP | A cada 4 meses')
+    # HBsAg absorvido no painel de hepatite B quando o rastreio do adulto também o pede (deduplicação por TUSS)
+    hbv = recs.get('Antígeno HBs, soro') or recs[PAINEL_HBV]
+    assert hbv['subtitulo'].startswith('PrEP | Anual')
+    assert recs['Clamídia e gonococo, PCR (urina ou swab)']['subtitulo'].startswith('PrEP | A cada 6 meses')
     assert 'PrEP | A cada 6 meses' in recs['Creatinina, soro']['subtitulo']   # sem ClCr calculado: semestral
     assert 'Beta-hCG, soro' not in recs
 
@@ -204,8 +211,10 @@ def test_hiv_recomendar_com_tenofovir():
 
 def test_ocrelizumabe_rastreia_hbv_e_pede_igg(client):
     recs, _ = _resposta(client, idade=35, sexo='feminino', imunossupressao='sim', medicacoes=['ocrelizumabe'])
-    for titulo in ('Antígeno HBs, soro', 'Anticorpos anti-HBc total, soro', 'Anticorpos anti-HCV, soro',
-                   'Prova tuberculínica (PPD) ou IGRA'):
+    assert PAINEL_HBV in recs or {'Antígeno HBs, soro', 'Anticorpos anti-HBc total, soro'} <= set(recs)
+    if PAINEL_HBV in recs:
+        assert not recs[PAINEL_HBV]['subtitulo'].startswith('Adultos')   # o motivo do imunobiológico abre o item
+    for titulo in ('Anticorpos anti-HCV, soro', 'Prova tuberculínica (PPD) ou IGRA'):
         assert titulo in recs, titulo
     assert recs['Imunoglobulina G (IgG), soro']['subtitulo'] == 'Em uso de ocrelizumabe | Antes de cada ciclo'
 
@@ -213,7 +222,7 @@ def test_ocrelizumabe_rastreia_hbv_e_pede_igg(client):
 def test_natalizumabe_pede_anti_jcv_semestral_e_fingolimode_tem_monitorizacao(client):
     recs, _ = _resposta(client, idade=35, sexo='feminino', imunossupressao='sim', medicacoes=['natalizumabe', 'fingolimode'])
     assert recs['Anticorpo anti-JCV (vírus JC), soro']['subtitulo'] == 'Em uso de natalizumabe | A cada 6 meses'
-    assert 'Antígeno HBs, soro' in recs
+    assert 'Antígeno HBs, soro' in recs or PAINEL_HBV in recs
     assert 'Em uso de fingolimode | Antes do tratamento' in recs['Eletrocardiograma de repouso']['subtitulo']
     assert recs['Avaliação oftalmológica (fundo de olho)']['subtitulo'] == 'Em uso de fingolimode | 3-4 meses após o início'
     assert 'Varicela, IgG' in recs

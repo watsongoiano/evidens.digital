@@ -12,7 +12,12 @@ Limiares e fontes
 - Tuberculose latente: ≥ 15 mg/dia de prednisona por ≥ 1 mês (MS, Manual de Tuberculose 2019).
 - Pneumocistose: ≥ 20 mg/dia por ≥ 4 semanas, com outro fator de imunossupressão (ATS 2011).
 - Metotrexato ≤ 0,4 mg/kg/semana e azatioprina ≤ 3 mg/kg/dia: imunossupressão de baixo grau
-  (CDC/ACIP; IDSA 2013). Sem o peso, metotrexato ≤ 20 mg/semana conta como baixo grau.
+  (CDC/ACIP; IDSA 2013). Sem o peso, metotrexato ≤ 20 mg/semana conta como baixo grau. Vira a classe
+  ``imunossupressao_baixo_grau``: vacinas de vírus vivo em precaução e dengue contraindicada (SBIm
+  Pacientes Especiais 2026/2027: 1 a 3 meses sem metotrexato e 3 meses sem azatioprina antes de vacina
+  viva; IN CNV 2026: dengue contraindicada em qualquer terapia imunossupressora).
+- Corticoide sem dose ou duração: classe ``corticoide_dose_desconhecida``; as vacinas de vírus vivo
+  saem da lista automática até a dose ser informada (src/utils/seguranca_vacinas.py).
 - Hidroxicloroquina: retinopatia sobe com dose > 5 mg/kg/dia e com mais de 5 anos de uso (AAO 2025).
 - Bisfosfonato: reavaliar pausa após 5 anos (oral) ou 3 anos (ácido zoledrônico) (ASBMR 2016).
 """
@@ -108,10 +113,20 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
         orientacoes.append({'titulo': titulo, 'descricao': descricao, 'referencia': referencia})
 
     corticoides = [m for m in medicacoes if POR_MEDICAMENTO.get(m, ('', 0))[0] == 'corticoide']
+    # Chave de classe vinda de formulário antigo: corticoide sem como saber a dose.
+    sem_principio_ativo = [m for m in medicacoes if m in ('corticoide_sistemico', 'corticoide_cronico')]
+    if sem_principio_ativo and not corticoides:
+        acrescentar.add('corticoide_dose_desconhecida')
+        orientar('Corticoide sistêmico: informe dose e duração',
+                 'Sem dose e duração, o uso foi tratado como crônico (≥ 3 meses). Com os dois, a ferramenta diz se há '
+                 'imunossupressão (vacinas de vírus vivo) e se cabe densitometria. A avaliação laboratorial e a '
+                 'monitorização do corticoide valem em qualquer dose.',
+                 'ACR 2022 / SBIm 2026/2027')
     if corticoides:
         completos = [m for m in corticoides if 'dose' in detalhes.get(m, {}) and 'duracao' in detalhes.get(m, {})]
         if len(completos) < len(corticoides):
-            acrescentar.add('corticoide_sem_dose')
+            # Imunossupressão desconhecida: as vacinas de vírus vivo saem da lista até a dose ser informada.
+            acrescentar.update({'corticoide_dose_desconhecida', 'corticoide_sem_dose'})
             orientar('Corticoide sistêmico: informe dose e duração',
                      'Sem dose e duração, o uso foi tratado como crônico (≥ 3 meses). Com os dois, a ferramenta diz se há '
                      'imunossupressão (vacinas de vírus vivo) e se cabem densitometria, painel laboratorial basal e prova '
@@ -174,10 +189,12 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
             limite = 0.4 * float(peso) if peso else 20
             if dose <= limite:
                 excluir.setdefault('metotrexato', set()).add('imunossupressor')
+                acrescentar.add('imunossupressao_baixo_grau')
                 orientar('Metotrexato em dose de baixo grau de imunossupressão',
                          f'{_texto(dose)} mg/semana (limite de baixo grau: {_texto(round(limite, 1))} mg/semana). Vacinas '
-                         'inativadas seguem indicadas; as de vírus vivo podem ser consideradas caso a caso, e a resposta de '
-                         '"Imunossupressão" na triagem de vacinas fica a critério do médico.', 'CDC/ACIP 2025 / IDSA 2013')
+                         'inativadas seguem indicadas. As de vírus vivo saem da lista automática para avaliação caso a caso '
+                         '(SBIm: 1 a 3 meses sem metotrexato antes de vacina viva) e a dengue fica contraindicada.',
+                         'CDC/ACIP 2025 / IDSA 2013 / SBIm Pacientes Especiais 2026/2027')
     if 'azatioprina' in medicacoes:
         dose = detalhes.get('azatioprina', {}).get('dose')
         if dose is None or not peso:
@@ -186,9 +203,12 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
                      'CDC/ACIP 2025 / IDSA 2013')
         elif dose <= 3 * float(peso):
             excluir.setdefault('azatioprina', set()).add('imunossupressor')
+            acrescentar.add('imunossupressao_baixo_grau')
             orientar('Azatioprina em dose de baixo grau de imunossupressão',
                      f'{_texto(dose)} mg/dia ({_texto(round(dose / float(peso), 1))} mg/kg/dia; limite de baixo grau: 3 mg/kg/dia). '
-                     'Vacinas de vírus vivo podem ser consideradas caso a caso.', 'CDC/ACIP 2025 / IDSA 2013')
+                     'As vacinas de vírus vivo saem da lista automática para avaliação caso a caso (SBIm: 3 meses sem '
+                     'azatioprina antes de vacina viva) e a dengue fica contraindicada.',
+                     'CDC/ACIP 2025 / IDSA 2013 / SBIm Pacientes Especiais 2026/2027')
     if 'hidroxicloroquina' in medicacoes:
         d = detalhes.get('hidroxicloroquina', {})
         dose, anos = d.get('dose'), d.get('duracao')
