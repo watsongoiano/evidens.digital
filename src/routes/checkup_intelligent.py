@@ -1859,6 +1859,49 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
     )
 
 
+@checkup_intelligent_bp.route('/preoperatorio', methods=['POST'])
+def preoperatorio_endpoint():
+    """Avaliação pré-operatória de cirurgia não cardíaca (aba "Pré-operatório")."""
+    from src.utils import periodicidade, preoperatorio, preop_medicamentos
+    bruto = request.get_json(silent=True) or {}
+    anteriores, erros = periodicidade.ler_exames_anteriores(bruto.get('exames_anteriores'))
+    if erros:
+        return jsonify({'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in erros),
+                        'codigo': 'entrada_invalida', 'erros': erros}), 400
+    try:
+        p = preoperatorio.ler(bruto)
+    except preoperatorio.EntradaInvalida as exc:
+        mensagem = exc.mensagem     # texto de validação escrito por nós, nunca o rastro da exceção
+        return jsonify({'error': 'Dados inválidos: ' + mensagem, 'codigo': 'entrada_invalida',
+                        'erros': [{'campo': '', 'mensagem': mensagem}]}), 400
+    preoperatorio.aplicar_exames_anteriores(p, anteriores)
+    resultado = preoperatorio.avaliar(p)
+    pas, pad = p.get('pas'), p.get('pad')
+    ctx = {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr'], 'cirurgia': p['cirurgia'],
+           'sangramento': p['sangramento'], 'cirurgia_risco_elevado': resultado['contexto']['cir_elev'],
+           'urgencia': p['urgencia'], 'neuroaxial': p['neuroaxial'], 'condicoes': set(p['condicoes']),
+           'stent': p['stent'], 'aas_indicacao': p['aas_indicacao'],
+           'pa_controlada': (pas < 140 and pad < 90) if pas and pad else None}
+    resultado['medicamentos'] = preop_medicamentos.condutas(p['medicacoes'], ctx)
+    _links_do_preoperatorio(resultado)
+    from src.routes.auth import usuario_atual
+    from src.utils import uso
+    uso.registrar('preoperatorio', usuario_atual())
+    return jsonify(resultado)
+
+
+def _links_do_preoperatorio(valor):
+    """Toda entrada com 'referencias' ganha 'referencia_html' (links clicáveis)."""
+    if isinstance(valor, dict):
+        if isinstance(valor.get('referencias'), list):
+            valor['referencia_html'] = build_reference_html(valor['referencias'])
+        for v in valor.values():
+            _links_do_preoperatorio(v)
+    elif isinstance(valor, list):
+        for v in valor:
+            _links_do_preoperatorio(v)
+
+
 @checkup_intelligent_bp.route('/catalogo')
 def catalogo_endpoint():
     """Itens que o médico pode acrescentar a um pedido ou receita, por categoria."""

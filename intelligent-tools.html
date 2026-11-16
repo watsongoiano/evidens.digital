@@ -38,9 +38,20 @@
 </header>
 
 <main class="max-w-[1100px] mx-auto px-4 sm:px-6 pt-14 lg:pt-20 pb-24">
-  <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">EVIDĒNS CHECK / AVALIAÇÃO</p>
-  <h1 class="font-light text-[40px] sm:text-[56px] leading-[1] tracking-tightest max-w-[820px]">Check-up do adulto, <span class="font-serif italic text-teal tracking-tight">guiado por evidência.</span></h1>
-  <p class="text-[17px] text-ink/65 leading-relaxed mt-6 max-w-[640px]">Preencha o que tiver. Idade, sexo e tabagismo são obrigatórios; o resto refina as recomendações de rastreamento, exames e vacinas.</p>
+  <!-- Duas abas no mesmo formulário: identificação, dados clínicos, medicações e exames são compartilhados. -->
+  <div class="abas-modo mb-8" role="tablist" aria-label="Tipo de avaliação">
+    <button type="button" role="tab" class="aba-modo" data-aba="checkup" aria-selected="true">Check-up</button>
+    <button type="button" role="tab" class="aba-modo" data-aba="preop" aria-selected="false">Pré-operatório</button>
+  </div>
+  <div data-modo="checkup">
+    <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">EVIDĒNS CHECK / AVALIAÇÃO</p>
+    <h1 class="font-light text-[40px] sm:text-[56px] leading-[1] tracking-tightest max-w-[820px]">Check-up do adulto, <span class="font-serif italic text-teal tracking-tight">guiado por evidência.</span></h1>
+    <p class="text-[17px] text-ink/65 leading-relaxed mt-6 max-w-[640px]">Preencha o que tiver. Idade, sexo e tabagismo são obrigatórios; o resto refina as recomendações de rastreamento, exames e vacinas.</p>
+  </div>
+  <div data-modo="preop" hidden>
+    <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">EVIDĒNS CHECK / PRÉ-OPERATÓRIO</p>
+    <h1 class="font-light text-[40px] sm:text-[56px] leading-[1] tracking-tightest max-w-[820px]">Avaliação pré-operatória, <span class="font-serif italic text-teal tracking-tight">guiada por evidência.</span></h1>
+  </div>
 
   <form id="checkupForm" class="mt-12 flex flex-col gap-5" novalidate>
 
@@ -96,7 +107,212 @@
       </div>
     </section>
 
-    <section class="secao" aria-labelledby="s-comorbidades">
+    <!-- Pré-operatório (aba "Pré-operatório"): src/utils/preoperatorio.py. Valores gerados das tabelas do motor. -->
+    <section class="secao" aria-labelledby="s-cirurgia" data-modo="preop" hidden>
+      <h2 id="s-cirurgia" class="secao-titulo"><span class="secao-num">03</span>Cirurgia</h2>
+      <div class="grade">
+        <div class="campo sm:col-span-2">
+          <label for="po_cirurgia">Cirurgia proposta</label>
+          <select id="po_cirurgia" data-sem-botoes>
+            <option value="">Selecione a mais parecida...</option>
+            <optgroup label="Risco baixo (&lt; 1%)">
+              <option value="catarata">Oftalmológica (catarata e outras)</option>
+              <option value="odontologica">Odontológica</option>
+              <option value="endoscopia">Endoscopia ou colonoscopia</option>
+              <option value="pele">Superficial (pele e partes moles, biópsia)</option>
+              <option value="mama">Mama</option>
+              <option value="tireoide">Tireoide ou paratireoide</option>
+              <option value="ginecologica_menor">Ginecológica menor</option>
+              <option value="ortopedica_menor">Ortopédica menor (artroscopia, menisco)</option>
+              <option value="plastica">Reconstrutiva ou plástica</option>
+              <option value="rtu">Urológica menor (RTU de próstata ou bexiga)</option>
+              <option value="vats_menor">Videotoracoscopia com ressecção pulmonar menor</option>
+              <option value="hernia">Hérnia inguinal ou umbilical</option>
+            </optgroup>
+            <optgroup label="Risco intermediário (1–5%)">
+              <option value="carotida_assintomatica">Carótida assintomática (endarterectomia ou stent)</option>
+              <option value="endarterectomia_sintomatica">Endarterectomia de carótida sintomática</option>
+              <option value="evar">Aneurisma de aorta por via endovascular (EVAR)</option>
+              <option value="angioplastia_periferica">Angioplastia arterial periférica</option>
+              <option value="cabeca_pescoco">Cabeça e pescoço</option>
+              <option value="colecistectomia">Intraperitoneal: colecistectomia, hérnia hiatal, esplenectomia</option>
+              <option value="colectomia">Intraperitoneal: colectomia ou outra cirurgia intestinal</option>
+              <option value="intratoracica">Intratorácica não maior</option>
+              <option value="coluna">Coluna</option>
+              <option value="neurocirurgia">Neurocirurgia intracraniana</option>
+              <option value="quadril">Ortopédica maior (quadril, joelho, artroplastia)</option>
+              <option value="transplante_renal">Transplante renal</option>
+              <option value="urologica_maior">Urológica maior (prostatectomia, nefrectomia)</option>
+              <option value="ginecologica_maior">Ginecológica maior (histerectomia abdominal)</option>
+            </optgroup>
+            <optgroup label="Risco alto (&gt; 5%)">
+              <option value="adrenal">Ressecção de adrenal</option>
+              <option value="aorta_aberta">Aorta ou cirurgia vascular maior aberta</option>
+              <option value="stent_carotida_sintomatica">Stent de carótida sintomática</option>
+              <option value="revascularizacao_mmii">Revascularização aberta de membro inferior ou amputação</option>
+              <option value="pancreas">Duodenopancreatectomia</option>
+              <option value="figado">Ressecção hepática ou de vias biliares</option>
+              <option value="esofagectomia">Esofagectomia</option>
+              <option value="pneumectomia">Pneumectomia</option>
+              <option value="transplante_hepatico">Transplante hepático</option>
+              <option value="transplante_pulmonar">Transplante pulmonar</option>
+              <option value="perfuracao_intestinal">Reparo de perfuração intestinal</option>
+              <option value="cistectomia">Cistectomia total</option>
+            </optgroup>
+          </select>
+          <p id="po_cirurgia_risco" class="text-[12px] text-ink/55 mt-1.5">Risco intrínseco de morte cardiovascular, IAM ou AVC em 30 dias (SBC 2024 e ESC 2022).</p>
+        </div>
+        <div class="campo">
+          <label for="po_urgencia">Urgência</label>
+          <select id="po_urgencia">
+            <option value="eletiva">Eletiva</option>
+            <option value="tempo_sensivel">Tempo-sensível (pode esperar até 3 meses)</option>
+            <option value="urgencia">Urgência (2 a 24 h)</option>
+            <option value="emergencia">Emergência (&lt; 2 h)</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="po_asa">Classe ASA</label>
+          <select id="po_asa">
+            <option value="">Não sei</option>
+            <option value="1">ASA I — saudável</option>
+            <option value="2">ASA II — doença sistêmica leve</option>
+            <option value="3">ASA III — doença sistêmica grave</option>
+            <option value="4">ASA IV — ameaça constante à vida</option>
+            <option value="5">ASA V — moribundo</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="po_duracao">Duração prevista</label>
+          <select id="po_duracao">
+            <option value="">Não sei</option>
+            <option value="menos_2h">Menos de 2 h</option>
+            <option value="2_3h">2 a 3 h</option>
+            <option value="mais_3h">Mais de 3 h</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="po_sangramento">Risco de sangramento da cirurgia</label>
+          <select id="po_sangramento">
+            <option value="">Não sei</option>
+            <option value="minimo">Mínimo (catarata, dentária ou pele simples)</option>
+            <option value="baixo_moderado">Baixo ou moderado (&lt; 2% em 30 dias)</option>
+            <option value="alto">Alto (≥ 2% em 30 dias)</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="po_neuroaxial">Anestesia neuroaxial ou cateter peridural</label>
+          <select id="po_neuroaxial">
+            <option value="">Não</option>
+            <option value="sim">Sim</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="secao" aria-labelledby="s-condicoes" data-modo="preop" hidden>
+      <h2 id="s-condicoes" class="secao-titulo"><span class="secao-num">04</span>Condições clínicas</h2>
+      <p class="campo-rotulo">Grave ou instável agora</p>
+      <div class="opcoes">
+        <label class="opcao" for="po_i_sca"><input type="checkbox" id="po_i_sca" name="po_instaveis" value="sca">Síndrome coronariana aguda</label>
+        <label class="opcao" for="po_i_ic_descompensada"><input type="checkbox" id="po_i_ic_descompensada" name="po_instaveis" value="ic_descompensada">Insuficiência cardíaca descompensada (NYHA III/IV)</label>
+        <label class="opcao" for="po_i_angina_grave"><input type="checkbox" id="po_i_angina_grave" name="po_instaveis" value="angina_grave">Angina CCS III/IV</label>
+        <label class="opcao" for="po_i_valvopatia_grave_sintomatica"><input type="checkbox" id="po_i_valvopatia_grave_sintomatica" name="po_instaveis" value="valvopatia_grave_sintomatica">Estenose aórtica ou mitral importante sintomática</label>
+        <label class="opcao" for="po_i_arritmia_grave"><input type="checkbox" id="po_i_arritmia_grave" name="po_instaveis" value="arritmia_grave">Bradi ou taquiarritmia grave (BAVT, TV)</label>
+        <label class="opcao" for="po_i_fa_alta_resposta"><input type="checkbox" id="po_i_fa_alta_resposta" name="po_instaveis" value="fa_alta_resposta">FA com FC &gt; 120 bpm</label>
+        <label class="opcao" for="po_i_hap_sintomatica"><input type="checkbox" id="po_i_hap_sintomatica" name="po_instaveis" value="hap_sintomatica">Hipertensão arterial pulmonar sintomática</label>
+        <label class="opcao" for="po_i_aorta_instavel"><input type="checkbox" id="po_i_aorta_instavel" name="po_instaveis" value="aorta_instavel">Doença instável da aorta torácica</label>
+        <label class="opcao" for="po_i_edema_choque"><input type="checkbox" id="po_i_edema_choque" name="po_instaveis" value="edema_choque">Edema agudo de pulmão ou choque cardiogênico</label>
+      </div>
+      <p class="campo-rotulo mt-5">Doenças e antecedentes</p>
+      <div class="opcoes">
+        <label class="opcao" for="po_c_dac"><input type="checkbox" id="po_c_dac" name="po_condicoes" value="dac">Doença coronária (angina, IAM, prova funcional positiva, nitrato, onda Q)</label>
+        <label class="opcao" for="po_c_iam_previo"><input type="checkbox" id="po_c_iam_previo" name="po_condicoes" value="iam_previo">IAM prévio</label>
+        <label class="opcao" for="po_c_stent"><input type="checkbox" id="po_c_stent" name="po_condicoes" value="stent">Angioplastia ou stent</label>
+        <label class="opcao" for="po_c_revascularizacao_cirurgica"><input type="checkbox" id="po_c_revascularizacao_cirurgica" name="po_condicoes" value="revascularizacao_cirurgica">Cirurgia de revascularização</label>
+        <label class="opcao" for="po_c_ic"><input type="checkbox" id="po_c_ic" name="po_condicoes" value="ic">Insuficiência cardíaca</label>
+        <label class="opcao" for="po_c_ic_fe_reduzida"><input type="checkbox" id="po_c_ic_fe_reduzida" name="po_condicoes" value="ic_fe_reduzida">IC com fração de ejeção reduzida</label>
+        <label class="opcao" for="po_c_ic_recente"><input type="checkbox" id="po_c_ic_recente" name="po_condicoes" value="ic_recente">IC recente, tratamento ainda não otimizado</label>
+        <label class="opcao" for="po_c_avc_ait"><input type="checkbox" id="po_c_avc_ait" name="po_condicoes" value="avc_ait">AVC ou AIT</label>
+        <label class="opcao" for="po_c_avc_ait_recente"><input type="checkbox" id="po_c_avc_ait_recente" name="po_condicoes" value="avc_ait_recente">AVC ou AIT há menos de 3 meses</label>
+        <label class="opcao" for="po_c_diabetes"><input type="checkbox" id="po_c_diabetes" name="po_condicoes" value="diabetes">Diabetes</label>
+        <label class="opcao" for="po_c_diabetes_insulina"><input type="checkbox" id="po_c_diabetes_insulina" name="po_condicoes" value="diabetes_insulina">Diabetes em uso de insulina</label>
+        <label class="opcao" for="po_c_hipertensao"><input type="checkbox" id="po_c_hipertensao" name="po_condicoes" value="hipertensao">Hipertensão</label>
+        <label class="opcao" for="po_c_fa"><input type="checkbox" id="po_c_fa" name="po_condicoes" value="fa">FA (fibrilação atrial)</label>
+        <label class="opcao" for="po_c_valvopatia"><input type="checkbox" id="po_c_valvopatia" name="po_condicoes" value="valvopatia">Valvopatia moderada ou grave</label>
+        <label class="opcao" for="po_c_protese_mecanica"><input type="checkbox" id="po_c_protese_mecanica" name="po_condicoes" value="protese_mecanica">Prótese valvar mecânica</label>
+        <label class="opcao" for="po_c_protese_mecanica_mitral"><input type="checkbox" id="po_c_protese_mecanica_mitral" name="po_condicoes" value="protese_mecanica_mitral">Prótese mecânica mitral</label>
+        <label class="opcao" for="po_c_dpoc"><input type="checkbox" id="po_c_dpoc" name="po_condicoes" value="dpoc">DPOC</label>
+        <label class="opcao" for="po_c_doenca_arterial_periferica"><input type="checkbox" id="po_c_doenca_arterial_periferica" name="po_condicoes" value="doenca_arterial_periferica">Doença arterial periférica</label>
+        <label class="opcao" for="po_c_marcapasso_cdi"><input type="checkbox" id="po_c_marcapasso_cdi" name="po_condicoes" value="marcapasso_cdi">Marca-passo ou CDI</label>
+        <label class="opcao" for="po_c_hipertensao_pulmonar"><input type="checkbox" id="po_c_hipertensao_pulmonar" name="po_condicoes" value="hipertensao_pulmonar">Hipertensão pulmonar</label>
+        <label class="opcao" for="po_c_tev"><input type="checkbox" id="po_c_tev" name="po_condicoes" value="tev">Trombose venosa ou TEP prévio</label>
+        <label class="opcao" for="po_c_tev_recente_3m"><input type="checkbox" id="po_c_tev_recente_3m" name="po_condicoes" value="tev_recente_3m">TEV há menos de 3 meses</label>
+        <label class="opcao" for="po_c_tev_3_12m"><input type="checkbox" id="po_c_tev_3_12m" name="po_condicoes" value="tev_3_12m">TEV entre 3 e 12 meses</label>
+        <label class="opcao" for="po_c_cancer_ativo"><input type="checkbox" id="po_c_cancer_ativo" name="po_condicoes" value="cancer_ativo">Câncer ativo</label>
+        <label class="opcao" for="po_c_trombofilia_grave"><input type="checkbox" id="po_c_trombofilia_grave" name="po_condicoes" value="trombofilia_grave">Trombofilia grave ou antifosfolípide</label>
+        <label class="opcao" for="po_c_tabagismo"><input type="checkbox" id="po_c_tabagismo" name="po_condicoes" value="tabagismo">Tabagismo atual</label>
+        <label class="opcao" for="po_c_obesidade"><input type="checkbox" id="po_c_obesidade" name="po_condicoes" value="obesidade">Obesidade</label>
+        <label class="opcao" for="po_c_hepatopatia"><input type="checkbox" id="po_c_hepatopatia" name="po_condicoes" value="hepatopatia">Hepatopatia crônica</label>
+        <label class="opcao" for="po_c_doenca_renal"><input type="checkbox" id="po_c_doenca_renal" name="po_condicoes" value="doenca_renal">Doença renal crônica</label>
+      </div>
+      <div id="po_stent" class="bloco-condicional grade" hidden>
+        <div class="campo">
+          <label for="po_stent_tipo">Angioplastia: tipo</label>
+          <select id="po_stent_tipo">
+            <option value="">Selecione...</option>
+            <option value="farmacologico">Stent farmacológico</option>
+            <option value="convencional">Stent convencional</option>
+            <option value="balao">Só balão</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="po_stent_indicacao">Indicação</label>
+          <select id="po_stent_indicacao">
+            <option value="">Selecione...</option>
+            <option value="dac_cronica">Doença coronária crônica</option>
+            <option value="sca">Síndrome coronariana aguda</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="po_stent_data">Data da angioplastia</label>
+          <input type="date" id="po_stent_data">
+        </div>
+      </div>
+      <p class="campo-rotulo mt-5">Sintomas e sinais</p>
+      <div class="opcoes">
+        <label class="opcao" for="po_s_angina"><input type="checkbox" id="po_s_angina" name="po_sintomas" value="angina">Angina (dor opressiva aos esforços)</label>
+        <label class="opcao" for="po_s_dispneia"><input type="checkbox" id="po_s_dispneia" name="po_sintomas" value="dispneia">Dispneia aos esforços habituais</label>
+        <label class="opcao" for="po_s_dispneia_nova"><input type="checkbox" id="po_s_dispneia_nova" name="po_sintomas" value="dispneia_nova">Dispneia nova ou em piora</label>
+        <label class="opcao" for="po_s_palpitacoes"><input type="checkbox" id="po_s_palpitacoes" name="po_sintomas" value="palpitacoes">Palpitações</label>
+        <label class="opcao" for="po_s_sincope"><input type="checkbox" id="po_s_sincope" name="po_sintomas" value="sincope">Síncope</label>
+        <label class="opcao" for="po_s_sopro"><input type="checkbox" id="po_s_sopro" name="po_sintomas" value="sopro">Sopro cardíaco</label>
+        <label class="opcao" for="po_s_sinais_ic"><input type="checkbox" id="po_s_sinais_ic" name="po_sintomas" value="sinais_ic">Sinais de insuficiência cardíaca</label>
+      </div>
+      <div class="grade mt-5">
+        <div class="campo">
+          <label for="po_spo2">SpO₂ em ar ambiente (%)</label>
+          <input type="number" id="po_spo2" min="50" max="100" inputmode="numeric" placeholder="Ex: 97">
+        </div>
+        <div class="campo">
+          <label for="po_infeccao">Infecção respiratória no último mês</label>
+          <select id="po_infeccao">
+            <option value="">Não</option>
+            <option value="sim">Sim</option>
+          </select>
+        </div>
+        <div class="campo" id="po_aas_campo" hidden>
+          <label for="po_aas">AAS: indicação</label>
+          <select id="po_aas">
+            <option value="">Selecione...</option>
+            <option value="secundaria">Prevenção secundária</option>
+            <option value="primaria">Prevenção primária</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="secao" aria-labelledby="s-comorbidades" data-modo="checkup">
       <h2 id="s-comorbidades" class="secao-titulo"><span class="secao-num">03</span>Comorbidades e História Prévia</h2>
       <p class="secao-nota">Marque as que se aplicam.</p>
       <p id="coerencia-aviso" class="aviso aviso-info mb-4 text-[13px]" hidden></p>
@@ -708,7 +924,70 @@
       <!-- lista:medicacoes:fim -->
     </section>
 
-    <section class="secao" aria-labelledby="s-familia">
+    <section class="secao" aria-labelledby="s-capacidade" data-modo="preop" hidden>
+      <h2 id="s-capacidade" class="secao-titulo"><span class="secao-num">06</span>Capacidade funcional e fragilidade</h2>
+      <div class="grade">
+        <div class="campo">
+          <label for="po_funcional">Estado funcional (atividades de vida diária)</label>
+          <select id="po_funcional">
+            <option value="">Não informado</option>
+            <option value="independente">Independente</option>
+            <option value="parcial">Parcialmente dependente</option>
+            <option value="total">Totalmente dependente</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="po_escadas">Sobe dois lances de escada sem parar?</label>
+          <select id="po_escadas">
+            <option value="">Não sei</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="po_cfs">Escala Clínica de Fragilidade (CFS)</label>
+          <select id="po_cfs" data-sem-botoes>
+            <option value="">Não avaliada</option>
+            <option value="1">1 — muito em forma</option>
+            <option value="2">2 — em forma</option>
+            <option value="3">3 — controlando bem</option>
+            <option value="4">4 — vulnerável</option>
+            <option value="5">5 — fragilidade leve</option>
+            <option value="6">6 — fragilidade moderada</option>
+            <option value="7">7 — fragilidade grave</option>
+            <option value="8">8 — fragilidade muito grave</option>
+            <option value="9">9 — doente terminal</option>
+          </select>
+        </div>
+      </div>
+      <p class="campo-rotulo mt-5">DASI — marque o que o paciente consegue fazer</p>
+      <div class="opcoes">
+        <label class="opcao" for="po_d_cuidar_de_si"><input type="checkbox" id="po_d_cuidar_de_si" name="po_dasi" value="cuidar_de_si">Cuidar de si (comer, vestir-se, tomar banho)</label>
+        <label class="opcao" for="po_d_andar_em_casa"><input type="checkbox" id="po_d_andar_em_casa" name="po_dasi" value="andar_em_casa">Andar dentro de casa</label>
+        <label class="opcao" for="po_d_andar_quarteiroes"><input type="checkbox" id="po_d_andar_quarteiroes" name="po_dasi" value="andar_quarteiroes">Andar 1 a 2 quarteirões no plano</label>
+        <label class="opcao" for="po_d_subir_lance"><input type="checkbox" id="po_d_subir_lance" name="po_dasi" value="subir_lance">Subir um lance de escada ou uma ladeira</label>
+        <label class="opcao" for="po_d_correr"><input type="checkbox" id="po_d_correr" name="po_dasi" value="correr">Correr uma distância curta</label>
+        <label class="opcao" for="po_d_domestico_leve"><input type="checkbox" id="po_d_domestico_leve" name="po_dasi" value="domestico_leve">Serviço doméstico leve (tirar pó, lavar louça)</label>
+        <label class="opcao" for="po_d_domestico_moderado"><input type="checkbox" id="po_d_domestico_moderado" name="po_dasi" value="domestico_moderado">Serviço doméstico moderado (varrer, carregar compras)</label>
+        <label class="opcao" for="po_d_domestico_pesado"><input type="checkbox" id="po_d_domestico_pesado" name="po_dasi" value="domestico_pesado">Serviço doméstico pesado (esfregar chão, mover móveis)</label>
+        <label class="opcao" for="po_d_jardinagem"><input type="checkbox" id="po_d_jardinagem" name="po_dasi" value="jardinagem">Jardinagem (varrer folhas, capinar)</label>
+        <label class="opcao" for="po_d_relacoes_sexuais"><input type="checkbox" id="po_d_relacoes_sexuais" name="po_dasi" value="relacoes_sexuais">Ter relações sexuais</label>
+        <label class="opcao" for="po_d_recreacao_moderada"><input type="checkbox" id="po_d_recreacao_moderada" name="po_dasi" value="recreacao_moderada">Recreação moderada (dança, tênis em duplas)</label>
+        <label class="opcao" for="po_d_esporte_extenuante"><input type="checkbox" id="po_d_esporte_extenuante" name="po_dasi" value="esporte_extenuante">Esporte extenuante (natação, futebol)</label>
+      </div>
+      <p id="po_dasi_valor" class="text-[14px] mt-3" aria-live="polite" hidden></p>
+      <p class="campo-rotulo mt-5">STOP-Bang (apneia do sono)</p>
+      <div class="opcoes">
+        <label class="opcao" for="po_b_ronco"><input type="checkbox" id="po_b_ronco" name="po_stop_bang" value="ronco">Ronco alto</label>
+        <label class="opcao" for="po_b_cansaco"><input type="checkbox" id="po_b_cansaco" name="po_stop_bang" value="cansaco">Cansaço ou sonolência diurna</label>
+        <label class="opcao" for="po_b_apneia_observada"><input type="checkbox" id="po_b_apneia_observada" name="po_stop_bang" value="apneia_observada">Apneia observada durante o sono</label>
+        <label class="opcao" for="po_b_imc_35"><input type="checkbox" id="po_b_imc_35" name="po_stop_bang" value="imc_35">IMC &gt; 35 kg/m²</label>
+        <label class="opcao" for="po_b_pescoco_40"><input type="checkbox" id="po_b_pescoco_40" name="po_stop_bang" value="pescoco_40">Pescoço &gt; 40 cm</label>
+      </div>
+      <p class="text-[12px] text-ink/55 mt-2">Hipertensão, idade acima de 50 anos e sexo masculino entram sozinhos. O IMC acima de 35 é calculado quando há peso e altura.</p>
+    </section>
+
+    <section class="secao" aria-labelledby="s-familia" data-modo="checkup">
       <h2 id="s-familia" class="secao-titulo"><span class="secao-num">05</span>História familiar</h2>
       <p class="secao-nota">Parentes de 1º grau (pais, irmãos, filhos).</p>
       <div class="opcoes mt-4">
@@ -798,7 +1077,7 @@
       </div>
     </section>
 
-    <section class="secao" aria-labelledby="s-habitos">
+    <section class="secao" aria-labelledby="s-habitos" data-modo="checkup">
       <h2 id="s-habitos" class="secao-titulo"><span class="secao-num">06</span>Hábitos de vida</h2>
       <div class="grade mt-4">
         <fieldset class="campo sm:col-span-2">
@@ -851,7 +1130,7 @@
       </div>
     </section>
 
-    <section class="secao" aria-labelledby="s-vacinas">
+    <section class="secao" aria-labelledby="s-vacinas" data-modo="checkup">
       <h2 id="s-vacinas" class="secao-titulo"><span class="secao-num">07</span>Triagem de segurança para vacinas</h2>
       <p class="secao-nota">Vacinas de vírus vivo atenuado (tríplice viral, varicela, febre amarela e dengue) só entram nas recomendações quando estas perguntas estão respondidas. "Não informado" não é tratado como "não".</p>
       <div class="grade">
@@ -933,13 +1212,14 @@
     <div id="formErrors" role="alert" class="aviso aviso-erro" style="display: none;"></div>
 
     <div class="flex flex-wrap items-center gap-4 pt-2">
-      <button type="submit" class="btn-escuro">Gerar recomendações <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button>
+      <button type="submit" class="btn-escuro"><span data-modo="checkup">Gerar recomendações</span><span data-modo="preop" hidden>Avaliar risco</span> <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button>
       <p class="text-[13px] text-ink/50">Sugestões para avaliação do médico — não constituem prescrição.</p>
     </div>
   </form>
 
   <div id="staleNotice" role="status" class="aviso aviso-atencao mt-8" style="display: none;">
-    Os dados do paciente foram alterados. Gere as recomendações novamente.
+    <span data-modo="checkup">Os dados do paciente foram alterados. Gere as recomendações novamente.</span>
+    <span data-modo="preop" hidden>Os dados do paciente foram alterados. Avalie o risco novamente.</span>
   </div>
 
   <section id="recommendations" class="mt-16" style="display: none;" aria-labelledby="titulo-recomendacoes">
@@ -973,6 +1253,29 @@
       <p id="assinaturaSelo" class="text-[13px] text-ink/60 mt-4" style="display: none;"><i class="fa-solid fa-signature text-teal text-[12px] mr-1.5"></i><span data-assinatura-sessao></span> · <button type="button" class="text-teal underline underline-offset-2" data-assinatura-encerrar>Encerrar</button></p>
     </div>
     <div id="naoIncluidasContent"></div>
+  </section>
+
+  <!-- Resultado do pré-operatório (renderizado por exibirPreoperatorio). -->
+  <section id="preopResultado" class="mt-16" style="display: none;" aria-labelledby="titulo-preop">
+    <div class="border-t border-ink/10 pt-10">
+      <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-4">RESULTADO</p>
+      <h2 id="titulo-preop" class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Avaliação pré-operatória <span class="font-serif italic text-teal tracking-tight">para revisar.</span></h2>
+      <p id="preopCirurgia" class="text-[15px] text-ink/60 mt-4"></p>
+    </div>
+    <div class="aviso aviso-info mt-8">
+      <p><strong class="text-ink font-medium">Sugestões para avaliação do médico — não constituem prescrição.</strong> AHA/ACC 2026 e SBC 2024; quando divergem, as duas aparecem com o aviso.</p>
+    </div>
+    <div id="preopConteudo"></div>
+    <div class="mt-10 pt-8 border-t border-ink/10">
+      <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-4">GERAR DOCUMENTOS</p>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" class="btn-claro" onclick="gerarPDFExamesLaboratoriais()"><i class="fa-solid fa-vial text-[12px]"></i>PDF exames laboratoriais</button>
+        <button type="button" class="btn-claro" onclick="gerarPDFExamesImagem()"><i class="fa-solid fa-x-ray text-[12px]"></i>PDF exames de imagem</button>
+        <button type="button" class="btn-claro" id="preopCopiar"><i class="fa-regular fa-copy text-[12px]"></i>Copiar para o prontuário</button>
+      </div>
+      <p class="text-[13px] text-ink/50 mt-3">Os PDFs saem com os exames marcados acima; laboratório e imagem em arquivos separados, cada exame de imagem em uma folha.</p>
+      <p id="preopCopiado" class="text-[13px] text-teal mt-2" role="status" hidden>Texto copiado.</p>
+    </div>
   </section>
 </main>
 
@@ -1101,6 +1404,7 @@
             const formData = new FormData(checkupForm);
             const data = {};
             for (let [key, value] of formData.entries()) {
+                if (key.startsWith('po_')) continue;   // campos da aba Pré-operatório (lidos por lerPreop)
                 if (data[key]) {
                     if (Array.isArray(data[key])) {
                         data[key].push(value);
@@ -1648,6 +1952,7 @@
 
         checkupForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            if (modo === 'preop') { avaliarPreop(); return; }
             limparErros();
             staleNotice.style.display = 'none';
 
@@ -1729,7 +2034,9 @@
         function semEfeitoNasRecomendacoes(evento) {
             const campo = evento && evento.target;
             if (!campo || !(campo.id === 'nome_paciente' || campo.hasAttribute('data-plano'))) return false;
-            if (campo.id === 'nome_paciente' && evento.type === 'change' && recommendationsDiv.style.display === 'block') {
+            if (campo.id === 'nome_paciente' && evento.type === 'change'
+                    && (recommendationsDiv.style.display === 'block'
+                        || document.getElementById('preopResultado').style.display === 'block')) {
                 pedirConfirmacaoDoPlano();
             }
             return true;
@@ -2159,6 +2466,13 @@
         // "Check-up — 65 anos, diabetes tipo 2, hipertensão": o médico pode reescrever antes de gerar.
         function indicacaoSugerida() {
             const data = lerFormulario();
+            if (modo === 'preop') {
+                // "Avaliação pré-operatória — colectomia, 72 anos"
+                const cirurgia = document.getElementById('po_cirurgia');
+                const nome = cirurgia.selectedOptions[0] && cirurgia.value ? cirurgia.selectedOptions[0].textContent.trim() : '';
+                return [T('Avaliação pré-operatória') + (nome ? ' — ' + nome : ''), data.idade ? `${data.idade} anos` : '']
+                    .filter(Boolean).join(', ').slice(0, 150);
+            }
             const partes = [];
             if (data.idade) partes.push(`${data.idade} anos`);
             if (document.documentElement.lang.toLowerCase().startsWith('pt')) {
@@ -2241,7 +2555,7 @@
 
         async function baixarPdf(endpoint, itens, prefixoArquivo, descricao, guia, assinar, justificativa, apac) {
             try {
-                if (!currentRecommendations || currentRecommendations.length === 0) {
+                if (modo === 'preop' ? !resultadoPreop : (!currentRecommendations || currentRecommendations.length === 0)) {
                     alert(T('Gere as recomendações primeiro!'));
                     return;
                 }
@@ -2400,7 +2714,8 @@
         }
 
         async function abrirDialogoDePdf(categoria) {
-            if (!currentRecommendations || currentRecommendations.length === 0) {
+            // No pré-operatório o médico pode desmarcar tudo e só acrescentar exames no diálogo.
+            if (modo === 'preop' ? !resultadoPreop : (!currentRecommendations || currentRecommendations.length === 0)) {
                 alert(T('Gere as recomendações primeiro!'));
                 return;
             }
@@ -2721,7 +3036,7 @@
             const carga = porDia * Number(anos);
             oculto.value = String(Math.round(carga * 10000) / 10000);
             const exibida = Math.floor(carga * 10 + 1e-9) / 10;
-            saida.replaceChildren(T('Carga tabágica:') + ' ', Object.assign(document.createElement('strong'), { textContent: exibida.toLocaleString('pt-BR') + ' ' + T('maços-ano') }));
+            saida.replaceChildren(T('Carga tabágica:') + ' ', Object.assign(document.createElement('strong'), { textContent: exibida.toLocaleString(document.documentElement.lang || 'pt-BR') + ' ' + T('maços-ano') }));
             saida.hidden = false;
         }
         ['cigarros_dia', 'anos_fumando'].forEach(id => document.getElementById(id).addEventListener('input', calcularCargaTabagica));
@@ -3187,7 +3502,7 @@
                 sel.insertAdjacentElement('afterend', grupo);
                 grupos.push([sel, grupo]);
             }
-            checkupForm.querySelectorAll('select:not([data-plano])').forEach(emBotoes);
+            checkupForm.querySelectorAll('select:not([data-plano]):not([data-sem-botoes])').forEach(emBotoes);
             // Resultados qualitativos dos cartões de exame (sorologias, FIT) são criados depois.
             window.selectEmBotoes = sel => { emBotoes(sel); sincronizar(); };
             function sincronizar() {
@@ -3214,6 +3529,335 @@
             });
         }
         window.addEventListener('pageshow', e => { if (e.persisted) sincronizarCondicionais(); });
+
+        // ── Aba "Pré-operatório" ─────────────────────────────────────────────────────────────────────
+        // Mesmo formulário: identificação, dados clínicos, medicações e exames já realizados são compartilhados;
+        // as demais seções aparecem conforme a aba. O motor fica em /api/preoperatorio (src/utils/preoperatorio.py).
+        let modo = 'checkup';
+        let resultadoPreop = null;
+        const preopResultado = document.getElementById('preopResultado');
+        const secaoDe = id => document.querySelector(`section[aria-labelledby="${id}"]`);
+        const ORDEM_ORIGINAL = [...checkupForm.querySelectorAll(':scope > section.secao')];
+        const ORDEM_PREOP = ['s-identificacao', 's-clinicos', 's-cirurgia', 's-condicoes', 's-exames', 's-capacidade',
+                             's-medicacoes'];
+
+        function renumerarSecoes() {
+            let n = 0;
+            checkupForm.querySelectorAll(':scope > section.secao').forEach(secao => {
+                if (secao.hidden) return;
+                n += 1;
+                const numero = secao.querySelector('.secao-num');
+                if (numero) numero.textContent = String(n).padStart(2, '0');
+            });
+        }
+
+        function esconderPreop() {
+            preopResultado.style.display = 'none';
+            document.getElementById('preopConteudo').innerHTML = '';
+            resultadoPreop = null;
+        }
+
+        function definirModo(novo) {
+            if (novo === modo) return;
+            modo = novo;
+            revisaoDoFormulario += 1;     // resposta ainda pendente da outra aba não volta para a tela
+            document.querySelectorAll('[data-modo]').forEach(el => { el.hidden = el.dataset.modo !== modo; });
+            document.querySelectorAll('.aba-modo').forEach(b => b.setAttribute('aria-selected', b.dataset.aba === modo ? 'true' : 'false'));
+            const fim = document.getElementById('formErrors');
+            const ordem = modo === 'preop' ? ORDEM_PREOP.map(secaoDe).concat(ORDEM_ORIGINAL.filter(s => !ORDEM_PREOP.includes(s.getAttribute('aria-labelledby'))))
+                                           : ORDEM_ORIGINAL;
+            ordem.forEach(secao => checkupForm.insertBefore(secao, fim));
+            renumerarSecoes();
+            // Resultado de uma aba não vale na outra (e os PDFs não podem misturar as duas).
+            limparErros();
+            limparResultados();
+            esconderPreop();
+            staleNotice.style.display = 'none';
+            history.replaceState(null, '', modo === 'preop' ? '#pre-operatorio' : location.pathname + location.search);
+        }
+        document.querySelectorAll('.aba-modo').forEach(b => b.addEventListener('click', () => definirModo(b.dataset.aba)));
+        renumerarSecoes();
+        if (location.hash === '#pre-operatorio') definirModo('preop');
+
+        // Campos que dependem de outros
+        const marcadosPreop = nome => [...checkupForm.querySelectorAll(`input[name="${nome}"]:checked`)].map(i => i.value);
+        function atualizarCamposPreop() {
+            document.getElementById('po_stent').hidden = !marcadosPreop('po_condicoes').includes('stent');
+            const usaAas = [...checkupForm.querySelectorAll('input[name="medicacoes"]:checked')].some(i => i.value === 'aas_acido_acetilsalicilico');
+            document.getElementById('po_aas_campo').hidden = !usaAas;
+            const cirurgia = document.getElementById('po_cirurgia');
+            const grupo = cirurgia.selectedOptions[0] && cirurgia.selectedOptions[0].parentElement;
+            const nota = document.getElementById('po_cirurgia_risco');
+            nota.textContent = grupo && grupo.tagName === 'OPTGROUP'
+                ? T(grupo.label) + ' ' + T('de morte cardiovascular, IAM ou AVC em 30 dias.')
+                : T('Risco intrínseco de morte cardiovascular, IAM ou AVC em 30 dias (SBC 2024 e ESC 2022).');
+            const dasi = marcadosPreop('po_dasi');
+            const pesos = { cuidar_de_si: 2.75, andar_em_casa: 1.75, andar_quarteiroes: 2.75, subir_lance: 5.5, correr: 8,
+                            domestico_leve: 2.7, domestico_moderado: 3.5, domestico_pesado: 8, jardinagem: 4.5,
+                            relacoes_sexuais: 5.25, recreacao_moderada: 6, esporte_extenuante: 7.5 };
+            const saida = document.getElementById('po_dasi_valor');
+            if (!dasi.length) { saida.hidden = true; return; }
+            const total = Math.round(dasi.reduce((s, k) => s + (pesos[k] || 0), 0) * 100) / 100;
+            saida.replaceChildren('DASI: ', Object.assign(document.createElement('strong'), { textContent: total.toLocaleString(document.documentElement.lang || 'pt-BR') }),
+                                  ' ' + (total <= 34 ? T('(≤ 34: capacidade baixa)') : T('(> 34: capacidade boa)')));
+            saida.hidden = false;
+        }
+        checkupForm.addEventListener('change', atualizarCamposPreop);
+        atualizarCamposPreop();
+
+        function lerPreop() {
+            const v = id => (document.getElementById(id).value || '').trim();
+            const dados = lerFormulario();
+            const peso = parseFloat(dados.peso), altura = parseFloat(dados.altura);
+            const imc = peso && altura ? peso / Math.pow(altura / 100, 2) : null;
+            const condicoes = marcadosPreop('po_condicoes');
+            if (imc && imc >= 30 && !condicoes.includes('obesidade')) condicoes.push('obesidade');
+            const stop = marcadosPreop('po_stop_bang');
+            if (imc && imc > 35 && !stop.includes('imc_35')) stop.push('imc_35');
+            const dasi = marcadosPreop('po_dasi');
+            const d = {
+                idade: dados.idade || null, sexo: dados.sexo || null, peso: dados.peso || null,
+                pas: dados.pas || null, pad: dados.pad || null,
+                // Creatinina digitada no cartão do exame é campo do motor (name="creatinina"); a data vem do cartão.
+                creatinina: dados.creatinina || null,
+                medicacoes: [].concat(dados.medicacoes || []),
+                exames_anteriores: dados.exames_anteriores || [],
+                cirurgia: v('po_cirurgia'), urgencia: v('po_urgencia') || 'eletiva', asa: v('po_asa') || null,
+                duracao: v('po_duracao') || null, sangramento: v('po_sangramento') || null,
+                neuroaxial: v('po_neuroaxial') === 'sim',
+                instaveis: marcadosPreop('po_instaveis'), condicoes, sintomas: marcadosPreop('po_sintomas'),
+                spo2: v('po_spo2') || null, infeccao_respiratoria: v('po_infeccao') === 'sim',
+                escadas: v('po_escadas') || null, dasi, dasi_respondido: dasi.length > 0,
+                cfs: v('po_cfs') || null, stop_bang: stop, aas_indicacao: v('po_aas') || null,
+                funcional: v('po_funcional') || null,
+            };
+            if (condicoes.includes('stent')) {
+                d.stent = { tipo: v('po_stent_tipo') || null, indicacao: v('po_stent_indicacao') || null,
+                            data: v('po_stent_data') || null };
+            }
+            return d;
+        }
+
+        async function avaliarPreop() {
+            limparErros();
+            staleNotice.style.display = 'none';
+            revisaoDoFormulario += 1;
+            const revisaoDoEnvio = revisaoDoFormulario;
+            const d = lerPreop();
+            const faltam = [];
+            if (!d.idade) faltam.push(T('Informe a idade.'));
+            if (!d.sexo) faltam.push(T('Informe o sexo.'));
+            if (!d.cirurgia) faltam.push(T('Escolha a cirurgia proposta.'));
+            if (faltam.length) { esconderPreop(); mostrarErros(faltam); return; }
+            try {
+                const resposta = await fetch('/api/preoperatorio', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+                let r = null;
+                try { r = await resposta.json(); } catch (erro) { r = null; }
+                if (revisaoDoEnvio !== revisaoDoFormulario) return;
+                if (resposta.status === 400 && r && Array.isArray(r.erros)) {
+                    esconderPreop();
+                    mostrarErros(r.erros.map(e => e.mensagem));
+                    return;
+                }
+                if (!resposta.ok || !r) throw new Error((r && r.error) || `Erro HTTP: ${resposta.status}`);
+                limparAcrescimos();
+                resultadoPreop = r;
+                exibirPreoperatorio(r);
+            } catch (erro) {
+                esconderPreop();
+                mostrarErros([T('Não foi possível calcular a avaliação pré-operatória.') + ' ' + (erro.message || '')]);
+            }
+        }
+
+        // Pré-operatório: qualquer mudança no formulário (exceto nome e plano) invalida o resultado na tela.
+        function invalidarPreop(evento) {
+            if (modo !== 'preop' || preopResultado.style.display === 'none') return;
+            const campo = evento && evento.target;
+            if (campo && (campo.id === 'nome_paciente' || (campo.hasAttribute && campo.hasAttribute('data-plano')))) return;
+            esconderPreop();
+            currentRecommendations = [];
+            staleNotice.style.display = 'block';
+            pedirConfirmacaoDoPlano();
+        }
+        checkupForm.addEventListener('input', invalidarPreop);
+        checkupForm.addEventListener('change', invalidarPreop);
+
+        // ── Resultado ──
+        const textoSeguro = t => escapeHtml(T(t || ''));
+        const classeTag = c => c ? `<span class="po-classe">${escapeHtml(c)}</span>` : '';
+        const divergenciaHtml = t => t ? `<div class="po-divergencia"><strong>${textoSeguro('Divergência:')}</strong> ${textoSeguro(t)}</div>` : '';
+        // Escore calculado sem um dado ("item contado como ausente") ou não calculado (valor "—": falta o essencial).
+        const faltaHtml = e => !(e.falta && e.falta.length) ? '' : e.valor === '—'
+            ? `<p class="po-detalhe text-[#A0430A]">${textoSeguro('Para calcular, informe:')} ${e.falta.map(textoSeguro).join(', ')}.</p>`
+            : `<p class="po-detalhe text-[#A0430A]">${textoSeguro('Sem')} ${e.falta.map(textoSeguro).join(', ')}: ${textoSeguro('item contado como ausente.')}</p>`;
+        const refsHtml = x => x && x.referencia_html ? `<p class="po-ref referencia-links">${x.referencia_html}</p>` : '';
+        // Classes escritas por extenso: o Tailwind só gera o CSS das classes que encontra no arquivo.
+        const CLASSE_DA_FAIXA = { baixo: 'po-faixa po-faixa-baixo', intermediario: 'po-faixa po-faixa-intermediario',
+                                  alto: 'po-faixa po-faixa-alto' };
+        const CLASSE_DA_CONDUTA = { manter: 'po-conduta-manter', suspender: 'po-conduta-suspender',
+                                    ajustar: 'po-conduta-ajustar', individualizar: 'po-conduta-individualizar' };
+        const faixaHtml = e => e.faixa ? `<span class="${CLASSE_DA_FAIXA[e.nivel] || CLASSE_DA_FAIXA.baixo}">${textoSeguro(e.faixa)}</span>` : '';
+
+        function classesDoExame(e) {
+            const partes = [];
+            if (e.aha && e.aha !== '—') partes.push(classeTag('AHA ' + e.aha));
+            if (e.sbc && e.sbc !== '—') partes.push(classeTag('SBC ' + e.sbc));
+            if (e.outra) partes.push(classeTag(e.outra));
+            return partes.join(' ');
+        }
+
+        function cartaoDeItens(itens, montar) {
+            return `<div class="risco-cartao !mt-0">${itens.map(montar).join('')}</div>`;
+        }
+
+        function exibirPreoperatorio(r) {
+            const alvo = document.getElementById('preopConteudo');
+            document.getElementById('preopCirurgia').textContent =
+                [T(r.cirurgia.rotulo), T('Risco') + ' ' + T(r.cirurgia.risco).toLowerCase(), T(r.cirurgia.urgencia)].join(' · ');
+            let h = '';
+            let detalhes = '';     // no resumo curto, os escores e o resto ficam recolhidos
+
+            if (r.resumido && r.resumo) {
+                h += `<div class="aviso aviso-info mt-6"><p><strong class="font-medium">${textoSeguro(r.resumo.titulo)}</strong></p>
+                    <p class="mt-1">${textoSeguro(r.resumo.texto)}</p>${refsHtml(r.resumo)}</div>`;
+            }
+
+            if (r.adiar && r.adiar.length) {
+                h += `<h3 class="po-titulo">${textoSeguro('Antes de marcar a cirurgia')}</h3>`;
+                h += r.adiar.map(a => `<div class="aviso ${a.ok ? 'aviso-info' : 'aviso-atencao'} mt-3">
+                    <p><strong class="font-medium">${textoSeguro(a.titulo)}</strong> ${classeTag(a.classe)}</p>
+                    <p class="mt-1">${textoSeguro(a.texto)}</p>${refsHtml(a)}${divergenciaHtml(a.divergencia)}</div>`).join('');
+            }
+
+            const ind = r.indicacao;
+            const inicioDosDetalhes = h.length;
+            h += `<h3 class="po-titulo">${textoSeguro('A avaliação cardiológica está indicada?')}</h3>
+                <div class="risco-cartao !mt-0"><ol class="po-passos">${ind.passos.map(p => `<li class="po-passo">
+                    <span class="${p.estado === 'ok' ? 'po-resposta po-resposta-ok' : 'po-resposta po-resposta-atencao'}">${textoSeguro(p.resposta)}</span>
+                    <div><p class="font-medium">${textoSeguro(p.pergunta)}</p><p class="text-ink/60 mt-0.5">${textoSeguro(p.texto)}</p></div></li>`).join('')}</ol>
+                <div class="aviso ${ind.tipo === 'nao_indicada' ? 'aviso-info' : 'aviso-atencao'} mt-4"><strong class="font-medium">${textoSeguro(ind.conclusao)}</strong></div>
+                ${refsHtml(ind)}${divergenciaHtml(ind.divergencia)}</div>`;
+
+            h += `<h3 class="po-titulo">${textoSeguro('Risco cardiovascular')}</h3><div class="po-escores">`;
+            h += r.escores.map(e => `<div class="po-escore"><p class="po-escore-nome">${textoSeguro(e.nome)}</p>
+                <p class="po-escore-valor">${escapeHtml(e.valor)} ${faixaHtml(e)}</p>
+                ${e.itens && e.itens.length ? `<p class="po-detalhe">${e.itens.map(textoSeguro).join(' · ')}</p>` : ''}
+                ${e.nota ? `<p class="po-detalhe">${textoSeguro(e.nota)}</p>` : ''}
+                ${faltaHtml(e)}
+                ${refsHtml(e)}</div>`).join('');
+            h += '</div>';
+            if (r.clcr != null) h += `<p class="text-[13px] text-ink/60 mt-3">${textoSeguro('Depuração de creatinina (Cockcroft-Gault)')}: <strong>${escapeHtml(String(r.clcr).replace('.', ','))} mL/min</strong></p>`;
+            if (r.resumido) { detalhes += h.slice(inicioDosDetalhes); h = h.slice(0, inicioDosDetalhes); }
+
+            const exames = r.exames || [];
+            const sugeridos = exames.map((e, i) => [e, i]).filter(([e]) => e.estado !== 'nao_indicado');
+            const naoIndicados = exames.filter(e => e.estado === 'nao_indicado');
+            if (sugeridos.length || !r.resumido) h += `<h3 class="po-titulo">${textoSeguro('Exames antes da cirurgia')}</h3>`;
+            if (sugeridos.length) {
+                h += `<div class="risco-cartao !mt-0"><p class="text-[13px] text-ink/55 mb-2">${textoSeguro('Os marcados entram nos PDFs. "Considerar" vem desmarcado: só se o resultado mudar a conduta.')}</p>`;
+                h += sugeridos.map(([e, i]) => {
+                    const podePedir = e.categoria !== 'outro';
+                    const marcado = e.estado === 'indicado';
+                    const rotulo = { indicado: 'Indicado', considerar: 'Considerar', ja_feito: 'Já realizado' }[e.estado] || '';
+                    return `<div class="po-item"><label class="po-exame">
+                        ${podePedir ? `<input type="checkbox" data-exame-preop="${i}" ${marcado ? 'checked' : ''}>` : '<span class="w-4"></span>'}
+                        <span class="min-w-0"><span class="font-medium">${textoSeguro(e.titulo)}</span>
+                        <span class="text-[12px] text-ink/50 ml-1">${textoSeguro(rotulo)}</span> ${classesDoExame(e)}
+                        <span class="block text-[13px] text-ink/60 mt-0.5">${textoSeguro(e.motivo)}</span>
+                        ${e.ultimo ? `<span class="block text-[12px] text-teal-dark mt-0.5">${textoSeguro(e.ultimo)}</span>` : ''}</span></label>
+                        ${refsHtml(e)}${divergenciaHtml(e.divergencia)}</div>`;
+                }).join('');
+                h += '</div>';
+            }
+            if (naoIndicados.length && !r.resumido) {
+                h += `<details class="risco-cartao mt-3"><summary class="cursor-pointer text-[13px] text-teal">${textoSeguro('Não indicados')} (${naoIndicados.length})</summary>
+                    ${naoIndicados.map(e => `<div class="po-item"><p><span class="font-medium">${textoSeguro(e.titulo)}</span> ${classesDoExame(e)}</p>
+                    <p class="text-[13px] text-ink/60 mt-0.5">${textoSeguro(e.motivo)}</p>${refsHtml(e)}${divergenciaHtml(e.divergencia)}</div>`).join('')}</details>`;
+            }
+
+            const meds = r.medicamentos || {};
+            if ((meds.itens && meds.itens.length) || (meds.avisos && meds.avisos.length)) {
+                h += `<h3 class="po-titulo">${textoSeguro('Medicamentos')}</h3>`;
+                if (meds.itens && meds.itens.length) {
+                    h += cartaoDeItens(meds.itens, m => `<div class="po-item">
+                        <p><span class="font-medium">${textoSeguro(m.medicamento)}</span> · <span class="${CLASSE_DA_CONDUTA[m.conduta] || ''}">${textoSeguro(m.resumo)}</span> ${classeTag(m.classe)}</p>
+                        <p class="text-[13px] text-ink/60 mt-0.5">${textoSeguro(m.texto)}</p>${refsHtml(m)}${divergenciaHtml(m.divergencia)}</div>`);
+                }
+                (meds.avisos || []).forEach(a => {
+                    h += `<div class="aviso aviso-atencao mt-3"><p><strong class="font-medium">${textoSeguro(a.titulo)}</strong></p>
+                        <p class="mt-1">${textoSeguro(a.texto)}</p>${refsHtml(a)}${divergenciaHtml(a.divergencia)}</div>`;
+                });
+            }
+
+            const pul = r.pulmonar;
+            const inicioDoFim = h.length;
+            h += `<h3 class="po-titulo">${textoSeguro('Risco pulmonar e apneia do sono')}</h3><div class="po-escores">`;
+            h += [pul.escore, pul.stop_bang].map(e => `<div class="po-escore"><p class="po-escore-nome">${textoSeguro(e.nome)}</p>
+                <p class="po-escore-valor">${escapeHtml(e.valor)} ${faixaHtml(e)}</p>
+                ${e.itens && e.itens.length ? `<p class="po-detalhe">${e.itens.map(textoSeguro).join(' · ')}</p>` : ''}
+                ${e.nota ? `<p class="po-detalhe">${textoSeguro(e.nota)}</p>` : ''}
+                ${faltaHtml(e)}
+                ${refsHtml(e)}</div>`).join('') + '</div>';
+            const outras = (pul.medidas || []).concat(r.orientacoes || []);
+            if (outras.length) {
+                h += cartaoDeItens(outras, o => `<div class="po-item"><p><span class="font-medium">${textoSeguro(o.titulo)}</span> ${classeTag(o.classe)}</p>
+                    <p class="text-[13px] text-ink/60 mt-0.5">${textoSeguro(o.texto)}</p>${refsHtml(o)}${divergenciaHtml(o.divergencia)}</div>`).replace('!mt-0', 'mt-3');
+            }
+
+            if (r.pos_operatorio && r.pos_operatorio.length) {
+                h += `<h3 class="po-titulo">${textoSeguro('No pós-operatório')}</h3>`;
+                h += cartaoDeItens(r.pos_operatorio, o => `<div class="po-item"><p><span class="font-medium">${textoSeguro(o.titulo)}</span> ${classeTag(o.classe)}</p>
+                    <p class="text-[13px] text-ink/60 mt-0.5">${textoSeguro(o.texto)}</p>${refsHtml(o)}${divergenciaHtml(o.divergencia)}</div>`);
+            }
+
+            if (r.resumido) {
+                detalhes += h.slice(inicioDoFim);
+                h = h.slice(0, inicioDoFim) + `<details class="risco-cartao mt-6"><summary class="cursor-pointer text-[13px] text-teal">${textoSeguro('Ver escores e detalhes')}</summary>${detalhes}</details>`;
+            }
+            alvo.innerHTML = h;
+            alvo.querySelectorAll('[data-exame-preop]').forEach(caixa => caixa.addEventListener('change', sincronizarExamesDoPreop));
+            sincronizarExamesDoPreop();
+            preopResultado.style.display = 'block';
+            preopResultado.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Os exames marcados viram a lista dos PDFs (mesmo diálogo do check-up: acréscimo, justificativa, guia, APAC).
+        function sincronizarExamesDoPreop() {
+            if (!resultadoPreop) { currentRecommendations = []; return; }
+            const marcados = new Set([...document.querySelectorAll('[data-exame-preop]:checked')].map(c => Number(c.dataset.examePreop)));
+            currentRecommendations = (resultadoPreop.exames || [])
+                .filter((e, i) => marcados.has(i) && (e.categoria === 'laboratorio' || e.categoria === 'imagem'))
+                .map(e => ({ titulo: e.titulo, categoria: e.categoria }));
+        }
+
+        // Texto para colar no prontuário: conclusão, escores, exames marcados, medicamentos e pós-operatório.
+        function textoParaProntuario(r) {
+            const linhas = [T('Avaliação pré-operatória') + ' — ' + T(r.cirurgia.rotulo) + ' (' + T(r.cirurgia.risco) + '; ' + T(r.cirurgia.urgencia) + ')'];
+            linhas.push(T(r.indicacao.conclusao));
+            (r.adiar || []).filter(a => !a.ok).forEach(a => linhas.push('- ' + T(a.titulo) + ': ' + T(a.texto)));
+            linhas.push(T('Escores') + ': ' + r.escores.map(e => `${T(e.nome)} ${e.valor}${e.faixa ? ' (' + T(e.faixa) + ')' : ''}`).join('; ')
+                        + `; ${T(r.pulmonar.escore.nome)} ${r.pulmonar.escore.valor} (${T(r.pulmonar.escore.faixa)})`
+                        + `; ${T(r.pulmonar.stop_bang.nome)} ${r.pulmonar.stop_bang.valor} (${T(r.pulmonar.stop_bang.faixa)})`
+                        + (r.clcr != null ? `; ClCr ${String(r.clcr).replace('.', ',')} mL/min` : ''));
+            const pedidos = currentRecommendations.map(e => T(e.titulo));
+            if (pedidos.length) linhas.push(T('Exames solicitados') + ': ' + pedidos.join('; '));
+            const meds = (r.medicamentos && r.medicamentos.itens) || [];
+            if (meds.length) linhas.push(T('Medicamentos') + ': ' + meds.map(m => `${T(m.medicamento)}: ${T(m.resumo)}`).join('; '));
+            if ((r.pos_operatorio || []).length) linhas.push(T('Pós-operatório') + ': ' + r.pos_operatorio.map(o => T(o.titulo)).join('; '));
+            return linhas.join('\n');
+        }
+        document.getElementById('preopCopiar').addEventListener('click', async () => {
+            if (!resultadoPreop) return;
+            try {
+                await navigator.clipboard.writeText(textoParaProntuario(resultadoPreop));
+                const aviso = document.getElementById('preopCopiado');
+                aviso.hidden = false;
+                setTimeout(() => { aviso.hidden = true; }, 2500);
+            } catch (erro) {
+                alert(T('Não foi possível copiar. Selecione o texto manualmente.'));
+            }
+        });
     </script>
 </body>
 </html>

@@ -371,6 +371,10 @@ SEM_CODIGO = {
         'sem código conferido na TUSS',
     'Angiotomografia de coronárias':
         'código não conferido',
+    'Cintilografia de perfusão miocárdica (estresse e repouso)':
+        'código não conferido para esta minuta',
+    'Ecocardiograma de estresse com dobutamina':
+        'código não conferido para esta minuta',
     'Prova de função pulmonar completa com difusão (DLCO)':
         'a difusão de CO não tem código conferido; o 40105075 também cobre a espirometria simples, que não mede a DLCO',
     'Genotipagem do gene DPYD (deficiência de DPD)':

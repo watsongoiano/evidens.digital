@@ -17,7 +17,7 @@
     pt: { sigla: 'BR/PT', nome: 'Português', lang: 'pt-BR' },
     en: { sigla: 'US/EN', nome: 'English', lang: 'en' }
   };
-  var ATRIBUTOS = ['placeholder', 'title', 'aria-label', 'alt'];
+  var ATRIBUTOS = ['placeholder', 'title', 'aria-label', 'alt', 'label'];  // label: <optgroup>
   var NAO_ENTRAR = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEXTAREA: 1, TEMPLATE: 1 };
 
   function guardar(idioma) {
