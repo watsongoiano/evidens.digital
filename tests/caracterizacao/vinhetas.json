@@ -526,8 +526,7 @@
         "Hepatite B (Engerix-B® ou Euvax B®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)",
         "Herpes Zóster (Shingrix®)",
-        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
-        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)"
       ]
     },
     "nao_incluidas": [
@@ -722,7 +721,11 @@
         "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "Herpes Zóster (Shingrix®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)",
+        "Haemophilus influenzae tipo b (Hib)"
       ]
     },
     "nao_incluidas": [
@@ -799,7 +802,10 @@
         "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "Herpes Zóster (Shingrix®)",
+        "Haemophilus influenzae tipo b (Hib)"
       ]
     },
     "nao_incluidas": [
@@ -848,7 +854,10 @@
         "Hepatites A e B (Twinrix® ou vacinas isoladas)",
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
-        "COVID-19 (Comirnaty®, Spikevax® ou outras)"
+        "COVID-19 (Comirnaty®, Spikevax® ou outras)",
+        "Pneumocócica conjugada 20-valente (Prevenar 20®)",
+        "Herpes Zóster (Shingrix®)",
+        "VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)"
       ]
     },
     "nao_incluidas": [

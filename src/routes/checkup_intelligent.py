@@ -341,9 +341,10 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # dTpa
     _add_rec({
         'titulo': 'dTpa (Adacel® ou Boostrix®)',
-        'descricao': 'Esquema completo: reforço com dTpa a cada 10 anos. Incompleto: 1 dose de dTpa e completar com dT até 3 doses com componente tetânico. Não vacinado/desconhecido: 1 dTpa + 2 dT (0-2-4 a 8 meses). Contactante de lactente: considerar antecipar o reforço para 5 anos. Viagem a área com pólio: dTpa-VIP.',
-        'subtitulo': 'Rotina | Reforço a cada 10 anos (+ cada gestação)',
-        'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
+        'descricao': 'Esquema completo: reforço com dTpa a cada 10 anos. Incompleto: 1 dose de dTpa e completar com dT até 3 doses com componente tetânico. Não vacinado/desconhecido: 1 dTpa + 2 dT (0-2-4 a 8 meses). Contactante de lactente: considerar antecipar o reforço para 5 anos. Viagem a área com pólio: dTpa-VIP.'
+                     + (' Gestante: 1 dose de dTpa a cada gestação, a partir de 20 semanas; não feita na gestação, até 45 dias após o parto.' if is_pregnant else ''),
+        'subtitulo': 'Gestante | 1 dose a cada gestação a partir de 20 sem | PNI: sim' if is_pregnant else 'Rotina | Reforço a cada 10 anos (+ cada gestação)',
+        'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM + (' / IN CNV 2026 (MS)' if is_pregnant else ''), 'grau_evidencia': 'A'
     })
 
     # Hepatites: uma recomendação só
@@ -422,9 +423,9 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         _add_rec({
             'titulo': 'Dengue (Qdenga®)',
             'viva_atenuada': True,
-            'descricao': '2 doses com intervalo de 3 meses (0-3), independentemente de contato prévio com dengue. Licenciada de 4 a 60 anos. Contraindicada em gestantes e lactantes.',
+            'descricao': '2 doses com intervalo de 3 meses (0-3), independentemente de contato prévio com dengue. Licenciada de 4 a 60 anos. Contraindicada em gestantes, lactantes e imunossuprimidos (inclusive terapia imunossupressora). Intervalo de 30 dias com outra vacina atenuada não aplicada no mesmo dia. PNI: só de 10 a 14 anos. A Butantan-DV (dose única, 12 a 59 anos) foi aprovada pela Anvisa em 2025, mas ainda não consta da IN CNV 2026.',
             'subtitulo': 'Até 60 anos | 2 doses (0-3m) | Rede privada',
-            'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'B'
+            'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM + ' / SBIm Pacientes Especiais 2026/2027 / IN CNV 2026 (MS) / Anvisa 2025 (Butantan-DV)', 'grau_evidencia': 'B'
         })
 
     # COVID-19
@@ -452,17 +453,19 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'descricao': 'Dose única. Já recebeu VPP23: aguardar 1 ano. Esquema incompleto com VPC13/VPC15 (± VPP23): completar com VPC20 (2 meses após VPC13/15 ou 1 ano após VPP23). Esquema completo (VPC13/15 + VPP23): dose adicional a critério médico.',
             'subtitulo': ('A partir de 50 anos' if age >= 50 else 'Comorbidade de risco (' + ', '.join(
                 x for x, sim in (('DPOC', has_dpoc), ('doença cardiovascular crônica', has_cardiopatia_cronica)) if sim)
-                + ')') + ' | Dose única | PNI: grupos de risco (CRIE)',
-            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
+                + ')') + (' | Dose única | PNI: sim (≥ 85 anos)' if age >= 85 else
+                        ' | Dose única | PNI: acamados/institucionalizados; CRIE p/ comorbidades' if age >= 60 else
+                        ' | Dose única | PNI: grupos de risco (CRIE)'),
+            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM + (' / IN CNV 2026 (MS)' if age >= 60 else ''), 'grau_evidencia': 'A'
         })
 
     # Vírus sincicial respiratório
     if is_pregnant and sex == 'feminino':
         _add_rec({
             'titulo': 'RSV - Vírus Sincicial Respiratório (Abrysvo®)',
-            'descricao': 'Dose única a cada gestação. SBIm/PNI: a partir de 28 semanas (24-27 a critério médico). ACOG/CDC: 32 a 36 semanas, preferencialmente na sazonalidade. Única vacina VSR licenciada para gestantes.',
+            'descricao': 'SBIm/PNI: a partir de 28 semanas, sem limite superior (exceto em trabalho de parto), 1 dose a cada gestação (24-27 semanas a critério médico). Bula: preferencialmente de 24 a 36 semanas. ACIP/ACOG: 32 a 36 semanas, na sazonalidade, e sem dose em gestação subsequente. Única vacina VSR licenciada para gestantes.',
             'subtitulo': 'Gestantes ≥28 sem (SBIm) ou 32-36 sem (ACOG) | Dose única por gestação | PNI: sim',
-            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM + ' / ACOG 2025', 'grau_evidencia': 'A'
+            'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM + ' / CVE-SP/PNI 2025 (VSR na gestante) / ACOG 2023', 'grau_evidencia': 'A'
         })
     elif age >= 70:
         _add_rec({
@@ -472,12 +475,15 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'categoria': 'vacina', 'prioridade': 'alta', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
         })
     elif idoso:
-        _add_rec({
-            'titulo': 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)',
-            'descricao': 'Dose única para 60-69 anos com maior risco: cardiopatia, pneumopatia, diabetes, obesidade, nefropatia, hepatopatia, imunossupressão, fragilidade ou institucionalização.',
-            'subtitulo': '60-69 anos com fator de risco | Dose única | Rede privada',
-            'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
-        })
+        # 60-69 anos: só com fator de risco (SBIm Idoso). Aqui, DPOC e DCV; os demais fatores e a orientação
+        # para quem não tem nenhum ficam em src/utils/condicoes.py.
+        if has_dpoc or has_cardiopatia_cronica:
+            _add_rec({
+                'titulo': 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)',
+                'descricao': 'Dose única para 60-69 anos com maior risco: cardiopatia, pneumopatia, diabetes, obesidade, nefropatia, hepatopatia, imunossupressão, fragilidade ou institucionalização.',
+                'subtitulo': '60-69 anos com fator de risco | Dose única | Rede privada',
+                'categoria': 'vacina', 'prioridade': 'media', 'referencia': REF_SBIM, 'grau_evidencia': 'A'
+            })
     elif has_dpoc or has_cardiopatia_cronica:
         qual = ' e '.join(x for x, sim in (('DPOC', has_dpoc), ('doença cardiovascular crônica', has_cardiopatia_cronica)) if sim)
         _add_rec({
@@ -1151,7 +1157,9 @@ def generate_intelligent_recommendations():
         
         # Listas de comorbidades, medicações e história familiar (src/utils/condicoes.py)
         orientacoes = condicoes.aplicar(recommendations, age, sex, comorbidades, medicacoes_checkboxes, familia,
-                                        gestante=is_pregnant, tabagismo=tabagismo, imc=imc)
+                                        gestante=is_pregnant, tabagismo=tabagismo, imc=imc,
+                                        imunossuprimido=triagem.get('imunossupressao') == SIM,
+                                        cd4=data.get('cd4') if is_hiv_positive else None)
 
         # Gestação: rotina do pré-natal pela idade gestacional; itens do check-up geral que
         # não se aplicam na gestação saem da lista e aparecem como "adiados".
@@ -1291,7 +1299,7 @@ def generate_intelligent_recommendations():
 
         # Triagem de segurança das vacinas. É a última etapa de propósito: vale para
         # qualquer regra acima, inclusive as que forem acrescentadas depois.
-        contexto_vacinas = {'idade': age, 'hiv': is_hiv_positive, 'cd4': data.get('cd4')}
+        contexto_vacinas = {'idade': age, 'hiv': is_hiv_positive, 'cd4': data.get('cd4'), 'classes': medicacoes_checkboxes}
         mantidas, nao_incluidas = aplicar_triagem_vacinas(response['recommendations'], triagem, contexto_vacinas)
         if gestacao is not None:
             mantidas, vacinas_futuras = prenatal.vacinas_fora_da_janela(mantidas, gestacao['ig'])
@@ -1419,6 +1427,20 @@ def _ler_pedido_de_pdf(categoria):
     return dados_paciente, itens
 
 
+MAX_ITENS_LISTA_PDF = 200
+
+
+def _lista_do_pedido(valor):
+    """Lista de chaves (comorbidades ou medicações) dos dados do paciente; texto solto vira lista de um item."""
+    if valor is None or valor == '':
+        return []
+    valor = [valor] if isinstance(valor, str) else valor
+    if not isinstance(valor, list) or len(valor) > MAX_ITENS_LISTA_PDF or \
+            not all(isinstance(v, str) and 0 < len(v) <= 80 for v in valor):
+        raise PedidoDePdfInvalido('Lista de comorbidades ou medicações inválida')
+    return [v.strip() for v in valor]
+
+
 def _conferir_triagem_das_vacinas(dados_paciente, vacinas):
     """Segunda linha de defesa: recusa o PDF se houver vacina que a triagem não libera.
 
@@ -1430,10 +1452,26 @@ def _conferir_triagem_das_vacinas(dados_paciente, vacinas):
     sexo = sexo.strip().lower() if isinstance(sexo, str) else None
     idade = ler_numero(dados_paciente.get('idade'))
     triagem, _ = normalizar_triagem(dados_paciente, sexo, idade)
+    # Comorbidades e medicações (com dose e duração) entram como nas recomendações: o que implica
+    # imunossupressão vale como "Sim", e corticoide sem dose ou imunossupressor de baixo grau seguem a triagem.
+    comorbidades = _lista_do_pedido(dados_paciente.get('comorbidades'))
+    escolhidas = _lista_do_pedido(dados_paciente.get('medicacoes'))
+    from src.utils import doses, medicamentos
+    try:
+        detalhes = doses.ler(dados_paciente, escolhidas)
+        peso = ler_numero(dados_paciente.get('peso'))
+    except (doses.DetalheInvalido, TypeError, ValueError):
+        raise PedidoDePdfInvalido('Dose, duração ou peso inválidos nos dados do paciente')
+    mais, excluir, _ = doses.avaliar(escolhidas, detalhes, peso=peso)
+    classes = medicamentos.classes_de(escolhidas, excluir)
+    classes += [c for c in sorted(mais) if c not in classes]
+    if condicoes.imunossupressao_implicada(comorbidades, classes):
+        triagem['imunossupressao'] = SIM
     contexto = {
         'idade': idade,
-        'hiv': bool(dados_paciente.get('hiv')),
+        'hiv': bool(dados_paciente.get('hiv')) or 'hiv' in comorbidades,
         'cd4': ler_numero(dados_paciente.get('cd4')),
+        'classes': classes,
     }
     _, bloqueadas = aplicar_triagem_vacinas(vacinas, triagem, contexto)
     if bloqueadas:
