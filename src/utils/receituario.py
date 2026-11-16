@@ -146,7 +146,11 @@ def montar(dados, logo=None):
         pdf.set_line_width(0.5)
         pdf.line(esquerda, fim_cabecalho + 3, direita, fim_cabecalho + 3)
 
-    rodape = [linha for linha in (dados.get('endereco'), dados.get('contato')) if linha]
+    # Endereço e contato quebram dentro da largura da página (um texto longo não pode sair pelas bordas);
+    # a altura do rodapé sai do número de linhas resultante.
+    pdf.set_font('DejaVu', '', 8.5)
+    rodape = [parte for linha in (dados.get('endereco'), dados.get('contato')) if linha
+              for parte in pdf.multi_cell(largura, 4.5, linha, align='C', dry_run=True, output='LINES')]
     if rodape or tema == 'faixa':
         y = 297 - 12 - 4.5 * len(rodape)
         if tema == 'linha' and rodape:

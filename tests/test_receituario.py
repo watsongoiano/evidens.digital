@@ -176,3 +176,18 @@ def test_receituario_que_nao_abre_nao_impede_o_pedido(app, contas, monkeypatch):
     monkeypatch.setattr(receituario, 'montar', lambda *a, **k: (_ for _ in ()).throw(RuntimeError('quebrou')))
     texto, _ = _texto_do_pedido(cliente)
     assert 'Hemograma' in texto
+
+
+def test_rodape_longo_quebra_dentro_da_pagina():
+    import pypdfium2
+    dados = receituario.validar_montado(dict(MONTADO, endereco='AVENIDA ' * 20, contato='CONTATO ' * 15))
+    pdf = receituario.montar(dados)
+    documento = pypdfium2.PdfDocument(pdf)
+    try:
+        texto = documento[0].get_textpage()
+        caixas = [texto.get_charbox(i) for i in range(texto.count_chars())]
+    finally:
+        documento.close()
+    assert min(c[0] for c in caixas) >= 15 / 25.4 * 72 and max(c[2] for c in caixas) <= 195 / 25.4 * 72
+    topo, base = timbrado.margens_sugeridas(pdf)
+    assert 297 - topo - base >= timbrado.AREA_MINIMA
