@@ -3034,7 +3034,7 @@
             const carga = porDia * Number(anos);
             oculto.value = String(Math.round(carga * 10000) / 10000);
             const exibida = Math.floor(carga * 10 + 1e-9) / 10;
-            saida.replaceChildren(T('Carga tabágica:') + ' ', Object.assign(document.createElement('strong'), { textContent: exibida.toLocaleString('pt-BR') + ' ' + T('maços-ano') }));
+            saida.replaceChildren(T('Carga tabágica:') + ' ', Object.assign(document.createElement('strong'), { textContent: exibida.toLocaleString(document.documentElement.lang || 'pt-BR') + ' ' + T('maços-ano') }));
             saida.hidden = false;
         }
         ['cigarros_dia', 'anos_fumando'].forEach(id => document.getElementById(id).addEventListener('input', calcularCargaTabagica));
@@ -3595,7 +3595,7 @@
             const saida = document.getElementById('po_dasi_valor');
             if (!dasi.length) { saida.hidden = true; return; }
             const total = Math.round(dasi.reduce((s, k) => s + (pesos[k] || 0), 0) * 100) / 100;
-            saida.replaceChildren('DASI: ', Object.assign(document.createElement('strong'), { textContent: total.toLocaleString('pt-BR') }),
+            saida.replaceChildren('DASI: ', Object.assign(document.createElement('strong'), { textContent: total.toLocaleString(document.documentElement.lang || 'pt-BR') }),
                                   ' ' + (total <= 34 ? T('(≤ 34: capacidade baixa)') : T('(> 34: capacidade boa)')));
             saida.hidden = false;
         }

@@ -4,6 +4,7 @@ As páginas são escritas em português; static/i18n/en.json guarda o par em ing
 Estes testes falham quando alguém acrescenta ou muda um texto e esquece o par.
 """
 from datetime import date, timedelta
+from html import unescape as html_unescape
 import itertools
 import json
 import re
@@ -192,6 +193,218 @@ def test_tudo_o_que_o_motor_devolve_tem_traducao(client):
         resposta = client.post('/api/checkup-intelligent', json=dados).get_json()
         faltando.update(t for t in _frases(resposta) if not i18n.coberto(t))
     assert not faltando, f'{len(faltando)} frases do motor sem par em inglês, por exemplo: {sorted(faltando)[:8]}'
+
+
+# --- Pré-operatório -----------------------------------------------------------------------------
+
+# Campos da resposta de /api/preoperatorio que a tela mostra (ver exibirPreoperatorio em intelligent-tools.html).
+# 'classe' e os rótulos das referências também aparecem: a página traduz todo texto que entra no documento.
+CAMPOS_LIDOS_PREOP = ('titulo', 'texto', 'resumo', 'motivo', 'nota', 'faixa', 'valor', 'itens', 'conclusao', 'pergunta',
+                      'resposta', 'divergencia', 'classe', 'rotulo', 'risco', 'urgencia', 'falta', 'medicamento', 'nome',
+                      'ultimo', 'label')
+HOJE_PREOP = date(2026, 11, 16)
+
+
+def _frases_do_preop(valor, dentro=False):
+    if isinstance(valor, str):
+        if dentro and '<a ' not in valor:
+            yield valor
+    elif isinstance(valor, list):
+        for v in valor:
+            yield from _frases_do_preop(v, dentro)
+    elif isinstance(valor, dict):
+        if 'aha' in valor and 'sbc' in valor and 'outra' in valor:  # exame: as classes viram etiquetas "AHA 2a", "SBC IIa"
+            yield from (f'{quem} {valor[quem.lower()]}' for quem in ('AHA', 'SBC') if valor[quem.lower()] not in ('', '—'))
+            yield from ([valor['outra']] if valor['outra'] else [])
+        for k, v in valor.items():
+            yield from _frases_do_preop(v, k in CAMPOS_LIDOS_PREOP)
+
+
+def _ctx_dos_medicamentos(p, resultado):
+    """O mesmo contexto que a rota /api/preoperatorio monta para preop_medicamentos.condutas."""
+    pas, pad = p.get('pas'), p.get('pad')
+    return {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr'],
+            'sangramento': p['sangramento'], 'cirurgia_risco_elevado': resultado['contexto']['cir_elev'],
+            'urgencia': p['urgencia'], 'neuroaxial': p['neuroaxial'], 'condicoes': set(p['condicoes']),
+            'stent': p['stent'], 'aas_indicacao': p['aas_indicacao'],
+            'pa_controlada': (pas < 140 and pad < 90) if pas and pad else None}
+
+
+def _casos_do_preoperatorio():
+    """Pedidos fictícios da aba: cada cirurgia em cada urgência, condições instáveis, prazos depois da angioplastia,
+    itens do DASI e do STOP-Bang, faixas dos escores, exames já feitos, medicamentos e dados que faltam."""
+    from src.utils import preoperatorio as po
+
+    def mes(k):  # 'AAAA-MM' de k meses antes de HOJE_PREOP
+        ano, m = divmod(HOJE_PREOP.year * 12 + HOJE_PREOP.month - 1 - k, 12)
+        return f'{ano}-{m + 1:02d}'
+
+    pacientes = [
+        dict(idade=35, sexo='feminino'),
+        dict(idade=58, sexo='masculino', peso=80, creatinina=1.0, hemoglobina=13, asa=2, duracao='menos_2h', spo2=97,
+             escadas='sim', condicoes=['hipertensao', 'diabetes'], sangramento='baixo_moderado'),
+        dict(idade=82, sexo='masculino', peso=60, creatinina=2.4, hemoglobina=9.5, asa=4, duracao='mais_3h', spo2=89,
+             infeccao_respiratoria=True, escadas='nao', cfs=6, sintomas=['angina', 'dispneia'], sangramento='alto',
+             condicoes=['dac', 'ic', 'avc_ait', 'diabetes_insulina', 'dpoc', 'tabagismo', 'fa', 'valvopatia', 'doenca_renal',
+                        'hepatopatia', 'obesidade', 'hipertensao'], medicacoes=['metoprolol', 'varfarina', 'losartana']),
+        dict(idade=70, sexo='feminino', peso=70, hemoglobina=11, asa=3, duracao='2_3h', spo2=93, escadas='sim',
+             condicoes=['revascularizacao_cirurgica', 'protese_mecanica', 'marcapasso_cdi'], dasi=['cuidar_de_si', 'andar_em_casa'],
+             medicacoes=['apixabana', 'metformina', 'insulina_glargina'], neuroaxial='sim'),
+        dict(idade=50, sexo='feminino', peso=95, creatinina=0.8, asa=2, sintomas=['sopro'], dasi=list(po.DASI_ITENS),
+             condicoes=['stent'], stent={'tipo': 'farmacologico', 'indicacao': 'sca', 'data': mes(8)}, pas=185, pad=100,
+             medicacoes=['aas_acido_acetilsalicilico', 'clopidogrel']),
+    ]
+    casos = [dict(paciente, cirurgia=cirurgia, urgencia=urgencia)
+             for cirurgia in po.CIRURGIAS for urgencia in po.URGENCIAS for paciente in pacientes]
+    base = dict(idade=68, sexo='masculino', peso=75, cirurgia='colectomia', urgencia='eletiva')
+    vascular = dict(base, cirurgia='aorta_aberta')
+    casos += [dict(base, instaveis=[chave]) for chave in po.INSTAVEIS] + [dict(base, instaveis=list(po.INSTAVEIS))]
+    for cirurgia, idade in itertools.product(('colectomia', 'aorta_aberta', 'catarata', 'mama'), (45, 68, 85)):
+        casos += [dict(base, cirurgia=cirurgia, idade=idade, condicoes=[chave]) for chave in po.CONDICOES]
+        casos += [dict(base, cirurgia=cirurgia, idade=idade, sintomas=[chave]) for chave in po.SINTOMAS]
+        casos += [dict(base, cirurgia=cirurgia, idade=idade, condicoes=['dac', 'ic'], escadas=escadas, dasi=dasi, dasi_respondido=True)
+                  for escadas in (None, 'sim', 'nao', 'nao_sabe') for dasi in ([], ['correr', 'esporte_extenuante', 'domestico_pesado', 'subir_lance', 'recreacao_moderada'])]
+    # DASI e escadas (concordantes e discordantes), STOP-Bang, fragilidade
+    casos += [dict(base, condicoes=['dac', 'ic'], dasi=[item], escadas=escadas) for item in po.DASI_ITENS for escadas in (None, 'sim', 'nao')]
+    casos += [dict(base, condicoes=['dac', 'ic'], dasi=list(po.DASI_ITENS), escadas=escadas) for escadas in (None, 'sim', 'nao')]
+    casos += [dict(base, sexo=sexo, idade=idade, stop_bang=[item], condicoes=com) for item in po.STOP_BANG_ITENS
+              for sexo in ('masculino', 'feminino') for idade in (40, 60) for com in ([], ['hipertensao'])]
+    casos += [dict(base, sexo=sexo, stop_bang=list(po.STOP_BANG_ITENS), condicoes=['hipertensao']) for sexo in ('masculino', 'feminino')]
+    casos += [dict(base, idade=idade, cfs=cfs) for cfs in range(1, 10) for idade in (60, 75)]
+    # ARISCAT, AUB-HAS2, VSG-CRI e exames de rotina pelo porte e pela classe ASA
+    casos += [dict(base, idade=idade, spo2=spo2, hemoglobina=hb, duracao=duracao, infeccao_respiratoria=infeccao)
+              for idade, spo2, hb, duracao, infeccao in itertools.product((40, 60, 85), (None, 88, 93, 98), (None, 9, 13),
+                                                                        (None, 'menos_2h', '2_3h', 'mais_3h'), (False, True))]
+    casos += [dict(vascular, idade=idade, creatinina=cr, condicoes=com, medicacoes=meds)
+              for idade in (55, 65, 75, 85) for cr in (None, 1.0, 2.0, 2.6)
+              for com in ([], ['dac', 'ic', 'dpoc', 'tabagismo', 'diabetes_insulina', 'stent'], ['revascularizacao_cirurgica'])
+              for meds in ([], ['metoprolol'])]
+    casos += [dict(base, cirurgia=cirurgia, asa=asa, condicoes=com, medicacoes=meds, creatinina=cr)
+              for cirurgia in ('catarata', 'mama', 'colectomia', 'rtu') for asa in (None, 1, 2, 3, 4, 5)
+              for com in ([], ['doenca_renal'], ['dac'], ['hepatopatia']) for meds in ([], ['varfarina'], ['losartana'])
+              for cr in (None, 1.1)]
+    casos += [dict(base, sexo='feminino', idade=idade, cirurgia=cirurgia) for idade in (30, 55, 56) for cirurgia in ('rtu', 'mama')]
+    # Gupta NSQIP MICA: cada cirurgia com estado funcional, classe ASA e creatinina (e sem eles)
+    casos += [dict(base, cirurgia=cirurgia, funcional=funcional, asa=asa, creatinina=cr, idade=idade)
+              for cirurgia in po.CIRURGIAS for funcional in po.ESTADOS_FUNCIONAIS
+              for asa, cr, idade in ((1, None, 40), (3, 1.0, 68), (5, 2.0, 85))]
+    casos += [dict(base, cirurgia=cirurgia, funcional=funcional) for cirurgia in ('colectomia', 'catarata') for funcional in po.ESTADOS_FUNCIONAIS]
+    # PA e AVC recente adiam a eletiva; diabetes pede HbA1c
+    casos += [dict(base, pas=pas, pad=pad, urgencia=urgencia) for pas, pad in ((185, 100), (150, 115), (130, 80), (130, None))
+              for urgencia in po.URGENCIAS]
+    casos += [dict(base, condicoes=['avc_ait_recente'], urgencia=urgencia) for urgencia in po.URGENCIAS]
+    casos += [dict(base, condicoes=['diabetes'], hba1c_dias=dias, urgencia=urgencia) for dias in (None, 0, 20, 45, 92, 200)
+              for urgencia in po.URGENCIAS]
+    # Angioplastia: tipo, indicação e tempo desde o procedimento (inclusive sem data)
+    for tipo, indicacao, meses, urgencia in itertools.product(('farmacologico', 'convencional', 'balao', None), ('sca', 'dac_cronica', None),
+                                                             (0, 1, 2, 4, 7, 11, 13, 30, None), ('eletiva', 'tempo_sensivel', 'urgencia')):
+        stent = {'tipo': tipo, 'indicacao': indicacao, 'data': mes(meses) if meses is not None else None}
+        casos.append(dict(base, condicoes=['stent'], stent=stent, urgencia=urgencia,
+                          medicacoes=['aas_acido_acetilsalicilico', 'clopidogrel', 'ticagrelor', 'prasugrel']))
+        casos.append(dict(base, condicoes=['stent', 'fa'], stent=stent, urgencia=urgencia, sangramento='alto',
+                          medicacoes=['prasugrel', 'apixabana']))
+    # data exata (dia, mês e ano): os prazos curtos (14 e 30 dias) sem o aviso de "só mês e ano"
+    for tipo, indicacao, dias in itertools.product(('farmacologico', 'convencional', 'balao'), ('sca', 'dac_cronica'), (5, 20, 45, 120, 250, 400)):
+        stent = {'tipo': tipo, 'indicacao': indicacao, 'data': (HOJE_PREOP - timedelta(days=dias)).isoformat()}
+        casos.append(dict(base, condicoes=['stent'], stent=stent, medicacoes=['aas_acido_acetilsalicilico', 'clopidogrel']))
+    casos.append(dict(base, condicoes=['stent']))
+    # Exames já realizados: ECG, eco e HbA1c recentes ou antigos, e resultados que alimentam os escores
+    for meses, sintomas, com in itertools.product((0, 1, 2, 5, 11, 20, 40), ([], ['dispneia'], ['sopro']), (['dac', 'diabetes'], ['valvopatia'])):
+        data = (HOJE_PREOP - timedelta(days=30 * meses + 3)).isoformat()
+        anteriores = [{'exame': exame, 'data': data} for exame in (
+            'Eletrocardiograma de repouso', 'Ecocardiograma transtorácico', 'Hemoglobina glicada (HbA1c), soro',
+            'Peptídeo natriurético BNP/PROBNP', 'Troponina, soro', 'Radiografia de tórax', 'Coagulograma (TP/INR e TTPa)')]
+        anteriores += [{'exame': 'Creatinina, soro', 'data': data, 'resultados': {'creatinina': '1,9'}},
+                       {'exame': 'Hemograma completo com plaquetas', 'data': data, 'resultados': {'hemoglobina': '9,8'}}]
+        casos.append(dict(base, idade=72, condicoes=com, sintomas=sintomas, exames_anteriores=anteriores))
+        casos.append(dict(base, idade=72, cirurgia='aorta_aberta', condicoes=com, sintomas=sintomas, exames_anteriores=anteriores))
+    return casos
+
+
+def _ctx_extras_dos_medicamentos():
+    """Contextos montados à mão para preop_medicamentos.condutas: cada risco de sangramento, ClCr e urgência; anestesia
+    neuroaxial; indicações de anticoagulação e de AAS; PA e risco da cirurgia; janelas depois da ICP."""
+    base = dict(idade=70, sexo='feminino', peso=70.0, clcr=60.0, sangramento='baixo_moderado', cirurgia_risco_elevado=True,
+                urgencia='eletiva', neuraxial=False, pa_controlada=True, condicoes=set(), aas_indicacao=None, stent=None)
+    ctxs = [dict(base, sangramento=sang, neuraxial=neuro, clcr=clcr, urgencia=urg, condicoes={'fa'})
+            for sang, neuro, clcr, urg in itertools.product((None, 'minimo', 'baixo_moderado', 'alto'), (False, True),
+                                                           (None, 10.0, 22.5, 40.0, 60.0), ('eletiva', 'tempo_sensivel', 'urgencia'))]
+    condicoes = [set(), {'ic'}, {'ic_fe_reduzida'}, {'hipertensao'}, {'fa'}, {'fa', 'hipertensao', 'diabetes', 'dac'},
+                 {'fa', 'avc_ait'}, {'fa', 'avc_ait_recente'}, {'fa', 'avc_ait', 'ic', 'hipertensao', 'diabetes', 'doenca_arterial_periferica'},
+                 {'fa', 'avc_ait_recente', 'ic', 'hipertensao', 'diabetes'}, {'fa', 'valvopatia'}, {'tev'}, {'tev_3_12m'},
+                 {'tev_recente_3m'}, {'trombofilia_grave'}, {'cancer_ativo'}, {'protese_mecanica'}, {'protese_mecanica', 'fa', 'avc_ait'},
+                 {'protese_mecanica_mitral'}, {'avc_ait'}, {'avc_ait_recente'}, {'stent'}, {'dac'}, {'doenca_arterial_periferica'},
+                 {'diabetes'}, {'fa', 'ic', 'hipertensao', 'diabetes', 'avc_ait', 'dac'}]
+    for com, (idade, sexo) in itertools.product(condicoes, ((None, None), (50, 'masculino'), (68, 'feminino'), (80, 'masculino'), (80, 'feminino'))):
+        ctxs.append(dict(base, condicoes=com, idade=idade, sexo=sexo))
+    for elevado, pa, com, idade in itertools.product((True, False, None), (True, False, None), (set(), {'ic'}, {'ic_fe_reduzida'}), (50, 70)):
+        ctxs.append(dict(base, cirurgia_risco_elevado=elevado, pa_controlada=pa, condicoes=com, idade=idade))
+    for indicacao, com in itertools.product((None, 'primaria', 'secundaria'), (set(), {'dac'}, {'stent'}, {'avc_ait'})):
+        ctxs.append(dict(base, aas_indicacao=indicacao, condicoes=com))
+    for tipo, indicacao, meses, urg, sang in itertools.product(('farmacologico', 'convencional', 'balao', None), ('sca', 'dac_cronica', None),
+                                                              (0, 0.3, 1, 2, 4, 7, 13, None), ('eletiva', 'tempo_sensivel', 'emergencia'),
+                                                              (None, 'minimo', 'alto')):
+        ctxs.append(dict(base, condicoes={'stent'}, stent={'tipo': tipo, 'indicacao': indicacao, 'meses': meses}, urgencia=urg,
+                         sangramento=sang))
+    return ctxs
+
+
+def _textos_do_preoperatorio():
+    """Todas as frases que a aba "Pré-operatório" pode mostrar para a bateria acima (e as mensagens de erro)."""
+    from src.utils import periodicidade, preoperatorio as po, preop_medicamentos as pm
+
+    frases = set()
+    todos = sorted(pm.CHAVES_COBERTAS | pm.CHAVES_SO_NA_IC)
+    for dados in _casos_do_preoperatorio():
+        anteriores, erros = periodicidade.ler_exames_anteriores(dados.pop('exames_anteriores', None), hoje_=HOJE_PREOP)
+        assert not erros, erros
+        p = po.aplicar_exames_anteriores(po.ler(dados, hoje=HOJE_PREOP), anteriores, hoje=HOJE_PREOP)
+        resultado = po.avaliar(p)
+        resultado['medicamentos'] = pm.condutas(p['medicacoes'], _ctx_dos_medicamentos(p, resultado))
+        frases.update(_frases_do_preop(resultado))
+    # cada medicamento com regra, sozinho e junto dos demais (com e sem AAS: a DAPT muda a conduta do inibidor de P2Y12)
+    for ctx in _ctx_extras_dos_medicamentos():
+        for meds in (todos, [m for m in todos if m != 'aas_acido_acetilsalicilico'], ['varfarina'], ['dabigatrana'],
+                     ['apixabana', 'rivaroxabana']):
+            frases.update(_frases_do_preop(pm.condutas(meds, ctx)))
+    # mensagens de erro da leitura do pedido
+    certo = dict(idade=60, sexo='masculino', cirurgia='colectomia', urgencia='eletiva')
+    errados = [None, {}, dict(certo, idade='abc'), dict(certo, idade=10), dict(certo, sexo=None), dict(certo, sexo='x'),
+               dict(certo, cirurgia=''), dict(certo, cirurgia='x'), dict(certo, urgencia=''), dict(certo, urgencia='x'),
+               dict(certo, peso='x'), dict(certo, peso=500), dict(certo, asa=7), dict(certo, duracao='x'), dict(certo, sangramento='x'),
+               dict(certo, pas=20), dict(certo, pad=300), dict(certo, spo2=30), dict(certo, escadas='x'), dict(certo, cfs=12),
+               dict(certo, aas_indicacao='x'), dict(certo, creatinina=40), dict(certo, hemoglobina=1), dict(certo, hba1c_dias=-1),
+               dict(certo, pas=120, pad=130), dict(certo, instaveis={'x': 1}), dict(certo, condicoes={'x': 1}),
+               dict(certo, sintomas={'x': 1}), dict(certo, dasi={'x': 1}), dict(certo, stop_bang={'x': 1}),
+               dict(certo, condicoes=['stent'], stent={'tipo': 'x'}), dict(certo, condicoes=['stent'], stent={'indicacao': 'x'}),
+               dict(certo, condicoes=['stent'], stent={'data': 'ontem'}), dict(certo, condicoes=['stent'], stent={'data': '2999-01'})]
+    mensagens = set()
+    for dados in errados:
+        try:
+            po.ler(dados, hoje=HOJE_PREOP)
+        except po.EntradaInvalida as erro:
+            mensagens.add(str(erro))
+    assert len(mensagens) > 20, mensagens  # a bateria precisa mesmo passar pelas mensagens de erro
+    return frases | mensagens
+
+
+def test_tudo_o_que_o_preoperatorio_devolve_tem_traducao():
+    """Varre a aba "Pré-operatório" (cada cirurgia e urgência, condições instáveis, angioplastia, DASI, STOP-Bang,
+    escores, exames já feitos, cada medicamento com regra e os erros de leitura) e confere que cada frase mostrada tem
+    par em inglês."""
+    faltando = sorted(t for t in _textos_do_preoperatorio() if not i18n.coberto(t))
+    assert not faltando, f'{len(faltando)} frases do pré-operatório sem par em inglês, por exemplo: {faltando[:8]}'
+
+
+def test_textos_fixos_da_aba_pre_operatorio_tem_traducao():
+    """Textos que o script da aba passa por T() e os grupos de risco das cirurgias (atributo label, fora do extrair_textos)."""
+    html = (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
+    bloco = html[html.index('// ── Aba "Pré-operatório"'):]
+    textos = {t.replace("\\'", "'") for t in re.findall(r"\b(?:T|textoSeguro)\('((?:[^'\\]|\\.)*)'\)", bloco)}
+    textos |= {'Indicado', 'Considerar', 'Já realizado'}  # rótulos do estado de cada exame
+    textos |= {html_unescape(t) for t in re.findall(r'<optgroup label="([^"]+)"', html)}
+    faltando = sorted(t for t in textos if not i18n.coberto(t))
+    assert len(textos) > 25 and not faltando, f'textos da aba "Pré-operatório" sem par em inglês: {faltando}'
 
 
 def test_todo_item_do_catalogo_de_acrescimo_tem_traducao():
