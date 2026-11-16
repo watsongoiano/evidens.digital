@@ -864,7 +864,7 @@
 
     <section class="secao" aria-labelledby="s-exames">
       <h2 id="s-exames" class="secao-titulo"><span class="secao-num">08</span>Exames já realizados</h2>
-      <p class="secao-nota">Opcional. Escolha entre os exames mais comuns, adicione outro do catálogo ou anexe o laudo em PDF; informe a data e, se quiser, o resultado. O que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. Colesterol, HDL, creatinina, HbA1c, relação albumina/creatinina e DNA-HPV entram nos cálculos (PREVENT, TFG pela CKD-EPI, risco renal e colo do útero); os outros resultados aparecem no resumo. O laudo é lido e descartado; nada é guardado.</p>
+      <p class="secao-nota">Opcional. Escolha entre os exames mais comuns, adicione outro do catálogo ou anexe o laudo em PDF; informe a data e, se quiser, o resultado. O que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. Colesterol, HDL, creatinina, HbA1c, relação albumina/creatinina e DNA-HPV entram nos cálculos (PREVENT, TFG pela CKD-EPI, risco renal e colo do útero); os outros ficam registrados no cartão do exame. O laudo é lido e descartado; nada é guardado.</p>
       <!-- Exames mais comuns: o cartão de cada exame abre logo abaixo do grupo do botão tocado. -->
       <div id="examesComunsPainel" class="exames-comuns" aria-label="Exames mais comuns"></div>
       <div class="flex flex-wrap gap-3 mt-6">
@@ -944,7 +944,8 @@
 
     <div id="riscoContent"></div>
     <div id="renalContent" class="mt-4"></div>
-    <div id="resultadosInformados" class="mt-4"></div>
+    <!-- Resumo dos resultados informados: oculto a pedido (os valores ficam nos cartões dos exames). -->
+    <div id="resultadosInformados" hidden></div>
     <div id="orientacoesContent"></div>
     <p class="text-[12px] text-ink/50 mt-6 flex flex-wrap gap-x-5 gap-y-1"><span><span class="inline-block w-2 h-2 rounded-full bg-teal align-middle mr-1"></span>prioridade alta</span><span><span class="inline-block w-2 h-2 rounded-full bg-aqua align-middle mr-1"></span>média</span><span><span class="inline-block w-2 h-2 rounded-full bg-ink/20 align-middle mr-1"></span>baixa</span><span><span class="rec-grau align-middle mr-1">A</span>grau de evidência</span></p>
     <div id="recommendationsContent"></div>
@@ -1731,12 +1732,26 @@
         const COR_CATEGORIA = { baixo: 'bg-teal', limitrofe: 'bg-[#C9A227]', intermediario: 'bg-[#D98B2B]', alto: 'bg-[#B53A2E]' };
         const pct = v => (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
 
+        // Questionário citado na orientação: o nome dele vira o link (só endereços https da lista do servidor).
+        function comLinks(o) {
+            let html = escapeHtml(o.descricao || '');
+            (o.links || []).forEach(l => {
+                if (!l || !/^https:\/\//.test(l.url || '') || !l.texto) return;
+                const nome = escapeHtml(l.texto);
+                const a = document.createElement('a');
+                a.href = l.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+                a.className = 'text-teal underline underline-offset-2'; a.textContent = l.texto;
+                html = html.split(nome).join(a.outerHTML);
+            });
+            return html;
+        }
+
         // Orientações que não viram pedido nem receita (idade de início, aconselhamento, alertas).
         function exibirOrientacoes(itens) {
             const alvo = document.getElementById('orientacoesContent');
             if (!itens.length) { alvo.innerHTML = ''; return; }
             const item = o => `<div class="py-2.5 border-t border-ink/5 first:border-0">${o.urgente ? `<span class="selo bg-[#C0392B] text-white">${T('Urgente')}</span>` : ''}<p class="text-[14px] font-medium">${escapeHtml(o.titulo)}</p>
-                 <p class="text-[13px] text-ink/65 mt-0.5">${escapeHtml(o.descricao)}</p>
+                 <p class="text-[13px] text-ink/65 mt-0.5">${comLinks(o)}</p>
                  <p class="text-[11px] text-ink/45 mt-1 font-mono referencia-links">${o.referencia_html || escapeHtml(o.referencia || '')}</p></div>`;
             // Urgências ficam sempre à vista; as demais orientações abrem com um clique.
             const urgentes = itens.filter(o => o.urgente), demais = itens.filter(o => !o.urgente);
