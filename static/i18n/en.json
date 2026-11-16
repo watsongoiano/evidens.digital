@@ -3058,7 +3058,17 @@
   "Seu CNS (Cartão Nacional de Saúde do profissional, 15 dígitos)": "Your CNS (professional national health card, 15 digits)",
   "Salvar estabelecimento": "Save facility",
   "SUS (APAC)": "SUS (APAC)",
-  "CEP": "ZIP code"
+  "CEP": "ZIP code",
+  "Quanto fuma por dia": "How much smoked per day",
+  "Quanto fumava por dia": "How much smoked per day (when smoking)",
+  "cigarros": "cigarettes",
+  "maços": "packs",
+  "Por quantos anos fumou": "Years of smoking",
+  "Carga tabágica:": "Pack-years:",
+  "maços-ano": "pack-years",
+  "Cigarros por dia": "Cigarettes per day",
+  "Anos de tabagismo": "Years of smoking",
+  "Unidade": "Unit"
  },
  "padroes": [
   [
@@ -3524,6 +3534,14 @@
   [
    "^Resultado em formato inválido: (.+)\\.$",
    "Result in invalid format: $1."
+  ],
+  [
+   "^Anos de tabagismo \\((.+)\\) incompatível com a idade \\((.+) anos\\)\\.$",
+   "Years of smoking (%1) incompatible with age (%2 years)."
+  ],
+  [
+   "^Anos de tabagismo \\((.+)\\) somados aos anos sem fumar \\((.+)\\) incompatíveis com a idade \\((.+) anos\\)\\.$",
+   "Years of smoking (%1) plus years since quitting (%2) incompatible with age (%3 years)."
   ]
  ],
  "manter": [

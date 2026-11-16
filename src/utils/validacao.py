@@ -76,6 +76,8 @@ CAMPOS_NUMERICOS = {
     'hba1c': (('hba1c',), 3, 20, 'HbA1c (%)'),
     'uacr': (('uacr', 'rac'), 0.1, 25000, 'Relação albumina/creatinina urinária (mg/g)'),
     'macos_ano': (('macos_ano',), 0, 300, 'Maços-ano'),
+    'cigarros_dia': (('cigarros_dia',), 0, 100, 'Cigarros por dia'),
+    'anos_fumando': (('anos_fumando',), 0, 90, 'Anos de tabagismo'),
     'anos_parou_fumar': (('anos_parou_fumar',), 0, 100, 'Anos desde que parou de fumar'),
     'idade_ccr_familiar': (('idade_ccr_familiar',), 10, 110, 'Idade do familiar mais jovem com câncer colorretal'),
     'cd4': (('cd4',), 0, 5000, 'CD4 (células/mm³)'),
@@ -226,6 +228,17 @@ def validar_entrada(bruto):
         if parou is not None and parou > idade - 5:
             erro('anos_parou_fumar', f'Anos desde que parou de fumar ({_formatar(parou)}) incompatível com a idade '
                                      f'({idade} anos).')
+        anos = dados.get('anos_fumando')
+        if anos is not None and anos > max(idade - 5, 0):
+            erro('anos_fumando', f'Anos de tabagismo ({_formatar(anos)}) incompatível com a idade ({idade} anos).')
+        elif anos is not None and parou is not None and anos + parou > max(idade - 5, 0):
+            erro('anos_fumando', f'Anos de tabagismo ({_formatar(anos)}) somados aos anos sem fumar '
+                                 f'({_formatar(parou)}) incompatíveis com a idade ({idade} anos).')
+    # Carga tabágica: cigarros por dia ÷ 20 × anos de tabagismo (o médico informa o consumo e o tempo; o maço tem
+    # 20 cigarros). Se a tela já mandou os maços-ano, valem os dela.
+    if dados.get('macos_ano') is None and dados.get('cigarros_dia') is not None and dados.get('anos_fumando') is not None:
+        dados['macos_ano'] = round(dados['cigarros_dia'] / 20 * dados['anos_fumando'], 4)  # sem arredondar para 1 casa: mudaria a elegibilidade
+    if idade is not None:
         macos = dados.get('macos_ano')
         if macos is not None and macos > max(idade - 5, 0) * 5:
             erro('macos_ano', f'Maços-ano ({_formatar(macos)}) incompatível com a idade ({idade} anos).')
