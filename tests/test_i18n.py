@@ -223,7 +223,7 @@ def _frases_do_preop(valor, dentro=False):
 def _ctx_dos_medicamentos(p, resultado):
     """O mesmo contexto que a rota /api/preoperatorio monta para preop_medicamentos.condutas."""
     pas, pad = p.get('pas'), p.get('pad')
-    return {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr'],
+    return {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr'], 'cirurgia': p['cirurgia'],
             'sangramento': p['sangramento'], 'cirurgia_risco_elevado': resultado['contexto']['cir_elev'],
             'urgencia': p['urgencia'], 'neuroaxial': p['neuroaxial'], 'condicoes': set(p['condicoes']),
             'stent': p['stent'], 'aas_indicacao': p['aas_indicacao'],
@@ -308,6 +308,24 @@ def _casos_do_preoperatorio():
         stent = {'tipo': tipo, 'indicacao': indicacao, 'data': (HOJE_PREOP - timedelta(days=dias)).isoformat()}
         casos.append(dict(base, condicoes=['stent'], stent=stent, medicacoes=['aas_acido_acetilsalicilico', 'clopidogrel']))
     casos.append(dict(base, condicoes=['stent']))
+    # Glicemia: HbA1c (com valor acima e abaixo de 8%) e glicose já feitas, no diabetes e no rastreio (≥ 35 anos ou fator
+    # de risco), em cirurgia eletiva e tempo-sensível
+    for dias, a1c, com, idade, urgencia in itertools.product((10, 60, 200), ('7,2', '9,1', None), (['diabetes'], [], ['hipertensao']),
+                                                             (30, 50), ('eletiva', 'tempo_sensivel')):
+        data = (HOJE_PREOP - timedelta(days=dias)).isoformat()
+        anteriores = [dict({'exame': 'Hemoglobina glicada (HbA1c), soro', 'data': data}, **({'resultados': {'hba1c': a1c}} if a1c else {})),
+                      {'exame': 'Glicose, soro', 'data': data}]
+        casos.append(dict(base, idade=idade, condicoes=com, urgencia=urgencia, exames_anteriores=anteriores))
+    # condição instável em cada urgência; AVC ou AIT recente com e sem doença carotídea sintomática
+    casos += [dict(base, instaveis=[chave], urgencia=urgencia) for chave in po.INSTAVEIS for urgencia in po.URGENCIAS]
+    casos += [dict(base, cirurgia=cirurgia, condicoes=['avc_ait_recente'], urgencia=urgencia)
+              for cirurgia in ('endarterectomia_sintomatica', 'stent_carotida_sintomatica', 'carotida_assintomatica', 'catarata')
+              for urgencia in po.URGENCIAS]
+    # AAS e inibidor de P2Y12 pela indicação, inclusive nas exceções da SBC (neurocirurgia e RTU)
+    casos += [dict(base, cirurgia=cirurgia, condicoes=com, aas_indicacao=indicacao, medicacoes=meds)
+              for cirurgia in ('neurocirurgia', 'rtu', 'colectomia', 'catarata') for com in ([], ['dac'], ['stent'])
+              for indicacao in (None, 'primaria', 'secundaria')
+              for meds in (['aas_acido_acetilsalicilico'], ['aas_acido_acetilsalicilico', 'clopidogrel'])]
     # Exames já realizados: ECG, eco e HbA1c recentes ou antigos, e resultados que alimentam os escores
     for meses, sintomas, com in itertools.product((0, 1, 2, 5, 11, 20, 40), ([], ['dispneia'], ['sopro']), (['dac', 'diabetes'], ['valvopatia'])):
         data = (HOJE_PREOP - timedelta(days=30 * meses + 3)).isoformat()
@@ -339,13 +357,21 @@ def _ctx_extras_dos_medicamentos():
         ctxs.append(dict(base, condicoes=com, idade=idade, sexo=sexo))
     for elevado, pa, com, idade in itertools.product((True, False, None), (True, False, None), (set(), {'ic'}, {'ic_fe_reduzida'}), (50, 70)):
         ctxs.append(dict(base, cirurgia_risco_elevado=elevado, pa_controlada=pa, condicoes=com, idade=idade))
-    for indicacao, com in itertools.product((None, 'primaria', 'secundaria'), (set(), {'dac'}, {'stent'}, {'avc_ait'})):
-        ctxs.append(dict(base, aas_indicacao=indicacao, condicoes=com))
+    for indicacao, com, cirurgia in itertools.product((None, 'primaria', 'secundaria'), (set(), {'dac'}, {'stent'}, {'avc_ait'}),
+                                                      (None, 'neurocirurgia', 'rtu', 'quadril', 'catarata')):
+        ctxs.append(dict(base, aas_indicacao=indicacao, condicoes=com, cirurgia=cirurgia))
     for tipo, indicacao, meses, urg, sang in itertools.product(('farmacologico', 'convencional', 'balao', None), ('sca', 'dac_cronica', None),
-                                                              (0, 0.3, 1, 2, 4, 7, 13, None), ('eletiva', 'tempo_sensivel', 'emergencia'),
+                                                              (0, 0.3, 1, 2, 4, 7, 13, None),
+                                                              ('eletiva', 'tempo_sensivel', 'urgencia', 'emergencia'),
                                                               (None, 'minimo', 'alto')):
         ctxs.append(dict(base, condicoes={'stent'}, stent={'tipo': tipo, 'indicacao': indicacao, 'meses': meses}, urgencia=urg,
                          sangramento=sang))
+    for tipo, dias, neuro in itertools.product(('farmacologico', 'convencional', 'balao'), (5, 20, 45, 100, 200, 300, 400), (False, True)):
+        ctxs.append(dict(base, condicoes={'stent', 'fa'}, stent={'tipo': tipo, 'indicacao': None, 'dias': dias}, neuraxial=neuro))
+    # prótese mecânica com anticoagulante direto; anestesia neuroaxial com cada ClCr
+    for com, clcr, neuro in itertools.product(({'protese_mecanica'}, {'protese_mecanica_mitral', 'fa'}, {'fa'}), (None, 20.0, 45.0, 80.0),
+                                              (False, True)):
+        ctxs.append(dict(base, condicoes=com, clcr=clcr, neuraxial=neuro, sangramento='alto'))
     return ctxs
 
 

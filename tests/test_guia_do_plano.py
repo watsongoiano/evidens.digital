@@ -274,7 +274,7 @@ def test_plano_e_carteira_ficam_na_identificacao_e_nao_vao_para_o_motor():
         assert ' name=' not in campo, campo
     assert len(re.findall(r'<(?:select|input)[^>]*data-plano[^>]*>', secao)) == 2
     # a lista de planos não vira botões (as opções vêm do cadastro do médico)
-    assert "checkupForm.querySelectorAll('select:not([data-plano])')" in tela
+    assert "checkupForm.querySelectorAll('select:not([data-plano]):not([data-sem-botoes])')" in tela
 
 
 def test_troca_de_paciente_pede_confirmacao_do_plano_antes_da_guia():

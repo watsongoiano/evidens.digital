@@ -1,4 +1,5 @@
 """Aba "Pré-operatório" (src/utils/preoperatorio.py e /api/preoperatorio). Dados fictícios."""
+import itertools
 from datetime import date
 
 import pytest
@@ -6,6 +7,7 @@ import pytest
 from src.utils import preoperatorio as po
 
 HOJE = date(2026, 11, 16)
+_SEQ_CONTAS = itertools.count(1)
 
 
 def _p(**extra):
@@ -146,7 +148,7 @@ def test_caso_completo_da_previa():
     assert _exame(r, 'Hemoglobina glicada (HbA1c), soro')['estado'] == 'ja_feito'
     assert _exame(r, 'Ecocardiograma transtorácico')['estado'] == 'nao_indicado'
     stent = r['adiar'][0]
-    assert stent.get('ok') and '8 meses' in stent['titulo']
+    assert stent.get('ok') and '7 meses' in stent['titulo']       # só o mês: conta do último dia (31/03)
     assert r['pulmonar']['escore']['valor'] == 34
     titulos_pos = [x['titulo'] for x in r['pos_operatorio']]
     assert 'Troponina com 24 e 48 h' in titulos_pos and 'Unidade de terapia intensiva por 48 h' in titulos_pos
@@ -221,7 +223,12 @@ def test_exames_anteriores_alimentam_o_motor():
     r = po.avaliar(p)
     assert 'Creatinina > 2,0 mg/dL' in r['escores'][0]['itens']
     ecg = _exame(r, 'Eletrocardiograma de repouso')
-    assert ecg['estado'] == 'ja_feito' and ecg['ultimo'].startswith('Último em 01/08/2026')
+    # RCRI 3 em cirurgia intraperitoneal: ECG de base para o 1º e 2º dia (SBC Quadro 30), mesmo com um recente
+    assert ecg['estado'] == 'indicado' and 'linha de base' in ecg['motivo']
+    assert ecg['ultimo'].startswith('Último em 01/08/2026')
+    p = _p(idade=50, cirurgia='hernia', condicoes=['hipertensao'])
+    po.aplicar_exames_anteriores(p, anteriores, hoje=HOJE)
+    assert _exame(po.avaliar(p), 'Eletrocardiograma de repouso')['estado'] == 'ja_feito'
 
 
 def test_toda_saida_tem_referencia_com_link():
@@ -246,9 +253,20 @@ def test_tela_tem_as_opcoes_do_motor():
     assert 'Risco cardiovascular e pulmonar para cirurgia não cardíaca' not in html
 
 
+def _conta_preop(app, contas):
+    """Cliente logado numa conta nova e aprovada (e-mails próprios deste arquivo)."""
+    from conftest import SENHA_DE_TESTE, aceitar_termos
+    n = next(_SEQ_CONTAS)
+    u = contas.criar(f'preop{n}@exemplo.test', f'Dra. Preop {n}', f'CRM-GO 7654{n}', 'medico', SENHA_DE_TESTE)
+    contas.definir_situacao(u['id'], 'aprovado')
+    aceitar_termos(contas, u)
+    cliente = app.test_client()
+    assert cliente.post('/api/auth/login', json={'email': u['email'], 'senha': SENHA_DE_TESTE}).status_code == 200
+    return cliente, u
+
+
 def test_rota_do_preoperatorio(app, contas):
-    from tests.test_apac import _conta
-    cliente, _ = _conta(app, contas)
+    cliente, _ = _conta_preop(app, contas)
     corpo = dict(idade=72, sexo='masculino', peso=78, cirurgia='colectomia', urgencia='eletiva',
                  condicoes=['dac'], medicacoes=['aas_acido_acetilsalicilico', 'losartana'],
                  exames_anteriores=[{'exame': 'Creatinina, soro', 'data': '2026-10-01', 'resultados': {'creatinina': '1,6'}}])
@@ -271,3 +289,38 @@ def test_jovem_sem_comorbidade_em_cirurgia_de_baixo_risco_recebe_orientacao_curt
     assert not po.avaliar(_p(idade=28, cirurgia='pele', sintomas=['sincope']))['resumido']
     # Risco elevado pelo escore com boa capacidade não é o resumo curto.
     assert not po.avaliar(_p(condicoes=['dac'], escadas='sim'))['resumido']
+
+
+# ── SBD/SBA/ABESO 2026: rastreio de diabetes, HbA1c e UTI pela SBC ──────────────────────────────────────────────
+SBD_URL = 'https://doi.org/10.1186/s13098-025-02060-5'
+
+
+def test_rastreio_de_diabetes_em_quem_tem_35_anos_ou_mais():
+    r = po.avaliar(_p(idade=40, cirurgia='hernia'))
+    a1c, gli = _exame(r, 'Hemoglobina glicada (HbA1c), soro'), _exame(r, 'Glicose, soro')
+    assert a1c['estado'] == gli['estado'] == 'indicado' and a1c['outra'] == 'SBD I-B'
+    assert 'NICE' in a1c['divergencia'] and SBD_URL in {x['url'] for x in a1c['referencias']}
+    jovem = po.avaliar(_p(idade=28, cirurgia='hernia'))
+    assert _exame(jovem, 'Glicose, soro') is None
+    assert _exame(po.avaliar(_p(idade=28, cirurgia='hernia', condicoes=['hipertensao'])), 'Glicose, soro')
+    assert _exame(po.avaliar(_p(idade=40, cirurgia='hernia', urgencia='urgencia')), 'Glicose, soro') is None
+
+
+def test_hba1c_acima_de_8_no_diabetico_pede_endocrinologista_e_pode_adiar():
+    p = _p(condicoes=['diabetes'])
+    po.aplicar_exames_anteriores(p, [{'exame': 'Hemoglobina glicada (HbA1c), soro', 'data': date(2026, 10, 1),
+                                      'resultados': [{'campo': 'hba1c', 'valor': '9,2'}]}], hoje=HOJE)
+    r = po.avaliar(p)
+    adiar = [a for a in r['adiar'] if a['titulo'].startswith('HbA1c')]
+    assert adiar and adiar[0]['titulo'] == 'HbA1c 9,2% (acima de 8%)' and 'endocrinologista' in adiar[0]['texto']
+    assert _exame(r, 'Hemoglobina glicada (HbA1c), soro')['estado'] == 'ja_feito'
+    assert '9,2%' in _exame(r, 'Hemoglobina glicada (HbA1c), soro')['motivo']
+
+
+def test_uti_pela_sbc_com_nivel_e_aviso_da_aha():
+    r = po.avaliar(_p(idade=75, condicoes=['dac', 'ic', 'diabetes_insulina'], creatinina=2.3, asa=3))
+    uti = next(x for x in r['pos_operatorio'] if x['titulo'].startswith('Unidade de terapia intensiva'))
+    assert uti['classe'] == 'SBC I-C' and 'AHA/ACC 2026 não recomenda UTI' in uti['divergencia']
+    r = po.avaliar(_p(condicoes=['dac']))                    # RCRI 2: risco intermediário
+    uti = next(x for x in r['pos_operatorio'] if x['titulo'].startswith('Unidade de terapia intensiva'))
+    assert uti['classe'] == 'SBC IIa-C'

@@ -66,7 +66,9 @@ def test_um_item_por_chave_na_ordem_da_entrada():
 
 def test_contexto_ausente_nao_quebra():
     r = pm.condutas(['apixabana', 'varfarina', 'aas_acido_acetilsalicilico', 'clopidogrel', 'losartana'], None)
-    assert {i['conduta'] for i in r['itens']} == {'individualizar'}
+    conduta = {i['chave']: i['conduta'] for i in r['itens']}
+    assert conduta.pop('aas_acido_acetilsalicilico') == 'manter'      # AAS com P2Y12 (DAPT) é prevenção secundária
+    assert set(conduta.values()) == {'individualizar'}
 
 
 # --- Cardiovasculares ---------------------------------------------------------------------------------------------
@@ -137,12 +139,26 @@ def test_cardio_outro_so_com_ic():
 
 
 # --- iSGLT2, metformina, outros antidiabéticos, aGLP-1, insulina ---------------------------------------------------
+# --- Antidiabéticos: SBD/SBA/ABESO 2026 (R4–R15, Tabela 2), nota da SBA 2026 (aGLP-1) e AHA §7.8 ---------------
+SBD = 'https://doi.org/10.1186/s13098-025-02060-5'
+
+
+def _urls(i):
+    return {r['url'] for r in i['referencias']}
+
+
 @pytest.mark.parametrize('chave', ['empagliflozina', 'dapagliflozina', 'canagliflozina'])
-def test_isglt2_suspende_3_dias_com_divergencia_sbc(chave):
+def test_isglt2_suspende_3_dias_com_divergencia_sbd(chave):
     i = item(chave, condicoes={'ic'})
     assert i['conduta'] == 'suspender' and i['resumo'] == 'Suspender 3 dias antes'
-    assert i['classe'] == 'AHA 1 (C-LD)' and 'D-4' in i['texto']
-    assert 'SBC' in i['divergencia'] and 'Nós optamos por seguir a AHA' in i['divergencia']
+    assert i['classe'] == 'AHA 1 (C-LD) · SBD/SBA/ABESO I-B' and 'D-4' in i['texto']
+    assert 'SBD' in i['divergencia'] and 'SBC' in i['divergencia'] and 'Nós optamos por seguir a AHA' in i['divergencia']
+    assert SBD in _urls(i)
+
+
+def test_isglt2_na_emergencia_pede_cetonemia():
+    i = item('empagliflozina', urgencia='emergencia')
+    assert 'cetonemia' in i['resumo'] and 'ânion gap' in i['texto']
 
 
 def test_ertugliflozina_4_dias(monkeypatch):
@@ -158,53 +174,82 @@ def test_associacoes_com_isglt2_seguem_o_isglt2():
     assert item('empagliflozina_linagliptina')['resumo'] == 'Suspender 3 dias antes'
 
 
-def test_metformina_mantida_com_divergencia_spaqi():
+def test_metformina_nao_tomada_no_dia_com_divergencia_aha():
     i = item('metformina')
-    assert i['conduta'] == 'manter' and i['classe'] == 'AHA 2a (C-LD)'
-    assert 'SPAQI' in i['divergencia'] and 'Nós optamos por seguir a AHA' in i['divergencia']
+    assert i['conduta'] == 'suspender' and i['resumo'] == 'Tomar até a véspera; não tomar no dia'
+    assert 'IIa-B' in i['classe'] and 'AHA' in i['divergencia'] and 'Nós optamos por seguir a SBD/SBA/ABESO' in i['divergencia']
+    assert SBD in _urls(i)
 
 
-@pytest.mark.parametrize('chave', ['glibenclamida', 'gliclazida', 'sitagliptina', 'pioglitazona', 'acarbose'])
-def test_orais_nao_tomados_na_manha_da_cirurgia(chave):
+def test_metformina_com_clcr_abaixo_de_30_e_suspensa():
+    i = item('metformina', clcr=22.0)
+    assert i['conduta'] == 'suspender' and 'ClCr < 30' in i['resumo'] and 'KDIGO' in i['classe']
+
+
+@pytest.mark.parametrize('chave', ['glibenclamida', 'gliclazida', 'glimepirida'])
+def test_sulfonilureia_suspensa_24_h_antes(chave):
     i = item(chave)
+    assert i['conduta'] == 'suspender' and i['resumo'] == 'Suspender 24 h antes'
+    assert i['classe'] == 'SBD/SBA/ABESO I-C' and 'hipoglicemia' in i['texto'] and 'SPAQI' in i['divergencia']
+
+
+@pytest.mark.parametrize('chave', ['sitagliptina', 'vildagliptina', 'linagliptina', 'alogliptina'])
+def test_idpp4_mantido(chave):
+    i = item(chave)
+    assert i['conduta'] == 'manter' and i['classe'] == 'SBD/SBA/ABESO I-A' and 'SPAQI' in i['divergencia']
+
+
+def test_saxagliptina_com_ic_discute_troca():
+    assert item('saxagliptina')['conduta'] == 'manter'
+    i = item('saxagliptina', condicoes={'ic'})
+    assert i['conduta'] == 'individualizar' and 'IC' in i['texto']
+
+
+def test_pioglitazona_e_acarbose():
+    assert item('pioglitazona')['conduta'] == 'manter'
+    assert item('pioglitazona', condicoes={'ic'})['conduta'] == 'individualizar'
+    i = item('acarbose')
     assert i['conduta'] == 'suspender' and i['resumo'] == 'Suspender no dia da cirurgia'
-    assert 'consenso' in i['classe']
 
 
-def test_idpp4_mais_metformina_segue_a_spaqi_com_divergencia():
+def test_idpp4_mais_metformina_segue_a_metformina():
     i = item('sitagliptina_metformina')
-    assert i['resumo'] == 'Suspender no dia da cirurgia' and 'AHA' in i['divergencia']
+    assert i['resumo'] == 'Tomar até a véspera; não tomar no dia' and 'AHA' in i['divergencia']
 
 
 @pytest.mark.parametrize('chave', ['semaglutida', 'dulaglutida', 'tirzepatida'])
-def test_aglp1_semanal(chave):
+def test_aglp1_de_longa_acao(chave):
     i = item(chave)
-    assert i['conduta'] == 'individualizar' and '1 semana antes' in i['resumo']
-    assert '≥1 semana antes' in i['texto'] and 'dieta líquida nas 24 h' in i['texto']
-    assert '>1 semana' in i['divergencia'] and 'multissocietária' in i['divergencia']
+    assert i['conduta'] == 'suspender' and i['resumo'] == 'Suspender 7 dias antes; dieta líquida nas 24 h antes'
+    assert 'jejum de 8 a 12 h' in i['texto'] and 'POCUS' in i['texto'] and '12 semanas' in i['texto']
+    assert 'multissocietária' in i['divergencia'] and 'SBA de 2026' in i['divergencia']
+    assert any('C.SBA-01744/2026' in r['label'] for r in i['referencias'])
 
 
-def test_aglp1_diario():
+def test_aglp1_de_curta_acao():
     i = item('liraglutida')
-    assert 'suspender no dia' in i['resumo'] and 'não aplicar no dia da cirurgia' in i['texto']
-    assert 'véspera' in i['divergencia']
+    assert i['resumo'] == 'Suspender 1 dia antes; dieta líquida nas 24 h antes' and 'véspera' in i['divergencia']
 
 
-def test_insulina_basal_nph_prandial_e_associacao_com_aglp1():
+def test_insulinas():
     basal = item('insulina_glargina')
-    assert basal['conduta'] == 'ajustar' and '60–80%' in basal['resumo']
+    assert basal['conduta'] == 'ajustar' and '70–80%' in basal['resumo'] and 'nunca omitir' in basal['texto']
+    deg = item('insulina_degludeca')
+    assert deg['conduta'] == 'ajustar' and '72 h' in deg['resumo']
     nph = item('insulina_nph')
     assert nph['conduta'] == 'ajustar' and '50%' in nph['resumo']
     for chave in ('insulina_lispro', 'insulina_regular'):
         assert item(chave)['conduta'] == 'suspender'
     combo = item('insulina_degludeca_liraglutida')
-    assert combo['conduta'] == 'individualizar' and '60–80%' in combo['texto'] and 'aGLP-1' in combo['texto']
+    assert combo['conduta'] == 'individualizar' and 'aGLP-1' in combo['texto'] and '1 dia' in combo['texto']
     assert pm.condutas(['insulina_icodeca'], {})['itens'] == []
 
 
 def test_aviso_de_hba1c_com_antidiabetico():
-    assert 'HbA1c pré-operatória' in titulos(['metformina'])
-    assert 'HbA1c pré-operatória' not in titulos(['atenolol'])
+    assert 'HbA1c e glicemia pré-operatórias' in titulos(['metformina'])
+    assert 'HbA1c e glicemia pré-operatórias' not in titulos(['atenolol'])
+    a = [x for x in avisos(['metformina']) if x['titulo'] == 'HbA1c e glicemia pré-operatórias'][0]
+    assert '8%' in a['texto'] and '250 mg/dL' in a['texto'] and SBD in {r['url'] for r in a['referencias']}
 
 
 # --- DOAC: fármaco × ClCr × sangramento (AHA Tabela 13; SBC Quadro 26) --------------------------------------------
@@ -440,7 +485,7 @@ def test_des_por_sca_recente_cirurgia_eletiva_adiar():
     r = pm.condutas(['aas_acido_acetilsalicilico', 'ticagrelor'], ctx)
     aas, tica = r['itens']
     assert aas['conduta'] == 'manter'
-    assert tica['conduta'] == 'individualizar' and 'adiar' in tica['resumo']
+    assert tica['conduta'] == 'individualizar' and tica['resumo'].startswith('Adiar a eletiva')
     assert tica['classe'] == 'AHA 1 (B-NR) · SBC IIb-B'
     aviso = next(a for a in r['avisos'] if a['titulo'] == 'Momento da cirurgia após ICP')
     assert '≥12 meses' in aviso['texto'] and 'IIb-B' in aviso['texto']

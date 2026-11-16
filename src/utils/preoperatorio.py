@@ -46,6 +46,9 @@ PERISCOPE = _ref('Mazo 2014 (PERISCOPE)', 'https://doi.org/10.1097/ALN.000000000
 COCHRANE_IS = _ref('Cochrane 2014 (incentivador)', 'https://doi.org/10.1002/14651858.CD006058.pub3')
 COCHRANE_IMT = _ref('Cochrane 2015 (treino inspiratório)', 'https://doi.org/10.1002/14651858.CD010356.pub2')
 TABAGISMO = _ref('Wong 2012', 'https://doi.org/10.1007/s12630-011-9652-x')
+CAROTIDA_AHA = _ref('AHA/ASA 2021 (prevenção secundária do AVC)', 'https://doi.org/10.1161/STR.0000000000000375')
+CAROTIDA_ESVS = _ref('ESVS 2023 (doença carotídea)', 'https://doi.org/10.1016/j.ejvs.2022.04.011')
+SBD = _ref('SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91)', 'https://doi.org/10.1186/s13098-025-02060-5')
 
 # ── Cirurgias ────────────────────────────────────────────────────────────────
 # risco: risco intrínseco de morte CV, IAM ou AVC em 30 dias (SBC 2024 Tabela 3 = ESC 2022 Tabela 5).
@@ -224,13 +227,19 @@ def _lista(valor, permitidos, nome):
 
 
 def _dias_desde(texto, hoje):
-    """'AAAA-MM-DD' → (dias até hoje, exata). 'AAAA-MM' (só mês) conta do dia 1 e não é exata."""
+    """'AAAA-MM-DD' → (dias até hoje, exata). 'AAAA-MM' (só mês) não é exata e conta do último dia do mês (ou de hoje,
+    no mês corrente): o menor intervalo possível, para não liberar antes do prazo."""
+    import calendar
     try:
         partes = [int(x) for x in str(texto).split('-')[:3]]
         exata = len(partes) == 3
         inicio = date(partes[0], partes[1], partes[2] if exata else 1)
     except (TypeError, ValueError, IndexError):
         raise EntradaInvalida('Confira a data da angioplastia.')
+    if inicio > hoje:
+        raise EntradaInvalida('A data da angioplastia não pode estar no futuro.')
+    if not exata:
+        inicio = min(date(partes[0], partes[1], calendar.monthrange(partes[0], partes[1])[1]), hoje)
     if inicio > hoje:
         raise EntradaInvalida('A data da angioplastia não pode estar no futuro.')
     return (hoje - inicio).days, exata
@@ -294,7 +303,7 @@ def ler(dados, hoje=None):
     # No RCRI, revascularização isolada não é doença coronária (Lee 1999: só com outro critério); o IAM prévio é.
     if 'iam_previo' in c:
         c.add('dac')
-    if 'ic_fe_reduzida' in c:
+    if c & {'ic_fe_reduzida', 'ic_recente'}:
         c.add('ic')
     if 'avc_ait_recente' in c:
         c.add('avc_ait')
@@ -320,7 +329,9 @@ def _medicacao_com_classe(p, classe):
 
 def rcri(p):
     cir, c = CIRURGIAS[p['cirurgia']], p['condicoes']
-    itens = [('Doença coronária', 'dac' in c), ('Insuficiência cardíaca', 'ic' in c),
+    sint = p['sintomas']
+    # Lee 1999: doença isquêmica inclui angina atual; IC inclui sinais (edema pulmonar, B3, estertores, DPN).
+    itens = [('Doença coronária', 'dac' in c or 'angina' in sint), ('Insuficiência cardíaca', 'ic' in c or 'sinais_ic' in sint),
              ('AVC ou AIT', 'avc_ait' in c), ('Diabetes com insulina', 'diabetes_insulina' in c),
              ('Creatinina > 2,0 mg/dL', (p['creatinina'] or 0) > 2.0),
              ('Cirurgia intraperitoneal, intratorácica ou vascular suprainguinal', cir['rcri'])]
@@ -339,7 +350,7 @@ def aub_has2(p):
     cir, c = CIRURGIAS[p['cirurgia']], p['condicoes']
     # Dakik 2019: IAM, revascularização, cirurgia cardíaca (prótese valvar), IC, FA ou valvopatia moderada/grave
     historia = bool(c & {'iam_previo', 'stent', 'revascularizacao_cirurgica', 'ic', 'fa', 'valvopatia',
-                         'protese_mecanica'})
+                         'protese_mecanica'}) or 'sinais_ic' in p['sintomas']
     itens = [('História de doença cardíaca', historia),
              ('Angina ou dispneia', bool(p['sintomas'] & {'angina', 'dispneia', 'dispneia_nova'})),
              ('Idade ≥ 75 anos', p['idade'] >= 75),
@@ -547,6 +558,12 @@ def _ha_dias(dias):
     return _ha_meses(dias // 30)
 
 
+def _fmt(x):
+    """Número no formato brasileiro, sem casas desnecessárias: 8.0 → '8'; 8.25 → '8,3'."""
+    x = round(float(x), 1)
+    return (str(int(x)) if x == int(x) else f'{x:.1f}').replace('.', ',')
+
+
 def _feito(p, titulo):
     """(dias, data) do exame mais recente que cobre o título, ou None."""
     from src.utils import periodicidade
@@ -582,7 +599,7 @@ def aplicar_exames_anteriores(p, anteriores, hoje=None):
                 continue
             if campo not in mais_recente or exame['data'] > mais_recente[campo][0]:
                 mais_recente[campo] = (exame['data'], valor)
-    for campo in ('creatinina', 'hemoglobina'):
+    for campo in ('creatinina', 'hemoglobina', 'hba1c'):
         if p.get(campo) is None and campo in mais_recente:
             p[campo] = mais_recente[campo][1]
     if p.get('hba1c_dias') is None:
@@ -627,7 +644,7 @@ def exames(p, ctx):
         motivos_sbc.append(('IIa', 'obesidade'))
     if idade > 40:
         motivos_sbc.append(('IIa', 'idade acima de 40 anos'))
-    sbc_ecg = 'I' if any(cl == 'I' for cl, _ in motivos_sbc) else 'IIa' if motivos_sbc else 'III'
+    sbc_ecg = 'I' if any(cl == 'I' for cl, _ in motivos_sbc) else 'IIa' if motivos_sbc else ''
     indicado = aha_ecg in ('2a', '2b') or sbc_ecg in ('I', 'IIa')
     div = ''
     if aha_ecg.startswith('3') and sbc_ecg in ('I', 'IIa'):
@@ -640,10 +657,12 @@ def exames(p, ctx):
     feito = _feito_ha_dias(p, 'Eletrocardiograma de repouso')
     estado = 'indicado' if indicado else 'nao_indicado'
     motivo = '; '.join(m for _, m in motivos_sbc) or 'Assintomático em cirurgia de baixo risco.'
-    if indicado and feito is not None and feito <= 365 and not sint:
+    if pac_ia and cir_ia:
+        motivo += '; linha de base para o ECG do 1º e 2º dia (SBC Quadro 30)'
+    elif indicado and feito is not None and feito <= 365 and not sint:
         estado, motivo = 'ja_feito', f'Feito {_ha_dias(feito)}, sem sintomas novos: pode valer o atual.'
-    saida.append(_item('Eletrocardiograma de repouso', 'imagem', estado, motivo, aha=aha_ecg or '—', sbc=sbc_ecg,
-                       refs=[AHA, SBC], divergencia=div))
+    saida.append(_item('Eletrocardiograma de repouso', 'imagem', estado, motivo, aha=aha_ecg or '—',
+                       sbc=sbc_ecg or '—', refs=[AHA, SBC], divergencia=div))
 
     # Ecocardiograma transtorácico (AHA §4.2 e §6.5; SBC Quadros 4, 15 e 16)
     sint_ic = bool(sint & {'dispneia_nova', 'sinais_ic'})
@@ -659,6 +678,9 @@ def exames(p, ctx):
         if not cir_ia:
             div = ('Na suspeita de regurgitação, a AHA indica antes de qualquer cirurgia eletiva; na de estenose '
                    'aórtica, só em cirurgia de risco elevado. A SBC restringe a cirurgias de risco intermediário ou alto.')
+    elif 'dispneia' in sint and cir_ia:
+        sbc_eco, motivo = 'I', 'Dispneia aos esforços: sintoma sugestivo de insuficiência cardíaca, sem eco no último ano.'
+        div = 'A SBC indica (I-B) com sintoma sugestivo de IC; a AHA só recomenda na dispneia nova ou em piora.'
     elif 'valvopatia' in c:
         janela = 183 if cir_ia else 365
         if cir_ia:
@@ -719,10 +741,12 @@ def exames(p, ctx):
 
     # Troponina antes da cirurgia (AHA biomarcadores rec. 2; SBC Quadro 30). A de 24/48 h fica no pós-operatório.
     aha_tn = '2b' if cir_ia and (dcv or idade >= 65 or (idade >= 45 and sint)) else ''
-    sbc_tn = 'I' if pac_ia and cir_ia else ''
+    sbc_tn = 'I' if (pac_ia and cir_ia) or p['cirurgia'] == 'transplante_renal' else ''
     if aha_tn or sbc_tn:
         if aha_tn and sbc_tn:
             div = 'Classe I na SBC e 2b na AHA.'
+        elif sbc_tn and p['cirurgia'] == 'transplante_renal':
+            div = 'Indicada pela SBC no transplante renal (Quadro 17, I-B), qualquer que seja o escore.'
         elif sbc_tn:
             div = 'Indicada só pela SBC (risco intermediário ou alto pelo escore em cirurgia de risco intermediário ou alto).'
         else:
@@ -735,7 +759,11 @@ def exames(p, ctx):
                            aha='3: sem benefício', sbc='III', refs=[AHA, SBC]))
 
     # Prova funcional e angiotomografia: risco elevado com capacidade baixa ou desconhecida, só se mudar a conduta
-    if ctx['investigar_isquemia']:
+    if p['instaveis']:
+        saida.append(_item('Prova funcional ou angiotomografia de coronárias', 'outro', 'nao_indicado',
+                           'Condição instável: estabilizar primeiro; prova de estresse contraindicada na SCA de alto '
+                           'risco.', aha='—', sbc='—', refs=[SBC, AHA]))
+    elif ctx['investigar_isquemia']:
         if p['urgencia'] == 'urgencia':
             saida.append(_item('Prova funcional ou angiotomografia de coronárias', 'outro', 'nao_indicado',
                                'Cirurgia de urgência: o resultado não mudaria a conduta.', aha='—', sbc='—',
@@ -753,6 +781,13 @@ def exames(p, ctx):
                                sbc='—', refs=[AHA, SBC],
                                divergencia='Admitida pela AHA (2b); a SBC não a recomenda para estratificar o risco.',
                                grupo='isquemia'))
+    elif cir_ia and ctx.get('capacidade') in ('baixa', 'desconhecida') and c & {'dac', 'iam_previo', 'stent',
+            'revascularizacao_cirurgica'} and p['urgencia'] == 'eletiva' and not sint & {'angina', 'dispneia_nova'}:
+        saida.append(_item('Cintilografia de perfusão miocárdica (estresse e repouso)', 'imagem', 'considerar',
+                           'Risco baixo pelo escore, mas baixa capacidade funcional com doença coronária conhecida: '
+                           'só se o resultado puder mudar a conduta.', aha='—', sbc='IIb', refs=[SBC, AHA],
+                           divergencia='A SBC admite (IIb-B, Quadro 6); pela AHA, risco < 1% libera sem testes.',
+                           grupo='isquemia'))
     elif cir_ia:
         if pac_ia:
             motivo, sbc = 'Boa capacidade funcional e sintomas estáveis: sem benefício.', 'sem classe (texto)'
@@ -763,19 +798,50 @@ def exames(p, ctx):
     else:
         saida.append(_item('Prova funcional ou angiotomografia de coronárias', 'outro', 'nao_indicado',
                            'Cirurgia de baixo risco: sem benefício.', aha='3: sem benefício', sbc='III', refs=[AHA, SBC]))
-    saida.append(_item('Cateterismo cardíaco de rotina', 'outro', 'nao_indicado',
-                       'Só com as mesmas indicações de fora da cirurgia (SCA, isquemia extensa na prova funcional).',
-                       aha='3: sem benefício', sbc='III' if not cir_ia else 'sem classe (texto)', refs=[AHA, SBC]))
+    if 'sca' in p['instaveis']:
+        saida.append(_item('Cineangiocoronariografia', 'outro', 'indicado',
+                           'Síndrome coronariana aguda de alto risco: estratificação invasiva, como fora da cirurgia.',
+                           aha='1 (diretriz de SCA)', sbc='I', refs=[SBC, AHA]))
+    else:
+        saida.append(_item('Cateterismo cardíaco de rotina', 'outro', 'nao_indicado',
+                           'Só com as mesmas indicações de fora da cirurgia (SCA, isquemia extensa na prova funcional).',
+                           aha='3: sem benefício', sbc='III' if not cir_ia else 'sem classe (texto)', refs=[AHA, SBC]))
 
-    # HbA1c (AHA biomarcadores/glicemia rec. 1: diabetes ou risco, cirurgia eletiva, sem HbA1c em ≤ 3 meses)
-    if 'diabetes' in c and p['urgencia'] in ('eletiva', 'tempo_sensivel'):
+    # Glicemia (AHA §7.8 rec. 1, 2a B-NR: diabetes ou risco de diabetes, eletiva, sem HbA1c em ≤ 3 meses;
+    # SBD/SBA/ABESO 2026 R1, I-B: rastrear diabetes com glicemia de jejum e HbA1c, sobretudo com ≥ 35 anos ou fator
+    # de risco; R2, I-B: no diabetes conhecido, HbA1c < 8% desejável). A NICE não oferece HbA1c a quem não tem diabetes.
+    if p['urgencia'] in ('eletiva', 'tempo_sensivel'):
         dias = p['hba1c_dias']
-        if dias is not None and dias <= 92:
-            saida.append(_item('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'ja_feito',
-                               f'Feita {_ha_dias(dias)} (vale até 3 meses).', aha='2a', refs=[AHA]))
-        else:
-            saida.append(_item('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'indicado',
-                               'Diabetes, sem HbA1c nos últimos 3 meses.', aha='2a', sbc='—', refs=[AHA]))
+        valor = p.get('hba1c')
+        feita = (f'Feita {_ha_dias(dias)}' + (f', {_fmt(valor)}%' if valor is not None else '') + ' (vale até 3 meses).'
+                 if dias is not None else '')
+        if 'diabetes' in c:
+            if dias is not None and dias <= 92:
+                saida.append(_item('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'ja_feito', feita,
+                                   aha='2a', sbc='—', outra='SBD I-B', refs=[AHA, SBD, NICE]))
+            else:
+                saida.append(_item('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'indicado',
+                                   'Diabetes, sem HbA1c nos últimos 3 meses (meta < 8% antes da cirurgia eletiva).',
+                                   aha='2a', sbc='—', outra='SBD I-B · NICE', refs=[AHA, SBD, NICE]))
+        elif idade >= 35 or c & {'hipertensao', 'obesidade', 'dac', 'iam_previo', 'avc_ait',
+                                 'doenca_arterial_periferica'}:
+            motivo = ('Sem diagnóstico de diabetes, com 35 anos ou mais' if idade >= 35 else
+                      'Sem diagnóstico de diabetes, com fator de risco') + ': rastreio de diabetes.'
+            div = ('A NICE NG45 não oferece HbA1c de rotina a quem não tem diabetes. Nós optamos por seguir a '
+                   'SBD/SBA/ABESO 2026 (I-B) e a AHA (2a), que incluem quem tem risco de diabetes.')
+            if dias is not None and dias <= 92:
+                saida.append(_item('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'ja_feito', feita,
+                                   aha='2a', sbc='—', outra='SBD I-B', refs=[SBD, AHA, NICE], divergencia=div))
+            else:
+                saida.append(_item('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'indicado', motivo,
+                                   aha='2a', sbc='—', outra='SBD I-B', refs=[SBD, AHA, NICE], divergencia=div))
+            gdias = _feito_ha_dias(p, 'Glicose, soro')
+            if gdias is not None and gdias <= 92:
+                saida.append(_item('Glicose, soro', 'laboratorio', 'ja_feito', f'Feita {_ha_dias(gdias)}.',
+                                   outra='SBD I-B', refs=[SBD]))
+            else:
+                saida.append(_item('Glicose, soro', 'laboratorio', 'indicado', motivo + ' Glicemia de jejum.',
+                                   outra='SBD I-B', refs=[SBD]))
 
     # Exames de rotina (NICE NG45): "Offer" = indicado; "Consider" = considerar
     asa, porte = p['asa'], cir['porte']
@@ -864,8 +930,9 @@ def adiamentos(p):
     saida = []
     eletiva = p['urgencia'] in ('eletiva', 'tempo_sensivel')
     for chave in sorted(p['instaveis']):
-        saida.append(_adiar(INSTAVEIS[chave], 'Condição grave ou instável: estabilizar antes; adiar a cirurgia eletiva.',
-                            'SBC Tabela 2', [SBC, AHA]))
+        texto = ('Condição grave ou instável: estabilizar antes; adiar a cirurgia eletiva.' if eletiva else
+                 'Condição grave ou instável: estabilizar o quanto o tempo permitir, sem atrasar a cirurgia.')
+        saida.append(_adiar(INSTAVEIS[chave], texto, 'SBC Tabela 2', [SBC, AHA]))
     if p['pa_descontrolada'] and eletiva:
         pa = ' × '.join(str(int(v)) for v in (p['pas'], p['pad']) if v)
         saida.append(_adiar(f'PA {pa} mmHg',
@@ -880,7 +947,24 @@ def adiamentos(p):
     st = p['stent']
     if st:
         saida.extend(_adiamentos_do_stent(st, p['urgencia']))
-    if 'avc_ait_recente' in p['condicoes'] and eletiva:
+    a1c = p.get('hba1c')
+    if 'diabetes' in p['condicoes'] and a1c is not None and a1c > 8 and eletiva:
+        if p['urgencia'] == 'eletiva':
+            texto = ('Encaminhar ao endocrinologista para otimizar o controle e considerar adiar a cirurgia eletiva até '
+                     'a HbA1c ficar abaixo de 8%, sem hipoglicemia. No dia, glicemia acima de 250 mg/dL: considerar '
+                     'adiar.')
+        else:
+            texto = ('Cirurgia tempo-sensível: avaliação do endocrinologista antes, sem esperar a meta. No dia, glicemia '
+                     'acima de 250 mg/dL: considerar adiar.')
+        saida.append(_adiar(f'HbA1c {_fmt(a1c)}% (acima de 8%)', texto, 'SBD/SBA/ABESO I-B (meta < 8%) · AHA: texto',
+                            [SBD, AHA]))
+    carotida = p['cirurgia'] in ('endarterectomia_sintomatica', 'stent_carotida_sintomatica')
+    if 'avc_ait_recente' in p['condicoes'] and carotida:
+        saida.append(_adiar('AVC ou AIT recente com doença carotídea sintomática',
+                            'A revascularização carotídea é o tratamento do evento: fazer de preferência nas 2 semanas '
+                            'seguintes, sem esperar 3 meses.', 'AHA/ASA 2021 2a · ESVS 2023 I',
+                            [CAROTIDA_AHA, CAROTIDA_ESVS, AHA], ok=True))
+    elif 'avc_ait_recente' in p['condicoes'] and eletiva:
         saida.append(_adiar('AVC ou AIT há menos de 3 meses',
                             'Adiar a cirurgia eletiva para pelo menos 3 meses depois do evento.', 'AHA 2a', [AHA]))
     return saida
@@ -988,20 +1072,21 @@ def avaliar(p):
                              'atencao' if inst else 'ok',
                              'SCA, IC descompensada, angina CCS III/IV, estenose aórtica ou mitral importante '
                              'sintomática, BAVT/TV, FA com FC > 120, PA ≥ 180 × 110, HAP sintomática.'))
-        if inst:
+        if inst and p['urgencia'] in ('eletiva', 'tempo_sensivel'):
             conclusao = ('adiar', 'Condição grave ou instável: estabilizar e adiar a cirurgia eletiva; '
                                   'avaliação cardiológica indicada.')
+        elif inst:
+            conclusao = ('indicada', 'Condição grave ou instável em cirurgia de urgência: estabilizar o quanto o tempo '
+                                     'permitir, sem atrasar a operação; avaliação cardiológica e monitorização '
+                                     'perioperatória.')
     if not conclusao:
         passos.append(_passo('Risco intrínseco da cirurgia', RISCO_DA_CIRURGIA[cir['risco']].split(' (')[0],
                              'ok' if not cir_ia else 'atencao',
                              'Baixo risco (< 1%) em paciente estável: não há avaliação cardiológica nem exames '
                              'cardíacos de rotina indicados.'))
         if not cir_ia:
-            texto = ('Cirurgia de baixo risco em paciente estável: avaliação cardiológica e exames cardíacos de rotina '
-                     'não indicados. Pode operar.')
-            if p['sintomas'] & {'dispneia_nova', 'sinais_ic', 'sopro'}:
-                texto += ' Os sintomas ou sinais novos são investigados como fora do contexto cirúrgico (veja os exames).'
-            conclusao = ('nao_indicada', texto)
+            conclusao = ('nao_indicada', 'Cirurgia de baixo risco em paciente estável: avaliação cardiológica e '
+                                         'exames cardíacos de rotina não indicados. Pode operar.')
     if not conclusao:
         passos.append(_passo('Risco do paciente pelos escores', 'Elevado' if risco_elevado else 'Baixo',
                              'atencao' if risco_elevado else 'ok',
@@ -1025,12 +1110,18 @@ def avaliar(p):
             motivos = [f'cirurgia de risco {RISCO_DA_CIRURGIA[cir["risco"]].split(" (")[0].lower()}',
                        ', '.join(elevado_por), f'capacidade funcional {cap["valor"].lower()}']
             conclusao = ('indicada', 'Avaliação cardiológica indicada: ' + '; '.join(m for m in motivos if m) + '.')
+    # Dispneia nova, sinais de IC ou sopro: avaliar o VE ou a valva antes de qualquer cirurgia eletiva (AHA §4.2, 1;
+    # §6.5, 1), qualquer que seja o escore ou a capacidade.
+    if conclusao[0] == 'nao_indicada' and p['sintomas'] & {'dispneia_nova', 'sinais_ic', 'sopro'} \
+            and p['urgencia'] in ('eletiva', 'tempo_sensivel'):
+        conclusao = ('indicada', 'Dispneia nova, sinais de insuficiência cardíaca ou sopro: avaliar a função '
+                                 'ventricular ou a valva (ecocardiograma) antes de operar.')
     if any(not a.get('ok') for a in adiar) and conclusao[0] in ('nao_indicada', 'indicada'):
         conclusao = (conclusao[0], conclusao[1] + ' Antes, veja o que pede adiamento.')
 
     classes_meds = set(classes_de(p['medicacoes']))
     ctx = {'cir_elev': cir_ia, 'pac_ia': pac_ia, 'dcv': dcv, 'investigar_isquemia': investigar,
-           'classes_medicacoes': classes_meds}
+           'classes_medicacoes': classes_meds, 'capacidade': cap['estado']}
     lista_exames = exames(p, ctx)
 
     escores = [escore_rcri, escore_aub]
@@ -1076,19 +1167,23 @@ def avaliar(p):
     pos = []
     fr = bool(c & {'hipertensao', 'diabetes', 'tabagismo', 'obesidade'}) or p['sexo'] == 'masculino' or p['idade'] > 65
     aha_tn = '2b' if cir_ia and (dcv or p['sintomas'] or (p['idade'] >= 65 and fr)) else ''
-    sbc_tn = 'I' if pac_ia and cir_ia else ''
+    sbc_tn = 'I' if (pac_ia and cir_ia) or p['cirurgia'] == 'transplante_renal' else ''
     if aha_tn or sbc_tn:
         pos.append({'titulo': 'Troponina com 24 e 48 h', 'texto': 'Para detectar injúria miocárdica após a cirurgia.',
                     'classe': ' · '.join(x for x in (f'AHA {aha_tn}' if aha_tn else '', f'SBC {sbc_tn}' if sbc_tn else '') if x),
                     'referencias': [AHA, SBC]})
-    if sbc_tn:
+    if pac_ia and cir_ia:
         pos.append({'titulo': 'ECG no 1º e no 2º dia', 'texto': 'Junto da troponina.', 'classe': 'SBC I',
                     'referencias': [SBC]})
         niveis = [e['nivel'] for e in (escore_rcri, escore_aub, escore_vsg) if e]
         alto = 'alto' in niveis
         pos.append({'titulo': 'Unidade de terapia intensiva por 48 h',
-                    'texto': 'Risco alto pelo escore.' if alto else 'Risco intermediário pelo escore: considerar.',
-                    'classe': 'SBC I' if alto else 'SBC IIa', 'referencias': [SBC]})
+                    'texto': ('Risco alto pelo escore.' if alto else 'Risco intermediário pelo escore: considerar.')
+                    + ' Recomendação só da SBC (Quadro 30), por opinião de especialistas.',
+                    'classe': 'SBC I-C' if alto else 'SBC IIa-C', 'referencias': [SBC, AHA],
+                    'divergencia': 'A AHA/ACC 2026 não recomenda UTI pelo risco dos escores; cita cuidado intensivo só '
+                                   'em situações específicas (hipertensão pulmonar grave, 2a; cardiomiopatia '
+                                   'hipertrófica obstrutiva; estenose mitral). Nós optamos por seguir a SBC.'})
     if 'hipertensao' in c:
         pos.append({'titulo': 'Reintroduzir os anti-hipertensivos', 'texto': 'Assim que clinicamente possível.',
                     'classe': 'AHA 1 · SBC I', 'referencias': [AHA, SBC]})
@@ -1097,15 +1192,18 @@ def avaliar(p):
 
     # Sem indicação de avaliação cardiológica num paciente sem doença cardiovascular, sem sintomas e sem risco pelos
     # escores (o jovem sem comorbidade em cirurgia de baixo risco): a tela mostra só uma orientação curta.
-    resumido = (conclusao[0] == 'nao_indicada' and not dcv and not risco_elevado and not p['sintomas']
-                and not p['instaveis'] and not p['pa_descontrolada'] and not any(not a.get('ok') for a in adiar))
+    pulmonar_risco = ariscat(p)
+    resumido = (conclusao[0] == 'nao_indicada' and not cir_ia and p['idade'] < 65 and not c
+                and not risco_elevado and not p['sintomas'] and not p['instaveis'] and not p['pa_descontrolada']
+                and not any(not a.get('ok') for a in adiar)
+                and (not pulmonar_risco.get('aplicavel', True) or pulmonar_risco['nivel'] == 'baixo')
+                and sb['nivel'] != 'alto' and (frag is None or (frag['valor'] or 0) < 5))
     resumo = None
     if resumido:
-        motivo = ('cirurgia de baixo risco (< 1%)' if not cir_ia else
-                  f'risco baixo pelos escores (RCRI {escore_rcri["valor"]}, AUB-HAS2 {escore_aub["valor"]})')
         resumo = {'titulo': 'Avaliação cardiológica não indicada',
-                  'texto': f'Motivo: {motivo}, sem doença cardiovascular conhecida, sem sintomas e sem condição '
-                           'instável. Exames cardíacos adicionais não mudam a conduta neste perfil; pode operar.',
+                  'texto': 'Motivo: cirurgia de baixo risco (< 1%), em paciente com menos de 65 anos, sem '
+                           'comorbidade, sem sintomas e sem condição instável. Exames cardíacos adicionais não mudam '
+                           'a conduta neste perfil; pode operar.',
                   'referencias': [AHA, SBC]}
 
     return {

@@ -17,6 +17,8 @@ Fontes (só entra o que tem fonte citável; o que não tem não gera item):
   joelho; fora dela, evidência indireta.
 - ESE/Endocrine Society 2024 (Beuschlein et al., J Clin Endocrinol Metab 2024): insuficiência adrenal induzida por
   glicocorticoide.
+- SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91; versão em inglês da Diretriz SBD 2025): antidiabéticos e
+  insulinas (R4–R15, Tabela 2); aGLP-1 pela nota da SBA de 15/05/2026 (C.SBA-01744/2026).
 
 Convenções:
 - D0 = dia da cirurgia. "Dias sem dose" são dias inteiros antes do D0 em que o fármaco não é tomado.
@@ -29,7 +31,7 @@ Convenções:
 - Associações em dose fixa geram um item só, com a regra do componente que mais restringe (o comprimido não se
   divide), e o texto cita o outro componente: IECA/BRA + diurético/BCC seguem o IECA/BRA; betabloqueador +
   diurético segue o betabloqueador; estatina + ezetimiba segue a estatina; iSGLT2 + metformina/iDPP-4 seguem o
-  iSGLT2; iDPP-4 + metformina seguem a SPAQI (não tomar na manhã da cirurgia); insulina + aGLP-1 juntam as duas.
+  iSGLT2; iDPP-4 + metformina seguem a metformina (não tomar no dia); insulina + aGLP-1 seguem o aGLP-1.
 - Medicamento sem recomendação perioperatória nas fontes não gera item (não se presume "manter"). Entre eles:
   ezetimiba e outros hipolipemiantes isolados, nitratos, ticlopidina, cilostazol, insulinas bifásica e icodeca,
   hipnóticos não benzodiazepínicos, metilfenidato, anticonvulsivantes, inalatórios, IBP, imunossupressores fora do
@@ -51,6 +53,14 @@ _URL_SPAQI_ENDO = 'https://doi.org/10.1016/j.mayocp.2020.10.002'
 _URL_SPAQI_PSIQ = 'https://doi.org/10.1016/j.mayocp.2021.11.011'
 _URL_ACR = 'https://doi.org/10.1002/art.42140'
 _URL_ESE = 'https://doi.org/10.1210/clinem/dgae250'
+_URL_SBD = 'https://doi.org/10.1186/s13098-025-02060-5'
+_URL_SBD_PT = 'https://diretriz.diabetes.org.br/rastreamento-e-controle-da-hiperglicemia-no-perioperatorio-2/'
+_URL_SBA_GLP1 = ('https://www.sbahq.org/nota-da-sba-de-atualizacao-sobre-as-recomendacoes-do-manejo-perioperatorio-'
+                 'dos-agonistas-do-receptor-glp-1-e-coagonistas-glp-1-gip/')
+_URL_KDIGO_DM = 'https://doi.org/10.1016/j.kint.2022.06.008'
+_URL_ASRA = 'https://doi.org/10.1097/AAP.0000000000000763'
+_URL_VALVAS = 'https://doi.org/10.1161/CIR.0000000000000923'
+_URL_MEC = 'https://doi.org/10.15585/mmwr.rr7304a1'
 
 REFERENCIAS = {
     'aha': {'label': 'AHA/ACC 2026, Manejo cardiovascular perioperatório em cirurgia não cardíaca', 'url': _URL_AHA},
@@ -63,6 +73,16 @@ REFERENCIAS = {
     'spaqi_psiq': {'label': 'SPAQI 2022, medicações psiquiátricas (Mayo Clin Proc)', 'url': _URL_SPAQI_PSIQ},
     'acr': {'label': 'ACR/AAHKS 2022, antirreumáticos na artroplastia de quadril e joelho', 'url': _URL_ACR},
     'ese': {'label': 'ESE/Endocrine Society 2024, insuficiência adrenal induzida por glicocorticoide', 'url': _URL_ESE},
+    'sbd': {'label': 'SBD/SBA/ABESO 2026, hiperglicemia no perioperatório (Diabetol Metab Syndr 2026;18:91)',
+            'url': _URL_SBD},
+    'sbd_pt': {'label': 'Diretriz SBD 2025, Rastreamento e controle da hiperglicemia no perioperatório', 'url': _URL_SBD_PT},
+    'sba_glp1': {'label': 'SBA 2026, nota C.SBA-01744/2026 sobre aGLP-1 e coagonistas GLP-1/GIP no perioperatório',
+                 'url': _URL_SBA_GLP1},
+    'kdigo_dm': {'label': 'KDIGO 2022, diabetes na doença renal crônica', 'url': _URL_KDIGO_DM},
+    'asra': {'label': 'ASRA 2018 (4ª ed.), anestesia regional e antitrombóticos', 'url': _URL_ASRA},
+    'valvas': {'label': 'ACC/AHA 2020, valvopatias (Circulation 2021;143:e72–e227)', 'url': _URL_VALVAS},
+    'mec': {'label': 'CDC US MEC 2024, critérios de elegibilidade para contraceptivos (MMWR 2024;73(4))',
+            'url': _URL_MEC},
 }
 
 
@@ -356,43 +376,53 @@ def _sbc_janela(indicacao, meses):
 
 
 def _janela_icp(ctx):
-    """Situação da cirurgia em relação à ICP prévia (AHA §7.5 recs. 2–10; SBC Quadros 21–23).
+    """Situação da cirurgia em relação à ICP prévia (AHA §7.5 recs. 2–10; SBC Quadros 21–23), com os mesmos prazos
+    da tela de adiamentos (src/utils/preoperatorio.py).
 
-    fase: 'proibitiva' (stent ≤30 dias), 'manter_dapt' (DES <3 meses e cirurgia tempo-sensível), 'adiar' (cirurgia
-    eletiva antes do intervalo da AHA), 'indefinida' (faltam dados) ou 'liberada'.
+    fase: 'proibitiva' (stent ≤ 30 dias), 'urgente' (urgência ou emergência até 1 ano da ICP), 'manter_dapt' (DES
+    < 3 meses e cirurgia tempo-sensível), 'adiar' (eletiva dentro do prazo da indicação), 'indefinida' (faltam dados)
+    ou 'liberada'. Sem a indicação da ICP, vale o prazo mais longo (SCA).
     """
     st = ctx.get('stent')
     cond = _cond(ctx)
     if not st:
         if 'stent' in cond:
-            return {'fase': 'indefinida', 'faltas': ['tipo do stent, indicação da ICP e meses desde a ICP'],
-                    'aha': '', 'sbc': '', 'div': ''}
+            return {'fase': 'indefinida', 'faltas': ['tipo do stent, indicação da ICP e data da ICP'],
+                    'aha': '', 'sbc': '', 'div': '', 'tempo_sensivel': False}
         return None
-    tipo, indicacao, meses = st.get('tipo'), st.get('indicacao'), st.get('meses')
+    tipo, indicacao = st.get('tipo'), st.get('indicacao')
+    dias = st.get('dias')
+    if dias is None and st.get('meses') is not None:
+        dias = float(st['meses']) * 30.44
     urg = ctx.get('urgencia')
     tempo_sensivel = urg in ('tempo_sensivel', 'urgencia', 'emergencia')
-    faltas = [n for n, v in (('tipo do stent', tipo), ('meses desde a ICP', meses)) if v is None]
-    if tipo in ('farmacologico', 'convencional') and indicacao is None:
-        faltas.append('indicação da ICP (SCA ou DAC crônica)')
-    r = {'faltas': faltas, 'aha': '', 'sbc': '', 'div': '', 'classe': '', 'meses': meses, 'tipo': tipo,
+    faltas = [n for n, v in (('tipo do stent', tipo), ('data da ICP', dias)) if v is None]
+    r = {'faltas': faltas, 'aha': '', 'sbc': '', 'div': '', 'classe': '', 'dias': dias, 'tipo': tipo,
          'indicacao': indicacao, 'tempo_sensivel': tempo_sensivel, 'urgencia': urg}
-    if tipo is None or meses is None:
+    if tipo is None or dias is None:
         r['fase'] = 'indefinida'
         return r
-    m = float(meses)
+    m = dias / 30.44
+    if urg in ('urgencia', 'emergencia'):
+        if dias < 365:
+            r['fase'] = 'urgente'
+            r['sbc'] = ('SBC (Quadro 21, I-C): na cirurgia que não pode esperar, manter o AAS e, se o risco de '
+                        'sangramento permitir, o inibidor de P2Y12; operar em centro com suporte multidisciplinar e '
+                        'hemodinâmica.')
+        else:
+            r['fase'] = 'liberada'
+        return r
     if tipo == 'balao':
-        if m * 30.44 < 14:
+        if dias < 14:
             r['fase'] = 'adiar'
             r['classe'] = 'AHA 1 (C-LD)'
-            r['aha'] = ('AHA: após angioplastia só com balão, adiar a cirurgia eletiva por no mínimo 14 dias '
-                        '(1, C-LD).')
+            r['aha'] = 'AHA: após angioplastia só com balão, adiar a cirurgia eletiva por no mínimo 14 dias (1, C-LD).'
         else:
             r['fase'] = 'liberada'
             r['aha'] = 'AHA: angioplastia só com balão há ≥14 dias; cirurgia eletiva liberada pelo intervalo (1, C-LD).'
-        r['sbc'] = ('SBC (Quadros 22–23): intervalos pela indicação da ICP, sem tratar à parte a angioplastia só '
-                    'com balão.')
+        r['sbc'] = 'SBC 2022 (ICP): o mesmo prazo de 14 dias após angioplastia com balão.'
         return r
-    if m < 1:
+    if dias <= 30:
         r['fase'] = 'proibitiva'
         r['aha'] = ('AHA: stent há ≤30 dias; cirurgia eletiva com interrupção de antiplaquetário é potencialmente '
                     'danosa (3: Dano, B-NR). Se a cirurgia for tempo-sensível, manter a DAPT, salvo se o risco de '
@@ -401,70 +431,56 @@ def _janela_icp(ctx):
                     'vigência da DAPT (IIa-C); se a DAPT for interrompida antes do tempo mínimo, operar em centro com '
                     'retaguarda hemodinâmica (I-C). Ponte com tirofiban: IIb-B; ponte com HBPM: III-B (Quadro 21).')
         return r
-    if tipo == 'convencional':
-        r['fase'] = 'liberada'
-        r['aha'] = 'AHA: stent convencional após ≥30 dias de DAPT ininterrupta; cirurgia eletiva pode prosseguir.'
-        if indicacao:
-            r['sbc'] = _sbc_janela(indicacao, m)
-            ideal = 12 if indicacao == 'sca' else 6
-            if m < ideal:
-                r['div'] = ('A AHA não define intervalo além de 30 dias para o stent convencional; a SBC gradua o '
-                            f'intervalo pela indicação (ideal ≥{ideal} meses, I-A). Nós optamos por seguir a AHA, '
-                            'que trata o stent convencional à parte, lembrando que a SBC dá classe menor a '
-                            'intervalos mais curtos.')
-        return r
-    # Stent farmacológico com ≥30 dias
+    ind = indicacao or 'sca'
+    nota_ind = '' if indicacao else ' Sem a indicação da ICP informada, valeu o prazo mais longo (SCA).'
     if tempo_sensivel:
-        if m < 3:
+        if tipo == 'farmacologico' and m < 3:
             r['fase'] = 'manter_dapt'
             r['aha'] = ('AHA: cirurgia tempo-sensível <3 meses após DES: manter a DAPT, salvo se o risco de '
                         'sangramento superar o de trombose do stent (1, B-NR). Em selecionados de alto risco '
                         'trombótico, ponte com antiplaquetário venoso pode ser considerada se a cirurgia não puder '
                         'esperar (<6 meses do DES; 2b, B-NR).')
-            r['sbc'] = (_sbc_janela(indicacao, m) if indicacao else
-                        'SBC: cirurgia de baixo risco de sangramento na vigência da DAPT se a ICP tem <3 meses '
-                        '(IIa-C, Quadro 21).')
+            r['sbc'] = _sbc_janela(ind, m) + nota_ind
             r['div'] = ('Ponte venosa: a AHA admite até 6 meses após DES (2b, B-NR); a SBC reserva o tirofiban para '
                         '<1 mês de ICP (IIb-B) e contraindica ponte com HBPM (III-B).')
         else:
             r['fase'] = 'liberada'
             r['aha'] = ('AHA: cirurgia tempo-sensível ≥3 meses após DES pode ser considerada se o risco de adiar '
-                        'superar o de eventos (2b, B-NR).')
-            r['sbc'] = _sbc_janela(indicacao, m) if indicacao else ''
-            if m < 6:
-                r['div'] = ('Ponte venosa: a AHA admite até 6 meses após DES (2b, B-NR); a SBC reserva o tirofiban '
-                            'para <1 mês de ICP (IIb-B).')
+                        'superar o de eventos (2b, B-NR).' if tipo == 'farmacologico' else
+                        'AHA: stent convencional após ≥30 dias de DAPT; a cirurgia pode prosseguir.')
+            r['sbc'] = _sbc_janela(ind, m) + nota_ind
         return r
-    if indicacao is None:
-        r['fase'] = 'indefinida' if m < 12 else 'liberada'
+    ideal = 12 if ind == 'sca' else 6
+    r['sbc'] = _sbc_janela(ind, m) + nota_ind
+    classe_sbc = _sbc_classe_janela(ind, m)[0]
+    if m >= ideal:
+        r['fase'] = 'liberada'
+        r['aha'] = ('AHA: DES por SCA há ≥12 meses; intervalo cumprido (1, B-NR).' if tipo == 'farmacologico' and
+                    ind == 'sca' else 'AHA: DES por DAC crônica há ≥6 meses; intervalo cumprido (2a, B-NR).'
+                    if tipo == 'farmacologico' else 'AHA: stent convencional após ≥30 dias; intervalo cumprido.')
+        if tipo == 'farmacologico' and ind != 'sca':
+            r['div'] = 'Força diferente para o mesmo intervalo de ≥6 meses: SBC I-A × AHA 2a.'
         return r
-    r['sbc'] = _sbc_janela(indicacao, m)
-    classe_sbc = _sbc_classe_janela(indicacao, m)[0]
-    if indicacao == 'sca':
-        if m < 12:
-            r['fase'] = 'adiar'
+    r['fase'] = 'adiar'
+    if tipo == 'farmacologico':
+        if ind == 'sca':
             r['classe'] = f'AHA 1 (B-NR) · SBC {classe_sbc}'
             r['aha'] = 'AHA: DES por SCA; idealmente adiar a cirurgia eletiva até ≥12 meses (1, B-NR).'
             if m >= 6:
-                r['div'] = ('Entre 6 e 12 meses após DES por SCA, a SBC aceita operar (IIa-B) e a AHA prefere '
-                            'adiar até 12 meses (1, B-NR). Nós optamos por seguir a AHA: adiar, se a cirurgia puder '
-                            'esperar.')
+                r['div'] = ('Entre 6 e 12 meses após DES por SCA, a SBC aceita operar (IIa-B) e a AHA prefere adiar '
+                            'até 12 meses (1, B-NR). Nós optamos por seguir a AHA: adiar, se a cirurgia puder esperar.')
         else:
-            r['fase'] = 'liberada'
-            r['aha'] = 'AHA: DES por SCA há ≥12 meses; intervalo cumprido (1, B-NR).'
-        return r
-    if m < 6:
-        r['fase'] = 'adiar'
-        r['classe'] = f'AHA 2a (B-NR) · SBC {classe_sbc}'
-        r['aha'] = 'AHA: DES por DAC crônica; é razoável adiar a cirurgia eletiva até ≥6 meses (2a, B-NR).'
-        if m >= 3:
-            r['div'] = ('Entre 3 e 6 meses após DES por DAC crônica, a SBC aceita operar (IIa-B) e a AHA considera '
-                        'razoável adiar até 6 meses (2a, B-NR). Nós optamos por seguir a AHA: adiar, se a cirurgia '
-                        'puder esperar.')
+            r['classe'] = f'AHA 2a (B-NR) · SBC {classe_sbc}'
+            r['aha'] = 'AHA: DES por DAC crônica; é razoável adiar a cirurgia eletiva até ≥6 meses (2a, B-NR).'
+            if m >= 3:
+                r['div'] = ('Entre 3 e 6 meses após DES por DAC crônica, a SBC aceita operar (IIa-B) e a AHA considera '
+                            'razoável adiar até 6 meses (2a, B-NR). Nós optamos por seguir a AHA: adiar, se a '
+                            'cirurgia puder esperar.')
     else:
-        r['fase'] = 'liberada'
-        r['aha'] = 'AHA: DES por DAC crônica há ≥6 meses; intervalo cumprido (2a, B-NR).'
-        r['div'] = 'Força diferente para o mesmo intervalo de ≥6 meses: SBC I-A × AHA 2a.'
+        r['classe'] = f'SBC {classe_sbc}'
+        r['aha'] = 'AHA: stent convencional após ≥30 dias de DAPT; a AHA não define prazo maior.'
+        r['div'] = (f'A AHA não define intervalo além de 30 dias para o stent convencional; a SBC gradua pela indicação '
+                    f'(ideal ≥{ideal} meses, I-A). Nós optamos por seguir a SBC, como na tela de adiamentos.')
     return r
 
 
@@ -510,9 +526,16 @@ def _ieca_bra(chave, ctx):
                      'pela AHA vale só para o uso na hipertensão.' + nota,
                      'AHA 2a (C-EO) · SBC I-C', _refs(_aha('§7.2, rec. 2'), _sbc('Quadro 8')))
     if 'ic' in cond:
+        div_ic = ''
+        if 'hipertensao' in cond:
+            div_ic = ('Na IC sem FE reduzida com hipertensão, duas recomendações da AHA se cruzam: manter a terapia da IC '
+                      '(§6.3, 2a) e omitir o IECA/BRA nas 24 h antes em selecionados com PA controlada e cirurgia de '
+                      'risco elevado (§7.2, 2b). A SBC manda manter todas as medicações da IC (I-C). Nós optamos por '
+                      'manter, pela IC.')
         return _item(chave, 'manter', 'Manter',
-                     'IC compensada: manter a terapia da IC no perioperatório e retomar o mais cedo possível.' + nota,
-                     'AHA 2a (C-LD) · SBC I-C', _refs(_aha('§6.3, rec. 2'), _sbc('Quadro 8')))
+                     'IC compensada: manter a terapia da IC no perioperatório e retomar o mais cedo possível.' + nota
+                     + _cautela_hipotensao(ctx),
+                     'AHA 2a (C-LD) · SBC I-C', _refs(_aha('§6.3, rec. 2, e §7.2, rec. 1'), _sbc('Quadro 8')), div_ic)
     div = ('AHA 2026: em selecionados (PA controlada e cirurgia de risco elevado), omitir o IECA/BRA nas 24 h antes '
            'para limitar a hipotensão intraoperatória (2b, B-R). SBC 2024: manter no perioperatório, com suspensão '
            'permitida em casos selecionados (I-C).')
@@ -536,7 +559,8 @@ def _ieca_bra(chave, ctx):
               if v is None]
     return _item(chave, 'individualizar', 'Manter ou omitir 24 h antes',
                  f'Falta informar {" e ".join(faltas)}: com PA controlada e cirurgia de risco elevado, a AHA sugere '
-                 f'omitir nas 24 h antes; nos demais casos, manter. Se omitido, {retomar}.' + nota,
+                 f'omitir nas 24 h antes; nos demais casos, manter. Se omitido, {retomar}.' + nota
+                 + _cautela_hipotensao(ctx),
                  'AHA 2b (B-R) · SBC I-C', refs, div)
 
 
@@ -601,107 +625,191 @@ def _cardio_ic(chave, ctx):
 
 
 # --- Diabetes -----------------------------------------------------------------------------------------------------
+# Fonte principal: posicionamento conjunto SBD/SBA/ABESO (Diabetol Metab Syndr 2026, versão em inglês da Diretriz SBD
+# 2025), recomendações R4–R15 e Tabela 2; aGLP-1 atualizados pela nota da SBA de 15/05/2026 (C.SBA-01744/2026).
+# Classes da SBD: I (> 90% de concordância), IIa (70–90%), IIb (50–70%); níveis A, B e C.
+def _sbd(onde):
+    return [{'label': f'SBD/SBA/ABESO 2026, {onde}', 'url': _URL_SBD}, dict(REFERENCIAS['sbd_pt'])]
+
+
+_DIV_METFORMINA = ('AHA 2026: é razoável manter a metformina no perioperatório (2a, C-LD), sem citar o dia da cirurgia. '
+                   'SBD/SBA/ABESO 2026 (IIa-B) e SPAQI: manter até a véspera e não tomar no dia. Nós optamos por seguir '
+                   'a SBD/SBA/ABESO.')
+
+
 def _isglt2(chave, ctx):
     dias = 4 if 'ertugliflozina' in chave else 3
-    texto = (f'Suspender ≥{dias} dias antes (última dose no D-{dias + 1}) para reduzir o risco de acidose metabólica '
-             '(cetoacidose euglicêmica), também na IC; retomar com o paciente clinicamente estável e em dieta normal '
-             '(texto da AHA).')
-    refs = [_aha('§7.8, rec. 2, e §6.3, rec. 1'), _sbc('Quadro 8')]
     classes = MEDICAMENTOS[chave]['classes']
+    refs = [_aha('§7.8, rec. 2, e §6.3, rec. 1'), _sbd('R6 e Tabela 2'), _sbc('Quadro 8')]
+    if ctx.get('urgencia') in ('urgencia', 'emergencia'):
+        texto = ('Sem tempo para suspender antes: não tomar mais e, pelo risco de cetoacidose euglicêmica, dosar a '
+                 'cetonemia capilar (beta-hidroxibutirato) e fazer gasometria com ânion gap; a cetoacidose pode vir com '
+                 'glicemia normal. Retomar só com dieta normal e paciente estável.')
+        return _item(chave, 'suspender', 'Não tomar mais; dosar a cetonemia', texto,
+                     'SBD/SBA/ABESO: notas 3 e 4 · AHA 1 (C-LD) na eletiva', _refs(*refs))
+    texto = (f'Suspender ≥{dias} dias antes (última dose no D-{dias + 1}) para reduzir o risco de cetoacidose '
+             'euglicêmica, também na IC; retomar com o paciente estável e em dieta normal. Mal-estar, náusea ou dor '
+             'abdominal no perioperatório: dosar a cetonemia mesmo com glicemia normal.')
     if 'metformina' in classes:
-        texto += (' O comprimido combinado leva junto a metformina, que a AHA considera razoável manter (2a, C-LD): '
-                  'só é possível com metformina isolada nesse intervalo.')
-        refs.append(_aha('§7.8, rec. 3'))
+        texto += ' A metformina da associação fica suspensa junto.'
     elif 'idpp4_pioglitazona' in classes:
         texto += ' O iDPP-4 da associação fica suspenso junto.'
-    return _item(chave, 'suspender', f'Suspender {dias} dias antes', texto, 'AHA 1 (C-LD)', _refs(*refs),
-                 'A SBC 2024 não tem recomendação específica para iSGLT2 e, na IC, manda manter todas as medicações '
-                 'de uso crônico (Quadro 8, I-C). Nós optamos por seguir a AHA, a única com recomendação específica '
-                 'para iSGLT2.')
+    return _item(chave, 'suspender', f'Suspender {dias} dias antes', texto, 'AHA 1 (C-LD) · SBD/SBA/ABESO I-B',
+                 _refs(*refs),
+                 'SBD/SBA/ABESO 2026 (R6, I-B): suspender 3–4 dias antes de cirurgia maior ou de procedimento com '
+                 'restrição calórica; nos demais, decidir caso a caso. A SBC 2024 manda manter as medicações da IC '
+                 '(Quadro 8, I-C), sem citar o iSGLT2. Nós optamos por seguir a AHA (3 dias antes em toda cirurgia '
+                 'eletiva), mais protetora contra a cetoacidose.')
 
 
 def _metformina(chave, ctx):
-    return _item(chave, 'manter', 'Manter',
-                 'É razoável manter a metformina no perioperatório para o controle glicêmico; dados recentes não a '
-                 'associam a acidose lática (texto da AHA).',
-                 'AHA 2a (C-LD)', _refs(_aha('§7.8, rec. 3'), _ref('spaqi_endo')),
-                 'A SPAQI (consenso, 2021) orienta manter até a véspera e não tomar na manhã da cirurgia; a SBC não '
-                 'trata do tema. Nós optamos por seguir a AHA.')
+    clcr = ctx.get('clcr')
+    refs = [_sbd('R5 e Tabela 2'), _aha('§7.8, rec. 3'), _ref('spaqi_endo')]
+    if clcr is not None and clcr < 30:
+        return _item(chave, 'suspender', 'Suspender (ClCr < 30 mL/min)',
+                     f'ClCr {clcr:.0f} mL/min: a metformina é contraindicada com filtração abaixo de 30 mL/min/1,73 m². '
+                     'Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir sem '
+                     'função renal estável.',
+                     'KDIGO 2022: ponto de prática (sem gradação)', _refs(_ref('kdigo_dm'), *refs))
+    return _item(chave, 'suspender', 'Tomar até a véspera; não tomar no dia',
+                 'Manter até a véspera e não tomar no dia da cirurgia. Reintroduzir com o paciente estável, com função '
+                 'renal preservada e sem complicação que leve a hipóxia tecidual.',
+                 'SBD/SBA/ABESO IIa-B · AHA 2a (C-LD)', _refs(*refs), _DIV_METFORMINA)
 
 
-def _oral_manha(chave, ctx):
+def _sulfonilureia(chave, ctx):
+    return _item(chave, 'suspender', 'Suspender 24 h antes',
+                 'Última dose pelo menos 24 h antes da cirurgia (na prática, não tomar na véspera à noite nem no dia): '
+                 'em jejum, o secretagogo causa hipoglicemia, que a anestesia mascara.',
+                 'SBD/SBA/ABESO I-C', _refs(_sbd('R4 e Tabela 2'), _ref('spaqi_endo')),
+                 'A SPAQI orienta só não tomar na manhã da cirurgia. Nós optamos por seguir a SBD/SBA/ABESO, mais '
+                 'protetora contra a hipoglicemia.')
+
+
+def _idpp4(chave, ctx):
     classes = MEDICAMENTOS[chave]['classes']
-    texto = 'Manter até a véspera e não tomar na manhã da cirurgia.'
-    if 'sulfonilureia' in classes:
-        texto += ' Em jejum, a sulfonilureia expõe a hipoglicemia.'
-    div, refs = '', [_ref('spaqi_endo')]
+    div_spaqi = ('A SPAQI (consenso) orienta não tomar o iDPP-4 na manhã da cirurgia; a SBD/SBA/ABESO (R11, I-A, com '
+                 'ensaios randomizados) mantém. Nós optamos por seguir a SBD/SBA/ABESO.')
     if 'metformina' in classes:
-        texto += ' A metformina da associação vai junto.'
-        div = ('A AHA considera razoável manter a metformina (2a, C-LD); no comprimido combinado, a SPAQI orienta '
-               'não tomar na manhã da cirurgia. Nós optamos por seguir a SPAQI para a associação.')
-        refs.append(_aha('§7.8, rec. 3'))
-    return _item(chave, 'suspender', 'Suspender no dia da cirurgia', texto, 'SPAQI: consenso de especialistas',
-                 _refs(*refs), div)
+        return _item(chave, 'suspender', 'Tomar até a véspera; não tomar no dia',
+                     'O iDPP-4 pode ser mantido no perioperatório (SBD/SBA/ABESO I-A), mas o comprimido leva metformina, '
+                     'que não se toma no dia da cirurgia (IIa-B).',
+                     'SBD/SBA/ABESO IIa-B (metformina) · I-A (iDPP-4)',
+                     _refs(_sbd('R5, R11 e Tabela 2'), _aha('§7.8, rec. 3'), _ref('spaqi_endo')), _DIV_METFORMINA)
+    if chave == 'saxagliptina':
+        ic = _ic(_cond(ctx))
+        texto = ('Os iDPP-4 são mantidos no perioperatório, mas a SBD/SBA/ABESO evita a saxagliptina, sobretudo com IC '
+                 'ou risco de IC (mais internação por IC no SAVOR-TIMI 53).')
+        if ic:
+            texto += ' Com IC: discutir a troca com o médico assistente.'
+        return _item(chave, 'individualizar' if ic else 'manter',
+                     'Discutir a troca (IC)' if ic else 'Manter (evitar se IC ou risco de IC)', texto,
+                     'SBD/SBA/ABESO I-A', _refs(_sbd('R11 e Tabela 2'), _ref('spaqi_endo')), div_spaqi)
+    return _item(chave, 'manter', 'Manter, inclusive no dia',
+                 'Manter no perioperatório: controle glicêmico semelhante ao da insulina basal-bolus, com menos '
+                 'hipoglicemia.',
+                 'SBD/SBA/ABESO I-A', _refs(_sbd('R11 e Tabela 2'), _ref('spaqi_endo')), div_spaqi)
 
 
-def _texto_glp1(semanal, chave):
-    base = ('Orientação multissocietária 2024: manter na maioria, por decisão compartilhada; suspender se o risco de '
-            'retenção gástrica for alto (fase de escalonamento, dose alta, sintomas gastrointestinais, gastroparesia, '
-            'dismotilidade intestinal, doença de Parkinson; as formulações semanais dão mais efeitos '
-            'gastrointestinais). ')
-    base += ('Se suspender: última dose ≥1 semana antes. ' if semanal else
-             'Se suspender: não aplicar no dia da cirurgia. ')
-    base += ('Com preocupação de esvaziamento gástrico, dieta líquida nas 24 h antes; a ultrassonografia gástrica à '
-             'beira-leito ajuda a avaliar o risco de aspiração.')
-    if chave == 'semaglutida':
-        base += ' A semaglutida oral é diária e segue o esquema diário.'
-    if chave == 'tirzepatida':
-        base += ' Tirzepatida (agonista GIP/GLP-1): aplicação por extensão.'
-    return base
+def _pioglitazona(chave, ctx):
+    if _ic(_cond(ctx)):
+        return _item(chave, 'individualizar', 'Discutir a suspensão (IC)',
+                     'A pioglitazona retém líquido e pode descompensar a IC, com efeito que dura dias a semanas: com IC, '
+                     'discutir a suspensão com o médico assistente.',
+                     'SBD/SBA/ABESO IIb-C', _refs(_sbd('R12 e Tabela 2'), _ref('spaqi_endo')))
+    return _item(chave, 'manter', 'Pode manter',
+                 'Pode ser mantida em cirurgia eletiva não cardíaca, com o paciente estável e sem internação longa '
+                 'prevista; cautela na IC conhecida ou suspeita.',
+                 'SBD/SBA/ABESO IIb-C', _refs(_sbd('R12 e Tabela 2'), _ref('spaqi_endo')),
+                 'A SPAQI orienta não tomar na manhã da cirurgia. Nós optamos por seguir a SBD/SBA/ABESO.')
 
 
-def _div_glp1(semanal):
-    aha = ('AHA 2026 (texto, sem classe, citando a ASA 2023): suspender a formulação semanal >1 semana antes'
-           if semanal else 'AHA 2026 (texto, sem classe, citando a ASA 2023): suspender a formulação diária na véspera')
-    return (aha + ', sem distinguir o risco individual; a orientação multissocietária de 2024 mantém na maioria e '
-                  'suspende só no alto risco. A SBC 2024 não trata do tema. Nós optamos por seguir a orientação '
-                  'multissocietária de 2024, mais recente e específica.')
+def _acarbose(chave, ctx):
+    return _item(chave, 'suspender', 'Suspender no dia da cirurgia', 'Não tomar no dia da cirurgia (age só com refeição).',
+                 'SBD/SBA/ABESO: Tabela 2 · SPAQI: consenso', _refs(_sbd('Tabela 2'), _ref('spaqi_endo')))
+
+
+_FATORES_GLP1 = ('Fatores de risco de aspiração: início há menos de 12 semanas ou aumento de dose nos últimos 3 meses; '
+                 'sintomas gastrointestinais; HbA1c > 8% ou diabetes há mais de 8 anos; gastroparesia; cirurgia '
+                 'gastrointestinal prévia, inclusive bariátrica; resíduo gástrico em endoscopia anterior; obstrução ou '
+                 'acalasia; IMC ≥ 40; opioide crônico, tricíclico, anticolinérgico ou bloqueador dos canais de cálcio; '
+                 'disfagia ou doença neurológica; sedação moderada ou profunda sem via aérea protegida, posição prona, '
+                 'sedação > 30 min ou via aérea difícil prevista.')
+
+
+def _texto_glp1(longa, chave):
+    nome = {'liraglutida': 'liraglutida (curta ação)', 'semaglutida': 'semaglutida, oral ou subcutânea (longa ação)',
+            'dulaglutida': 'dulaglutida (longa ação)', 'tirzepatida': 'tirzepatida, coagonista GIP/GLP-1 (longa ação)'}
+    dias = 7 if longa else 1
+    rotulo = nome.get(chave, chave)
+    return (f'{rotulo[0].upper() + rotulo[1:]}: suspender {dias} dia{"s" if dias > 1 else ""} antes. Para todos: '
+            'dieta líquida sem resíduos nas 24 h antes e jejum de 8 a 12 h. Manter a dose só se estiver estável há mais '
+            'de 12 semanas, sem fatores de risco de aspiração, e se o serviço fizer ultrassonografia gástrica (POCUS) '
+            'sistemática no dia, pelo menos 1 h antes da anestesia; sem POCUS, suspender. ' + _FATORES_GLP1 +
+            ' Com suspensão longa no DM2, o médico assistente ajusta o tratamento para evitar hiperglicemia. Termo de '
+            'consentimento específico da SBA.')
+
+
+def _div_glp1(longa):
+    return ('AHA 2026 (texto, sem classe, citando a ASA 2023): suspender ' +
+            ('a formulação semanal mais de 1 semana antes' if longa else 'a formulação diária na véspera') +
+            '. A orientação multissocietária de 2024 e o consenso britânico de 2025 mantêm na maioria. A SBD/SBA/ABESO '
+            '2026 manteria quem está estável há mais de 12 semanas e sem fatores de risco (R9, I-C); a nota da SBA de '
+            'maio de 2026 passou a exigir POCUS sistemático para manter. Nós optamos por seguir a nota da SBA de 2026, '
+            'a posição brasileira mais recente.')
 
 
 def _glp1(chave, ctx):
-    semanal = chave not in _GLP1_DIARIO
-    resumo = ('Manter na maioria; se alto risco, suspender 1 semana antes' if semanal else
-              'Manter na maioria; se alto risco, suspender no dia')
-    return _item(chave, 'individualizar', resumo, _texto_glp1(semanal, chave),
-                 'Multissocietária 2024: consenso (sem gradação) · AHA: texto, sem classe',
-                 _refs(_ref('glp1'), _aha('§7.8 (texto)')), _div_glp1(semanal))
-
-
-_TEXTO_BASAL = ('Manter a insulina basal antes e no dia da cirurgia; aplicar 60–80% da dose usual na noite anterior '
-                'pode ser razoável, sobretudo no DM2 ou em quem tende a hipoglicemia.')
+    longa = chave not in _GLP1_DIARIO
+    resumo = ('Suspender 7 dias antes; dieta líquida nas 24 h antes' if longa else
+              'Suspender 1 dia antes; dieta líquida nas 24 h antes')
+    return _item(chave, 'suspender', resumo, _texto_glp1(longa, chave),
+                 'SBD/SBA/ABESO I-C · SBA 2026 (nota)',
+                 _refs(_ref('sba_glp1'), _sbd('R7–R10 e Tabela 2'), _aha('§7.8 (texto)'), _ref('glp1')),
+                 _div_glp1(longa))
 
 
 def _insulina(chave, ctx):
+    refs_sbd = _sbd('R13–R15 e Tabela 2')
+    nunca = (' No DM1, LADA ou pancreatectomia total, nunca omitir a insulina basal (risco de cetoacidose), salvo com '
+             'insulina venosa ou bomba funcionando.')
+    if chave == 'insulina_degludeca':
+        return _item(chave, 'ajustar', 'Reduzir 20–30% a partir de 72 h antes',
+                     'Reduzir a dose em 20–30% começando 72 h antes (ação ultralonga); até 50% se a basal passar de '
+                     'metade da dose diária total; com basal até metade da dose total e glicemia estável, a redução '
+                     'pode ser desnecessária.' + nunca,
+                     'SBD/SBA/ABESO IIa-B', _refs(refs_sbd, _ref('spaqi_endo')),
+                     'A SPAQI orienta 60–80% da dose na noite anterior para as insulinas basais, sem prazo próprio para '
+                     'a degludeca. Nós optamos por seguir a SBD/SBA/ABESO.')
     if chave in _INSULINA_BASAL:
-        return _item(chave, 'ajustar', 'Manter, com 60–80% da dose na noite anterior', _TEXTO_BASAL,
-                     'SPAQI: consenso de especialistas', _refs(_ref('spaqi_endo')))
+        return _item(chave, 'ajustar', 'Na noite anterior, 70–80% da dose',
+                     'Reduzir a dose da noite anterior em 20–30%; até 50% se a basal passar de metade da dose diária '
+                     'total; com basal até metade da dose total e glicemia estável, a redução pode ser desnecessária. '
+                     'Manter a basal no dia.' + nunca,
+                     'SBD/SBA/ABESO IIa-B', _refs(refs_sbd, _ref('spaqi_endo')),
+                     'A SPAQI aceita 60–80% da dose na noite anterior. Nós optamos por seguir a SBD/SBA/ABESO (70–80%).')
     if chave in _INSULINA_NPH:
-        return _item(chave, 'ajustar', 'Reduzir 50% da dose da manhã da cirurgia',
-                     'Manter; na manhã da cirurgia, aplicar 50% da dose habitual e considerar reduzir 25% a dose da '
-                     'noite anterior.',
-                     'SPAQI: consenso de especialistas', _refs(_ref('spaqi_endo')))
+        return _item(chave, 'ajustar', 'Na manhã da cirurgia, 50% da dose',
+                     'Dose habitual na noite anterior; na manhã da cirurgia, 50% da dose (sobretudo se a NPH for mais '
+                     'da metade da insulina total ou se dois terços ou mais forem aplicados de manhã). No esquema '
+                     'basal-bolus com NPH, reduzir cada componente em 50% e dividir a NPH em três doses iguais.' + nunca,
+                     'SBD/SBA/ABESO IIa-C', _refs(refs_sbd, _ref('spaqi_endo')),
+                     'A SPAQI sugere considerar também reduzir 25% a dose da noite anterior. Nós optamos por seguir a '
+                     'SBD/SBA/ABESO (noite anterior sem redução).')
     if chave in _INSULINA_PRANDIAL:
-        return _item(chave, 'suspender', 'Suspender no dia da cirurgia (exceto correção)',
-                     'Dose habitual até a véspera; no dia da cirurgia, só para correção de hiperglicemia.',
-                     'SPAQI: consenso de especialistas', _refs(_ref('spaqi_endo')))
+        return _item(chave, 'suspender', 'No jejum, só correção',
+                     'Dose habitual até a véspera; em jejum, suspender as doses fixas das refeições e usar só a insulina '
+                     'de correção (esquema basal-plus) até voltar a comer.',
+                     'SBD/SBA/ABESO I-C', _refs(refs_sbd, _ref('spaqi_endo')))
     if chave in _INSULINA_GLP1:
-        return _item(chave, 'individualizar', 'Ajustar a dose da caneta na noite anterior',
-                     'Componente basal: ' + _TEXTO_BASAL[0].lower() + _TEXTO_BASAL[1:] + ' Componente aGLP-1 (diário): '
-                     'a orientação multissocietária 2024 mantém na maioria e, no alto risco de retenção gástrica, '
-                     'suspende no dia da cirurgia. Na associação em dose fixa, reduzir a dose reduz os dois '
-                     'componentes.',
-                     'SPAQI: consenso · Multissocietária 2024: consenso (sem gradação)',
-                     _refs(_ref('spaqi_endo'), _ref('glp1'), _aha('§7.8 (texto)')), _div_glp1(False))
+        return _item(chave, 'individualizar', 'Seguir a regra do aGLP-1 (curta ação)',
+                     'A associação em dose fixa segue o componente aGLP-1 (lixisenatida e liraglutida são de curta '
+                     'ação): suspender 1 dia antes, salvo se estável há mais de 12 semanas, sem fatores de risco e com '
+                     'POCUS gástrico sistemático no serviço; dieta líquida nas 24 h antes e jejum de 8 a 12 h. A '
+                     'insulina da caneta não reduz o efeito no esvaziamento gástrico; no dia sem a caneta, o médico '
+                     'assistente define a cobertura com insulina basal.',
+                     'SBD/SBA/ABESO I-C · SBA 2026 (nota)',
+                     _refs(_ref('sba_glp1'), _sbd('Nota 8 e Tabela 2'), _ref('spaqi_endo')), _div_glp1(False))
     return None  # bifásica e icodeca: sem recomendação nas fontes
 
 
@@ -756,6 +864,23 @@ def _doac(chave, ctx):
     clcr = ctx.get('clcr')
     neuraxial = bool(ctx.get('neuraxial'))
     refs = _refs(_aha('§7.6, rec. 1, e Tabela 13'), _sbc('Quadros 12–14 e 26'))
+    if _cond(ctx) & {'protese_mecanica', 'protese_mecanica_mitral'}:
+        texto = (f'Prótese valvar mecânica: a {nome} é contraindicada (mais trombose e sangramento que a varfarina). '
+                 'Rever a anticoagulação com o cardiologista antes da cirurgia; o manejo perioperatório passa a ser o '
+                 'da varfarina.')
+        if ctx.get('urgencia') in ('urgencia', 'emergencia'):
+            reversor = 'idarucizumabe' if farmaco == 'dabigatrana' else 'andexanet alfa ou complexo protrombínico'
+            texto += (' Na urgência: medir o efeito residual (testes de coagulação ou nível do fármaco) e, se presente '
+                      f'com sangramento relevante, reverter com {reversor} (AHA, texto do §7.6 e Tabela 15).')
+        return _item(chave, 'individualizar', 'Contraindicado com prótese mecânica', texto,
+                     'ACC/AHA 2020 (valvopatias) 3: Dano (B-R) · SBC: texto',
+                     _refs(_ref('valvas'), _sbc('4.3.2 (texto)'), _aha('§7.6 (texto) e Tabela 15')))
+    if neuraxial and farmaco == 'dabigatrana' and clcr is not None and clcr < 30:
+        return _item(chave, 'individualizar', 'ClCr < 30: evitar anestesia neuroaxial',
+                     f'Dabigatrana com ClCr {_num(clcr)} mL/min: a ASRA não recomenda bloqueio neuroaxial; preferir '
+                     'outra técnica anestésica, em decisão com a anestesia. Se a neuroaxial for indispensável, '
+                     'suspender por mais tempo (pela AHA, ≥6 dias sem dose) e conferir o efeito residual.',
+                     'ASRA 2018 · AHA 1 (B-NR)', _refs(_ref('asra'), refs))
     if sang == 'minimo':
         return _item(chave, 'manter', 'Não interromper',
                      'Sangramento mínimo: manter (AHA, Tabela 13). SBC: catarata, I-B; endoscopia de baixo risco e '
@@ -877,11 +1002,17 @@ def _varfarina(chave, ctx):
 
 
 def _enoxaparina(chave, ctx):
+    if ctx.get('urgencia') in ('urgencia', 'emergencia'):
+        return _item(chave, 'individualizar', 'Urgência: informar a hora da última dose',
+                     'Sem tempo para o intervalo de 24 h: informar à anestesia a hora da última aplicação. Anestesia '
+                     'neuroaxial só ≥24 h após dose plena e ≥12 h após dose profilática (ASRA); com dose recente, '
+                     'preferir outra técnica.',
+                     'ASRA 2018 · SBC IIa-C', _refs(_ref('asra'), _sbc('Quadro 25')))
     return _item(chave, 'suspender', 'Dose plena: última dose 24 h antes',
                  'Em dose plena, última aplicação 24 h antes e retorno ≥24 h depois (48–72 h se sangramento alto), com '
-                 'hemostasia: intervalos que a SBC define para a HBPM na ponte, aqui estendidos ao uso contínuo. As '
-                 'fontes revisadas não definem intervalo para a dose profilática.',
-                 'SBC IIa-C (extrapolado da ponte)', _refs(_sbc('Quadro 25')))
+                 'hemostasia: intervalos que a SBC define para a HBPM na ponte, aqui estendidos ao uso contínuo. Na '
+                 'anestesia neuroaxial (ASRA): punção ≥24 h após dose plena e ≥12 h após dose profilática.',
+                 'SBC IIa-C (extrapolado da ponte) · ASRA 2018', _refs(_sbc('Quadro 25'), _ref('asra')))
 
 
 # --- Antiagregantes -----------------------------------------------------------------------------------------------
@@ -889,6 +1020,8 @@ def _indicacao_aas(ctx):
     # Doença vascular ou stent é prevenção secundária, mesmo que a tela tenha marcado "primária": nunca suspender o
     # AAS de quem tem stent ou DAC por um erro de marcação.
     if _cond(ctx) & _SECUNDARIA or ctx.get('stent'):
+        return 'secundaria'
+    if set(ctx.get('medicacoes') or ()) & set(_P2Y12):   # DAPT: houve SCA ou ICP
         return 'secundaria'
     return ctx.get('aas_indicacao')
 
@@ -906,6 +1039,18 @@ def _aas(chave, ctx):
                      'AHA 2026: sem recomendação formal; a interrupção do AAS de prevenção primária dispensa decisão '
                      'multiprofissional e a função plaquetária se recupera em 4 dias (Tabela 12). Nós optamos por '
                      'seguir a SBC (7 dias).')
+    if indicacao == 'secundaria' and ctx.get('cirurgia') == 'neurocirurgia':
+        return _item(chave, 'suspender', 'Suspender 7 dias antes (neurocirurgia)',
+                     'Neurocirurgia: mesmo na prevenção secundária, suspender o AAS 7 dias antes, porque qualquer '
+                     'sangramento pode ser catastrófico; retomar assim que a hemostasia permitir. Com stent recente, '
+                     'decisão multiprofissional.',
+                     'SBC: texto do 4.1.3 (exceção do Quadro 20)', _refs(_sbc('Quadros 20 e 21 e texto do 4.1.3'), _aha('§7.5')))
+    if indicacao == 'secundaria' and ctx.get('cirurgia') == 'rtu':
+        return _item(chave, 'individualizar', 'RTU de próstata: suspender 7 dias antes; de bexiga: manter',
+                     'Na ressecção transuretral de próstata, sem hemostasia direta, a SBC suspende o AAS 7 dias antes, '
+                     'mesmo na prevenção secundária (algumas técnicas permitem manter: decidir com o urologista). Na '
+                     'RTU de bexiga, manter. Com stent recente, decisão multiprofissional.',
+                     'SBC: texto do 4.1.3', _refs(_sbc('texto do 4.1.3 e Quadro 20')))
     if indicacao == 'secundaria':
         if ctx.get('stent') or 'stent' in cond:
             return _item(chave, 'manter', 'Manter (75–100 mg)',
@@ -927,6 +1072,17 @@ def _aas(chave, ctx):
 
 
 def _p2y12(chave, ctx, medicacoes):
+    item = _p2y12_regra(chave, ctx, medicacoes)
+    if ctx.get('neuraxial') and item['conduta'] in ('manter', 'individualizar'):
+        nome, _, _ = _P2Y12[chave]
+        asra = {'clopidogrel': '5–7', 'ticagrelor': '5–7', 'prasugrel': '7–10'}[chave]
+        item['texto'] += (f' Anestesia neuroaxial: com o {nome} mantido, o bloqueio fica contraindicado (a ASRA pede '
+                          f'{asra} dias sem ele); preferir outra técnica, em decisão com a anestesia.')
+        item['referencias'] = _refs(item['referencias'], _ref('asra'))
+    return item
+
+
+def _p2y12_regra(chave, ctx, medicacoes):
     nome, dias, faixa = _P2Y12[chave]
     dapt = _AAS in medicacoes
     sang = _sangramento(ctx)
@@ -936,8 +1092,20 @@ def _p2y12(chave, ctx, medicacoes):
     mantendo = ', mantendo o AAS' if dapt else ''
     div_dias = (f'AHA (Tabela 12): {faixa} dias até recuperar a função plaquetária; SBC: {dias} dias. Nós optamos por '
                 f'seguir a SBC ({dias} dias), dentro da faixa da AHA.')
+    if janela and sang == 'minimo' and janela['fase'] in ('proibitiva', 'manter_dapt', 'adiar'):
+        return _item(chave, 'manter', 'Manter a DAPT',
+                     'Procedimento de sangramento mínimo dentro do prazo após a ICP: fazer na vigência da DAPT, sem '
+                     'suspender (SBC: odontologia, IIa-B; catarata com stent recente, IIa-B; baixo risco de '
+                     'sangramento < 3 meses da ICP, IIa-C).',
+                     'SBC IIa-B', _refs(_sbc('Quadros 11, 14 e 21')), janela['div'])
     if janela:
         fase = janela['fase']
+        if fase == 'urgente':
+            recente = (janela['dias'] or 0) <= 30 or (janela['tipo'] == 'farmacologico' and janela['dias'] < 91)
+            return _item(chave, 'manter', 'Manter a DAPT, se o sangramento permitir',
+                         janela['sbc'] + ' Se a DAPT for interrompida antes do tempo mínimo, operar em centro com '
+                         'retaguarda hemodinâmica.', ('AHA 1 (B-NR) · SBC I-C' if recente else 'SBC I-C'), refs,
+                         janela['div'])
         if fase == 'proibitiva':
             if janela['tempo_sensivel']:
                 return _item(chave, 'manter', 'Manter a DAPT',
@@ -955,8 +1123,9 @@ def _p2y12(chave, ctx, medicacoes):
                          'AHA 1 (B-NR) · SBC IIa-C', refs, janela['div'])
         if fase == 'adiar':
             partes = [janela['aha'], janela['sbc'],
-                      f'Se a cirurgia for mantida, suspender o {nome} {dias} dias antes{mantendo}.']
-            return _item(chave, 'individualizar', f'Avaliar adiar a cirurgia; se operar, suspender {dias} dias antes',
+                      f'Não suspender agora. Se a equipe decidir operar antes do prazo, suspender o {nome} {dias} dias '
+                      f'antes{mantendo}, com decisão multiprofissional.']
+            return _item(chave, 'individualizar', f'Adiar a eletiva; se operar antes, suspender {dias} dias antes',
                          ' '.join(p for p in partes if p), janela['classe'], refs, janela['div'] or div_dias)
         if fase == 'indefinida':
             return _item(chave, 'individualizar', f'Suspender {dias} dias antes, se fora da janela do stent',
@@ -999,6 +1168,11 @@ def _p2y12(chave, ctx, medicacoes):
                      'SBC IIb-C', refs, div_dias)
     classe = 'AHA: sem classe (Tabela 12) · SBC I-B' if dapt else 'AHA: sem classe (Tabela 12) · SBC IIb-C'
     texto = f'Suspender o {nome} {dias} dias antes{mantendo}.' + reinicio
+    if ctx.get('neuraxial'):
+        asra = {'clopidogrel': '5–7', 'ticagrelor': '5–7', 'prasugrel': '7–10'}[chave]
+        texto += (f' Anestesia neuroaxial: a ASRA pede {asra} dias sem o {nome} antes da punção; o AAS isolado não '
+                  'impede o bloqueio.')
+        refs = _refs(refs, _ref('asra'))
     return _item(chave, 'suspender', f'Suspender {dias} dias antes', texto, classe, refs, div_dias)
 
 
@@ -1062,9 +1236,15 @@ def _hormonio(chave, ctx):
     classe = 'SPAQI: consenso de especialistas'
     if chave in _ESTROGENIOS:
         texto = 'Manter antes e no dia da cirurgia, pesando o risco de TEV.'
+        div = ''
         if chave == 'anticoncepcional_combinado':
             texto += ' Se suspenso, considerar o risco de gestação.'
-        return _item(chave, 'manter', 'Manter, pesando o risco de TEV', texto, classe, refs)
+            refs = _refs(refs, _ref('mec'))
+            div = ('CDC US MEC 2024: cirurgia de grande porte com imobilização prolongada é categoria 4 (risco '
+                   'inaceitável) para o contraceptivo combinado; a SPAQI mantém, pesando o TEV. Nós optamos por seguir '
+                   'a SPAQI na cirurgia sem imobilização prolongada; com imobilização prolongada prevista, trocar por '
+                   'método só com progestagênio ou não hormonal, com antecedência.')
+        return _item(chave, 'manter', 'Manter, pesando o risco de TEV', texto, classe, refs, div)
     if chave == 'anticoncepcional_so_com_progestagenio':
         return _item(chave, 'manter', 'Manter', 'Manter antes e no dia da cirurgia.', classe, refs)
     if chave == 'testosterona':
@@ -1101,8 +1281,14 @@ def _regra(chave, ctx, medicacoes):
         return _insulina(chave, ctx)
     if 'aglp1' in classes:
         return _glp1(chave, ctx)
-    if classes & {'sulfonilureia', 'idpp4_pioglitazona'}:
-        return _oral_manha(chave, ctx)
+    if 'sulfonilureia' in classes:
+        return _sulfonilureia(chave, ctx)
+    if chave == 'pioglitazona':
+        return _pioglitazona(chave, ctx)
+    if chave == 'acarbose':
+        return _acarbose(chave, ctx)
+    if 'idpp4_pioglitazona' in classes:
+        return _idpp4(chave, ctx)
     if 'metformina' in classes:
         return _metformina(chave, ctx)
     if 'arni' in classes:
@@ -1180,24 +1366,35 @@ def _avisos(meds, ctx):
             'anticoagulante, quando viável, até a retomada; depois, o AAS pode ser suspenso.',
             _refs(_aha('§7.5, rec. 9'))))
 
-    if ctx.get('neuraxial') and anticoag:
+    if ctx.get('neuraxial') and not anticoag and set(meds) & set(_P2Y12):
+        avisos.append(_aviso(
+            'Anestesia neuroaxial e antiagregantes',
+            'ASRA: suspender o clopidogrel e o ticagrelor 5–7 dias e o prasugrel 7–10 dias antes da punção; o AAS '
+            'isolado não impede o bloqueio. Com inibidor de P2Y12 mantido (stent recente), preferir outra técnica.',
+            _refs(_ref('asra'), _sbc('Quadro 21'))))
+    elif ctx.get('neuraxial') and anticoag:
         avisos.append(_aviso(
             'Anestesia neuroaxial e anticoagulantes',
             'A AHA trata a anestesia neuroaxial como procedimento de maior risco de sangramento: interrupção completa '
             'do anticoagulante (≥5 meias-vidas: ≥3 dias para anti-Xa; ≥4 dias para dabigatrana, 5–6 se ClCr <50) e '
-            'decisão de equipe. Com cateter peridural, a próxima dose de DOAC só ≥6 h após a retirada (SBC I-B). As '
-            'fontes revisadas não definem intervalos neuroaxiais para antiagregantes nem para HBPM.',
-            _refs(_aha('§7.6 (texto) e Tabela 13'), _sbc('Quadro 26'))))
+            'decisão de equipe. Com cateter peridural, a próxima dose de DOAC só ≥6 h após a retirada (SBC I-B). '
+            'ASRA: anti-Xa ≥72 h; dabigatrana 72–120 h conforme o ClCr, e não fazer o bloqueio com ClCr <30; HBPM '
+            '≥24 h após dose plena e ≥12 h após dose profilática; clopidogrel e ticagrelor 5–7 dias, prasugrel 7–10 '
+            'dias; AAS isolado não impede o bloqueio.',
+            _refs(_aha('§7.6 (texto) e Tabela 13'), _sbc('Quadro 26'), _ref('asra'))))
 
     diabetico = cond & {'diabetes', 'diabetes_insulina'} or any(
         set(MEDICAMENTOS[m]['classes']) & _ANTIDIABETICOS for m in meds)
     if diabetico:
         avisos.append(_aviso(
-            'HbA1c pré-operatória',
-            'Com diabetes ou risco de diabetes, é razoável dosar a HbA1c se não houver resultado dos últimos 3 meses '
-            '(AHA 2a, B-NR). Sem limiar validado; adiar cirurgia eletiva com HbA1c >8% pode ser razoável, mas '
-            'cirurgia tempo-sensível ou de emergência não deve esperar a meta (texto da AHA).',
-            _refs(_aha('§7.8, rec. 1'))))
+            'HbA1c e glicemia pré-operatórias',
+            'Dosar a HbA1c se não houver resultado dos últimos 3 meses (AHA 2a, B-NR). Meta antes da cirurgia eletiva: '
+            'HbA1c < 8%, sem hipoglicemia (SBD/SBA/ABESO I-B). HbA1c > 8%: encaminhar ao endocrinologista e considerar '
+            'adiar a eletiva; HbA1c < 6% em uso de insulina ou sulfonilureia: endocrinologista, pelo risco de '
+            'hipoglicemia. Cirurgia tempo-sensível ou de urgência não espera a meta. No dia, glicemia > 250 mg/dL: '
+            'considerar adiar; meta perioperatória de 100 a 180 mg/dL (I-A), com glicemia de hora em hora na cirurgia '
+            'média ou grande (I-A).',
+            _refs(_sbd('R2, R3, R16, R17 e notas 2–3'), _aha('§7.8, rec. 1'))))
     return avisos
 
 
@@ -1257,8 +1454,8 @@ def condutas(medicacoes: list[str], ctx: dict) -> dict:
     ``ctx`` (tudo opcional): idade, sexo ('masculino'|'feminino'), peso, clcr (mL/min, Cockcroft-Gault),
     sangramento ('minimo'|'baixo_moderado'|'alto'), cirurgia_risco_elevado, urgencia
     ('eletiva'|'tempo_sensivel'|'urgencia'|'emergencia'), neuraxial (aceita também 'neuroaxial'), condicoes (set), stent
-    ({'tipo': 'farmacologico'|'convencional'|'balao', 'indicacao': 'sca'|'dac_cronica', 'meses': float}),
-    aas_indicacao ('primaria'|'secundaria'), pa_controlada.
+    ({'tipo': 'farmacologico'|'convencional'|'balao', 'indicacao': 'sca'|'dac_cronica', 'dias': int}; 'meses' ainda
+    é aceito), aas_indicacao ('primaria'|'secundaria'), pa_controlada, cirurgia (chave de preoperatorio.CIRURGIAS).
 
     Devolve {'itens': [...], 'avisos': [...]}. Item: chave, medicamento, conduta
     ('manter'|'suspender'|'ajustar'|'individualizar'), resumo, texto, classe, referencias [{label, url}],
@@ -1272,6 +1469,7 @@ def condutas(medicacoes: list[str], ctx: dict) -> dict:
     for chave in medicacoes or ():
         if chave in MEDICAMENTOS and chave not in meds:
             meds.append(chave)
+    ctx['medicacoes'] = set(meds)
     itens = [i for i in (_regra(chave, ctx, meds) for chave in meds) if i]
     return {'itens': itens, 'avisos': _avisos(meds, ctx)}
 

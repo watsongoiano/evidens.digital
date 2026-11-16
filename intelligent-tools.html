@@ -3799,13 +3799,13 @@
             const outras = (pul.medidas || []).concat(r.orientacoes || []);
             if (outras.length) {
                 h += cartaoDeItens(outras, o => `<div class="po-item"><p><span class="font-medium">${textoSeguro(o.titulo)}</span> ${classeTag(o.classe)}</p>
-                    <p class="text-[13px] text-ink/60 mt-0.5">${textoSeguro(o.texto)}</p>${refsHtml(o)}</div>`).replace('!mt-0', 'mt-3');
+                    <p class="text-[13px] text-ink/60 mt-0.5">${textoSeguro(o.texto)}</p>${refsHtml(o)}${divergenciaHtml(o.divergencia)}</div>`).replace('!mt-0', 'mt-3');
             }
 
             if (r.pos_operatorio && r.pos_operatorio.length) {
                 h += `<h3 class="po-titulo">${textoSeguro('No pós-operatório')}</h3>`;
                 h += cartaoDeItens(r.pos_operatorio, o => `<div class="po-item"><p><span class="font-medium">${textoSeguro(o.titulo)}</span> ${classeTag(o.classe)}</p>
-                    <p class="text-[13px] text-ink/60 mt-0.5">${textoSeguro(o.texto)}</p>${refsHtml(o)}</div>`);
+                    <p class="text-[13px] text-ink/60 mt-0.5">${textoSeguro(o.texto)}</p>${refsHtml(o)}${divergenciaHtml(o.divergencia)}</div>`);
             }
 
             if (r.resumido) {
