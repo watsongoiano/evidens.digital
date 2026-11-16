@@ -150,6 +150,24 @@ _ESQUEMA = [
     """CREATE TABLE IF NOT EXISTS assinatura_preferencias (
         usuario_id BIGINT PRIMARY KEY, provedor TEXT NOT NULL, horas INTEGER NOT NULL, assinar INTEGER NOT NULL
     )""",
+    # Estabelecimentos de saúde (CNES): cadastro compartilhado entre os médicos; só dados públicos (nome e CNES).
+    """CREATE TABLE IF NOT EXISTS estabelecimentos (
+        id {pk},
+        cnes TEXT NOT NULL UNIQUE,
+        nome TEXT NOT NULL,
+        criado_por BIGINT,
+        criado_em BIGINT NOT NULL
+    )""",
+    # Vínculo do médico com um estabelecimento do SUS (laudo de APAC): o CNS do profissional fica só na conta dele.
+    """CREATE TABLE IF NOT EXISTS vinculos_sus (
+        id {pk},
+        usuario_id BIGINT NOT NULL,
+        estabelecimento_id BIGINT NOT NULL,
+        cns TEXT NOT NULL,
+        criado_em BIGINT NOT NULL,
+        UNIQUE (usuario_id, estabelecimento_id)
+    )""",
+    "CREATE INDEX IF NOT EXISTS vinculos_sus_usuario ON vinculos_sus (usuario_id)",
 ]
 
 APROVACAO_MANUAL = "aprovacao_manual"
@@ -551,6 +569,138 @@ def criar_credenciamento(uid, dados):
 def excluir_credenciamento(uid, cid):
     with _conexao() as executar:
         return executar('DELETE FROM credenciamentos WHERE id = ? AND usuario_id = ?', (cid, uid)).rowcount > 0
+
+
+# ── SUS: estabelecimentos (CNES, compartilhados) e vínculos do médico (laudo de APAC) ─────
+
+MAX_VINCULOS_SUS = 10
+
+
+def cns_valido(cns):
+    """Cartão Nacional de Saúde: 15 dígitos com soma ponderada (pesos 15 a 1) múltipla de 11 (regra do DATASUS,
+    vale para o definitivo, que começa com 1 ou 2, e o provisório, que começa com 7, 8 ou 9)."""
+    digitos = re.sub(r'\D', '', cns or '')
+    if len(digitos) != 15 or digitos[0] not in '12789':
+        return False
+    return sum(int(d) * (15 - i) for i, d in enumerate(digitos)) % 11 == 0
+
+
+def cnes_limpo(cnes):
+    """CNES com 7 dígitos, ou '' se não tiver."""
+    digitos = re.sub(r'\D', '', cnes if isinstance(cnes, str) else str(cnes or ''))
+    return digitos if len(digitos) == 7 else ''
+
+
+_COLUNAS_EST = ('id', 'cnes', 'nome', 'criado_por')
+
+
+def _estabelecimento(linha):
+    return dict(zip(_COLUNAS_EST, linha)) if linha else None
+
+
+def estabelecimento_por_cnes(cnes):
+    cnes = cnes_limpo(cnes)
+    if not cnes:
+        return None
+    with _conexao() as executar:
+        return _estabelecimento(executar('SELECT id, cnes, nome, criado_por FROM estabelecimentos WHERE cnes = ?',
+                                         (cnes,)).fetchone())
+
+
+def buscar_estabelecimentos(termo, limite=10):
+    """Por parte do nome ou do CNES, para a busca na conta."""
+    termo = _limpo(termo, 80)
+    if len(termo) < 2:
+        return []
+    padrao = '%' + termo.lower().replace('%', '').replace('_', '') + '%'
+    with _conexao() as executar:
+        linhas = executar('SELECT id, cnes, nome, criado_por FROM estabelecimentos '
+                          'WHERE LOWER(nome) LIKE ? OR cnes LIKE ? ORDER BY nome LIMIT ?',
+                          (padrao, padrao, int(limite))).fetchall()
+    return [_estabelecimento(l) for l in linhas]
+
+
+def renomear_estabelecimento(eid, nome, usuario):
+    """Corrige o nome: só quem cadastrou ou o administrador."""
+    nome = _limpo(nome, 120)
+    if len(nome) < 3:
+        raise DadosInvalidos(['Informe o nome do estabelecimento.'])
+    with _conexao() as executar:
+        linha = executar('SELECT criado_por FROM estabelecimentos WHERE id = ?', (eid,)).fetchone()
+        if not linha:
+            return False
+        if linha[0] != usuario['id'] and not usuario.get('administrador'):
+            raise PermissionError
+        executar('UPDATE estabelecimentos SET nome = ? WHERE id = ?', (nome, eid))
+    return True
+
+
+_SELECT_VINCULO = ('SELECT v.id, e.id, e.cnes, e.nome, v.cns, e.criado_por FROM vinculos_sus v '
+                   'JOIN estabelecimentos e ON e.id = v.estabelecimento_id ')
+
+
+def _vinculo(linha):
+    if not linha:
+        return None
+    vid, eid, cnes, nome, cns, criado_por = linha
+    return {'id': vid, 'estabelecimento_id': eid, 'cnes': cnes, 'nome': nome, 'cns': cns, 'criado_por': criado_por}
+
+
+def vinculos_sus_de(uid):
+    with _conexao() as executar:
+        linhas = executar(_SELECT_VINCULO + 'WHERE v.usuario_id = ? ORDER BY e.nome, v.id', (uid,)).fetchall()
+    return [_vinculo(l) for l in linhas]
+
+
+def vinculo_sus_de(uid, vid):
+    with _conexao() as executar:
+        return _vinculo(executar(_SELECT_VINCULO + 'WHERE v.id = ? AND v.usuario_id = ?', (vid, uid)).fetchone())
+
+
+def criar_vinculo_sus(uid, dados):
+    """{cnes, nome?, cns}: usa o estabelecimento já cadastrado com o CNES ou cria (aí o nome é obrigatório)."""
+    dados = dados if isinstance(dados, dict) else {}
+    cnes = cnes_limpo(dados.get('cnes'))
+    nome = _limpo(dados.get('nome'), 120)
+    cns = re.sub(r'\D', '', _limpo(dados.get('cns'), 30))
+    erros = []
+    if not cnes:
+        erros.append('O CNES tem 7 dígitos.')
+    if not cns_valido(cns):
+        erros.append('Confira o seu CNS (Cartão Nacional de Saúde do profissional): 15 dígitos válidos.')
+    if erros:
+        raise DadosInvalidos(erros)
+    agora = int(time.time())
+    with _conexao() as executar:
+        linha = executar('SELECT id FROM estabelecimentos WHERE cnes = ?', (cnes,)).fetchone()
+        if linha:
+            eid = linha[0]
+        else:
+            if len(nome) < 3:
+                raise DadosInvalidos(['Este CNES ainda não está cadastrado: informe o nome do estabelecimento.'])
+            executar('INSERT INTO estabelecimentos (cnes, nome, criado_por, criado_em) VALUES (?, ?, ?, ?)',
+                     (cnes, nome, uid, agora))
+            eid = executar('SELECT id FROM estabelecimentos WHERE cnes = ?', (cnes,)).fetchone()[0]
+        total = executar('SELECT COUNT(*) FROM vinculos_sus WHERE usuario_id = ?', (uid,)).fetchone()[0]
+        existente = executar('SELECT id FROM vinculos_sus WHERE usuario_id = ? AND estabelecimento_id = ?',
+                             (uid, eid)).fetchone()
+        if existente:
+            executar('UPDATE vinculos_sus SET cns = ? WHERE id = ?', (cns, existente[0]))
+            vid = existente[0]
+        else:
+            if total >= MAX_VINCULOS_SUS:
+                raise DadosInvalidos([f'O limite é de {MAX_VINCULOS_SUS} estabelecimentos por conta.'])
+            executar('INSERT INTO vinculos_sus (usuario_id, estabelecimento_id, cns, criado_em) VALUES (?, ?, ?, ?)',
+                     (uid, eid, cns, agora))
+            vid = executar('SELECT id FROM vinculos_sus WHERE usuario_id = ? AND estabelecimento_id = ?',
+                           (uid, eid)).fetchone()[0]
+    return vinculo_sus_de(uid, vid)
+
+
+def excluir_vinculo_sus(uid, vid):
+    """Desfaz o vínculo; o estabelecimento continua no cadastro compartilhado."""
+    with _conexao() as executar:
+        return executar('DELETE FROM vinculos_sus WHERE id = ? AND usuario_id = ?', (vid, uid)).rowcount > 0
 
 
 # --- Termos de Uso -----------------------------------------------------------

@@ -96,7 +96,7 @@
       const resumo = document.querySelector('[data-resumo]');
       if (resumo) resumo.textContent = `${perfis[usuario.perfil] || ''} · ${usuario.registro} · ${usuario.email}`;
       if (usuario.administrador) document.querySelectorAll('[data-so-admin]').forEach(el => { el.style.display = 'block'; });
-      if (usuario.perfil === 'medico' || usuario.perfil === 'residente') { abrirPlanos(usuario); abrirTimbrado(usuario); abrirAssinatura(); }
+      if (usuario.perfil === 'medico' || usuario.perfil === 'residente') { abrirPlanos(usuario); abrirSus(); abrirTimbrado(usuario); abrirAssinatura(); }
     }).catch(() => {});
   }
 
@@ -289,6 +289,82 @@
       postar('/api/auth/timbrado/margens', { margem_topo: topo.value, margem_base: base.value }, 'Espaços salvos. Confira a prévia.'));
 
     fetch('/api/auth/timbrado', { credentials: 'same-origin' }).then(r => r.json()).then(d => { if (d.disponivel) aplicar(d); }).catch(() => {});
+  }
+
+  // SUS: estabelecimentos (CNES, cadastro compartilhado) e o CNS do médico, para o laudo de APAC
+  function abrirSus() {
+    const secao = document.querySelector('[data-sus]');
+    if (!secao) return;
+    secao.style.display = 'block';
+    const lista = secao.querySelector('[data-lista-sus]');
+    const form = secao.querySelector('form');
+    const erro = form.querySelector('[data-erro]'), ok = form.querySelector('[data-ok]');
+    const cnes = form.querySelector('[name="cnes"]'), nome = form.querySelector('[name="nome"]');
+    const achado = form.querySelector('[data-sus-achado]');
+
+    // CNES já cadastrado por outro médico: o nome vem do cadastro e não é digitado de novo.
+    async function conferirCnes() {
+      const digitos = cnes.value.replace(/\D/g, '');
+      achado.hidden = true; nome.readOnly = false;
+      if (digitos.length !== 7) return;
+      try {
+        const r = await fetch('/api/auth/estabelecimentos?cnes=' + digitos, { credentials: 'same-origin' });
+        const { estabelecimentos } = await r.json();
+        if (estabelecimentos && estabelecimentos.length) {
+          nome.value = estabelecimentos[0].nome; nome.readOnly = true;
+          achado.textContent = 'Estabelecimento já cadastrado no Evidēns.'; achado.hidden = false;
+        }
+      } catch (e) { /* segue com o nome digitado */ }
+    }
+    cnes.addEventListener('input', conferirCnes);
+
+    function linha(v) {
+      const div = document.createElement('div');
+      div.className = 'recommendation-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3';
+      const info = document.createElement('div');
+      const h = document.createElement('h5'); h.textContent = v.nome;
+      const p = document.createElement('p'); p.className = 'text-[14px] text-ink/60 mt-1';
+      p.textContent = `CNES ${v.cnes} · seu CNS ${v.cns}`;
+      info.append(h, p);
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-claro shrink-0'; b.textContent = 'Remover';
+      b.addEventListener('click', async () => {
+        b.disabled = true;
+        try {
+          const { resposta, dados } = await enviar(`/api/auth/vinculos-sus/${v.id}/excluir`);
+          if (!resposta.ok) { mostrar(erro, dados.error || 'Não foi possível remover. Tente de novo.'); return; }
+          carregar();
+        } catch (e) {
+          mostrar(erro, 'Sem conexão com o servidor. Tente de novo.');
+        } finally { b.disabled = false; }
+      });
+      div.append(info, b);
+      return div;
+    }
+
+    async function carregar() {
+      try {
+        const r = await fetch('/api/auth/vinculos-sus', { credentials: 'same-origin' });
+        const { vinculos } = await r.json();
+        lista.replaceChildren(...(vinculos || []).map(linha));
+      } catch (e) { /* a lista fica como está */ }
+    }
+
+    form.addEventListener('submit', async ev => {
+      ev.preventDefault();
+      mostrar(erro, ''); mostrar(ok, '');
+      const botao = form.querySelector('button[type="submit"]');
+      botao.disabled = true;
+      try {
+        const { resposta, dados } = await enviar('/api/auth/vinculos-sus', Object.fromEntries(new FormData(form).entries()));
+        if (!resposta.ok) { mostrar(erro, dados.error || 'Não foi possível salvar. Tente de novo.', dados.erros); return; }
+        mostrar(ok, dados.mensagem || 'Salvo.');
+        form.reset(); nome.readOnly = false; achado.hidden = true;
+        carregar();
+      } catch (e) {
+        mostrar(erro, 'Sem conexão com o servidor. Tente de novo.');
+      } finally { botao.disabled = false; }
+    });
+    carregar();
   }
 
   // Planos de saúde em que o médico é credenciado (dados da guia SP/SADT)

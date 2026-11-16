@@ -1673,6 +1673,48 @@ def _ler_guia_do_plano(usuario):
             'indicacao': pdf_minutas.indicacao_clinica(indicacao)}
 
 
+# Dados do paciente para o laudo de APAC: só passam por aqui para entrar no PDF; não são gravados.
+_CAMPOS_PACIENTE_APAC = {'cns': 20, 'nascimento': 10, 'mae': 120, 'telefone': 20, 'endereco': 150, 'municipio': 60,
+                         'ibge': 7, 'uf': 2, 'cep': 9, 'prontuario': 20, 'responsavel': 120, 'raca': 20}
+
+
+def _ler_apac(usuario, categoria):
+    """{'apac': {'vinculo_id', 'paciente': {...}, 'cid'}} do pedido de exames de imagem."""
+    pedido = (request.get_json(silent=True) or {}).get('apac')
+    if pedido is None:
+        return None
+    from src.utils import contas
+    if categoria != 'imagem':
+        raise PedidoDePdfInvalido('O laudo de APAC é só para exames de imagem e procedimentos (tomografia, ressonância, '
+                                  'endoscopia, colonoscopia e densitometria).')
+    if not isinstance(pedido, dict):
+        raise PedidoDePdfInvalido('Dados da APAC em formato inválido')
+    if not contas.pode_ter_credenciamento(usuario):
+        raise PedidoDePdfInvalido('O laudo de APAC é só para médicos e residentes.', codigo='guia_indisponivel')
+    vid = pedido.get('vinculo_id')
+    if isinstance(vid, bool) or not isinstance(vid, int):
+        raise PedidoDePdfInvalido('Escolha o estabelecimento do SUS.')
+    vinculo = contas.vinculo_sus_de(usuario['id'], vid)
+    if not vinculo:
+        raise PedidoDePdfInvalido('Estabelecimento do SUS não encontrado no seu cadastro. Confira em Minha conta.',
+                                  codigo='guia_indisponivel')
+    bruto = pedido.get('paciente') if isinstance(pedido.get('paciente'), dict) else {}
+    paciente = {}
+    for campo, maximo in _CAMPOS_PACIENTE_APAC.items():
+        valor = bruto.get(campo)
+        if valor is None:
+            continue
+        if not isinstance(valor, str) or len(valor) > maximo + 20:
+            raise PedidoDePdfInvalido('Dados do paciente da APAC inválidos ou longos demais')
+        paciente[campo] = ' '.join(valor.split())[:maximo]
+    if paciente.get('cns') and not contas.cns_valido(paciente['cns']):
+        raise PedidoDePdfInvalido('Confira o CNS do paciente: 15 dígitos válidos.')
+    cid = pedido.get('cid') or ''
+    if not isinstance(cid, str) or not re.fullmatch(r'([A-Z]\d{2}(\.?\d)?)?', cid.strip().upper()):
+        raise PedidoDePdfInvalido('Confira o CID-10 (ex.: Z12.2).')
+    return {'vinculo': vinculo, 'paciente': paciente, 'cid': cid.strip().upper()}
+
+
 def _ler_justificativa():
     """Justificativa (indicação clínica) do pedido de exames: vai no pedido e na guia. Não é gravada."""
     texto = (request.get_json(silent=True) or {}).get('justificativa')
@@ -1756,6 +1798,11 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
             if justificativa:
                 extras['justificativa'] = justificativa
             guia = _ler_guia_do_plano(usuario)
+            apac = _ler_apac(usuario, categoria)
+            if guia and apac:
+                raise PedidoDePdfInvalido('Escolha o plano de saúde ou o SUS (APAC), não os dois.')
+            if apac:
+                extras['apac'] = apac
             if guia:
                 if justificativa and not (request.get_json(silent=True) or {}).get('guia', {}).get('indicacao'):
                     guia['indicacao'] = pdf_minutas.indicacao_clinica(justificativa)
@@ -1797,6 +1844,8 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
     uso.registrar(uso.POR_CATEGORIA_DE_PDF.get(categoria), usuario)
     if extras.get('guia'):
         uso.registrar('guia_plano', usuario)
+    if extras.get('apac'):
+        uso.registrar('apac', usuario)
     return send_file(
         io.BytesIO(pdf_bytes),
         mimetype='application/pdf',

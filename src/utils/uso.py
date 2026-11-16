@@ -25,6 +25,7 @@ TIPOS = {
     'pdf_imagem': 'Pedidos de imagem',
     'pdf_vacinas': 'Receitas de vacinas',
     'guia_plano': 'Guias do plano de saúde',
+    'apac': 'Laudos de APAC (SUS)',
     'pdf_assinado': 'Pedidos assinados digitalmente',
 }
 POR_CATEGORIA_DE_PDF = {'laboratorio': 'pdf_laboratorio', 'imagem': 'pdf_imagem', 'vacina': 'pdf_vacinas'}

@@ -56,6 +56,23 @@
       </div>
     </form>
   </section>
+  <section data-sus style="display: none;">
+    <h2 class="text-[22px] font-light tracking-tight mt-12">SUS (laudo de APAC)</h2>
+    <p class="text-[15px] text-ink/65 leading-relaxed mt-3">Cadastre os estabelecimentos do SUS em que você atende. Tomografia, ressonância, endoscopia, colonoscopia e densitometria pedidas pelo SUS saem com o laudo de solicitação de APAC já preenchido. O estabelecimento (nome e CNES) fica disponível para os outros médicos; o seu CNS fica só na sua conta.</p>
+    <div data-lista-sus class="mt-5 flex flex-col gap-3"></div>
+    <form data-form-sus class="secao mt-5 flex flex-col gap-5" novalidate>
+      <div class="grade">
+        <div class="campo"><label for="sus_cnes">CNES do estabelecimento (7 dígitos)</label><input type="text" id="sus_cnes" name="cnes" inputmode="numeric" maxlength="9" required autocomplete="off"></div>
+        <div class="campo"><label for="sus_nome">Nome do estabelecimento</label><input type="text" id="sus_nome" name="nome" maxlength="120" autocomplete="off"><p data-sus-achado class="text-[13px] text-teal mt-1.5" hidden></p></div>
+        <div class="campo sm:col-span-2"><label for="sus_cns">Seu CNS (Cartão Nacional de Saúde do profissional, 15 dígitos)</label><input type="text" id="sus_cns" name="cns" inputmode="numeric" maxlength="20" required autocomplete="off"></div>
+      </div>
+      <div data-erro role="alert" class="aviso aviso-erro" style="display: none;"></div>
+      <div data-ok role="status" class="aviso aviso-info" style="display: none;"></div>
+      <div class="flex flex-wrap items-center gap-4">
+        <button type="submit" class="btn-escuro">Salvar estabelecimento <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button>
+      </div>
+    </form>
+  </section>
   <section data-timbrado style="display: none;">
     <h2 class="text-[22px] font-light tracking-tight mt-12">Receituário</h2>
     <p class="text-[15px] text-ink/65 leading-relaxed mt-3">Escolha como os pedidos de exames e a prescrição de vacinas saem impressos. Vale só para a sua conta. A guia SP/SADT continua no formato padrão.</p>
