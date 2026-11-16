@@ -118,6 +118,7 @@ def test_tela_tem_os_cartoes_e_o_resumo():
     html = TELA.read_text(encoding='utf-8')
     assert 'id="examesComunsPainel"' in html and 'data-cartoes-do-grupo' in html   # o cartão abre junto do grupo
     assert 'montagemDosComuns' in html                                             # montado uma vez só
+    assert 'exames-comuns-abrir' in html and 'opcoes.hidden = true' in html        # cada grupo recolhido num botão
     assert "fetch('/api/exames-comuns'" in html
     assert 'id="resultadosInformados"' in html and 'function exibirResultadosInformados' in html
     for nome in E.DO_MOTOR:
