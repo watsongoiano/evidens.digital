@@ -8,6 +8,7 @@ from src.utils import hiv
 from src.utils import condicoes
 from src.utils import prenatal
 from src.utils import prevent
+from src.utils import rastreio_cancer
 from src.utils.seguranca_vacinas import aplicar_triagem_vacinas
 from src.utils.validacao import EntradaInvalida, SIM, ler_numero, normalizar_triagem, validar_entrada
 
@@ -235,31 +236,10 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'grau_evidencia': 'B'
         })
     
-    # Rastreamento de câncer por idade e sexo
-    if sex == 'feminino':
-        if 40 <= age <= 74:
-            _add_rec({
-                'titulo': 'Mamografia Digital - Bilateral',
-                'descricao': 'Mamografia bienal (40-74 anos)',
-                'subtitulo': 'Mulheres 40-74 anos | Bienal',
-                'categoria': 'imagem',
-                'prioridade': 'alta',
-                'referencia': 'USPSTF 2024',
-                'grau_evidencia': 'B'
-            })
-        
-        # Colo do útero: regras em src/utils/colo_utero.py (dependem de imunossupressão e do último resultado).
-
-    if sex == 'masculino' and age >= 50:
-        _add_rec({
-            'titulo': 'PSA total, soro',
-            'descricao': 'Rastreamento de câncer de próstata (≥50 anos)',
-            'subtitulo': 'Homens ≥50 anos | Anual',
-            'categoria': 'laboratorio',
-            'prioridade': 'media',
-            'referencia': 'USPSTF 2018',
-            'grau_evidencia': 'C'
-        })
+    # Rastreamento de câncer por idade e sexo: mamografia e PSA (src/utils/rastreio_cancer.py).
+    # Colo do útero: regras em src/utils/colo_utero.py (dependem de imunossupressão e do último resultado).
+    for rec in rastreio_cancer.mama_e_prostata(age, sex):
+        _add_rec(rec)
     
     # Densitometria óssea (Osteoporose)
     if sex == 'feminino' and age >= 65:
@@ -276,17 +256,9 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Densitometria para mulheres pós-menopausa <65 anos com fatores de risco
     # Nota: Requer avaliação individualizada de fatores de risco
     
-    # Colonoscopia
-    if 45 <= age <= 75:
-        _add_rec({
-            'titulo': 'Colonoscopia de Rastreio com ou sem biópsia',
-            'descricao': 'Colonoscopia a cada 10 anos (45-75 anos)',
-            'subtitulo': 'Adultos 45-75 anos | A cada 10 anos',
-            'categoria': 'imagem',
-            'prioridade': 'alta',
-            'referencia': 'USPSTF 2021',
-            'grau_evidencia': 'B'
-        })
+    # Colorretal: colonoscopia ou FIT, 45-75 anos (src/utils/rastreio_cancer.py)
+    for rec in rastreio_cancer.colorretal(age):
+        _add_rec(rec)
     
     # Aneurisma de Aorta Abdominal (AAA)
     # Critérios: Homens 65-75 anos E (DPOC OU fumante/ex-fumante com ≥10 maços-ano)
@@ -592,7 +564,22 @@ def calcular_risco_cardiovascular(data, comorbidades, medicacoes, is_diabetic, i
         'observacao': 'Categoria SBC pelo escore, pela idade no DM2 e pelos agravantes informados (história familiar '
                       'de DCV prematura, obesidade, MASLD, doença inflamatória crônica, HIV). Lp(a), PCR-us, fatores '
                       'femininos, estratificadores do DM2, LDL ≥ 190 e CAC também reclassificam e ficam a cargo do médico.',
+        'limitacao': PREVENT_LIMITACAO,
     }
+
+
+# Limite de aplicabilidade: o PREVENT foi derivado e validado em população dos EUA. A validação externa no NHANES
+# mostrou boa discriminação (C 0,89) e calibração só moderadamente imperfeita; não há validação em coorte
+# brasileira, e no Brasil os escores de risco concordam pouco entre si.
+PREVENT_LIMITACAO = {
+    'texto': 'Equações derivadas e validadas em população dos EUA, sem validação em coorte brasileira: use o '
+             'resultado como estimativa. No Brasil, os escores de risco cardiovascular concordam pouco entre si.',
+    'fontes': [
+        {'rotulo': 'Validação externa (JAMA Netw Open 2024)',
+         'link': 'https://doi.org/10.1001/jamanetworkopen.2024.38311'},
+        {'rotulo': 'Escores no Brasil (Arq Bras Cardiol 2025)', 'link': 'https://doi.org/10.36660/abc.20240405'},
+    ],
+}
 
 
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
@@ -702,7 +689,9 @@ def generate_intelligent_recommendations():
         # Itens que implicam imunossupressão valem como "Sim" na triagem de vacinas.
         if condicoes.imunossupressao_implicada(comorbidades, medicacoes_checkboxes):
             triagem['imunossupressao'] = SIM
-        pa_classificacao = coerencia.classificar_pa(data.get('pas'), data.get('pad'))
+        # Na gestação, ≥ 140/90 e faixa grave ≥ 160/110, sem os estágios da AHA/ACC (src/utils/prenatal.py).
+        pa_classificacao = (prenatal.classificar_pa(data.get('pas'), data.get('pad')) if is_pregnant
+                            else coerencia.classificar_pa(data.get('pas'), data.get('pad')))
         
         # Verificar se tem hipertensão nas comorbidades
         if 'hipertensao' in comorbidades or 'hipertensão' in comorbidades:
@@ -746,32 +735,21 @@ def generate_intelligent_recommendations():
         if sex == 'feminino':
             recs_colo, orientacoes_colo = colo_utero.recomendar(
                 age, imunossuprimida='hiv' in comorbidades or triagem.get('imunossupressao') == SIM,
-                resultado=data.get('hpv_resultado'), histerectomizada=colo_utero.HISTERECTOMIA in comorbidades)
+                resultado=data.get('hpv_resultado'), histerectomizada=colo_utero.HISTERECTOMIA in comorbidades,
+                rastreio_adequado=data.get('colo_rastreio_adequado'), nic2_previa=data.get('colo_nic2_previa') == SIM)
             recommendations.extend(recs_colo)
+
+        # Clamídia e gonococo em mulheres sexualmente ativas até 24 anos (USPSTF 2021, B). Na gestante, o pré-natal pede.
+        orientacoes_ist = []
+        if sex == 'feminino' and not is_pregnant:
+            recs_ist, orientacoes_ist = prenatal.clamidia_fora_da_gestacao(age, data.get('sexualmente_ativa'))
+            recommendations.extend(recs_ist)
         
-        # Rastreamento de câncer de pulmão (LDCT) - USPSTF 2021
-        # tabagismo e macos_ano já extraídos acima
-        anos_parou_fumar = float(data.get('anos_parou_fumar', 0)) if data.get('anos_parou_fumar') else 0
-        
-        # Critérios: 50-80 anos, ≥20 maços-ano, fumante atual OU parou há <15 anos
-        elegivel_ldct = False
-        if 50 <= age <= 80 and macos_ano >= 20:
-            if tabagismo == 'atual':
-                elegivel_ldct = True
-            elif tabagismo == 'ex' and anos_parou_fumar < 15:
-                elegivel_ldct = True
-        
-        if elegivel_ldct:
-            recommendations.append({
-                'titulo': 'Tomografia computadorizada de tórax de baixa dose (LDCT)',
-                'descricao': 'Rastreamento anual de câncer de pulmão. Indicado para adultos 50-80 anos com história de tabagismo de 20 maços-ano e que atualmente fumam ou pararam nos últimos 15 anos. Descontinuar se não fumou por 15 anos ou desenvolveu problema de saúde que limita substancialmente expectativa de vida.',
-                'subtitulo': 'Adultos 50-80 anos com ≥20 maços-ano | Anual',
-                'categoria': 'imagem',
-                'prioridade': 'alta',
-                'referencia': 'USPSTF 2021',
-                'link': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening',
-                'grau_evidencia': 'B'
-            })
+        # Rastreamento de câncer de pulmão (LDCT): USPSTF 2021 / SBCT-SBPT-CBR 2024 (src/utils/rastreio_cancer.py).
+        # Maços-ano ou anos desde que parou ausentes não viram zero: o item aparece como dados insuficientes.
+        recs_pulmao, nao_incluidas_cancer, orientacoes_cancer = rastreio_cancer.pulmao(
+            age, tabagismo, data.get('macos_ano'), data.get('anos_parou_fumar'), gestante=is_pregnant)
+        recommendations.extend(recs_pulmao)
         
         # ========== DIABETES SCREENING E MANAGEMENT (ADA 2024) ==========
         
@@ -1159,21 +1137,44 @@ def generate_intelligent_recommendations():
         orientacoes = condicoes.aplicar(recommendations, age, sex, comorbidades, medicacoes_checkboxes, familia,
                                         gestante=is_pregnant, tabagismo=tabagismo, imc=imc,
                                         imunossuprimido=triagem.get('imunossupressao') == SIM,
-                                        cd4=data.get('cd4') if is_hiv_positive else None)
+                                        cd4=data.get('cd4') if is_hiv_positive else None,
+                                        idade_ccr_familiar=data.get('idade_ccr_familiar'))
+        # Rastreio de câncer: divergências entre diretrizes e o que vale depois da idade de parada.
+        mais_orientacoes, mais_nao_incluidas = rastreio_cancer.finalizar(recommendations, age, sex, familia)
+        orientacoes_cancer += mais_orientacoes
+        nao_incluidas_cancer += mais_nao_incluidas
 
         # Gestação: rotina do pré-natal pela idade gestacional; itens do check-up geral que
         # não se aplicam na gestação saem da lista e aparecem como "adiados".
-        adiados_gestacao, proximas_gestacao = [], []
+        adiados_gestacao, proximas_gestacao, orientacoes_gestacao = [], [], []
         if gestacao is not None:
             if 'diabetes_gestacional_previo' in comorbidades and 'dmg_previo' not in gestacao['condicoes']:
                 gestacao['condicoes'].append('dmg_previo')  # mesma informação, marcada na lista de comorbidades
+            dados_pn = dict(comorbidades=comorbidades, imc=imc, pas=data.get('pas'), pad=data.get('pad'))
             exames_pn, proximas_gestacao = prenatal.programacao(gestacao, age, hipertensa=has_hypertension,
-                                                                diabetica=is_diabetic, hiv='hiv' in comorbidades)
+                                                                diabetica=is_diabetic, hiv='hiv' in comorbidades, **dados_pn)
             titulos_pn = {r['titulo'].lower() for r in exames_pn}
             recommendations = [r for r in recommendations if (r.get('titulo') or '').lower() not in titulos_pn]
-            recommendations, adiados_gestacao = prenatal.adiar(recommendations, diabetica=is_diabetic)
+            recommendations, fora = prenatal.fora_da_gestacao(recommendations)
+            altos_pe, _ = prenatal.fatores_pre_eclampsia(gestacao, age, has_hypertension, is_diabetic, comorbidades, imc)
+            com_indicacao = bool(has_hypertension or is_diabetic or 'doenca_renal' in comorbidades or altos_pe
+                                 or prenatal.suspeita_de_pre_eclampsia(gestacao, data.get('pas'), data.get('pad')))
+            recommendations, adiados_gestacao = prenatal.adiar(recommendations, diabetica=is_diabetic,
+                                                               com_indicacao=com_indicacao)
+            adiados_gestacao = fora + [a for a in adiados_gestacao if a['titulo'] not in {f['titulo'] for f in fora}]
             recommendations = prenatal.sem_equivalentes(recommendations, exames_pn)
-            recommendations = exames_pn + recommendations
+            recommendations = prenatal.ajustar_textos(exames_pn + recommendations, diabetica=is_diabetic)
+            orientacoes_gestacao = prenatal.orientacoes(
+                gestacao, age, hipertensa=has_hypertension, diabetica=is_diabetic, hiv='hiv' in comorbidades,
+                agora=exames_pn, **dados_pn)
+        else:
+            # Amamentando criança com menos de 6 meses: TOTG pós-DMG e o que esperar do puerpério recente.
+            recs_pp, orientacoes_gestacao = prenatal.pos_parto(triagem.get('lactante'), comorbidades,
+                                                                  diabetica=is_diabetic)
+            recommendations.extend(recs_pp)
+            if sex == 'feminino':
+                orientacoes_gestacao += prenatal.acido_folico(age, data.get('sexualmente_ativa'),
+                                                              histerectomizada=colo_utero.HISTERECTOMIA in comorbidades)
 
         # Rastreio de HIV não se pede a quem já vive com HIV
         if 'hiv' in comorbidades:
@@ -1307,14 +1308,17 @@ def generate_intelligent_recommendations():
         # Periodicidade: exame já feito e ainda dentro do intervalo da própria regra sai do pedido
         # e aparece em "não incluídos", com a data e a data a partir da qual volta a ser indicado.
         mantidas, em_dia = periodicidade.aplicar(mantidas, exames_anteriores, sex)
-        nao_incluidas = nao_incluidas + em_dia
+        nao_incluidas = nao_incluidas + em_dia + nao_incluidas_cancer
         response['recommendations'] = mantidas
         response['total_recommendations'] = len(mantidas)
         response['nao_incluidas'] = nao_incluidas
         response['adiados_gestacao'] = adiados_gestacao
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['inferencias'] = inferencias
-        response['orientacoes'] = orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_hiv
+        todas = (orientacoes_gestacao + orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_ist
+                 + orientacoes_hiv + orientacoes_cancer)
+        # Urgências (PA em faixa grave na gestação) no topo; depois as da gestação (alto risco, AAS, divergências).
+        response['orientacoes'] = [o for o in todas if o.get('urgente')] + [o for o in todas if not o.get('urgente')]
         aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
         if aviso_exames:
             response['orientacoes'] = response['orientacoes'] + [aviso_exames]
@@ -1522,15 +1526,17 @@ def _ler_guia_do_plano(usuario):
 
 
 def _timbrado_do_medico(usuario):
-    """{'timbrado': ...} se o médico enviou o papel timbrado; um timbrado que não abre não impede o pedido."""
-    from src.utils import contas, timbrado
+    """{'timbrado': ...} com o receituário do médico (modelo, montado ou papel já timbrado); um receituário
+    que não abre não impede o pedido (sai no modelo do Evidēns)."""
+    from src.utils import contas, receituario
     if not usuario or not contas.pode_ter_credenciamento(usuario):
         return {}
     try:
-        registro = contas.timbrado_de(usuario['id'])
-        return {'timbrado': timbrado.para_o_pdf(registro)} if registro else {}
-    except timbrado.TimbradoInvalido:
+        config = receituario.para_o_pdf(contas, usuario['id'])
+    except Exception as exc:
+        print(f"⚠️ Receituário do médico não abriu ({type(exc).__name__}); pedido no modelo do Evidēns")
         return {}
+    return {'timbrado': config} if config else {}
 
 
 MSG_SEM_SESSAO_DE_ASSINATURA = 'Abra a sessão de assinatura digital para assinar este pedido.'

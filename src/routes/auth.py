@@ -274,7 +274,11 @@ def credenciamentos_excluir(cid):
     return jsonify({'ok': True})
 
 
-# ── Papel timbrado (fundo dos pedidos; só de quem assina) ─────────────────────
+# ── Receituário: modelo enviado, montado na tela ou papel já timbrado (só de quem assina) ─────
+# src/utils/receituario.py decide o fundo e as margens de cada modo; src/utils/timbrado.py lê o modelo.
+
+MSG_RECEITUARIO = 'O receituário personalizado é só para médicos e residentes.'
+
 
 def _meta_do_timbrado(t):
     from src.utils import timbrado
@@ -283,24 +287,58 @@ def _meta_do_timbrado(t):
             'margem_base': t['margem_base'], 'largura': largura, 'altura': altura}
 
 
+def _estado_do_receituario(uid):
+    from src.utils import receituario
+    t = contas.timbrado_de(uid)
+    r = contas.receituario_de(uid) or {'dados': {}, 'logo': None}
+    montado = {k: v for k, v in r['dados'].items() if k in (*receituario.CAMPOS, 'tema', 'alinhamento', 'cor',
+                                                            'margem_topo', 'margem_base')}
+    topo, base = receituario.margens_do_papel(r['dados'])
+    try:
+        ativo = receituario.para_o_pdf(contas, uid)
+    except Exception:
+        ativo = None
+    return {
+        'disponivel': True, 'modo': receituario.modo_de(contas, uid),
+        'timbrado': _meta_do_timbrado(t) if t else None,
+        'montado': dict(montado, tem_logo=bool(r['logo'])) if montado.get('nome') else None,
+        'papel': {'margem_topo': topo, 'margem_base': base},
+        'ativo': {k: ativo[k] for k in ('largura', 'altura', 'margem_topo', 'margem_base')} if ativo else None,
+        'opcoes': {'temas': list(receituario.TEMAS), 'alinhamentos': list(receituario.ALINHAMENTOS),
+                   'cores': {k: '#%02x%02x%02x' % v for k, v in receituario.CORES.items()}},
+    }
+
+
+def _medico_do_receituario():
+    u = usuario_atual()
+    return u if contas.pode_ter_credenciamento(u) else None
+
+
+def _erro_do_receituario(erro, status=400):
+    """Resposta de erro pelo código da exceção: só mensagens fixas escritas para o médico, nunca o texto dela."""
+    from src.utils import receituario, timbrado
+    codigo = getattr(erro, 'codigo', None)
+    mensagem = receituario.MENSAGENS.get(codigo) or timbrado.MENSAGENS.get(codigo) or receituario.MENSAGENS['modo']
+    return jsonify({'error': mensagem, 'codigo': codigo if isinstance(codigo, str) else None}), status
+
+
 @auth_bp.route('/auth/timbrado')
 @exigir_login
 def timbrado_estado():
-    u = usuario_atual()
-    if not contas.pode_ter_credenciamento(u):
+    u = _medico_do_receituario()
+    if not u:
         return jsonify({'timbrado': None, 'disponivel': False})
-    t = contas.timbrado_de(u['id'])
-    return jsonify({'timbrado': _meta_do_timbrado(t) if t else None, 'disponivel': True})
+    return jsonify(_estado_do_receituario(u['id']))
 
 
 @auth_bp.route('/auth/timbrado', methods=['POST'])
 @exigir_login
 def timbrado_enviar():
-    """Recebe o PDF do timbrado (campo `arquivo`), mede a área livre e guarda na conta."""
+    """Recebe o modelo do médico (campo `arquivo`: PDF, PNG ou JPG), mede a área livre e passa a usá-lo."""
     from src.utils import timbrado
-    u = usuario_atual()
-    if not contas.pode_ter_credenciamento(u):
-        return jsonify({'error': MSG_SO_QUEM_ASSINA}), 403
+    u = _medico_do_receituario()
+    if not u:
+        return jsonify({'error': MSG_RECEITUARIO}), 403
     request.max_content_length = timbrado.TAMANHO_MAXIMO + 64 * 1024
     try:
         arquivo = request.files.get('arquivo')
@@ -310,58 +348,120 @@ def timbrado_enviar():
         return jsonify({'error': timbrado.MENSAGENS['nao_pdf']}), 400
     conteudo = arquivo.read(timbrado.TAMANHO_MAXIMO + 1)
     try:
+        if timbrado.eh_imagem(conteudo):     # PNG ou JPG: vira uma página A4 em PDF
+            conteudo = timbrado.imagem_para_pdf(conteudo)
         topo, base = timbrado.margens_sugeridas(conteudo)
     except timbrado.TimbradoInvalido as erro:
         return jsonify({'error': timbrado.MENSAGENS.get(erro.codigo, timbrado.MENSAGENS['invalido'])}), 422
     nome = (arquivo.filename or 'timbrado.pdf').rsplit('/', 1)[-1].rsplit('\\', 1)[-1][:120]
     contas.salvar_timbrado(u['id'], conteudo, nome, topo, base)
-    return jsonify({'ok': True, 'timbrado': _meta_do_timbrado(contas.timbrado_de(u['id']))}), 201
+    contas.salvar_receituario(u['id'], 'modelo')
+    return jsonify({'ok': True, **_estado_do_receituario(u['id'])}), 201
+
+
+@auth_bp.route('/auth/timbrado/modo', methods=['POST'])
+@exigir_login
+def timbrado_modo():
+    """Corpo: {modo: padrao | modelo | montado | papel}."""
+    from src.utils import receituario
+    u = _medico_do_receituario()
+    if not u:
+        return jsonify({'error': MSG_RECEITUARIO}), 403
+    try:
+        receituario.escolher_modo(contas, u['id'], _corpo().get('modo'))
+    except receituario.ReceituarioInvalido as erro:
+        return _erro_do_receituario(erro)
+    return jsonify({'ok': True, **_estado_do_receituario(u['id'])})
+
+
+@auth_bp.route('/auth/timbrado/montado', methods=['POST'])
+@exigir_login
+def timbrado_montado():
+    """Formulário (multipart): nome, registro, especialidade, endereco, contato, tema, alinhamento, cor,
+    `logo` (imagem, opcional) e `remover_logo`. Gera o fundo, mede a área livre e passa a usá-lo."""
+    from src.utils import receituario
+    u = _medico_do_receituario()
+    if not u:
+        return jsonify({'error': MSG_RECEITUARIO}), 403
+    request.max_content_length = receituario.LOGO_MAXIMO + 64 * 1024
+    try:
+        campos = request.form.to_dict()
+        arquivo = request.files.get('logo')
+    except Exception:
+        return _erro_do_receituario(receituario.ReceituarioInvalido('logo'), 413)
+    logo = arquivo.read(receituario.LOGO_MAXIMO + 1) if arquivo and arquivo.filename else None
+    from src.utils import timbrado
+    try:
+        receituario.salvar_montado(contas, u['id'], campos, logo, remover_logo=campos.get('remover_logo') == '1')
+    except (receituario.ReceituarioInvalido, timbrado.TimbradoInvalido) as erro:
+        return _erro_do_receituario(erro)
+    return jsonify({'ok': True, **_estado_do_receituario(u['id'])})
 
 
 @auth_bp.route('/auth/timbrado/margens', methods=['POST'])
 @exigir_login
 def timbrado_margens():
-    from src.utils import timbrado
-    u = usuario_atual()
-    t = contas.timbrado_de(u['id']) if contas.pode_ter_credenciamento(u) else None
-    if not t:
-        return jsonify({'error': 'Envie o timbrado antes de ajustar as margens.'}), 404
+    from src.utils import receituario, timbrado
+    u = _medico_do_receituario()
+    if not u or receituario.modo_de(contas, u['id']) == 'padrao':
+        return jsonify({'error': 'Escolha um receituário antes de ajustar os espaços.'}), 404
     d = _corpo()
     try:
-        topo, base = timbrado.conferir_margens(t['arquivo'], d.get('margem_topo'), d.get('margem_base'))
-    except timbrado.TimbradoInvalido as erro:
-        return jsonify({'error': timbrado.MENSAGENS.get(erro.codigo, timbrado.MENSAGENS['invalido'])}), 400
-    contas.ajustar_margens_do_timbrado(u['id'], topo, base)
-    return jsonify({'ok': True, 'timbrado': _meta_do_timbrado(contas.timbrado_de(u['id']))})
+        receituario.ajustar_margens(contas, u['id'], d.get('margem_topo'), d.get('margem_base'))
+    except (timbrado.TimbradoInvalido, receituario.ReceituarioInvalido) as erro:
+        return _erro_do_receituario(erro)
+    return jsonify({'ok': True, **_estado_do_receituario(u['id'])})
 
 
 @auth_bp.route('/auth/timbrado/remover', methods=['POST'])
 @exigir_login
 def timbrado_remover():
-    contas.remover_timbrado(usuario_atual()['id'])
-    return jsonify({'ok': True})
+    """Apaga o modelo enviado; se era ele que valia, os pedidos voltam ao modelo do Evidēns."""
+    from src.utils import receituario
+    uid = usuario_atual()['id']
+    era_o_modelo = receituario.modo_de(contas, uid) == 'modelo'
+    contas.remover_timbrado(uid)
+    if era_o_modelo:
+        contas.salvar_receituario(uid, 'padrao')
+    return jsonify({'ok': True, **(_estado_do_receituario(uid) if _medico_do_receituario() else {})})
+
+
+def _sem_cache(resposta):
+    resposta.headers['Cache-Control'] = 'no-store'
+    return resposta
+
+
+@auth_bp.route('/auth/timbrado/imagem')
+@exigir_login
+def timbrado_imagem():
+    """Imagem do fundo do receituário atual, para ajustar os espaços arrastando as linhas."""
+    import io
+    from flask import send_file
+    from src.utils import receituario
+    u = _medico_do_receituario()
+    if not u:
+        return jsonify({'error': MSG_RECEITUARIO}), 403
+    png = receituario.imagem(receituario.para_o_pdf(contas, u['id']))
+    return _sem_cache(send_file(io.BytesIO(png), mimetype='image/png', download_name='receituario.png'))
 
 
 @auth_bp.route('/auth/timbrado/previa')
 @exigir_login
 def timbrado_previa():
-    """Pedido de exemplo (paciente fictício) sobre o timbrado, para o médico conferir a área livre."""
+    """Pedido de exemplo (paciente fictício) no receituário atual, para o médico conferir a área livre."""
     import io
     from flask import send_file
-    from src.utils import pdf_minutas, timbrado
-    u = usuario_atual()
-    t = contas.timbrado_de(u['id']) if contas.pode_ter_credenciamento(u) else None
-    if not t:
-        return jsonify({'error': 'Nenhum timbrado enviado.'}), 404
+    from src.utils import pdf_minutas, receituario
+    u = _medico_do_receituario()
+    if not u:
+        return jsonify({'error': MSG_RECEITUARIO}), 403
     exemplo = [{'titulo': titulo} for titulo in (
         'Hemograma completo com plaquetas', 'Glicose, soro', 'Hemoglobina glicada (HbA1c), soro',
         'Colesterol total e frações, soro', 'Creatinina, soro', 'Hormônio Tireoestimulante (TSH), soro')]
     pdf = pdf_minutas.gerar_pdf_exames_laboratoriais(
         {'nome': 'Paciente de exemplo', 'idade': 50, 'sexo': 'feminino'}, exemplo,
-        responsavel=pdf_minutas.responsavel_de(u), timbrado=timbrado.para_o_pdf(t))
-    resposta = send_file(io.BytesIO(pdf), mimetype='application/pdf', download_name='previa-timbrado.pdf')
-    resposta.headers['Cache-Control'] = 'no-store'
-    return resposta
+        responsavel=pdf_minutas.responsavel_de(u), timbrado=receituario.para_o_pdf(contas, u['id']))
+    return _sem_cache(send_file(io.BytesIO(pdf), mimetype='application/pdf', download_name='previa-receituario.pdf'))
 
 
 @auth_bp.route('/auth/configurar', methods=['POST'])

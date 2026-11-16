@@ -448,7 +448,7 @@ def _folha_de_pedido(pdf, dados_paciente, exames, numerar=True):
 def _com_timbrado(pdf, timbrado, paginas=None):
     """Bytes do PDF; com timbrado, as `paginas` primeiras (o pedido) ganham o fundo do médico."""
     conteudo = pdf.bytes()
-    if not timbrado:
+    if not timbrado or not timbrado.get('arquivo'):   # papel já timbrado: só as margens, sem fundo
         return conteudo
     from src.utils import timbrado as papel
     return papel.aplicar(conteudo, timbrado['arquivo'], paginas)

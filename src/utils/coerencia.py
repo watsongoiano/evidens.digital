@@ -187,11 +187,12 @@ def inferir(data, egfr=None, gestante=False, recusados=(), escolhidas=()):
         marcar(comorbidades, 'comorbidades', 'dislipidemia', 'uso de hipolipemiante')
     if 'anti_hipertensivos' in medicacoes:
         marcar(comorbidades, 'comorbidades', 'hipertensao', 'uso de anti-hipertensivo')
-    pa = classificar_pa(data.get('pas'), data.get('pad'))
+    # Na gestação a PA não marca hipertensão: antes de 20 semanas é provável HAS crônica a confirmar; depois,
+    # hipertensão gestacional ou pré-eclâmpsia (ACOG PB 222). As orientações vêm de src/utils/prenatal.py.
+    pa = None if gestante else classificar_pa(data.get('pas'), data.get('pad'))
     if pa:
-        # Fora da gestação, corte AHA/ACC 2025 (≥ 130/80). Na gestação, ≥ 140/90.
-        # (estágio 1 com um componente faltando pode ser 2 na gestação; só marca o que é certo)
-        limiar = pa['categoria'] == 'estagio2' or (pa['categoria'] == 'estagio1' and not gestante)
+        # Corte AHA/ACC 2025 (≥ 130/80).
+        limiar = pa['categoria'] in ('estagio2', 'estagio1')
         if limiar:
             marcar(comorbidades, 'comorbidades', 'hipertensao',
                    f"PA {_pa_texto(data)} = {pa['rotulo']} (AHA/ACC 2025); confirmar com MRPA ou MAPA")

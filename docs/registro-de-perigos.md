@@ -24,7 +24,12 @@ Os testes ficam em `tests/` e rodam com `python -m pytest`.
 | P-08 | Conteúdo enviado pelo navegador interpretado como HTML na geração do PDF | Templates sem escape; delimitador multipart fixo | Escape automático nos templates; delimitador aleatório por requisição; limites de quantidade e tamanho; erro do serviço de PDF não é repassado ao cliente | `test_pdf.py` |
 | P-09 | PDF de vacinas impresso a partir de uma lista que não corresponde mais ao formulário | A lista ficava na tela depois de o formulário mudar. A segunda conferência só lia a resposta da triagem: com adalimumabe na lista e a triagem "Não", a febre amarela era impressa | A página descarta o resultado quando um dado clínico muda; o servidor confere de novo a triagem no pedido de PDF, agora com as comorbidades, as medicações (com dose, duração e peso) e a mesma implicação de imunossupressão das recomendações, e recusa a lista se houver vacina não liberada | `test_pdf.py` (segunda linha de defesa); `test_vacinas_especiais.py::test_pdf_recusa_viva_com_imunossupressao_das_listas` |
 | P-10 | Dados de paciente gravados sem intenção | O endpoint tentava gravar nome e dados clínicos em banco a cada consulta | Gravação removida; o nome do paciente não é mais enviado com o pedido de recomendações e é opcional | `test_site.py::test_motor_nao_tem_acesso_a_banco_de_dados`; `test_site.py::test_nome_do_paciente_e_opcional_e_nao_vai_com_as_recomendacoes` |
+| P-24 | Falso negativo silencioso por dado ausente | Fumante sem maços-ano informados não recebia rastreio de câncer de pulmão nem aviso de que faltava o dado; ex-fumante sem "anos desde que parou" era tratado como se tivesse acabado de parar | `src/utils/rastreio_cancer.py`: maços-ano ou anos desde a cessação ausentes não viram zero; a TC de baixa dose aparece em `nao_incluidas` como dados insuficientes, com o que falta (USPSTF 2021 / SBCT-SBPT-CBR 2024) | `test_rastreio_cancer.py::test_tc_de_baixa_dose_e_dado_ausente`; vinheta `h60_fumante_sem_macos_ano` |
 | P-11 | Telas antigas e arquivos internos acessíveis por URL | Qualquer `.html`, `.js` ou `.json` do repositório era servido | Lista explícita de arquivos publicados em `api/index.py` | `test_site.py::test_arquivos_internos_e_telas_antigas_nao_sao_servidos` |
+| P-G1 | Hipertensão na gestação tratada como HAS ambulatorial, sem alerta de pré-eclâmpsia nem de faixa grave (parte gestacional de P-17) | Na gestante, PA ≥ 140/90 marcava "HAS estágio 2 (AHA/ACC)" e disparava MAPA, ecocardiograma e exames "basais"; 165/112 não gerava alerta | Na gestação a PA não marca HAS (`coerencia.inferir`); `prenatal.classificar_pa` usa ≥ 140/90 e ≥ 160/110; com ≥ 20 semanas os exames de pré-eclâmpsia entram como investigação "Agora" (ACOG PB 222); faixa grave vira orientação urgente no topo (ACOG CO 767); itens de HAS de fora da gestação saem (`prenatal.fora_da_gestacao`) | `test_gestacao_e_saude_da_mulher.py` (E-01); `test_coerencia.py::test_pa_na_gestacao_nao_marca_hipertensao` |
+| P-G2 | Prevenção de pré-eclâmpsia omitida ou fora da janela | Lúpus, SAF e doença renal não contavam como alto risco; fatores moderados ignorados; AAS sugerido com 34 semanas, dentro da descrição de um exame de urina | `prenatal.fatores_pre_eclampsia` (USPSTF 2021; FEBRASGO 2023) e `prenatal.orientacao_aas` por idade gestacional (não iniciar depois de 28 semanas), com aviso de divergência de dose | `test_gestacao_e_saude_da_mulher.py` (E-02, E-04, E-05) |
+| P-G3 | Rastreio grau B omitido em mulheres jovens | Clamídia/gonococo só no pré-natal e no HIV | `prenatal.clamidia_fora_da_gestacao`: mulheres sexualmente ativas até 24 anos (USPSTF 2021, B); "não informado" não vale como "não"; aviso de divergência com o MS | `test_gestacao_e_saude_da_mulher.py` (E-03) |
+| P-G4 | Regra de fora da gestação aplicada à gestante; exame repetido com outro nome (parte gestacional de P-18) | Carga viral "a cada 6 meses" na gestante com HIV; cálcio/vitamina D do diabético; HIV, HCV, HBsAg e toxoplasmose do check-up geral repetidos; adiados em dobro | `hiv.recomendar(gestante=True)` (FEBRASGO 2025); `prenatal.fora_da_gestacao` e `prenatal.adiar` (um aviso por título) | `test_gestacao_e_saude_da_mulher.py` (E-06, E-09, E-13) |
 
 ## Parciais
 
@@ -32,6 +37,7 @@ Os testes ficam em `tests/` e rodam com `python -m pytest`.
 |---|---|---|
 | P-12 | Serviço de PDF externo aceitava requisições de qualquer origem | Resolvido: os PDFs passaram a ser gerados dentro da própria função; não há mais serviço externo |
 | P-13 | O PDF imprime a lista que o navegador envia | O conteúdo é validado, limitado e escapado, e as vacinas atenuadas são conferidas de novo, com a imunossupressão implicada pelas comorbidades e medicações enviadas. O servidor ainda não recalcula as recomendações a partir dos dados do paciente |
+| P-16 | Rastreio sem idade de parada | Rastreamento de câncer: resolvido. PSA só de 55 a 69 anos por decisão compartilhada (40-69 com BRCA, 45-69 com pai ou irmão acometido) e, a partir de 70, em `nao_incluidas` como não recomendado (USPSTF D); mamografia até 74 anos (também na história familiar); colonoscopia e FIT até 75 (também na história familiar); vigilância por síndrome hereditária de câncer até 75; depois disso, orientação de decisão individual pela expectativa de vida (`test_rastreio_cancer.py`; vinhetas `h69`, `h70`, `h76`, `h88`). Continua aberto fora do câncer: Lp(a) aos 88 anos |
 | P-14 | Nome do paciente trafega até o servidor e o serviço de PDF | Passou a ser opcional e só acompanha o pedido de PDF. Continua saindo do navegador quando informado |
 
 ## Abertos
@@ -39,15 +45,13 @@ Os testes ficam em `tests/` e rodam com `python -m pytest`.
 | ID | Perigo | Exemplo observado |
 |---|---|---|
 | P-15 | Excesso de exames em pessoa assintomática | Homem de 25 anos hígido recebe glicemia, HbA1c, TOTG, perfil lipídico, Lp(a), creatinina, HIV, HCV e ECG |
-| P-16 | Rastreio sem idade de parada | Homem de 88 anos recebe PSA e Lp(a) |
 | P-17 | Diagnóstico inferido de dado isolado | Uma PA de 132/80 marca hipertensão e dispara MAPA, ecocardiograma, potássio e ácido úrico |
 | P-18 | Rastreio da própria doença em quem já tem o diagnóstico; item duplicado | Diabético recebe o rastreio de diabetes; albuminúria aparece duas vezes com nomes diferentes |
 | P-19 | Vacina sugerida a quem já está vacinado | Não há entrada de histórico vacinal |
-| P-20 | Regra diferente da fonte que ela cita | Aneurisma de aorta exige DPOC ou 10 maços-ano; PSA anual a partir dos 50; título de HPV molecular com texto de citologia trienal; densitometria bienal |
+| P-20 | Regra diferente da fonte que ela cita | Aneurisma de aorta exige DPOC ou 10 maços-ano; título de HPV molecular com texto de citologia trienal; densitometria bienal |
 | P-21 | Grau de evidência atribuído sem correspondência com a fonte | Graus digitados à mão em cada regra |
 | P-22 | Diretriz desatualizada | As fontes citadas são de 2024 e 2025; não há data de revisão por regra |
 | P-23 | Dado relevante coletado e ignorado | País, álcool, doença renal, história familiar de câncer e de cardiopatia |
-| P-24 | Falso negativo silencioso por dado ausente | Fumante sem maços-ano informados não recebe rastreio de câncer de pulmão nem aviso de que falta o dado |
 
 ## Critérios clínicos da triagem de vacinas
 

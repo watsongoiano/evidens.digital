@@ -344,7 +344,8 @@ def test_vsr_a_criterio_nao_aparece_sem_a_condicao(client):
 
 def test_covid_na_gestante_uma_dose_a_cada_gestacao(client):
     v = _vacinas(_consultar(client, idade=30, sexo='feminino', gestante='sim', idade_gestacional='20'))
-    assert v[COVID]['subtitulo'] == 'Gestante | 1 dose a cada gestação'
+    assert v[COVID]['subtitulo'].startswith('Gestante | 1 dose a cada gestação')
+    assert '6 meses desde a última dose' in v[COVID]['descricao']
 
 
 def test_covid_no_imunocomprometido_e_no_hiv_a_cada_6_meses(client):

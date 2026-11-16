@@ -57,26 +57,68 @@
     </form>
   </section>
   <section data-timbrado style="display: none;">
-    <h2 class="text-[22px] font-light tracking-tight mt-12">Papel timbrado</h2>
-    <p class="text-[15px] text-ink/65 leading-relaxed mt-3">Envie o PDF do receituário que você usa no consultório (só o fundo: logo, cabeçalho e rodapé). Os pedidos de exames e a prescrição de vacinas passam a sair nele, escritos no espaço entre o cabeçalho e o rodapé. O timbrado fica só na sua conta. A guia SP/SADT continua no formato padrão.</p>
+    <h2 class="text-[22px] font-light tracking-tight mt-12">Receituário</h2>
+    <p class="text-[15px] text-ink/65 leading-relaxed mt-3">Escolha como os pedidos de exames e a prescrição de vacinas saem impressos. Vale só para a sua conta. A guia SP/SADT continua no formato padrão.</p>
     <div class="secao mt-5 flex flex-col gap-5">
-      <label for="timbradoPdf" data-soltar class="flex flex-col items-center justify-center gap-2 text-center rounded-2xl border-2 border-dashed border-teal/30 bg-mist/40 px-5 py-8 cursor-pointer hover:border-teal transition">
-        <i class="fa-solid fa-file-arrow-up text-teal text-[22px]"></i>
-        <span class="text-[15px] text-ink/80">Arraste o PDF do timbrado aqui ou clique para escolher</span>
-        <span class="text-[12px] text-ink/50">PDF de até 3 MB; vale a 1ª página</span>
-      </label>
-      <input type="file" id="timbradoPdf" accept="application/pdf,.pdf" class="sr-only">
-      <div data-timbrado-atual style="display: none;" class="flex flex-col gap-4">
-        <p class="text-[14px] text-ink/70"><i class="fa-solid fa-file-pdf text-teal mr-1.5"></i><span data-timbrado-nome></span></p>
+      <div class="opcoes" role="radiogroup" aria-label="Modelo do receituário" data-modos>
+        <button type="button" class="opcao" role="radio" data-modo="padrao">Modelo do Evidēns</button>
+        <button type="button" class="opcao" role="radio" data-modo="modelo">Tenho um modelo</button>
+        <button type="button" class="opcao" role="radio" data-modo="montado">Montar o meu</button>
+        <button type="button" class="opcao" role="radio" data-modo="papel">Imprimo em papel já timbrado</button>
+      </div>
+
+      <div data-bloco="modelo" class="bloco-condicional flex flex-col gap-4" hidden>
+        <p class="text-[14px] text-ink/70">Envie o receituário que você já usa, só o fundo (logo, cabeçalho e rodapé). Se ele estiver no Word, salve como PDF antes. Medimos sozinhos onde terminam o cabeçalho e o rodapé.</p>
+        <label for="timbradoPdf" data-soltar class="flex flex-col items-center justify-center gap-2 text-center rounded-2xl border-2 border-dashed border-teal/30 bg-white px-5 py-7 cursor-pointer hover:border-teal transition">
+          <i class="fa-solid fa-file-arrow-up text-teal text-[22px]"></i>
+          <span class="text-[15px] text-ink/80">Arraste o seu modelo aqui ou clique para escolher</span>
+          <span class="text-[12px] text-ink/50">PDF, PNG ou JPG de até 3 MB; vale a 1ª página</span>
+        </label>
+        <input type="file" id="timbradoPdf" accept="application/pdf,.pdf,image/png,image/jpeg,.png,.jpg,.jpeg" class="sr-only">
+        <div data-timbrado-atual class="flex flex-wrap items-center gap-3" hidden>
+          <p class="text-[14px] text-ink/70"><i class="fa-solid fa-file-lines text-teal mr-1.5"></i><span data-timbrado-nome></span></p>
+          <button type="button" class="text-[14px] text-ink/55 underline underline-offset-2" data-timbrado-remover>Remover modelo</button>
+        </div>
+      </div>
+
+      <form data-bloco="montado" class="bloco-condicional flex flex-col gap-4" hidden novalidate>
+        <p class="text-[14px] text-ink/70">Monte o cabeçalho e o rodapé. Depois de salvar, a prévia abaixo mostra como ficou.</p>
+        <div class="grade">
+          <div class="campo sm:col-span-2"><label for="rec_nome">Nome no cabeçalho</label><input type="text" id="rec_nome" name="nome" maxlength="80" required></div>
+          <div class="campo"><label for="rec_registro">Registro (CRM, RQE)</label><input type="text" id="rec_registro" name="registro" maxlength="60" placeholder="CRM-GO 12345 · RQE 6789"></div>
+          <div class="campo"><label for="rec_especialidade">Especialidade</label><input type="text" id="rec_especialidade" name="especialidade" maxlength="80"></div>
+          <div class="campo sm:col-span-2"><label for="rec_endereco">Endereço (rodapé)</label><input type="text" id="rec_endereco" name="endereco" maxlength="140"></div>
+          <div class="campo sm:col-span-2"><label for="rec_contato">Telefone, e-mail ou site (rodapé)</label><input type="text" id="rec_contato" name="contato" maxlength="120"></div>
+          <div class="campo"><label for="rec_tema">Tema</label><select id="rec_tema" name="tema"><option value="linha">Linha sob o cabeçalho</option><option value="faixa">Faixa colorida</option><option value="simples">Simples</option></select></div>
+          <div class="campo"><label for="rec_alinhamento">Alinhamento</label><select id="rec_alinhamento" name="alinhamento"><option value="esquerda">À esquerda</option><option value="centro">Centralizado</option><option value="direita">À direita</option></select></div>
+          <div class="campo"><label for="rec_cor">Cor</label><select id="rec_cor" name="cor"><option value="teal">Azul-petróleo</option><option value="grafite">Grafite</option><option value="azul">Azul</option><option value="verde">Verde</option><option value="vinho">Vinho</option></select></div>
+          <div class="campo"><label for="rec_logo">Logo (PNG ou JPG, até 1 MB)</label><input type="file" id="rec_logo" name="logo" accept="image/png,image/jpeg,.png,.jpg,.jpeg"></div>
+        </div>
+        <label class="flex items-center gap-3 text-[14px] text-ink/75 cursor-pointer" for="rec_remover_logo" data-tem-logo hidden><input type="checkbox" id="rec_remover_logo" name="remover_logo" value="1" class="w-4 h-4 accent-teal">Remover o logo atual</label>
+        <div><button type="submit" class="btn-escuro">Salvar receituário <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button></div>
+      </form>
+
+      <div data-bloco="papel" class="bloco-condicional" hidden>
+        <p class="text-[14px] text-ink/70">O pedido sai sem fundo, só com o texto, para imprimir no papel timbrado que fica na impressora do consultório. Ajuste abaixo onde termina o cabeçalho e onde começa o rodapé do seu papel.</p>
+      </div>
+
+      <div data-ajuste class="flex flex-col gap-4" hidden>
+        <p class="campo-rotulo">Espaço do pedido</p>
+        <p class="text-[13px] text-ink/60 -mt-2">Arraste as duas linhas para onde terminam o cabeçalho e o rodapé. O pedido é escrito na área clara entre elas.</p>
+        <div class="relative w-full max-w-[360px] select-none touch-none border border-ink/15 rounded-lg overflow-hidden bg-white" data-folha>
+          <img alt="Prévia do fundo do receituário" class="block w-full" data-folha-img>
+          <div class="absolute inset-x-0 top-0 bg-teal/15 pointer-events-none" data-sombra="topo"></div>
+          <div class="absolute inset-x-0 bottom-0 bg-teal/15 pointer-events-none" data-sombra="base"></div>
+          <div class="absolute inset-x-0 h-6 -mt-3 cursor-ns-resize flex items-center" role="slider" tabindex="0" aria-label="Fim do cabeçalho (mm)" data-linha="topo"><span class="block w-full border-t-2 border-dashed border-teal"></span></div>
+          <div class="absolute inset-x-0 h-6 -mb-3 cursor-ns-resize flex items-center" role="slider" tabindex="0" aria-label="Início do rodapé (mm)" data-linha="base"><span class="block w-full border-t-2 border-dashed border-teal"></span></div>
+        </div>
         <div class="grade">
           <div class="campo"><label for="margem_topo">Espaço do cabeçalho (mm)</label><input type="number" id="margem_topo" step="1" min="10" inputmode="numeric"></div>
           <div class="campo"><label for="margem_base">Espaço do rodapé (mm)</label><input type="number" id="margem_base" step="1" min="10" inputmode="numeric"></div>
         </div>
-        <p class="text-[12px] text-ink/55 -mt-2">Medimos automaticamente onde termina o cabeçalho e onde começa o rodapé. Confira na prévia; se o texto encostar no timbrado, aumente o espaço.</p>
         <div class="flex flex-wrap gap-3">
           <button type="button" class="btn-escuro" data-timbrado-margens>Salvar espaços</button>
-          <a target="_blank" rel="noopener" class="btn-claro" data-timbrado-previa><i class="fa-solid fa-eye text-[11px]"></i>Ver prévia</a>
-          <button type="button" class="btn-claro" data-timbrado-remover>Remover timbrado</button>
+          <a target="_blank" rel="noopener" class="btn-claro" data-timbrado-previa><i class="fa-solid fa-eye text-[11px]"></i>Ver prévia do pedido</a>
         </div>
       </div>
       <div data-erro role="alert" class="aviso aviso-erro" style="display: none;"></div>
