@@ -162,6 +162,79 @@ def mensagem_de_agradecimento(usuario, url_site):
     return 'Obrigado por testar o Evidēns', corpo
 
 
+def mensagem_de_novidades(usuario, url_site):
+    """Comunicado de novembro de 2026, escrito pelo Dr. Rodolfo: boas-vindas e o resumo das atualizações.
+
+    Só promete o que o sistema faz: a guia SP/SADT sai preenchida na parte da solicitação (a autorização é da
+    operadora) e o médico cadastra o credenciamento, nunca a senha do plano."""
+    primeiro_nome = _primeiro_nome(usuario)
+    corpo = '\n'.join([
+        f'Olá, {primeiro_nome}.' if primeiro_nome else 'Olá.',
+        '',
+        'Aqui quem fala é o Rodolfo C. Frota, criador do Evidēns! Fico feliz com os mais de 100 médicos que se '
+        'cadastraram nos últimos dias. Espero que, além de simplificar a nossa rotina, o Evidēns nos ajude a '
+        'reduzir o desperdício com exames mal indicados e a lembrar das indicações que acabam esquecidas.',
+        '',
+        'Passo para contar, em poucas linhas, as atualizações do fim de semana:',
+        '',
+        '- Função renal automática: TFG pela CKD-EPI 2021, estágio da DRC (KDIGO 2024) e risco de falência '
+        'renal em 2 e 5 anos (KFRE), calculados com os dados informados.',
+        '- Exames anteriores: escolha entre os 42 exames mais comuns, digite o resultado ou anexe o laudo em '
+        'PDF, que preenche nomes, datas e valores. O Evidēns compara com o que está indicado e só pede de novo '
+        'o que já venceu pela periodicidade das diretrizes.',
+        '- Guia SP/SADT no padrão TISS 4 e receituário com o seu modelo: cadastre no painel da sua conta os '
+        'dados do seu credenciamento em cada plano (operadora, código do prestador, CBO) e o seu timbrado. A '
+        'guia sai preenchida na parte da solicitação, pronta para a autorização da operadora.',
+        '- Orientações mais enxutas: detalhes importantes para a decisão no consultório, que abrem com um toque.',
+        '- Revisão completa das regras: conferimos todas as recomendações contra as diretrizes de referência, '
+        'testadas em mais de 6.000 casos simulados, e corrigimos pequenos erros.',
+        '',
+        'Nas próximas semanas vêm novidades sugeridas por vocês, como a APAC de exames de imagem e o cálculo do '
+        'risco cardiovascular pré-operatório.',
+        '',
+        'Lembrando que as recomendações são sugestões para a sua avaliação: revise e individualize sempre. '
+        'Fiquem à vontade para responder este e-mail com qualquer feedback.',
+        '',
+        f'Para conferir, é só entrar em {url_site}/login',
+        '',
+        'Um abraço e uma ótima semana!',
+        '',
+        'Rodolfo C. Frota',
+        'CRM-GO 26.815',
+        'Criador do Evidēns',
+    ])
+    return 'Evidēns: novidades do fim de semana', corpo
+
+
+def enviar_lote(mensagens):
+    """Envia vários e-mails numa chamada (API de lote da Resend, até 100). ``mensagens``: (para, assunto, texto).
+    Devolve ``(ok, detalhe, incerto)``; nunca levanta exceção. ``incerto``: a falha não garante que nada saiu
+    (rede caiu, tempo esgotado ou erro 5xx depois de a Resend receber o lote)."""
+    chave = (os.environ.get('RESEND_API_KEY') or '').strip()
+    if not chave:
+        return False, 'RESEND_API_KEY não configurada.', False
+    if not mensagens:
+        return True, 'nada a enviar', False
+    remetente = (os.environ.get('AVISO_CADASTRO_DE') or '').strip() or REMETENTE_PADRAO
+    contato = email_de_contato()
+    corpo = json.dumps([{'from': remetente, 'to': [para], 'subject': assunto, 'text': texto,
+                         **({'reply_to': contato} if contato else {})} for para, assunto, texto in mensagens[:100]]).encode('utf-8')
+    pedido = urllib.request.Request(URL_RESEND + '/batch', data=corpo, method='POST', headers={
+        'Authorization': f'Bearer {chave}', 'Content-Type': 'application/json', 'User-Agent': 'evidens-digital/1.0'})
+    try:
+        with urllib.request.urlopen(pedido, timeout=15) as resposta:
+            return 200 <= resposta.status < 300, f'HTTP {resposta.status}', False
+    except urllib.error.HTTPError as erro:
+        try:
+            detalhe = json.loads(erro.read().decode('utf-8', 'replace')).get('message', '')
+        except Exception:
+            detalhe = ''
+        # 4xx: a Resend recusou o lote (nada saiu). 5xx: pode ter saído.
+        return False, f'HTTP {erro.code} {detalhe}'.strip()[:300], erro.code >= 500
+    except Exception as erro:  # rede, tempo esgotado: o lote pode ter chegado à Resend
+        return False, type(erro).__name__, True
+
+
 def mensagem_de_aprovacao(usuario, url_site, reativada=False):
     """Aviso de que o acesso foi liberado: conta aprovada ou, se estava bloqueada, reativada."""
     primeiro_nome = _primeiro_nome(usuario)

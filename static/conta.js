@@ -488,6 +488,47 @@
         if (total) mostrar(ok, 'Agradecimento enviado a ' + (total === 1 ? '1 conta' : total + ' contas') + '.');
         if (motivo) mostrar(erro, motivo + (pendentesAg ? ' Restam ' + pendentesAg + ' sem receber; tente de novo em instantes.' : ''));
       });
+      // Comunicado de novidades: sai sozinho pelo cron na data marcada; o botão envia antes, se preciso.
+      const estadoCo = aviso.querySelector('[data-comunicado-estado]');
+      const testeCo = aviso.querySelector('[data-comunicado-teste]');
+      const enviarCo = aviso.querySelector('[data-comunicado-enviar]');
+      let comunicado = null, confirmarCo = false, ligadoCo = false;
+      function pintarComunicado() {
+        confirmarCo = false;
+        if (!comunicado) return;
+        const n = comunicado.pendentes, pessoas = n === 1 ? '1 conta' : n + ' contas';
+        const quando = new Date(comunicado.a_partir).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+        estadoCo.textContent = (n ? 'Novidades: ' + pessoas + ' a receber. Envio automático a partir de ' + quando + '.'
+                                  : 'Novidades: todas as contas aprovadas já receberam.')
+          + (comunicado.cron ? '' : ' O envio automático precisa da variável CRON_SECRET na Vercel; sem ela, use o botão.');
+        enviarCo.textContent = n ? 'Enviar novidades agora a ' + pessoas : 'Enviar novidades agora';
+        enviarCo.disabled = !ligadoCo || !n;
+        testeCo.disabled = !ligadoCo;
+      }
+      testeCo.addEventListener('click', async () => {
+        mostrar(erro, ''); mostrar(ok, '');
+        testeCo.disabled = true;
+        const { resposta, dados } = await enviar('/api/admin/comunicado/teste');
+        testeCo.disabled = false;
+        if (!resposta.ok) { mostrar(erro, (dados && dados.error) || 'Não foi possível enviar o teste.'); return; }
+        mostrar(ok, 'Novidades de teste enviadas a ' + dados.destinatarios.join(', ') + '.');
+      });
+      enviarCo.addEventListener('click', async () => {
+        mostrar(erro, ''); mostrar(ok, '');
+        if (!confirmarCo) { confirmarCo = true; enviarCo.textContent = 'Confirmar: enviar agora'; return; }
+        enviarCo.disabled = true; testeCo.disabled = true;
+        let total = 0, motivo = '';
+        while (true) {
+          const { resposta, dados } = await enviar('/api/admin/comunicado');
+          if (!resposta.ok) { motivo = (dados && dados.error) || 'Não foi possível enviar.'; break; }
+          total += dados.enviados; comunicado.pendentes = dados.restantes;
+          if (dados.falhas) { motivo = 'Falha no envio: ' + (dados.motivo || 'erro desconhecido') + '.'; break; }
+          if (!dados.restantes || !dados.enviados) break;
+        }
+        pintarComunicado();
+        if (total) mostrar(ok, 'Novidades enviadas a ' + (total === 1 ? '1 conta' : total + ' contas') + '.');
+        if (motivo) mostrar(erro, motivo);
+      });
       fetch('/api/admin/aviso', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(d => {
         if (!d) { estado.textContent = 'Não foi possível verificar o aviso por e-mail.'; return; }
         estadoBv.textContent = d.boas_vindas
@@ -496,6 +537,8 @@
         botaoBv.disabled = !d.boas_vindas;
         pendentesAg = d.agradecimento_pendentes || 0;
         pintarAgradecimento(d.boas_vindas);
+        comunicado = d.comunicado || null; ligadoCo = !!d.boas_vindas;
+        pintarComunicado();
         if (!d.configurado) {
           estado.textContent = 'Desligado. Para receber um e-mail a cada conta nova, cadastre a variável RESEND_API_KEY na Vercel (passo a passo em docs/deploy.md).';
           return;
