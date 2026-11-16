@@ -1673,6 +1673,16 @@ def _ler_guia_do_plano(usuario):
             'indicacao': pdf_minutas.indicacao_clinica(indicacao)}
 
 
+def _ler_justificativa():
+    """Justificativa (indicação clínica) do pedido de exames: vai no pedido e na guia. Não é gravada."""
+    texto = (request.get_json(silent=True) or {}).get('justificativa')
+    if texto is None:
+        return ''
+    if not isinstance(texto, str) or len(texto) > 300:
+        raise PedidoDePdfInvalido('Justificativa inválida ou longa demais')
+    return ' '.join(texto.split())[:150]
+
+
 def _timbrado_do_medico(usuario):
     """{'timbrado': ...} com o receituário do médico (modelo, montado ou papel já timbrado); um receituário
     que não abre não impede o pedido (sai no modelo do Evidēns)."""
@@ -1742,8 +1752,13 @@ def _gerar_pdf(categoria, nome_gerador, prefixo_arquivo, mensagem_vazia, conferi
         usuario = usuario_atual()
         extras = {}
         if categoria in ('laboratorio', 'imagem'):
+            justificativa = _ler_justificativa()
+            if justificativa:
+                extras['justificativa'] = justificativa
             guia = _ler_guia_do_plano(usuario)
             if guia:
+                if justificativa and not (request.get_json(silent=True) or {}).get('guia', {}).get('indicacao'):
+                    guia['indicacao'] = pdf_minutas.indicacao_clinica(justificativa)
                 extras['guia'] = guia
         extras.update(_timbrado_do_medico(usuario))
         sessao = _sessao_para_assinar(usuario)

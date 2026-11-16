@@ -979,13 +979,17 @@
       </div>
       <div id="acrescimoItens" class="flex flex-wrap gap-2 mt-4"></div>
     </div>
+    <!-- Justificativa do pedido: vai no pedido e na guia do plano (campo 23); vem sugerida e o médico reescreve. -->
+    <div id="justificativaPainel" class="campo mt-5" style="display: none;">
+      <label for="guiaIndicacao">Justificativa (indicação clínica)</label>
+      <textarea id="guiaIndicacao" rows="2" maxlength="150" autocomplete="off"></textarea>
+    </div>
 
     <div id="guiaPainel" class="mt-6 pt-5 border-t border-ink/10" style="display: none;">
       <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-3">GUIA DO PLANO DE SAÚDE</p>
       <div class="grade">
         <div class="campo sm:col-span-2"><label for="guiaPlano">Plano do paciente</label><select id="guiaPlano"><option value="">Particular (sem guia)</option></select></div>
         <div class="campo sm:col-span-2" data-guia-campo style="display: none;"><label for="guiaCarteira">Número da carteira</label><input type="text" id="guiaCarteira" maxlength="30" autocomplete="off" inputmode="numeric"></div>
-        <div class="campo sm:col-span-2" data-guia-campo style="display: none;"><label for="guiaIndicacao">Indicação clínica</label><textarea id="guiaIndicacao" rows="2" maxlength="150" autocomplete="off"></textarea></div>
       </div>
       <p data-guia-campo class="text-[13px] text-ink/55 mt-3" style="display: none;">A guia SP/SADT sai no mesmo PDF, logo depois do pedido, com os seus dados no plano e os códigos TUSS. O número da carteira não é guardado.</p>
       <div id="guiaConfirmar" role="alert" class="aviso aviso-info mt-3" style="display: none;">
@@ -2129,6 +2133,16 @@
             document.querySelectorAll('[data-guia-campo]').forEach(el => { el.style.display = comGuia ? '' : 'none'; });
         }
 
+        function prepararJustificativa(categoria) {
+            const exames = categoria !== 'vacina';
+            document.getElementById('justificativaPainel').style.display = exames ? '' : 'none';
+            const campo = document.getElementById('guiaIndicacao');
+            if (exames && !campo.value) campo.value = indicacaoSugerida();
+        }
+        function justificativaDoDialogo(categoria) {
+            return categoria === 'vacina' ? '' : document.getElementById('guiaIndicacao').value.trim();
+        }
+
         async function prepararGuia(categoria) {
             const painel = document.getElementById('guiaPainel');
             const convite = document.getElementById('guiaConvite');
@@ -2144,7 +2158,6 @@
             preencherPlanos(seletor, planos.lista);
             seletor.value = campoPlano().value;
             document.getElementById('guiaCarteira').value = campoCarteira().value;
-            if (!document.getElementById('guiaIndicacao').value) document.getElementById('guiaIndicacao').value = indicacaoSugerida();
             painel.style.display = '';
             mostrarCamposDaGuia();
             mostrarCamposDoPlano();
@@ -2161,7 +2174,7 @@
             };
         }
 
-        async function baixarPdf(endpoint, itens, prefixoArquivo, descricao, guia, assinar) {
+        async function baixarPdf(endpoint, itens, prefixoArquivo, descricao, guia, assinar, justificativa) {
             try {
                 if (!currentRecommendations || currentRecommendations.length === 0) {
                     alert(T('Gere as recomendações primeiro!'));
@@ -2176,7 +2189,7 @@
                     body: JSON.stringify(Object.assign({
                         dados_paciente: dadosDoPacienteParaPdf(),
                         recomendacoes: itens
-                    }, guia ? { guia } : {}, assinar ? { assinar: true } : {}))
+                    }, guia ? { guia } : {}, assinar ? { assinar: true } : {}, justificativa ? { justificativa } : {}))
                 });
 
                 if (!response.ok) {
@@ -2338,6 +2351,7 @@
             desenharConflitos();
             const cat = await carregarCatalogo();
             (cat[categoria] || []).forEach(t => { tituloOriginal[T(t).toLowerCase()] = t; });
+            prepararJustificativa(categoria);
             await prepararGuia(categoria);
             await prepararAssinatura();
             const dialogo = document.getElementById('dialogoAcrescimo');
@@ -2389,7 +2403,8 @@
                 return;
             }
             const assinar = querAssinar();
-            const gerar = () => { fecharDialogo(); baixarPdf(doc.endpoint, itens, doc.arquivo, doc.descricao, guia, assinar); };
+            const justificativa = justificativaDoDialogo(categoria);
+            const gerar = () => { fecharDialogo(); baixarPdf(doc.endpoint, itens, doc.arquivo, doc.descricao, guia, assinar, justificativa); };
             if (assinar && !assinatura.sessao) { abrirSessaoDeAssinatura(gerar); return; }
             gerar();
         });
