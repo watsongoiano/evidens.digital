@@ -162,6 +162,57 @@ def mensagem_de_agradecimento(usuario, url_site):
     return 'Obrigado por testar o Evidēns', corpo
 
 
+def mensagem_de_novidades(usuario, url_site):
+    """Comunicado de novembro de 2026: boas-vindas em uma linha e o resumo das atualizações."""
+    primeiro_nome = _primeiro_nome(usuario)
+    corpo = '\n'.join([
+        f'Olá, {primeiro_nome}.' if primeiro_nome else 'Olá.',
+        '',
+        'Que bom ter você no Evidēns! Passamos para contar, em poucas linhas, o que mudou na plataforma.',
+        '',
+        '- Revisão clínica de todas as regras (rastreamento, câncer, vacinas, gestação, comorbidades e '
+        'medicações), cada uma com a referência e com aviso quando as diretrizes divergem.',
+        '- Função renal ao lado do PREVENT: TFG pela CKD-EPI 2021, estágio da DRC (KDIGO 2024) e risco de '
+        'falência renal em 2 e 5 anos (KFRE).',
+        '- Exames já feitos num só lugar, com a leitura do laudo em PDF e os resultados entrando nos cálculos.',
+        '- Guia SP/SADT no padrão TISS 4 e receituário com o seu modelo (enviado, montado na tela ou em papel '
+        'já timbrado).',
+        '- Aviso antes de gerar o pedido quando há exames alternativos (por exemplo, colonoscopia e FIT).',
+        '- Orientações mais enxutas, que abrem com um toque.',
+        '',
+        f'É só entrar em {url_site}/login para conferir.',
+        '',
+    ] + _fecho(url_site))
+    return 'Evidēns: o que há de novo', corpo
+
+
+def enviar_lote(mensagens):
+    """Envia vários e-mails numa chamada (API de lote da Resend, até 100). ``mensagens``: (para, assunto, texto).
+    Devolve ``(ok, detalhe)``; nunca levanta exceção."""
+    chave = (os.environ.get('RESEND_API_KEY') or '').strip()
+    if not chave:
+        return False, 'RESEND_API_KEY não configurada.'
+    if not mensagens:
+        return True, 'nada a enviar'
+    remetente = (os.environ.get('AVISO_CADASTRO_DE') or '').strip() or REMETENTE_PADRAO
+    contato = email_de_contato()
+    corpo = json.dumps([{'from': remetente, 'to': [para], 'subject': assunto, 'text': texto,
+                         **({'reply_to': contato} if contato else {})} for para, assunto, texto in mensagens[:100]]).encode('utf-8')
+    pedido = urllib.request.Request(URL_RESEND + '/batch', data=corpo, method='POST', headers={
+        'Authorization': f'Bearer {chave}', 'Content-Type': 'application/json', 'User-Agent': 'evidens-digital/1.0'})
+    try:
+        with urllib.request.urlopen(pedido, timeout=15) as resposta:
+            return 200 <= resposta.status < 300, f'HTTP {resposta.status}'
+    except urllib.error.HTTPError as erro:
+        try:
+            detalhe = json.loads(erro.read().decode('utf-8', 'replace')).get('message', '')
+        except Exception:
+            detalhe = ''
+        return False, f'HTTP {erro.code} {detalhe}'.strip()[:300]
+    except Exception as erro:  # rede, tempo esgotado
+        return False, type(erro).__name__
+
+
 def mensagem_de_aprovacao(usuario, url_site, reativada=False):
     """Aviso de que o acesso foi liberado: conta aprovada ou, se estava bloqueada, reativada."""
     primeiro_nome = _primeiro_nome(usuario)

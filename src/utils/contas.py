@@ -87,6 +87,14 @@ _ESQUEMA = [
         tipo TEXT NOT NULL,
         quando BIGINT NOT NULL
     )""",
+    # Comunicados (src/utils/comunicados.py): cada conta recebe cada comunicado uma vez só.
+    """CREATE TABLE IF NOT EXISTS comunicados_enviados (
+        id {pk},
+        usuario_id BIGINT NOT NULL,
+        comunicado TEXT NOT NULL,
+        quando BIGINT NOT NULL,
+        UNIQUE (usuario_id, comunicado)
+    )""",
     # No máximo um administrador: a regra fica no banco, para que duas instalações
     # simultâneas com o código certo não criem duas contas privilegiadas.
     "CREATE UNIQUE INDEX IF NOT EXISTS um_so_administrador ON usuarios (administrador) WHERE administrador = 1",
@@ -342,6 +350,29 @@ def liberar_email(uid, tipo):
     """Desfaz a marca quando o envio falhou, para a conta voltar à fila."""
     with _conexao() as executar:
         executar('DELETE FROM emails_enviados WHERE usuario_id = ? AND tipo = ?', (int(uid), tipo))
+
+
+def reservar_comunicado(uid, chave):
+    """Reserva a conta para o comunicado antes de enviar. False se ela já tinha a reserva."""
+    with _conexao() as executar:
+        cur = executar('INSERT INTO comunicados_enviados (usuario_id, comunicado, quando) VALUES (?, ?, ?) '
+                       'ON CONFLICT (usuario_id, comunicado) DO NOTHING', (int(uid), chave, int(time.time())))
+        return cur.rowcount == 1
+
+
+def liberar_comunicado(uid, chave):
+    with _conexao() as executar:
+        executar('DELETE FROM comunicados_enviados WHERE usuario_id = ? AND comunicado = ?', (int(uid), chave))
+
+
+def sem_comunicado(chave, limite=None):
+    """Contas aprovadas (fora o administrador) que ainda não receberam o comunicado, da mais antiga para a mais nova."""
+    with _conexao() as executar:
+        linhas = executar(_SELECT + "WHERE administrador = 0 AND situacao = 'aprovado' AND id NOT IN "
+                          '(SELECT usuario_id FROM comunicados_enviados WHERE comunicado = ?) ORDER BY criado_em, id',
+                          (chave,)).fetchall()
+    usuarios = [_usuario(l) for l in linhas]
+    return usuarios if limite is None else usuarios[:limite]
 
 
 def sem_email(limite=None):
