@@ -115,6 +115,11 @@ _FONTES_DIRETAS = [
     ('williams 26e', 'https://www.mheducation.com/highered/mhp/product/williams-obstetrics-27e.html?viewOption=student'),
     ('sbd 2024', 'https://doi.org/10.29327/5412848.2024-1'),
     ('ada 2026 (seção 4)', 'https://doi.org/10.2337/dc26-S004'),  # avaliação médica e comorbidades
+    ('ada 2026 (seção 6)', 'https://doi.org/10.2337/dc26-S006'),  # metas glicêmicas
+    ('ada 2026 (seção 9)', 'https://doi.org/10.2337/dc26-S009'),  # tratamento farmacológico (metformina e B12)
+    ('ada 2026 (seção 10)', 'https://doi.org/10.2337/dc26-S010'),  # doença cardiovascular e lipídios
+    ('ada 2026 (seção 11)', 'https://doi.org/10.2337/dc26-S011'),  # doença renal crônica
+    ('ada 2026 (seção 12)', 'https://doi.org/10.2337/dc26-S012'),  # retinopatia, neuropatia e pés
     ('ada 2026', 'https://doi.org/10.2337/dc26-S002'),  # diagnóstico e classificação
     ('cgh 2025 (feuerstein)', 'https://doi.org/10.1016/j.cgh.2025.05.019'),
     ('drugs aging 2024 (sparling)', 'https://doi.org/10.1007/s40266-024-01143-8'),
@@ -167,6 +172,37 @@ _FONTES_DIRETAS = [
     ('bsr 2017', 'https://doi.org/10.1093/rheumatology/kew479'),
     ('kdigo 2009', 'https://kdigo.org/guidelines/transplant-recipient/'),
     ('aasld 2018', 'https://doi.org/10.1002/hep.29800'),
+    # Auditoria clínica de 15/11/2026 (relatório D): comorbidades e monitorização de medicações
+    ('kdigo 2024 (drc)', 'https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf'),
+    ('kdigo 2017 (dmo-drc)', 'https://doi.org/10.1016/j.kisu.2017.04.001'),
+    ('kdigo 2012 (anemia', 'https://kdigo.org/guidelines/anemia-in-ckd/'),
+    ('esc 2021 (insuficiência cardíaca)', 'https://doi.org/10.1093/eurheartj/ehab368'),
+    ('esc 2023 (insuficiência cardíaca)', 'https://doi.org/10.1093/eurheartj/ehad195'),
+    ('acc/aha 2018 (colesterol)', 'https://doi.org/10.1016/j.jacc.2018.11.003'),
+    ('acc/aha 2017 (hipertensão)', 'https://doi.org/10.1161/HYP.0000000000000065'),
+    ('sbc 2025 (dislipidemia)', 'https://doi.org/10.36660/abc.20250640'),
+    ('fda 2025 (clozapina)', 'https://www.fda.gov/drugs/drug-safety-and-availability/fda-removes-risk-evaluation-and-mitigation-strategy-rems-program-antipsychotic-drug-clozapine'),
+    ('anvisa (bula do leponex)', 'https://consultas.anvisa.gov.br/#/bulario/q/?nomeProduto=Leponex'),
+    ('ronaldson 2011', 'https://doi.org/10.3109/00048674.2011.572852'),
+    ('ms 2024 (pcdt prep)', 'https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv'),
+    ('fda (bula do ocrelizumabe)', 'https://www.gene.com/download/pdf/ocrevus_prescribing.pdf'),
+    ('ema (bula do natalizumabe)', 'https://www.ema.europa.eu/en/medicines/human/EPAR/tysabri'),
+    ('ema (bula do fingolimode)', 'https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya'),
+    ('ema (bula do micofenolato)', 'https://www.ema.europa.eu/en/medicines/human/EPAR/cellcept'),
+    ('ema (bula do sirolimo)', 'https://www.ema.europa.eu/en/medicines/human/EPAR/rapamune'),
+    ('ema (bula do ácido zoledrônico)', 'https://www.ema.europa.eu/en/medicines/human/EPAR/aclasta'),
+    ('ema (bula do denosumabe)', 'https://www.ema.europa.eu/en/medicines/human/EPAR/prolia'),
+    ('ema 2018 (valproato)', 'https://www.ema.europa.eu/en/medicines/human/referrals/valproate-related-substances-0'),
+    ('endocrine society 2018 (hipogonadismo)', 'https://doi.org/10.1210/jc.2018-00229'),
+    ('endocrine society 2024 (vitamina d)', 'https://doi.org/10.1210/clinem/dgae290'),
+    ('endocrine society 2016 (hiperaldosteronismo)', 'https://doi.org/10.1210/jc.2015-4061'),
+    ('endocrine society 2025 (hiperaldosteronismo)', 'https://doi.org/10.1210/clinem/dgaf284'),
+    ('acr 2022 (osteoporose por corticoide)', 'https://doi.org/10.1002/art.42646'),
+    ('cpic 2018', 'https://doi.org/10.1002/cpt.1304'),
+    ('bsg 2019 (dii)', 'https://doi.org/10.1136/gutjnl-2019-318484'),
+    ('aha/acc/accp/hrs 2023', 'https://doi.org/10.1161/CIR.0000000000001193'),
+    ('ata 2016', 'https://doi.org/10.1089/thy.2016.0229'),
+    ('gina 2025', 'https://ginasthma.org/reports/'),
 ]
 
 

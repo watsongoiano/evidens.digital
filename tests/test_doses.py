@@ -38,30 +38,43 @@ def test_prednisona_20mg_por_2_semanas_e_imunossupressora(client):
     basal = {'Prova tuberculínica (PPD) ou IGRA', 'Hemograma completo com plaquetas', 'Albumina, soro', 'Creatinina, soro',
              'Ureia, soro', 'Sódio, soro', 'Potássio, soro', 'Cálcio iônico, soro', 'Aspartato aminotransferase, soro',
              'Alanina aminotransferase, soro', 'Fosfatase alcalina, soro', 'Bilirrubinas totais e frações, soro',
-             'Glicose, soro', 'Hemoglobina glicada (HbA1c), soro', 'Colesterol total e frações, soro', '25-hidroxivitamina D, soro',
-             'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)', 'Avaliação oftalmológica com tonometria e fundoscopia',
-             'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)'}
+             'Glicose, soro', 'Hemoglobina glicada (HbA1c), soro', 'Colesterol total e frações, soro',
+             'Avaliação oftalmológica com tonometria e fundoscopia', 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)'}
     assert basal <= set(_titulos(r)), basal - set(_titulos(r))
+    # MAPA não se pede pelo corticoide (PA em cada consulta) e a 25(OH)D só a partir de 3 meses de uso (relatório D, D-14)
+    assert not {'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)', '25-hidroxivitamina D, soro'} & set(_titulos(r))
+    assert 'Corticoide sistêmico: pressão arterial' in _orientacoes(r)
     for viva in ('Tríplice Viral', 'Varicela', 'Febre Amarela', 'Dengue'):
         assert not any(viva in t for t in _titulos(r)), viva
     assert 'influenza, COVID-19, pneumocócica' in ' '.join(o['descricao'] for o in r['orientacoes'])
 
 
-PAINEL_DO_CORTICOIDE = {
-    'Prova tuberculínica (PPD) ou IGRA', 'Hemograma completo com plaquetas', 'Albumina, soro', 'Creatinina, soro', 'Ureia, soro',
-    'Sódio, soro', 'Potássio, soro', 'Cálcio iônico, soro', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro',
-    'Fosfatase alcalina, soro', 'Bilirrubinas totais e frações, soro', 'Glicose, soro', 'Hemoglobina glicada (HbA1c), soro',
-    'Colesterol total e frações, soro', '25-hidroxivitamina D, soro', 'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)',
-    'Avaliação oftalmológica com tonometria e fundoscopia'}
+# Monitorização de qualquer corticoide sistêmico em uso (Feuerstein 2025)
+MONITORIZACAO_DO_CORTICOIDE = {'Glicose, soro', 'Hemoglobina glicada (HbA1c), soro', 'Colesterol total e frações, soro',
+                               'Avaliação oftalmológica com tonometria e fundoscopia'}
+# Painel basal (Sparling 2024): só com 3 meses ou mais, dose imunossupressora ou sem dose informada (relatório D, D-14)
+PAINEL_BASAL = {'Albumina, soro', 'Ureia, soro', 'Sódio, soro', 'Potássio, soro', 'Cálcio iônico, soro',
+                'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro', 'Fosfatase alcalina, soro',
+                'Bilirrubinas totais e frações, soro', 'Hemograma completo com plaquetas'}
+PPD = 'Prova tuberculínica (PPD) ou IGRA'
 
 
-@pytest.mark.parametrize('dose, semanas', [(5, 2), (5, 26), (2, 52), (40, 16), (None, None)],
-                         ids=['baixa-curta', 'baixa-cronica', 'muito-baixa', 'imunossupressora', 'sem-dose'])
-def test_work_up_do_corticoide_vale_a_partir_da_dose_baixa(client, dose, semanas):
-    """Qualquer corticoide sistêmico em uso recebe a avaliação basal e a monitorização inteiras."""
+@pytest.mark.parametrize('dose, semanas, painel, ppd, vitamina_d', [
+    (5, 2, False, False, False), (10, 3, False, False, False), (5, 26, True, False, True), (2, 52, False, False, False),
+    (2.5, 12, True, False, True), (15, 4, False, True, False), (14, 4, False, False, False), (40, 16, True, True, True),
+    (None, None, True, True, True)],
+    ids=['baixa-curta', 'baixa-3-semanas', 'baixa-cronica', 'muito-baixa', 'limite-cronico', 'limite-tb', 'abaixo-do-limite-tb',
+         'imunossupressora', 'sem-dose'])
+def test_work_up_do_corticoide_depende_da_dose(client, dose, semanas, painel, ppd, vitamina_d):
+    """Glicemia, lipídios e olhos em qualquer dose; painel basal e 25(OH)D só no uso crônico ou imunossupressor; PPD com
+    ≥ 15 mg/dia por ≥ 4 semanas (MS 2019), dose imunossupressora ou dose não informada. MAPA nunca pelo corticoide."""
     extra = {} if dose is None else dict(dose__prednisona=dose, duracao__prednisona=semanas)
-    r = _pedir(client, idade=32, medicacoes=['prednisona'], **extra)
-    assert PAINEL_DO_CORTICOIDE <= set(_titulos(r)), PAINEL_DO_CORTICOIDE - set(_titulos(r))
+    t = set(_titulos(_pedir(client, idade=32, medicacoes=['prednisona'], **extra)))
+    assert MONITORIZACAO_DO_CORTICOIDE <= t, MONITORIZACAO_DO_CORTICOIDE - t
+    assert (PAINEL_BASAL <= t) == painel and (not PAINEL_BASAL & t) == (not painel), PAINEL_BASAL & t
+    assert (PPD in t) == ppd
+    assert ('25-hidroxivitamina D, soro' in t) == vitamina_d
+    assert 'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)' not in t
 
 
 def test_dose_e_duracao_so_mudam_osso_e_vacinas(client):
@@ -70,8 +83,10 @@ def test_dose_e_duracao_so_mudam_osso_e_vacinas(client):
     assert not {'Densitometria óssea (DEXA)', 'Radiografia de coluna torácica e lombar (perfil)',
                 'VSR - Vírus Sincicial Respiratório (Arexvy® ou Abrysvo®)'} & set(_titulos(r))
     assert r['triagem_vacinas']['imunossupressao'] == 'nao' and any('Febre Amarela' in t for t in _titulos(r))
-    tb = next(x for x in r['recommendations'] if x['titulo'] == 'Prova tuberculínica (PPD) ou IGRA')
-    assert tb['subtitulo'].startswith('Corticoide sistêmico') and 'corticoide sistêmico' in tb['descricao']
+    assert 'Prova tuberculínica (PPD) ou IGRA' not in _titulos(r)   # abaixo de 15 mg/dia por 1 mês (MS 2019)
+    sem_dose = _pedir(client, idade=52, imunossupressao='nao', medicacoes=['prednisona'])
+    tb = next(x for x in sem_dose['recommendations'] if x['titulo'] == 'Prova tuberculínica (PPD) ou IGRA')
+    assert tb['subtitulo'].startswith('Corticoide sistêmico sem dose informada') and 'corticoide sistêmico' in tb['descricao']
     # 3 meses ou mais: densitometria em qualquer idade adulta; imagem da coluna a partir dos 40
     jovem = _pedir(client, idade=32, medicacoes=['prednisona'], dose__prednisona=5, duracao__prednisona=26)
     assert 'Densitometria óssea (DEXA)' in _titulos(jovem) and 'Radiografia de coluna torácica e lombar (perfil)' not in _titulos(jovem)
@@ -84,7 +99,7 @@ def test_prednisona_5mg_por_6_meses_indica_densitometria_sem_imunossupressao(cli
     t = _titulos(r)
     assert 'Densitometria óssea (DEXA)' in t and 'Hemoglobina glicada (HbA1c), soro' in t
     assert r['triagem_vacinas']['imunossupressao'] != 'sim'
-    assert 'Prova tuberculínica (PPD) ou IGRA' in t   # avaliação basal vale em qualquer dose
+    assert 'Prova tuberculínica (PPD) ou IGRA' not in t   # 5 mg/dia: abaixo do limiar de tuberculose latente
 
 
 def test_prednisona_20mg_por_2_meses_rastreia_tuberculose_latente(client):

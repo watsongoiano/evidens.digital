@@ -25,6 +25,7 @@ Os testes ficam em `tests/` e rodam com `python -m pytest`.
 | P-09 | PDF de vacinas impresso a partir de uma lista que não corresponde mais ao formulário | A lista ficava na tela depois de o formulário mudar | A página descarta o resultado quando um dado clínico muda; o servidor confere de novo a triagem no pedido de PDF e recusa a lista se houver vacina não liberada | `test_pdf.py` (segunda linha de defesa) |
 | P-10 | Dados de paciente gravados sem intenção | O endpoint tentava gravar nome e dados clínicos em banco a cada consulta | Gravação removida; o nome do paciente não é mais enviado com o pedido de recomendações e é opcional | `test_site.py::test_motor_nao_tem_acesso_a_banco_de_dados`; `test_site.py::test_nome_do_paciente_e_opcional_e_nao_vai_com_as_recomendacoes` |
 | P-11 | Telas antigas e arquivos internos acessíveis por URL | Qualquer `.html`, `.js` ou `.json` do repositório era servido | Lista explícita de arquivos publicados em `api/index.py` | `test_site.py::test_arquivos_internos_e_telas_antigas_nao_sao_servidos` |
+| P-25 | Comorbidade ou medicação de alto risco sem o acompanhamento da diretriz | DRC e insuficiência cardíaca não acionavam exame; clozapina sem hemograma, PrEP sem teste de HIV, ocrelizumabe sem HBV, natalizumabe sem anti-JCV; a regra do tenofovir procurava a palavra entre as classes e nunca disparava; lipídios "a cada 4-6 anos" em uso de estatina ou com DCV; cálcio e 25(OH)D anuais para todo diabético; corticoide em dose baixa e curta com PPD, MAPA e painel (auditoria clínica de 15/11/2026, relatório D) | Ramos próprios em `src/utils/condicoes.py` (DRC pelo mapa G x A do KDIGO 2024, com estágio pela TFG ou pelos detalhes do item; IC pela ESC 2021; lipídios em tratamento pela ACC/AHA 2018; FIB-4 pela ADA 2026 e AASLD 2023) e classes de medicação próprias em `src/utils/medicamentos.py` (clozapina, PrEP, tenofovir, ocrelizumabe, natalizumabe, fingolimode, micofenolato, mTOR, testosterona, sulfassalazina, mesalazina, alopurinol, zoledrônico, denosumabe, sotalol); a rota passa ao HIV o tenofovir pela classe. Divergências entre diretrizes viram orientação | `test_auditoria_comorbidades.py`; `test_doses.py::test_work_up_do_corticoide_depende_da_dose` |
 
 ## Parciais
 
@@ -46,7 +47,7 @@ Os testes ficam em `tests/` e rodam com `python -m pytest`.
 | P-20 | Regra diferente da fonte que ela cita | Aneurisma de aorta exige DPOC ou 10 maços-ano; PSA anual a partir dos 50; título de HPV molecular com texto de citologia trienal; densitometria bienal |
 | P-21 | Grau de evidência atribuído sem correspondência com a fonte | Graus digitados à mão em cada regra |
 | P-22 | Diretriz desatualizada | As fontes citadas são de 2024 e 2025; não há data de revisão por regra |
-| P-23 | Dado relevante coletado e ignorado | País, álcool, doença renal, história familiar de câncer e de cardiopatia |
+| P-23 | Dado relevante coletado e ignorado | País, álcool, história familiar de câncer e de cardiopatia. A doença renal (marcada ou pela TFG < 60) passou a definir o acompanhamento (ver P-25) |
 | P-24 | Falso negativo silencioso por dado ausente | Fumante sem maços-ano informados não recebe rastreio de câncer de pulmão nem aviso de que falta o dado |
 
 ## Critérios clínicos da triagem de vacinas

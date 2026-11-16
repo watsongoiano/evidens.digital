@@ -304,7 +304,11 @@
         "Ácido úrico, soro",
         "EAS - Elementos Anormais e Sedimentoscopia",
         "Razão albumina/creatinina, urina",
-        "PSA total, soro"
+        "PSA total, soro",
+        "Hormônio Tireoestimulante (TSH), soro",
+        "Cálcio iônico, soro",
+        "Sódio, soro",
+        "Hemograma completo com plaquetas"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -357,14 +361,14 @@
         "EAS - Elementos Anormais e Sedimentoscopia",
         "Razão albumina/creatinina, urina",
         "PSA total, soro",
+        "Relação albumina/creatinina urinária (uACR)",
+        "Hemograma completo com plaquetas",
+        "Vitamina B12, soro",
         "Aspartato aminotransferase, soro",
         "Alanina aminotransferase, soro",
-        "Relação albumina/creatinina urinária (uACR)",
-        "Vitamina B12, soro",
-        "Hemograma completo com plaquetas",
+        "Hormônio Tireoestimulante (TSH), soro",
         "Cálcio iônico, soro",
-        "25-hidroxivitamina D, soro",
-        "Fósforo, soro"
+        "Sódio, soro"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -418,7 +422,11 @@
         "Ácido úrico, soro",
         "EAS - Elementos Anormais e Sedimentoscopia",
         "Razão albumina/creatinina, urina",
-        "PSA total, soro"
+        "PSA total, soro",
+        "Hormônio Tireoestimulante (TSH), soro",
+        "Cálcio iônico, soro",
+        "Sódio, soro",
+        "Hemograma completo com plaquetas"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -465,13 +473,10 @@
         "Creatinina, soro",
         "Anti-HCV IgG, soro",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular",
-        "Aspartato aminotransferase, soro",
-        "Alanina aminotransferase, soro",
         "Relação albumina/creatinina urinária (uACR)",
         "Hemograma completo com plaquetas",
-        "Cálcio iônico, soro",
-        "25-hidroxivitamina D, soro",
-        "Fósforo, soro"
+        "Aspartato aminotransferase, soro",
+        "Alanina aminotransferase, soro"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
@@ -558,11 +563,9 @@
         "Creatinina, soro",
         "Anti-HCV IgG, soro",
         "PSA total, soro",
+        "Alfa-1 antitripsina, soro",
         "Gasometria arterial, sangue arterial",
-        "Sódio, soro",
-        "Potássio, soro",
-        "Cloreto, soro",
-        "Hemograma completo, sangue total"
+        "Hemograma completo com plaquetas"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",

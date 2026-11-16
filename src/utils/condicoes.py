@@ -141,6 +141,25 @@ MEDICACOES = {
     'inibidor_checkpoint': {'rotulo': 'Inibidor de checkpoint imunológico'},
     'fluoropirimidina': {'rotulo': 'Fluoropirimidina', 'imunossupressao': True},
     'bloqueio_hormonal': {'rotulo': 'Agonista ou antagonista de GnRH'},
+    # Monitorização própria (auditoria clínica de 15/11/2026, relatório D)
+    'clozapina': {'rotulo': 'Clozapina'},
+    'prep': {'rotulo': 'Tenofovir + entricitabina ou cabotegravir (PrEP, sem HIV)'},
+    'tenofovir': {'rotulo': 'Tenofovir (TDF ou TAF)'},
+    'tenofovir_alafenamida': {'rotulo': 'Tenofovir alafenamida (TAF)'},
+    'ocrelizumabe': {'rotulo': 'Ocrelizumabe'},
+    'natalizumabe': {'rotulo': 'Natalizumabe'},
+    'fingolimode': {'rotulo': 'Fingolimode'},
+    'micofenolato': {'rotulo': 'Micofenolato'},
+    'inibidor_mtor': {'rotulo': 'Sirolimo ou everolimo'},
+    'testosterona': {'rotulo': 'Testosterona'},
+    'sulfassalazina': {'rotulo': 'Sulfassalazina'},
+    'aminossalicilato': {'rotulo': 'Mesalazina'},
+    'alopurinol': {'rotulo': 'Alopurinol'},
+    'zoledronico': {'rotulo': 'Ácido zoledrônico'},
+    'denosumabe': {'rotulo': 'Denosumabe'},
+    'sotalol': {'rotulo': 'Sotalol'},
+    # Corticoide sem dose ou duração informadas (src/utils/doses.py): conduta conservadora, com aviso
+    'corticoide_sem_dose': {'rotulo': 'Corticoide sistêmico sem dose informada'},
 }
 
 HEREDITARIAS = 'Síndromes e doenças hereditárias'
@@ -248,7 +267,7 @@ AASLD_HBV = 'AASLD 2018 (hepatite B)'
 AASLD_HCV = 'AASLD/IDSA (hepatite C)'
 ASCO_HBV = 'ASCO 2020 (hepatite B no câncer)'
 NHLBI_FALCIFORME = 'NHLBI 2014 (doença falciforme)'
-GINA = 'GINA 2024'
+GINA = 'GINA 2025'
 ESC_FA = 'ESC 2024 (fibrilação atrial)'
 AGA_CELIACA = 'AGA 2019 (doença celíaca)'
 BSG_CELIACA = 'BSG 2014 (doença celíaca)'
@@ -263,6 +282,42 @@ ASCO_IRAE = 'ASCO 2021 (eventos imunomediados)'
 EMA_DPD = 'EMA 2020 (teste de DPD)'
 AHA_ADT = 'AHA/ACS/AUA 2010 (bloqueio androgênico)'
 NCCN_OSSO = 'NCCN (saúde óssea no câncer)'
+# Auditoria clínica de 15/11/2026 (relatório D): comorbidades e monitorização de medicações
+KDIGO_DRC = 'KDIGO 2024 (DRC)'
+KDIGO_DMO = 'KDIGO 2017 (DMO-DRC)'
+KDIGO_ANEMIA = 'KDIGO 2012 (anemia na DRC)'
+ESC_IC = 'ESC 2021 (insuficiência cardíaca)'
+ESC_IC_2023 = 'ESC 2023 (insuficiência cardíaca)'
+ACC_AHA_COLESTEROL = 'ACC/AHA 2018 (colesterol)'
+SBC_DISLIPIDEMIA = 'SBC 2025 (dislipidemia)'
+ADA_FIGADO = 'ADA 2026 (seção 4)'
+ADA_LIPIDIOS = 'ADA 2026 (seção 10)'
+ADA_PES = 'ADA 2026 (seção 12)'
+ADA_METFORMINA = 'ADA 2026 (seção 9)'
+AASLD_MASLD = 'AASLD 2023'
+FDA_CLOZAPINA = 'FDA 2025 (clozapina)'
+ANVISA_CLOZAPINA = 'ANVISA (bula do Leponex)'
+RONALDSON = 'Ronaldson 2011 (miocardite por clozapina)'
+PCDT_PREP = 'MS 2024 (PCDT PrEP)'
+FDA_OCRELIZUMABE = 'FDA (bula do ocrelizumabe)'
+EMA_NATALIZUMABE = 'EMA (bula do natalizumabe)'
+EMA_FINGOLIMODE = 'EMA (bula do fingolimode)'
+EMA_MICOFENOLATO = 'EMA (bula do micofenolato)'
+EMA_SIROLIMO = 'EMA (bula do sirolimo)'
+EMA_ZOLEDRONICO = 'EMA (bula do ácido zoledrônico)'
+EMA_DENOSUMABE = 'EMA (bula do denosumabe)'
+EMA_VALPROATO = 'EMA 2018 (valproato)'
+ENDO_TESTOSTERONA = 'Endocrine Society 2018 (hipogonadismo)'
+ENDO_VITAMINA_D = 'Endocrine Society 2024 (vitamina D)'
+ENDO_PA_2016 = 'Endocrine Society 2016 (hiperaldosteronismo)'
+ENDO_PA_2025 = 'Endocrine Society 2025 (hiperaldosteronismo)'
+ACC_AHA_HAS_2017 = 'ACC/AHA 2017 (hipertensão)'
+ACR_GIOP = 'ACR 2022 (osteoporose por corticoide)'
+BSR = 'BSR 2017'
+CPIC_TIOPURINA = 'CPIC 2018 (TPMT/NUDT15)'
+BSG_2019 = 'BSG 2019 (DII)'
+AHA_FA_2023 = 'AHA/ACC/ACCP/HRS 2023 (FA)'
+ATA_HIPERTIREOIDISMO = 'ATA 2016'
 
 # Detalhes que abrem embaixo do item escolhido (como o bloco do HIV): vão no mesmo campo `comorbidades`.
 DETALHES_COMORBIDADE = {
@@ -279,12 +334,54 @@ DETALHES_COMORBIDADE = {
         ('rcu_alem_reto', 'Colite além do reto (não só proctite)'),
         ('rcu_8_anos', '8 anos ou mais desde o início dos sintomas'),
         ('rcu_cep', 'Colangite esclerosante primária')]),
+    'doenca_renal': ('Doença renal crônica: estágio', 'Define a frequência de TFG, albuminúria e dos exames de G3a em diante '
+                     '(KDIGO 2024). Com a creatinina informada, o estágio G é calculado.', [
+        ('drc_g1_g2', 'TFG ≥ 60 (G1-G2, com albuminúria ou lesão renal)'), ('drc_g3a', 'TFG 45-59 (G3a)'),
+        ('drc_g3b', 'TFG 30-44 (G3b)'), ('drc_g4', 'TFG 15-29 (G4)'), ('drc_g5', 'TFG < 15 (G5)'),
+        ('drc_a1', 'uACR < 30 mg/g (A1)'), ('drc_a2', 'uACR 30-300 mg/g (A2)'), ('drc_a3', 'uACR > 300 mg/g (A3)')]),
+    'osteoporose': ('Osteoporose: o que se aplica', 'Define a investigação de causas secundárias (BHOF 2022).', [
+        ('osteoporose_diagnostico', 'Diagnóstico recente, causas secundárias ainda não investigadas')]),
     'hepatite_b_cronica': ('Hepatite B: o que se aplica', 'Define o rastreio de carcinoma hepatocelular sem cirrose (AASLD 2018).', [
         ('hbv_risco_chc', 'História familiar de carcinoma hepatocelular, coinfecção por HIV ou hepatite D, homem asiático ≥ 40 anos, '
                           'mulher asiática ≥ 50 anos ou origem africana subsaariana')]),
 }
 # Diagnóstico antigo "doença inflamatória autoimune" (um item só): ainda aceito vindo de formulários salvos.
 LEGADO_AUTOIMUNE = 'doenca_autoimune'
+
+
+def _clcr(idade, sexo, peso, creatinina):
+    """Clearance de creatinina estimado (Cockcroft-Gault), em mL/min; None sem peso ou creatinina."""
+    try:
+        peso, creatinina = float(peso), float(creatinina)
+    except (TypeError, ValueError):
+        return None
+    if peso <= 0 or creatinina <= 0:
+        return None
+    valor = (140 - idade) * peso / (72 * creatinina)
+    return valor * 0.85 if sexo == 'feminino' else valor
+
+
+# Doença renal crônica (KDIGO 2024): estágio G pela TFG e categoria A pela albuminúria. Detalhes do item
+# "Doença renal crônica" (a TFG calculada pela creatinina, quando informada, também define o G).
+ESTAGIOS_G = ('G1-G2', 'G3a', 'G3b', 'G4', 'G5')
+CATEGORIAS_A = ('A1', 'A2', 'A3')
+# Vezes por ano que a TFG e a albuminúria são medidas, pelo mapa G x A (KDIGO 2024, Fig. 13; igual ao de 2012).
+VEZES_POR_ANO = {'G1-G2': (1, 1, 2), 'G3a': (1, 2, 3), 'G3b': (2, 3, 3), 'G4': (3, 3, 4), 'G5': (4, 4, 4)}
+_FREQUENCIA = {1: 'Anual', 2: 'A cada 6 meses', 3: 'A cada 4 meses', 4: 'A cada 3 meses'}
+
+
+def _detalhe_drc(chave):
+    return 'drc_' + chave.lower().replace('-', '_')
+
+
+def estagio_drc(com, tfg=None):
+    """(estágio G, categoria A) da DRC; o pior entre a TFG calculada e o detalhe marcado. None se não se sabe."""
+    marcados = [g for g in ESTAGIOS_G if _detalhe_drc(g) in com]
+    if tfg is not None:
+        marcados.append('G1-G2' if tfg >= 60 else 'G3a' if tfg >= 45 else 'G3b' if tfg >= 30 else 'G4' if tfg >= 15 else 'G5')
+    g = max(marcados, key=ESTAGIOS_G.index) if marcados else None
+    categorias = [a for a in CATEGORIAS_A if _detalhe_drc(a) in com]
+    return g, (max(categorias, key=CATEGORIAS_A.index) if categorias else None)
 
 
 def imunossupressao_implicada(comorbidades, medicacoes):
@@ -332,8 +429,13 @@ def _garantir(recs, nova):
     recs.append(nova)
 
 
-def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False, tabagismo=None, imc=None):
-    """Soma às recomendações o que as listas disparam. Devolve as orientações (sem pedido/receita)."""
+def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False, tabagismo=None, imc=None,
+            tfg=None, creatinina=None, peso=None, hipertensao=False):
+    """Soma às recomendações o que as listas disparam. Devolve as orientações (sem pedido/receita).
+
+    ``tfg`` (CKD-EPI 2021), ``creatinina`` e ``peso`` vêm dos exames informados; ``hipertensao`` é a HAS que
+    a rota considera estabelecida (marcada, em tratamento ou pela PA, conforme a regra da rota).
+    """
     com, med, fam = set(comorbidades), set(medicacoes), set(familia)
     orient = []
 
@@ -342,6 +444,44 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
 
     def orientar(titulo, descricao, referencia):
         orient.append({'titulo': titulo, 'descricao': descricao, 'referencia': referencia})
+
+    diabetico = bool(set(TIPOS_DE_DIABETES) & com) or 'diabetes_sem_tipo' in com or 'insulina' in med
+    ic = 'insuficiencia_cardiaca' in com
+    dcv = bool({'dcv_aterosclerotica', 'cardiopatia'} & com)
+    hipolipemiante = bool({'estatina', 'outro_hipolipemiante'} & med)
+    obeso = 'obesidade' in com or (imc or 0) >= 30
+    hipertenso = hipertensao  # decidida pela rota (HAS confirmada), não por uma PA isolada
+
+    # ---------------- Perfil lipídico (relatório D, D-11) ----------------
+    # Em tratamento hipolipemiante, com dislipidemia ou com DCV aterosclerótica o perfil lipídico deixa de ser
+    # rastreio (a cada 4-6 anos): 4-12 semanas após iniciar ou ajustar e depois a cada 3-12 meses (ACC/AHA 2018,
+    # I-A). No diabetes sem estatina: anual a partir de 40 anos; antes, a cada 5 anos (ADA 2026, seção 10).
+    # Só a regra de rastreio por idade ("Adultos ...") é trocada; as de outras indicações (HIV) ficam somadas.
+    lipidios = None
+    if hipolipemiante or dcv or 'dislipidemia' in com:
+        quem = 'DCV aterosclerótica' if dcv else 'Dislipidemia ou tratamento hipolipemiante'
+        lipidios = _rec('Colesterol total e frações, soro', 'laboratorio',
+                        'Em tratamento hipolipemiante: perfil lipídico 4-12 semanas após iniciar ou ajustar a dose (adesão e '
+                        'resposta) e depois a cada 3-12 meses. Sem tratamento, dosar para decidir o início.'
+                        + (' DCV aterosclerótica: risco muito alto pela SBC 2025, meta de LDL-c < 50 mg/dL (< 40 mg/dL no '
+                           'risco extremo).' if dcv else ''),
+                        f'{quem} | A cada 3-12 meses', ACC_AHA_COLESTEROL + (' / ' + SBC_DISLIPIDEMIA if dcv else ''), 'A', 'alta')
+        if diabetico and hipolipemiante:
+            orientar('Perfil lipídico no diabetes em uso de estatina: diretrizes divergem',
+                     'O motor seguiu a ACC/AHA 2018 (4-12 semanas após iniciar ou ajustar e depois a cada 3-12 meses). A ADA '
+                     '2026 aceita, depois do controle de 4-12 semanas, um perfil lipídico por ano.',
+                     ACC_AHA_COLESTEROL + ' / ' + ADA_LIPIDIOS)
+    elif diabetico:
+        lipidios = _rec('Colesterol total e frações, soro', 'laboratorio',
+                        'Diabetes sem estatina: perfil lipídico no diagnóstico e na avaliação inicial; depois anual a partir '
+                        'de 40 anos (idade em que a estatina passa a ser indicada) e a cada 5 anos antes disso.',
+                        'Diabéticos | Anual' if idade >= 40 else 'Diabéticos sem estatina, menos de 40 anos | A cada 5 anos',
+                        ADA_LIPIDIOS, 'B', 'alta')
+    if lipidios:
+        rastreio = next((r for r in recs if (r.get('titulo') or '').lower() == lipidios['titulo'].lower()
+                         and (r.get('subtitulo') or '').startswith('Adultos ')), None)
+        lipidios['_substituir'] = rastreio is not None
+        _garantir(recs, lipidios)
 
     # ---------------- História familiar ----------------
     # Colorretal (USMSTF 2017): parente de 1º grau antes dos 60 anos, ou 2 ou mais parentes → colonoscopia a cada
@@ -601,38 +741,83 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  'AAO 2020')
 
     # ---------------- Medicações ----------------
+    # Antagonista mineralocorticoide, e sacubitril/valsartana na IC: K e creatinina em 1 e 4 semanas e depois a
+    # cada 3-4 meses (ESC 2021; AHA/ACC/HFSA 2022). IECA/BRA e diuréticos: 2-4 semanas após iniciar ou ajustar
+    # e depois anual (KDIGO 2024, PP 3.6.2; AHA 2025).
     renais = ('ieca_bra', 'arni', 'espironolactona', 'tiazidico', 'diuretico_alca')
-    if set(renais) & med:
-        quais = ', '.join(MEDICACOES[k]['rotulo'] for k in renais if k in med)
-        add('Potássio, soro', 'laboratorio', f'Monitorização em uso de {quais}.', f'Em uso de {quais} | Anual',
-            'KDIGO 2024 / AHA 2025', 'B')
-        add('Creatinina, soro', 'laboratorio', f'Função renal em uso de {quais}.', f'Em uso de {quais} | Anual',
-            'KDIGO 2024 / AHA 2025', 'B')
+    frequentes = [k for k in renais if k in med and (k == 'espironolactona' or (k == 'arni' and ic))]
+    anuais = [k for k in renais if k in med and k not in frequentes]
+    if anuais:
+        quais = ', '.join(MEDICACOES[k]['rotulo'] for k in anuais)
+        add('Potássio, soro', 'laboratorio', f'Potássio em uso de {quais}: 2-4 semanas após iniciar ou ajustar a dose e '
+            'depois pelo menos uma vez por ano.', f'Em uso de {quais} | Anual', 'KDIGO 2024 / AHA 2025', 'B')
+        add('Creatinina, soro', 'laboratorio', f'Função renal em uso de {quais}: 2-4 semanas após iniciar ou ajustar a dose '
+            'e depois pelo menos uma vez por ano.', f'Em uso de {quais} | Anual', 'KDIGO 2024 / AHA 2025', 'B')
+    if frequentes:
+        quais = ', '.join(MEDICACOES[k]['rotulo'] for k in frequentes)
+        grupo = ('Insuficiência cardíaca em uso de ' if ic else 'Em uso de ') + quais
+        for titulo in ('Potássio, soro', 'Creatinina, soro'):
+            add(titulo, 'laboratorio',
+                'Antagonista mineralocorticoide (e sacubitril/valsartana na insuficiência cardíaca): potássio e creatinina 1 e '
+                '4 semanas após iniciar ou ajustar a dose, depois mensalmente até 3 meses e então a cada 3-4 meses.',
+                f'{grupo} | A cada 3-4 meses', ESC_IC + ' / AHA/ACC/HFSA 2022', 'C', 'alta')
     if {'tiazidico', 'diuretico_alca'} & med:
         add('Sódio, soro', 'laboratorio', 'Hiponatremia por diurético, sobretudo em idosos.', 'Em uso de diurético | Anual',
             'AHA 2025', 'C', 'baixa')
     if 'metformina' in med:
         add('Vitamina B12, soro', 'laboratorio',
             'Uso prolongado de metformina associa-se a deficiência de B12; dosar periodicamente, sobretudo com anemia '
-            'ou neuropatia.', 'Em uso de metformina | Periódico', 'ADA 2025', 'B')
+            'ou neuropatia.', 'Em uso de metformina | Periódico', ADA_METFORMINA, 'B')
     if 'antitireoidiano' in med or 'hipertireoidismo' in com:
-        add('Hormônio Tireoestimulante (TSH), soro', 'laboratorio',
-            'Hipertireoidismo: TSH (com T4 livre) a cada 4-8 semanas até o controle e depois a cada 3-6 meses.',
-            'Hipertireoidismo / antitireoidiano', 'ATA 2016', 'B')
+        for titulo in ('Hormônio Tireoestimulante (TSH), soro', 'T4 livre, soro'):
+            add(titulo, 'laboratorio',
+                'Hipertireoidismo: T4 livre e T3 total (com o TSH, que pode seguir suprimido por meses) 4-6 semanas após iniciar '
+                'o antitireoidiano, depois a cada 4-8 semanas até o eutireoidismo e então a cada 2-3 meses.',
+                'Hipertireoidismo / antitireoidiano | A cada 4-8 semanas', ATA_HIPERTIREOIDISMO, 'B')
+        if 'antitireoidiano' in med:
+            orientar('Antitireoidiano: agranulocitose e hepatotoxicidade',
+                     'Hemograma com diferencial se houver febre ou dor de garganta, e função hepática se houver sintomas de '
+                     'hepatotoxicidade; suspender o antitireoidiano até o resultado. Hemograma e função hepática basais antes '
+                     'de iniciar.', ATA_HIPERTIREOIDISMO)
+        else:
+            for titulo in ('Hemograma completo com plaquetas', 'Alanina aminotransferase, soro'):
+                add(titulo, 'laboratorio', 'Hipertireoidismo: hemograma com diferencial e função hepática basais antes de '
+                    'iniciar o antitireoidiano (neutropenia e hepatopatia prévias mudam a escolha).',
+                    'Hipertireoidismo | Antes do tratamento', ATA_HIPERTIREOIDISMO, 'B')
     if 'varfarina' in med:
         add('Tempo de protrombina (TP/INR), plasma', 'laboratorio',
             'Varfarina: INR a cada 4 semanas com dose estável (até 12 semanas se INR consistentemente no alvo).',
             'Em uso de varfarina | A cada 4-12 semanas', 'CHEST 2012', 'B', 'alta')
     if 'doac' in med:
+        # EHRA 2021: função renal, hemoglobina e função hepática anuais; a cada 6 meses com 75 anos ou mais (ou
+        # fragilidade); com ClCr ≤ 60 mL/min, a função renal a cada ClCr/10 meses.
+        meses = 6 if idade >= 75 else 12
+        clcr = _clcr(idade, sexo, peso, creatinina)
+        renal = min(meses, max(1, int(clcr // 10))) if clcr is not None and clcr <= 60 else meses
+        texto = {12: 'Anual', 1: 'A cada 1 mês'}.get(renal, f'A cada {renal} meses')
         add('Creatinina, soro', 'laboratorio',
-            'Anticoagulante oral direto: função renal ao menos anual (mais frequente se ClCr < 60 mL/min ou idade ≥ 75 anos) '
-            'para ajuste de dose.', 'Em uso de anticoagulante oral direto | Anual', 'EHRA 2021', 'B')
-        add('Hemograma completo com plaquetas', 'laboratorio', 'Anticoagulante oral direto: hemoglobina ao menos anual.',
-            'Em uso de anticoagulante oral direto | Anual', 'EHRA 2021', 'B')
+            'Anticoagulante oral direto: função renal (ClCr por Cockcroft-Gault) para ajustar a dose: anual; a cada 6 meses '
+            'com 75 anos ou mais ou fragilidade; com ClCr ≤ 60 mL/min, a cada "ClCr/10" meses (ClCr de 40: a cada 4 meses).',
+            f'Em uso de anticoagulante oral direto | {texto}', 'EHRA 2021', 'B')
+        for titulo in ('Hemograma completo com plaquetas', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro'):
+            add(titulo, 'laboratorio', 'Anticoagulante oral direto: hemoglobina e função hepática anuais (a cada 6 meses com '
+                '75 anos ou mais ou fragilidade).',
+                'Em uso de anticoagulante oral direto | ' + ('A cada 6 meses' if idade >= 75 else 'Anual'), 'EHRA 2021', 'B')
     if 'antipsicotico_atipico' in med:
         for titulo in ('Glicose, soro', 'Colesterol total e frações, soro'):
             add(titulo, 'laboratorio', 'Antipsicótico de 2ª geração: monitorização metabólica (peso, glicemia e lipídios) '
                 'em 12 semanas e depois anualmente.', 'Em uso de antipsicótico de 2ª geração | Anual', 'ADA/APA 2004', 'B')
+    if 'clozapina' in med:
+        add('Hemograma completo com plaquetas', 'laboratorio',
+            'Clozapina: contagem absoluta de neutrófilos antes de iniciar, semanal nos 6 primeiros meses, quinzenal do 6º ao 12º '
+            'mês e mensal depois (bula FDA; a FDA retirou o REMS em 2025, mas manteve a recomendação). A bula brasileira pede '
+            'semanal nas 18 primeiras semanas e mensal depois.', 'Em uso de clozapina | A cada 1-4 semanas',
+            FDA_CLOZAPINA + ' / ' + ANVISA_CLOZAPINA, 'B', 'alta')
+        orientar('Clozapina: neutrófilos e miocardite',
+                 'O motor seguiu a bula americana para os neutrófilos (semanal até 6 meses, quinzenal até 12 meses e mensal '
+                 'depois); a bula brasileira pede semanal até 18 semanas e mensal depois. Miocardite: troponina e PCR antes de '
+                 'iniciar e nos dias 7, 14, 21 e 28; troponina acima de 2 vezes o limite ou PCR acima de 100 mg/L indicam '
+                 'suspender.', FDA_CLOZAPINA + ' / ' + ANVISA_CLOZAPINA + ' / ' + RONALDSON)
     if 'inibidor_aromatase' in med:
         add('Densitometria óssea (DEXA)', 'imagem',
             'Inibidor de aromatase: densitometria no início do tratamento e a cada 1-2 anos.',
@@ -663,15 +848,24 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Colesterol total e frações, soro', 'laboratorio',
             'Corticoide sistêmico: perfil lipídico basal e de rotina durante o uso.', f'{quem} | Basal e periódico',
             CGH_CORTICOIDE + ' / ' + SPARLING, 'B')
-        add('MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)', 'imagem',
-            'Corticoide sistêmico: acompanhar a pressão arterial de rotina durante o uso (hipertensão induzida por corticoide).',
-            f'{quem} | Durante o uso', CGH_CORTICOIDE, 'B')
+        # A PA se acompanha no consultório: o uso de corticoide, sozinho, não indica MAPA (relatório D, D-14).
+        orientar('Corticoide sistêmico: pressão arterial',
+                 'Aferir a pressão arterial em cada consulta durante o uso (hipertensão induzida por corticoide).', CGH_CORTICOIDE)
         add('Avaliação oftalmológica com tonometria e fundoscopia', 'imagem',
             'Corticoide sistêmico: exame oftalmológico periódico para catarata e glaucoma.', f'{quem} | Periódico',
             CGH_CORTICOIDE + ' / ' + SPARLING, 'B')
+    # 25(OH)D e painel basal: só no uso por 3 meses ou mais (ou sem dose informada, tratado como crônico) e na
+    # dose imunossupressora. Dose baixa e curta não pede painel (relatório D, D-14).
+    if cronico:
         add('25-hidroxivitamina D, soro', 'laboratorio',
-            'Corticoide sistêmico: manter vitamina D adequada (prevenção de osteoporose induzida por corticoide).',
-            f'{quem} | Basal', 'ACR 2022 / ' + SPARLING, 'B')
+            'Corticoide sistêmico por 3 meses ou mais: manter vitamina D adequada (prevenção de osteoporose induzida por corticoide).',
+            f'{quem} | Basal', ACR_GIOP + ' / ' + SPARLING, 'B')
+        orientar('Vitamina D no corticoide crônico: diretrizes divergem',
+                 'O motor pede a 25(OH)D basal no uso de corticoide por 3 meses ou mais (Sparling 2024). A ACR 2022 recomenda '
+                 'otimizar cálcio e vitamina D sem exigir a dosagem, e a Endocrine Society 2024 sugere não dosar de rotina em '
+                 'adultos sem indicação. Retire o exame se for suplementar empiricamente.',
+                 SPARLING + ' / ' + ACR_GIOP + ' / ' + ENDO_VITAMINA_D)
+    if cronico or imunossupressor:
         painel = ('Hemograma completo com plaquetas', 'Albumina, soro', 'Creatinina, soro', 'Ureia, soro', 'Sódio, soro',
                   'Potássio, soro', 'Cálcio iônico, soro', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro',
                   'Fosfatase alcalina, soro', 'Bilirrubinas totais e frações, soro')
@@ -693,13 +887,17 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     if imunossupressor and 18 <= idade < 60 and not gestante:
         add(VSR, 'vacina', 'Dose única para adultos imunossuprimidos, incluído o uso de corticoide em dose imunossupressora.',
             'Corticoide em dose imunossupressora | Dose única', SBIM + ' / ' + CGH_CORTICOIDE, 'B')
-    if corticoide or 'biologico' in med:
-        motivo = ' e '.join(x for x, sim in (('corticoide sistêmico', corticoide),
+    # Tuberculose latente: corticoide ≥ 15 mg/dia de prednisona por ≥ 1 mês (MS 2019), dose imunossupressora ou
+    # imunobiológico. Sem a dose informada, conservador: entra, com o aviso de doses.py (relatório D, D-14).
+    tb_corticoide = imunossupressor or 'rastreio_tb_latente' in med or 'corticoide_sem_dose' in med
+    if tb_corticoide or 'biologico' in med:
+        motivo = ' e '.join(x for x, sim in (('corticoide sistêmico', tb_corticoide),
                                              (MEDICACOES['biologico']['rotulo'].lower(), 'biologico' in med)) if sim)
         imunossuprime = imunossupressor or 'rastreio_tb_latente' in med or 'biologico' in med
         add('Prova tuberculínica (PPD) ou IGRA', 'laboratorio',
             f'Rastreamento de tuberculose latente em uso de {motivo}; com resultado positivo e doença ativa afastada, tratar.',
-            ('Imunossupressão' if imunossuprime else 'Corticoide sistêmico') + ' | Antes ou no início do tratamento', 'MS 2019 (Manual de Tuberculose) / ACR 2022' + (' / ' + SPARLING if corticoide else ''), 'A', 'alta')
+            ('Imunossupressão' if imunossuprime else 'Corticoide sistêmico sem dose informada') + ' | Antes ou no início do tratamento',
+            'MS 2019 (Manual de Tuberculose) / ACR 2022' + (' / ' + SPARLING if tb_corticoide else ''), 'A', 'alta')
     if 'biologico' in med:
         for titulo in ('Antígeno HBs, soro', 'Anticorpos anti-HBc total, soro'):
             add(titulo, 'laboratorio', 'Imunobiológico ou inibidor de JAK: rastrear hepatite B antes do tratamento '
@@ -733,6 +931,104 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Imunoglobulina G (IgG), soro', 'laboratorio',
             'Rituximabe: IgG antes do primeiro ciclo e antes de cada novo ciclo (hipogamaglobulinemia aumenta o risco de '
             'infecção grave).', 'Em uso de rituximabe | Antes de cada ciclo', BUCH_RITUXIMABE, 'C', 'alta')
+    if 'ocrelizumabe' in med:
+        add('Imunoglobulina G (IgG), soro', 'laboratorio',
+            'Ocrelizumabe: imunoglobulinas antes de iniciar e antes de cada nova dose (hipogamaglobulinemia aumenta o risco de '
+            'infecção grave). Hepatite B ativa contraindica o uso: HBsAg e anti-HBc antes da primeira dose.',
+            'Em uso de ocrelizumabe | Antes de cada ciclo', FDA_OCRELIZUMABE, 'B', 'alta')
+    if 'natalizumabe' in med:
+        add('Anticorpo anti-JCV (vírus JC), soro', 'laboratorio',
+            'Natalizumabe: anticorpo anti-JCV (com índice) antes de iniciar para estratificar o risco de leucoencefalopatia '
+            'multifocal progressiva (LEMP), e a cada 6 meses enquanto negativo ou com índice baixo.',
+            'Em uso de natalizumabe | A cada 6 meses', EMA_NATALIZUMABE, 'B', 'alta')
+        for titulo in ('Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro'):
+            add(titulo, 'laboratorio', 'Natalizumabe: função hepática periódica (lesão hepática descrita na bula).',
+                'Em uso de natalizumabe | A cada 6 meses', EMA_NATALIZUMABE, 'C')
+    if 'fingolimode' in med:
+        add('Eletrocardiograma de repouso', 'imagem',
+            'Fingolimode: ECG antes da primeira dose e monitorização de 6 horas na primeira dose (bradicardia e bloqueio '
+            'atrioventricular).', 'Em uso de fingolimode | Antes do tratamento', EMA_FINGOLIMODE, 'B', 'alta')
+        add('Avaliação oftalmológica (fundo de olho)', 'imagem',
+            'Fingolimode: exame oftalmológico 3-4 meses após o início (edema macular); antes de iniciar no diabetes ou com uveíte.',
+            'Em uso de fingolimode | 3-4 meses após o início', EMA_FINGOLIMODE, 'B')
+        add('Varicela, IgG', 'laboratorio', 'Fingolimode: sorologia para varicela-zóster antes de iniciar; não imune, vacinar '
+            'e só iniciar o fingolimode 1 mês depois.', 'Em uso de fingolimode | Antes do tratamento', EMA_FINGOLIMODE, 'B')
+        add('Hemograma completo com plaquetas', 'laboratorio',
+            'Fingolimode: hemograma (linfócitos) antes de iniciar, no 3º mês e pelo menos anual.',
+            'Em uso de fingolimode | Anual', EMA_FINGOLIMODE, 'B')
+        for titulo in ('Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro'):
+            add(titulo, 'laboratorio', 'Fingolimode: transaminases antes de iniciar, nos meses 1, 3, 6, 9 e 12 e depois periodicamente.',
+                'Em uso de fingolimode | A cada 3 meses', EMA_FINGOLIMODE, 'B')
+    if 'micofenolato' in med:
+        add('Hemograma completo com plaquetas', 'laboratorio',
+            'Micofenolato: hemograma semanal no 1º mês, quinzenal no 2º e no 3º mês e mensal até completar 1 ano (neutropenia).',
+            'Em uso de micofenolato | A cada 1-4 semanas', EMA_MICOFENOLATO, 'B', 'alta')
+    if 'inibidor_mtor' in med:
+        for titulo in ('Colesterol total e frações, soro', 'Glicose, soro', 'Relação proteína/creatinina, urina'):
+            add(titulo, 'laboratorio', 'Sirolimo ou everolimo: lipídios, glicemia e proteinúria periódicos (dislipidemia, '
+                'hiperglicemia e proteinúria induzidas pelo inibidor de mTOR).', 'Em uso de sirolimo ou everolimo | Periódico',
+                EMA_SIROLIMO, 'B')
+        if 'transplante' in com:
+            add('Sirolimo ou everolimo, sangue total (nível de vale)', 'laboratorio',
+                'Transplantado em uso de sirolimo ou everolimo: nível de vale, com alvo definido pela equipe de transplante; '
+                'repetir após mudança de medicação que interage.', 'Transplante em uso de sirolimo ou everolimo | A cada 1-3 meses',
+                'KDIGO 2009 (transplante renal) / ' + EMA_SIROLIMO, 'B', 'alta')
+    if 'testosterona' in med and sexo == 'masculino':
+        add('Hemograma completo com plaquetas', 'laboratorio',
+            'Testosterona: hematócrito antes de iniciar, 3-6 meses após o início e depois anual; acima de 54%, suspender até '
+            'normalizar e investigar.', 'Em uso de testosterona | Anual', ENDO_TESTOSTERONA, 'B', 'alta')
+        risco_prostata = bool({'cancer_prostata', 'prostata_alto_risco', 'brca'} & fam)
+        if 55 <= idade <= 69 or (risco_prostata and 40 <= idade <= 69):
+            add('PSA total, soro', 'laboratorio',
+                'Testosterona: PSA 3-12 meses após o início (homens de 55 a 69 anos, ou de 40 a 69 com risco aumentado de '
+                'câncer de próstata) e depois conforme o rastreio habitual.',
+                'Em uso de testosterona | 3-12 meses após o início', ENDO_TESTOSTERONA, 'B')
+    if 'aminossalicilato' in med:
+        add('Creatinina, soro', 'laboratorio', 'Mesalazina: função renal antes de iniciar e pelo menos uma vez por ano '
+            '(nefrite intersticial).', 'Em uso de mesalazina | Anual', BSG_2019, 'C')
+    if 'alopurinol' in med:
+        orientar('Alopurinol: HLA-B*58:01',
+                 'Antes de iniciar, testar o HLA-B*58:01 em pessoas de ascendência do Sudeste Asiático ou afrodescendentes '
+                 '(risco maior de reação cutânea grave); recomendação condicional. Começar com dose baixa (até 100 mg/dia; '
+                 'menos na doença renal) e aumentar até o alvo de ácido úrico.', 'ACR 2020')
+    if 'zoledronico' in med:
+        for titulo in ('Creatinina, soro', 'Cálcio iônico, soro'):
+            add(titulo, 'laboratorio', 'Ácido zoledrônico: creatinina (clearance) e cálcio antes de cada infusão; hipocalcemia '
+                'deve ser corrigida antes, e ClCr < 35 mL/min contraindica.', 'Em uso de ácido zoledrônico | Antes de cada dose',
+                EMA_ZOLEDRONICO, 'B', 'alta')
+    if 'denosumabe' in med:
+        add('Cálcio iônico, soro', 'laboratorio', 'Denosumabe: cálcio antes de cada dose e, com risco de hipocalcemia (doença '
+            'renal crônica avançada), também nas 2 semanas seguintes à primeira dose.', 'Em uso de denosumabe | Antes de cada dose',
+            EMA_DENOSUMABE, 'B', 'alta')
+    if 'sotalol' in med:
+        add('Eletrocardiograma de repouso', 'imagem', 'Sotalol: ECG com QTc no início e a cada ajuste de dose (pró-arrítmico).',
+            'Em uso de sotalol | No início e a cada ajuste de dose', AHA_FA_2023, 'B', 'alta')
+        add('Creatinina, soro', 'laboratorio', 'Sotalol: função renal (ClCr) para definir a dose e o intervalo; eliminação renal.',
+            'Em uso de sotalol | No início e a cada ajuste de dose', AHA_FA_2023, 'B', 'alta')
+    if 'prep' in med and 'hiv' not in com:
+        # PCDT PrEP oral (Portaria SECTICS/MS nº 55/2024), Quadro 5: consultas a cada 120 dias.
+        add('Anti-HIV 1 e 2, soro', 'laboratorio',
+            'PrEP: teste de HIV (de preferência teste rápido) 30 dias após o início e em toda consulta, a cada 120 dias; '
+            'obrigatório para dispensar a medicação.', 'PrEP | A cada 4 meses', PCDT_PREP, 'A', 'alta')
+        add('Sífilis: teste treponêmico ou VDRL, soro', 'laboratorio', 'PrEP: teste para sífilis a cada 120 dias.',
+            'PrEP | A cada 4 meses', PCDT_PREP, 'A', 'alta')
+        add('Anticorpos anti-HCV, soro', 'laboratorio', 'PrEP: anti-HCV a cada 120 dias se o anterior foi não reagente '
+            '(o texto do PCDT fala em a cada 3 meses).', 'PrEP | A cada 4 meses', PCDT_PREP, 'B')
+        for titulo in ('Antígeno HBs, soro', 'Anticorpos anti-HBs, soro'):
+            add(titulo, 'laboratorio', 'PrEP: HBsAg e anti-HBs anuais, conforme a avaliação inicial; vacinar quem não é imune.',
+                'PrEP | Anual', PCDT_PREP, 'B')
+        add('Clamídia e gonococo, PCR (urina ou swab)', 'laboratorio',
+            'PrEP: teste molecular para clamídia e gonococo a cada 6 meses (antes, se houver sintomas).',
+            'PrEP | A cada 6 meses', PCDT_PREP, 'B')
+        clcr = _clcr(idade, sexo, peso, creatinina)
+        risco_renal = idade >= 50 or diabetico or hipertenso or 'doenca_renal' in com or clcr is None or clcr < 90
+        add('Creatinina, soro', 'laboratorio',
+            'PrEP: creatinina com clearance a cada 12 meses abaixo de 50 anos, sem comorbidade e com ClCr ≥ 90 mL/min; a cada '
+            '6 meses a partir de 50 anos, com hipertensão, diabetes ou ClCr < 90 (ou sem ClCr calculado).',
+            'PrEP | ' + ('A cada 6 meses' if risco_renal else 'Anual'), PCDT_PREP, 'B')
+        if sexo == 'feminino' and idade <= 50 and not gestante:
+            add('Beta-hCG, soro', 'laboratorio', 'PrEP em quem pode engravidar: teste de gravidez a cada 120 dias ou quando necessário.',
+                'PrEP | A cada 4 meses', PCDT_PREP, 'B')
     if {'oncologico', 'antraciclina', 'anti_her2', 'inibidor_checkpoint', 'fluoropirimidina'} & med:
         add('HBsAg, anti-HBc total e anti-HBs', 'laboratorio',
             'Tratamento sistêmico do câncer: HBsAg, anti-HBc total e anti-HBs antes de iniciar (risco de reativação da '
@@ -772,18 +1068,34 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                 add(titulo, 'laboratorio', 'Bloqueio androgênico: pressão arterial, perfil lipídico e glicemia antes de '
                     'iniciar (resistência insulínica, dislipidemia e risco cardiovascular).',
                     'Bloqueio androgênico | Antes do tratamento', AHA_ADT, 'B')
-    for classe, exames, quando, ref in (
-            ('metotrexato', ('Hemograma completo com plaquetas', 'Aspartato aminotransferase, soro',
-                             'Alanina aminotransferase, soro', 'Creatinina, soro'), 'A cada 8-12 semanas', 'ACR 2021'),
-            ('azatioprina', ('Hemograma completo com plaquetas', 'Aspartato aminotransferase, soro',
-                             'Alanina aminotransferase, soro'), 'A cada 12 semanas', 'BSR 2017'),
-            ('leflunomida', ('Hemograma completo com plaquetas', 'Aspartato aminotransferase, soro',
-                             'Alanina aminotransferase, soro'), 'A cada 8-12 semanas', 'ACR 2021'),
-            ('inibidor_calcineurina', ('Creatinina, soro', 'Potássio, soro', 'Magnésio, soro'), 'A cada 1-3 meses', 'KDIGO 2009 (transplante)')):
-        if classe in med:
-            for titulo in exames:
-                add(titulo, 'laboratorio', f'Monitorização de toxicidade em uso de {MEDICACOES[classe]["rotulo"].lower()}.',
-                    f'Em uso de {MEDICACOES[classe]["rotulo"].lower()} | {quando}', ref, 'B')
+    # Antirreumáticos sintéticos (BSR 2017): hemograma, TGO/TGP, creatinina e albumina a cada 2 semanas até 6 semanas de
+    # dose estável, depois mensal por 3 meses e então pelo menos a cada 12 semanas (relatório D, D-16, D-17, D-21).
+    painel_dmard = ('Hemograma completo com plaquetas', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro',
+                    'Creatinina, soro', 'Albumina, soro')
+    for classe in ('metotrexato', 'leflunomida', 'azatioprina', 'sulfassalazina'):
+        if classe not in med:
+            continue
+        nome = MEDICACOES[classe]['rotulo'].lower()
+        for titulo in painel_dmard:
+            add(titulo, 'laboratorio', f'Monitorização de toxicidade em uso de {nome}: a cada 2 semanas até completar 6 semanas '
+                'com dose estável, depois mensal por 3 meses e então pelo menos a cada 12 semanas; repetir o ciclo a cada '
+                'aumento de dose.', f'Em uso de {nome} | A cada 2-12 semanas', BSR, 'B')
+        if classe in ('metotrexato', 'leflunomida'):
+            for titulo in ('Antígeno HBs, soro', 'Anticorpos anti-HBc total, soro', 'Anticorpos anti-HCV, soro'):
+                add(titulo, 'laboratorio', f'Antes de iniciar {nome}: rastrear hepatites B e C (HIV conforme o risco).',
+                    f'Em uso de {nome} | Avaliação inicial', BSR, 'B')
+        if classe == 'metotrexato':
+            add('Radiografia de tórax', 'imagem', 'Metotrexato: radiografia de tórax antes de iniciar, se não houver uma dos '
+                'últimos 6 meses (referência para pneumonite).', 'Em uso de metotrexato | Avaliação inicial', BSR, 'C')
+        if classe == 'azatioprina':
+            add('Atividade da TPMT ou genotipagem TPMT/NUDT15', 'laboratorio',
+                'Azatioprina: atividade da TPMT (ou genotipagem de TPMT e NUDT15) antes de iniciar; atividade baixa pede dose '
+                'reduzida e ausente contraindica.', 'Em uso de azatioprina | Antes do tratamento', BSR + ' / ' + CPIC_TIOPURINA,
+                'A', 'alta')
+    if 'inibidor_calcineurina' in med:
+        for titulo in ('Creatinina, soro', 'Potássio, soro', 'Magnésio, soro'):
+            add(titulo, 'laboratorio', 'Monitorização de toxicidade em uso de ciclosporina ou tacrolimo.',
+                'Em uso de ciclosporina ou tacrolimo | A cada 1-3 meses', 'KDIGO 2009 (transplante)', 'B')
     if 'bisfosfonato_longo' in med:
         add('Densitometria óssea (DEXA)', 'imagem',
             'Bisfosfonato por 5 anos (oral) ou 3 anos (ácido zoledrônico): densitometria para decidir entre pausa e continuidade.',
@@ -827,6 +1139,16 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  'de má adesão ou de toxicidade, ajuste de dose de fenitoína, interação farmacocinética ou situações '
                  'especiais (gestação, insuficiência renal ou hepática). Indicar na requisição o horário da última dose.',
                  'NICE NG217 (2022)')
+    if sexo == 'feminino' and idade <= 55 and not gestante:
+        if 'valproato' in med:
+            orientar('Valproato em mulher que pode engravidar',
+                     'Programa de prevenção da gravidez: teste de gravidez antes de iniciar e quando necessário, contracepção '
+                     'eficaz durante todo o uso e revisão anual da indicação por especialista (risco de malformação e de '
+                     'alteração do neurodesenvolvimento).', EMA_VALPROATO + ' / NICE NG217 (2022)')
+        if {'carbamazepina', 'fenitoina', 'fenobarbital'} & med:
+            orientar('Anticonvulsivante indutor enzimático e contracepção',
+                     'Carbamazepina, fenitoína e fenobarbital reduzem a eficácia de contraceptivos hormonais orais, do adesivo, '
+                     'do anel e do implante: preferir DIU (cobre ou levonorgestrel) ou injetável trimestral.', 'NICE NG217 (2022)')
     if 'transplante' in com:
         for classe, titulo in (('tacrolimo', 'Tacrolimo, sangue total (nível de vale)'),
                                ('ciclosporina', 'Ciclosporina, sangue total (nível de vale)')):
@@ -840,10 +1162,20 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         for titulo in ('Hormônio Tireoestimulante (TSH), soro', 'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro'):
             add(titulo, 'laboratorio', 'Toxicidade tireoidiana e hepática da amiodarona.', 'Em uso de amiodarona | A cada 6 meses',
                 'HRS 2007 (Goldschlager)', 'B')
+        add('T4 livre, soro', 'laboratorio', 'Amiodarona: TSH e T4 livre antes de iniciar e a cada 6 meses (hipo e '
+            'hipertireoidismo).', 'Em uso de amiodarona | A cada 6 meses', 'HRS 2007 (Goldschlager)', 'B')
+        add('Radiografia de tórax', 'imagem', 'Amiodarona: radiografia de tórax antes de iniciar e anual (toxicidade pulmonar).',
+            'Em uso de amiodarona | Anual', 'HRS 2007 (Goldschlager)', 'B')
+        add('Prova de função pulmonar completa com difusão (DLCO)', 'imagem',
+            'Amiodarona: prova de função pulmonar com DLCO antes de iniciar (referência para tosse ou dispneia novas).',
+            'Em uso de amiodarona | Basal', 'HRS 2007 (Goldschlager)', 'B')
+        if 'varfarina' in med:
+            orientar('Amiodarona com varfarina',
+                     'A amiodarona potencializa a varfarina: reduzir empiricamente a dose da varfarina ao iniciar a amiodarona e '
+                     'medir o INR semanalmente nas primeiras 6-8 semanas.', 'HRS 2007 (Goldschlager)')
 
     # ---------------- Comorbidades ----------------
     com_tipo = bool(set(TIPOS_DE_DIABETES) & com)
-    diabetico = com_tipo or 'diabetes_sem_tipo' in com or 'insulina' in med
     if 'diabetes_sem_tipo' in com:
         orientar('HbA1c ≥ 6,5%: informe o tipo de diabetes',
                  'HbA1c ≥ 6,5% é critério de diabetes (confirmar com um segundo exame se não houver hiperglicemia inequívoca), '
@@ -861,7 +1193,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                 'Diabetes gestacional prévio | Pelo menos a cada 3 anos', 'ADA 2026', 'B', 'alta')
     if 'pre_diabetes' in com:
         add('Hemoglobina glicada (HbA1c), soro', 'laboratorio', 'Pré-diabetes: reavaliar a glicemia ao menos uma vez por ano.',
-            'Pré-diabetes | Anual', 'ADA 2025', 'B')
+            'Pré-diabetes | Anual', 'ADA 2026', 'B')
     if 'cirurgia_bariatrica' in com:
         for titulo in ('Hemograma completo com plaquetas', 'Ferritina, soro', 'Vitamina B12, soro', 'Ácido fólico, soro',
                        '25-hidroxivitamina D, soro', 'Cálcio iônico, soro', 'Paratormônio (PTH), soro'):
@@ -874,7 +1206,34 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     if 'masld' in com:
         for titulo in ('Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro', 'Hemograma completo com plaquetas'):
             add(titulo, 'laboratorio', 'Para o cálculo do FIB-4 (idade, AST, ALT, plaquetas): estratifica risco de fibrose '
-                'avançada; FIB-4 ≥ 1,3 pede elastografia.', 'MASLD | FIB-4 a cada 1-2 anos', 'AASLD 2023 / ADA 2025', 'B')
+                'avançada; FIB-4 ≥ 1,3 pede elastografia.', 'MASLD | FIB-4 a cada 1-2 anos', AASLD_MASLD + ' / ' + ADA_FIGADO, 'B')
+    # Fibrose hepática pelo FIB-4 mesmo com enzimas normais (relatório D, D-22 e D-24): diabetes tipo 2 e outros tipos
+    # e pré-diabetes (ADA 2026, seção 4); diabetes tipo 1 só com obesidade ou MASLD; obesidade com mais um fator
+    # metabólico (AASLD 2023: 2 ou mais fatores de risco metabólico).
+    so_dm1 = 'diabetes_tipo_1' in com and not (set(TIPOS_DE_DIABETES) - {'diabetes_tipo_1'}) & com
+    metabolicos = hipertenso or 'dislipidemia' in com or hipolipemiante or 'pre_diabetes' in com or diabetico
+    fib4 = None
+    if (diabetico and not so_dm1) or 'pre_diabetes' in com:
+        fib4 = ('Diabetes tipo 2 ou pré-diabetes', ADA_FIGADO + ' / ' + AASLD_MASLD)
+    elif diabetico and (obeso or 'masld' in com):
+        fib4 = ('Diabetes tipo 1 com obesidade ou MASLD', ADA_FIGADO + ' / ' + AASLD_MASLD)
+    elif obeso and metabolicos:
+        fib4 = ('Obesidade com fator de risco metabólico', AASLD_MASLD)
+    if fib4:
+        for titulo in ('Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro', 'Hemograma completo com plaquetas'):
+            add(titulo, 'laboratorio', 'Rastreio de fibrose hepática pelo FIB-4 (idade, AST, ALT e plaquetas), mesmo com enzimas '
+                'normais: abaixo de 1,3, repetir em 1-2 anos; de 1,3 em diante, elastografia; acima de 2,67, encaminhar ao '
+                'hepatologista.', f'{fib4[0]} | FIB-4 a cada 1-2 anos', fib4[1], 'B')
+    if diabetico:
+        orientar('Diabetes: exame dos pés',
+                 'Avaliação completa dos pés pelo menos uma vez por ano: inspeção, pulsos pediosos, monofilamento de 10 g e mais um '
+                 'teste de sensibilidade (vibração com diapasão de 128 Hz, pinprick ou reflexo aquileu); a cada consulta se houver '
+                 'perda de sensibilidade, deformidade ou úlcera prévia.', ADA_PES)
+    if 'diabetes_tipo_1' in com:
+        for titulo in ('Anticorpo antitransglutaminase tecidual IgA, soro', 'Imunoglobulina A (IgA), soro'):
+            add(titulo, 'laboratorio', 'Diabetes tipo 1: rastrear doença celíaca (antitransglutaminase IgA com IgA total) logo após o '
+                'diagnóstico; repetir se houver sintomas, crescimento ou glicemia instáveis ou parente de 1º grau com doença celíaca.',
+                'Diabetes tipo 1 | Avaliação inicial', ADA_FIGADO, 'B')
     if 'cirrose' in com:
         add('Ultrassonografia de abdome superior', 'imagem',
             'Cirrose: rastreamento de carcinoma hepatocelular com ultrassonografia a cada 6 meses (com ou sem alfafetoproteína).',
@@ -887,10 +1246,17 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'BHOF 2022', 'B')
         add('25-hidroxivitamina D, soro', 'laboratorio', 'Manter 25(OH)D ≥ 30 ng/mL em osteoporose.', 'Osteoporose',
             'BHOF 2022', 'B')
-        for titulo in ('Cálcio iônico, soro', 'Fósforo, soro', 'Creatinina, soro', 'Fosfatase alcalina, soro',
-                       'Paratormônio (PTH), soro'):
-            add(titulo, 'laboratorio', 'Osteoporose: investigar causas secundárias no diagnóstico (cálcio, fósforo, função '
-                'renal, fosfatase alcalina e PTH) antes de iniciar o tratamento.', 'Osteoporose | Avaliação inicial', 'BHOF 2022', 'B')
+        # Causas secundárias só no diagnóstico (relatório D, D-37): detalhe "diagnóstico recente" do item.
+        if 'osteoporose_diagnostico' in com:
+            for titulo in ('Cálcio iônico, soro', 'Fósforo, soro', 'Creatinina, soro', 'Fosfatase alcalina, soro',
+                           'Paratormônio (PTH), soro'):
+                add(titulo, 'laboratorio', 'Osteoporose: investigar causas secundárias no diagnóstico (cálcio, fósforo, função '
+                    'renal, fosfatase alcalina e PTH) antes de iniciar o tratamento.', 'Osteoporose | Avaliação inicial', 'BHOF 2022', 'B')
+        else:
+            orientar('Osteoporose: causas secundárias',
+                     'As causas secundárias (cálcio, fósforo, função renal, fosfatase alcalina e PTH) se investigam no diagnóstico, '
+                     'antes de iniciar o tratamento. Se ainda não foram investigadas, marque o detalhe "diagnóstico recente" do item.',
+                     'BHOF 2022')
     if 'gota' in com:
         add('Ácido úrico, soro', 'laboratorio', 'Tratamento por alvo: ácido úrico < 6 mg/dL.', 'Gota | Alvo < 6 mg/dL',
             'ACR 2020', 'A')
@@ -1049,6 +1415,90 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         orientar('Hepatite C: depois da cura',
                  'Com fibrose avançada ou cirrose, a ultrassonografia a cada 6 meses continua mesmo após a cura. Sem ela, '
                  'não há acompanhamento hepático de rotina; repetir o HCV-RNA se houver nova exposição.', AASLD_HCV)
+
+    # ---------------- Doença renal crônica (relatório D, D-01; relatório A, M-03) ----------------
+    if 'doenca_renal' in com:
+        g, a = estagio_drc(com, tfg)
+        if g:
+            vezes = VEZES_POR_ANO[g][CATEGORIAS_A.index(a) if a else 0]
+        else:
+            vezes = {'A3': 2}.get(a, 1)
+        grupo = ' '.join(['Doença renal crônica'] + [x for x in (g, a) if x])
+        freq = _FREQUENCIA[vezes]
+        for titulo in ('Creatinina, soro', 'Relação albumina/creatinina urinária (uACR)'):
+            add(titulo, 'laboratorio',
+                'Doença renal crônica: TFG estimada (CKD-EPI 2021) e albuminúria (uACR) pelo menos uma vez por ano e mais vezes '
+                'com maior risco de progressão, pelo mapa G x A do KDIGO 2024 (de 1 vez por ano em G1-G2/A1 a 4 ou mais em G4-G5). '
+                'A uACR também define a categoria A e a indicação de iSGLT2 e de IECA ou BRA.',
+                f'{grupo} | {freq}', KDIGO_DRC, 'E', 'alta')
+        if not g or not a:
+            orientar('Doença renal crônica: informe o estágio',
+                     'A frequência de TFG e albuminúria depende do estágio G (TFG) e da categoria A (albuminúria). Informe a '
+                     'creatinina e marque os detalhes do item para o sistema ajustar; sem eles, o mínimo é uma vez por ano.', KDIGO_DRC)
+        if g in ('G3a', 'G3b', 'G4', 'G5'):
+            g3 = g in ('G3a', 'G3b')
+            add('Hemograma completo com plaquetas', 'laboratorio',
+                'DRC: rastrear anemia (hemoglobina) pelo menos uma vez por ano em G3 e duas vezes por ano em G4-G5.',
+                f'{grupo} | ' + ('Anual' if g3 else 'A cada 6 meses'), KDIGO_ANEMIA, 'E')
+            ca_p = {'G3a': 'A cada 6-12 meses', 'G3b': 'A cada 6-12 meses', 'G4': 'A cada 3-6 meses', 'G5': 'A cada 1-3 meses'}[g]
+            for titulo in ('Cálcio iônico, soro', 'Fósforo, soro'):
+                add(titulo, 'laboratorio', 'Distúrbio mineral e ósseo da DRC: cálcio e fósforo a cada 6-12 meses em G3, a cada 3-6 '
+                    'meses em G4 e a cada 1-3 meses em G5.', f'{grupo} | {ca_p}', KDIGO_DMO, 'E')
+            pth = {'G4': 'A cada 6-12 meses', 'G5': 'A cada 3-6 meses'}.get(g, 'Avaliação inicial')
+            add('Paratormônio (PTH), soro', 'laboratorio', 'Distúrbio mineral e ósseo da DRC: PTH basal em G3 (repetir conforme o '
+                'valor e a progressão), a cada 6-12 meses em G4 e a cada 3-6 meses em G5.', f'{grupo} | {pth}', KDIGO_DMO, 'E')
+            add('Fosfatase alcalina, soro', 'laboratorio', 'Distúrbio mineral e ósseo da DRC: fosfatase alcalina basal em G3 e anual '
+                'a partir de G4 (mais vezes com PTH elevado).', f'{grupo} | ' + ('Avaliação inicial' if g3 else 'Anual'), KDIGO_DMO, 'E')
+            add('25-hidroxivitamina D, soro', 'laboratorio', 'Distúrbio mineral e ósseo da DRC: 25(OH)D basal a partir de G3a; '
+                'repetir conforme o valor e o tratamento.', f'{grupo} | Avaliação inicial', KDIGO_DMO, 'C')
+            for titulo in ('Potássio, soro', 'Reserva alcalina (bicarbonato)'):
+                add(titulo, 'laboratorio', 'DRC G3a ou mais: potássio e bicarbonato junto da TFG (hipercalemia e acidose metabólica, '
+                    'que mudam o tratamento).', f'{grupo} | {freq}', KDIGO_DRC, 'E')
+        if g in ('G4', 'G5') or a == 'A3':
+            orientar('Doença renal crônica: encaminhar ao nefrologista',
+                     'TFG abaixo de 30 mL/min/1,73 m² ou albuminúria A3 (uACR ≥ 300 mg/g): acompanhamento conjunto com nefrologia.',
+                     KDIGO_DRC)
+
+    # ---------------- Insuficiência cardíaca (relatório D, D-02) ----------------
+    if ic:
+        for titulo in ('Hemograma completo com plaquetas', 'Ferritina, soro', 'Índice de saturação de transferrina, soro'):
+            add(titulo, 'laboratorio',
+                'Insuficiência cardíaca: rastrear anemia e deficiência de ferro periodicamente em todos, com hemograma, ferritina e '
+                'saturação de transferrina (classe I). Ferropenia: ferritina < 100 ng/mL, ou 100-299 com saturação < 20%; com '
+                'sintomas e fração de ejeção reduzida ou levemente reduzida, ferro intravenoso (classe I).',
+                'Insuficiência cardíaca | Anual', ESC_IC + ' / ' + ESC_IC_2023, 'C', 'alta')
+        add('Peptídeo natriurético BNP/PROBNP', 'laboratorio',
+            'Insuficiência cardíaca: peptídeo natriurético na avaliação inicial (prognóstico e referência) e de novo na mudança do '
+            'quadro clínico.', 'Insuficiência cardíaca | Avaliação inicial', ESC_IC, 'B')
+        add('Hormônio Tireoestimulante (TSH), soro', 'laboratorio',
+            'Insuficiência cardíaca: TSH na avaliação inicial (hipo e hipertireoidismo causam ou agravam a IC).',
+            'Insuficiência cardíaca | Avaliação inicial', ESC_IC, 'C')
+
+    # ---------------- Hipertensão (relatório D, D-13, D-30 e Dúvida 1) ----------------
+    if hipertenso and idade >= 18:
+        for titulo in ('Hormônio Tireoestimulante (TSH), soro', 'Cálcio iônico, soro', 'Sódio, soro',
+                       'Hemograma completo com plaquetas'):
+            add(titulo, 'laboratorio', 'Hipertensão: exames básicos da avaliação inicial (glicemia, hemograma, lipídios, creatinina '
+                'com TFG, sódio, potássio, cálcio, TSH, urina e ECG).', 'Adultos com HAS | Avaliação inicial',
+                ACC_AHA_HAS_2017 + ' / AHA 2025', 'B')
+        orientar('Ácido úrico na hipertensão: diretrizes divergem',
+                 'A SBC 2025 inclui o ácido úrico nos exames de rotina do hipertenso; a AHA/ACC o trata como exame opcional, sem '
+                 'repetição seriada. O motor pede uma dosagem na avaliação inicial.', 'SBC 2025 / AHA 2025')
+        resistente = 'has_resistente' in com
+        if 'apneia_sono' in com and not resistente:
+            add('Relação Aldosterona/Renina (A/R)', 'laboratorio',
+                'Hipertensão com apneia obstrutiva do sono: rastrear hiperaldosteronismo primário (relação aldosterona/renina pela '
+                'manhã; manter o potássio normal e suspender o antagonista mineralocorticoide antes).',
+                'HAS com apneia do sono | Avaliação inicial', ENDO_PA_2016, 'C')
+        orientar('Hiperaldosteronismo primário: diretrizes divergem',
+                 'O motor pede a relação aldosterona/renina na HAS resistente (AHA/ACC 2025, classe 1, com qualquer potássio) e na '
+                 'HAS com apneia do sono (Endocrine Society 2016). Rastreie também com hipocalemia espontânea ou por diurético, '
+                 'incidentaloma adrenal, PA ≥ 150/100 persistente ou história familiar de HAS ou AVC antes dos 40 anos. A '
+                 'Endocrine Society 2025 sugere rastrear todos os hipertensos (recomendação condicional, certeza baixa).',
+                 'AHA 2025 / ' + ENDO_PA_2016 + ' / ' + ENDO_PA_2025)
+    if 'apneia_sono' in com:
+        # A apneia já diagnosticada não se investiga de novo na HAS resistente (relatório D, D-30).
+        recs[:] = [r for r in recs if r.get('titulo') != 'Polissonografia']
 
     # ---------------- Outras comorbidades ----------------
     if 'neoplasia_ativa' in com:

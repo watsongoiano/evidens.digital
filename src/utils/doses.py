@@ -111,10 +111,11 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
     if corticoides:
         completos = [m for m in corticoides if 'dose' in detalhes.get(m, {}) and 'duracao' in detalhes.get(m, {})]
         if len(completos) < len(corticoides):
+            acrescentar.add('corticoide_sem_dose')
             orientar('Corticoide sistêmico: informe dose e duração',
                      'Sem dose e duração, o uso foi tratado como crônico (≥ 3 meses). Com os dois, a ferramenta diz se há '
-                     'imunossupressão (vacinas de vírus vivo) e se cabe densitometria. A avaliação laboratorial e a '
-                     'monitorização do corticoide valem em qualquer dose.',
+                     'imunossupressão (vacinas de vírus vivo) e se cabem densitometria, painel laboratorial basal e prova '
+                     'tuberculínica (que saem com dose baixa e curta). Glicemia, lipídios, pressão e olhos valem em qualquer dose.',
                      'ACR 2022 / SBIm 2026/2027')
         else:
             equivalente = {m: detalhes[m]['dose'] * POR_MEDICAMENTO[m][1] for m in corticoides}
@@ -140,7 +141,7 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
                          'depois de suspender. Manter em dia as inativadas: influenza, COVID-19, pneumocócica, herpes-zóster '
                          'recombinante, HPV, VSR, dTpa, hepatites A e B nos não vacinados e meningocócicas quando indicadas. '
                          'Durante o uso: avaliação laboratorial basal, glicemia e HbA1c, perfil lipídico, pressão arterial '
-                         '(MAPA) e exame oftalmológico; densitometria se o uso passar de 3 meses.',
+                         'em cada consulta e exame oftalmológico; densitometria se o uso passar de 3 meses.',
                          'SBIm 2026/2027 / CDC/ACIP 2025 / CGH 2025 (Feuerstein) / Drugs Aging 2024 (Sparling)')
             if tb_latente:
                 acrescentar.add('rastreio_tb_latente')
@@ -158,8 +159,9 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
             elif not imunossupressor:
                 orientar('Corticoide sistêmico em dose ou tempo baixos',
                          f'{resumo}: abaixo dos limiares de imunossupressão (20 mg/dia por 2 semanas) e de risco de fratura '
-                         '(2,5 mg/dia por 3 meses). Não muda as vacinas nem indica densitometria; a avaliação laboratorial e a '
-                         'monitorização do corticoide (glicemia, lipídios, pressão, olhos) seguem indicadas.',
+                         '(2,5 mg/dia por 3 meses). Não muda as vacinas nem indica densitometria, painel laboratorial basal ou '
+                         'prova tuberculínica (abaixo de 15 mg/dia por 1 mês); glicemia, lipídios, pressão e olhos seguem '
+                         'indicados.',
                          'ACR 2022 / SBIm 2026/2027 / CGH 2025 (Feuerstein)')
 
     if 'metotrexato' in medicacoes:
