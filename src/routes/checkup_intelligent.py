@@ -1457,8 +1457,12 @@ def generate_intelligent_recommendations():
             is_diabetic=is_diabetic, rastreio_dm=rastreio_dm, imc=imc, hiv=is_hiv_positive, prep=prep,
             rastrear_hbv=not is_pregnant and 'hepatite_b_cronica' not in comorbidades, tabagismo=tabagismo,
             fatores_osso=fatores_osso, drc_a_confirmar=drc_a_confirmar, dm_a_confirmar=dm_a_confirmar)
+        from src.utils import aconselhamento
+        orientacoes_aconselhamento = aconselhamento.orientacoes(
+            age, sex, gestante=is_pregnant, lactante=triagem.get('lactante') not in (None, 'nao'), tabagismo=tabagismo, imc=imc,
+            comorbidades=comorbidades, historia_familiar=familia, medicacoes=escolhidas, prep=prep)
         todas = (orientacoes_gestacao + orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_ist
-                 + orientacoes_hiv + orientacoes_cancer + orientacoes_rastreio)
+                 + orientacoes_hiv + orientacoes_cancer + orientacoes_rastreio + orientacoes_aconselhamento)
         # Urgências (PA em faixa grave na gestação) no topo; depois as da gestação (alto risco, AAS, divergências).
         response['orientacoes'] = [o for o in todas if o.get('urgente')] + [o for o in todas if not o.get('urgente')]
         response['resultados_informados'] = periodicidade.resultados_informados(exames_anteriores)

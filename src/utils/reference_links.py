@@ -138,6 +138,7 @@ _FONTES_DIRETAS = [
     ('conitec 2026 (aas', 'https://www.gov.br/conitec/pt-br/midias/consultas/relatorios/2026/relatorio-preliminar-acido-acetilsalicilico-pre-eclampsia-cp-53/@@display-file/file'),
     ('uspstf 2021 (aas', 'https://www.uspreventiveservicestaskforce.org/uspstf/document/RecommendationStatementFinal/low-dose-aspirin-use-for-the-prevention-of-morbidity-and-mortality-from-preeclampsia-preventive-medication'),
     ('uspstf 2021 (clamídia', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/chlamydia-and-gonorrhea-screening'),
+    ('uspstf a e b', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations'),
     ('uspstf 2023 (ácido fólico', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/folic-acid-for-the-prevention-of-neural-tube-defects-preventive-medication'),
     ('ms nt 8/2025', 'https://www.gov.br/aids/pt-br/central-de-conteudo/notas-tecnicas/2025/nota-tecnica-no-8-2025-cgist-dathi-svsa-ms.pdf/@@download/file'),
     ('ms 2022 (gestação de alto risco)', 'https://bvsms.saude.gov.br/bvs/publicacoes/manual_gestacao_alto_risco.pdf'),
