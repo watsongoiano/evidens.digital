@@ -1712,7 +1712,12 @@ def _ler_apac(usuario, categoria):
     cid = pedido.get('cid') or ''
     if not isinstance(cid, str) or not re.fullmatch(r'([A-Z]\d{2}(\.?\d)?)?', cid.strip().upper()):
         raise PedidoDePdfInvalido('Confira o CID-10 (ex.: Z12.2).')
-    return {'vinculo': vinculo, 'paciente': paciente, 'cid': cid.strip().upper()}
+    from src.utils import sigtap
+    comorbidades = pedido.get('comorbidades') or []
+    if not isinstance(comorbidades, list) or len(comorbidades) > 40:
+        raise PedidoDePdfInvalido('Comorbidades da APAC inválidas')
+    comorbidades = [c for c in comorbidades if isinstance(c, str) and c in sigtap.CID_DA_COMORBIDADE]
+    return {'vinculo': vinculo, 'paciente': paciente, 'cid': cid.strip().upper(), 'comorbidades': comorbidades}
 
 
 def _ler_justificativa():

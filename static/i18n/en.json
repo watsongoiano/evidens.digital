@@ -3068,7 +3068,9 @@
   "maços-ano": "pack-years",
   "Cigarros por dia": "Cigarettes per day",
   "Anos de tabagismo": "Years of smoking",
-  "Unidade": "Unit"
+  "Unidade": "Unit",
+  "CID-10 principal (opcional)": "Main ICD-10 (optional)",
+  "Automático pelas comorbidades": "Automatic from the comorbidities"
  },
  "padroes": [
   [

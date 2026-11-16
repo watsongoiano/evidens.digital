@@ -1,6 +1,7 @@
 """SUS: estabelecimentos por CNES (cadastro compartilhado), vínculo do médico com o CNS dele e o laudo de
 solicitação de APAC que sai junto do pedido de exames de imagem. Dados fictícios."""
 import io
+import re
 import itertools
 
 import pytest
@@ -128,3 +129,20 @@ def test_tela_tem_o_sus_no_seletor_e_os_campos_da_apac():
     assert 'id="apacCampos"' in html and 'function apacDoDialogo(categoria)' in html
     conta = (raiz / 'conta.html').read_text(encoding='utf-8')
     assert 'data-sus' in conta and 'name="cns"' in conta
+
+
+def test_cid_automatico_pelas_comorbidades():
+    assert sigtap.cid_do_exame('Colonoscopia', ['hipertensao', 'crohn_colon']) == ('K50.1', 'I10')
+    assert sigtap.cid_do_exame('Colonoscopia', ['hipertensao']) == ('Z12.1', 'I10')
+    assert sigtap.cid_do_exame('Tomografia de tórax de baixa dose', ['dpoc']) == ('Z12.2', 'J44.9')
+    assert sigtap.cid_do_exame('Densitometria óssea (DEXA)', ['osteoporose_diagnostico']) == ('M81.9', '')
+    assert sigtap.cid_do_exame('Endoscopia digestiva alta', ['diabetes', 'obesidade']) == ('E11.9', 'E66.9')
+    assert sigtap.cid_do_exame('Endoscopia digestiva alta', []) == ('Z00.0', '')
+    # O que o médico digita prevalece.
+    assert sigtap.cid_do_exame('Colonoscopia', ['crohn_colon'], 'K63.5') == ('K63.5', 'K50.1')
+    assert all(re.fullmatch(r'[A-Z]\d{2}(\.\d)?', c) for c in sigtap.CID_DA_COMORBIDADE.values())
+
+
+def test_tela_envia_comorbidades_para_o_cid():
+    html = open('intelligent-tools.html', encoding='utf-8').read()
+    assert "cid: v('apacCid').toUpperCase(), comorbidades" in html

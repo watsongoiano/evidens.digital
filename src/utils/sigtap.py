@@ -67,3 +67,48 @@ def formatado(cod):
     if len(cod or '') != 10:
         return ''
     return f'{cod[0:2]}.{cod[2:4]}.{cod[4:6]}.{cod[6:9]}-{cod[9]}'
+
+
+# CID-10 automático do laudo de APAC. Ordem: o CID que o médico digitou; a comorbidade marcada que motivou
+# aquele exame (ex.: colonoscopia na doença de Crohn); o código de rastreamento do exame (capítulo Z da CID-10,
+# OMS); a primeira comorbidade marcada; e, por fim, Z00.0 (exame médico geral). O secundário é a primeira
+# comorbidade marcada que não virou o principal. É sugestão de codificação: o médico pode reescrever.
+CID_DA_COMORBIDADE = {
+    'diabetes': 'E11.9', 'diabetes_tipo_1': 'E10.9', 'hipertensao': 'I10', 'has_resistente': 'I10',
+    'dislipidemia': 'E78.5', 'obesidade': 'E66.9', 'dpoc': 'J44.9', 'doenca_renal': 'N18.9',
+    'insuficiencia_cardiaca': 'I50.9', 'hiv': 'B24', 'hbv_risco_chc': 'B18.1',
+    'crohn_colon': 'K50.1', 'crohn_8_anos': 'K50.9', 'crohn_cep': 'K50.9', 'crohn_delgado': 'K50.0',
+    'rcu_8_anos': 'K51.9', 'rcu_alem_reto': 'K51.9', 'rcu_cep': 'K51.9',
+    'les_nefrite': 'M32.1', 'osteoporose_diagnostico': 'M81.9', 'psoriase_extensa': 'L40.0',
+}
+# Exame → comorbidades que o motivam no motor (a primeira marcada vira o CID principal).
+_COMORBIDADES_DO_EXAME = {
+    'Colonoscopia': ('crohn_colon', 'crohn_8_anos', 'crohn_cep', 'rcu_8_anos', 'rcu_alem_reto', 'rcu_cep'),
+    'Colonoscopia de Rastreio com ou sem biópsia': ('crohn_colon', 'crohn_8_anos', 'crohn_cep', 'rcu_8_anos',
+                                                    'rcu_alem_reto', 'rcu_cep'),
+    'Densitometria óssea (DEXA)': ('osteoporose_diagnostico',),
+    'Densitometria óssea (coluna lombar e fêmur)': ('osteoporose_diagnostico',),
+}
+# Exame de rastreamento → CID-10 de "exame especial de rastreamento" (Z12.1 intestino, Z12.2 aparelho respiratório,
+# Z12.3 mama, Z12.8 outras localizações, Z13.6 doenças cardiovasculares, Z13.8 outras doenças especificadas).
+_CID_DO_RASTREIO = {
+    'Tomografia computadorizada de tórax de baixa dose (LDCT)': 'Z12.2',
+    'Tomografia de tórax de baixa dose': 'Z12.2',
+    'Colonoscopia': 'Z12.1', 'Colonoscopia de Rastreio com ou sem biópsia': 'Z12.1',
+    'Ressonância magnética de mamas': 'Z12.3', 'Ressonância magnética de corpo inteiro': 'Z12.8',
+    'Angiotomografia de coronárias': 'Z13.6', 'Escore de cálcio coronariano (TC)': 'Z13.6',
+    'Densitometria óssea (DEXA)': 'Z13.8', 'Densitometria óssea (coluna lombar e fêmur)': 'Z13.8',
+    'Ressonância magnética de crânio': 'Z13.8', 'Angiorressonância de crânio': 'Z13.8',
+}
+
+
+def cid_do_exame(titulo, comorbidades=(), digitado=''):
+    """(CID principal, CID secundário) do laudo de APAC daquele exame."""
+    marcadas = [CID_DA_COMORBIDADE[c] for c in comorbidades if c in CID_DA_COMORBIDADE]
+    if digitado:
+        principal = digitado
+    else:
+        do_exame = [CID_DA_COMORBIDADE[c] for c in _COMORBIDADES_DO_EXAME.get(titulo, ()) if c in comorbidades]
+        principal = (do_exame or [_CID_DO_RASTREIO.get(titulo)] or [None])[0] or (marcadas[0] if marcadas else 'Z00.0')
+    secundario = next((c for c in marcadas if c != principal), '')
+    return principal, secundario

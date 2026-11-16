@@ -1013,7 +1013,7 @@
           <div class="campo"><label for="apacNascimento">Data de nascimento</label><input type="text" id="apacNascimento" maxlength="10" inputmode="numeric" placeholder="dd/mm/aaaa" autocomplete="off"></div>
           <div class="campo sm:col-span-2"><label for="apacMae">Nome da mãe</label><input type="text" id="apacMae" maxlength="120" autocomplete="off"></div>
           <div class="campo"><label for="apacTelefone">Telefone</label><input type="text" id="apacTelefone" maxlength="20" inputmode="tel" autocomplete="off"></div>
-          <div class="campo"><label for="apacCid">CID-10 principal</label><input type="text" id="apacCid" maxlength="6" placeholder="Ex: Z12.2" autocomplete="off"></div>
+          <div class="campo"><label for="apacCid">CID-10 principal (opcional)</label><input type="text" id="apacCid" maxlength="6" placeholder="Automático pelas comorbidades" autocomplete="off"></div>
           <div class="campo sm:col-span-2"><label for="apacEndereco">Endereço (rua, nº, bairro)</label><input type="text" id="apacEndereco" maxlength="150" autocomplete="off"></div>
           <div class="campo"><label for="apacMunicipio">Município</label><input type="text" id="apacMunicipio" maxlength="60" autocomplete="off"></div>
           <div class="campo"><div class="grade !mt-0 grid-cols-2"><div class="campo"><label for="apacUf">UF</label><input type="text" id="apacUf" maxlength="2" autocomplete="off"></div><div class="campo"><label for="apacCep">CEP</label><input type="text" id="apacCep" maxlength="9" inputmode="numeric" autocomplete="off"></div></div></div>
@@ -2214,7 +2214,9 @@
             [['cns', 'apacCns'], ['nascimento', 'apacNascimento'], ['mae', 'apacMae'], ['telefone', 'apacTelefone'],
              ['endereco', 'apacEndereco'], ['municipio', 'apacMunicipio'], ['uf', 'apacUf'], ['cep', 'apacCep']]
                 .forEach(([campo, id]) => { if (v(id)) paciente[campo] = campo === 'uf' ? v(id).toUpperCase() : v(id); });
-            return { vinculo_id: Number(plano.slice(4)), paciente, cid: v('apacCid').toUpperCase() };
+            // CID: em branco, o servidor escolhe por exame a partir das comorbidades marcadas (src/utils/sigtap.py).
+            const comorbidades = [...checkupForm.querySelectorAll('input[name="comorbidades"]:checked')].map(c => c.value);
+            return { vinculo_id: Number(plano.slice(4)), paciente, cid: v('apacCid').toUpperCase(), comorbidades };
         }
 
         function guiaDoDialogo() {

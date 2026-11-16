@@ -579,7 +579,7 @@ def _pagina_da_apac(pdf, dados_paciente, exame, apac):
                                     (128, 'Nome do procedimento secundário', ''), (16, 'Qtde.', '')])
     y = _faixa_apac(pdf, y + 1.5, 'JUSTIFICATIVA DO(S) PROCEDIMENTO(S) SOLICITADO(S)')
     y = _linha_apac(pdf, y, 12, [(108, 'Descrição do diagnóstico', apac.get('diagnostico')),
-                                 (26, 'CID-10 principal', apac.get('cid')), (26, 'CID-10 secundário', ''),
+                                 (26, 'CID-10 principal', apac.get('cid')), (26, 'CID-10 secundário', apac.get('cid_secundario')),
                                  (26, 'CID-10 causas associadas', '')])
     y = _linha_apac(pdf, y, 14, [(186, 'Observações', apac.get('observacoes'))])
     y = _faixa_apac(pdf, y + 1.5, 'SOLICITAÇÃO')
@@ -606,7 +606,9 @@ def _anexar_apacs(pdf, dados_paciente, exames, apac):
     pdf.em_guia = True
     pdf.set_auto_page_break(auto=False)
     for exame in alvos:
-        _pagina_da_apac(pdf, dados_paciente, exame, apac)
+        principal, secundario = sigtap.cid_do_exame(exame.get('titulo'), apac.get('comorbidades') or (),
+                                                    apac.get('cid') or '')
+        _pagina_da_apac(pdf, dados_paciente, exame, dict(apac, cid=principal, cid_secundario=secundario))
     return len(alvos)
 
 
