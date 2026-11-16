@@ -15,6 +15,7 @@ ENTRADA = RAIZ / 'api' / 'index.py'
 FERRAMENTAS = {
     'scripts/gerar_catalogo.py',   # gera src/data/catalogo_motor.json
     'scripts/gerar_listas.py',     # regera as listas com busca de intelligent-tools.html
+    'scripts/gerar_preop.py',      # regera as condições e as sugestões automáticas da aba Pré-operatório
     'scripts/generate_favicon.py',
     'scripts/extrair_textos.py',   # lista os textos das páginas sem tradução para o inglês
 }

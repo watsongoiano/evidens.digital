@@ -88,6 +88,11 @@ EXAMES = [
     ('Sorologias e rastreio', 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular', [_s('hpv_resultado', 'Resultado', HPV)]),
 ]
 
+# Aba Pré-operatório: só o que o motor de lá lê (src/utils/preoperatorio.py). Creatinina, hemoglobina e HbA1c entram
+# nos escores; glicemia, ECG e ecocardiograma contam pela data. Os de imagem não têm campo de resultado.
+PREOP = {'Glicose, soro', 'Hemoglobina glicada (HbA1c), soro', 'Creatinina, soro', 'Hemograma completo com plaquetas'}
+PREOP_IMAGEM = [('Eletrocardiograma de repouso', 'ECG'), ('Ecocardiograma transtorácico', 'Ecocardiograma')]
+
 # Nome curto do botão em "Exames mais comuns".
 CURTO = {
     'Glicose, soro': 'Glicemia', 'Hemoglobina glicada (HbA1c), soro': 'HbA1c', 'Insulina de jejum, soro': 'Insulina',
@@ -310,9 +315,10 @@ def para_a_tela():
     """Definição usada pela tela: grupos, títulos, nomes curtos, campos e os outros nomes de cada exame."""
     tirar = ('no_laudo',)
     return {
-        'exames': [{'grupo': g, 'titulo': t, 'curto': CURTO.get(t, t),
+        'exames': [{'grupo': g, 'titulo': t, 'curto': CURTO.get(t, t), 'preop': t in PREOP,
                     'campos': [{k: v for k, v in c.items() if k not in tirar} for c in campos]}
                    for g, t, campos in EXAMES],
+        'preop_imagem': [{'titulo': t, 'curto': curto} for t, curto in PREOP_IMAGEM],
         'apelidos': {t: {'titulo': base, 'campos': campos} for t, (base, campos) in apelidos().items()},
         'livre': {k: v for k, v in LIVRE.items() if k not in tirar},
     }

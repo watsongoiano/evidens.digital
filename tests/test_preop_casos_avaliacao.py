@@ -131,9 +131,17 @@ class Paciente:
             cond.add('avc_ait')
         if 'protese_mecanica_mitral' in cond:
             cond.add('protese_mecanica')
-        self.cond, self.meds = cond, meds
         self.sint = set(c.get('sintomas', []))
         self.inst = set(c.get('instaveis', []))
+        # A condição grave já diz o antecedente: SCA e angina CCS III/IV são dor isquêmica atual (doença coronária em
+        # Lee 1999); IC descompensada e edema agudo são IC; estenose importante sintomática é valvopatia; HAP
+        # sintomática é hipertensão pulmonar; FA com FC > 120 é FA.
+        for instavel, antecedente in (('sca', 'dac'), ('angina_grave', 'dac'), ('ic_descompensada', 'ic'),
+                                      ('edema_choque', 'ic'), ('valvopatia_grave_sintomatica', 'valvopatia'),
+                                      ('hap_sintomatica', 'hipertensao_pulmonar'), ('fa_alta_resposta', 'fa')):
+            if instavel in self.inst:
+                cond.add(antecedente)
+        self.cond, self.meds = cond, meds
         self.pas, self.pad = c.get('pas'), c.get('pad')
         self.spo2, self.dur, self.infec = c.get('spo2'), c.get('duracao'), bool(c.get('infeccao_respiratoria'))
         self.asa, self.peso, self.cfs = c.get('asa'), c.get('peso'), c.get('cfs')
