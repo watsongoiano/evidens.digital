@@ -315,7 +315,11 @@ def _medico_do_receituario():
 
 
 def _erro_do_receituario(erro, status=400):
-    return jsonify({'error': str(erro)}), status
+    """Resposta de erro pelo código da exceção: só mensagens fixas escritas para o médico, nunca o texto dela."""
+    from src.utils import receituario, timbrado
+    codigo = getattr(erro, 'codigo', None)
+    mensagem = receituario.MENSAGENS.get(codigo) or timbrado.MENSAGENS.get(codigo) or receituario.MENSAGENS['modo']
+    return jsonify({'error': mensagem, 'codigo': codigo if isinstance(codigo, str) else None}), status
 
 
 @auth_bp.route('/auth/timbrado')
