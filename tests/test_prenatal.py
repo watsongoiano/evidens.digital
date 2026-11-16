@@ -60,10 +60,14 @@ def test_estreptococo_b_no_fim():
     assert 'Cultura para estreptococo do grupo B (swab vaginal e retal)' not in _titulos(_g(idade_gestacional='22'))
 
 
-def test_hipertensa_tem_exames_basais_de_pre_eclampsia_e_aas():
-    recs = prenatal.exames(_g(idade_gestacional='14'), 42, hipertensa=True)
+def test_hipertensa_tem_exames_basais_de_pre_eclampsia_e_aas_nas_orientacoes():
+    g = _g(idade_gestacional='14')
+    recs = prenatal.exames(g, 42, hipertensa=True)
     upcr = next(r for r in recs if r['titulo'] == 'Relação proteína/creatinina, urina')
-    assert 'AAS' in upcr['descricao']
+    assert upcr['subtitulo'] == 'Pré-natal | Alto risco de pré-eclâmpsia | Basal'
+    assert 'hipertensão crônica' in upcr['descricao'] and 'AAS' not in upcr['descricao']   # AAS não vai no exame de urina
+    titulos = [o['titulo'] for o in prenatal.orientacoes(g, 42, hipertensa=True, agora=recs)]
+    assert 'AAS para prevenção de pré-eclâmpsia' in titulos
 
 
 def test_parto_prematuro_previo_antecipa_colo():
@@ -116,10 +120,15 @@ def test_adiados_na_gestacao():
             {'titulo': 'Hemoglobina glicada (HbA1c), soro', 'categoria': 'laboratorio'},
             {'titulo': 'Creatinina, soro', 'categoria': 'laboratorio'}]
     mantidas, adiadas = prenatal.adiar(recs)
-    assert [r['titulo'] for r in mantidas] == ['Creatinina, soro']
+    assert mantidas == []          # creatinina anual não é do pré-natal de risco habitual (MS, CAB 32)
     assert {a['estado'] for a in adiadas} == {'adiado_gestacao'}
+    mantidas, _ = prenatal.adiar(recs, com_indicacao=True)
+    assert [r['titulo'] for r in mantidas] == ['Creatinina, soro']
     mantidas, _ = prenatal.adiar(recs, diabetica=True)
     assert 'Hemoglobina glicada (HbA1c), soro' in [r['titulo'] for r in mantidas]
+    # um aviso por título, mesmo com o exame pedido por duas regras
+    _, adiadas = prenatal.adiar(recs + [{'titulo': 'Colesterol total e frações, soro', 'categoria': 'laboratorio'}])
+    assert [a['titulo'] for a in adiadas].count('Colesterol total e frações, soro') == 1
 
 
 CASO_DA_HOME = {   # gestante 42 a, 24 semanas, hipertensa, ex-tabagista 25 maços-ano, mãe com CCR
@@ -301,8 +310,11 @@ def test_fontes_do_pre_natal_sao_clicaveis(client):
     for x in pn:
         assert x['referencia_html'].count('<a href="https://') == len(x['referencias']), (x['titulo'], x['referencia_html'])
     html = ' '.join(x['referencia_html'] for x in pn)
-    for dominio in ('medicalsuite.einstein.br', 'bvsms.saude.gov.br', 'acog.org', 'uspreventiveservicestaskforce.org'):
+    for dominio in ('medicalsuite.einstein.br', 'bvsms.saude.gov.br', 'acog.org', 'febrasgo.org.br'):
         assert dominio in html, dominio
+    # orientações (AAS, divergências) também com fonte clicável
+    for o in r['orientacoes']:
+        assert o.get('referencias') and all(l['url'] for l in o['referencias']), o['titulo']
 
 
 def test_fontes_das_listas_e_das_sindromes_sao_clicaveis(client):
@@ -316,7 +328,7 @@ def test_fontes_das_listas_e_das_sindromes_sao_clicaveis(client):
 
 
 def test_pedido_so_leva_a_janela_gestacional_como_observacao():
-    """No receituário, só a instrução de quando fazer o exame ("Realizar com 35-37 semanas de gestação.").
+    """No receituário, só a instrução de quando fazer o exame ("Realizar com 36-37+6 semanas de gestação.").
     "Primeira consulta de pré-natal", "Basal: alto risco de pré-eclâmpsia" e o aviso de TOTG atrasado são
     o motivo do pedido: ficam na tela, não no papel."""
     vistas = set()
