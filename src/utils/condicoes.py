@@ -42,6 +42,8 @@ COMORBIDADES = {
                            'busca': 'ar autoimune doenca inflamatoria reumatismo'},
     'lupus': {'rotulo': 'Lúpus eritematoso sistêmico', 'agravante': 'doença inflamatória crônica',
               'busca': 'les autoimune doenca inflamatoria colagenose'},
+    # Fator de alto risco de pré-eclâmpsia (USPSTF 2021; src/utils/prenatal.py); sem exame próprio fora da gestação.
+    'saf': {'rotulo': 'Síndrome antifosfolípide', 'busca': 'saf sindrome do anticorpo antifosfolipide trombofilia autoimune'},
     'psoriase': {'rotulo': 'Psoríase', 'agravante': 'doença inflamatória crônica', 'busca': 'pele autoimune doenca inflamatoria'},
     'artrite_psoriasica': {'rotulo': 'Artrite psoriásica', 'agravante': 'doença inflamatória crônica',
                            'busca': 'aps psoriase espondiloartrite autoimune doenca inflamatoria'},

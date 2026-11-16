@@ -151,19 +151,18 @@
         "HBsAg, soro",
         "Anti-HCV IgG, soro",
         "Rubéola IgG, soro",
+        "Hormônio Tireoestimulante (TSH), soro",
         "Citomegalovírus IgG e IgM, soro",
         "Parasitológico de fezes",
         "Tipagem sanguínea ABO e fator Rh",
         "Coombs indireto, soro",
         "Toxoplasmose IgG e IgM, soro",
         "Clamídia e gonococo, PCR (urina ou swab)",
-        "Creatinina, soro",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
         "Ultrassonografia morfológica de 2º trimestre",
-        "Ultrassonografia transvaginal para medida do colo uterino",
-        "Eletrocardiograma de repouso"
+        "Ultrassonografia transvaginal para medida do colo uterino"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",

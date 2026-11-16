@@ -683,7 +683,9 @@ def generate_intelligent_recommendations():
         # Itens que implicam imunossupressão valem como "Sim" na triagem de vacinas.
         if condicoes.imunossupressao_implicada(comorbidades, medicacoes_checkboxes):
             triagem['imunossupressao'] = SIM
-        pa_classificacao = coerencia.classificar_pa(data.get('pas'), data.get('pad'))
+        # Na gestação, ≥ 140/90 e faixa grave ≥ 160/110, sem os estágios da AHA/ACC (src/utils/prenatal.py).
+        pa_classificacao = (prenatal.classificar_pa(data.get('pas'), data.get('pad')) if is_pregnant
+                            else coerencia.classificar_pa(data.get('pas'), data.get('pad')))
         
         # Verificar se tem hipertensão nas comorbidades
         if 'hipertensao' in comorbidades or 'hipertensão' in comorbidades:
@@ -730,6 +732,12 @@ def generate_intelligent_recommendations():
                 resultado=data.get('hpv_resultado'), histerectomizada=colo_utero.HISTERECTOMIA in comorbidades,
                 rastreio_adequado=data.get('colo_rastreio_adequado'), nic2_previa=data.get('colo_nic2_previa') == SIM)
             recommendations.extend(recs_colo)
+
+        # Clamídia e gonococo em mulheres sexualmente ativas até 24 anos (USPSTF 2021, B). Na gestante, o pré-natal pede.
+        orientacoes_ist = []
+        if sex == 'feminino' and not is_pregnant:
+            recs_ist, orientacoes_ist = prenatal.clamidia_fora_da_gestacao(age, data.get('sexualmente_ativa'))
+            recommendations.extend(recs_ist)
         
         # Rastreamento de câncer de pulmão (LDCT): USPSTF 2021 / SBCT-SBPT-CBR 2024 (src/utils/rastreio_cancer.py).
         # Maços-ano ou anos desde que parou ausentes não viram zero: o item aparece como dados insuficientes.
@@ -1130,17 +1138,35 @@ def generate_intelligent_recommendations():
 
         # Gestação: rotina do pré-natal pela idade gestacional; itens do check-up geral que
         # não se aplicam na gestação saem da lista e aparecem como "adiados".
-        adiados_gestacao, proximas_gestacao = [], []
+        adiados_gestacao, proximas_gestacao, orientacoes_gestacao = [], [], []
         if gestacao is not None:
             if 'diabetes_gestacional_previo' in comorbidades and 'dmg_previo' not in gestacao['condicoes']:
                 gestacao['condicoes'].append('dmg_previo')  # mesma informação, marcada na lista de comorbidades
+            dados_pn = dict(comorbidades=comorbidades, imc=imc, pas=data.get('pas'), pad=data.get('pad'))
             exames_pn, proximas_gestacao = prenatal.programacao(gestacao, age, hipertensa=has_hypertension,
-                                                                diabetica=is_diabetic, hiv='hiv' in comorbidades)
+                                                                diabetica=is_diabetic, hiv='hiv' in comorbidades, **dados_pn)
             titulos_pn = {r['titulo'].lower() for r in exames_pn}
             recommendations = [r for r in recommendations if (r.get('titulo') or '').lower() not in titulos_pn]
-            recommendations, adiados_gestacao = prenatal.adiar(recommendations, diabetica=is_diabetic)
+            recommendations, fora = prenatal.fora_da_gestacao(recommendations)
+            altos_pe, _ = prenatal.fatores_pre_eclampsia(gestacao, age, has_hypertension, is_diabetic, comorbidades, imc)
+            com_indicacao = bool(has_hypertension or is_diabetic or 'doenca_renal' in comorbidades or altos_pe
+                                 or prenatal.suspeita_de_pre_eclampsia(gestacao, data.get('pas'), data.get('pad')))
+            recommendations, adiados_gestacao = prenatal.adiar(recommendations, diabetica=is_diabetic,
+                                                               com_indicacao=com_indicacao)
+            adiados_gestacao = fora + [a for a in adiados_gestacao if a['titulo'] not in {f['titulo'] for f in fora}]
             recommendations = prenatal.sem_equivalentes(recommendations, exames_pn)
-            recommendations = exames_pn + recommendations
+            recommendations = prenatal.ajustar_textos(exames_pn + recommendations, diabetica=is_diabetic)
+            orientacoes_gestacao = prenatal.orientacoes(
+                gestacao, age, hipertensa=has_hypertension, diabetica=is_diabetic, hiv='hiv' in comorbidades,
+                agora=exames_pn, **dados_pn)
+        else:
+            # Amamentando criança com menos de 6 meses: TOTG pós-DMG e o que esperar do puerpério recente.
+            recs_pp, orientacoes_gestacao = prenatal.pos_parto(triagem.get('lactante'), comorbidades,
+                                                                  diabetica=is_diabetic)
+            recommendations.extend(recs_pp)
+            if sex == 'feminino':
+                orientacoes_gestacao += prenatal.acido_folico(age, data.get('sexualmente_ativa'),
+                                                              histerectomizada=colo_utero.HISTERECTOMIA in comorbidades)
 
         # Rastreio de HIV não se pede a quem já vive com HIV
         if 'hiv' in comorbidades:
@@ -1281,7 +1307,10 @@ def generate_intelligent_recommendations():
         response['adiados_gestacao'] = adiados_gestacao
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['inferencias'] = inferencias
-        response['orientacoes'] = orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_hiv + orientacoes_cancer
+        todas = (orientacoes_gestacao + orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_ist
+                 + orientacoes_hiv + orientacoes_cancer)
+        # Urgências (PA em faixa grave na gestação) no topo; depois as da gestação (alto risco, AAS, divergências).
+        response['orientacoes'] = [o for o in todas if o.get('urgente')] + [o for o in todas if not o.get('urgente')]
         aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
         if aviso_exames:
             response['orientacoes'] = response['orientacoes'] + [aviso_exames]
