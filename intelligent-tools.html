@@ -1728,12 +1728,26 @@
         const COR_CATEGORIA = { baixo: 'bg-teal', limitrofe: 'bg-[#C9A227]', intermediario: 'bg-[#D98B2B]', alto: 'bg-[#B53A2E]' };
         const pct = v => (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
 
+        // Questionário citado na orientação: o nome dele vira o link (só endereços https da lista do servidor).
+        function comLinks(o) {
+            let html = escapeHtml(o.descricao || '');
+            (o.links || []).forEach(l => {
+                if (!l || !/^https:\/\//.test(l.url || '') || !l.texto) return;
+                const nome = escapeHtml(l.texto);
+                const a = document.createElement('a');
+                a.href = l.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+                a.className = 'text-teal underline underline-offset-2'; a.textContent = l.texto;
+                html = html.split(nome).join(a.outerHTML);
+            });
+            return html;
+        }
+
         // Orientações que não viram pedido nem receita (idade de início, aconselhamento, alertas).
         function exibirOrientacoes(itens) {
             const alvo = document.getElementById('orientacoesContent');
             if (!itens.length) { alvo.innerHTML = ''; return; }
             const item = o => `<div class="py-2.5 border-t border-ink/5 first:border-0">${o.urgente ? `<span class="selo bg-[#C0392B] text-white">${T('Urgente')}</span>` : ''}<p class="text-[14px] font-medium">${escapeHtml(o.titulo)}</p>
-                 <p class="text-[13px] text-ink/65 mt-0.5">${escapeHtml(o.descricao)}</p>
+                 <p class="text-[13px] text-ink/65 mt-0.5">${comLinks(o)}</p>
                  <p class="text-[11px] text-ink/45 mt-1 font-mono referencia-links">${o.referencia_html || escapeHtml(o.referencia || '')}</p></div>`;
             // Urgências ficam sempre à vista; as demais orientações abrem com um clique.
             const urgentes = itens.filter(o => o.urgente), demais = itens.filter(o => !o.urgente);
