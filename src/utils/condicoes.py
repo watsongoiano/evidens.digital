@@ -201,6 +201,15 @@ FAMILIA_DETALHES = {
 NCCN_GENETICA = 'NCCN 2026 (risco genético mama/ovário/pâncreas/próstata)'
 USPSTF_BRCA = 'USPSTF 2019 (BRCA)'
 USMSTF = 'USMSTF 2017'
+USMSTF_2022 = 'USMSTF 2022'
+# Vigilância por história familiar e por síndrome hereditária de câncer: até 75 anos (USMSTF 2017/2022 para o
+# colorretal; NCCN, que não fixa idade de parada para o portador e manda individualizar pela expectativa de vida).
+# Depois disso, só orientação. A mamografia por história familiar segue a do risco habitual: até 74 anos.
+FIM_VIGILANCIA = 75
+FIM_MAMOGRAFIA_FAMILIAR = 74
+FIM_PSA = 69  # USPSTF 2018: grau D a partir de 70 anos
+SINDROMES_DE_CANCER = {'brca': 'BRCA1/2', 'li_fraumeni': 'Li-Fraumeni', 'lynch': 'Lynch', 'paf': 'PAF', 'cdh1': 'CDH1',
+                       'cowden': 'Cowden', 'nem1': 'NEM1', 'nem2': 'NEM2'}
 
 
 def criterios_teste_genetico(familia):
@@ -210,7 +219,7 @@ def criterios_teste_genetico(familia):
     if 'mama_ate_50' in fam:
         criterios.append('câncer de mama aos 50 anos ou antes em parente próximo')
     if 'mama_triplo_negativo' in fam:
-        criterios.append('câncer de mama triplo-negativo em parente próximo (até 60 anos)')
+        criterios.append('câncer de mama triplo-negativo em parente próximo, em qualquer idade')
     if 'mama_masculino' in fam:
         criterios.append('câncer de mama em homem da família')
     if 'cancer_ovario' in fam:
@@ -332,8 +341,11 @@ def _garantir(recs, nova):
     recs.append(nova)
 
 
-def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False, tabagismo=None, imc=None):
-    """Soma às recomendações o que as listas disparam. Devolve as orientações (sem pedido/receita)."""
+def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False, tabagismo=None, imc=None,
+            idade_ccr_familiar=None):
+    """Soma às recomendações o que as listas disparam. Devolve as orientações (sem pedido/receita).
+
+    `idade_ccr_familiar`: idade do diagnóstico do familiar mais jovem com câncer colorretal (opcional)."""
     com, med, fam = set(comorbidades), set(medicacoes), set(familia)
     orient = []
 
@@ -345,40 +357,49 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
 
     # ---------------- História familiar ----------------
     # Colorretal (USMSTF 2017): parente de 1º grau antes dos 60 anos, ou 2 ou mais parentes → colonoscopia a cada
-    # 5 anos a partir dos 40 (ou 10 anos antes do caso mais jovem); 1 parente com 60 anos ou mais → rastreio de
-    # risco habitual, mas começando aos 40.
-    if 'ccr_antes_60' in fam:
-        if idade >= 40:
+    # 5 anos a partir dos 40 (ou 10 anos antes do caso mais jovem, o que vier primeiro); 1 parente com 60 anos ou mais
+    # → rastreio de risco habitual, mas começando aos 40. Até 75 anos (USMSTF 2017/2022); depois, decisão individual
+    # (orientação em src/utils/rastreio_cancer.py).
+    antes_60 = 'ccr_antes_60' in fam or (idade_ccr_familiar is not None and idade_ccr_familiar < 60)
+    if antes_60:
+        inicio = 40 if idade_ccr_familiar is None else int(min(40, idade_ccr_familiar - 10))
+        if inicio <= idade <= FIM_VIGILANCIA:
+            quando = ('a partir dos 40 anos, ou 10 anos antes da idade do diagnóstico do familiar mais jovem (o que vier '
+                      'primeiro)' if idade_ccr_familiar is None else
+                      f'a partir dos {inicio} anos (familiar mais jovem diagnosticado aos {int(idade_ccr_familiar)}; início aos '
+                      '40 anos ou 10 anos antes dessa idade, o que vier primeiro)')
             add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
                 'Parente de 1º grau com câncer colorretal antes dos 60 anos (ou 2 ou mais parentes de 1º grau): '
-                'colonoscopia a cada 5 anos a partir dos 40 anos, ou 10 anos antes da idade do diagnóstico do familiar '
-                'mais jovem (o que vier primeiro).',
-                'História familiar de CCR antes dos 60 anos | A partir de 40 anos | A cada 5 anos',
+                f'colonoscopia a cada 5 anos, {quando}, até os 75 anos.',
+                'História familiar de CCR antes dos 60 anos | ' + ('A partir de 40 anos | ' if inicio == 40 else '') + 'A cada 5 anos',
                 USMSTF, 'B', 'alta', substituir=True)
-        else:
+        elif idade < inicio:
             orientar('Colonoscopia por história familiar de câncer colorretal',
                      'Parente de 1º grau com câncer colorretal antes dos 60 anos (ou 2 ou mais parentes): colonoscopia a cada '
                      '5 anos, começando aos 40 anos ou 10 anos antes da idade do diagnóstico do familiar mais jovem (o que '
-                     'vier primeiro).', USMSTF)
+                     'vier primeiro). Informe a idade do familiar na história familiar para o motor calcular o início.', USMSTF)
     elif 'cancer_colorretal' in fam:
-        if idade >= 40:
+        if 40 <= idade <= FIM_VIGILANCIA:
             add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
                 'Um parente de 1º grau com câncer colorretal diagnosticado aos 60 anos ou mais: rastreio de risco habitual '
                 '(colonoscopia a cada 10 anos ou pesquisa de sangue oculto anual), começando aos 40 anos.',
                 'História familiar de CCR aos 60 anos ou mais | A partir de 40 anos | A cada 10 anos',
                 USMSTF, 'B', 'alta', substituir=True)
-        orientar('Câncer colorretal na família: idade do familiar',
-                 'Se o diagnóstico do familiar foi antes dos 60 anos, ou se há 2 ou mais parentes de 1º grau, marque o detalhe '
-                 'na história familiar: a colonoscopia passa a cada 5 anos, a partir dos 40 anos ou 10 anos antes do caso mais '
-                 'jovem.', USMSTF)
+        if idade <= FIM_VIGILANCIA:
+            orientar('Câncer colorretal na família: idade do familiar',
+                     'Se o diagnóstico do familiar foi antes dos 60 anos, ou se há 2 ou mais parentes de 1º grau, marque o detalhe '
+                     'na história familiar: a colonoscopia passa a cada 5 anos, a partir dos 40 anos ou 10 anos antes do caso mais '
+                     'jovem.', USMSTF)
     tem_mama = bool({'cancer_mama', 'mama_ate_50', 'mama_bilateral', 'mama_masculino', 'mama_triplo_negativo'} & fam)
+    # Anual só com parente de 1º grau (a caixa "Câncer de mama"); os detalhes aceitam também o 2º grau, que muda o risco
+    # calculado, não o intervalo. Até 74 anos, como no risco habitual; depois, decisão individual (rastreio_cancer.py).
     if tem_mama and sexo == 'feminino':
-        if idade >= 40:
+        if 'cancer_mama' in fam and 40 <= idade <= FIM_MAMOGRAFIA_FAMILIAR:
             add('Mamografia Digital - Bilateral', 'imagem',
-                'Parente de 1º grau com câncer de mama: risco acima do habitual; mamografia anual a partir dos 40 anos. '
+                'Câncer de mama em parente de 1º grau: risco acima do habitual; mamografia anual dos 40 aos 74 anos. '
                 'Calcular o risco de câncer de mama ao longo da vida (Tyrer-Cuzick/IBIS): 20% ou mais indica ressonância '
-                'anual associada.', 'História familiar de câncer de mama | Anual', 'ACR 2023', 'B', 'alta', substituir=True)
-        elif idade >= 25:
+                'anual associada.', 'Câncer de mama na família | Anual', 'ACR 2023', 'B', 'alta', substituir=True)
+        elif 25 <= idade < 40:
             orientar('Rastreio de câncer de mama por história familiar',
                      'Calcular o risco de câncer de mama ao longo da vida (Tyrer-Cuzick/IBIS) até os 25 anos. Com risco de '
                      '20% ou mais: ressonância anual a partir de 25-30 anos e mamografia anual a partir de 30. Abaixo disso: '
@@ -408,9 +429,10 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         orientar('História familiar de DCV prematura',
                  'Agravante de risco cardiovascular (já considerado na categoria SBC). Em risco intermediário, o escore '
                  'de cálcio coronário pode reclassificar.', 'SBC 2025')
-    if 'cancer_prostata' in fam and sexo == 'masculino' and 45 <= idade < 50:
+    if 'cancer_prostata' in fam and sexo == 'masculino' and 45 <= idade <= FIM_PSA:
         add('PSA total, soro', 'laboratorio',
-            'Pai ou irmão com câncer de próstata: oferecer rastreamento a partir dos 45 anos, com decisão compartilhada.',
+            'Pai ou irmão com câncer de próstata: oferecer rastreamento a partir dos 45 anos, com decisão compartilhada '
+            '(conversa sobre benefícios e danos), até os 69 anos.',
             'História familiar de câncer de próstata | A partir de 45 anos', 'AUA/SUO 2023 / EAU 2024', 'B')
     if 'osteoporose_fratura' in fam and ((sexo == 'feminino' and 50 <= idade < 65) or (sexo == 'masculino' and 50 <= idade < 70)):
         add('Densitometria óssea (DEXA)', 'imagem',
@@ -451,26 +473,28 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             add('Mamografia Digital - Bilateral', 'imagem', f'{motivo}: mamografia anual a partir de {inicio} anos.',
                 f'{motivo} | {QUEM} | Anual a partir de {inicio} anos', ref, 'A', 'alta', substituir=True)
 
-    def colonoscopia(inicio, intervalo, ref, motivo, grau='A'):
-        if idade >= inicio:
+    vigilancia = idade <= FIM_VIGILANCIA
+
+    def colonoscopia(inicio, intervalo, ref, motivo, grau='A', detalhe=''):
+        if inicio <= idade <= FIM_VIGILANCIA:
             add('Colonoscopia de Rastreio com ou sem biópsia', 'imagem',
-                f'{motivo}: colonoscopia {intervalo}, a partir de {inicio} anos.',
+                f'{motivo}: colonoscopia {intervalo}, a partir de {inicio} anos{detalhe}.',
                 f'{motivo} | {QUEM} | {intervalo.capitalize()}', ref, grau, 'alta', substituir=True)
 
     if 'brca' in fam:
         rm_mamas(25, 'NCCN 2025 / ACS 2007', 'BRCA1/2 na família')
         mamografia_anual(30, 'NCCN 2025', 'BRCA1/2 na família')
-        if homem and idade >= 40:
+        if homem and 40 <= idade <= FIM_PSA:
             add('PSA total, soro', 'laboratorio',
                 'BRCA1/2 na família: rastreamento de câncer de próstata a partir dos 40 anos no portador de BRCA2 '
-                '(considerar em BRCA1).', f'BRCA1/2 na família | {QUEM} | A partir de 40 anos', 'NCCN 2025', 'B')
+                '(considerar em BRCA1), com decisão compartilhada, até os 69 anos.', f'BRCA1/2 na família | {QUEM} | A partir de 40 anos', 'NCCN 2025', 'B')
         orientar('Mutação BRCA1/2 na família',
                  CASCATA + ' Portadoras: discutir salpingo-ooforectomia redutora de risco (35-40 anos em BRCA1, 40-45 em '
                  'BRCA2) e mastectomia redutora. Homens portadores: exame clínico das mamas a partir de 35 anos. '
                  'Pâncreas: rastrear o portador que também tem caso de câncer de pâncreas na família.', 'NCCN 2025')
     if 'li_fraumeni' in fam:
         rm_mamas(20, 'NCCN 2025 / Kratz 2017', 'Li-Fraumeni na família')
-        for titulo in ('Ressonância magnética de corpo inteiro', 'Ressonância magnética de crânio'):
+        for titulo in ('Ressonância magnética de corpo inteiro', 'Ressonância magnética de crânio') if vigilancia else ():
             add(titulo, 'imagem', 'Li-Fraumeni (protocolo de Toronto): ressonância de corpo inteiro e de crânio anuais, '
                 'sem contraste quando possível.', f'Li-Fraumeni na família | {QUEM} | Anual', 'NCCN 2025 / Kratz 2017', 'B', 'alta')
         colonoscopia(25, 'a cada 2-5 anos', 'NCCN 2025 / Kratz 2017', 'Li-Fraumeni na família', 'B')
@@ -479,8 +503,10 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  'endoscopia digestiva alta junto com a colonoscopia. Evitar radiação ionizante sempre que houver alternativa.',
                  'NCCN 2025 / Kratz 2017')
     if 'lynch' in fam:
-        colonoscopia(20, 'a cada 1-2 anos', 'NCCN 2025 / ACG 2015', 'Síndrome de Lynch na família')
-        if idade >= 30:
+        colonoscopia(20, 'a cada 1-2 anos', 'NCCN 2025 / ACG 2015', 'Síndrome de Lynch na família',
+                     detalhe=' (MLH1, MSH2 e EPCAM: a partir de 20-25 anos, a cada 1-2 anos; MSH6 e PMS2: a partir de 30-35 '
+                             'anos, a cada 1-3 anos)')
+        if 30 <= idade <= FIM_VIGILANCIA:
             add('Endoscopia digestiva alta', 'imagem',
                 'Síndrome de Lynch: endoscopia digestiva alta com biópsias e pesquisa de H. pylori a cada 2-4 anos, a partir de 30-40 anos.',
                 f'Síndrome de Lynch na família | {QUEM} | A cada 2-4 anos', 'NCCN 2025', 'B')
@@ -490,14 +516,17 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  '30-35 anos e discutir histerectomia com salpingo-ooforectomia após prole constituída.', 'NCCN 2025 / ACG 2015')
     if 'paf' in fam:
         colonoscopia(18, 'anual', 'NCCN 2025 / ACG 2015', 'Polipose adenomatosa familiar')
-        if idade >= 20:
+        if 20 <= idade <= FIM_VIGILANCIA:
             add('Endoscopia digestiva alta', 'imagem',
                 'Polipose adenomatosa familiar: endoscopia digestiva alta com avaliação da papila a partir de 20-25 anos; '
                 'intervalo conforme o estágio de Spigelman.', f'PAF na família | {QUEM}', 'NCCN 2025 / ACG 2015', 'B')
         orientar('Polipose adenomatosa familiar na família',
                  CASCATA + ' No portador, a colonoscopia começa aos 10-15 anos; discutir colectomia conforme a carga de pólipos. '
-                 'Considerar ultrassonografia de tireoide.', 'NCCN 2025 / ACG 2015')
-    if 'cdh1' in fam:
+                 'Considerar ultrassonografia de tireoide.' + (
+                     ' Parente não testado com mais de 50 anos: a penetrância da PAF chega a quase 100% antes dos 40-50 anos; '
+                     'sem polipose nas colonoscopias anteriores, a chance de ser portador é baixa. Fazer o teste em cascata '
+                     'antes de continuar a vigilância anual.' if idade > 50 else ''), 'NCCN 2025 / ACG 2015')
+    if 'cdh1' in fam and vigilancia:
         add('Endoscopia digestiva alta', 'imagem',
             'CDH1: endoscopia digestiva alta anual com múltiplas biópsias (protocolo de Cambridge) para quem adia a gastrectomia.',
             f'CDH1 na família | {QUEM} | Anual', 'IGCLC 2020 / NCCN 2025', 'B', 'alta')
@@ -508,10 +537,11 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     if 'cowden' in fam:
         rm_mamas(30, 'NCCN 2025', 'Síndrome de Cowden na família')
         mamografia_anual(30, 'NCCN 2025', 'Síndrome de Cowden na família')
-        add('Ultrassonografia de tireoide', 'imagem', 'Síndrome de Cowden (PTEN): ultrassonografia de tireoide anual.',
-            f'Síndrome de Cowden na família | {QUEM} | Anual', 'NCCN 2025', 'B')
+        if vigilancia:
+            add('Ultrassonografia de tireoide', 'imagem', 'Síndrome de Cowden (PTEN): ultrassonografia de tireoide anual.',
+                f'Síndrome de Cowden na família | {QUEM} | Anual', 'NCCN 2025', 'B')
         colonoscopia(35, 'a cada 5 anos', 'NCCN 2025', 'Síndrome de Cowden na família', 'B')
-        if idade >= 40:
+        if 40 <= idade <= FIM_VIGILANCIA:
             add('Ultrassonografia de rins e vias urinárias', 'imagem',
                 'Síndrome de Cowden (PTEN): ultrassonografia renal a cada 1-2 anos a partir dos 40 anos.',
                 f'Síndrome de Cowden na família | {QUEM} | A cada 1-2 anos', 'NCCN 2025', 'C')
@@ -519,21 +549,29 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  CASCATA + ' Mulheres: orientar sobre sangramento uterino anormal e considerar rastreamento de endométrio a partir de 35 anos.',
                  'NCCN 2025')
     if 'nem1' in fam:
-        for titulo in ('Cálcio iônico, soro', 'Paratormônio (PTH), soro', 'Prolactina, soro'):
+        for titulo in ('Cálcio iônico, soro', 'Paratormônio (PTH), soro', 'Prolactina, soro') if vigilancia else ():
             add(titulo, 'laboratorio', 'NEM1: cálcio, PTH e prolactina anuais.', f'NEM1 na família | {QUEM} | Anual',
                 'Endocrine Society 2012', 'B')
         orientar('Neoplasia endócrina múltipla tipo 1 na família',
                  CASCATA + ' No portador: gastrina e imagem pancreática anuais; ressonância de hipófise a cada 3-5 anos.',
                  'Endocrine Society 2012')
     if 'nem2' in fam:
-        for titulo in ('Calcitonina, soro', 'Metanefrinas, plasma ou urina de 24h', 'Cálcio iônico, soro'):
+        for titulo in ('Calcitonina, soro', 'Metanefrinas, plasma ou urina de 24h', 'Cálcio iônico, soro') if vigilancia else ():
             add(titulo, 'laboratorio', 'NEM2 / carcinoma medular de tireoide familiar: calcitonina, metanefrinas e cálcio anuais.',
                 f'NEM2 na família | {QUEM} | Anual', 'ATA 2015', 'B', 'alta')
-        add('Ultrassonografia de tireoide', 'imagem', 'NEM2 / carcinoma medular de tireoide familiar: ultrassonografia cervical.',
-            f'NEM2 na família | {QUEM}', 'ATA 2015', 'B')
+        if vigilancia:
+            add('Ultrassonografia de tireoide', 'imagem', 'NEM2 / carcinoma medular de tireoide familiar: ultrassonografia cervical.',
+                f'NEM2 na família | {QUEM}', 'ATA 2015', 'B')
         orientar('NEM2 / carcinoma medular de tireoide na família',
                  CASCATA + ' O teste do gene RET define a conduta: no portador, tireoidectomia profilática na idade indicada pelo '
                  'risco da mutação.', 'ATA 2015')
+    sindromes = [nome for chave, nome in SINDROMES_DE_CANCER.items() if chave in fam]
+    if sindromes and not vigilancia:
+        orientar('Síndrome hereditária de câncer depois dos 75 anos: decisão individual',
+                 f'A vigilância por {", ".join(sindromes)} na família vai até os 75 anos. Depois disso, individualizar pela '
+                 'expectativa de vida e pelas comorbidades: o NCCN não fixa idade de parada para o portador confirmado. No parente '
+                 'ainda não testado, fazer primeiro o teste em cascata: teste negativo para a variante da família dispensa a '
+                 'vigilância.', 'NCCN 2025 / ' + USMSTF_2022)
     if 'cardiomiopatia_hipertrofica' in fam or 'cardiomiopatia_dilatada' in fam:
         qual = 'cardiomiopatia hipertrófica' if 'cardiomiopatia_hipertrofica' in fam else 'cardiomiopatia dilatada familiar'
         ref = 'AHA/ACC 2024' if 'cardiomiopatia_hipertrofica' in fam else 'AHA/ACC/HFSA 2022'
@@ -582,16 +620,20 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  'síndrome de Lynch e encaminhar para aconselhamento genético.', 'NCCN 2024 / ACG 2015')
     if 'cancer_pancreas' in fam:
         orientar('Câncer de pâncreas na família',
-                 'Dois ou mais parentes de 1º grau acometidos, ou síndrome hereditária conhecida, indicam avaliação em '
-                 'centro de referência (ressonância ou ecoendoscopia). Um parente isolado não indica rastreamento.',
+                 'Indicam avaliação em centro de referência (ressonância ou ecoendoscopia): dois ou mais parentes acometidos do '
+                 'mesmo ramo da família, com pelo menos um de 1º grau; ou variante patogênica de risco (BRCA1, BRCA2, PALB2, ATM, '
+                 'síndrome de Lynch) com parente acometido; ou síndrome de alto risco (Peutz-Jeghers, CDKN2A). Um parente '
+                 'isolado, sem variante conhecida, não indica rastreamento.',
                  'AGA 2020 / CAPS 2020')
     if 'cancer_gastrico' in fam:
         orientar('Câncer gástrico na família',
                  'Pesquisar e tratar Helicobacter pylori; endoscopia conforme sintomas e risco individual.',
                  'Maastricht VI 2022 / ACG 2024')
     if 'melanoma' in fam:
-        orientar('Melanoma na família', 'Exame dermatológico de corpo inteiro periódico e orientação de fotoproteção.',
-                 'AAD 2019')
+        orientar('Melanoma na família',
+                 'Parente com melanoma aumenta o risco, mas a evidência para o exame da pele em pessoa assintomática é '
+                 'insuficiente (USPSTF, grau I): individualizar o exame dermatológico de corpo inteiro periódico e orientar '
+                 'fotoproteção.', 'USPSTF 2023')
     if 'trombose' in fam:
         orientar('Trombose venosa na família',
                  'Pesar o risco antes de prescrever estrogênio (anticoncepcional combinado, terapia hormonal). Pesquisa de '

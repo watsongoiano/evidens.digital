@@ -706,6 +706,11 @@
         <div class="opcoes">
           <label class="opcao" for="fam_ccr_antes_60"><input type="checkbox" id="fam_ccr_antes_60" name="historia_familiar" value="ccr_antes_60">Parente de 1º grau antes dos 60 anos, ou 2 ou mais parentes de 1º grau</label>
         </div>
+        <div class="campo mt-4">
+          <label for="idade_ccr_familiar">Idade do familiar mais jovem ao diagnóstico</label>
+          <input type="number" id="idade_ccr_familiar" name="idade_ccr_familiar" min="10" max="110" step="1" inputmode="numeric">
+          <p class="text-[12px] text-ink/55 mt-1.5">Opcional. Antes dos 60 anos, a colonoscopia começa aos 40 ou 10 anos antes dessa idade, o que vier primeiro.</p>
+        </div>
       </div>
 
       <!-- lista:familia:inicio -->
@@ -866,6 +871,26 @@
           <option value="colposcopia_negativa">Colposcopia sem doença</option>
         </select>
         <p class="text-[12px] text-ink/55 mt-1.5">Opcional. Define o passo seguinte: novo teste em 5 anos, em 1 ano, ou colposcopia. Para adiar o pedido pela data, informe também a data do teste acima.</p>
+      </div>
+      <div class="grade mt-4" id="colo-historico" style="display: none;">
+        <div class="campo">
+          <label for="colo_rastreio_adequado">Rastreio anterior do colo adequado e negativo?</label>
+          <select id="colo_rastreio_adequado" name="colo_rastreio_adequado">
+            <option value="">Não sei</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+          <p class="text-[12px] text-ink/55 mt-1.5">3 citologias negativas seguidas ou 2 testes negativos nos últimos 10 anos. Define se o rastreio pode parar depois dos 65 anos.</p>
+        </div>
+        <div class="campo">
+          <label for="colo_nic2_previa">Já tratou NIC 2, NIC 3 ou adenocarcinoma in situ?</label>
+          <select id="colo_nic2_previa" name="colo_nic2_previa">
+            <option value="">Não sei</option>
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+          <p class="text-[12px] text-ink/55 mt-1.5">Com tratamento prévio, o rastreio continua por 25 anos após o tratamento.</p>
+        </div>
       </div>
     </section>
 
@@ -1429,6 +1454,7 @@
             contraindicada: { texto: 'Contraindicada', classe: 'bg-[#C0392B] text-white', borda: 'border-[#E5B7B1]' },
             precaucao: { texto: 'Precaução', classe: 'bg-[#D35400] text-white', borda: 'border-[#EDC9A8]' },
             dados_insuficientes: { texto: 'Dados insuficientes', classe: 'bg-ink/15 text-ink', borda: 'border-ink/15' },
+            nao_recomendado: { texto: 'Não recomendado', classe: 'bg-ink/15 text-ink', borda: 'border-ink/15' },
             adiado_gestacao: { texto: 'Adiado na gestação', classe: 'bg-sand text-ink', borda: 'border-[#E6DCC0]' },
             proxima_janela: { texto: 'Próxima etapa', classe: 'bg-mist text-teal-dark', borda: 'border-teal/20' },
             etapa_anterior: { texto: 'Etapa anterior', classe: 'bg-ink/10 text-ink', borda: 'border-ink/15' },
@@ -2034,6 +2060,7 @@
                 const aberto = marcados.includes(bloco.dataset.familia);
                 bloco.hidden = !aberto;
                 if (!aberto) bloco.querySelectorAll('input:checked').forEach(c => { c.checked = false; });
+                if (!aberto) bloco.querySelectorAll('input[type="number"]').forEach(c => { c.value = ''; });
             });
             // "3 ou mais casos de mama e/ou próstata" aparece nos dois blocos: uma caixa só vale (a do bloco da mama
             // vai no formulário; a da próstata só espelha). Sem o bloco da mama aberto, a da próstata envia o valor.
@@ -2432,7 +2459,8 @@
             });
             // Resultado do último teste de HPV: só para o sexo feminino.
             document.getElementById('hpv-item').style.display = feminino ? 'block' : 'none';
-            if (!feminino) document.getElementById('hpv_resultado').value = '';
+            document.getElementById('colo-historico').style.display = feminino ? '' : 'none';
+            if (!feminino) ['hpv_resultado', 'colo_rastreio_adequado', 'colo_nic2_previa'].forEach(id => { document.getElementById(id).value = ''; });
             atualizarBlocoGestacao();
         });
 

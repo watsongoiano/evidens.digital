@@ -76,12 +76,13 @@ CAMPOS_NUMERICOS = {
     'hba1c': (('hba1c',), 3, 20, 'HbA1c (%)'),
     'macos_ano': (('macos_ano',), 0, 300, 'Maços-ano'),
     'anos_parou_fumar': (('anos_parou_fumar',), 0, 100, 'Anos desde que parou de fumar'),
+    'idade_ccr_familiar': (('idade_ccr_familiar',), 10, 110, 'Idade do familiar mais jovem com câncer colorretal'),
     'cd4': (('cd4',), 0, 5000, 'CD4 (células/mm³)'),
     'carga_viral': (('carga_viral',), 0, 100_000_000, 'Carga viral (cópias/mL)'),
 }
 
 CAMPOS_LISTA = ('comorbidades', 'medicacoes')
-CAMPOS_SIM_NAO_OPCIONAIS = ('em_tarv', 'supressao_viral', 'exames_hiv_previos')
+CAMPOS_SIM_NAO_OPCIONAIS = ('em_tarv', 'supressao_viral', 'exames_hiv_previos', 'colo_rastreio_adequado', 'colo_nic2_previa')
 TAMANHO_MAXIMO_TEXTO = 2000
 ITENS_MAXIMOS_LISTA = 50
 

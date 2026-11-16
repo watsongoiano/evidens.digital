@@ -21,8 +21,15 @@ Resumo aplicado
     outros tipos + citologia reflexa negativa ...... repetir o teste em 12 meses
     colposcopia sem doença ......................... repetir o teste em 12 meses
     imunossuprimida com qualquer tipo detectado .... colposcopia (não depende da citologia)
-- Depois dos 65 anos (risco habitual, sem resultado positivo a seguir): não se pede; a orientação
-  diz quando encerrar.
+- Dos 61 aos 65 com o último teste negativo: não se pede (o negativo depois dos 60 encerra, MS 2025, rec. 12),
+  com orientação para o caso de o teste ter sido feito antes dos 60.
+- Depois dos 65 anos (risco habitual, sem resultado positivo a seguir): para só com rastreio anterior adequado e
+  negativo (pergunta do formulário; ACOG 2026) ou com teste negativo depois dos 60 (MS). Sem rastreio adequado, ou
+  sem resposta, o teste continua sendo pedido (MS rec. 13: quem passou dos 60 sem teste faz um). NIC 2+ tratada:
+  rastreio por 25 anos após o tratamento (MS rec. 14; ACOG). A orientação mostra a divergência MS x ACOG.
+- Aos 65 anos o teste cita só a ACOG (o MS convida até os 64).
+- Método (MS: DNA-HPV, sem coteste; ACOG 2026: HPV primário preferido, coteste aceitável, autocoleta a cada 3 anos
+  com sistema de seguimento): texto em METODOS.
 """
 
 HPV = 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular'
@@ -44,7 +51,19 @@ BRASIL = f'{MS} / {SBOC}'
 IDADE_CITOLOGIA = 21   # ACOG: citologia dos 21 aos 29; aqui, até o teste de HPV começar
 IDADE_INICIO = 25      # MS e SBOC: teste de DNA-HPV
 IDADE_FIM = 65         # ACOG; o MS convida até os 64
+IDADE_FIM_MS = 64
+IDADE_ENCERRA = 60     # MS: teste negativo depois dos 60 anos encerra
 HISTERECTOMIA = 'histerectomia_total'
+SIM, NAO = 'sim', 'nao'
+
+# Método: preferido e alternativas aceitas por fonte (a ACOG não proíbe o coteste).
+METODOS = ('Métodos: MS 2025, teste de DNA-HPV sem citologia junto (não recomenda o coteste) e, onde o teste não estiver '
+           'disponível, citologia a cada 3 anos após dois exames anuais negativos. ACOG 2026: teste de HPV primário a cada 5 '
+           'anos é o preferido; o coteste (HPV com citologia) a cada 5 anos é aceitável quando o HPV primário não estiver '
+           'disponível ou por escolha após aconselhamento; a autocoleta a cada 3 anos pode ser considerada se houver sistema '
+           'de aviso e seguimento.')
+NIC2_TEXTO = ('NIC 2, NIC 3 ou adenocarcinoma in situ tratados: manter o rastreamento por 25 anos após o tratamento, mesmo '
+              'depois dos 60-65 anos (MS 2025, rec. 14; ACOG 2026).')
 
 
 def _rec(titulo, categoria, descricao, subtitulo, referencia, grau='A'):
@@ -74,8 +93,25 @@ def _divergencia(idade):
         'referencia': f'{BRASIL} / {ACOG}'}
 
 
-def recomendar(idade, imunossuprimida=False, resultado=None, histerectomizada=False):
-    """Devolve (recomendações, orientações) para uma mulher adulta. `resultado`: um de RESULTADOS ou None."""
+def _quando_encerrar():
+    return {
+        'titulo': 'Colo do útero: quando encerrar o rastreamento',
+        'descricao': 'As diretrizes divergem. MS 2025: encerrar quando o último teste de DNA-HPV, feito depois dos 60 anos, for '
+                     'negativo; quem passou dos 60 sem nenhum teste faz um, e negativo encerra. ACOG 2026: depois dos 65 anos, '
+                     'parar só com rastreio anterior adequado (3 citologias negativas seguidas ou 2 cotestes negativos em 10 '
+                     'anos, o último há até 3 anos para citologia ou até 5 para coteste); sem rastreio adequado ou com alto '
+                     'risco, continuar. Com NIC 2, NIC 3 ou adenocarcinoma in situ tratados, manter o rastreamento por 25 anos '
+                     'após o tratamento (MS e ACOG).',
+        'referencia': f'{MS} / {ACOG}'}
+
+
+def recomendar(idade, imunossuprimida=False, resultado=None, histerectomizada=False, rastreio_adequado=None,
+               nic2_previa=False):
+    """Devolve (recomendações, orientações) para uma mulher adulta. `resultado`: um de RESULTADOS ou None.
+
+    `rastreio_adequado`: 'sim', 'nao' ou None (não sabe): rastreio anterior adequado e negativo, que decide se o
+    rastreamento pode parar depois dos 65 anos (ACOG 2026). `nic2_previa`: NIC 2, NIC 3 ou AIS já tratados.
+    """
     resultado = resultado if resultado in RESULTADOS else None
     recs, orient = [], []
 
@@ -136,22 +172,43 @@ def recomendar(idade, imunossuprimida=False, resultado=None, histerectomizada=Fa
                          'Colposcopia sem doença após HPV detectado: repetir o teste de DNA-HPV em 12 meses. Negativo: volta a cada '
                          '5 anos. HPV 16/18 de novo, ou outro tipo persistente por 24 meses: nova colposcopia.',
                          'Colposcopia sem doença após HPV detectado | A cada 1 ano', BRASIL, 'B'))
-    elif idade <= IDADE_FIM:
+    elif idade <= IDADE_FIM and not (resultado == NAO_DETECTADO and idade > IDADE_ENCERRA and not nic2_previa):
         com_acog = idade >= 30
-        descricao = ('Teste de DNA-HPV oncogênico com genotipagem a cada 5 anos, dos 25 aos 65 anos, sem citologia junto '
-                     '(coteste não é recomendado). HPV 16/18: colposcopia. Outros tipos: citologia reflexa na mesma amostra. '
-                     'Onde o teste não estiver disponível: citologia a cada 3 anos, após dois exames anuais negativos.')
-        if idade > 60:
-            descricao += ' Depois dos 60 anos, um teste negativo encerra o rastreamento.'
-        recs.append(_rec(HPV, 'laboratorio', descricao, 'Mulheres 25-65 anos | A cada 5 anos',
-                         f'{BRASIL} / {ACOG}' if com_acog else BRASIL, 'A' if com_acog else 'B'))
+        so_acog = idade > IDADE_FIM_MS
+        descricao = ('Teste de DNA-HPV oncogênico com genotipagem a cada 5 anos. HPV 16/18: colposcopia. Outros tipos: citologia '
+                     'reflexa na mesma amostra. ' + METODOS)
+        if nic2_previa and idade > IDADE_ENCERRA:
+            descricao += ' ' + NIC2_TEXTO
+        elif idade > IDADE_ENCERRA:
+            descricao += ' Depois dos 60 anos, um teste negativo encerra o rastreamento (MS 2025).'
+        recs.append(_rec(HPV, 'laboratorio', descricao, 'Mulheres 25-64 anos (ACOG: até 65) | A cada 5 anos',
+                         ACOG if so_acog else f'{BRASIL} / {ACOG}' if com_acog else BRASIL, 'A' if com_acog else 'B'))
         if not com_acog:
             orient.append(_divergencia(idade))
-    else:
+    elif idade <= IDADE_FIM:
+        # MS 2025 (rec. 12): teste negativo depois dos 60 anos encerra o rastreamento. O campo não traz a data do teste.
         orient.append({
-            'titulo': 'Colo do útero: quando encerrar o rastreamento',
-            'descricao': 'Encerrar se o último teste de DNA-HPV, feito depois dos 60 anos, foi negativo (ACOG: depois dos 65 anos, '
-                         'com rastreamento prévio adequado). Quem nunca fez o teste faz um; negativo, encerra. Com NIC2, NIC3 ou '
-                         'adenocarcinoma in situ tratados, manter o rastreamento por 25 anos após o tratamento.',
+            'titulo': 'Colo do útero: rastreamento encerrado',
+            'descricao': 'MS 2025: teste de DNA-HPV negativo depois dos 60 anos encerra o rastreamento. Se o teste negativo foi '
+                         'feito antes dos 60 anos, ainda falta um: repetir 5 anos depois dele (acrescente o teste pelo catálogo). '
+                         'Pela ACOG 2026, o rastreio vai até os 65 anos e só para com rastreio anterior adequado.',
             'referencia': f'{MS} / {ACOG}'})
+    elif nic2_previa:
+        # Depois dos 65 com NIC 2+ tratada: MS 2025 (rec. 14) e ACOG 2026 (alto risco) mantêm o rastreamento.
+        recs.append(_rec(HPV, 'laboratorio',
+                         'Teste de DNA-HPV oncogênico a cada 5 anos. ' + NIC2_TEXTO + ' ' + METODOS,
+                         'Mulheres acima de 65 anos com NIC 2 ou mais tratada | A cada 5 anos', f'{BRASIL} / {ACOG}', 'C'))
+        orient.append(_quando_encerrar())
+    elif rastreio_adequado == SIM or (resultado == NAO_DETECTADO and rastreio_adequado != NAO):
+        orient.append(_quando_encerrar())
+    else:
+        # Rastreio anterior inadequado ou não informado: não se presume que ela possa parar.
+        recs.append(_rec(HPV, 'laboratorio',
+                         'Rastreio anterior adequado não informado ou ausente. MS 2025 (rec. 13): mulher com mais de 60 anos sem '
+                         'teste prévio faz um teste de DNA-HPV; negativo, encerra. ACOG 2026: depois dos 65 anos, continuar até '
+                         'completar o rastreio adequado. A decisão de rastrear é individual, pela saúde e pela expectativa de '
+                         'vida. Se o rastreio anterior foi adequado e negativo, responda "Sim" no formulário: o rastreamento é '
+                         'encerrado.',
+                         'Mulheres acima de 65 anos sem rastreio anterior adequado | A cada 5 anos', f'{BRASIL} / {ACOG}', 'C'))
+        orient.append(_quando_encerrar())
     return recs, orient

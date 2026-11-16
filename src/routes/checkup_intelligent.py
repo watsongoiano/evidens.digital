@@ -8,6 +8,7 @@ from src.utils import hiv
 from src.utils import condicoes
 from src.utils import prenatal
 from src.utils import prevent
+from src.utils import rastreio_cancer
 from src.utils.seguranca_vacinas import aplicar_triagem_vacinas
 from src.utils.validacao import EntradaInvalida, SIM, ler_numero, normalizar_triagem, validar_entrada
 
@@ -235,31 +236,10 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'grau_evidencia': 'B'
         })
     
-    # Rastreamento de câncer por idade e sexo
-    if sex == 'feminino':
-        if 40 <= age <= 74:
-            _add_rec({
-                'titulo': 'Mamografia Digital - Bilateral',
-                'descricao': 'Mamografia bienal (40-74 anos)',
-                'subtitulo': 'Mulheres 40-74 anos | Bienal',
-                'categoria': 'imagem',
-                'prioridade': 'alta',
-                'referencia': 'USPSTF 2024',
-                'grau_evidencia': 'B'
-            })
-        
-        # Colo do útero: regras em src/utils/colo_utero.py (dependem de imunossupressão e do último resultado).
-
-    if sex == 'masculino' and age >= 50:
-        _add_rec({
-            'titulo': 'PSA total, soro',
-            'descricao': 'Rastreamento de câncer de próstata (≥50 anos)',
-            'subtitulo': 'Homens ≥50 anos | Anual',
-            'categoria': 'laboratorio',
-            'prioridade': 'media',
-            'referencia': 'USPSTF 2018',
-            'grau_evidencia': 'C'
-        })
+    # Rastreamento de câncer por idade e sexo: mamografia e PSA (src/utils/rastreio_cancer.py).
+    # Colo do útero: regras em src/utils/colo_utero.py (dependem de imunossupressão e do último resultado).
+    for rec in rastreio_cancer.mama_e_prostata(age, sex):
+        _add_rec(rec)
     
     # Densitometria óssea (Osteoporose)
     if sex == 'feminino' and age >= 65:
@@ -276,17 +256,9 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     # Densitometria para mulheres pós-menopausa <65 anos com fatores de risco
     # Nota: Requer avaliação individualizada de fatores de risco
     
-    # Colonoscopia
-    if 45 <= age <= 75:
-        _add_rec({
-            'titulo': 'Colonoscopia de Rastreio com ou sem biópsia',
-            'descricao': 'Colonoscopia a cada 10 anos (45-75 anos)',
-            'subtitulo': 'Adultos 45-75 anos | A cada 10 anos',
-            'categoria': 'imagem',
-            'prioridade': 'alta',
-            'referencia': 'USPSTF 2021',
-            'grau_evidencia': 'B'
-        })
+    # Colorretal: colonoscopia ou FIT, 45-75 anos (src/utils/rastreio_cancer.py)
+    for rec in rastreio_cancer.colorretal(age):
+        _add_rec(rec)
     
     # Aneurisma de Aorta Abdominal (AAA)
     # Critérios: Homens 65-75 anos E (DPOC OU fumante/ex-fumante com ≥10 maços-ano)
@@ -740,32 +712,15 @@ def generate_intelligent_recommendations():
         if sex == 'feminino':
             recs_colo, orientacoes_colo = colo_utero.recomendar(
                 age, imunossuprimida='hiv' in comorbidades or triagem.get('imunossupressao') == SIM,
-                resultado=data.get('hpv_resultado'), histerectomizada=colo_utero.HISTERECTOMIA in comorbidades)
+                resultado=data.get('hpv_resultado'), histerectomizada=colo_utero.HISTERECTOMIA in comorbidades,
+                rastreio_adequado=data.get('colo_rastreio_adequado'), nic2_previa=data.get('colo_nic2_previa') == SIM)
             recommendations.extend(recs_colo)
         
-        # Rastreamento de câncer de pulmão (LDCT) - USPSTF 2021
-        # tabagismo e macos_ano já extraídos acima
-        anos_parou_fumar = float(data.get('anos_parou_fumar', 0)) if data.get('anos_parou_fumar') else 0
-        
-        # Critérios: 50-80 anos, ≥20 maços-ano, fumante atual OU parou há <15 anos
-        elegivel_ldct = False
-        if 50 <= age <= 80 and macos_ano >= 20:
-            if tabagismo == 'atual':
-                elegivel_ldct = True
-            elif tabagismo == 'ex' and anos_parou_fumar < 15:
-                elegivel_ldct = True
-        
-        if elegivel_ldct:
-            recommendations.append({
-                'titulo': 'Tomografia computadorizada de tórax de baixa dose (LDCT)',
-                'descricao': 'Rastreamento anual de câncer de pulmão. Indicado para adultos 50-80 anos com história de tabagismo de 20 maços-ano e que atualmente fumam ou pararam nos últimos 15 anos. Descontinuar se não fumou por 15 anos ou desenvolveu problema de saúde que limita substancialmente expectativa de vida.',
-                'subtitulo': 'Adultos 50-80 anos com ≥20 maços-ano | Anual',
-                'categoria': 'imagem',
-                'prioridade': 'alta',
-                'referencia': 'USPSTF 2021',
-                'link': 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening',
-                'grau_evidencia': 'B'
-            })
+        # Rastreamento de câncer de pulmão (LDCT): USPSTF 2021 / SBCT-SBPT-CBR 2024 (src/utils/rastreio_cancer.py).
+        # Maços-ano ou anos desde que parou ausentes não viram zero: o item aparece como dados insuficientes.
+        recs_pulmao, nao_incluidas_cancer, orientacoes_cancer = rastreio_cancer.pulmao(
+            age, tabagismo, data.get('macos_ano'), data.get('anos_parou_fumar'), gestante=is_pregnant)
+        recommendations.extend(recs_pulmao)
         
         # ========== DIABETES SCREENING E MANAGEMENT (ADA 2024) ==========
         
@@ -1151,7 +1106,12 @@ def generate_intelligent_recommendations():
         
         # Listas de comorbidades, medicações e história familiar (src/utils/condicoes.py)
         orientacoes = condicoes.aplicar(recommendations, age, sex, comorbidades, medicacoes_checkboxes, familia,
-                                        gestante=is_pregnant, tabagismo=tabagismo, imc=imc)
+                                        gestante=is_pregnant, tabagismo=tabagismo, imc=imc,
+                                        idade_ccr_familiar=data.get('idade_ccr_familiar'))
+        # Rastreio de câncer: divergências entre diretrizes e o que vale depois da idade de parada.
+        mais_orientacoes, mais_nao_incluidas = rastreio_cancer.finalizar(recommendations, age, sex, familia)
+        orientacoes_cancer += mais_orientacoes
+        nao_incluidas_cancer += mais_nao_incluidas
 
         # Gestação: rotina do pré-natal pela idade gestacional; itens do check-up geral que
         # não se aplicam na gestação saem da lista e aparecem como "adiados".
@@ -1299,14 +1259,14 @@ def generate_intelligent_recommendations():
         # Periodicidade: exame já feito e ainda dentro do intervalo da própria regra sai do pedido
         # e aparece em "não incluídos", com a data e a data a partir da qual volta a ser indicado.
         mantidas, em_dia = periodicidade.aplicar(mantidas, exames_anteriores, sex)
-        nao_incluidas = nao_incluidas + em_dia
+        nao_incluidas = nao_incluidas + em_dia + nao_incluidas_cancer
         response['recommendations'] = mantidas
         response['total_recommendations'] = len(mantidas)
         response['nao_incluidas'] = nao_incluidas
         response['adiados_gestacao'] = adiados_gestacao
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['inferencias'] = inferencias
-        response['orientacoes'] = orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_hiv
+        response['orientacoes'] = orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_hiv + orientacoes_cancer
         aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
         if aviso_exames:
             response['orientacoes'] = response['orientacoes'] + [aviso_exames]
