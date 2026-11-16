@@ -314,17 +314,7 @@
       </div>
       <div id="detalhes-doenca_renal" class="bloco-condicional" data-comorbidade="doenca_renal" hidden>
         <p class="campo-rotulo text-teal-dark">Doença renal crônica: estágio</p>
-        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Define a frequência de TFG, albuminúria e dos exames de G3a em diante (KDIGO 2024). Com a creatinina informada, o estágio G é calculado.</p>
-        <div class="opcoes">
-          <label class="opcao" for="det_drc_g1_g2"><input type="checkbox" id="det_drc_g1_g2" name="comorbidades" value="drc_g1_g2">TFG ≥ 60 (G1-G2, com albuminúria ou lesão renal)</label>
-          <label class="opcao" for="det_drc_g3a"><input type="checkbox" id="det_drc_g3a" name="comorbidades" value="drc_g3a">TFG 45-59 (G3a)</label>
-          <label class="opcao" for="det_drc_g3b"><input type="checkbox" id="det_drc_g3b" name="comorbidades" value="drc_g3b">TFG 30-44 (G3b)</label>
-          <label class="opcao" for="det_drc_g4"><input type="checkbox" id="det_drc_g4" name="comorbidades" value="drc_g4">TFG 15-29 (G4)</label>
-          <label class="opcao" for="det_drc_g5"><input type="checkbox" id="det_drc_g5" name="comorbidades" value="drc_g5">TFG &lt; 15 (G5)</label>
-          <label class="opcao" for="det_drc_a1"><input type="checkbox" id="det_drc_a1" name="comorbidades" value="drc_a1">uACR &lt; 30 mg/g (A1)</label>
-          <label class="opcao" for="det_drc_a2"><input type="checkbox" id="det_drc_a2" name="comorbidades" value="drc_a2">uACR 30-300 mg/g (A2)</label>
-          <label class="opcao" for="det_drc_a3"><input type="checkbox" id="det_drc_a3" name="comorbidades" value="drc_a3">uACR &gt; 300 mg/g (A3)</label>
-        </div>
+        <p class="text-[12px] text-ink/55 -mt-1 mb-3">Define a frequência de TFG, albuminúria e dos exames de G3a em diante (KDIGO 2024). O estágio é calculado com a creatinina e a relação albumina/creatinina informadas em &quot;Exames já realizados&quot;.</p>
       </div>
       <div id="detalhes-osteoporose" class="bloco-condicional" data-comorbidade="osteoporose" hidden>
         <p class="campo-rotulo text-teal-dark">Osteoporose: o que se aplica</p>
@@ -874,26 +864,7 @@
 
     <section class="secao" aria-labelledby="s-exames">
       <h2 id="s-exames" class="secao-titulo"><span class="secao-num">08</span>Exames já realizados</h2>
-      <p class="secao-nota">Opcional. Resultados recentes entram no cálculo do risco cardiovascular (PREVENT). Informe também cada exame já feito e a data, digitando ou anexando o laudo em PDF: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. O laudo é lido e descartado; nada é guardado.</p>
-      <fieldset class="campo">
-        <legend class="campo-rotulo">Tem exames laboratoriais recentes?</legend>
-        <div class="opcoes" id="tem_exames">
-          <label class="opcao" for="tem_exames_sim"><input type="radio" id="tem_exames_sim" name="tem_exames" value="sim">Sim</label>
-          <label class="opcao" for="tem_exames_nao"><input type="radio" id="tem_exames_nao" name="tem_exames" value="nao">Não</label>
-        </div>
-      </fieldset>
-      <div id="exames-bloco" class="bloco-condicional" hidden>
-        <p class="campo-rotulo text-teal-dark">Exames laboratoriais</p>
-        <p class="text-[13px] text-ink/55 -mt-1 mb-4">Preencha só os que tiver. Colesterol total, HDL e creatinina permitem calcular o PREVENT; HbA1c e a relação albumina/creatinina refinam o cálculo. Com a creatinina, calculamos a TFG (CKD-EPI 2021); com doença renal crônica marcada e a relação albumina/creatinina, também o risco de falência renal (KFRE).</p>
-        <div class="grade">
-          <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" min="50" max="1000" placeholder="Ex: 200" inputmode="numeric"></div>
-          <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" min="5" max="200" placeholder="Ex: 45" inputmode="numeric"></div>
-          <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" min="0.1" max="25" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
-          <div class="campo"><label for="uacr">Relação albumina/creatinina urinária (mg/g)</label><input type="number" id="uacr" name="uacr" min="0.1" max="25000" step="0.1" placeholder="Ex: 30" inputmode="decimal"></div>
-          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" min="3" max="20" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5% isolada não confirma diabetes (ADA 2026): o motor pede um segundo exame (HbA1c ou glicemia de jejum) e não marca a caixa. Com diagnóstico confirmado ou hiperglicemia inequívoca, marque o tipo de diabetes.</p></div>
-        </div>
-      </div>
-      <p class="campo-rotulo mt-6">Exames já feitos e datas</p>
+      <p class="secao-nota">Opcional. Informe cada exame já feito e a data, digitando ou anexando o laudo em PDF: o que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. Em colesterol, HDL, creatinina, HbA1c, relação albumina/creatinina e teste de DNA-HPV, o resultado aparece ao lado do exame e entra nos cálculos (PREVENT, TFG pela CKD-EPI, risco renal e colo do útero). O laudo é lido e descartado; nada é guardado.</p>
       <div id="examesAnteriores" class="flex flex-col gap-4"></div>
       <div class="flex flex-wrap gap-3 mt-4">
         <button type="button" id="adicionarExameAnterior" class="btn-claro"><i class="fa-solid fa-plus text-[11px]"></i> Adicionar exame</button>
@@ -901,17 +872,25 @@
         <input type="file" id="laudoPdf" accept="application/pdf,.pdf" multiple class="sr-only">
       </div>
       <div id="laudoStatus" role="status" class="aviso aviso-atencao mt-4" style="display: none;"></div>
-      <div class="campo mt-6" id="hpv-item" style="display: none;">
-        <label for="hpv_resultado">Último teste de DNA-HPV (colo do útero)</label>
-        <select id="hpv_resultado" name="hpv_resultado">
-          <option value="">Não fez ou não sabe</option>
-          <option value="nao_detectado">Não detectado</option>
-          <option value="hpv_16_18">HPV 16 ou 18</option>
-          <option value="outros_citologia_negativa">Outros tipos, citologia negativa</option>
-          <option value="outros_citologia_alterada">Outros tipos, citologia ASC-US ou mais</option>
-          <option value="colposcopia_negativa">Colposcopia sem doença</option>
-        </select>
-        <p class="text-[12px] text-ink/55 mt-1.5">Opcional. Define o passo seguinte: novo teste em 5 anos, em 1 ano, ou colposcopia. Para adiar o pedido pela data, informe também a data do teste acima.</p>
+      <!-- Resultados que entram nos cálculos: cada campo vai para a linha do exame correspondente (um só lugar). -->
+      <div id="resultadosGuardados" hidden>
+        <div class="campo" data-resultado="colesterol"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" min="50" max="1000" placeholder="Ex: 200" inputmode="numeric"></div>
+        <div class="campo" data-resultado="hdl"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" min="5" max="200" placeholder="Ex: 45" inputmode="numeric"></div>
+        <div class="campo" data-resultado="creatinina"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" min="0.1" max="25" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
+        <div class="campo" data-resultado="uacr"><label for="uacr">Relação albumina/creatinina urinária (mg/g)</label><input type="number" id="uacr" name="uacr" min="0.1" max="25000" step="0.1" placeholder="Ex: 30" inputmode="decimal"></div>
+        <div class="campo" data-resultado="hba1c"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" min="3" max="20" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5% isolada não confirma diabetes (ADA 2026): sugerimos um segundo exame (HbA1c ou glicemia de jejum) e a caixa não é marcada. Com diagnóstico confirmado ou hiperglicemia inequívoca, o tipo de diabetes pode ser marcado.</p></div>
+        <div class="campo" id="hpv-item" data-resultado="hpv_resultado" style="display: none;">
+          <label for="hpv_resultado">Resultado (colo do útero)</label>
+          <select id="hpv_resultado" name="hpv_resultado">
+            <option value="">Não sabe</option>
+            <option value="nao_detectado">Não detectado</option>
+            <option value="hpv_16_18">HPV 16 ou 18</option>
+            <option value="outros_citologia_negativa">Outros tipos, citologia negativa</option>
+            <option value="outros_citologia_alterada">Outros tipos, citologia ASC-US ou mais</option>
+            <option value="colposcopia_negativa">Colposcopia sem doença</option>
+          </select>
+          <p class="text-[12px] text-ink/55 mt-1.5">Define o passo seguinte: novo teste em 5 anos, em 1 ano, ou colposcopia.</p>
+        </div>
       </div>
       <div class="grade mt-4" id="colo-historico" style="display: none;">
         <div class="campo">
@@ -985,6 +964,7 @@
     <h3 id="acrescimoTitulo" class="text-[22px] font-light tracking-tight">Deseja acrescentar algum exame?</h3>
     <p class="text-[14px] text-ink/55 mt-2">Os itens acrescentados entram só neste documento. Vacinas acrescentadas passam pela mesma triagem de segurança.</p>
 
+    <div id="conflitoPainel" role="alert" class="aviso aviso-atencao mt-5" style="display: none;"></div>
     <div id="acrescimoPainel" class="mt-5" style="display: none;">
       <div class="campo">
         <label for="acrescimoBusca">Buscar no catálogo ou digitar um item</label>
@@ -1166,6 +1146,42 @@
                 } else if (e.key === 'Escape') fechar();
             });
         }
+        // Resultados que entram nos cálculos ficam ao lado do exame correspondente (um só lugar no formulário).
+        function resultadosDoExame(titulo) {
+            const t = semAcentoBusca(titulo);
+            if (/^colesterol total e fracoes|^perfil lipidico/.test(t)) return ['colesterol', 'hdl'];
+            if (/^colesterol total/.test(t)) return ['colesterol'];
+            if (/^colesterol \(hdl\)|^hdl/.test(t)) return ['hdl'];
+            if (/^creatinina, soro/.test(t)) return ['creatinina'];
+            if (/^relacao albumina\/creatinina|microalbumin/.test(t)) return ['uacr'];
+            if (/^hemoglobina glicada/.test(t)) return ['hba1c'];
+            if (/papilomavirus|dna-hpv/.test(t)) return ['hpv_resultado'];
+            return [];
+        }
+        function soltarResultados(linha) {
+            const guardados = document.getElementById('resultadosGuardados');
+            linha.querySelectorAll('[data-resultado]').forEach(campo => {
+                const entrada = campo.querySelector('input, select');
+                if (entrada && entrada.value !== '') { entrada.value = ''; entrada.dispatchEvent(new Event('input', { bubbles: true })); }
+                guardados.appendChild(campo);
+            });
+        }
+        function ligarResultados(linha) {
+            const digitado = linha.querySelector('[data-exame-anterior]').value.trim();
+            const titulo = nomeDoExame[digitado.toLowerCase()] || digitado;
+            const querem = resultadosDoExame(titulo);
+            const caixa = linha.querySelector('[data-resultados-da-linha]');
+            const atuais = [...caixa.querySelectorAll('[data-resultado]')].map(c => c.dataset.resultado);
+            if (querem.join() === atuais.join()) return;
+            soltarResultados(caixa);
+            querem.forEach(chave => {
+                const campo = document.querySelector(`#resultadosGuardados [data-resultado="${chave}"]`);
+                if (campo) caixa.appendChild(campo);   // já está em outra linha: fica lá
+            });
+            caixa.hidden = !caixa.children.length;
+            atualizarCamposDoColo();
+        }
+
         async function examesDoCatalogo(categorias) {
             const cat = await carregarCatalogo();
             return categorias.flatMap(c => cat[c] || []);
@@ -1205,15 +1221,20 @@
             const icone = document.createElement('i'); icone.className = 'fa-solid fa-xmark';
             const texto = document.createElement('span'); texto.className = 'sm:hidden'; texto.textContent = T('Retirar');
             retirar.append(icone, texto);
-            linha.append(campo('basis-full sm:basis-0 sm:flex-1', 'Exame', nome), campo('flex-1 sm:flex-none sm:w-44', 'Feito em', quando), retirar);
+            const resultados = document.createElement('div');
+            resultados.className = 'basis-full grade'; resultados.hidden = true;
+            resultados.setAttribute('data-resultados-da-linha', '');
+            linha.append(campo('basis-full sm:basis-0 sm:flex-1', 'Exame', nome), campo('flex-1 sm:flex-none sm:w-44', 'Feito em', quando), retirar, resultados);
+            nome.addEventListener('change', () => ligarResultados(linha));
             listaDeBusca(nome, () => examesDoCatalogo(['laboratorio', 'imagem']), titulo => {
                 nomeDoExame[T(titulo).toLowerCase()] = titulo;
                 nome.dispatchEvent(new Event('change', { bubbles: true }));   // os resultados deixam de valer
                 quando.focus();
             });
-            if (exame) linha.querySelector('[data-exame-anterior]').value = exame;
+            if (exame) { linha.querySelector('[data-exame-anterior]').value = exame; setTimeout(() => ligarResultados(linha)); }
             if (data) linha.querySelector('[data-data-anterior]').value = data;
             linha.querySelector('button').addEventListener('click', () => {
+                soltarResultados(linha);
                 linha.remove();
                 checkupForm.dispatchEvent(new Event('change', { bubbles: true }));   // os resultados deixam de valer
             });
@@ -1516,7 +1537,11 @@
             alvo.replaceChildren();
             if (!renal) return;
             const kfre = renal.kfre;
-            const estagio = renal.drc ? `DRC ${renal.g.categoria}${renal.a ? renal.a.categoria : ''}` : renal.g.categoria;
+            // DRC: categoria G x A, estágio e risco pelo mapa da KDIGO 2024 (ex.: "DRC G2A1 · Estágio 2 · risco baixo")
+            const estagio = renal.drc
+                ? [`DRC ${renal.g.categoria}${renal.a ? renal.a.categoria : ''}`, renal.estagio ? T(renal.estagio) : '',
+                   renal.risco_kdigo ? T('risco') + ' ' + T(renal.risco_kdigo) : ''].filter(Boolean).join(' · ')
+                : renal.g.categoria;
             alvo.innerHTML = `<div class="risco-cartao">
                 <div class="flex flex-wrap items-baseline justify-between gap-2">
                   <p class="campo-rotulo !mb-0">${T('Função renal · CKD-EPI 2021')}${kfre ? ' · KFRE' : ''}</p>
@@ -1931,6 +1956,8 @@
         // (é por ele que a posologia e a triagem das vacinas são decididas).
         const tituloOriginal = {};
         const acrescentados = { laboratorio: [], imagem: [], vacina: [] };
+        const retirados = new Set();       // títulos retirados pelo médico nesta consulta (exames alternativos)
+        const mantidosJuntos = new Set();  // conflitos que o médico decidiu manter
         let categoriaDoDialogo = null;
 
         async function carregarCatalogo() {
@@ -1946,13 +1973,53 @@
 
         function limparAcrescimos() {
             Object.keys(acrescentados).forEach(c => { acrescentados[c] = []; });
+            retirados.clear();
+            mantidosJuntos.clear();
+        }
+
+        // Exames alternativos para o mesmo rastreio: antes do PDF, o médico escolhe um (ou mantém os dois de propósito).
+        // Vale entre os pedidos de laboratório e de imagem, porque um mesmo paciente recebe os dois PDFs.
+        const CONFLITOS = [{
+            itens: ['Colonoscopia de Rastreio com ou sem biópsia', 'Sangue oculto nas fezes (FIT)'],
+            texto: 'Colonoscopia e pesquisa de sangue oculto nas fezes (FIT) são alternativas para o mesmo rastreio do câncer '
+                 + 'colorretal (USPSTF 2021; USMSTF 2022): sugerimos pedir só um dos dois.'
+        }];
+        const presente = titulo => ['laboratorio', 'imagem'].some(c => itensDaCategoria(c).some(r => r.titulo === titulo));
+        function conflitosAtivos() {
+            return CONFLITOS.filter(c => !mantidosJuntos.has(c.itens.join('|')) && c.itens.every(presente));
+        }
+        function desenharConflitos() {
+            const caixa = document.getElementById('conflitoPainel');
+            const ativos = conflitosAtivos();
+            caixa.replaceChildren();
+            caixa.style.display = ativos.length ? 'block' : 'none';
+            ativos.forEach(c => {
+                const p = document.createElement('p'); p.textContent = T(c.texto);
+                const botoes = document.createElement('p'); botoes.className = 'flex flex-wrap gap-3 mt-3';
+                c.itens.forEach(titulo => {
+                    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-claro';
+                    b.textContent = T('Manter só') + ' ' + T(titulo);
+                    b.addEventListener('click', () => {
+                        c.itens.filter(t => t !== titulo).forEach(t => retirados.add(t));
+                        desenharConflitos(); if (categoriaDoDialogo) desenharAcrescentados(categoriaDoDialogo);
+                    });
+                    botoes.appendChild(b);
+                });
+                const ambos = document.createElement('button'); ambos.type = 'button';
+                ambos.className = 'text-[14px] text-ink/55 underline underline-offset-2';
+                ambos.textContent = T('Manter os dois');
+                ambos.addEventListener('click', () => { mantidosJuntos.add(c.itens.join('|')); desenharConflitos(); });
+                botoes.appendChild(ambos);
+                caixa.append(p, botoes);
+            });
         }
 
         function itensDaCategoria(categoria) {
-            const base = (currentRecommendations || []).filter(rec => (rec.categoria || '').toLowerCase() === categoria);
+            const base = (currentRecommendations || []).filter(rec => (rec.categoria || '').toLowerCase() === categoria
+                                                                      && !retirados.has(rec.titulo));
             const presentes = new Set(base.map(r => (r.titulo || '').trim().toLowerCase()));
             const extras = acrescentados[categoria]
-                .filter(t => !presentes.has(t.toLowerCase()))
+                .filter(t => !presentes.has(t.toLowerCase()) && !retirados.has(t))
                 .map(t => ({ titulo: t, categoria: categoria, acrescentado: true }));
             return base.concat(extras);
         }
@@ -1969,7 +2036,7 @@
                 chip.className = 'inline-flex items-center gap-2 rounded-full bg-mist/70 border border-teal/20 pl-3 pr-1.5 py-1 text-[13px]';
                 const texto = document.createElement('span'); texto.textContent = titulo;
                 const x = document.createElement('button'); x.type = 'button'; x.className = 'w-6 h-6 rounded-full text-ink/40 hover:text-ink hover:bg-white'; x.setAttribute('aria-label', 'Retirar'); x.innerHTML = '<i class="fa-solid fa-xmark text-[11px]"></i>';
-                x.addEventListener('click', () => { acrescentados[categoria].splice(i, 1); desenharAcrescentados(categoria); });
+                x.addEventListener('click', () => { acrescentados[categoria].splice(i, 1); desenharAcrescentados(categoria); desenharConflitos(); });
                 chip.append(texto, x);
                 caixa.appendChild(chip);
             });
@@ -1983,8 +2050,10 @@
             const lista = acrescentados[categoriaDoDialogo];
             const jaTem = itensDaCategoria(categoriaDoDialogo).some(r => (r.titulo || '').trim().toLowerCase() === titulo.toLowerCase());
             if (!jaTem) lista.push(titulo);
+            retirados.delete(titulo);   // acrescentado à mão depois de retirado: o médico quer o exame
             campo.value = '';
             desenharAcrescentados(categoriaDoDialogo);
+            desenharConflitos();
             campo.focus();
         }
 
@@ -2002,6 +2071,7 @@
             painel.style.display = acrescentados[categoria].length ? 'block' : 'none';
             document.getElementById('acrescimoSim').style.display = acrescentados[categoria].length ? 'none' : '';
             desenharAcrescentados(categoria);
+            desenharConflitos();
             const cat = await carregarCatalogo();
             (cat[categoria] || []).forEach(t => { tituloOriginal[T(t).toLowerCase()] = t; });
             await prepararGuia(categoria);
@@ -2658,16 +2728,6 @@
             }, true);
         })();
 
-        // Exames laboratoriais só aparecem se o paciente tiver exames; "Não" limpa os valores.
-        document.getElementById('tem_exames').addEventListener('change', e => {
-            const tem = e.target.value === 'sim';
-            const bloco = document.getElementById('exames-bloco');
-            bloco.hidden = !tem;
-            if (!tem) {
-                bloco.querySelectorAll('input').forEach(i => { i.value = ''; i.dispatchEvent(new Event('input', { bubbles: true })); });
-            }
-        });
-
         // Dados da gestação aparecem só para gestante
         function atualizarBlocoGestacao() {
             const gestante = document.getElementById('gestante').value === 'sim';
@@ -2698,7 +2758,7 @@
             atualizarBlocoGestacao();
         });
 
-        // Colo do útero (src/utils/colo_utero.py): o resultado do último teste de HPV só conta a partir dos 25 anos
+        // Colo do útero (src/utils/colo_utero.py): o resultado do último teste de HPV só conta dos 25 aos 65 anos
         // (MS 2025, recomendação 11) ou, com HIV ou imunossupressão, em qualquer idade. Sem colo (histerectomia
         // total), o histórico de rastreio não se aplica. O rastreio anterior adequado e a NIC 2+ tratada só decidem depois dos 60 anos
         // (MS: teste negativo depois dos 60 encerra; ACOG: parar depois dos 65 com rastreio adequado).
@@ -2708,6 +2768,8 @@
             const marcada = v => !!document.querySelector(`input[name="comorbidades"][value="${v}"]:checked`);
             const imuno = document.getElementById('imunossupressao').value === 'sim' || marcada('hiv');
             // Com histerectomia o resultado de HPV continua: um resultado positivo segue o fluxo (colo_utero.recomendar).
+            // Depois dos 65 anos o motor não sugere o teste (USPSTF 2018, D; ACOG 2026), mas o resultado de um teste já
+            // feito continua valendo para o seguimento (ex.: HPV 16/18 → colposcopia); o campo só aparece na linha do teste.
             const hpv = feminino && (imuno || idade >= 25);
             const historico = feminino && !marcada('histerectomia_total') && !imuno && idade >= 60;
             document.getElementById('hpv-item').style.display = hpv ? 'block' : 'none';

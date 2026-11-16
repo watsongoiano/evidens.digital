@@ -139,3 +139,46 @@ def test_selecionar_exame_na_lista_invalida_o_resultado():
     html = (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
     trecho = html[html.index("listaDeBusca(nome, () => examesDoCatalogo"):]
     assert "nome.dispatchEvent(new Event('change', { bubbles: true }))" in trecho[:400]
+
+
+def test_cartao_renal_traz_estagio_e_risco_kdigo(client):
+    r = _post(client, idade=60, sexo='feminino', creatinina='1.0', uacr=10, comorbidades=['doenca_renal']).get_json()
+    renal = r['funcao_renal']
+    assert renal['estagio'] == 'Estágio 2' and renal['risco_kdigo'] == 'baixo'
+    r = _post(client, idade=65, creatinina='2.0', uacr=500, comorbidades=['doenca_renal']).get_json()
+    assert r['funcao_renal']['estagio'] == 'Estágio 3b' and r['funcao_renal']['risco_kdigo'] == 'muito alto'
+    # sem DRC marcada não há estágio
+    assert _post(client, idade=60, creatinina='1.0').get_json()['funcao_renal']['estagio'] is None
+
+
+@pytest.mark.parametrize('g, a, risco', [('G1', 'A1', 'baixo'), ('G2', 'A2', 'moderado'), ('G3a', 'A1', 'moderado'),
+                                         ('G3a', 'A2', 'alto'), ('G3b', 'A1', 'alto'), ('G3b', 'A2', 'muito alto'),
+                                         ('G4', 'A1', 'muito alto')])
+def test_mapa_de_risco_kdigo(g, a, risco):
+    assert funcao_renal.risco_kdigo(g, a) == risco
+
+
+def test_aviso_de_exames_alternativos_antes_do_pdf():
+    html = (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
+    assert "itens: ['Colonoscopia de Rastreio com ou sem biópsia', 'Sangue oculto nas fezes (FIT)']" in html
+    assert 'id="conflitoPainel"' in html and 'desenharConflitos();' in html
+    assert '&& !retirados.has(rec.titulo)' in html
+
+
+def test_drc_sem_opcoes_de_estagio_na_tela():
+    html = (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
+    bloco = html.split('id="detalhes-doenca_renal"')[1].split('</div>')[0]
+    assert 'det_drc_' not in bloco and 'Exames já realizados' in bloco
+
+
+def test_conflito_vale_para_itens_acrescentados_e_e_redesenhado():
+    html = (RAIZ / 'intelligent-tools.html').read_text(encoding='utf-8')
+    assert "!presentes.has(t.toLowerCase()) && !retirados.has(t)" in html
+    trecho = html[html.index('function adicionarDoCampo()'):]
+    assert 'desenharConflitos();' in trecho[:1200]
+
+
+def test_resultado_de_hpv_depois_dos_65_segue_o_fluxo(client):
+    """Sem sugerir rastreio depois dos 65, um HPV 16/18 já informado ainda leva à colposcopia."""
+    r = _post(client, idade=70, sexo='feminino', hpv_resultado='hpv_16_18').get_json()
+    assert any('olposcopia' in x['titulo'] for x in r['recommendations'])

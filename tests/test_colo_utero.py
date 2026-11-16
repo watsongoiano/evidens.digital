@@ -81,7 +81,7 @@ ENCERRAR = 'Colo do útero: quando encerrar o rastreamento'
 @pytest.mark.parametrize('adequado, nic2, resultado, pede', [
     ('sim', None, None, False),          # rastreio anterior adequado e negativo: para (ACOG)
     (None, None, 'nao_detectado', False),  # negativo depois dos 60 (MS) sem resposta sobre o rastreio anterior
-    (None, None, None, True),            # não sabe: não se presume que possa parar
+    (None, None, None, False),           # sem rastreio declarado inadequado: não se rastreia depois dos 65 (USPSTF D)
     ('nao', None, None, True),           # rastreio inadequado: continua (ACOG; MS rec. 13)
     ('nao', None, 'nao_detectado', True),
     ('sim', 'sim', None, True),          # NIC 2+ tratada: 25 anos após o tratamento
@@ -258,3 +258,12 @@ def test_formulario_tem_o_campo_so_para_o_sexo_feminino():
     # Só para mulheres com colo, a partir dos 25 anos ou com HIV/imunossupressão (MS 2025, rec. 11)
     assert "const hpv = feminino && (imuno || idade >= 25);" in html
     assert "getElementById('hpv-item').style.display = hpv ? 'block' : 'none'" in html
+    # O resultado fica na linha do teste de HPV em "Exames já realizados" (um só lugar)
+    assert "if (/papilomavirus|dna-hpv/.test(t)) return ['hpv_resultado'];" in html
+
+
+def test_sem_rastreio_depois_dos_65_sem_indicacao(client):
+    recs, orient = _colo(client, idade=70)
+    assert HPV not in recs
+    o = orient['Colo do útero: sem rastreio depois dos 65 anos']
+    assert 'USPSTF 2018' in o['referencia'] and 'rastreio anterior inadequado' in o['descricao']

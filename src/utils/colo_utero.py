@@ -46,6 +46,7 @@ RESULTADOS = (NAO_DETECTADO, HPV_16_18, OUTROS_CITOLOGIA_NEGATIVA, OUTROS_CITOLO
 MS = 'MS 2025 (DNA-HPV)'
 SBOC = 'SBOC 2026'
 ACOG = 'ACOG 2026'
+USPSTF_COLO = 'USPSTF 2018 (colo do útero)'
 BRASIL = f'{MS} / {SBOC}'
 
 IDADE_CITOLOGIA = 21   # ACOG: citologia dos 21 aos 29; aqui, até o teste de HPV começar
@@ -201,14 +202,22 @@ def recomendar(idade, imunossuprimida=False, resultado=None, histerectomizada=Fa
         orient.append(_quando_encerrar())
     elif rastreio_adequado == SIM or (resultado == NAO_DETECTADO and rastreio_adequado != NAO):
         orient.append(_quando_encerrar())
-    else:
-        # Rastreio anterior inadequado ou não informado: não se presume que ela possa parar.
+    elif rastreio_adequado == NAO:
+        # Rastreio anterior declarado inadequado: MS 2025 (rec. 13) e ACOG 2026 não presumem que ela possa parar.
         recs.append(_rec(HPV, 'laboratorio',
-                         'Rastreio anterior adequado não informado ou ausente. MS 2025 (rec. 13): mulher com mais de 60 anos sem '
-                         'teste prévio faz um teste de DNA-HPV; negativo, encerra. ACOG 2026: depois dos 65 anos, continuar até '
-                         'completar o rastreio adequado. A decisão de rastrear é individual, pela saúde e pela expectativa de '
-                         'vida. Se o rastreio anterior foi adequado e negativo, responda "Sim" no formulário: o rastreamento é '
-                         'encerrado.',
+                         'Rastreio anterior inadequado. MS 2025 (rec. 13): mulher com mais de 60 anos sem teste prévio faz um '
+                         'teste de DNA-HPV; negativo, encerra. ACOG 2026: depois dos 65 anos, continuar até completar o rastreio '
+                         'adequado. A decisão de rastrear é individual, pela saúde e pela expectativa de vida.',
                          'Mulheres acima de 65 anos sem rastreio anterior adequado | A cada 5 anos', f'{BRASIL} / {ACOG}', 'C'))
+        orient.append(_quando_encerrar())
+    else:
+        # Depois dos 65 anos, sem NIC 2+ e sem rastreio declarado inadequado: não se rastreia (USPSTF 2018, D, com
+        # rastreio anterior adequado; ACOG 2026). O teste só volta se o rastreio anterior não foi adequado.
+        orient.append({
+            'titulo': 'Colo do útero: sem rastreio depois dos 65 anos',
+            'descricao': 'Depois dos 65 anos não sugerimos o teste de DNA-HPV. A exceção é o rastreio anterior inadequado '
+                         '(resposta "Não" no formulário) ou NIC 2, NIC 3 ou adenocarcinoma in situ tratados nos últimos 25 '
+                         'anos: nesses casos o rastreio continua.',
+            'referencia': f'{USPSTF_COLO} / {ACOG} / {MS}'})
         orient.append(_quando_encerrar())
     return recs, orient

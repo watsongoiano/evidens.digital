@@ -471,7 +471,7 @@ def test_hba1c_a_partir_de_6_5_pede_confirmacao(client, hba1c, a_confirmar):
 
 def test_hba1c_alta_isolada_so_pede_confirmacao_sem_marcar_caixa(client, pagina):
     """HbA1c ≥ 6,5% isolada: nem a tela nem o servidor marcam diabetes; o motor pede um segundo exame."""
-    assert "pedir('diabetes', 'hba1c'" not in pagina and 'marque o tipo de diabetes' in pagina
+    assert "pedir('diabetes', 'hba1c'" not in pagina and 'o tipo de diabetes pode ser marcado' in pagina
     assert '(hb !== null && hb >= 6.5)' not in pagina          # na tela, a HbA1c sozinha não conta como diabetes
     corpo = {'idade': '50', 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao', 'hba1c': '7.2'}
     r = client.post('/api/checkup-intelligent', json=corpo).get_json()
@@ -491,12 +491,14 @@ def test_hba1c_alta_isolada_so_pede_confirmacao_sem_marcar_caixa(client, pagina)
     assert 'Hormônio Tireoestimulante (TSH), soro' in titulos1 and 'Relação albumina/creatinina urinária (uACR)' in titulos1
 
 
-def test_exames_laboratoriais_so_aparecem_se_houver(pagina):
-    bloco = pagina.split('id="exames-bloco"')[1].split('</section>')[0]
-    for campo in ('colesterol', 'hdl', 'creatinina', 'hba1c'):
-        assert f'id="{campo}"' in bloco
-    assert 'id="exames-bloco" class="bloco-condicional" hidden' in pagina
-    assert 'name="tem_exames" value="sim"' in pagina and 'name="tem_exames" value="nao"' in pagina
+def test_resultados_dos_exames_ficam_na_linha_do_exame(pagina):
+    """Um só lugar para os exames: os resultados usados nos cálculos ficam guardados e vão para a linha do exame."""
+    guardados = pagina.split('id="resultadosGuardados"')[1].split('<div class="grade mt-4" id="colo-historico"')[0]
+    for campo in ('colesterol', 'hdl', 'creatinina', 'uacr', 'hba1c', 'hpv_resultado'):
+        assert f'id="{campo}"' in guardados and f'data-resultado="{campo}"' in guardados
+    assert 'name="tem_exames"' not in pagina and 'id="exames-bloco"' not in pagina
+    for trecho in ("return ['colesterol', 'hdl']", "return ['creatinina']", "return ['uacr']", "return ['hba1c']"):
+        assert trecho in pagina
 
 
 def test_campo_tem_exames_e_aceito_pela_api(client):
@@ -584,8 +586,10 @@ def test_hpv_a_cada_cinco_anos_e_citologia_a_cada_tres(client):
     for idade in (25, 40, 65):
         assert '5 anos' in colo(idade)['subtitulo'] and 'HPV' in colo(idade)['titulo'], idade
     assert colo(20) is None
-    # depois dos 65, só para com rastreio anterior adequado e negativo (ACOG 2026)
-    assert colo(66)['subtitulo'].startswith('Mulheres acima de 65 anos sem rastreio anterior adequado')
+    # depois dos 65 não se rastreia, salvo rastreio anterior inadequado (USPSTF 2018; ACOG 2026)
+    assert colo(66) is None
+    recs = client.post('/api/checkup-intelligent', json=dict(base, idade=66, colo_rastreio_adequado='nao')).get_json()['recommendations']
+    assert any(r['subtitulo'].startswith('Mulheres acima de 65 anos sem rastreio anterior adequado') for r in recs)
     recs = client.post('/api/checkup-intelligent', json=dict(base, idade=66, colo_rastreio_adequado='sim')).get_json()['recommendations']
     assert not any(r['titulo'].startswith('Pesquisa do Papilomavírus') for r in recs)
 

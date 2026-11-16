@@ -43,6 +43,20 @@ def categoria_a(uacr):
     return {'categoria': 'A3', 'rotulo': 'gravemente aumentada'}
 
 
+# Estágio pela categoria G (KDIGO 2024: G1-G5; o G3 se divide em 3a e 3b)
+ESTAGIO = {'G1': '1', 'G2': '2', 'G3a': '3a', 'G3b': '3b', 'G4': '4', 'G5': '5'}
+
+# Mapa de calor da KDIGO 2024 (Figura 1): risco de desfechos adversos por G x A.
+_MAPA = {'G1': ('baixo', 'moderado', 'alto'), 'G2': ('baixo', 'moderado', 'alto'),
+         'G3a': ('moderado', 'alto', 'muito alto'), 'G3b': ('alto', 'muito alto', 'muito alto'),
+         'G4': ('muito alto', 'muito alto', 'muito alto'), 'G5': ('muito alto', 'muito alto', 'muito alto')}
+
+
+def risco_kdigo(g, a):
+    """Risco de progressão e de eventos pelo mapa G x A da KDIGO 2024 ('baixo' a 'muito alto')."""
+    return _MAPA[g][('A1', 'A2', 'A3').index(a)]
+
+
 def kfre(idade, sexo, tfg, uacr):
     """Risco (0-1) de falência renal tratada em 2 e 5 anos, KFRE de 4 variáveis (fora da América do Norte)."""
     c = _KFRE_COEF
@@ -63,8 +77,10 @@ def avaliar(creatinina, idade, sexo, uacr=None, drc=False):
         return None
     tfg = prevent.egfr_ckd_epi_2021(float(creatinina), idade, sexo)
     g = categoria_g(tfg)
-    cartao = {'tfg': tfg, 'g': g, 'a': categoria_a(float(uacr)) if uacr else None, 'drc': bool(drc),
-              'kfre': None, 'observacoes': [], 'fontes': [CKD_EPI, KDIGO]}
+    a = categoria_a(float(uacr)) if uacr else None
+    cartao = {'tfg': tfg, 'g': g, 'a': a, 'drc': bool(drc), 'kfre': None, 'observacoes': [], 'fontes': [CKD_EPI, KDIGO],
+              'estagio': f"Estágio {ESTAGIO[g['categoria']]}" if drc else None,
+              'risco_kdigo': risco_kdigo(g['categoria'], a['categoria']) if drc and a else None}
     obs = cartao['observacoes']
     if not drc:
         if tfg < 60:
