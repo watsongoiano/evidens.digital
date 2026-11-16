@@ -21,6 +21,7 @@ TIPOS = {
     'acesso': 'Acessos ao check-up',
     'login': 'Entradas na conta',
     'checkup': 'Check-ups gerados',
+    'preoperatorio': 'Avaliações pré-operatórias',
     'pdf_laboratorio': 'Pedidos de laboratório',
     'pdf_imagem': 'Pedidos de imagem',
     'pdf_vacinas': 'Receitas de vacinas',

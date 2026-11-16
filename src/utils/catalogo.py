@@ -86,6 +86,8 @@ EXTRAS = {
         'Holter de 24 horas',
         'Escore de cálcio coronariano (TC)',
         'Angiotomografia de coronárias',
+        'Cintilografia de perfusão miocárdica (estresse e repouso)',
+        'Ecocardiograma de estresse com dobutamina',
         'Tomografia de tórax de baixa dose',
         'Endoscopia digestiva alta',
         'Colonoscopia',
