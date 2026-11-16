@@ -8,3 +8,5 @@ fpdf2==2.9.0
 pypdf==7.1.0
 # Assinatura digital dos pedidos no padrão PAdES (certificado ICP-Brasil em nuvem).
 pyHanko==0.38.1
+# Imagem do receituário na tela (ajuste dos espaços) e leitura de timbrado escaneado.
+pypdfium2==5.15.2

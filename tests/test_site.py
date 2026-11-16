@@ -765,3 +765,15 @@ def test_medicacoes_anti_hipertensivas_levam_a_classe_para_a_has_resistente(pagi
         classes, _ = medicamentos.classes_anti_hipertensivas(chave)
         assert re.search(rf'value="{chave}"[^>]*data-classe-has="{"|".join(sorted(classes))}"', pagina), chave
     assert re.search(r'data-valor="carvedilol"[^>]*data-classe-has="betabloqueador" data-has-condicional="1"', pagina)
+
+
+def test_risco_prevent_declara_limite_de_aplicabilidade_com_fontes(client):
+    # O PREVENT foi derivado e validado nos EUA; não há validação em coorte brasileira.
+    r = client.post('/api/checkup-intelligent', json={
+        'idade': 55, 'sexo': 'masculino', 'tabagismo': 'nunca', 'imunossupressao': 'nao', 'pas': 128, 'pad': 78,
+        'colesterol': 200, 'hdl': 45, 'creatinina': 1.0, 'peso': 80, 'altura': 175}).get_json()
+    risco = r['risco_cardiovascular']
+    assert risco['status'] == 'calculado'
+    assert 'sem validação em coorte brasileira' in risco['limitacao']['texto']
+    assert {f['link'] for f in risco['limitacao']['fontes']} == {
+        'https://doi.org/10.1001/jamanetworkopen.2024.38311', 'https://doi.org/10.36660/abc.20240405'}
