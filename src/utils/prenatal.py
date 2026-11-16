@@ -394,7 +394,7 @@ def classificar_pa(pas, pad):
     if (s_ is not None and s_ >= 140) or (d_ is not None and d_ >= 90):
         return {'categoria': 'hipertensao', 'rotulo': 'Hipertensão na gestação (≥ 140/90)'}
     if not (tem_s and tem_d):
-        return {'categoria': 'incompleta', 'rotulo': 'Informe PAS e PAD para classificar', 'incompleta': True}
+        return {'categoria': 'incompleta', 'rotulo': 'Faltam PAS e PAD para classificar', 'incompleta': True}
     return {'categoria': 'normal', 'rotulo': 'PA < 140/90'}
 
 
@@ -515,7 +515,7 @@ def orientacoes(g, idade, pas=None, pad=None, hipertensa=False, diabetica=False,
         outras.append(aas)
         outras.append(_orientar(
             DIVERGENCIA + 'dose e duração do AAS',
-            'O motor segue a FEBRASGO 2023 e a Conitec 2026 (100-150 mg à noite, até 36 semanas); USPSTF 2021 e ACOG '
+            'Nós optamos por seguir a referência da FEBRASGO 2023 e da Conitec 2026 (100-150 mg à noite, até 36 semanas); USPSTF 2021 e ACOG '
             'usam 81 mg/dia, iniciado de 12 a 28 semanas e mantido até o parto.',
             f'{FEBRASGO_PE} / {CONITEC_AAS} / {USPSTF_AAS} / {ACOG_PE}'))
 
@@ -552,7 +552,7 @@ def orientacoes(g, idade, pas=None, pad=None, hipertensa=False, diabetica=False,
     if 'Hormônio Tireoestimulante (TSH), soro' in titulos:
         outras.append(_orientar(
             DIVERGENCIA + 'TSH na gestação',
-            'O motor segue a FEBRASGO/SBEM 2022 (TSH para todas no início do pré-natal); a ATA 2017 e a ACOG fazem rastreio '
+            'Nós optamos por seguir a referência da FEBRASGO/SBEM 2022 (TSH para todas no início do pré-natal); a ATA 2017 e a ACOG fazem rastreio '
             'seletivo (doença tireoidiana, DM1 ou outra autoimune, anti-TPO positivo, idade > 30, IMC ≥ 40, abortamento ou '
             'parto prematuro prévio, irradiação cervical, amiodarona ou lítio).',
             'FEBRASGO/SBEM 2022 (tireoide na gestação) / ATA 2017 (tireoide na gestação)'))
@@ -560,7 +560,7 @@ def orientacoes(g, idade, pas=None, pad=None, hipertensa=False, diabetica=False,
     if idade >= 25 and any(r['titulo'] == 'Clamídia e gonococo, PCR (urina ou swab)' and r.get('gestacao') for r in agora):
         outras.append(_orientar(
             DIVERGENCIA + 'clamídia e gonococo na gestante a partir de 25 anos',
-            'O motor segue o Williams (clamídia para todas na 1ª consulta); a USPSTF 2021 rastreia gestantes a partir de 25 '
+            'Nós optamos por seguir a referência do Williams (clamídia para todas na 1ª consulta); a USPSTF 2021 rastreia gestantes a partir de 25 '
             'anos só com risco aumentado (parceria nova ou múltipla, parceria com IST, IST prévia).',
             'Williams 26e / USPSTF 2021 (clamídia e gonococo)'))
     # Protocolo institucional (Einstein) sem respaldo de rotina no MS/ACOG
@@ -581,12 +581,12 @@ def orientacoes(g, idade, pas=None, pad=None, hipertensa=False, diabetica=False,
     if g['rh'] == 'negativo' and ig is not None and ig < 29:
         outras.append(_orientar(
             DIVERGENCIA + 'Coombs indireto na Rh negativa',
-            'O motor segue ACOG/Williams (repetir com 28 semanas e dar imunoglobulina anti-D); o MS (CAB 32) repete o Coombs '
+            'Nós optamos por seguir a referência da ACOG e do Williams (repetir com 28 semanas e dar imunoglobulina anti-D); o MS (CAB 32) repete o Coombs '
             'indireto a cada 4 semanas a partir de 24 semanas.', 'Williams 26e / MS 2012-2016'))
     elif g['rh'] == 'desconhecido' and not g['primeira_consulta']:
         outras.append(_orientar(
             'Fator Rh não informado',
-            'Confirme a tipagem ABO/Rh da 1ª consulta. Se Rh negativo: Coombs indireto com 28 semanas e imunoglobulina anti-D '
+            'Sugerimos confirmar a tipagem ABO/Rh da 1ª consulta. Se Rh negativo: Coombs indireto com 28 semanas e imunoglobulina anti-D '
             'com 28 semanas e até 72 h após o parto (RN Rh positivo).', REF))
 
     # Fim da gestação (MS, CAB 32; PCDT TV 2022)
@@ -888,13 +888,13 @@ def clamidia_fora_da_gestacao(idade, sexualmente_ativa=None):
                'referencia': USPSTF_IST, 'grau_evidencia': 'B'}
         aviso = _orientar(
             DIVERGENCIA + 'clamídia e gonococo',
-            'O motor segue a USPSTF 2021 (todas as mulheres sexualmente ativas até 24 anos, anual); a nota técnica do MS de '
+            'Nós optamos por seguir a referência da USPSTF 2021 (todas as mulheres sexualmente ativas até 24 anos, anual); a nota técnica do MS de '
             '2025 restringe o teste no SUS a populações vulneráveis.', f'{USPSTF_IST} / {MS_IST}')
         return [rec], [aviso]
     if ativa == 'sim':
         return [], [_orientar(
             'Clamídia e gonococo a partir de 25 anos',
-            'Rastrear (teste molecular) se houver risco aumentado: parceria nova ou múltipla, parceria com IST, IST prévia, '
+            'Sugerimos rastrear (teste molecular) se houver risco aumentado: parceria nova ou múltipla, parceria com IST, IST prévia, '
             'troca de sexo por dinheiro ou drogas.', USPSTF_IST)]
     return [], []
 

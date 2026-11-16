@@ -185,7 +185,7 @@ def recomendar(idade, sexo, cd4=None, carga_viral=None, em_tarv=False, supressao
              'viral do HCV (HCV-RNA). Com CD4 baixo o anticorpo pode falhar: considerar o HCV-RNA.',
              f'{GRUPO} | Anual ou conforme indicação', AMBOS))
     for titulo in ('Antígeno HBs, soro', 'Anticorpos anti-HBc total, soro', 'Anticorpos anti-HBs, soro'):
-        add(_rec(titulo, 'Triagem de hepatite B na avaliação inicial. HBsAg reagente: carga viral do HBV. Vacinar quem não é '
+        add(_rec(titulo, 'Triagem de hepatite B na avaliação inicial. HBsAg reagente: carga viral do HBV. Sugerimos vacinar quem não é '
                  'imune; com anti-HBs reagente não é preciso repetir. Repetir a sorologia antes de trocar para esquema sem '
                  'tenofovir.', f'{GRUPO} | Avaliação inicial', AMBOS))
     add(_rec('Anticorpos anti-HAV IgG, soro',

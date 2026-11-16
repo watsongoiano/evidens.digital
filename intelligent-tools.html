@@ -89,10 +89,10 @@
       <h2 id="s-clinicos" class="secao-titulo"><span class="secao-num">02</span>Dados clínicos</h2>
       <p class="secao-nota">Valores mais recentes que tiver em mãos.</p>
       <div class="grade">
-        <div class="campo"><label for="peso">Peso (kg)</label><input type="number" id="peso" name="peso" step="0.1" placeholder="Ex: 70.5" inputmode="decimal"></div>
-        <div class="campo"><label for="altura">Altura (cm)</label><input type="number" id="altura" name="altura" placeholder="Ex: 170" inputmode="numeric"></div>
-        <div class="campo"><label for="pas">Pressão sistólica (mmHg)</label><input type="number" id="pas" name="pas" placeholder="Ex: 140" inputmode="numeric"></div>
-        <div class="campo"><label for="pad">Pressão diastólica (mmHg)</label><input type="number" id="pad" name="pad" placeholder="Ex: 90" inputmode="numeric"></div>
+        <div class="campo"><label for="peso">Peso (kg)</label><input type="number" id="peso" name="peso" min="20" max="400" step="0.1" placeholder="Ex: 70.5" inputmode="decimal"></div>
+        <div class="campo"><label for="altura">Altura (cm)</label><input type="number" id="altura" name="altura" min="100" max="250" placeholder="Ex: 170" inputmode="numeric"></div>
+        <div class="campo"><label for="pas">Pressão sistólica (mmHg)</label><input type="number" id="pas" name="pas" min="50" max="300" placeholder="Ex: 140" inputmode="numeric"></div>
+        <div class="campo"><label for="pad">Pressão diastólica (mmHg)</label><input type="number" id="pad" name="pad" min="20" max="200" placeholder="Ex: 90" inputmode="numeric"></div>
       </div>
     </section>
 
@@ -126,8 +126,8 @@
           </select>
         </div>
         <div class="grade">
-          <div class="campo hiv-previo"><label for="cd4">CD4 (células/mm³)</label><input type="number" id="cd4" name="cd4" placeholder="Ex: 350" inputmode="numeric"></div>
-          <div class="campo hiv-previo"><label for="carga_viral">Carga viral (cópias/mL)</label><input type="number" id="carga_viral" name="carga_viral" placeholder="Ex: 50" inputmode="numeric"></div>
+          <div class="campo hiv-previo"><label for="cd4">CD4 (células/mm³)</label><input type="number" id="cd4" name="cd4" min="0" max="5000" placeholder="Ex: 350" inputmode="numeric"></div>
+          <div class="campo hiv-previo"><label for="carga_viral">Carga viral (cópias/mL)</label><input type="number" id="carga_viral" name="carga_viral" min="0" max="100000000" placeholder="Ex: 50" inputmode="numeric"></div>
           <div class="campo">
             <label for="em_tarv">Em uso de TARV?</label>
             <select id="em_tarv" name="em_tarv">
@@ -830,19 +830,19 @@
         </div>
         <div class="campo conditional-field" id="macos_ano_field" style="display: none;">
           <label for="macos_ano">Maços-ano</label>
-          <input type="number" id="macos_ano" name="macos_ano" step="0.1" inputmode="decimal">
+          <input type="number" id="macos_ano" name="macos_ano" min="0" max="300" step="0.1" inputmode="decimal">
         </div>
         <div class="campo conditional-field" id="anos_parou_fumar_field" style="display: none;">
           <label for="anos_parou_fumar">Anos desde que parou de fumar</label>
-          <input type="number" id="anos_parou_fumar" name="anos_parou_fumar" step="1" inputmode="numeric">
+          <input type="number" id="anos_parou_fumar" name="anos_parou_fumar" min="0" max="100" step="1" inputmode="numeric">
         </div>
         <div class="campo conditional-field" id="doses_semana_field" style="display: none;">
           <label for="doses_semana">Doses por semana</label>
-          <input type="number" id="doses_semana" name="doses_semana" step="1" placeholder="1 dose = 350 mL de cerveja ou 150 mL de vinho" inputmode="numeric">
+          <input type="number" id="doses_semana" name="doses_semana" min="0" step="1" placeholder="1 dose = 350 mL de cerveja ou 150 mL de vinho" inputmode="numeric">
         </div>
         <div class="campo conditional-field" id="anos_consumo_alcool_field" style="display: none;">
           <label for="anos_consumo_alcool">Anos de consumo</label>
-          <input type="number" id="anos_consumo_alcool" name="anos_consumo_alcool" step="1" inputmode="numeric">
+          <input type="number" id="anos_consumo_alcool" name="anos_consumo_alcool" min="0" step="1" inputmode="numeric">
         </div>
       </div>
     </section>
@@ -884,17 +884,17 @@
       </fieldset>
       <div id="exames-bloco" class="bloco-condicional" hidden>
         <p class="campo-rotulo text-teal-dark">Exames laboratoriais</p>
-        <p class="text-[13px] text-ink/55 -mt-1 mb-4">Preencha só os que tiver. Colesterol total, HDL e creatinina permitem calcular o PREVENT; HbA1c refina o cálculo.</p>
+        <p class="text-[13px] text-ink/55 -mt-1 mb-4">Preencha só os que tiver. Colesterol total, HDL e creatinina permitem calcular o PREVENT; HbA1c e a relação albumina/creatinina refinam o cálculo. Com a creatinina, calculamos a TFG (CKD-EPI 2021); com doença renal crônica marcada e a relação albumina/creatinina, também o risco de falência renal (KFRE).</p>
         <div class="grade">
-          <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" placeholder="Ex: 200" inputmode="numeric"></div>
-          <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" placeholder="Ex: 45" inputmode="numeric"></div>
-          <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
-          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5% isolada não confirma diabetes (ADA 2026): o motor pede um segundo exame (HbA1c ou glicemia de jejum) e não marca a caixa. Com diagnóstico confirmado ou hiperglicemia inequívoca, marque o tipo de diabetes.</p></div>
+          <div class="campo"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" min="50" max="1000" placeholder="Ex: 200" inputmode="numeric"></div>
+          <div class="campo"><label for="hdl">HDL (mg/dL)</label><input type="number" id="hdl" name="hdl" min="5" max="200" placeholder="Ex: 45" inputmode="numeric"></div>
+          <div class="campo"><label for="creatinina">Creatinina sérica (mg/dL)</label><input type="number" id="creatinina" name="creatinina" min="0.1" max="25" step="0.1" placeholder="Ex: 1.0" inputmode="decimal"></div>
+          <div class="campo"><label for="uacr">Relação albumina/creatinina urinária (mg/g)</label><input type="number" id="uacr" name="uacr" min="0.1" max="25000" step="0.1" placeholder="Ex: 30" inputmode="decimal"></div>
+          <div class="campo"><label for="hba1c">HbA1c (%)</label><input type="number" id="hba1c" name="hba1c" min="3" max="20" step="0.1" placeholder="Ex: 7.0" inputmode="decimal"><p id="hba1c-aviso" class="text-[12px] text-teal-dark mt-1.5" hidden>HbA1c ≥ 6,5% isolada não confirma diabetes (ADA 2026): o motor pede um segundo exame (HbA1c ou glicemia de jejum) e não marca a caixa. Com diagnóstico confirmado ou hiperglicemia inequívoca, marque o tipo de diabetes.</p></div>
         </div>
       </div>
       <p class="campo-rotulo mt-6">Exames já feitos e datas</p>
       <div id="examesAnteriores" class="flex flex-col gap-4"></div>
-      <datalist id="examesConhecidos"></datalist>
       <div class="flex flex-wrap gap-3 mt-4">
         <button type="button" id="adicionarExameAnterior" class="btn-claro"><i class="fa-solid fa-plus text-[11px]"></i> Adicionar exame</button>
         <label for="laudoPdf" class="btn-claro cursor-pointer"><i class="fa-solid fa-file-arrow-up text-[11px]"></i> Anexar laudo (PDF)</label>
@@ -962,6 +962,7 @@
     </div>
 
     <div id="riscoContent"></div>
+    <div id="renalContent" class="mt-4"></div>
     <div id="orientacoesContent"></div>
     <p class="text-[12px] text-ink/50 mt-6 flex flex-wrap gap-x-5 gap-y-1"><span><span class="inline-block w-2 h-2 rounded-full bg-teal align-middle mr-1"></span>prioridade alta</span><span><span class="inline-block w-2 h-2 rounded-full bg-aqua align-middle mr-1"></span>média</span><span><span class="inline-block w-2 h-2 rounded-full bg-ink/20 align-middle mr-1"></span>baixa</span><span><span class="rec-grau align-middle mr-1">A</span>grau de evidência</span></p>
     <div id="recommendationsContent"></div>
@@ -988,8 +989,7 @@
       <div class="campo">
         <label for="acrescimoBusca">Buscar no catálogo ou digitar um item</label>
         <div class="flex gap-2">
-          <input type="text" id="acrescimoBusca" list="acrescimoLista" placeholder="Ex: TSH, soro" maxlength="300" autocomplete="off" class="flex-1">
-          <datalist id="acrescimoLista"></datalist>
+          <div class="relative flex-1"><input type="text" id="acrescimoBusca" placeholder="Ex: TSH, soro" maxlength="300" autocomplete="off" class="w-full"></div>
           <button type="button" id="acrescimoAdicionar" class="btn-claro shrink-0"><i class="fa-solid fa-plus text-[11px]"></i>Adicionar</button>
         </div>
       </div>
@@ -1104,6 +1104,73 @@
         const nomeDoExame = {};       // nome mostrado (traduzido em inglês) → título em português
         let linhasDeExame = 0;
 
+        // Lista suspensa com busca, a mesma do catálogo de exames ("Deseja acrescentar algum exame?"): digitar filtra
+        // (sem acento, todas as palavras), setas e Enter escolhem, toque escolhe. Funciona igual no celular.
+        const semAcentoBusca = t => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        function listaDeBusca(entrada, obterItens, aoEscolher) {
+            entrada.setAttribute('role', 'combobox');
+            entrada.setAttribute('aria-autocomplete', 'list');
+            entrada.setAttribute('aria-expanded', 'false');
+            const lista = document.createElement('ul');
+            lista.className = 'combo-lista'; lista.setAttribute('role', 'listbox'); lista.hidden = true;
+            lista.id = entrada.id + '-opcoes';
+            entrada.setAttribute('aria-controls', lista.id);
+            entrada.parentElement.classList.add('relative');
+            entrada.insertAdjacentElement('afterend', lista);
+            let ativa = -1, visiveis = [];
+            const marcar = n => {
+                [...lista.children].forEach((li, i) => li.setAttribute('aria-selected', i === n ? 'true' : 'false'));
+                ativa = n;
+                if (lista.children[n]) lista.children[n].scrollIntoView({ block: 'nearest' });
+            };
+            const fechar = () => { lista.hidden = true; entrada.setAttribute('aria-expanded', 'false'); ativa = -1; };
+            async function abrir() {
+                const itens = await obterItens();
+                const termos = semAcentoBusca(entrada.value).split(/\s+/).filter(Boolean);
+                visiveis = itens.filter(t => { const n = semAcentoBusca(T(t) + ' ' + t); return termos.every(x => n.includes(x)); })
+                    .sort((a, b) => semAcentoBusca(T(a)).startsWith(termos[0] || '') === semAcentoBusca(T(b)).startsWith(termos[0] || '') ? 0
+                                    : semAcentoBusca(T(a)).startsWith(termos[0] || '') ? -1 : 1)
+                    .slice(0, 60);
+                lista.replaceChildren(...visiveis.map((t, i) => {
+                    const li = document.createElement('li');
+                    li.setAttribute('role', 'option'); li.id = `${lista.id}-${i}`; li.textContent = T(t);
+                    li.addEventListener('mousedown', e => { e.preventDefault(); escolher(i); });
+                    return li;
+                }));
+                if (!visiveis.length) {
+                    const li = document.createElement('li');
+                    li.className = 'px-4 py-2 text-[13px] text-ink/45'; li.textContent = T('Nenhum item do catálogo com esse nome.');
+                    lista.appendChild(li);
+                }
+                lista.hidden = false; entrada.setAttribute('aria-expanded', 'true');
+                marcar(termos.length && visiveis.length ? 0 : -1);
+            }
+            function escolher(i) {
+                const titulo = visiveis[i];
+                if (!titulo) return;
+                entrada.value = T(titulo);
+                fechar();
+                aoEscolher(titulo);
+            }
+            entrada.addEventListener('focus', abrir);
+            entrada.addEventListener('input', abrir);
+            entrada.addEventListener('blur', () => setTimeout(fechar, 150));
+            entrada.addEventListener('keydown', e => {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (lista.hidden) { abrir(); return; }
+                    const n = visiveis.length;
+                    if (n) marcar((ativa + (e.key === 'ArrowDown' ? 1 : -1) + n) % n);
+                } else if (e.key === 'Enter' && !lista.hidden && ativa >= 0) {
+                    e.preventDefault(); e.stopImmediatePropagation(); escolher(ativa);
+                } else if (e.key === 'Escape') fechar();
+            });
+        }
+        async function examesDoCatalogo(categorias) {
+            const cat = await carregarCatalogo();
+            return categorias.flatMap(c => cat[c] || []);
+        }
+
         function examesAnterioresDoFormulario() {
             return Array.from(document.querySelectorAll('#examesAnteriores .exame-anterior')).map(linha => {
                 const digitado = linha.querySelector('[data-exame-anterior]').value.trim();
@@ -1129,7 +1196,7 @@
             };
             const nome = document.createElement('input');
             Object.assign(nome, { type: 'text', id: `exameAnterior${n}`, maxLength: 300, autocomplete: 'off' });
-            nome.setAttribute('list', 'examesConhecidos'); nome.setAttribute('data-exame-anterior', '');
+            nome.setAttribute('data-exame-anterior', '');
             const quando = document.createElement('input');
             Object.assign(quando, { type: 'date', id: `dataAnterior${n}`, max: hojeNoFormato() });
             quando.setAttribute('data-data-anterior', '');
@@ -1139,6 +1206,11 @@
             const texto = document.createElement('span'); texto.className = 'sm:hidden'; texto.textContent = T('Retirar');
             retirar.append(icone, texto);
             linha.append(campo('basis-full sm:basis-0 sm:flex-1', 'Exame', nome), campo('flex-1 sm:flex-none sm:w-44', 'Feito em', quando), retirar);
+            listaDeBusca(nome, () => examesDoCatalogo(['laboratorio', 'imagem']), titulo => {
+                nomeDoExame[T(titulo).toLowerCase()] = titulo;
+                nome.dispatchEvent(new Event('change', { bubbles: true }));   // os resultados deixam de valer
+                quando.focus();
+            });
             if (exame) linha.querySelector('[data-exame-anterior]').value = exame;
             if (data) linha.querySelector('[data-data-anterior]').value = data;
             linha.querySelector('button').addEventListener('click', () => {
@@ -1150,16 +1222,8 @@
         }
 
         async function carregarExamesConhecidos() {
-            const lista = document.getElementById('examesConhecidos');
-            if (lista.options.length) return;
-            try {
-                const r = await fetch('/api/exames-conhecidos', { credentials: 'same-origin' });
-                const { exames } = r.ok ? await r.json() : {};
-                (exames || []).forEach(t => {
-                    const o = document.createElement('option'); o.value = T(t); lista.appendChild(o);
-                    nomeDoExame[o.value.toLowerCase()] = t;
-                });
-            } catch (e) { /* sem a lista, o médico ainda pode digitar o nome */ }
+            // A mesma lista do acréscimo de exames: o catálogo de laboratório e imagem.
+            (await examesDoCatalogo(['laboratorio', 'imagem'])).forEach(t => { nomeDoExame[T(t).toLowerCase()] = t; });
         }
 
         document.getElementById('adicionarExameAnterior').addEventListener('click', () => {
@@ -1229,6 +1293,49 @@
             checkupForm.dispatchEvent(new Event('change', { bubbles: true }));   // os resultados deixam de valer
         });
 
+        // Números impossíveis são barrados na tela, antes do envio (o servidor confere de novo: src/utils/validacao.py).
+        function rotuloDoCampo(entrada) {
+            const rotulo = checkupForm.querySelector(`label[for="${entrada.id}"]`);
+            return rotulo ? rotulo.textContent.trim() : entrada.name;
+        }
+        function problemaDoNumero(entrada) {
+            if (entrada.value === '') return entrada.validity.badInput ? T('valor não numérico') : '';
+            const v = Number(entrada.value), min = entrada.min !== '' ? Number(entrada.min) : null, max = entrada.max !== '' ? Number(entrada.max) : null;
+            if (Number.isNaN(v)) return T('valor não numérico');
+            if ((min !== null && v < min) || (max !== null && v > max)) return `${T('fora da faixa aceita')} (${entrada.min} ${T('a')} ${entrada.max})`;
+            if (entrada.id === 'idade' && !Number.isInteger(v)) return T('use anos inteiros');
+            const idade = Number(document.getElementById('idade').value);
+            if (idade && entrada.id === 'anos_parou_fumar' && v > idade - 5) return T('incompatível com a idade');
+            if (idade && entrada.id === 'macos_ano' && v > Math.max(idade - 5, 0) * 5) return T('incompatível com a idade');
+            if (idade && entrada.id === 'anos_consumo_alcool' && v > idade) return T('incompatível com a idade');
+            return '';
+        }
+        const mostrarErrosDaTela = mensagens => mostrarErros(mensagens);   // antes do envio: não há resposta a descartar
+        function conferirNumeros() {
+            return [...checkupForm.querySelectorAll('input[type="number"]')]
+                .filter(e => e.offsetParent !== null || e.id === 'idade')
+                .map(e => [e, problemaDoNumero(e)]).filter(([, p]) => p)
+                .map(([e, p]) => `${rotuloDoCampo(e)}: ${p}.`);
+        }
+        checkupForm.addEventListener('input', e => {
+            const alvo = e.target;
+            if (!alvo.matches('input[type="number"]')) return;
+            const campos = alvo.id === 'idade' ? ['idade', 'anos_parou_fumar', 'macos_ano', 'anos_consumo_alcool'] : [alvo.id];
+            campos.map(id => document.getElementById(id)).filter(Boolean).forEach(entrada => {
+                let aviso = entrada.parentElement.querySelector('[data-aviso-numero]');
+                const problema = problemaDoNumero(entrada);
+                if (!problema) { if (aviso) aviso.remove(); entrada.removeAttribute('aria-invalid'); return; }
+                if (!aviso) {
+                    aviso = document.createElement('p');
+                    aviso.className = 'text-[12px] text-[#B53A2E] mt-1.5';
+                    aviso.setAttribute('data-aviso-numero', ''); aviso.setAttribute('role', 'alert');
+                    entrada.insertAdjacentElement('afterend', aviso);
+                }
+                aviso.textContent = problema.charAt(0).toUpperCase() + problema.slice(1) + '.';
+                entrada.setAttribute('aria-invalid', 'true');
+            });
+        });
+
         function mostrarErros(mensagens) {
             formErrors.innerHTML = '';
             const titulo = document.createElement('strong');
@@ -1260,6 +1367,7 @@
             document.getElementById('recommendationsContent').innerHTML = '';
             document.getElementById('naoIncluidasContent').innerHTML = '';
             document.getElementById('riscoContent').innerHTML = '';
+            document.getElementById('renalContent').innerHTML = '';
             document.getElementById('orientacoesContent').innerHTML = '';
             recommendationsDiv.style.display = 'none';
         }
@@ -1275,6 +1383,8 @@
             const revisaoDoEnvio = revisaoDoFormulario;
 
             const data = lerFormulario();
+            const problemas = conferirNumeros();
+            if (problemas.length) { limparResultados(); mostrarErrosDaTela(problemas); return; }
 
             // O nome do paciente não é necessário para calcular as recomendações
             // e não é enviado nesta etapa; ele só acompanha o pedido de PDF.
@@ -1324,6 +1434,7 @@
 
                 displayRecommendations(currentRecommendations, (result.nao_incluidas || []).concat(result.adiados_gestacao || [], result.proximas_gestacao || []));
                 exibirRisco(result.risco_cardiovascular);
+                exibirFuncaoRenal(result.funcao_renal);
                 exibirOrientacoes(result.orientacoes || []);
 
             } catch (error) {
@@ -1379,10 +1490,59 @@
         function exibirOrientacoes(itens) {
             const alvo = document.getElementById('orientacoesContent');
             if (!itens.length) { alvo.innerHTML = ''; return; }
-            alvo.innerHTML = `<div class="risco-cartao"><p class="campo-rotulo">Orientações · não entram nos PDFs</p>` + itens.map(o =>
-                `<div class="py-2.5 border-t border-ink/5 first:border-0">${o.urgente ? `<span class="selo bg-[#C0392B] text-white">${T('Urgente')}</span>` : ''}<p class="text-[14px] font-medium">${escapeHtml(o.titulo)}</p>
+            const item = o => `<div class="py-2.5 border-t border-ink/5 first:border-0">${o.urgente ? `<span class="selo bg-[#C0392B] text-white">${T('Urgente')}</span>` : ''}<p class="text-[14px] font-medium">${escapeHtml(o.titulo)}</p>
                  <p class="text-[13px] text-ink/65 mt-0.5">${escapeHtml(o.descricao)}</p>
-                 <p class="text-[11px] text-ink/45 mt-1 font-mono referencia-links">${o.referencia_html || escapeHtml(o.referencia || '')}</p></div>`).join('') + `</div>`;
+                 <p class="text-[11px] text-ink/45 mt-1 font-mono referencia-links">${o.referencia_html || escapeHtml(o.referencia || '')}</p></div>`;
+            // Urgências ficam sempre à vista; as demais orientações abrem com um clique.
+            const urgentes = itens.filter(o => o.urgente), demais = itens.filter(o => !o.urgente);
+            alvo.innerHTML = (urgentes.length ? `<div class="risco-cartao">${urgentes.map(item).join('')}</div>` : '')
+                + (demais.length ? `<details class="risco-cartao orientacoes-recolhidas" data-orientacoes>
+                    <summary class="flex items-center justify-between gap-4 cursor-pointer list-none">
+                      <span class="campo-rotulo !mb-0">${T('Orientações')} <span class="text-ink/40">${demais.length}</span></span>
+                      <span class="text-[13px] text-teal flex items-center gap-1.5"><span data-rotulo-abrir>${T('Ver orientações')}</span><i class="fa-solid fa-chevron-down text-[11px] transition-transform"></i></span>
+                    </summary>
+                    <div class="mt-3">${demais.map(item).join('')}</div>
+                  </details>` : '');
+            const caixa = alvo.querySelector('[data-orientacoes]');
+            if (caixa) caixa.addEventListener('toggle', () => {
+                caixa.querySelector('[data-rotulo-abrir]').textContent = T(caixa.open ? 'Fechar orientações' : 'Ver orientações');
+                caixa.querySelector('.fa-chevron-down').style.transform = caixa.open ? 'rotate(180deg)' : '';
+            });
+        }
+
+        // Função renal: TFG (CKD-EPI 2021), categorias KDIGO e, na DRC marcada, o KFRE (src/utils/funcao_renal.py).
+        function exibirFuncaoRenal(renal) {
+            const alvo = document.getElementById('renalContent');
+            alvo.replaceChildren();
+            if (!renal) return;
+            const kfre = renal.kfre;
+            const estagio = renal.drc ? `DRC ${renal.g.categoria}${renal.a ? renal.a.categoria : ''}` : renal.g.categoria;
+            alvo.innerHTML = `<div class="risco-cartao">
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                  <p class="campo-rotulo !mb-0">${T('Função renal · CKD-EPI 2021')}${kfre ? ' · KFRE' : ''}</p>
+                  <p class="font-mono text-[11px] text-ink/45">${escapeHtml(estagio)}</p>
+                </div>
+                <div class="flex flex-wrap items-end gap-x-8 gap-y-3 mt-3">
+                  <div><p class="text-[40px] font-light leading-none">${renal.tfg}</p><p class="text-[13px] text-ink/55 mt-1">${T('TFG (mL/min/1,73 m²)')}</p></div>
+                  <div class="flex flex-col gap-1.5 text-[13px]">
+                    <span>${escapeHtml(renal.g.categoria)}: <strong class="font-medium">${escapeHtml(T(renal.g.rotulo))}</strong></span>
+                    ${renal.a ? `<span>${escapeHtml(renal.a.categoria)}: <strong class="font-medium">${T('albuminúria')} ${escapeHtml(T(renal.a.rotulo))}</strong></span>` : ''}
+                  </div>
+                  ${kfre ? `<div class="flex gap-6"><div><p class="text-[28px] font-light leading-none">${pct(kfre.dois_anos)}</p><p class="text-[12px] text-ink/55 mt-1">${T('Falência renal em 2 anos')}</p></div>
+                    <div><p class="text-[28px] font-light leading-none">${pct(kfre.cinco_anos)}</p><p class="text-[12px] text-ink/55 mt-1">${T('Falência renal em 5 anos')}</p></div></div>` : ''}
+                </div>
+                ${(renal.observacoes || []).map(o => `<p class="text-[12px] text-ink/55 mt-2">${escapeHtml(T(o))}</p>`).join('')}
+                <p class="text-[11px] text-ink/45 mt-2 font-mono" data-fontes-renal></p>
+              </div>`;
+            const fontes = alvo.querySelector('[data-fontes-renal]');
+            (renal.fontes || []).forEach((f, i) => {
+                if (!/^https:\/\//.test(f.link || '')) return;
+                if (i) fontes.append(' · ');
+                const a = document.createElement('a');
+                a.href = f.link; a.target = '_blank'; a.rel = 'noopener';
+                a.className = 'text-teal underline underline-offset-2'; a.textContent = f.rotulo;
+                fontes.append(a);
+            });
         }
 
         function exibirRisco(risco) {
@@ -1842,13 +2002,8 @@
             painel.style.display = acrescentados[categoria].length ? 'block' : 'none';
             document.getElementById('acrescimoSim').style.display = acrescentados[categoria].length ? 'none' : '';
             desenharAcrescentados(categoria);
-            const datalist = document.getElementById('acrescimoLista');
-            datalist.innerHTML = '';
             const cat = await carregarCatalogo();
-            (cat[categoria] || []).forEach(t => {
-                const o = document.createElement('option'); o.value = T(t); datalist.appendChild(o);
-                tituloOriginal[o.value.toLowerCase()] = t;
-            });
+            (cat[categoria] || []).forEach(t => { tituloOriginal[T(t).toLowerCase()] = t; });
             await prepararGuia(categoria);
             await prepararAssinatura();
             const dialogo = document.getElementById('dialogoAcrescimo');
@@ -1873,6 +2028,10 @@
             document.getElementById('acrescimoPainel').style.display = 'block';
             document.getElementById('acrescimoSim').style.display = 'none';
             document.getElementById('acrescimoBusca').focus();
+        });
+        listaDeBusca(document.getElementById('acrescimoBusca'), () => examesDoCatalogo([categoriaDoDialogo]), titulo => {
+            tituloOriginal[T(titulo).toLowerCase()] = titulo;
+            adicionarDoCampo();
         });
         document.getElementById('acrescimoAdicionar').addEventListener('click', adicionarDoCampo);
         document.getElementById('acrescimoBusca').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); adicionarDoCampo(); } });
@@ -2279,7 +2438,7 @@
                     `${nomes.join(', ')}: não marca${nomes.length > 1 ? 'm' : ''} "${ROTULO_CAIXA(id)}" sozinho${nomes.length > 1 ? 's' : ''}, porque também se usa${nomes.length > 1 ? 'm' : ''} em outras indicações. Marque a caixa se for o caso.`));
                 // insulina indica diabetes, mas não o tipo
                 if (usaInsulina() && !marcada('diabetes') && !OUTROS_TIPOS_DE_DIABETES.some(marcada)) {
-                    frases.push('Insulina: indica diabetes, mas não o tipo (tipo 1, tipo 2, gestacional e outros a usam). Marque o tipo de diabetes.');
+                    frases.push('Insulina: indica diabetes, mas não o tipo (tipo 1, tipo 2, gestacional e outros a usam). Sugerimos marcar o tipo de diabetes.');
                 }
                 const pas = num('pas'), pad = num('pad');
                 if (pas !== null && pas >= 120 && pas < 130 && !document.getElementById('hipertensao').checked) {
@@ -2535,12 +2694,31 @@
                 }
             });
             if (!feminino) document.getElementById('sexualmente_ativa').value = 'desconhecido';
-            // Resultado do último teste de HPV: só para o sexo feminino.
-            document.getElementById('hpv-item').style.display = feminino ? 'block' : 'none';
-            document.getElementById('colo-historico').style.display = feminino ? '' : 'none';
-            if (!feminino) ['hpv_resultado', 'colo_rastreio_adequado', 'colo_nic2_previa'].forEach(id => { document.getElementById(id).value = ''; });
+            atualizarCamposDoColo();
             atualizarBlocoGestacao();
         });
+
+        // Colo do útero (src/utils/colo_utero.py): o resultado do último teste de HPV só conta a partir dos 25 anos
+        // (MS 2025, recomendação 11) ou, com HIV ou imunossupressão, em qualquer idade. Sem colo (histerectomia
+        // total), o histórico de rastreio não se aplica. O rastreio anterior adequado e a NIC 2+ tratada só decidem depois dos 60 anos
+        // (MS: teste negativo depois dos 60 encerra; ACOG: parar depois dos 65 com rastreio adequado).
+        function atualizarCamposDoColo() {
+            const feminino = document.getElementById('sexo').value === 'feminino';
+            const idade = parseInt(document.getElementById('idade').value, 10);
+            const marcada = v => !!document.querySelector(`input[name="comorbidades"][value="${v}"]:checked`);
+            const imuno = document.getElementById('imunossupressao').value === 'sim' || marcada('hiv');
+            // Com histerectomia o resultado de HPV continua: um resultado positivo segue o fluxo (colo_utero.recomendar).
+            const hpv = feminino && (imuno || idade >= 25);
+            const historico = feminino && !marcada('histerectomia_total') && !imuno && idade >= 60;
+            document.getElementById('hpv-item').style.display = hpv ? 'block' : 'none';
+            document.getElementById('colo-historico').style.display = historico ? '' : 'none';
+            if (!hpv) document.getElementById('hpv_resultado').value = '';
+            if (!historico) ['colo_rastreio_adequado', 'colo_nic2_previa'].forEach(id => { document.getElementById(id).value = ''; });
+        }
+        document.getElementById('idade').addEventListener('input', atualizarCamposDoColo);
+        document.getElementById('imunossupressao').addEventListener('change', atualizarCamposDoColo);
+        checkupForm.addEventListener('change', e => { if (e.target.name === 'comorbidades') atualizarCamposDoColo(); });
+        window.addEventListener('pageshow', atualizarCamposDoColo);
 
         // Listas suspensas curtas viram botões. O <select> continua no formulário (oculto) e é a fonte
         // do valor: o envio, as regras e os campos condicionais não mudam.

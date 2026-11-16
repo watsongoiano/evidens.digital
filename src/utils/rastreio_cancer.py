@@ -76,11 +76,11 @@ def colorretal(idade):
     return [
         _rec(COLONOSCOPIA, 'imagem',
              'Colonoscopia a cada 10 anos (45-75 anos). Alternativa: pesquisa de sangue oculto nas fezes por método '
-             'imunoquímico (FIT) anual. Escolha um dos dois métodos com o paciente e retire o outro.',
+             'imunoquímico (FIT) anual. Sugerimos escolher um dos dois métodos com o paciente e retirar o outro.',
              SUBTITULO_COLONOSCOPIA, USPSTF_CCR, 'B'),
         _rec(FIT, 'laboratorio',
              'Pesquisa de sangue oculto nas fezes por método imunoquímico (FIT), anual, como alternativa à colonoscopia: '
-             'escolha um dos dois métodos e retire o outro. Positivo: colonoscopia. É o exame de rastreio do SUS para '
+             'sugerimos escolher um dos dois métodos e retirar o outro. Positivo: colonoscopia. É o exame de rastreio do SUS para '
              'assintomáticos de 50 a 75 anos.',
              'Adultos 45-75 anos, alternativa à colonoscopia | Anual', USPSTF_CCR + ' / ' + INCA_FIT, 'B'),
     ]
@@ -121,7 +121,7 @@ def pulmao(idade, tabagismo, macos_ano, anos_parou_fumar, gestante=False):
     else:
         orient.append({
             'titulo': 'Câncer de pulmão: as diretrizes divergem para quem parou de fumar há 15 anos ou mais',
-            'descricao': 'O motor seguiu o USPSTF 2021 e o consenso brasileiro (SBCT/SBPT/CBR 2024), que não indicam a TC de '
+            'descricao': 'Nós optamos por seguir a referência do USPSTF 2021 e do consenso brasileiro (SBCT/SBPT/CBR 2024), que não indicam a TC de '
                          'baixa dose depois de 15 anos sem fumar. A ACS 2023 não usa o tempo desde a cessação e incluiria este '
                          'paciente (50-80 anos, 20 maços-ano ou mais), com decisão compartilhada.',
             'referencia': ref + ' / ' + ACS_PULMAO})
@@ -150,7 +150,7 @@ def finalizar(recs, idade, sexo, familia):
     if fit is not None:
         orient.append({
             'titulo': 'Câncer colorretal: as diretrizes divergem na idade de início e no método',
-            'descricao': 'O motor seguiu o USPSTF 2021 e a USMSTF 2022: rastreio a partir dos 45 anos, com colonoscopia a cada '
+            'descricao': 'Nós optamos por seguir a referência do USPSTF 2021 e da USMSTF 2022: rastreio a partir dos 45 anos, com colonoscopia a cada '
                          '10 anos ou FIT anual (o médico escolhe um dos dois). O MS/INCA (2026) adotou o FIT como exame do SUS '
                          'para assintomáticos de 50 a 75 anos, com colonoscopia se positivo, e não rastreia antes dos 50.',
             'referencia': f'{USPSTF_CCR} / {USMSTF_2022} / {INCA_FIT}'})
@@ -173,7 +173,7 @@ def finalizar(recs, idade, sexo, familia):
         if mamo is not None and (mamo.get('subtitulo') or '') == SUBTITULO_MAMOGRAFIA:
             orient.append({
                 'titulo': 'Mamografia: as diretrizes divergem no intervalo e na idade de início',
-                'descricao': 'O motor seguiu o USPSTF 2024: mamografia bienal dos 40 aos 74 anos. CBR/SBM/FEBRASGO 2023: anual '
+                'descricao': 'Nós optamos por seguir a referência do USPSTF 2024: mamografia bienal dos 40 aos 74 anos. CBR/SBM/FEBRASGO 2023: anual '
                              'dos 40 aos 74. MS (Nota Técnica 626/2025): rastreamento bienal dos 50 aos 74; dos 40 aos 49, por '
                              'demanda, após conversa sobre riscos e benefícios.',
                 'referencia': f'{USPSTF_MAMA} / {CBR_MAMA} / {MS_MAMA}'})
@@ -191,7 +191,7 @@ def finalizar(recs, idade, sexo, familia):
         if 50 <= idade <= 69 or (40 <= idade < 50 and risco_prostata):
             orient.append({
                 'titulo': 'Câncer de próstata: as diretrizes divergem',
-                'descricao': 'O motor seguiu o USPSTF 2018: PSA por decisão compartilhada dos 55 aos 69 anos e nenhum rastreio a '
+                'descricao': 'Nós optamos por seguir a referência do USPSTF 2018: PSA por decisão compartilhada dos 55 aos 69 anos e nenhum rastreio a '
                              'partir de 70. O MS/INCA (Nota Técnica 9/2023) não recomenda o rastreamento populacional: só decisão '
                              'compartilhada com quem pede o exame. SBU, SBOC e SBRT propõem discussão individual a partir de 50 '
                              'anos com expectativa de vida acima de 10 anos, e de 40 a 50 anos com história familiar, etnia negra '

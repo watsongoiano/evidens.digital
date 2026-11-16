@@ -154,7 +154,7 @@ def _classificar_pa_aha(pas, pad):
             return {'categoria': 'estagio1', 'rotulo': 'HAS estágio 1'}
         return {'categoria': 'estagio1', 'rotulo': 'HAS estágio 1 ou 2 (falta um componente)', 'incompleta': True}
     if not (tem_pas and tem_pad):
-        return {'categoria': 'incompleta', 'rotulo': 'Informe PAS e PAD para classificar', 'incompleta': True}
+        return {'categoria': 'incompleta', 'rotulo': 'Faltam PAS e PAD para classificar', 'incompleta': True}
     if s_ >= 120:
         return {'categoria': 'elevada', 'rotulo': 'PA elevada'}
     return {'categoria': 'normal', 'rotulo': 'PA normal'}

@@ -125,7 +125,7 @@ def test_colorretal_colonoscopia_ou_fit_dos_45_aos_75(client, idade):
     assert (CCR_86 in orient) == (idade >= 86)
     if dentro:
         assert recs[FIT]['subtitulo'] == 'Adultos 45-75 anos, alternativa à colonoscopia | Anual'
-        assert 'retire o outro' in recs[FIT]['descricao'] and 'retire o outro' in recs[COLONO]['descricao']
+        assert 'retirar o outro' in recs[FIT]['descricao'] and 'retirar o outro' in recs[COLONO]['descricao']
         assert [l['label'] for l in recs[FIT]['referencias']] == ['USPSTF 2021', 'MS/INCA 2026']
         assert all(l['url'] for l in recs[FIT]['referencias'])
         assert 'USMSTF 2022' in orient[DIV_CCR]['referencia']

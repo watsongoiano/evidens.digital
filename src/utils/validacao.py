@@ -74,6 +74,7 @@ CAMPOS_NUMERICOS = {
     'hdl': (('hdl', 'hdl_colesterol'), 5, 200, 'HDL colesterol (mg/dL)'),
     'creatinina': (('creatinina',), 0.1, 25, 'Creatinina sérica (mg/dL)'),
     'hba1c': (('hba1c',), 3, 20, 'HbA1c (%)'),
+    'uacr': (('uacr', 'rac'), 0.1, 25000, 'Relação albumina/creatinina urinária (mg/g)'),
     'macos_ano': (('macos_ano',), 0, 300, 'Maços-ano'),
     'anos_parou_fumar': (('anos_parou_fumar',), 0, 100, 'Anos desde que parou de fumar'),
     'idade_ccr_familiar': (('idade_ccr_familiar',), 10, 110, 'Idade do familiar mais jovem com câncer colorretal'),
@@ -217,6 +218,17 @@ def validar_entrada(bruto):
 
     if 'pas' in dados and 'pad' in dados and dados['pad'] >= dados['pas']:
         erro('pad', 'Pressão diastólica deve ser menor que a sistólica.')
+
+    # Tabagismo coerente com a idade: ninguém parou de fumar antes dos 5 anos de idade, nem fumou mais de 5 maços
+    # por dia (100 cigarros) desde os 5 anos.
+    if idade is not None:
+        parou = dados.get('anos_parou_fumar')
+        if parou is not None and parou > idade - 5:
+            erro('anos_parou_fumar', f'Anos desde que parou de fumar ({_formatar(parou)}) incompatível com a idade '
+                                     f'({idade} anos).')
+        macos = dados.get('macos_ano')
+        if macos is not None and macos > max(idade - 5, 0) * 5:
+            erro('macos_ano', f'Maços-ano ({_formatar(macos)}) incompatível com a idade ({idade} anos).')
 
     # Listas marcadas no formulário.
     for campo in CAMPOS_LISTA:

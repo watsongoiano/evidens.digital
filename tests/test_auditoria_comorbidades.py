@@ -33,7 +33,7 @@ def test_drc_isolada_pede_uacr_e_tfg_pelo_menos_anuais(client):
     assert UACR in recs and 'Doença renal crônica | Anual' in recs[UACR]['subtitulo']
     assert 'Doença renal crônica | Anual' in recs['Creatinina, soro']['subtitulo']
     assert 'KDIGO 2024 (DRC)' in recs[UACR]['referencia']
-    assert 'Doença renal crônica: informe o estágio' in orient
+    assert 'Doença renal crônica: estágio incompleto' in orient
     # sem o estágio, nada de G3a em diante
     assert 'Paratormônio (PTH), soro' not in recs
 
