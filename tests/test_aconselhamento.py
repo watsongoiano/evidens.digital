@@ -67,3 +67,23 @@ def test_rota_inclui_as_orientacoes(client):
     titulos = [o['titulo'] for o in r.get_json()['orientacoes']]
     assert 'Tabagismo: oferecer tratamento para parar de fumar' in titulos
     assert 'Prevenção de quedas a partir dos 65 anos' in titulos
+
+
+def test_rota_nao_trata_como_lactante_quem_nao_amamenta(client):
+    """Homem, mulher idosa sem resposta e mulher jovem sem resposta não recebem orientação de puerpério."""
+    for extra in (dict(sexo='masculino', idade=40), dict(sexo='feminino', idade=65), dict(sexo='feminino', idade=30, lactante=None)):
+        dados = dict(BASE, **extra)
+        if dados.get('lactante') is None:
+            dados.pop('lactante')
+        titulos = [o['titulo'] for o in client.post('/api/checkup-intelligent', json=dados).get_json()['orientacoes']]
+        assert 'Puerpério: apoio ao aleitamento e saúde mental' not in titulos, extra
+        if extra['idade'] > 45:
+            assert 'Rastrear violência por parceiro íntimo' not in titulos, extra
+
+
+def test_rota_quimioterapico_exclui_medicacao_para_mama(client):
+    titulo = 'Câncer de mama: avaliar medicação para reduzir o risco'
+    base = dict(BASE, idade=50, historia_familiar=['cancer_mama'])
+    sem = [o['titulo'] for o in client.post('/api/checkup-intelligent', json=base).get_json()['orientacoes']]
+    com = [o['titulo'] for o in client.post('/api/checkup-intelligent', json=dict(base, medicacoes=['doxorrubicina'])).get_json()['orientacoes']]
+    assert titulo in sem and titulo not in com

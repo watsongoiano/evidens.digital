@@ -1459,8 +1459,8 @@ def generate_intelligent_recommendations():
             fatores_osso=fatores_osso, drc_a_confirmar=drc_a_confirmar, dm_a_confirmar=dm_a_confirmar)
         from src.utils import aconselhamento
         orientacoes_aconselhamento = aconselhamento.orientacoes(
-            age, sex, gestante=is_pregnant, lactante=triagem.get('lactante') not in (None, 'nao'), tabagismo=tabagismo, imc=imc,
-            comorbidades=comorbidades, historia_familiar=familia, medicacoes=escolhidas, prep=prep)
+            age, sex, gestante=is_pregnant, lactante=triagem.get('lactante') in ('sim_menor_6m', 'sim_6m_ou_mais'), tabagismo=tabagismo, imc=imc,
+            comorbidades=comorbidades, historia_familiar=familia, medicacoes=list(escolhidas) + list(medicacoes_checkboxes), prep=prep)
         todas = (orientacoes_gestacao + orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_ist
                  + orientacoes_hiv + orientacoes_cancer + orientacoes_rastreio + orientacoes_aconselhamento)
         # Urgências (PA em faixa grave na gestação) no topo; depois as da gestação (alto risco, AAS, divergências).
