@@ -203,6 +203,10 @@ _FONTES_DIRETAS = [
     ('aha/acc/accp/hrs 2023', 'https://doi.org/10.1161/CIR.0000000000001193'),
     ('ata 2016', 'https://doi.org/10.1089/thy.2016.0229'),
     ('gina 2025', 'https://ginasthma.org/reports/'),
+    # Revisão externa (16/11/2026)
+    ('aasld/idsa 2025 (hepatite b)', 'https://doi.org/10.1097/HEP.0000000000001549'),
+    ('oms 2024 (hepatite b)', 'https://www.who.int/publications/i/item/9789240090903'),
+    ('aao 2025 (hidroxicloroquina)', 'https://doi.org/10.1016/j.ophtha.2025.11.001'),
 ]
 
 

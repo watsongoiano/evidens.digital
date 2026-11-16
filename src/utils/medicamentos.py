@@ -166,7 +166,7 @@ GRUPOS = [
     ]),
     ('Hormônios e oncologia hormonal', ['hormonio'], 'hormonio anticoncepcional reposicao', [
         'Anticoncepcional combinado', 'Anticoncepcional só com progestagênio', 'Terapia hormonal da menopausa',
-        'Tibolona', ('Testosterona', ['hormonio', 'testosterona']), 'Tamoxifeno', 'Fludrocortisona',
+        'Tibolona', ('Testosterona', ['hormonio', 'testosterona']), ('Tamoxifeno', ['hormonio', 'tamoxifeno']), 'Fludrocortisona',
         ('Anastrozol', ['inibidor_aromatase']), ('Letrozol', ['inibidor_aromatase']),
         ('Exemestano', ['inibidor_aromatase']),
     ]),

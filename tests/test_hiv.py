@@ -21,7 +21,7 @@ def _freq(rec):
 
 @pytest.mark.parametrize('cd4, em_tarv, supressao, esperado', [
     (250, True, True, 'A cada 6 meses'), (400, True, True, 'Anual'),
-    (650, True, True, 'Não solicitar se >500 em 2 exames consecutivos com intervalo de 6 meses'),
+    (650, True, True, 'A cada 6 meses'),   # uma contagem só: repetir para confirmar (2 exames acima de 500)
     (650, False, False, 'A cada 6 meses'), (650, True, False, 'A cada 6 meses'), (None, True, True, 'Avaliação inicial')])
 def test_cd4_segue_o_quadro_8_do_pcdt(cd4, em_tarv, supressao, esperado):
     recs, _ = _recs(cd4=cd4, em_tarv=em_tarv, supressao_viral=supressao)
@@ -29,16 +29,20 @@ def test_cd4_segue_o_quadro_8_do_pcdt(cd4, em_tarv, supressao, esperado):
 
 
 @pytest.mark.parametrize('em_tarv, supressao, esperado', [
-    (True, True, 'A cada 6 meses'), (True, False, 'Após 8 semanas do início ou mudança de TARV'),
+    (True, True, 'A cada 6 meses'), (True, False, 'Após 4 semanas da primeira carga viral detectável'),
     (False, False, 'Antes de iniciar a TARV')])
 def test_carga_viral_segue_o_quadro_9_do_pcdt(em_tarv, supressao, esperado):
     recs, _ = _recs(em_tarv=em_tarv, supressao_viral=supressao, carga_viral=0 if supressao else 4000)
     assert _freq(recs[CV]) == esperado
 
 
-def test_genotipagem_so_na_falha_acima_de_500_ou_nas_indicacoes_pre_tratamento():
-    assert GENO in _recs(em_tarv=True, carga_viral=800)[0]
+def test_genotipagem_so_na_falha_confirmada_ou_nas_indicacoes_pre_tratamento():
+    # uma carga viral detectável não confirma a falha: repetir em 4 semanas (MS 2024, Quadro 9 e seção 9.3)
+    recs, orient = _recs(em_tarv=True, carga_viral=800)
+    assert GENO not in recs and 'HIV: carga viral detectável em TARV' in orient
+    assert _freq(recs[CV]) == 'Após 4 semanas da primeira carga viral detectável'
     assert GENO not in _recs(em_tarv=True, carga_viral=300)[0]
+    assert 'HIV: carga viral detectável em TARV' not in _recs(em_tarv=True, carga_viral=50)[1]
     sem_tarv, orient = _recs(em_tarv=False, carga_viral=80000)
     assert GENO not in sem_tarv and 'HIV: genotipagem antes da TARV' in orient
     assert GENO in _recs(idade=30, sexo='feminino', em_tarv=False, gestante=True)[0]
@@ -114,6 +118,14 @@ def test_valores_que_passam_pela_validacao_chegam_ao_motor(client):
     r = client.post('/api/checkup-intelligent', json=corpo)
     assert r.status_code == 200, r.get_json()
     recs = {x['titulo']: x for x in r.get_json()['recommendations']}
-    assert CRAG in recs and GENO in recs
+    assert CRAG in recs and GENO not in recs   # uma carga de 800 em TARV: repetir antes de genotipar
+    assert 'HIV: carga viral detectável em TARV' in {o['titulo'] for o in r.get_json()['orientacoes']}
     assert _freq(recs[CD4]) == 'A cada 6 meses'
     assert recs[CD4]['descricao'].startswith('CD4 atual: 150 células/mm³.')
+
+
+@pytest.mark.parametrize('carga, caixa, suprimido', [(0, False, True), (50, False, True), (51, True, False), (5000, True, False),
+                                                    (None, True, True), (None, False, False)])
+def test_carga_viral_informada_prevalece_sobre_a_caixa_de_supressao(carga, caixa, suprimido):
+    recs, _ = _recs(cd4=400, em_tarv=True, supressao_viral=caixa, carga_viral=carga)
+    assert _freq(recs[CD4]) == ('Anual' if suprimido else 'A cada 6 meses')

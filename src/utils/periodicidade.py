@@ -53,7 +53,7 @@ SEM_INTERVALO = {
     'para confirmar o diagnóstico', 'rastreio em cascata', 'conforme uso de medicações', 'após teste de hpv positivo',
     'antes de iniciar a tarv', 'após 8 semanas do início ou mudança de tarv', 'após 4-8 semanas do início',
     'antes de cada ciclo', 'antes de cada dose', 'no início e a cada ajuste de dose', '3-4 meses após o início',
-    '3-12 meses após o início', 'se spo2 ≤ 92% ou dpoc grave',
+    '3-12 meses após o início', 'se spo2 ≤ 92% ou dpoc grave', 'após 4 semanas da primeira carga viral detectável', 'em cada consulta, no máximo mensal',
     # a critério clínico
     'conforme necessidade', 'conforme indicação clínica', 'fator de risco', 'adulto em risco',
     'alvo < 6 mg/dl', 'não solicitar se >500 em 2 exames consecutivos com intervalo de 6 meses',

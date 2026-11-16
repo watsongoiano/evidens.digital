@@ -13,7 +13,7 @@ Limiares e fontes
 - Pneumocistose: ≥ 20 mg/dia por ≥ 4 semanas, com outro fator de imunossupressão (ATS 2011).
 - Metotrexato ≤ 0,4 mg/kg/semana e azatioprina ≤ 3 mg/kg/dia: imunossupressão de baixo grau
   (CDC/ACIP; IDSA 2013). Sem o peso, metotrexato ≤ 20 mg/semana conta como baixo grau.
-- Hidroxicloroquina: retinopatia sobe com dose > 5 mg/kg/dia e com mais de 5 anos de uso (AAO 2016).
+- Hidroxicloroquina: retinopatia sobe com dose > 5 mg/kg/dia e com mais de 5 anos de uso (AAO 2025).
 - Bisfosfonato: reavaliar pausa após 5 anos (oral) ou 3 anos (ácido zoledrônico) (ASBMR 2016).
 """
 from __future__ import annotations
@@ -198,8 +198,8 @@ def avaliar(medicacoes, detalhes, peso=None, rotulos=None):
                 f'{_texto(round(dose / float(peso), 1))} mg/kg/dia (acima de 5 mg/kg/dia)' if acima else '',
                 f'{_texto(anos)} anos de uso' if anos is not None and anos >= 5 else '') if x)
             orientar('Hidroxicloroquina: rastreamento anual de retinopatia indicado',
-                     f'{motivo}. Avaliação oftalmológica anual com campo visual automatizado 10-2 e OCT de domínio espectral.'
-                     + (' Ajustar a dose para até 5 mg/kg/dia de peso real.' if acima else ''), 'AAO 2016')
+                     f'{motivo}. Rastreio anual com OCT e autofluorescência de padrão amplo (campo visual e ERG multifocal '
+                     'confirmam).' + (' Ajustar a dose para até 5 mg/kg/dia de peso real.' if acima else ''), 'AAO 2025 (hidroxicloroquina)')
             acrescentar.add('hidroxicloroquina_rastreio')
     bisf = [m for m in medicacoes if POR_MEDICAMENTO.get(m, ('', 0))[0] == 'bisfosfonato']
     longos = [m for m in bisf if detalhes.get(m, {}).get('duracao') is not None

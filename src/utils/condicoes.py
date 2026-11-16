@@ -158,6 +158,7 @@ MEDICACOES = {
     'zoledronico': {'rotulo': 'Ácido zoledrônico'},
     'denosumabe': {'rotulo': 'Denosumabe'},
     'sotalol': {'rotulo': 'Sotalol'},
+    'tamoxifeno': {'rotulo': 'Tamoxifeno'},
     # Corticoide sem dose ou duração informadas (src/utils/doses.py): conduta conservadora, com aviso
     'corticoide_sem_dose': {'rotulo': 'Corticoide sistêmico sem dose informada'},
 }
@@ -201,6 +202,7 @@ FAMILIA = {
     'osteoporose_fratura': {'rotulo': 'Fratura de quadril em pai ou mãe', 'busca': 'osteoporose'},
     'trombose': {'rotulo': 'Trombose venosa ou trombofilia', 'busca': 'tvp tep embolia'},
     'glaucoma': {'rotulo': 'Glaucoma', 'busca': 'olho'},
+    'barrett_esofago': {'rotulo': 'Esôfago de Barrett ou adenocarcinoma de esôfago', 'busca': 'refluxo esofago'},
 }
 # Marcadas por chip na tela (e "cardiopatia" é o valor antigo de DAC precoce).
 FAMILIA_CHIPS = ('cancer_mama', 'cancer_colorretal', 'cancer_ovario', 'diabetes', 'dac_precoce', 'cardiopatia')
@@ -318,6 +320,10 @@ CPIC_TIOPURINA = 'CPIC 2018 (TPMT/NUDT15)'
 BSG_2019 = 'BSG 2019 (DII)'
 AHA_FA_2023 = 'AHA/ACC/ACCP/HRS 2023 (FA)'
 ATA_HIPERTIREOIDISMO = 'ATA 2016'
+# Revisão externa (16/11/2026)
+AASLD_HBV_2025 = 'AASLD/IDSA 2025 (hepatite B)'
+OMS_HBV = 'OMS 2024 (hepatite B)'
+AAO_HCQ = 'AAO 2025 (hidroxicloroquina)'
 
 # Detalhes que abrem embaixo do item escolhido (como o bloco do HIV): vão no mesmo campo `comorbidades`.
 DETALHES_COMORBIDADE = {
@@ -368,6 +374,19 @@ CATEGORIAS_A = ('A1', 'A2', 'A3')
 # Vezes por ano que a TFG e a albuminúria são medidas, pelo mapa G x A (KDIGO 2024, Fig. 13; igual ao de 2012).
 VEZES_POR_ANO = {'G1-G2': (1, 1, 2), 'G3a': (1, 2, 3), 'G3b': (2, 3, 3), 'G4': (3, 3, 4), 'G5': (4, 4, 4)}
 _FREQUENCIA = {1: 'Anual', 2: 'A cada 6 meses', 3: 'A cada 4 meses', 4: 'A cada 3 meses'}
+
+
+def texto_fib4(idade):
+    """Interpretação do FIB-4 pela idade (AASLD 2023): corte baixo 2,0 a partir de 65 anos; pouco confiável abaixo de 35."""
+    base = 'Rastreio de fibrose hepática pelo FIB-4 (idade, AST, ALT e plaquetas), mesmo com enzimas normais: '
+    if idade >= 65:
+        return base + ('com 65 anos ou mais, abaixo de 2,0 afasta fibrose avançada e repete em 1-2 anos; de 2,0 a 2,67, '
+                       'elastografia; acima de 2,67, encaminhar ao hepatologista.')
+    if idade < 35:
+        return base + ('abaixo de 35 anos o FIB-4 é pouco confiável: interpretar junto com a elastografia. Abaixo de 1,3, repetir '
+                       'em 1-2 anos; de 1,3 em diante, elastografia; acima de 2,67, encaminhar ao hepatologista.')
+    return base + ('abaixo de 1,3, repetir em 1-2 anos; de 1,3 em diante, elastografia; acima de 2,67, encaminhar ao '
+                   'hepatologista.')
 
 
 def _detalhe_drc(chave):
@@ -823,9 +842,13 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Inibidor de aromatase: densitometria no início do tratamento e a cada 1-2 anos.',
             'Em uso de inibidor de aromatase', 'ASCO 2019', 'B')
     if 'hidroxicloroquina' in med and 'hidroxicloroquina_rastreio' not in med:
+        # AAO 2025 (revisão da de 2016): OCT e autofluorescência de padrão amplo são o rastreio principal (revisão externa, FARM-02)
+        risco = 'doenca_renal' in com or 'tamoxifeno' in med
         orientar('Hidroxicloroquina',
-                 'Exame oftalmológico basal no primeiro ano e rastreamento anual de retinopatia após 5 anos de uso '
-                 '(antes, se dose > 5 mg/kg/dia, doença renal ou uso de tamoxifeno).', 'AAO 2016')
+                 'Dose até 5 mg/kg/dia de peso real (menos de 400 mg/dia na obesidade grave). Exame basal logo após o início, '
+                 'com fundo de olho, OCT e autofluorescência de padrão amplo. Rastreio anual com OCT e autofluorescência; pode '
+                 'ser adiado nos 5 primeiros anos sem fator de risco (doença renal, tamoxifeno, início em idade mais avançada).'
+                 + (' Com doença renal crônica ou tamoxifeno: rastreio anual desde o início.' if risco else ''), AAO_HCQ)
     if 'levotiroxina' in med or 'hipotireoidismo' in com:
         add('Hormônio Tireoestimulante (TSH), soro', 'laboratorio',
             'Hipotireoidismo em reposição: TSH anual com dose estável (6-8 semanas após ajuste).',
@@ -1205,8 +1228,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'Hepatopatia crônica | Suscetíveis', SBIM, 'A', 'alta')
     if 'masld' in com:
         for titulo in ('Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro', 'Hemograma completo com plaquetas'):
-            add(titulo, 'laboratorio', 'Para o cálculo do FIB-4 (idade, AST, ALT, plaquetas): estratifica risco de fibrose '
-                'avançada; FIB-4 ≥ 1,3 pede elastografia.', 'MASLD | FIB-4 a cada 1-2 anos', AASLD_MASLD + ' / ' + ADA_FIGADO, 'B')
+            add(titulo, 'laboratorio', texto_fib4(idade), 'MASLD | FIB-4 a cada 1-2 anos', AASLD_MASLD + ' / ' + ADA_FIGADO, 'B')
     # Fibrose hepática pelo FIB-4 mesmo com enzimas normais (relatório D, D-22 e D-24): diabetes tipo 2 e outros tipos
     # e pré-diabetes (ADA 2026, seção 4); diabetes tipo 1 só com obesidade ou MASLD; obesidade com mais um fator
     # metabólico (AASLD 2023: 2 ou mais fatores de risco metabólico).
@@ -1221,14 +1243,17 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         fib4 = ('Obesidade com fator de risco metabólico', AASLD_MASLD)
     if fib4:
         for titulo in ('Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro', 'Hemograma completo com plaquetas'):
-            add(titulo, 'laboratorio', 'Rastreio de fibrose hepática pelo FIB-4 (idade, AST, ALT e plaquetas), mesmo com enzimas '
-                'normais: abaixo de 1,3, repetir em 1-2 anos; de 1,3 em diante, elastografia; acima de 2,67, encaminhar ao '
-                'hepatologista.', f'{fib4[0]} | FIB-4 a cada 1-2 anos', fib4[1], 'B')
+            add(titulo, 'laboratorio', texto_fib4(idade), f'{fib4[0]} | FIB-4 a cada 1-2 anos', fib4[1], 'B')
     if diabetico:
         orientar('Diabetes: exame dos pés',
                  'Avaliação completa dos pés pelo menos uma vez por ano: inspeção, pulsos pediosos, monofilamento de 10 g e mais um '
                  'teste de sensibilidade (vibração com diapasão de 128 Hz, pinprick ou reflexo aquileu); a cada consulta se houver '
                  'perda de sensibilidade, deformidade ou úlcera prévia.', ADA_PES)
+    if so_dm1:
+        orientar('Diabetes tipo 1: quando começar a uACR',
+                 'No tipo 1, a uACR e a TFG anuais começam 5 anos após o diagnóstico (no tipo 2, desde o diagnóstico). O motor não '
+                 'sabe a duração do diabetes: retire a uACR se o diagnóstico tiver menos de 5 anos e não houver outra indicação.',
+                 'ADA 2026 (seção 11)')
     if 'diabetes_tipo_1' in com:
         for titulo in ('Anticorpo antitransglutaminase tecidual IgA, soro', 'Imunoglobulina A (IgA), soro'):
             add(titulo, 'laboratorio', 'Diabetes tipo 1: rastrear doença celíaca (antitransglutaminase IgA com IgA total) logo após o '
@@ -1294,8 +1319,13 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                 'Nefrite lúpica: quantificar a proteinúria pelo menos a cada 3 meses até a remissão completa e a cada 3-6 meses '
                 'na remissão mantida.', 'Nefrite lúpica | A cada 3 meses', ACR_NEFRITE, 'A', 'alta')
         for titulo in ('Complemento C3', 'Complemento C4', 'Anti-DNA'):
-            add(titulo, 'laboratorio', 'Lúpus: complemento (C3, C4) e anti-DNA ajudam a confirmar atividade ou remissão.',
-                'Lúpus eritematoso sistêmico | Conforme indicação clínica', EULAR_LES, 'C')
+            if 'les_nefrite' in com:
+                # ACR 2024, boa prática: complemento e anti-dsDNA em cada consulta, não mais que mensalmente (REUM-01)
+                add(titulo, 'laboratorio', 'Nefrite lúpica: complemento (C3, C4) e anti-dsDNA em cada consulta de acompanhamento, '
+                    'não mais que uma vez por mês.', 'Nefrite lúpica | Em cada consulta, no máximo mensal', ACR_NEFRITE, 'C')
+            else:
+                add(titulo, 'laboratorio', 'Lúpus: complemento (C3, C4) e anti-DNA ajudam a confirmar atividade ou remissão.',
+                    'Lúpus eritematoso sistêmico | Conforme indicação clínica', EULAR_LES, 'C')
         for titulo in ('Anticardiolipina - IgG', 'Anticardiolipina - IgM', 'Anticorpos Beta 2 glicoproteina I - IgG/IgM/IgA',
                        'Anticoagulante lúpico, pesquisa'):
             add(titulo, 'laboratorio', 'Lúpus: anticorpos antifosfolípides na avaliação inicial e de novo antes de gestação, '
@@ -1387,8 +1417,18 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                 'Hepatite B crônica | Avaliação inicial', AASLD_HBV, 'B')
         for titulo in ('Anticorpos anti-HCV, soro', 'Anti-HIV 1 e 2, soro', 'Anticorpos anti-HAV IgG, soro'):
             add(titulo, 'laboratorio', 'Hepatite B crônica: testar coinfecção por HCV e HIV e imunidade contra hepatite A '
-                '(vacinar se suscetível). Anti-HDV se houver fator de risco.', 'Hepatite B crônica | Avaliação inicial',
-                AASLD_HBV, 'B')
+                '(vacinar se suscetível).', 'Hepatite B crônica | Avaliação inicial', AASLD_HBV, 'B')
+        # OMS 2024: anti-HDV para toda pessoa com HBsAg reagente (revisão externa, HEP-02)
+        add('Hepatite delta, anticorpo IgG', 'laboratorio', 'Hepatite B crônica: anti-HDV em toda pessoa com HBsAg reagente; '
+            'reagente, pedir o HDV-RNA (hepatite delta acelera a fibrose e o carcinoma hepatocelular).',
+            'Hepatite B crônica | Avaliação inicial', OMS_HBV, 'B')
+        # AASLD/IDSA 2025, rec. 8 (condicional): HBV com HIV, vigilância de CHC em homens ≥ 18 e mulheres ≥ 40 (HEP-01)
+        if 'hiv' in com and 'cirrose' not in com and 'hbv_risco_chc' not in com and (
+                (sexo == 'masculino' and idade >= 18) or (sexo == 'feminino' and idade >= 40)):
+            add('Ultrassonografia de abdome superior', 'imagem',
+                'Hepatite B com HIV: vigilância de carcinoma hepatocelular com ultrassonografia a cada 6 meses (com ou sem '
+                'alfafetoproteína) em homens a partir de 18 anos e mulheres a partir de 40, mesmo sem cirrose; recomendação '
+                'condicional.', 'Hepatite B com HIV | A cada 6 meses', AASLD_HBV_2025, 'C', 'alta')
         if 'hbv_risco_chc' in com and 'cirrose' not in com:
             add('Ultrassonografia de abdome superior', 'imagem',
                 'Hepatite B com alto risco de carcinoma hepatocelular, mesmo sem cirrose: ultrassonografia a cada 6 meses, com '
@@ -1487,9 +1527,9 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         resistente = 'has_resistente' in com
         if 'apneia_sono' in com and not resistente:
             add('Relação Aldosterona/Renina (A/R)', 'laboratorio',
-                'Hipertensão com apneia obstrutiva do sono: rastrear hiperaldosteronismo primário (relação aldosterona/renina pela '
-                'manhã; manter o potássio normal e suspender o antagonista mineralocorticoide antes).',
-                'HAS com apneia do sono | Avaliação inicial', ENDO_PA_2016, 'C')
+                'Hipertensão com apneia obstrutiva do sono: rastrear hiperaldosteronismo primário (aldosterona e renina com potássio, '
+                'pela manhã e sentado; corrigir a hipocalemia; interpretar pelos cortes do método do laboratório).',
+                'HAS com apneia do sono | Avaliação inicial', ENDO_PA_2016 + ' / ' + ENDO_PA_2025, 'C')
         orientar('Hiperaldosteronismo primário: diretrizes divergem',
                  'O motor pede a relação aldosterona/renina na HAS resistente (AHA/ACC 2025, classe 1, com qualquer potássio) e na '
                  'HAS com apneia do sono (Endocrine Society 2016). Rastreie também com hipocalemia espontânea ou por diurético, '
@@ -1542,16 +1582,21 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
     if 'drge' in com:
         fumante = tabagismo in ('atual', 'ex')
         obeso = 'obesidade' in com or (imc or 0) >= 30
+        # ACG 2022: sexo masculino, mais de 50 anos, raça branca, tabagismo, obesidade e Barrett ou adenocarcinoma de esôfago em
+        # parente de 1º grau. A raça não é coletada: fica na orientação (revisão externa, GASTRO-01).
         fatores = [nome for nome, sim in (('sexo masculino', sexo == 'masculino'), ('mais de 50 anos', idade > 50),
-                                          ('tabagismo', fumante), ('obesidade', obeso)) if sim]
+                                          ('tabagismo', fumante), ('obesidade', obeso),
+                                          ('familiar', 'barrett_esofago' in fam)) if sim]
         if len(fatores) >= 3:
             add('Endoscopia digestiva alta', 'imagem',
                 'Doença do refluxo crônica com 3 ou mais fatores de risco de esôfago de Barrett (sexo masculino, mais de 50 '
-                'anos, tabagismo, obesidade): endoscopia única de rastreio.', 'Refluxo crônico com fatores de risco | Uma vez', ACG_BARRETT, 'C')
+                'anos, raça branca, tabagismo, obesidade, Barrett ou adenocarcinoma de esôfago em parente de 1º grau): endoscopia '
+                'única de rastreio.', 'Refluxo crônico com fatores de risco | Uma vez', ACG_BARRETT, 'C')
         else:
             orientar('Refluxo: rastreio de esôfago de Barrett',
                      'Endoscopia única de rastreio se refluxo crônico e 3 ou mais fatores: sexo masculino, mais de 50 anos, '
-                     'raça branca, tabagismo, obesidade, esôfago de Barrett ou adenocarcinoma de esôfago em parente de 1º grau.',
+                     'raça branca, tabagismo, obesidade, esôfago de Barrett ou adenocarcinoma de esôfago em parente de 1º grau. A raça '
+                     'não é coletada: com 2 fatores e raça branca, a endoscopia está indicada.',
                      ACG_BARRETT)
     if 'sop' in com and sexo == 'feminino' and not gestante:
         add('TOTG-75g (Teste Oral de Tolerância à Glicose), soro', 'laboratorio',

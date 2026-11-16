@@ -2328,7 +2328,34 @@
   "Define a investigação de causas secundárias (BHOF 2022).": "Sets the investigation of secondary causes (BHOF 2022).",
   "Diagnóstico recente, causas secundárias ainda não investigadas": "Recent diagnosis, secondary causes not yet investigated",
   "4 de 30": "4 of 30",
-  "30 recomendações": "30 recommendations"
+  "30 recomendações": "30 recommendations",
+  "AAO 2025 (hidroxicloroquina)": "AAO 2025 (hydroxychloroquine)",
+  "AASLD/IDSA 2025 (hepatite B)": "AASLD/IDSA 2025 (hepatitis B)",
+  "OMS 2024 (hepatite B)": "WHO 2024 (hepatitis B)",
+  "Após 4 semanas da primeira carga viral detectável": "4 weeks after the first detectable viral load",
+  "Em cada consulta, no máximo mensal": "At every visit, at most monthly",
+  "Hepatite B com HIV": "Hepatitis B with HIV",
+  "Hepatite delta, anticorpo IgG": "Hepatitis delta, IgG antibody",
+  "HIV: carga viral detectável em TARV": "HIV: detectable viral load on ART",
+  "Diabetes tipo 1: quando começar a uACR": "Type 1 diabetes: when to start uACR",
+  "Esôfago de Barrett ou adenocarcinoma de esôfago": "Barrett's esophagus or esophageal adenocarcinoma",
+  "Em TARV, assintomático e com carga viral indetectável: abaixo de 350 a cada 6 meses; 350-500 anual; acima de 500, repetir em 6 meses, e com 2 exames consecutivos acima de 500 (6 meses de intervalo) não é mais necessário. Sem TARV, evento clínico ou falha virológica: a cada 6 meses. Em profilaxia ou com infecção oportunista: a cada 3 meses.": "On ART, asymptomatic and with undetectable viral load: below 350 every 6 months; 350-500 yearly; above 500, repeat in 6 months, and with 2 consecutive tests above 500 (6 months apart) it is no longer needed. Off ART, clinical event or virologic failure: every 6 months. On prophylaxis or with an opportunistic infection: every 3 months.",
+  "Doença do refluxo crônica com 3 ou mais fatores de risco de esôfago de Barrett (sexo masculino, mais de 50 anos, raça branca, tabagismo, obesidade, Barrett ou adenocarcinoma de esôfago em parente de 1º grau): endoscopia única de rastreio.": "Chronic reflux disease with 3 or more risk factors for Barrett's esophagus (male sex, age over 50, white race, smoking, obesity, Barrett's or esophageal adenocarcinoma in a first-degree relative): one-time screening endoscopy.",
+  "Endoscopia única de rastreio se refluxo crônico e 3 ou mais fatores: sexo masculino, mais de 50 anos, raça branca, tabagismo, obesidade, esôfago de Barrett ou adenocarcinoma de esôfago em parente de 1º grau. A raça não é coletada: com 2 fatores e raça branca, a endoscopia está indicada.": "One-time screening endoscopy if chronic reflux and 3 or more factors: male sex, age over 50, white race, smoking, obesity, Barrett's esophagus or esophageal adenocarcinoma in a first-degree relative. Race is not collected: with 2 factors and white race, endoscopy is indicated.",
+  "Dose até 5 mg/kg/dia de peso real (menos de 400 mg/dia na obesidade grave). Exame basal logo após o início, com fundo de olho, OCT e autofluorescência de padrão amplo. Rastreio anual com OCT e autofluorescência; pode ser adiado nos 5 primeiros anos sem fator de risco (doença renal, tamoxifeno, início em idade mais avançada).": "Dose up to 5 mg/kg/day of actual body weight (under 400 mg/day in severe obesity). Baseline exam soon after starting, with fundus exam, OCT and wide-pattern fundus autofluorescence. Yearly screening with OCT and autofluorescence; it may be deferred during the first 5 years without risk factors (kidney disease, tamoxifen, starting at an older age).",
+  "Com doença renal crônica ou tamoxifeno: rastreio anual desde o início.": "With chronic kidney disease or tamoxifen: yearly screening from the start.",
+  "Hepatite B com HIV: vigilância de carcinoma hepatocelular com ultrassonografia a cada 6 meses (com ou sem alfafetoproteína) em homens a partir de 18 anos e mulheres a partir de 40, mesmo sem cirrose; recomendação condicional.": "Hepatitis B with HIV: hepatocellular carcinoma surveillance with ultrasound every 6 months (with or without alpha-fetoprotein) in men from age 18 and women from age 40, even without cirrhosis; conditional recommendation.",
+  "Hepatite B crônica: anti-HDV em toda pessoa com HBsAg reagente; reagente, pedir o HDV-RNA (hepatite delta acelera a fibrose e o carcinoma hepatocelular).": "Chronic hepatitis B: anti-HDV in everyone with a reactive HBsAg; if reactive, order HDV RNA (hepatitis delta accelerates fibrosis and hepatocellular carcinoma).",
+  "Hepatite B crônica: testar coinfecção por HCV e HIV e imunidade contra hepatite A (vacinar se suscetível).": "Chronic hepatitis B: test for HCV and HIV coinfection and hepatitis A immunity (vaccinate if susceptible).",
+  "Nefrite lúpica: complemento (C3, C4) e anti-dsDNA em cada consulta de acompanhamento, não mais que uma vez por mês.": "Lupus nephritis: complement (C3, C4) and anti-dsDNA at every follow-up visit, no more than once a month.",
+  "No tipo 1, a uACR e a TFG anuais começam 5 anos após o diagnóstico (no tipo 2, desde o diagnóstico). O motor não sabe a duração do diabetes: retire a uACR se o diagnóstico tiver menos de 5 anos e não houver outra indicação.": "In type 1, yearly uACR and eGFR start 5 years after diagnosis (in type 2, from diagnosis). The engine does not know the duration of diabetes: remove the uACR if the diagnosis is less than 5 years old and there is no other indication.",
+  "Rastreamento de hiperaldosteronismo primário, causa importante de hipertensão resistente. Aldosterona e renina (atividade ou concentração) com potássio sérico, coletados pela manhã, sentado e sem garrote prolongado; corrigir a hipocalemia antes. Pode ser feito em uso da maioria dos anti-hipertensivos; betabloqueador e agonista alfa-2 central podem dar falso-positivo. Interpretar pelos cortes do método do laboratório (imunoensaio ou espectrometria de massa; atividade ou concentração de renina): renina suprimida com aldosterona elevada.": "Screening for primary aldosteronism, an important cause of resistant hypertension. Aldosterone and renin (activity or concentration) with serum potassium, drawn in the morning, seated and without prolonged tourniquet; correct hypokalemia first. It can be done on most antihypertensives; beta-blockers and central alpha-2 agonists may give false positives. Interpret by the cutoffs of the laboratory's method (immunoassay or mass spectrometry; renin activity or concentration): suppressed renin with elevated aldosterone.",
+  "Hipertensão com apneia obstrutiva do sono: rastrear hiperaldosteronismo primário (aldosterona e renina com potássio, pela manhã e sentado; corrigir a hipocalemia; interpretar pelos cortes do método do laboratório).": "Hypertension with obstructive sleep apnea: screen for primary aldosteronism (aldosterone and renin with potassium, in the morning and seated; correct hypokalemia; interpret by the cutoffs of the laboratory's method).",
+  "Rastreio de fibrose hepática pelo FIB-4 (idade, AST, ALT e plaquetas), mesmo com enzimas normais: abaixo de 35 anos o FIB-4 é pouco confiável: interpretar junto com a elastografia. Abaixo de 1,3, repetir em 1-2 anos; de 1,3 em diante, elastografia; acima de 2,67, encaminhar ao hepatologista.": "Liver fibrosis screening with FIB-4 (age, AST, ALT and platelets), even with normal enzymes: under age 35 FIB-4 is unreliable: interpret it together with elastography. Below 1.3, repeat in 1-2 years; from 1.3 up, elastography; above 2.67, refer to hepatology.",
+  "Rastreio de fibrose hepática pelo FIB-4 (idade, AST, ALT e plaquetas), mesmo com enzimas normais: com 65 anos ou mais, abaixo de 2,0 afasta fibrose avançada e repete em 1-2 anos; de 2,0 a 2,67, elastografia; acima de 2,67, encaminhar ao hepatologista.": "Liver fibrosis screening with FIB-4 (age, AST, ALT and platelets), even with normal enzymes: at 65 years or older, below 2.0 rules out advanced fibrosis and is repeated in 1-2 years; from 2.0 to 2.67, elastography; above 2.67, refer to hepatology.",
+  "Uma carga viral detectável não define falha: reforçar a adesão, rever interações e repetir a carga viral 4 semanas depois. Falha confirmada (duas cargas consecutivas detectáveis, a última acima de 500 cópias/mL): pedir a genotipagem (acrescente pelo catálogo). Entre 200 e 500 cópias/mL, o teste não é liberado no SUS: carga viral a cada 3 meses.": "A single detectable viral load does not define failure: reinforce adherence, review interactions and repeat the viral load 4 weeks later. Confirmed failure (two consecutive detectable loads, the last above 500 copies/mL): order genotyping (add it from the catalog). Between 200 and 500 copies/mL, the test is not available in the SUS: viral load every 3 months.",
+  "151 recomendações mapeadas": "151 recommendations mapped",
+  "151 recomendações": "151 recommendations"
  },
  "padroes": [
   [
@@ -2424,12 +2451,12 @@
    "%1 mg/week (low-level limit: %2 mg/week). Inactivated vaccines remain indicated; live-virus vaccines may be considered case by case, and the answer to \"Immunosuppression\" in the vaccine screening is at the physician's discretion."
   ],
   [
-   "^(.+)\\. Avaliação oftalmológica anual com campo visual automatizado 10-2 e OCT de domínio espectral\\. Ajustar a dose para até 5 mg/kg/dia de peso real\\.$",
-   "$1. Yearly eye exam with automated 10-2 visual field and spectral-domain OCT. Adjust the dose to at most 5 mg/kg/day of actual body weight."
+   "^(.+)\\. Rastreio anual com OCT e autofluorescência de padrão amplo \\(campo visual e ERG multifocal confirmam\\)\\. Ajustar a dose para até 5 mg/kg/dia de peso real\\.$",
+   "$1. Yearly screening with OCT and wide-pattern fundus autofluorescence (visual field and multifocal ERG confirm). Adjust the dose to at most 5 mg/kg/day of actual body weight."
   ],
   [
-   "^(.+)\\. Avaliação oftalmológica anual com campo visual automatizado 10-2 e OCT de domínio espectral\\.$",
-   "$1. Yearly eye exam with automated 10-2 visual field and spectral-domain OCT."
+   "^(.+)\\. Rastreio anual com OCT e autofluorescência de padrão amplo \\(campo visual e ERG multifocal confirmam\\)\\.$",
+   "$1. Yearly screening with OCT and wide-pattern fundus autofluorescence (visual field and multifocal ERG confirm)."
   ],
   [
    "^(.+ \\(acima de 5 mg/kg/dia\\)) e (.+ anos de uso)$",

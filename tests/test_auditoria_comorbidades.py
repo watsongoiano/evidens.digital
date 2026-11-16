@@ -473,3 +473,77 @@ def test_toda_fonte_nova_tem_link():
             assert link['url'].startswith('http'), rotulo
     assert build_reference_links('x', 'KDIGO 2024 (DRC)')[0]['url'].endswith('KDIGO-2024-CKD-Guideline.pdf')
     assert build_reference_links('x', 'ESC 2021 (insuficiência cardíaca)')[0]['url'] == 'https://doi.org/10.1093/eurheartj/ehab368'
+
+
+# --- Revisão externa (16/11/2026) -----------------------------------------------------------------
+
+US = 'Ultrassonografia de abdome superior'
+
+
+@pytest.mark.parametrize('sexo, idade, vigilancia', [('masculino', 18, True), ('masculino', 17, False), ('feminino', 40, True),
+                                                     ('feminino', 39, False)])
+def test_hbv_com_hiv_vigilancia_de_chc_sem_cirrose(sexo, idade, vigilancia):
+    """AASLD/IDSA 2025, recomendação 8 (condicional): homens a partir de 18 anos e mulheres a partir de 40."""
+    recs, _ = _rodar(['hepatite_b_cronica', 'hiv'], idade=idade, sexo=sexo)
+    assert (US in recs) == vigilancia
+    if vigilancia:
+        assert recs[US]['subtitulo'] == 'Hepatite B com HIV | A cada 6 meses'
+    assert US not in _rodar(['hepatite_b_cronica'], idade=idade, sexo=sexo)[0]
+
+
+def test_anti_hdv_para_todo_hbsag_reagente():
+    recs, _ = _rodar(['hepatite_b_cronica'])
+    assert recs['Hepatite delta, anticorpo IgG']['referencia'] == 'OMS 2024 (hepatite B)'
+
+
+@pytest.mark.parametrize('idade, trecho', [(65, 'abaixo de 2,0'), (64, 'abaixo de 1,3'), (35, 'abaixo de 1,3'),
+                                           (34, 'pouco confiável')])
+def test_fib4_interpretado_pela_idade(idade, trecho):
+    recs, _ = _rodar(['masld'], idade=idade)
+    assert trecho in recs['Alanina aminotransferase, soro']['descricao']
+
+
+def test_hidroxicloroquina_pela_aao_2025():
+    _, orient = _rodar([], ['hidroxicloroquina'])
+    texto = orient['Hidroxicloroquina']['descricao']
+    assert 'autofluorescência' in texto and 'peso real' in texto and 'desde o início' not in texto
+    assert orient['Hidroxicloroquina']['referencia'] == 'AAO 2025 (hidroxicloroquina)'
+    for extra in (dict(comorbidades=['doenca_renal']), dict(medicacoes=['hidroxicloroquina', 'tamoxifeno'])):
+        _, orient = _rodar(extra.get('comorbidades', []), extra.get('medicacoes', ['hidroxicloroquina']))
+        assert 'rastreio anual desde o início' in orient['Hidroxicloroquina']['descricao']
+
+
+def test_dm1_orienta_inicio_da_uacr_e_dm2_nao():
+    assert 'Diabetes tipo 1: quando começar a uACR' in _rodar(['diabetes_tipo_1'])[1]
+    assert 'Diabetes tipo 1: quando começar a uACR' not in _rodar(['diabetes'])[1]
+
+
+@pytest.mark.parametrize('idade, tabagismo, familia, endoscopia', [
+    (55, 'nunca', ['barrett_esofago'], True),    # homem + > 50 + familiar
+    (45, 'nunca', ['barrett_esofago'], False),   # homem + familiar
+    (55, 'nunca', [], False)])                   # homem + > 50
+def test_barrett_conta_o_familiar_de_1o_grau(idade, tabagismo, familia, endoscopia):
+    recs, orient = _rodar(['drge'], idade=idade, tabagismo=tabagismo, familia=familia, imc=24)
+    assert ('Endoscopia digestiva alta' in recs) == endoscopia
+    if not endoscopia:
+        assert 'raça branca' in orient['Refluxo: rastreio de esôfago de Barrett']['descricao']
+
+
+def test_aldosterona_renina_pela_endocrine_society_2025(client):
+    recs, _ = _resposta(client, idade=52, comorbidades=['has_resistente'])
+    texto = recs['Relação Aldosterona/Renina (A/R)']['descricao']
+    assert 'sentado' in texto and 'método do laboratório' in texto and '2 horas em pé' not in texto
+
+
+def test_nefrite_lupica_complemento_em_cada_consulta():
+    recs, _ = _rodar(['lupus', 'les_nefrite'], sexo='feminino')
+    assert recs['Complemento C3']['subtitulo'] == 'Nefrite lúpica | Em cada consulta, no máximo mensal'
+    assert recs['Anti-DNA']['referencia'] == 'ACR 2024 (nefrite lúpica)'
+    recs, _ = _rodar(['lupus'], sexo='feminino')
+    assert recs['Complemento C3']['subtitulo'].endswith('Conforme indicação clínica')
+
+
+def test_antitireoidiano_pede_t4_livre_com_o_tsh():
+    recs, _ = _rodar([], ['antitireoidiano'], sexo='feminino')
+    assert recs['T4 livre, soro']['subtitulo'] == recs['Hormônio Tireoestimulante (TSH), soro']['subtitulo']
+    assert 'T3 total' in recs['T4 livre, soro']['descricao']

@@ -512,11 +512,11 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         
         _add_rec({
             'titulo': 'Relação Aldosterona/Renina (A/R)',
-            'descricao': 'Rastreamento de hiperaldosteronismo primário, causa importante de hipertensão resistente. Coletar pela manhã após 2 horas em pé. Relação >20-30 sugere hiperaldosteronismo.',
+            'descricao': 'Rastreamento de hiperaldosteronismo primário, causa importante de hipertensão resistente. Aldosterona e renina (atividade ou concentração) com potássio sérico, coletados pela manhã, sentado e sem garrote prolongado; corrigir a hipocalemia antes. Pode ser feito em uso da maioria dos anti-hipertensivos; betabloqueador e agonista alfa-2 central podem dar falso-positivo. Interpretar pelos cortes do método do laboratório (imunoensaio ou espectrometria de massa; atividade ou concentração de renina): renina suprimida com aldosterona elevada.',
             'subtitulo': 'Adultos com HAS resistente | Conforme necessidade',
             'categoria': 'laboratorio',
             'prioridade': 'alta',
-            'referencia': 'AHA 2025 / SBC 2025',
+            'referencia': 'AHA 2025 / Endocrine Society 2025 (hiperaldosteronismo)',
             'grau_evidencia': 'A'
         })
         
