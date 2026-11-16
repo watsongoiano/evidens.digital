@@ -100,7 +100,7 @@ def test_nome_com_quebra_de_linha_nao_forja_campos_no_email():
 def test_painel_mostra_o_estado_e_envia_teste(admin, administrador, resend):
     estado = admin.get('/api/admin/aviso').get_json()
     assert estado == {'configurado': True, 'destinatarios': [administrador['email']], 'boas_vindas': False,
-                      'agradecimento_pendentes': estado['agradecimento_pendentes']}
+                      'agradecimento_pendentes': estado['agradecimento_pendentes'], 'comunicado': estado['comunicado']}
     r = admin.post('/api/admin/aviso/teste', json={})
     assert r.status_code == 200 and r.get_json()['destinatarios'] == [administrador['email']]
     assert 'teste' in resend[-1]['corpo']['subject']

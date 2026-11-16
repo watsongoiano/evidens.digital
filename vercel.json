@@ -18,6 +18,11 @@
   ],
   "env": {
     "FLASK_ENV": "production"
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/comunicados",
+      "schedule": "0 10 * * *"
+    }
+  ]
 }
-

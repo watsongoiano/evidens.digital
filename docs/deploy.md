@@ -146,3 +146,16 @@ As contas criadas antes de existir o e-mail de boas-vindas não receberam nada. 
 - Vai para contas aprovadas e pendentes; o administrador e as contas bloqueadas ficam de fora.
 - Cada conta recebe uma vez só: o envio fica registrado, e quem recebeu as boas-vindas não entra na lista.
 - O envio é feito em lotes de 5; se algum falhar, a conta volta para a lista e basta clicar de novo.
+
+## Comunicados aos usuários (novidades)
+
+Cada comunicado fica em `src/utils/comunicados.py`, com a data a partir da qual pode sair. O cron da Vercel
+(`vercel.json`, todo dia às 10:00 UTC = 07:00 em Brasília) chama `/api/cron/comunicados`, que envia em lote
+(API de lote da Resend, até 100 por chamada) às contas aprovadas que ainda não receberam aquele comunicado.
+Cada conta recebe cada comunicado uma vez só.
+
+- Requer `RESEND_API_KEY` e `AVISO_CADASTRO_DE` (as mesmas das boas-vindas).
+- Requer `CRON_SECRET` (Production): um valor aleatório longo, criado por você no painel da Vercel. A Vercel o envia
+  no cabeçalho `Authorization` de cada execução do cron; sem a variável, a rota recusa e nada é enviado.
+- No painel do administrador (`/admin`, "Aviso por e-mail") há "Enviar novidades de teste para mim" e
+  "Enviar novidades agora" (dois cliques), para mandar antes da hora ou se o cron não estiver ligado.

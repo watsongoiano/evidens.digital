@@ -504,7 +504,69 @@ def admin_aviso_estado():
     return jsonify({'configurado': notificacoes.configurado(),
                     'destinatarios': notificacoes.destinatarios(contas.listar()),
                     'boas_vindas': notificacoes.boas_vindas_ligadas(),
-                    'agradecimento_pendentes': len(contas.sem_email())})
+                    'agradecimento_pendentes': len(contas.sem_email()),
+                    'comunicado': _estado_do_comunicado()})
+
+
+def _estado_do_comunicado():
+    from src.utils import comunicados
+    chave = next(iter(comunicados.COMUNICADOS))
+    quando = comunicados.COMUNICADOS[chave][0]
+    return {'chave': chave, 'pendentes': len(contas.sem_comunicado(chave)), 'a_partir': quando.isoformat(),
+            'cron': bool((os.environ.get('CRON_SECRET') or '').strip())}
+
+
+@auth_bp.route('/admin/comunicado/teste', methods=['POST'])
+@exigir_administrador
+def admin_comunicado_teste():
+    """Envia ao próprio administrador o comunicado de novidades, para conferir o texto antes do envio."""
+    from src.utils import comunicados
+    u = usuario_atual()
+    if not notificacoes.boas_vindas_ligadas():
+        return jsonify({'error': 'O envio aos usuários está desligado: falta RESEND_API_KEY ou o remetente do domínio '
+                                 '(AVISO_CADASTRO_DE).'}), 502
+    chave = next(iter(comunicados.COMUNICADOS))
+    assunto, texto = comunicados.COMUNICADOS[chave][1](u, _url_do_site())
+    ok, detalhe = notificacoes.enviar([u['email']], assunto, texto)
+    if not ok:
+        return jsonify({'error': f'Não foi possível enviar o comunicado de teste: {detalhe}'}), 502
+    return jsonify({'ok': True, 'destinatarios': [u['email']]})
+
+
+@auth_bp.route('/admin/comunicado', methods=['POST'])
+@exigir_administrador
+def admin_comunicado():
+    """Envia agora o comunicado (um lote; a página chama de novo enquanto houver restantes)."""
+    from src.utils import comunicados
+    if not notificacoes.boas_vindas_ligadas():
+        return jsonify({'error': 'O envio aos usuários está desligado: falta RESEND_API_KEY ou o remetente do domínio '
+                                 '(AVISO_CADASTRO_DE).'}), 502
+    chave = next(iter(comunicados.COMUNICADOS))
+    enviados, falha, restantes = comunicados.enviar(chave, _url_do_site(), contas)
+    return jsonify({'ok': True, 'enviados': enviados, 'falhas': 1 if falha else 0, 'motivo': falha, 'restantes': restantes})
+
+
+@auth_bp.route('/cron/comunicados')
+def cron_comunicados():
+    """Chamado pelo cron da Vercel (vercel.json). Só com o CRON_SECRET no cabeçalho; sem a variável, recusa."""
+    import hmac
+    from src.utils import comunicados
+    segredo = (os.environ.get('CRON_SECRET') or '').strip()
+    recebido = request.headers.get('Authorization', '')
+    if not segredo or not hmac.compare_digest(recebido, f'Bearer {segredo}'):
+        return jsonify({'error': 'não autorizado'}), 401
+    if not notificacoes.boas_vindas_ligadas():
+        return jsonify({'error': 'envio desligado'}), 503
+    resumo = {}
+    for chave in comunicados.devidos():
+        total, falha, restantes = 0, None, None
+        for _ in range(5):   # até 500 contas por execução
+            enviados, falha, restantes = comunicados.enviar(chave, _url_do_site(), contas)
+            total += enviados
+            if falha or not restantes or not enviados:
+                break
+        resumo[chave] = {'enviados': total, 'restantes': restantes, 'falha': falha}
+    return jsonify({'ok': True, 'comunicados': resumo})
 
 
 @auth_bp.route('/admin/aviso/teste', methods=['POST'])
