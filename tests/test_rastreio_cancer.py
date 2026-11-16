@@ -262,7 +262,9 @@ def test_gestante_sem_macos_ano_nao_recebe_aviso_de_tc(client):
 def test_referencias_somadas_por_regras_diferentes_tem_um_link_cada():
     links = build_reference_links('Mamografia Digital - Bilateral', 'USPSTF 2024 | NCCN 2025 / ACS 2007')
     assert [l['label'] for l in links] == ['USPSTF 2024', 'NCCN 2025', 'ACS 2007']
-    assert 'breast-cancer-screening' in links[0]['url'] and 'nccn.org' in links[1]['url'] and 'canjclin' in links[2]['url']
+    from urllib.parse import urlsplit
+    assert 'breast-cancer-screening' in links[0]['url'] and 'canjclin' in links[2]['url']
+    assert urlsplit(links[1]['url']).hostname in ('nccn.org', 'www.nccn.org')
 
 
 def test_textos_da_historia_familiar(client):
