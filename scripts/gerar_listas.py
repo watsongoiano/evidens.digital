@@ -91,10 +91,7 @@ def _detalhes_das_comorbidades():
         saida.append(f'''      <div id="detalhes-{chave}" class="bloco-condicional" data-comorbidade="{chave}" hidden>
         <p class="campo-rotulo text-teal-dark">{html.escape(titulo)}</p>
         <p class="text-[12px] text-ink/55 -mt-1 mb-3">{html.escape(dica)}</p>
-        <div class="opcoes">
-{opcoes}
-        </div>
-      </div>
+{f'        <div class="opcoes">{chr(10)}{opcoes}{chr(10)}        </div>{chr(10)}' if itens else ''}      </div>
 ''')
     return ''.join(saida)
 

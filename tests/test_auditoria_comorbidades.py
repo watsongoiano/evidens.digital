@@ -96,7 +96,8 @@ def test_detalhes_da_drc_e_da_osteoporose_estao_na_tela(client):
     pagina = client.get('/intelligent-tools').get_data(as_text=True)
     for chave in ('doenca_renal', 'osteoporose'):
         assert f'data-comorbidade="{chave}"' in pagina
-    assert 'value="drc_g3b"' in pagina and 'value="osteoporose_diagnostico"' in pagina
+    # DRC: o estágio vem da creatinina e da uACR em "Exames já realizados" (sem opções duplicadas)
+    assert 'id="detalhes-doenca_renal"' in pagina and 'value="osteoporose_diagnostico"' in pagina
 
 
 # --- D-02 e D-12: insuficiência cardíaca e antagonista mineralocorticoide --------------------------

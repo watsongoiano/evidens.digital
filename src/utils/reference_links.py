@@ -83,6 +83,7 @@ _FONTES_DIRETAS = [
     # Rastreamento geral (relatório de auditoria A)
     ('acc/aha 2026', 'https://doi.org/10.1161/CIR.0000000000001423'),  # dislipidemia
     ('accf/aha 2010', 'https://doi.org/10.1161/CIR.0b013e3182051b4c'),  # risco CV em assintomáticos
+    ('uspstf 2018 (colo do útero)', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening'),
     ('uspstf 2018 (ecg)', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cardiovascular-disease-risk-screening-with-electrocardiography'),
     ('uspstf 2021 (hipertensão)', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hypertension-in-adults-screening'),
     ('uspstf 2022 (estatina)', 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/statin-use-in-adults-preventive-medication'),

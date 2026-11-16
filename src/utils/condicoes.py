@@ -368,11 +368,11 @@ DETALHES_COMORBIDADE = {
         ('rcu_alem_reto', 'Colite além do reto (não só proctite)'),
         ('rcu_8_anos', '8 anos ou mais desde o início dos sintomas'),
         ('rcu_cep', 'Colangite esclerosante primária')]),
+    # Sem opções na tela: o estágio vem da creatinina e da uACR informadas em "Exames já realizados" (um só lugar).
+    # Os valores drc_g*/drc_a* continuam aceitos pela API (estagio_drc).
     'doenca_renal': ('Doença renal crônica: estágio', 'Define a frequência de TFG, albuminúria e dos exames de G3a em diante '
-                     '(KDIGO 2024). Com a creatinina informada, o estágio G é calculado.', [
-        ('drc_g1_g2', 'TFG ≥ 60 (G1-G2, com albuminúria ou lesão renal)'), ('drc_g3a', 'TFG 45-59 (G3a)'),
-        ('drc_g3b', 'TFG 30-44 (G3b)'), ('drc_g4', 'TFG 15-29 (G4)'), ('drc_g5', 'TFG < 15 (G5)'),
-        ('drc_a1', 'uACR < 30 mg/g (A1)'), ('drc_a2', 'uACR 30-300 mg/g (A2)'), ('drc_a3', 'uACR > 300 mg/g (A3)')]),
+                     '(KDIGO 2024). O estágio é calculado com a creatinina e a relação albumina/creatinina informadas em '
+                     '"Exames já realizados".', []),
     'osteoporose': ('Osteoporose: o que se aplica', 'Define a investigação de causas secundárias (BHOF 2022).', [
         ('osteoporose_diagnostico', 'Diagnóstico recente, causas secundárias ainda não investigadas')]),
     'hepatite_b_cronica': ('Hepatite B: o que se aplica', 'Define o rastreio de carcinoma hepatocelular sem cirrose (AASLD 2018).', [
