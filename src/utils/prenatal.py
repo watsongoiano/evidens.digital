@@ -78,6 +78,13 @@ ADIAR_NA_GESTACAO = {
     'Densitometria óssea (DEXA)': 'Rastreio de osteoporose não se faz na gestação.',
     'Colonoscopia de Rastreio com ou sem biópsia': 'Colonoscopia de rastreio adiada para após a gestação (fazer na gestação só se houver indicação diagnóstica).',
     'Tomografia computadorizada de tórax de baixa dose (LDCT)': 'Rastreio com radiação ionizante adiado para após a gestação.',
+    'Sangue oculto nas fezes (FIT)': 'Rastreio colorretal adiado para após a gestação, junto com a colonoscopia.',
+    # Com fonte própria: (motivo, referência)
+    'Ressonância magnética de mamas': ('Ressonância de rastreio, com gadolínio, adiada para após o parto (na gestação, gadolínio '
+                                       'só quando essencial; ultrassonografia e exame clínico se houver achado). Na lactação '
+                                       'pode ser feita.', 'ACOG CO 723'),
+    'Endoscopia digestiva alta': ('Endoscopia eletiva (rastreio ou vigilância) adiada para após o parto; na gestação, só com '
+                                  'indicação forte.', 'ASGE 2012'),
     # Não fazem parte do pré-natal de risco habitual (MS, CAB 32). Com HAS, diabetes, doença renal ou risco de
     # pré-eclâmpsia continuam na lista (ver adiar(..., com_indicacao=True)).
     'Eletrocardiograma de repouso': 'Não faz parte do pré-natal de risco habitual (MS, CAB 32); pedir se houver indicação clínica.',
@@ -811,6 +818,9 @@ def adiar(recomendacoes, diabetica=False, com_indicacao=False):
     for r in recomendacoes:
         titulo = (r.get('titulo') or '').strip().lower()
         motivo = _ADIAR.get(titulo)
+        referencia = REF
+        if isinstance(motivo, tuple):
+            motivo, referencia = motivo
         if diabetica and titulo.startswith('hemoglobina glicada'):
             motivo = None
         if com_indicacao and titulo in ADIAR_SEM_INDICACAO:
@@ -819,7 +829,7 @@ def adiar(recomendacoes, diabetica=False, com_indicacao=False):
             if titulo not in vistos:
                 vistos.add(titulo)
                 adiadas.append({'titulo': r['titulo'], 'categoria': r.get('categoria'), 'estado': 'adiado_gestacao',
-                                'motivo': motivo, 'referencia': REF})
+                                'motivo': motivo, 'referencia': referencia})
         else:
             mantidas.append(r)
     return mantidas, adiadas

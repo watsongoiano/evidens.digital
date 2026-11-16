@@ -207,6 +207,10 @@ def test_invariantes_de_seguranca_em_toda_a_grade(client):
         assert len(titulos_retirados) == len(set(titulos_retirados)), caso
         assert not set(titulos_retirados) & set(r['titulo'] for r in dados['recommendations']), caso
         for item in dados['nao_incluidas']:
+            if item['categoria'] != 'vacina':
+                # rastreio de câncer não indicado (PSA a partir de 70) ou com dado faltando (TC de baixa dose)
+                assert item['estado'] in ESTADOS | {'nao_recomendado'} and item['motivo'], caso
+                continue
             assert item['estado'] in ESTADOS and item['motivo'], caso
             assert ATENUADA.search(item['titulo']) or HPV.search(item['titulo']), caso
         assert dados['total_recommendations'] == len(dados['recommendations']), caso

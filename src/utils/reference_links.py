@@ -9,7 +9,11 @@ def _split_refs(ref: str) -> List[str]:
     """
     if not ref:
         return []
-    
+
+    # Referências somadas por regras diferentes vêm unidas por ' | ' (src/utils/condicoes.py): cada uma tem o seu link.
+    if ' | ' in ref:
+        return [p for parte in ref.split(' | ') for p in _split_refs(parte)]
+
     # Tentar separar por ' / ' primeiro (preserva ACC/AHA, ESC/EAS, etc)
     if ' / ' in ref:
         parts = [p.strip() for p in ref.split(' / ')]
@@ -47,8 +51,10 @@ def _uspstf_url_by_title(title_lc: str) -> str:
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening'
     if _contains_any(title_lc, ['brca']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/brca-related-cancer-risk-assessment-genetic-counseling-and-genetic-testing'
-    if _contains_any(title_lc, ['colonoscopia', 'colorretal']):
+    if _contains_any(title_lc, ['colonoscopia', 'colorretal', 'sangue oculto']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening'
+    if _contains_any(title_lc, ['melanoma', 'pele']):
+        return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/skin-cancer-screening'
     if _contains_any(title_lc, ['cervical', 'papanicolaou', 'pap', 'hpv']):
         return 'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening'
     if _contains_any(title_lc, ['psa', 'próstata', 'prostata']):
@@ -145,6 +151,17 @@ _FONTES_DIRETAS = [
     ('acog 2025', 'https://www.acog.org/clinical/clinical-guidance/practice-advisory/articles/2023/09/maternal-respiratory-syncytial-virus-vaccination'),
     ('pcdt-ist', 'https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts'),
     ('nccn', 'https://www.nccn.org/guidelines/category_2'),
+    # Rastreio de câncer (src/utils/rastreio_cancer.py)
+    ('cbr/sbm/febrasgo 2023', 'https://doi.org/10.1590/0100-3984.2023.0064-en'),
+    ('ms nt 626/2025', 'https://ninho.inca.gov.br/jspui/bitstream/123456789/17713/1/SEI_0050548355_Nota_Tecnica_626.pdf'),
+    ('ms/inca nt 9/2023', 'https://antigo.inca.gov.br/sites/ufu.sti.inca.local/files//media/document//notatecnica_rastreio_cancer_de_prostata_2023.pdf'),
+    ('sbu/sboc/sbrt', 'https://portaldaurologia.org.br/files/arquivos/filee4e2d7e8d48f92bae5f8f445d4e71e43.pdf'),
+    ('ms/inca 2026', 'https://www.gov.br/inca/pt-br/assuntos/noticias/2026/sus-adota-novo-exame-para-detectar-cancer-de-intestino-antes-dos-sintomas'),
+    ('usmstf 2022', 'https://doi.org/10.1053/j.gastro.2021.10.007'),
+    ('sbct-sbpt-cbr 2024', 'https://dx.doi.org/10.36416/1806-3756/e20230233'),
+    ('acs 2023', 'https://doi.org/10.3322/caac.21811'),
+    ('acog co 723', 'https://pubmed.ncbi.nlm.nih.gov/28937575/'),
+    ('asge 2012', 'https://pubmed.ncbi.nlm.nih.gov/22579258/'),
     ('acs 2007', 'https://doi.org/10.3322/canjclin.57.2.75'),
     ('kratz 2017', 'https://doi.org/10.1158/1078-0432.CCR-17-0408'),
     ('igclc 2020', 'https://doi.org/10.1016/S1470-2045(20)30219-9'),
