@@ -2129,11 +2129,14 @@
                 // medicação escolhida (botão ou lista) aponta a comorbidade que implica
                 document.querySelectorAll('input[data-marca]:checked').forEach(i =>
                     i.dataset.marca.split(' ').forEach(id => pedir(id, 'med:' + i.value, 'uso de ' + i.dataset.rotulo)));
-                // PA de consultório, AHA/ACC 2025: estágio 1 ≥ 130/80, estágio 2 ≥ 140/90 (na gestação, só ≥ 140/90)
+                // PA de consultório (mesmas regras de coerencia.inferir): uma PA isolada não rotula HAS. Fora da gestação,
+                // só a PA ≥ 180/110 (HAS estágio 3 da SBC 2025) marca a caixa; de 130/80 a 179/109 o motor pede MRPA ou MAPA
+                // para confirmar (a dica abaixo explica). Na gestação, ≥ 140/90.
                 const pas = num('pas') || 0, pad = num('pad') || 0;
                 const gest = document.getElementById('gestante').value === 'sim';
-                const est2 = pas >= 140 || pad >= 90, est1 = pas >= 130 || pad >= 80;
-                if (est2 || (est1 && !gest)) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg = HAS estágio ${est2 ? 2 : 1} (AHA/ACC 2025); confirmar com MRPA ou MAPA`);
+                const est2 = pas >= 140 || pad >= 90, grave = pas >= 180 || pad >= 110;
+                if (gest && est2) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg = HAS estágio 2 (AHA/ACC 2025); confirmar com MRPA ou MAPA`);
+                else if (!gest && grave) pedir('hipertensao', 'pa', `PA ${pas || '–'}/${pad || '–'} mmHg ≥ 180/110 mmHg = HAS estágio 3 (SBC 2025); confirmar com MRPA ou MAPA`);
                 // HAS resistente (AHA 2018; AHA/ACC 2025): PA acima da meta com 3 classes, ou 4 ou mais classes.
                 // Só conta hipertensão pedida agora ou marcada à mão: a automática de uma rodada anterior, cuja regra
                 // já não vale (PA corrigida), não pode sustentar a si mesma pela HAS resistente.
@@ -2197,6 +2200,16 @@
                     else if (pad < 80) frases.push(`PA ${pas}/${pad} mmHg: elevada pela AHA/ACC 2025 (120-129 e < 80). Não é hipertensão; a caixa não é marcada.`);
                 }
                 const gest = document.getElementById('gestante').value === 'sim';
+                // PA alterada sem HAS conhecida (mesma regra de coerencia.pa_a_confirmar): AHA/ACC 2025 a partir de
+                // 130/80, com a categoria da SBC 2025 ao lado (lá, 130-139/80-89 é pré-hipertensão).
+                const altaAha = (pas !== null && pas >= 130) || (pad !== null && pad >= 80);
+                const graveAgora = (pas !== null && pas >= 180) || (pad !== null && pad >= 110);
+                if (!gest && altaAha && !graveAgora && !document.getElementById('hipertensao').checked) {
+                    const est2Aha = (pas !== null && pas >= 140) || (pad !== null && pad >= 90);
+                    const sbc = (pas !== null && pas >= 160) || (pad !== null && pad >= 100) ? 'HAS estágio 2'
+                        : est2Aha ? 'HAS estágio 1' : 'pré-hipertensão';
+                    frases.push(`PA ${pas ?? '–'}/${pad ?? '–'} mmHg: HAS estágio ${est2Aha ? 2 : 1} pela AHA/ACC 2025 e ${sbc} pela SBC 2025. Uma medida isolada não confirma HAS: a caixa não é marcada e o motor pede MRPA ou MAPA.`);
+                }
                 if (gest && pas !== null && pad !== null && (pas >= 130 || pad >= 80) && pas < 140 && pad < 90 && !document.getElementById('hipertensao').checked) {
                     frases.push(`PA ${pas}/${pad} mmHg na gestação: hipertensão só a partir de 140/90; a caixa não é marcada.`);
                 }

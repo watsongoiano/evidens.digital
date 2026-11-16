@@ -78,11 +78,69 @@ def achados_no_texto(texto):
 
 
 def classificar_pa(pas, pad):
-    """Categoria da PA de consultório pela diretriz AHA/ACC 2025 (mesmas faixas de 2017).
+    """Categoria da PA de consultório pela diretriz AHA/ACC 2025 (mesmas faixas de 2017), com a da SBC 2025 em ``sbc``.
 
     Com só um dos componentes, a categoria vale apenas se aquele valor já a define
     (ex.: PAS 145 é estágio 2 qualquer que seja a PAD); senão volta "incompleta".
+    A categoria é da medida, não um diagnóstico: uma PA isolada não confirma HAS (ver ``inferir``).
     """
+    c = _classificar_pa_aha(pas, pad)
+    if c is not None:
+        sbc = classificar_pa_sbc(pas, pad)
+        if sbc:
+            c['sbc'] = sbc
+    return c
+
+
+# SBC 2025 (Diretriz Brasileira de HAS, Arq Bras Cardiol 2025;122(9):e20250624): normal < 120/80;
+# pré-hipertensão 120-139 e/ou 80-89; HAS estágio 1 140-159/90-99, estágio 2 160-179/100-109, estágio 3 ≥ 180/110.
+ROTULOS_SBC = {'normal': 'PA normal', 'pre_hipertensao': 'pré-hipertensão', 'estagio1': 'HAS estágio 1',
+               'estagio2': 'HAS estágio 2', 'estagio3': 'HAS estágio 3'}
+
+
+def classificar_pa_sbc(pas, pad):
+    """Categoria da PA de consultório pela SBC 2025, ou None se faltar o componente que a define."""
+    tem_pas, tem_pad = pas not in (None, ''), pad not in (None, '')
+    if not tem_pas and not tem_pad:
+        return None
+    s_ = float(pas) if tem_pas else None
+    d_ = float(pad) if tem_pad else None
+    for categoria, corte_s, corte_d in (('estagio3', 180, 110), ('estagio2', 160, 100), ('estagio1', 140, 90),
+                                         ('pre_hipertensao', 120, 80)):
+        if (s_ is not None and s_ >= corte_s) or (d_ is not None and d_ >= corte_d):
+            # com um componente só, a categoria vale se ele já a define (o outro só poderia subir a faixa)
+            c = {'categoria': categoria, 'rotulo': ROTULOS_SBC[categoria]}
+            if not (tem_pas and tem_pad):
+                c['incompleta'] = True
+            return c
+    if not (tem_pas and tem_pad):
+        return None
+    return {'categoria': 'normal', 'rotulo': ROTULOS_SBC['normal']}
+
+
+# PA a partir da qual uma medida de consultório basta para tratar como HAS (decisão do responsável clínico:
+# HAS estágio 3 da SBC 2025). Abaixo disso, sem HAS conhecida, a PA alterada só pede confirmação (MRPA ou MAPA).
+PA_GRAVE = (180, 110)
+
+
+def pa_grave(pas, pad):
+    s_ = float(pas) if pas not in (None, '') else None
+    d_ = float(pad) if pad not in (None, '') else None
+    return (s_ is not None and s_ >= PA_GRAVE[0]) or (d_ is not None and d_ >= PA_GRAVE[1])
+
+
+def pa_a_confirmar(classificacao, comorbidades, gestante=False):
+    """PA de consultório ≥ 130/80 (AHA/ACC 2025) sem HAS conhecida: estado "PA alterada, HAS a confirmar".
+
+    Fora da gestação. HAS marcada pelo médico, anti-hipertensivo em uso (que marca HAS) ou PA ≥ 180/110 já
+    chegam aqui como 'hipertensao' nas comorbidades e não ficam neste estado.
+    """
+    if gestante or not classificacao or 'hipertensao' in comorbidades:
+        return False
+    return classificacao['categoria'] in ('estagio1', 'estagio2')
+
+
+def _classificar_pa_aha(pas, pad):
     tem_pas, tem_pad = pas not in (None, ''), pad not in (None, '')
     if not tem_pas and not tem_pad:
         return None
@@ -189,12 +247,17 @@ def inferir(data, egfr=None, gestante=False, recusados=(), escolhidas=()):
         marcar(comorbidades, 'comorbidades', 'hipertensao', 'uso de anti-hipertensivo')
     pa = classificar_pa(data.get('pas'), data.get('pad'))
     if pa:
-        # Fora da gestação, corte AHA/ACC 2025 (≥ 130/80). Na gestação, ≥ 140/90.
+        # Uma PA de consultório isolada não rotula HAS (SBC 2025 e AHA/ACC 2025: confirmar em 2 ou mais consultas
+        # ou com MRPA/MAPA). Fora da gestação, só a PA ≥ 180/110 marca a caixa; de 130/80 a 179/109 a rota pede
+        # MRPA ou MAPA (estado "PA alterada, HAS a confirmar", ver pa_a_confirmar). Na gestação continua ≥ 140/90.
         # (estágio 1 com um componente faltando pode ser 2 na gestação; só marca o que é certo)
-        limiar = pa['categoria'] == 'estagio2' or (pa['categoria'] == 'estagio1' and not gestante)
-        if limiar:
+        if gestante:
+            if pa['categoria'] == 'estagio2':
+                marcar(comorbidades, 'comorbidades', 'hipertensao',
+                       f"PA {_pa_texto(data)} = {pa['rotulo']} (AHA/ACC 2025); confirmar com MRPA ou MAPA")
+        elif pa_grave(data.get('pas'), data.get('pad')):
             marcar(comorbidades, 'comorbidades', 'hipertensao',
-                   f"PA {_pa_texto(data)} = {pa['rotulo']} (AHA/ACC 2025); confirmar com MRPA ou MAPA")
+                   f"PA {_pa_texto(data)} ≥ 180/110 mmHg = HAS estágio 3 (SBC 2025); confirmar com MRPA ou MAPA")
     resistente = hipertensao_resistente(escolhidas, 'hipertensao' in comorbidades, data.get('pas'), data.get('pad'), gestante)
     if resistente:
         marcar(comorbidades, 'comorbidades', 'has_resistente', resistente)

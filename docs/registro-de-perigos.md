@@ -25,6 +25,8 @@ Os testes ficam em `tests/` e rodam com `python -m pytest`.
 | P-09 | PDF de vacinas impresso a partir de uma lista que não corresponde mais ao formulário | A lista ficava na tela depois de o formulário mudar | A página descarta o resultado quando um dado clínico muda; o servidor confere de novo a triagem no pedido de PDF e recusa a lista se houver vacina não liberada | `test_pdf.py` (segunda linha de defesa) |
 | P-10 | Dados de paciente gravados sem intenção | O endpoint tentava gravar nome e dados clínicos em banco a cada consulta | Gravação removida; o nome do paciente não é mais enviado com o pedido de recomendações e é opcional | `test_site.py::test_motor_nao_tem_acesso_a_banco_de_dados`; `test_site.py::test_nome_do_paciente_e_opcional_e_nao_vai_com_as_recomendacoes` |
 | P-11 | Telas antigas e arquivos internos acessíveis por URL | Qualquer `.html`, `.js` ou `.json` do repositório era servido | Lista explícita de arquivos publicados em `api/index.py` | `test_site.py::test_arquivos_internos_e_telas_antigas_nao_sao_servidos` |
+| P-17 | Diagnóstico inferido de dado isolado | Uma PA de 132/80 marcava hipertensão e disparava MAPA, ecocardiograma, potássio e ácido úrico | Uma PA de consultório isolada não rotula HAS (SBC 2025; AHA/ACC 2025): fora da gestação só a PA ≥ 180/110 marca a caixa. PA ≥ 130/80 sem HAS conhecida vira o estado "PA alterada, HAS a confirmar", que pede só MRPA ou MAPA e orienta repetir a PA; o bloco de HAS só entra com HAS marcada, anti-hipertensivo em uso ou PA ≥ 180/110. A categoria SBC aparece ao lado da AHA (`pa_classificacao.sbc`) e, na faixa 130-139/80-89, como aviso de divergência. Mesma regra na tela (`intelligent-tools.html`) | `test_coerencia.py::test_pa_isolada_so_marca_has_a_partir_de_180_110`, `test_pa_alterada_sem_has_fica_a_confirmar`, `test_api_pa_alterada_pede_so_mrpa_ou_mapa`, `test_api_bloco_de_has_so_com_has_confirmada`; `test_rastreamento_geral.py` |
+| P-18 | Rastreio da própria doença em quem já tem o diagnóstico; item duplicado | Diabético recebia o rastreio de diabetes; albuminúria, anti-HCV, hemograma, EAS, sódio/potássio, hepatite B e fundo de olho saíam duas vezes com nomes diferentes | Glicemia e HbA1c do diabético são de controle. A deduplicação final (`deduplicar_recomendacoes`) agrupa pelo código TUSS: sinônimos viram um item (título preferido em `tuss.TITULO_PREFERIDO`) e o exame pedido sozinho entra no combinado que o contém ("Potássio" em "Sódio e potássio", "Antígeno HBs" no painel de hepatite B); exames sem código que são o mesmo pedido estão em `tuss.MESMO_EXAME_SEM_CODIGO`. O item que fica mostra todos os motivos e todas as fontes com link | `test_rastreamento_geral.py::test_mesmo_exame_com_nomes_diferentes_sai_uma_vez`, `test_deduplicacao_por_codigo_une_sinonimos_e_absorve_o_exame_no_combinado`; `test_recomendacoes.py::test_diabetico_nao_recebe_totg_e_a_glicemia_vira_acompanhamento` |
 
 ## Parciais
 
@@ -33,19 +35,17 @@ Os testes ficam em `tests/` e rodam com `python -m pytest`.
 | P-12 | Serviço de PDF externo aceitava requisições de qualquer origem | Resolvido: os PDFs passaram a ser gerados dentro da própria função; não há mais serviço externo |
 | P-13 | O PDF imprime a lista que o navegador envia | O conteúdo é validado, limitado e escapado, e as vacinas atenuadas são conferidas de novo. O servidor ainda não recalcula as recomendações a partir dos dados do paciente |
 | P-14 | Nome do paciente trafega até o servidor e o serviço de PDF | Passou a ser opcional e só acompanha o pedido de PDF. Continua saindo do navegador quando informado |
+| P-15 | Excesso de exames em pessoa assintomática | Rastreamento geral corrigido (relatório de auditoria A): ECG, creatinina, glicemia e HbA1c deixaram de ser universais. O adulto hígido de 25 anos recebe perfil lipídico, Lp(a), anti-HIV, anti-HCV e o painel de hepatite B (cada um com fonte); glicemia/HbA1c a partir dos 35 anos ou com IMC ≥ 25 e fator de risco (ADA 2026); creatinina e uACR com fator de risco para DRC (KDIGO 2024). Falta revisar os rastreios das demais áreas |
+| P-16 | Rastreio sem idade de parada | Lp(a) só até 75 anos; perfil lipídico a partir dos 76 vira decisão individual; rastreio automático de diabetes para aos 70 (com aviso da divergência com a ADA). O PSA é da área de oncologia |
+| P-20 | Regra diferente da fonte que ela cita | Corrigidos: aneurisma de aorta (homem de 65-75 anos que já fumou, USPSTF 2019) e densitometria (sem intervalo fixo; mulher pós-menopausa < 65 anos com fator de risco; homem só pela BHOF). PSA e HPV ficam com as respectivas áreas |
+| P-22 | Diretriz desatualizada | Rastreamento geral com as fontes vigentes e link direto: ADA 2026, ACC/AHA 2026 (dislipidemia), MS 2026 (PCDT Hepatite C), CDC 2023 (hepatite B), USPSTF 2019-2025. Continua sem data de revisão por regra |
 
 ## Abertos
 
 | ID | Perigo | Exemplo observado |
 |---|---|---|
-| P-15 | Excesso de exames em pessoa assintomática | Homem de 25 anos hígido recebe glicemia, HbA1c, TOTG, perfil lipídico, Lp(a), creatinina, HIV, HCV e ECG |
-| P-16 | Rastreio sem idade de parada | Homem de 88 anos recebe PSA e Lp(a) |
-| P-17 | Diagnóstico inferido de dado isolado | Uma PA de 132/80 marca hipertensão e dispara MAPA, ecocardiograma, potássio e ácido úrico |
-| P-18 | Rastreio da própria doença em quem já tem o diagnóstico; item duplicado | Diabético recebe o rastreio de diabetes; albuminúria aparece duas vezes com nomes diferentes |
 | P-19 | Vacina sugerida a quem já está vacinado | Não há entrada de histórico vacinal |
-| P-20 | Regra diferente da fonte que ela cita | Aneurisma de aorta exige DPOC ou 10 maços-ano; PSA anual a partir dos 50; título de HPV molecular com texto de citologia trienal; densitometria bienal |
 | P-21 | Grau de evidência atribuído sem correspondência com a fonte | Graus digitados à mão em cada regra |
-| P-22 | Diretriz desatualizada | As fontes citadas são de 2024 e 2025; não há data de revisão por regra |
 | P-23 | Dado relevante coletado e ignorado | País, álcool, doença renal, história familiar de câncer e de cardiopatia |
 | P-24 | Falso negativo silencioso por dado ausente | Fumante sem maços-ano informados não recebe rastreio de câncer de pulmão nem aviso de que falta o dado |
 

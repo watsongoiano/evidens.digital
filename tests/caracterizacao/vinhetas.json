@@ -8,16 +8,11 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HIV 1 e 2, soro",
-        "Anti-HCV IgG, soro"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso"
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -47,17 +42,12 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -84,17 +74,12 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -157,13 +142,11 @@
         "Coombs indireto, soro",
         "Toxoplasmose IgG e IgM, soro",
         "Clamídia e gonococo, PCR (urina ou swab)",
-        "Creatinina, soro",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
         "Ultrassonografia morfológica de 2º trimestre",
-        "Ultrassonografia transvaginal para medida do colo uterino",
-        "Eletrocardiograma de repouso"
+        "Ultrassonografia transvaginal para medida do colo uterino"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -209,15 +192,14 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
-        "Anti-HCV IgG, soro"
+        "Anti-HIV 1 e 2, soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "Colonoscopia de Rastreio com ou sem biópsia"
       ],
       "vacina": [
@@ -248,16 +230,15 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
+        "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "Mamografia Digital - Bilateral",
         "Colonoscopia de Rastreio com ou sem biópsia"
       ],
@@ -294,22 +275,16 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
+        "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
-        "Potássio, soro",
-        "Ácido úrico, soro",
-        "EAS - Elementos Anormais e Sedimentoscopia",
-        "Razão albumina/creatinina, urina",
+        "HBsAg, anti-HBc total e anti-HBs",
         "PSA total, soro"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)",
-        "Ecocardiograma transtorácico",
         "Colonoscopia de Rastreio com ou sem biópsia",
         "Tomografia computadorizada de tórax de baixa dose (LDCT)"
       ],
@@ -346,20 +321,21 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
+        "Relação albumina/creatinina urinária (uACR)",
+        "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Potássio, soro",
         "Ácido úrico, soro",
         "EAS - Elementos Anormais e Sedimentoscopia",
-        "Razão albumina/creatinina, urina",
+        "Glicose, soro",
+        "Hemoglobina glicada (HbA1c), soro",
         "PSA total, soro",
         "Aspartato aminotransferase, soro",
         "Alanina aminotransferase, soro",
-        "Relação albumina/creatinina urinária (uACR)",
         "Vitamina B12, soro",
         "Hemograma completo com plaquetas",
         "Cálcio iônico, soro",
@@ -369,7 +345,6 @@
       "imagem": [
         "Eletrocardiograma de repouso",
         "MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)",
-        "Ecocardiograma transtorácico",
         "Colonoscopia de Rastreio com ou sem biópsia",
         "Tomografia computadorizada de tórax de baixa dose (LDCT)",
         "Fundoscopia (Exame de fundo de olho)"
@@ -408,22 +383,23 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
         "Creatinina, soro",
+        "Relação albumina/creatinina urinária (uACR)",
+        "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Potássio, soro",
         "Ácido úrico, soro",
         "EAS - Elementos Anormais e Sedimentoscopia",
-        "Razão albumina/creatinina, urina",
+        "Glicose, soro",
         "PSA total, soro"
       ],
       "imagem": [
         "Eletrocardiograma de repouso",
         "MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)",
-        "Ecocardiograma transtorácico",
         "Colonoscopia de Rastreio com ou sem biópsia"
       ],
       "vacina": [
@@ -458,23 +434,24 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
+        "Anti-HIV 1 e 2, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular",
+        "Hemoglobina glicada (HbA1c), soro",
+        "Glicose, soro",
         "Aspartato aminotransferase, soro",
         "Alanina aminotransferase, soro",
         "Relação albumina/creatinina urinária (uACR)",
+        "Creatinina, soro",
         "Hemograma completo com plaquetas",
         "Cálcio iônico, soro",
         "25-hidroxivitamina D, soro",
         "Fósforo, soro"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "Mamografia Digital - Bilateral",
         "Colonoscopia de Rastreio com ou sem biópsia",
         "Fundoscopia (Exame de fundo de olho)"
@@ -508,17 +485,16 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "PSA total, soro"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
-        "Colonoscopia de Rastreio com ou sem biópsia"
+        "Colonoscopia de Rastreio com ou sem biópsia",
+        "Ultrassonografia com Doppler de Aorta Abdominal"
       ],
       "vacina": [
         "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
@@ -551,12 +527,11 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "PSA total, soro",
         "Gasometria arterial, sangue arterial",
         "Sódio, soro",
@@ -565,7 +540,6 @@
         "Hemograma completo, sangue total"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "Colonoscopia de Rastreio com ou sem biópsia",
         "Ultrassonografia com Doppler de Aorta Abdominal",
         "Tomografia computadorizada de tórax de baixa dose (LDCT)",
@@ -600,15 +574,13 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
-        "Anti-HCV IgG, soro"
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs"
       ],
       "imagem": [
-        "Eletrocardiograma de repouso",
         "Mamografia Digital - Bilateral",
         "Densitometria óssea (DEXA)",
         "Colonoscopia de Rastreio com ou sem biópsia"
@@ -640,16 +612,10 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
-        "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
-        "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
         "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "PSA total, soro"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso"
       ],
       "vacina": [
         "Influenza trivalente de alta concentração (Efluelda®, HD3V)",
@@ -683,15 +649,15 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
-        "Anti-HCV IgG, soro",
+        "Anticorpos anti-HCV, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Contagem de linfócitos T CD4+",
         "Carga Viral do HIV (HIV RNA)",
         "Hemograma completo com plaquetas",
+        "Creatinina, soro",
         "EAS - Elementos Anormais e Sedimentoscopia, urina",
         "Sódio, soro",
         "Potássio, soro",
@@ -700,20 +666,13 @@
         "Alanina aminotransferase, soro",
         "Fosfatase alcalina, soro",
         "Bilirrubinas totais e frações, soro",
+        "Glicose, soro",
         "Sífilis: teste treponêmico ou VDRL, soro",
         "Clamídia e gonococo, PCR (urina ou swab)",
-        "Anticorpos anti-HCV, soro",
-        "Antígeno HBs, soro",
-        "Anticorpos anti-HBc total, soro",
-        "Anticorpos anti-HBs, soro",
         "Anticorpos anti-HAV IgG, soro",
         "Toxoplasmose IgG, soro",
         "Sorologia para HTLV 1 e 2, soro",
         "Antígeno criptocócico (LF-CrAg), soro"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso",
-        "Radiografia de tórax"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -723,6 +682,9 @@
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)"
+      ],
+      "imagem": [
+        "Radiografia de tórax"
       ]
     },
     "nao_incluidas": [
@@ -760,15 +722,15 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
-        "Anti-HCV IgG, soro",
+        "Anticorpos anti-HCV, soro",
+        "HBsAg, anti-HBc total e anti-HBs",
         "Contagem de linfócitos T CD4+",
         "Carga Viral do HIV (HIV RNA)",
         "Hemograma completo com plaquetas",
+        "Creatinina, soro",
         "EAS - Elementos Anormais e Sedimentoscopia, urina",
         "Sódio, soro",
         "Potássio, soro",
@@ -777,20 +739,13 @@
         "Alanina aminotransferase, soro",
         "Fosfatase alcalina, soro",
         "Bilirrubinas totais e frações, soro",
+        "Glicose, soro",
         "Sífilis: teste treponêmico ou VDRL, soro",
         "Clamídia e gonococo, PCR (urina ou swab)",
-        "Anticorpos anti-HCV, soro",
-        "Antígeno HBs, soro",
-        "Anticorpos anti-HBc total, soro",
-        "Anticorpos anti-HBs, soro",
         "Anticorpos anti-HAV IgG, soro",
         "Toxoplasmose IgG, soro",
         "Sorologia para HTLV 1 e 2, soro",
         "Prova tuberculínica (PPD) ou IGRA"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso",
-        "Radiografia de tórax"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",
@@ -800,6 +755,9 @@
         "Meningocócica ACWY (Menactra® ou Menveo®)",
         "Meningocócica B (Bexsero®)",
         "COVID-19 (Comirnaty®, Spikevax® ou outras)"
+      ],
+      "imagem": [
+        "Radiografia de tórax"
       ]
     },
     "nao_incluidas": [
@@ -831,15 +789,12 @@
     },
     "recomendacoes": {
       "laboratorio": [
-        "Glicose, soro",
         "Hemoglobina glicada (HbA1c), soro",
         "Colesterol total e frações, soro",
         "Lipoproteína(a) - Lp(a), soro",
-        "Creatinina, soro",
-        "Anti-HCV IgG, soro"
-      ],
-      "imagem": [
-        "Eletrocardiograma de repouso"
+        "Anti-HIV 1 e 2, soro",
+        "Anti-HCV IgG, soro",
+        "HBsAg, anti-HBc total e anti-HBs"
       ],
       "vacina": [
         "Influenza (trivalente ou quadrivalente)",

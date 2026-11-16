@@ -13,7 +13,8 @@ from src.utils.validacao import EntradaInvalida, SIM, ler_numero, normalizar_tri
 
 checkup_intelligent_bp = Blueprint('checkup_intelligent', __name__)
 
-def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False, is_pregnant=False, tabagismo='nunca_fumou', macos_ano=0, has_dpoc=False, has_cardiopatia_cronica=False):
+def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=False, has_resistant_hypertension=False, is_pregnant=False, tabagismo='nunca_fumou', macos_ano=0, has_dpoc=False, has_cardiopatia_cronica=False,
+                                     pa_alterada=False, rastreio_dm=None, risco_drc=False, rastrear_hbv=False, prep=False, fatores_osso=False):
     """Gera recomendações baseadas em idade, sexo e condições clínicas
     
     Args:
@@ -22,6 +23,12 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         country: País para guidelines
         has_hypertension: Se o paciente tem hipertensão (detectado por PA ou checkboxes)
         has_resistant_hypertension: Se o paciente tem hipertensão resistente
+        pa_alterada: PA de consultório ≥ 130/80 sem HAS conhecida (só pede MRPA ou MAPA)
+        rastreio_dm: grupo do critério de rastreio de diabetes (criterio_rastreio_dm) ou None
+        risco_drc: fator de risco para DRC (TFG e albuminúria)
+        rastrear_hbv: painel de hepatite B de rastreio
+        prep: uso de PrEP (teste de sífilis)
+        fatores_osso: mulher de 50-64 anos com fator de risco para fratura
     """
     recommendations = []
 
@@ -52,27 +59,21 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         recommendations.append(rec)
         print(f"Recomendação adicionada: {title}")
     
-    # Exames laboratoriais básicos - Rastreamento de Diabetes (3 exames separados)
-    _add_rec({
-        'titulo': 'Glicose, soro',
-        'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Valores de referência: <100 mg/dL normal, 100-125 mg/dL pré-diabetes, ≥126 mg/dL diabetes.',
-        'subtitulo': 'Adultos ≥35 anos | A cada 3 anos se normal',
-        'categoria': 'laboratorio',
-        'prioridade': 'alta',
-        'referencia': 'ADA 2024',
-        'grau_evidencia': 'A'
-    })
-    
-    _add_rec({
-        'titulo': 'Hemoglobina glicada (HbA1c), soro',
-        'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Valores de referência: <5,7% normal, 5,7-6,4% pré-diabetes, ≥6,5% diabetes. Reflete controle glicêmico dos últimos 2-3 meses.',
-        'subtitulo': 'Adultos ≥35 anos | A cada 3 anos se normal',
-        'categoria': 'laboratorio',
-        'prioridade': 'alta',
-        'referencia': 'ADA 2024',
-        'grau_evidencia': 'A'
-    })
-    
+    # Rastreamento de pré-diabetes e diabetes tipo 2 (ADA 2026, seção 2; USPSTF 2021): o critério vem da rota
+    # (criterio_rastreio_dm). Um exame basta: HbA1c, com a glicemia de jejum como alternativa na descrição.
+    if rastreio_dm:
+        _add_rec({
+            'titulo': 'Hemoglobina glicada (HbA1c), soro',
+            'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Um exame basta: HbA1c ou, como alternativa, '
+                         'glicemia de jejum. HbA1c < 5,7% normal, 5,7-6,4% pré-diabetes, ≥ 6,5% diabetes (glicemia: < 100, '
+                         '100-125 e ≥ 126 mg/dL). Repetir a cada 3 anos se normal e anualmente no pré-diabetes.',
+            'subtitulo': rastreio_dm + ' | A cada 3 anos se normal',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'ADA 2026 / USPSTF 2021',
+            'grau_evidencia': 'B'
+        })
+
     _add_rec({
         'titulo': 'TOTG-75g (Teste Oral de Tolerância à Glicose), soro',
         'descricao': 'Indicado quando glicemia de jejum ou HbA1c estão na faixa de pré-diabetes: confirma ou afasta diabetes (SBD 2024). No rastreamento de rotina bastam glicemia de jejum e HbA1c (ADA 2026). A SBD prefere a glicemia de 1 h: <155 mg/dL normal, 155-208 pré-diabetes, ≥209 diabetes; em 2 h: <140 normal, 140-199 pré-diabetes, ≥200 diabetes. Não se pede a quem já tem diabetes.',
@@ -82,9 +83,21 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
         'referencia': 'SBD 2024 / ADA 2026',
         'grau_evidencia': 'A'
     })
-    
-    # Painel lipídico - recomendação ajustada por idade
-    if age >= 40:
+
+    # Perfil lipídico (ACC/AHA 2026, dislipidemia). A partir dos 76 anos, fora de prevenção secundária, o
+    # rastreio é decisão individual (a USPSTF 2022 sobre estatina vai até 75 anos).
+    if age >= 76:
+        _add_rec({
+            'titulo': 'Colesterol total e frações, soro',
+            'descricao': 'Painel lipídico (não jejum). A partir dos 76 anos, sem doença cardiovascular estabelecida, pedir '
+                         'conforme a expectativa de vida e se o resultado mudar a conduta (início ou manutenção de estatina).',
+            'subtitulo': 'Adultos ≥76 anos | Decisão individual (expectativa de vida, prevenção secundária)',
+            'categoria': 'laboratorio',
+            'prioridade': 'media',
+            'referencia': 'ACC/AHA 2026 / USPSTF 2022 (estatina)',
+            'grau_evidencia': 'C'
+        })
+    elif age >= 40:
         # Adultos ≥40 anos
         _add_rec({
             'titulo': 'Colesterol total e frações, soro',
@@ -92,7 +105,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'subtitulo': 'Adultos ≥40 anos | A cada 4-6 anos',
             'categoria': 'laboratorio',
             'prioridade': 'alta',
-            'referencia': 'ACC/AHA 2019 / ESC/EAS 2019',
+            'referencia': 'ACC/AHA 2026',
             'grau_evidencia': 'A'
         })
     elif age >= 20:
@@ -103,40 +116,50 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'subtitulo': 'Adultos 20-39 anos | A cada 4-6 anos',
             'categoria': 'laboratorio',
             'prioridade': 'alta',
-            'referencia': 'ACC/AHA 2019',
+            'referencia': 'ACC/AHA 2026',
             'grau_evidencia': 'A'
         })
-    
-    # Lipoproteína(a) - recomendação única na vida adulta
-    if age >= 20:
+
+    # Lipoproteína(a): uma vez na vida adulta, de preferência cedo (ACC/AHA 2026)
+    if 20 <= age <= 75:
         _add_rec({
             'titulo': 'Lipoproteína(a) - Lp(a), soro',
-            'descricao': 'Medição única na vida adulta para refinamento de risco cardiovascular. Preferir ensaio independente de isoforma.',
-            'subtitulo': 'Adultos ≥20 anos | Dose única na vida',
+            'descricao': 'Medição única na vida adulta para refinamento de risco cardiovascular, se nunca dosada. Preferir ensaio independente de isoforma.',
+            'subtitulo': 'Adultos 20-75 anos | Dose única na vida',
             'categoria': 'laboratorio',
             'prioridade': 'media',
-            'referencia': 'ESC/EAS 2019 / EAS 2022',
+            'referencia': 'ACC/AHA 2026',
             'grau_evidencia': 'B'
         })
-    
+
     # Hemograma e TSH removidos - não há evidência para rastreamento universal
     # TSH: USPSTF grau I (evidência insuficiente)
     # Hemograma: sem guideline que recomende rastreamento universal
-    
-    _add_rec({
-        'titulo': 'Creatinina, soro',
-        'descricao': 'Avaliação da função renal',
-        'subtitulo': 'Adultos ≥18 anos | Anual',
-        'categoria': 'laboratorio',
-        'prioridade': 'alta',
-        'referencia': 'KDIGO 2024',
-        'grau_evidencia': 'A'
-    })
-    
+
+    # DRC: não há rastreio universal. Quem tem fator de risco faz TFG estimada e albuminúria juntas
+    # (KDIGO 2024, Practice Point 1.1.1.1). O diabetes tem regra própria (ADA), e as medicações nefrotóxicas
+    # ou que mexem no potássio, a delas (src/utils/condicoes.py).
+    if risco_drc:
+        for titulo, descricao in (
+                ('Creatinina, soro', 'Creatinina com TFG estimada (CKD-EPI 2021), junto da albuminúria, em quem tem fator de '
+                                     'risco para doença renal crônica.'),
+                ('Relação albumina/creatinina urinária (uACR)', 'Albuminúria (relação albumina/creatinina em amostra de urina), '
+                                                                'junto da TFG estimada, em quem tem fator de risco para doença renal crônica.')):
+            _add_rec({
+                'titulo': titulo,
+                'descricao': descricao,
+                'subtitulo': 'Adultos com fator de risco para DRC (HAS, DCV, insuficiência cardíaca, doença renal na família) | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'KDIGO 2024',
+                'grau_evidencia': 'PP'
+            })
+
     # TGO/TGP removido: sem evidência para rastreamento universal em assintomáticos
     # Apenas indicado para pacientes com fatores de risco específicos
-    
-    # HIV: Rastreamento para adolescentes e jovens ≤30 anos (PCDT-IST 2022)
+
+    # HIV: pelo menos uma vez dos 15 aos 65 anos (USPSTF 2019, A); adolescentes e jovens até 30 anos, anual
+    # (PCDT-IST MS 2022, Quadro 5). Acima de 65 anos, só com risco (orientação na rota).
     if age <= 30:
         _add_rec({
             'titulo': 'Anti-HIV 1 e 2, soro',
@@ -144,22 +167,74 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'subtitulo': 'Adolescentes e jovens ≤30 anos | Anual',
             'categoria': 'laboratorio',
             'prioridade': 'alta',
-            'referencia': 'PCDT-IST MS 2022',
+            'referencia': 'PCDT-IST MS 2022 / USPSTF 2019',
             'grau_evidencia': 'A'
         })
-    
+    elif age <= 65:
+        _add_rec({
+            'titulo': 'Anti-HIV 1 e 2, soro',
+            'descricao': 'Rastreamento de HIV: pelo menos um teste na vida dos 15 aos 65 anos, independentemente de risco; '
+                         'repetir em quem tem risco aumentado (populações-chave, parcerias múltiplas, IST, uso de PrEP).',
+            'subtitulo': 'Adultos 15-65 anos | Pelo menos 1x na vida',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'USPSTF 2019',
+            'grau_evidencia': 'A'
+        })
+
     _add_rec({
         'titulo': 'Anti-HCV IgG, soro',
-        'descricao': 'Teste para detecção de Hepatite C',
+        'descricao': 'Teste para detecção de Hepatite C: todas as pessoas a partir dos 18 anos pelo menos uma vez; '
+                     'intensificar a oferta a partir dos 40 anos.',
         'subtitulo': 'Adultos ≥18 anos | Pelo menos 1x na vida',
         'categoria': 'laboratorio',
         'prioridade': 'alta',
-        'referencia': 'USPSTF 2024',
-        'grau_evidencia': 'A'
+        'referencia': 'MS 2026 (PCDT Hepatite C) / USPSTF 2020',
+        'grau_evidencia': 'B'
     })
-    
-    # Exames para avaliação de hipertensão arterial (AHA 2025 / SBC 2025)
-    # Apenas adicionar se o paciente tiver hipertensão
+
+    # Hepatite B (decisão do responsável clínico, unindo as fontes): painel triplo uma vez em adulto sem vacinação
+    # documentada (CDC 2023; MS, PCDT IST 2022: rastrear suscetíveis) e repetir com fator de risco (USPSTF 2020, B).
+    if rastrear_hbv:
+        _add_rec({
+            'titulo': 'HBsAg, anti-HBc total e anti-HBs',
+            'descricao': 'Rastreamento de hepatite B com o painel triplo, uma vez, em adulto sem vacinação completa '
+                         'documentada (3 doses). Anti-HBs reagente sem HBsAg e anti-HBc: imune, não precisa vacinar. Painel '
+                         'todo não reagente: suscetível, vacinar. HBsAg ou anti-HBc reagente: investigar infecção. Repetir '
+                         'se houver fator de risco (USPSTF 2020).',
+            'subtitulo': 'Adultos ≥18 anos sem vacinação documentada | Pelo menos 1x na vida',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'CDC 2023 (hepatite B) / PCDT-IST MS 2022 / USPSTF 2020',
+            'grau_evidencia': 'B'
+        })
+
+    # Sífilis: o PCDT-IST 2022 (Quadro 5) não deixa clara a periodicidade fora da gestação e das populações-chave;
+    # o motor indica o teste só com risco que o formulário identifica (uso de PrEP) e orienta nos demais casos.
+    if prep:
+        _add_rec({
+            'titulo': 'Anti-HIV 1 e 2, soro',
+            'descricao': 'Uso de PrEP: teste de HIV a cada retorno, na periodicidade do protocolo de PrEP do serviço.',
+            'subtitulo': 'Em uso de PrEP | Conforme protocolo de PrEP',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'PCDT-IST MS 2022',
+            'grau_evidencia': 'A'
+        })
+        _add_rec({
+            'titulo': 'Sífilis: teste treponêmico ou VDRL, soro',
+            'descricao': 'Uso de PrEP é risco aumentado de IST: oferecer teste para sífilis junto do teste de HIV, na '
+                         'periodicidade do protocolo de PrEP do serviço.',
+            'subtitulo': 'Em uso de PrEP | Conforme protocolo de PrEP',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'PCDT-IST MS 2022 / USPSTF 2022',
+            'grau_evidencia': 'A'
+        })
+
+    # Hipertensão (SBC 2025 / AHA/ACC 2025). Uma PA de consultório isolada não rotula HAS: o bloco de HAS só
+    # entra com HAS marcada pelo médico, anti-hipertensivo em uso ou PA ≥ 180/110 (has_hypertension). PA
+    # alterada sem HAS conhecida (pa_alterada) pede só MRPA ou MAPA para confirmar.
     if has_hypertension and age >= 18:
         _add_rec({
             'titulo': 'Potássio, soro',
@@ -170,7 +245,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'referencia': 'AHA 2025 / SBC 2025',
             'grau_evidencia': 'A'
         })
-        
+
         _add_rec({
             'titulo': 'Ácido úrico, soro',
             'descricao': 'Avaliação de risco cardiovascular e renal em pacientes hipertensos',
@@ -180,7 +255,7 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'referencia': 'AHA 2025 / SBC 2025',
             'grau_evidencia': 'B'
         })
-        
+
         _add_rec({
             'titulo': 'EAS - Elementos Anormais e Sedimentoscopia',
             'descricao': 'Análise de urina para avaliação de lesão renal e investigação de hipertensão secundária',
@@ -190,9 +265,9 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'referencia': 'AHA 2025 / SBC 2025',
             'grau_evidencia': 'A'
         })
-        
+
         _add_rec({
-            'titulo': 'Razão albumina/creatinina, urina',
+            'titulo': 'Relação albumina/creatinina urinária (uACR)',
             'descricao': 'Avaliação de albuminúria para detecção precoce de lesão renal em hipertensos',
             'subtitulo': 'Adultos com HAS | Anual',
             'categoria': 'laboratorio',
@@ -200,41 +275,76 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'referencia': 'AHA 2025 / SBC 2025',
             'grau_evidencia': 'A'
         })
-    
-    # Exames de imagem
-    _add_rec({
-        'titulo': 'Eletrocardiograma de repouso',
-        'descricao': 'ECG de 12 derivações - Rastreamento cardiovascular para hipertensão, diabetes ou ≥40 anos',
-        'subtitulo': 'Adultos ≥40 anos | Anual',
-        'categoria': 'imagem',
-        'prioridade': 'alta',
-        'referencia': 'AHA 2025 / SBC 2025 / AHA 2022 / SBC 2018',
-        'grau_evidencia': 'B'
-    })
-    
-    # Exames de imagem para avaliação de hipertensão (AHA 2025 / SBC 2025)
-    # Apenas adicionar se o paciente tiver hipertensão
-    if has_hypertension and age >= 18:
+
+        _add_rec({
+            'titulo': 'Creatinina, soro',
+            'descricao': 'Creatinina com TFG estimada (CKD-EPI 2021) na avaliação inicial e no seguimento da HAS.',
+            'subtitulo': 'Adultos com HAS | Anual',
+            'categoria': 'laboratorio',
+            'prioridade': 'alta',
+            'referencia': 'AHA 2025 / SBC 2025',
+            'grau_evidencia': 'A'
+        })
+
+        for titulo in ('Glicose, soro', 'Hemoglobina glicada (HbA1c), soro'):
+            _add_rec({
+                'titulo': titulo,
+                'descricao': 'Glicemia de jejum e HbA1c fazem parte dos exames de rotina da avaliação do hipertenso.',
+                'subtitulo': 'Adultos com HAS | Anual',
+                'categoria': 'laboratorio',
+                'prioridade': 'alta',
+                'referencia': 'SBC 2025 / AHA 2025',
+                'grau_evidencia': 'B'
+            })
+
+        _add_rec({
+            'titulo': 'Eletrocardiograma de repouso',
+            'descricao': 'ECG de 12 derivações na avaliação inicial e no seguimento da HAS (hipertrofia ventricular '
+                         'esquerda, arritmias, isquemia).',
+            'subtitulo': 'Adultos com HAS | Anual',
+            'categoria': 'imagem',
+            'prioridade': 'alta',
+            'referencia': 'SBC 2025 / AHA 2025',
+            'grau_evidencia': 'B'
+        })
+
         _add_rec({
             'titulo': 'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)',
-            'descricao': 'Confirmação diagnóstica de hipertensão arterial, investigação de hipertensão do avental branco e hipertensão mascarada',
-            'subtitulo': 'Adultos com suspeita de HAS | Conforme necessidade',
+            'descricao': 'HAS estabelecida: MAPA de 24 h ou, como alternativa, MRPA (7 dias) para avaliar o controle, o '
+                         'efeito do avental branco e a hipertensão mascarada.',
+            'subtitulo': 'Adultos com HAS (avaliar controle, avental branco ou hipertensão mascarada) | Conforme necessidade',
             'categoria': 'imagem',
             'prioridade': 'alta',
             'referencia': 'AHA 2025 / SBC 2025',
             'grau_evidencia': 'A'
         })
-        
+
+        # Ecocardiograma: na AHA/ACC 2025 é exame opcional, guiado pela indicação; não há base para repetir a cada
+        # 1-2 anos em toda HAS. Entra sozinho na HAS resistente; nos demais casos, orientação (rota).
+        if has_resistant_hypertension:
+            _add_rec({
+                'titulo': 'Ecocardiograma transtorácico',
+                'descricao': 'HAS resistente: avaliação de hipertrofia ventricular esquerda, função diastólica e lesão de '
+                             'órgão-alvo.',
+                'subtitulo': 'HAS resistente | Conforme indicação clínica',
+                'categoria': 'imagem',
+                'prioridade': 'media',
+                'referencia': 'AHA 2025 / SBC 2025',
+                'grau_evidencia': 'B'
+            })
+    elif pa_alterada and age >= 18:
         _add_rec({
-            'titulo': 'Ecocardiograma transtorácico',
-            'descricao': 'Avaliação de hipertrofia ventricular esquerda, função diastólica e lesão de órgão-alvo em hipertensos',
-            'subtitulo': 'Adultos com HAS | Inicial e a cada 1-2 anos',
+            'titulo': 'MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)',
+            'descricao': 'PA de consultório alterada sem diagnóstico de HAS: confirmar fora do consultório com MAPA de 24 h '
+                         'ou, como alternativa, MRPA (7 dias), e repetir a PA em outra consulta. A investigação de lesão de '
+                         'órgão-alvo (exames da HAS) só depois de confirmar.',
+            'subtitulo': 'PA de consultório alterada, HAS a confirmar | Para confirmar o diagnóstico',
             'categoria': 'imagem',
-            'prioridade': 'media',
+            'prioridade': 'alta',
             'referencia': 'AHA 2025 / SBC 2025',
-            'grau_evidencia': 'B'
+            'grau_evidencia': 'A'
         })
-    
+
     # Rastreamento de câncer por idade e sexo
     if sex == 'feminino':
         if 40 <= age <= 74:
@@ -265,16 +375,28 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     if sex == 'feminino' and age >= 65:
         _add_rec({
             'titulo': 'Densitometria óssea (DEXA)',
-            'descricao': 'Rastreamento de osteoporose para prevenir fraturas osteoporóticas. Mulheres ≥65 anos.',
-            'subtitulo': 'Mulheres ≥65 anos | A cada 2 anos',
+            'descricao': 'Rastreamento de osteoporose para prevenir fraturas osteoporóticas. Mulheres ≥65 anos. A USPSTF '
+                         'não define intervalo: repetir conforme o T-score e o risco (BHOF).',
+            'subtitulo': 'Mulheres ≥65 anos | Repetir conforme o resultado (T-score)',
             'categoria': 'imagem',
             'prioridade': 'alta',
-            'referencia': 'USPSTF 2024',
+            'referencia': 'USPSTF 2025 / BHOF 2022',
             'grau_evidencia': 'B'
         })
-    
-    # Densitometria para mulheres pós-menopausa <65 anos com fatores de risco
-    # Nota: Requer avaliação individualizada de fatores de risco
+
+    # Mulher pós-menopausa < 65 anos com fator de risco (USPSTF 2025, B): estimar o risco (FRAX) e rastrear se
+    # elevado. O formulário não pergunta a menopausa: o texto pede que o médico confirme.
+    if sex == 'feminino' and 50 <= age < 65 and fatores_osso:
+        _add_rec({
+            'titulo': 'Densitometria óssea (DEXA)',
+            'descricao': 'Mulher pós-menopausa com menos de 65 anos e fator de risco para fratura: calcular o FRAX (Brasil) '
+                         'e pedir a densitometria se o risco estiver elevado. Confirme que a paciente está na pós-menopausa.',
+            'subtitulo': 'Pós-menopausa <65 anos com fator de risco | Fator de risco',
+            'categoria': 'imagem',
+            'prioridade': 'media',
+            'referencia': 'USPSTF 2025 / BHOF 2022',
+            'grau_evidencia': 'B'
+        })
     
     # Colonoscopia
     if 45 <= age <= 75:
@@ -288,21 +410,20 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
             'grau_evidencia': 'B'
         })
     
-    # Aneurisma de Aorta Abdominal (AAA)
-    # Critérios: Homens 65-75 anos E (DPOC OU fumante/ex-fumante com ≥10 maços-ano)
-    if sex == 'masculino' and 65 <= age <= 75:
-        elegivel_aaa = has_dpoc or (tabagismo in ['atual', 'ex'] and macos_ano >= 10)
-        if elegivel_aaa:
-            _add_rec({
-                'titulo': 'Ultrassonografia com Doppler de Aorta Abdominal',
-                'descricao': 'Rastreamento de aneurisma de aorta abdominal. Homens 65-75 anos com DPOC ou história de tabagismo ≥10 maços-ano.',
-                'subtitulo': 'Homens 65-75 anos com DPOC ou ≥10 maços-ano | Dose única',
-                'categoria': 'imagem',
-                'prioridade': 'alta',
-                'referencia': 'USPSTF 2019',
-                'grau_evidencia': 'B'
-            })
-    
+    # Aneurisma de Aorta Abdominal (AAA), USPSTF 2019: homem de 65 a 75 anos que já fumou (100 cigarros ou mais na
+    # vida), ultrassonografia uma vez (B). Homem que nunca fumou: oferta seletiva (C), em orientação na rota.
+    if sex == 'masculino' and 65 <= age <= 75 and tabagismo in ('atual', 'ex'):
+        _add_rec({
+            'titulo': 'Ultrassonografia com Doppler de Aorta Abdominal',
+            'descricao': 'Rastreamento de aneurisma de aorta abdominal: uma ultrassonografia em homens de 65 a 75 anos que '
+                         'já fumaram (100 cigarros ou mais na vida), qualquer que seja a carga tabágica.',
+            'subtitulo': 'Homens 65-75 anos que já fumaram | Uma vez',
+            'categoria': 'imagem',
+            'prioridade': 'alta',
+            'referencia': 'USPSTF 2019',
+            'grau_evidencia': 'B'
+        })
+
     # ===================== VACINAS — Calendários SBIm 2026/2027 =====================
     # Adolescente (até 19 anos), Adulto (20-59) e Idoso (60+). Uma recomendação por
     # vacina: quando há alternativas (vacinas isoladas x combinada, VPC20 x esquemas
@@ -532,6 +653,237 @@ def generate_age_sex_recommendations(age, sex, country='BR', has_hypertension=Fa
     
     return recommendations
 
+# Fatores de risco da ADA 2026 (seção 2, tabela 2.3) para rastrear diabetes antes dos 35 anos, com IMC ≥ 25.
+# Triglicerídeos não são coletados no formulário; sedentarismo só chega por API (atividade_fisica).
+def fatores_risco_dm(data, comorbidades, medicacoes, familia, has_hypertension):
+    com, med = set(comorbidades), set(medicacoes)
+    fatores = []
+    if 'diabetes' in familia:
+        fatores.append('parente de 1º grau com diabetes')
+    if has_hypertension:
+        fatores.append('hipertensão')
+    if data.get('hdl') and float(data['hdl']) < 35:
+        fatores.append('HDL < 35 mg/dL')
+    for chave, rotulo in (('sop', 'SOP'), ('diabetes_gestacional_previo', 'diabetes gestacional prévio'),
+                          ('dcv_aterosclerotica', 'doença cardiovascular'), ('hiv', 'HIV'), ('masld', 'MASLD')):
+        if chave in com:
+            fatores.append(rotulo)
+    if 'antipsicotico_atipico' in med:
+        fatores.append('antipsicótico de 2ª geração')
+    if data.get('atividade_fisica') in ('sedentario', 'sedentário'):
+        fatores.append('sedentarismo')
+    return fatores
+
+
+def criterio_rastreio_dm(idade, imc, fatores):
+    """Grupo do subtítulo do rastreio de diabetes, ou None (ADA 2026, seção 2; USPSTF 2021).
+
+    Automático dos 35 aos 70 anos (a USPSTF vai até 70; a ADA não tem limite: orientação na rota). Em qualquer
+    idade adulta, IMC ≥ 25 com ao menos um fator de risco.
+    """
+    if 35 <= idade <= 70:
+        return 'Adultos 35-70 anos'
+    if imc is not None and imc >= 25 and fatores:
+        return 'IMC ≥25 com fator de risco para diabetes'
+    return None
+
+
+def orientacoes_de_rastreio(idade, sexo, *, gestante, pa_informada, pa_classificacao, pa_alterada, has_hypertension,
+                            has_resistant_hypertension, is_diabetic, rastreio_dm, imc, hiv, prep, rastrear_hbv, tabagismo,
+                            fatores_osso):
+    """Orientações do rastreamento geral, incluídos os avisos de divergência entre diretrizes (só quando a
+    conduta divergente vale para este paciente). Cada aviso diz qual diretriz o motor seguiu e qual diverge."""
+    o = []
+
+    def orientar(titulo, descricao, referencia):
+        o.append({'titulo': titulo, 'descricao': descricao, 'referencia': referencia})
+
+    adulto = idade >= 18
+    if not pa_informada and not gestante and adulto:
+        orientar('Medir a pressão arterial',
+                 'Medir a PA em todo adulto: anualmente a partir dos 40 anos ou com fator de risco (PA 130-139/85-89 mmHg, '
+                 'sobrepeso ou obesidade, população negra); a cada 3-5 anos dos 18 aos 39 anos com PA normal e sem fator de '
+                 'risco. Confirmar fora do consultório antes de iniciar tratamento.', 'USPSTF 2021 (hipertensão)')
+    if pa_alterada:
+        orientar('PA alterada: confirmar antes de rotular HAS',
+                 'Uma medida de consultório não confirma HAS. Repetir a PA em outra consulta e confirmar com MRPA ou MAPA; '
+                 'os exames de lesão de órgão-alvo (potássio, creatinina, EAS, albuminúria, ECG) entram depois da confirmação.',
+                 'SBC 2025 / AHA 2025')
+        if (pa_classificacao.get('sbc') or {}).get('categoria') == 'pre_hipertensao':
+            orientar('Divergência entre diretrizes: classificação da PA',
+                     'Com PA de 130-139/80-89 mmHg, o motor segue a AHA/ACC 2025 (HAS estágio 1, a confirmar com MRPA ou '
+                     'MAPA). A SBC 2025 chama essa faixa de pré-hipertensão e só considera HAS a partir de 140/90 mmHg.',
+                     'AHA 2025 / SBC 2025')
+    if has_hypertension and not has_resistant_hypertension:
+        orientar('Divergência entre diretrizes: ecocardiograma na HAS',
+                 'O motor segue a AHA/ACC 2025: ecocardiograma só com indicação (ECG com sobrecarga ventricular esquerda, '
+                 'suspeita de insuficiência cardíaca, HAS de difícil controle). A SBC 2025 inclui o ecocardiograma na '
+                 'avaliação de lesão de órgão-alvo cardíaca.', 'AHA 2025 / SBC 2025')
+    if is_diabetic and not has_hypertension:
+        orientar('Divergência entre diretrizes: ECG no diabetes',
+                 'Sem HAS, o motor não pede ECG ao diabético assintomático (ADA 2026: não rastrear doença coronariana em '
+                 'assintomático). A ACCF/AHA 2010 considera razoável um ECG basal (IIa): pedir se o médico optar por ele.',
+                 'ADA 2026 (seção 10) / ACCF/AHA 2010')
+    if not is_diabetic:
+        if rastreio_dm == 'Adultos 35-70 anos' and (imc is None or imc < 25):
+            orientar('Divergência entre diretrizes: rastreio de diabetes sem sobrepeso',
+                     'O motor segue a ADA 2026 (rastreio a partir dos 35 anos, qualquer que seja o peso). A USPSTF 2021 '
+                     'restringe o rastreio dos 35 aos 70 anos a quem tem sobrepeso ou obesidade.', 'ADA 2026 / USPSTF 2021')
+        elif rastreio_dm is None and idade > 70:
+            orientar('Divergência entre diretrizes: rastreio de diabetes depois dos 70 anos',
+                     'Acima de 70 anos o motor só rastreia com IMC ≥ 25 e fator de risco (USPSTF 2021: rastreio dos 35 aos 70 '
+                     'anos). A ADA 2026 não tem idade de parada: considerar se a expectativa de vida justificar.',
+                     'USPSTF 2021 / ADA 2026')
+    if not hiv:
+        if idade <= 30 and not gestante:
+            orientar('Divergência entre diretrizes: frequência do teste de HIV',
+                     'Até 30 anos o motor segue o PCDT-IST 2022 (teste anual). A USPSTF 2019 pede pelo menos um teste dos 15 '
+                     'aos 65 anos e repetição só com risco aumentado.', 'PCDT-IST MS 2022 / USPSTF 2019')
+        elif idade > 65:
+            orientar('HIV depois dos 65 anos',
+                     'Sem teste anterior, oferecer o anti-HIV se houver risco (parcerias novas, IST). A USPSTF 2019 recomenda '
+                     'o rastreio universal até os 65 anos.', 'USPSTF 2019')
+        if not gestante and not prep and adulto:
+            orientar('Sífilis: testar com risco aumentado',
+                     'Oferecer teste para sífilis (treponêmico ou VDRL) junto do HIV a quem tem risco aumentado: populações-chave '
+                     '(HSH, pessoas trans, profissionais do sexo), IST atual ou prévia, parcerias múltiplas, sexo sem '
+                     'preservativo, uso de PrEP. A periodicidade por grupo está no Quadro 5 do PCDT-IST 2022.',
+                     'PCDT-IST MS 2022 / USPSTF 2022')
+    if idade >= 80:
+        orientar('Divergência entre diretrizes: anti-HCV depois dos 79 anos',
+                 'O motor segue o MS 2026 (PCDT Hepatite C), sem idade limite para o teste único. A USPSTF 2020 recomenda '
+                 'rastrear hepatite C dos 18 aos 79 anos.', 'MS 2026 (PCDT Hepatite C) / USPSTF 2020')
+    if rastrear_hbv and adulto:
+        orientar('Divergência entre diretrizes: rastreio de hepatite B',
+                 'O motor segue o CDC 2023 e o MS (painel uma vez em adulto sem vacinação documentada). A USPSTF 2020 '
+                 'recomenda rastrear só quem tem risco aumentado (B).', 'CDC 2023 (hepatite B) / USPSTF 2020')
+    if sexo == 'masculino' and 65 <= idade <= 75 and tabagismo == 'nunca':
+        orientar('Aneurisma de aorta: homem que nunca fumou',
+                 'Ultrassonografia de aorta como oferta seletiva (USPSTF C): decidir com o paciente, considerando história '
+                 'familiar de aneurisma, outros aneurismas, DPOC ou doença cardiovascular.', 'USPSTF 2019')
+    if sexo == 'masculino' and idade >= 70:
+        orientar('Divergência entre diretrizes: densitometria no homem',
+                 'O motor não pede densitometria ao homem sem fator de risco (USPSTF 2025: evidência insuficiente). A BHOF '
+                 '2022 recomenda a partir dos 70 anos, e dos 50 aos 69 com fator de risco: decisão compartilhada.',
+                 'USPSTF 2025 / BHOF 2022')
+    if sexo == 'feminino' and 50 <= idade < 65 and not fatores_osso and not gestante:
+        orientar('Densitometria antes dos 65 anos',
+                 'Na pós-menopausa, calcular o FRAX (Brasil) se houver fator de risco para fratura (fratura prévia por '
+                 'fragilidade, corticoide, tabagismo, baixo peso, álcool em excesso, artrite reumatoide, fratura de quadril '
+                 'em pai ou mãe) e pedir densitometria se o risco estiver elevado.', 'USPSTF 2025 / BHOF 2022')
+    return o
+
+
+def _titulo_normalizado(titulo):
+    """Título sem material biológico, parênteses e pontuação (chave antiga, para itens sem código TUSS)."""
+    t = re.sub(r',\s*(soro|plasma|sangue.*|urina)', '', titulo, flags=re.IGNORECASE)
+    t = re.sub(r'\s*\([^)]*\)', '', t)
+    t = re.sub(r'[^a-z0-9\s]', '', t.lower())
+    return ' '.join(t.split())
+
+
+def _identidade_do_exame(rec, sexo):
+    """Conjunto que identifica o exame: os códigos TUSS (src/utils/tuss.py) para laboratório e imagem; os itens sem
+    código que são o mesmo exame (tuss.MESMO_EXAME_SEM_CODIGO); ou o título normalizado."""
+    from src.utils import periodicidade, tuss
+    titulo = (rec.get('titulo') or '').strip()
+    if rec.get('categoria') in ('laboratorio', 'imagem'):
+        partes = tuss.MESMO_EXAME_SEM_CODIGO.get(titulo)
+        if partes:
+            return frozenset(partes)
+        chaves = periodicidade.chaves(titulo, sexo)
+        if not any(c.startswith('nome:') for c in chaves):
+            return chaves
+    return frozenset({'titulo:' + (rec.get('categoria') or '') + ':' + _titulo_normalizado(titulo)})
+
+
+def deduplicar_recomendacoes(recomendacoes, sexo=None):
+    """Um item por exame. Une as recomendações do mesmo exame com títulos diferentes ("Hemograma completo com
+    plaquetas" e "Hemograma completo, sangue total"; "Razão albumina/creatinina" e "uACR") e absorve o exame
+    pedido sozinho no exame combinado que já o contém ("Potássio, soro" em "Sódio e potássio, soro"; "Antígeno
+    HBs" no painel de hepatite B). O item que fica soma prioridade, motivos (subtítulos), referências e descrições.
+    """
+    from src.utils import tuss
+    grupos = []  # [identidade, [recs]] na ordem de chegada
+    for rec in recomendacoes:
+        if not (rec.get('titulo') or '').strip():
+            continue
+        chave = _identidade_do_exame(rec, sexo)
+        for grupo in grupos:
+            if grupo[0] == chave:
+                grupo[1].append(rec)
+                break
+        else:
+            grupos.append([chave, [rec]])
+    # Exame contido em um combinado (só para códigos: as chaves de título não se combinam)
+    maiores = sorted(grupos, key=lambda g: len(g[0]), reverse=True)
+    absorvidos = set()
+    for i, grupo in enumerate(maiores):
+        if id(grupo) in absorvidos or any(c.startswith('titulo:') for c in grupo[0]):
+            continue
+        for outro in maiores[i + 1:]:
+            if id(outro) not in absorvidos and len(outro[0]) < len(grupo[0]) and outro[0] < grupo[0]:
+                grupo[1].extend(outro[1])
+                absorvidos.add(id(outro))
+    unicos = []
+    for grupo in grupos:
+        if id(grupo) in absorvidos:
+            continue
+        chave, recs = grupo
+        if len(recs) == 1:
+            unicos.append(recs[0])
+            continue
+        unicos.append(_unir(recs, chave, tuss.TITULO_PREFERIDO.get(chave), sexo))
+    return unicos
+
+
+def _unir(recs, chave, preferido, sexo):
+    """Uma recomendação a partir de várias do mesmo exame."""
+    from src.utils.condicoes import ORDEM_PRIORIDADE
+    # O título que fica: o exame combinado (o que tem a identidade inteira); entre sinônimos, o do pré-natal
+    # (a gestação tem regras próprias), depois o título preferido do catálogo e, por fim, o mais completo.
+    completos = [r for r in recs if _identidade_do_exame(r, sexo) == chave]
+    def ordem(r):
+        return (not r.get('gestacao'), (r.get('titulo') or '').strip() != preferido, -len(r.get('titulo') or ''))
+    base = min(completos or recs, key=ordem)
+    melhor = dict(base)
+    outros = [r for r in recs if r is not base]
+    for r in outros:
+        if ORDEM_PRIORIDADE.get(r.get('prioridade'), 0) > ORDEM_PRIORIDADE.get(melhor.get('prioridade'), 0):
+            melhor['prioridade'] = r['prioridade']
+    refs = []
+    for r in [base] + outros:
+        for ref in (r.get('referencia') or '').split(' | '):
+            if ref and ref not in refs:
+                refs.append(ref)
+    if refs:
+        melhor['referencia'] = ' | '.join(refs)
+    # Links clicáveis de cada fonte (montados por regra: a referência unida não se separa de novo)
+    links = []
+    for r in [base] + outros:
+        for link in r.get('referencias') or build_reference_links(r.get('titulo', ''), r.get('referencia', '')):
+            if link['label'] not in [x['label'] for x in links]:
+                links.append(link)
+    if links:
+        melhor['referencias'] = links
+        melhor['referencia_html'] = build_reference_html(links)
+    # Todos os motivos ficam visíveis ("Também: ...") e contam na periodicidade (campo interno `_subtitulos`,
+    # retirado antes de responder; src/utils/periodicidade.py usa o menor intervalo).
+    subtitulo = base.get('subtitulo') or ''
+    unidos = list(base.get('_subtitulos') or [])
+    for r in outros:
+        outro = r.get('subtitulo') or ''
+        unidos += [outro] + list(r.get('_subtitulos') or [])
+        if outro and outro not in subtitulo:
+            subtitulo = f'{subtitulo} | Também: {outro}'.strip(' |')
+    melhor['subtitulo'] = subtitulo
+    melhor['_subtitulos'] = unidos
+    descricoes = list(dict.fromkeys(r.get('descricao') for r in [base] + outros if r.get('descricao')))
+    if len(descricoes) > 1:
+        melhor['descricao'] = ' '.join(descricoes[:2])  # Limitar a 2 descrições
+    return melhor
+
+
 def _lista_curta(valor):
     """Lista de textos curtos vinda do navegador (ou vazia)."""
     if not isinstance(valor, list):
@@ -640,9 +992,9 @@ def generate_intelligent_recommendations():
         has_hypertension = False
         has_resistant_hypertension = False
         
-        # 1. PA de consultório: classificada pela AHA/ACC 2025 em src/utils/coerencia.py
-        # (estágio 1 ≥ 130/80, estágio 2 ≥ 140/90; na gestação, ≥ 140/90), com pedido de
-        # confirmação fora do consultório (MRPA/MAPA).
+        # 1. PA de consultório: classificada pela AHA/ACC 2025 (e pela SBC 2025, em ``sbc``) em
+        # src/utils/coerencia.py. Uma PA isolada não rotula HAS: fora da gestação só PA ≥ 180/110 marca a
+        # caixa; PA ≥ 130/80 sem HAS conhecida pede só MRPA ou MAPA (coerencia.pa_a_confirmar).
         sbp = float(sbp_value) if sbp_value else 0
         dbp = float(dbp_value) if dbp_value else 0
 
@@ -723,7 +1075,23 @@ def generate_intelligent_recommendations():
         
         # Gerar recomendações
         recommendations = []
-        
+
+        # Rastreamento geral (relatório de auditoria A): PA alterada sem HAS, critério de rastreio de diabetes,
+        # risco de DRC, hepatite B, PrEP e fatores de risco para fratura.
+        imc = None
+        if weight and height:
+            imc = weight / ((height / 100) ** 2)
+        ja_diabetico = (bool(set(condicoes.TIPOS_DE_DIABETES) & set(comorbidades)) or 'insulina' in medicacoes_checkboxes
+                        or (data.get('hba1c') is not None and float(data['hba1c']) >= 6.5))
+        pa_alterada = coerencia.pa_a_confirmar(pa_classificacao, comorbidades, gestante=is_pregnant)
+        rastreio_dm = None if ja_diabetico else criterio_rastreio_dm(
+            age, imc, fatores_risco_dm(data, comorbidades, medicacoes_checkboxes, familia, has_hypertension))
+        risco_drc = has_hypertension or has_dcv_aterosclerotica or has_ic or 'rim_policistico' in familia
+        prep = 'hiv' not in comorbidades and bool({'tenofovir_entricitabina', 'cabotegravir'} & set(escolhidas))
+        alcool = (request.get_json(silent=True) or {}).get('alcoolismo')
+        fatores_osso = (tabagismo == 'atual' or (imc is not None and imc < 20) or alcool == 'pesado'
+                        or 'artrite_reumatoide' in comorbidades)
+
         # Recomendações baseadas em idade, sexo e status de hipertensão
         age_sex_recs = generate_age_sex_recommendations(age, sex, country='BR', 
                                                          has_hypertension=has_hypertension,
@@ -732,7 +1100,10 @@ def generate_intelligent_recommendations():
                                                          tabagismo=tabagismo,
                                                          macos_ano=macos_ano,
                                                          has_dpoc=has_dpoc,
-                                                         has_cardiopatia_cronica=has_dcv_aterosclerotica or has_ic)
+                                                         has_cardiopatia_cronica=has_dcv_aterosclerotica or has_ic,
+                                                         pa_alterada=pa_alterada, rastreio_dm=rastreio_dm,
+                                                         risco_drc=risco_drc, prep=prep, fatores_osso=fatores_osso,
+                                                         rastrear_hbv=not is_pregnant and 'hepatite_b_cronica' not in comorbidades)
         recommendations.extend(age_sex_recs)
 
         # Colo do útero: teste de DNA-HPV e colposcopia (MS 2025, SBOC 2026, ACOG 2026).
@@ -769,12 +1140,6 @@ def generate_intelligent_recommendations():
         
         # ========== DIABETES SCREENING E MANAGEMENT (ADA 2024) ==========
         
-        # Calcular IMC
-        imc = None
-        if weight and height:
-            altura_m = height / 100
-            imc = weight / (altura_m ** 2)
-        
         # Verificar se já é diabético
         # Qualquer tipo de diabetes (ADA 2026); insulina em uso indica diabetes mesmo sem o tipo marcado.
         is_diabetic = bool(set(condicoes.TIPOS_DE_DIABETES) & set(comorbidades)) or 'insulina' in medicacoes_checkboxes
@@ -797,90 +1162,39 @@ def generate_intelligent_recommendations():
             recommendations = [r for r in recommendations if not (r.get('titulo') or '').startswith('TOTG-75g')]
         if is_diabetic:
             # Quem já tem diabetes não faz rastreamento: glicemia e HbA1c passam a ser acompanhamento do controle.
-            for rec in recommendations:
-                if rec.get('titulo') == 'Hemoglobina glicada (HbA1c), soro':
-                    rec.update({'descricao': 'Controle glicêmico no diabetes: pelo menos 2 vezes ao ano em quem está na meta e a cada '
-                                             '3 meses após mudança de tratamento ou fora da meta.',
-                                'subtitulo': 'Diabéticos | A cada 3-6 meses', 'referencia': 'ADA 2025', 'grau_evidencia': 'A'})
-                elif rec.get('titulo') == 'Glicose, soro':
-                    rec.update({'descricao': 'Glicemia de jejum no acompanhamento do diabetes, junto da HbA1c.',
-                                'subtitulo': 'Diabéticos | Junto da HbA1c', 'referencia': 'ADA 2025', 'grau_evidencia': 'B'})
+            controle = {
+                'Hemoglobina glicada (HbA1c), soro': {
+                    'descricao': 'Controle glicêmico no diabetes: pelo menos 2 vezes ao ano em quem está na meta e a cada '
+                                 '3 meses após mudança de tratamento ou fora da meta.',
+                    'subtitulo': 'Diabéticos | A cada 3-6 meses', 'referencia': 'ADA 2025', 'grau_evidencia': 'A'},
+                'Glicose, soro': {
+                    'descricao': 'Glicemia de jejum no acompanhamento do diabetes, junto da HbA1c.',
+                    'subtitulo': 'Diabéticos | Junto da HbA1c', 'referencia': 'ADA 2025', 'grau_evidencia': 'B'},
+            }
+            for titulo, campos in controle.items():
+                rec = next((r for r in recommendations if r.get('titulo') == titulo), None)
+                if rec is None:
+                    rec = {'titulo': titulo, 'categoria': 'laboratorio', 'prioridade': 'alta'}
+                    recommendations.append(rec)
+                rec.update(campos)
+                rec.pop('_subtitulos', None)
 
-        # SCREENING DE DIABETES (ADA 2024 Criteria)
-        should_screen_diabetes = False
-        
-        # Critério 1: Idade ≥35 anos (todos)
-        if age >= 35 and not is_diabetic:
-            should_screen_diabetes = True
-        
-        # Critério 2: Adultos com sobrepeso/obesidade + fatores de risco
-        if not is_diabetic and imc:
-            # IMC ≥25 (≥23 para asiáticos) + 1 fator de risco
-            if imc >= 25:
-                # Fatores de risco
-                has_risk_factors = False
-                
-                # Familiar de primeiro grau com diabetes
-                historia_familiar = data.get('historia_familiar', {})
-                if (isinstance(historia_familiar, dict) and historia_familiar.get('diabetes')) or \
-                        (isinstance(historia_familiar, list) and 'diabetes' in historia_familiar):
-                    has_risk_factors = True
-                
-                # Hipertensão
-                if has_hypertension:
-                    has_risk_factors = True
-                
-                # HDL < 35 mg/dL ou triglicerídeos > 250 mg/dL
-                hdl = float(data.get('hdl_colesterol', 0) or data.get('hdl', 0)) if (data.get('hdl_colesterol') or data.get('hdl')) else 0
-                if hdl > 0 and hdl < 35:
-                    has_risk_factors = True
-                
-                # Síndrome dos ovários policísticos (SOP)
-                if 'sop' in comorbidades or 'ovarios_policisticos' in comorbidades:
-                    has_risk_factors = True
-                
-                # Inatividade física
-                atividade_fisica = data.get('atividade_fisica', '')
-                if atividade_fisica == 'sedentario' or atividade_fisica == 'sedentário':
-                    has_risk_factors = True
-                
-                # Outras condições de resistência insulínica
-                if 'obesidade' in comorbidades or imc >= 30:
-                    has_risk_factors = True
-                
-                if has_risk_factors:
-                    should_screen_diabetes = True
-        
-        # Adicionar exames de screening se indicado
-        if should_screen_diabetes:
-            # Verificar se já não tem HbA1C nas recomendações
-            tem_hba1c = any('hba1c' in rec.get('titulo', '').lower() or 'hemoglobina glicada' in rec.get('titulo', '').lower() for rec in recommendations)
-            if not tem_hba1c:
-                recommendations.append({
-                    'titulo': 'Hemoglobina glicada (HbA1c), soro',
-                    'descricao': 'Rastreamento de pré-diabetes e diabetes tipo 2. Valores de referência: <5,7% normal, 5,7-6,4% pré-diabetes, ≥6,5% diabetes. Reflete controle glicêmico dos últimos 2-3 meses. Indicado para adultos ≥35 anos ou com sobrepeso/obesidade + fatores de risco.',
-                    'subtitulo': 'Adultos ≥35 anos ou com fatores de risco | A cada 3 anos se normal',
-                    'categoria': 'laboratorio',
-                    'prioridade': 'alta',
-                    'referencia': 'ADA 2024',
-                    'grau_evidencia': 'B'
-                })
-        
         # EXAMES PARA DIABÉTICOS (ADA 2024 - Laboratory Evaluation)
         if is_diabetic:
-            # Perfil lipídico completo
-            tem_lipidico = any('lipid' in rec.get('titulo', '').lower() or 'colesterol' in rec.get('titulo', '').lower() for rec in recommendations)
-            if not tem_lipidico:
-                recommendations.append({
-                    'titulo': 'Colesterol total e frações, soro',
-                    'descricao': 'Avaliação do risco cardiovascular em pacientes diabéticos. Realizar anualmente ou mais frequentemente se em tratamento para dislipidemia.',
-                    'subtitulo': 'Diabéticos | Anual',
-                    'categoria': 'laboratorio',
-                    'prioridade': 'alta',
-                    'referencia': 'ADA 2024',
-                    'grau_evidencia': 'A'
-                })
-            
+            # Perfil lipídico (ADA 2026, seção 10): na avaliação inicial; sem estatina e < 40 anos, a cada 5 anos;
+            # com estatina, 4-12 semanas após iniciar ou ajustar e depois anualmente. Soma o motivo ao item que já existe.
+            if 'estatinas' in medicacoes_checkboxes:
+                condicoes._garantir(recommendations, condicoes._rec(
+                    'Colesterol total e frações, soro', 'laboratorio',
+                    'Diabetes em uso de estatina: perfil lipídico 4-12 semanas após iniciar ou ajustar a dose e depois anualmente.',
+                    'Diabéticos em uso de estatina | Anual', 'ADA 2026 (seção 10)', 'A', 'alta'))
+            else:
+                condicoes._garantir(recommendations, condicoes._rec(
+                    'Colesterol total e frações, soro', 'laboratorio',
+                    'Diabetes: perfil lipídico no diagnóstico e na avaliação inicial; sem estatina e com menos de 40 anos, a '
+                    'cada 5 anos. Ao iniciar ou ajustar a estatina, repetir em 4-12 semanas e depois anualmente.',
+                    'Diabéticos | Avaliação inicial', 'ADA 2026 (seção 10)', 'A', 'alta'))
+
             # Função hepática (TGO, TGP)
             recommendations.append({
                 'titulo': 'Aspartato aminotransferase, soro',
@@ -912,19 +1226,12 @@ def generate_intelligent_recommendations():
                 'grau_evidencia': 'A'
             })
             
-            # Creatinina sérica e eGFR
-            tem_creatinina = any('creatinina' in rec.get('titulo', '').lower() for rec in recommendations)
-            if not tem_creatinina:
-                recommendations.append({
-                    'titulo': 'Creatinina, soro',
-                    'descricao': 'Avaliação da função renal em pacientes diabéticos. Realizar anualmente para detecção precoce de doença renal diabética.',
-                    'subtitulo': 'Diabéticos | Anual',
-                    'categoria': 'laboratorio',
-                    'prioridade': 'alta',
-                    'referencia': 'ADA 2024',
-                    'grau_evidencia': 'A'
-                })
-            
+            # Creatinina sérica e eGFR (soma o motivo ao item que já existe)
+            condicoes._garantir(recommendations, condicoes._rec(
+                'Creatinina, soro', 'laboratorio',
+                'Avaliação da função renal em pacientes diabéticos (TFG estimada com a uACR). Realizar anualmente para '
+                'detecção precoce de doença renal diabética.', 'Diabéticos | Anual', 'ADA 2026 (seção 4)', 'A', 'alta'))
+
             # TSH: só no diabetes tipo 1 (doença tireoidiana autoimune associada); não é rotina nos outros tipos.
             if 'diabetes_tipo_1' in comorbidades:
                 recommendations.append({
@@ -1019,19 +1326,9 @@ def generate_intelligent_recommendations():
                 'grau_evidencia': 'A'
             })
             
-            # ECG (se ainda não estiver nas recomendações)
-            tem_ecg = any('eletrocardiograma' in rec.get('titulo', '').lower() or 'ecg' in rec.get('titulo', '').lower() for rec in recommendations)
-            if not tem_ecg:
-                recommendations.append({
-                    'titulo': 'Eletrocardiograma de repouso',
-                    'descricao': 'ECG de 12 derivações para rastreamento de doença cardiovascular em pacientes diabéticos. Diabetes é fator de risco importante para doença coronariana.',
-                    'subtitulo': 'Diabéticos | Anual',
-                    'categoria': 'imagem',
-                    'prioridade': 'alta',
-                    'referencia': 'ADA 2024',
-                    'grau_evidencia': 'C'
-                })
-        
+            # ECG: a ADA não recomenda rastrear doença coronariana no diabético assintomático; a ACCF/AHA 2010 acha
+            # razoável um ECG basal (IIa). Não entra sozinho: orientação de divergência (orientacoes_rastreio).
+
         # ========== HIV: src/utils/hiv.py (MS 2024 PCDT HIV / HIVMA/IDSA 2024) ==========
         is_hiv_positive = 'hiv' in comorbidades
         orientacoes_hiv = []
@@ -1214,65 +1511,10 @@ def generate_intelligent_recommendations():
             'total_recommendations': len(recommendations)
         }
         
-        # Deduplicar por título antes de responder (deduplicação inteligente)
+        # Deduplicar antes de responder: um pedido por exame, pelo código TUSS (sinônimos e exames combinados)
+        # e, sem código, pelo nome (deduplicar_recomendacoes).
         try:
-            from collections import defaultdict
-            
-            # Agrupar exames similares
-            grupos = defaultdict(list)
-            
-            for rec in recommendations:
-                titulo = (rec.get('titulo') or '').strip()
-                if not titulo:
-                    continue
-                
-                # Normalizar título para identificação de duplicados
-                # Remove material biológico, parênteses e pontuação
-                titulo_norm = re.sub(r',\s*(soro|plasma|sangue.*|urina)', '', titulo, flags=re.IGNORECASE)
-                titulo_norm = re.sub(r'\s*\([^)]*\)', '', titulo_norm)  # Remove parênteses
-                titulo_norm = re.sub(r'[^a-z0-9\s]', '', titulo_norm.lower())  # Remove pontuação
-                titulo_norm = ' '.join(titulo_norm.split())  # Normaliza espaços
-                
-                # Chave de agrupamento
-                key = titulo_norm
-                grupos[key].append(rec)
-            
-            # Manter apenas 1 exame por grupo, unindo referências
-            unique = []
-            for key, recs in grupos.items():
-                if len(recs) == 1:
-                    unique.append(recs[0])
-                else:
-                    # Múltiplas recomendações do mesmo exame - unir referências
-                    # Priorizar título mais completo (com material biológico)
-                    recs_sorted = sorted(recs, key=lambda r: len(r.get('titulo', '')), reverse=True)
-                    melhor = recs_sorted[0].copy()
-                    
-                    # Unir referências de todas as recomendações
-                    refs = []
-                    for r in recs:
-                        ref = r.get('referencia', '')
-                        if ref and ref not in refs:
-                            refs.append(ref)
-                    
-                    if refs:
-                        melhor['referencia'] = ' | '.join(refs)
-
-                    # O subtítulo mostrado é o de uma das regras, mas a periodicidade tem de considerar
-                    # todas: o exame anual do diabético pode ser trimestral pelo HIV. Campo interno,
-                    # retirado antes de responder (src/utils/periodicidade.py).
-                    unidos = list(melhor.get('_subtitulos') or [])
-                    for r in recs_sorted[1:]:
-                        unidos += [r.get('subtitulo') or ''] + list(r.get('_subtitulos') or [])
-                    melhor['_subtitulos'] = unidos
-                    
-                    # Unir descrições se diferentes
-                    descricoes = list(set([r.get('descricao', '') for r in recs if r.get('descricao')]))
-                    if len(descricoes) > 1:
-                        melhor['descricao'] = ' '.join(descricoes[:2])  # Limitar a 2 descrições
-                    
-                    unique.append(melhor)
-            
+            unique = deduplicar_recomendacoes(recommendations, sex)
             response['recommendations'] = unique
             response['total_recommendations'] = len(unique)
         except Exception as e:
@@ -1306,7 +1548,13 @@ def generate_intelligent_recommendations():
         response['adiados_gestacao'] = adiados_gestacao
         response['diabetes_por_hba1c'] = diabetes_por_hba1c
         response['inferencias'] = inferencias
-        response['orientacoes'] = orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_hiv
+        orientacoes_rastreio = orientacoes_de_rastreio(
+            age, sex, gestante=is_pregnant, pa_informada=bool(sbp or dbp), pa_classificacao=pa_classificacao or {},
+            pa_alterada=pa_alterada, has_hypertension=has_hypertension, has_resistant_hypertension=has_resistant_hypertension,
+            is_diabetic=is_diabetic, rastreio_dm=rastreio_dm, imc=imc, hiv=is_hiv_positive, prep=prep,
+            rastrear_hbv=not is_pregnant and 'hepatite_b_cronica' not in comorbidades, tabagismo=tabagismo,
+            fatores_osso=fatores_osso)
+        response['orientacoes'] = orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_hiv + orientacoes_rastreio
         aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
         if aviso_exames:
             response['orientacoes'] = response['orientacoes'] + [aviso_exames]

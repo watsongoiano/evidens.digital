@@ -378,6 +378,25 @@ SEM_CODIGO = {
 }
 
 
+# Exames sem código que são o mesmo pedido (consulta oftalmológica): partes que cada título cobre. A avaliação com
+# tonometria cobre também o fundo de olho, e a deduplicação do motor a mantém no lugar das outras.
+MESMO_EXAME_SEM_CODIGO = {
+    'Fundoscopia (Exame de fundo de olho)': ('oftalmo:fundo',),
+    'Avaliação oftalmológica (fundo de olho)': ('oftalmo:fundo',),
+    'Avaliação oftalmológica com tonometria e fundoscopia': ('oftalmo:fundo', 'oftalmo:tonometria'),
+}
+
+# Título que fica quando o motor une sinônimos do mesmo código (só na hora de unir: cada regra continua com o
+# título dela). Os demais grupos ficam com o título mais completo.
+TITULO_PREFERIDO = {
+    frozenset({'40311171'}): 'Relação albumina/creatinina urinária (uACR)',
+    frozenset({'40307026'}): 'Anticorpos anti-HCV, soro',
+    frozenset({'40304361'}): 'Hemograma completo com plaquetas',
+    frozenset({'40311210'}): 'EAS - Elementos Anormais e Sedimentoscopia',
+    frozenset({'oftalmo:fundo'}): 'Avaliação oftalmológica (fundo de olho)',
+}
+
+
 def _chave(titulo):
     s = unicodedata.normalize('NFD', str(titulo or '').strip().lower())
     s = ''.join(c for c in s if unicodedata.category(c) != 'Mn')
