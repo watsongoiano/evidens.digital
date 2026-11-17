@@ -1183,7 +1183,7 @@
         <input type="file" id="laudoPdf" accept="application/pdf,.pdf" multiple class="sr-only">
       </div>
       <div id="laudoStatus" role="status" class="aviso aviso-atencao mt-4" style="display: none;"></div>
-      <div id="examesAnteriores" class="flex flex-col gap-3 mt-4"></div>
+      <div id="examesAnteriores" class="gap-1.5 mt-4"></div>
       <!-- Resultados que entram nos cálculos: cada campo vai para a linha do exame correspondente (um só lugar). -->
       <div id="resultadosGuardados" hidden>
         <div class="campo" data-resultado="colesterol"><label for="colesterol">Colesterol total (mg/dL)</label><input type="number" id="colesterol" name="colesterol" data-campo="colesterol" min="50" max="1000" placeholder="Ex: 200" inputmode="numeric"></div>
@@ -2145,9 +2145,27 @@
             if (!resumoDosLaudos.size) return;
             const linhas = [...resumoDosLaudos.keys()].sort().reverse()
                 .map(data => data.split('-').reverse().join('/') + ' - ' + resumoDosLaudos.get(data));
-            const cartao = document.createElement('div'); cartao.className = 'risco-cartao';
-            const topo = document.createElement('div'); topo.className = 'flex flex-wrap items-center justify-between gap-2';
-            const titulo = document.createElement('p'); titulo.className = 'campo-rotulo !mb-0'; titulo.textContent = T('Exames já realizados');
+            // Recolhido como as Orientações: abre com um toque na seta.
+            const cartao = document.createElement('details'); cartao.className = 'risco-cartao orientacoes-recolhidas';
+            cartao.setAttribute('data-exames-resumo', '');
+            const topo = document.createElement('summary'); topo.className = 'flex items-center justify-between gap-4 cursor-pointer list-none';
+            const titulo = document.createElement('span'); titulo.className = 'campo-rotulo !mb-0';
+            const quantos = document.createElement('span'); quantos.className = 'text-ink/40'; quantos.textContent = linhas.length;
+            titulo.append(T('Exames já realizados') + ' ', quantos);
+            const abrir = document.createElement('span'); abrir.className = 'text-[13px] text-teal flex items-center gap-1.5';
+            const rotulo = document.createElement('span'); rotulo.textContent = T('Ver exames');
+            const seta = document.createElement('i'); seta.className = 'fa-solid fa-chevron-down text-[11px] transition-transform';
+            abrir.append(rotulo, seta); topo.append(titulo, abrir); cartao.appendChild(topo);
+            cartao.addEventListener('toggle', () => {
+                rotulo.textContent = T(cartao.open ? 'Fechar exames' : 'Ver exames');
+                seta.style.transform = cartao.open ? 'rotate(180deg)' : '';
+            });
+            const corpo = document.createElement('div'); corpo.className = 'mt-3';
+            linhas.forEach(linha => {
+                const p = document.createElement('p'); p.className = 'text-[13px] text-ink/80 mb-2 font-mono leading-relaxed break-words';
+                p.setAttribute('data-resumo-exames', ''); p.textContent = linha;
+                corpo.appendChild(p);
+            });
             const acoes = document.createElement('div'); acoes.className = 'flex items-center gap-4 text-[13px]';
             const copiar = document.createElement('button'); copiar.type = 'button'; copiar.className = 'text-teal underline underline-offset-2';
             copiar.textContent = T('Copiar');
@@ -2158,12 +2176,7 @@
             const limpar = document.createElement('button'); limpar.type = 'button'; limpar.className = 'text-ink/55 underline underline-offset-2';
             limpar.textContent = T('Limpar');
             limpar.addEventListener('click', () => { resumoDosLaudos.clear(); exibirResumoDosExames(); });
-            acoes.append(copiar, limpar); topo.append(titulo, acoes); cartao.appendChild(topo);
-            linhas.forEach(linha => {
-                const p = document.createElement('p'); p.className = 'text-[13px] text-ink/80 mt-2 font-mono leading-relaxed break-words';
-                p.setAttribute('data-resumo-exames', ''); p.textContent = linha;
-                cartao.appendChild(p);
-            });
+            acoes.append(copiar, limpar); corpo.appendChild(acoes); cartao.appendChild(corpo);
             alvo.appendChild(cartao);
         }
 
