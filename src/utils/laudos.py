@@ -277,7 +277,7 @@ def extrair(textos, hoje_=None):
     hoje_ = hoje_ or hoje()
     achados, nao_reconhecidos, sem_data = {}, [], []
 
-    def guardar(titulo, linha, data_exame, resultados=None):
+    def guardar(titulo, linha, data_exame, resultados=None, resumo=None):
         if data_exame is None:
             if linha not in sem_data:
                 sem_data.append(linha)
@@ -285,7 +285,7 @@ def extrair(textos, hoje_=None):
         anterior = achados.get(titulo)
         if anterior is None or data_exame > anterior['data']:
             achados[titulo] = {'exame': titulo, 'data': data_exame, 'nome_no_laudo': linha,
-                               'resultados': resultados or {}}
+                               'resultados': resultados or {}, 'resumo': resumo or []}
 
     pendente = None   # exame do fim da página anterior cujo "Coletado(...)" ficou na página seguinte
     for texto in textos:
@@ -295,7 +295,7 @@ def extrair(textos, hoje_=None):
         if pendente:
             antes = linhas[:titulos[0]] if titulos else linhas
             m = next((m for m in map(_COLETADO.search, antes) if m), None)
-            guardar(pendente[0], pendente[1], _data(*m.groups(), hoje_) if m else pendente[2], pendente[3])
+            guardar(pendente[0], pendente[1], _data(*m.groups(), hoje_) if m else pendente[2], pendente[3], pendente[4])
             pendente = None
         # Data da página: só a do cabeçalho (antes do primeiro exame), nunca a de um exame da página.
         cabecalho = ' '.join(linhas[:titulos[0]] if titulos else linhas)
@@ -322,15 +322,89 @@ def extrair(textos, hoje_=None):
                     nao_reconhecidos.append(linha)
                 continue
             resultados = exames_comuns.do_laudo(titulo, linhas[i + 1:fim])
+            resumo = _itens_do_resumo(titulo, linhas[i + 1:fim])
             if not explicita and n + 1 == len(titulos):
-                pendente = (titulo, linha, data_exame, resultados)   # o fim do exame pode estar na próxima página
+                pendente = (titulo, linha, data_exame, resultados, resumo)   # o fim do exame pode estar na próxima página
                 continue
-            guardar(titulo, linha, data_exame, resultados)
+            guardar(titulo, linha, data_exame, resultados, resumo)
     if pendente:
         guardar(*pendente)
     exames = sorted(achados.values(), key=lambda e: tuss._chave(e['exame']))
-    return {'exames': [dict(e, data=e['data'].isoformat()) for e in exames],
-            'nao_reconhecidos': nao_reconhecidos, 'sem_data': sem_data}
+    exames = [dict(e, data=e['data'].isoformat()) for e in exames]
+    return {'exames': [{c: v for c, v in e.items() if c != 'resumo'} for e in exames],
+            'nao_reconhecidos': nao_reconhecidos, 'sem_data': sem_data, 'resumo': _resumo(exames)}
+
+
+# ── Resumo em uma linha ("16/11/2026 - Hb 13,7 | Ht 40,3% | ... | Cr 0,71") ─────────────────────────────────
+# Só o que o laudo traz escrito, sem valor de referência e sem julgar se está alterado. A ordem é a da lista.
+# Milhar com ponto ("9.200"), decimal com vírgula ou com ponto ("0,71", "1.25"); nunca só um pedaço do número.
+_N = r'(\d{1,3}(?:\.\d{3})+(?:,\d+)?(?![\d.,/]*\d)|\d+(?:[.,]\d+)?(?![\d.,/]*\d))'
+_SEP = r'[\s.:]*'
+# (trecho do título do exame, [(sigla, expressão do valor, sufixo)]); None = exame de um resultado só ("RESULTADO: x")
+_RESUMO = (
+    ('hemograma', [('Hb', r'\bhemoglobina' + _SEP + _N, ''), ('Ht', r'\bhemat[óo]crito' + _SEP + _N, '%'),
+                   ('VCM', r'\bvcm' + _SEP + _N, ''), ('HCM', r'(?<![a-z])hcm' + _SEP + _N, ''),
+                   ('RDW', r'\brdw' + _SEP + _N, '%'), ('Leuc', r'\bleuc[óo]citos(?:\s+totais)?' + _SEP + _N, ''),
+                   ('Plaq', r'\bplaquetas' + _SEP + _N, '')]),
+    ('protrombina', [('RNI', r'\b(?:r\.?\s*n\.?\s*i|i\.?\s*n\.?\s*r)\b\.?' + _SEP + _N, '')]),
+    ('tromboplastina', [('TTPA', r'\brela[çc][ãa]o[^:\d]*:\s*' + _N, '')]),
+    ('hemoglobina glicada', [('HbA1c', None, '%')]), ('glic', [('Gli', None, '')]),
+    ('creatinina', [('Cr', None, '')]), ('ureia', [('Ur', None, '')]), ('sódio', [('Na', None, '')]),
+    ('potássio', [('K', None, '')]), ('cálcio iônico', [('CaI', None, '')]), ('cálcio', [('CaT', None, '')]),
+    ('magnésio', [('Mg', None, '')]), ('fósforo', [('P', None, '')]), ('aspartato', [('TGO', None, '')]),
+    ('alanina', [('TGP', None, '')]),
+    ('bilirrubina', [('BT', r'\btota(?:l|is)\s*:\s*' + _N, ''), ('BD', r'\bdireta\s*:\s*' + _N, ''),
+                     ('BI', r'\bindireta\s*:\s*' + _N, '')]),
+    ('proteínas totais', [('PT', r'\bprote[íi]nas(?:\s+totais)?' + _SEP + _N, ''), ('Alb', r'\balbumina' + _SEP + _N, ''),
+                          ('Glob', r'\bglobulinas?' + _SEP + _N, '')]),
+    ('fosfoquinase', [('CPK', None, '')]), ('proteína c reativa', [('PCR', None, '')]),
+    ('láctico', [('Lact', None, '')]), ('tireoestimulante', [('TSH', None, '')]),
+)
+# Ordem das siglas na linha (a da evolução clínica): hemograma, coagulação, função renal, eletrólitos, fígado...
+_ORDEM_DO_RESUMO = ('Hb', 'RNI', 'TTPA', 'HbA1c', 'Gli', 'Cr', 'Ur', 'Na', 'K', 'CaT', 'CaI', 'Mg', 'P', 'TGO', 'TGP', 'BT',
+                    'PT', 'CPK', 'PCR', 'Lact', 'TSH')
+_UMA_CASA = ('Hb', 'Ht', 'VCM', 'HCM', 'RDW')      # no hemograma, "13,70" sai "13,7"
+_UM_RESULTADO = re.compile(r'\bresultado\s*:\s*' + _N, re.IGNORECASE)
+_REFERENCIA = re.compile(r'^\s*valor(es)?\s+de\s+refer[eê]ncia', re.IGNORECASE)
+
+
+def _valor_do_resumo(sigla, texto):
+    """O valor como está no laudo, com vírgula decimal ("1.25" → "1,25"; o milhar "9.200" fica); no hemograma,
+    com uma casa ("13,70" → "13,7")."""
+    if re.fullmatch(r'\d+\.\d{1,2}', texto) or (re.fullmatch(r'\d+\.\d+', texto) and not re.fullmatch(r'\d{1,3}\.\d{3}', texto)):
+        texto = texto.replace('.', ',')
+    return texto[:-1] if sigla in _UMA_CASA and re.fullmatch(r'\d+,\d\d', texto) else texto
+
+
+def _itens_do_resumo(titulo, linhas):
+    """[(posição na ordem do resumo, texto)] do exame: "Cr 0,71", "BT 0,42 (BD 0,20 / BI 0,22)"."""
+    nome = titulo.lower()
+    campos = next((c for trecho, c in _RESUMO if trecho in nome), None)
+    if campos is None:
+        return []
+    posicao = _ORDEM_DO_RESUMO.index(campos[0][0])
+    corte = next((i for i, l in enumerate(linhas) if _REFERENCIA.match(l)), len(linhas))
+    texto = ' '.join(linhas[:corte])       # da linha "Valores de referência" em diante nada é lido
+    achados = []
+    for sigla, expressao, sufixo in campos:
+        m = re.search(expressao, texto, re.IGNORECASE) if expressao else _UM_RESULTADO.search(texto)
+        if m:
+            achados.append(f'{sigla} {_valor_do_resumo(sigla, m.group(1))}{sufixo}')
+    if not achados:
+        return []
+    if len(campos) > 1 and nome.startswith(('bilirrubina', 'proteínas')):      # total (frações)
+        achados = [achados[0] + (f' ({" / ".join(achados[1:])})' if len(achados) > 1 else '')] \
+            if achados[0].startswith(campos[0][0] + ' ') else achados
+    return [(posicao, ' | '.join(achados))]
+
+
+def _resumo(exames):
+    """[{'data': 'AAAA-MM-DD', 'texto': 'Hb 13,7 | ... | Cr 0,71'}], uma linha por data de coleta, a mais recente primeiro."""
+    por_data = {}
+    for exame in exames:
+        por_data.setdefault(exame['data'], []).extend(exame.get('resumo') or [])
+    return [{'data': data, 'texto': ' | '.join(texto for _, texto in sorted(itens, key=lambda par: par[0]))}
+            for data, itens in sorted(por_data.items(), reverse=True) if itens]
 
 
 def _como_na_lista(titulo):

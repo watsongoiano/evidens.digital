@@ -1260,7 +1260,22 @@
     <!-- Resumo dos resultados informados: oculto a pedido (os valores ficam nos cartões dos exames). -->
     <div id="resultadosInformados" hidden></div>
     <div id="orientacoesContent"></div>
-    <p class="text-[12px] text-ink/50 mt-6 flex flex-wrap gap-x-5 gap-y-1"><span><span class="inline-block w-2 h-2 rounded-full bg-teal align-middle mr-1"></span>prioridade alta</span><span><span class="inline-block w-2 h-2 rounded-full bg-aqua align-middle mr-1"></span>média</span><span><span class="inline-block w-2 h-2 rounded-full bg-ink/20 align-middle mr-1"></span>baixa</span><span><span class="rec-grau align-middle mr-1">A</span>grau de evidência</span></p>
+    <!-- Exames já realizados, lidos dos laudos, em uma linha por data (src/utils/laudos.py). Sem nome do paciente. -->
+    <div id="examesResumo"></div>
+    <p class="text-[12px] text-ink/50 mt-6 flex flex-wrap gap-x-5 gap-y-1"><span><span class="inline-block w-2 h-2 rounded-full bg-teal align-middle mr-1"></span>prioridade alta</span><span><span class="inline-block w-2 h-2 rounded-full bg-aqua align-middle mr-1"></span>média</span><span><span class="inline-block w-2 h-2 rounded-full bg-ink/20 align-middle mr-1"></span>baixa</span></p>
+    <details class="text-[12px] text-ink/60 mt-2" id="legendaGraus">
+      <summary class="cursor-pointer list-none flex flex-wrap items-center gap-x-2 gap-y-1"><span>Grau de evidência:</span><span class="rec-grau">A</span><span class="rec-grau">B</span><span class="rec-grau rec-grau-c">C</span><span class="rec-grau rec-grau-e">E</span><span class="rec-grau rec-grau-pp">PP</span><span class="rec-grau rec-grau-d">D</span><span class="rec-grau rec-grau-i">I</span><span class="text-teal underline underline-offset-2">o que significam</span></summary>
+      <ul class="mt-2 flex flex-col gap-1.5">
+        <li><span class="rec-grau align-middle mr-1.5">A</span>Recomendação forte, com evidência de boa qualidade (USPSTF grau A; ADA nível A; classe I).</li>
+        <li><span class="rec-grau align-middle mr-1.5">B</span>Recomendação com evidência moderada (USPSTF grau B; ADA nível B; classe IIa).</li>
+        <li><span class="rec-grau rec-grau-c align-middle mr-1.5">C</span>Decisão individual, com o paciente: benefício pequeno ou evidência limitada (USPSTF grau C; ADA nível C; classe IIb).</li>
+        <li><span class="rec-grau rec-grau-e align-middle mr-1.5">E</span>Consenso de especialistas, sem estudo clínico que sustente (ADA nível E).</li>
+        <li><span class="rec-grau rec-grau-pp align-middle mr-1.5">PP</span>Ponto de prática: orientação da diretriz sem revisão sistemática da evidência (KDIGO).</li>
+        <li><span class="rec-grau rec-grau-d align-middle mr-1.5">D</span>Recomendação contrária (USPSTF grau D; classe III). Não entra no pedido: aparece nos itens não incluídos e nas orientações.</li>
+        <li><span class="rec-grau rec-grau-i align-middle mr-1.5">I</span>Evidência insuficiente para recomendar a favor ou contra (USPSTF declaração I). Não entra no pedido.</li>
+        <li>Fontes: <a class="text-teal underline underline-offset-2" target="_blank" rel="noopener noreferrer" href="https://www.uspreventiveservicestaskforce.org/uspstf/about-uspstf/methods-and-processes/grade-definitions">USPSTF</a> · <a class="text-teal underline underline-offset-2" target="_blank" rel="noopener noreferrer" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9845083">ADA</a> · <a class="text-teal underline underline-offset-2" target="_blank" rel="noopener noreferrer" href="https://doi.org/10.1016/j.kint.2023.10.018">KDIGO 2024</a></li>
+      </ul>
+    </details>
     <div id="recommendationsContent"></div>
     <div id="acoesPdf" class="mt-10 pt-8 border-t border-ink/10">
       <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-4">GERAR DOCUMENTOS</p>
@@ -1331,14 +1346,16 @@
       <div id="apacCampos" class="mt-3" style="display: none;">
         <p class="text-[13px] text-ink/60 mb-3">Tomografia, ressonância, endoscopia, colonoscopia e densitometria saem com o laudo de solicitação de APAC, logo depois do pedido. Os campos abaixo são opcionais (o que ficar em branco é preenchido à mão) e não são guardados.</p>
         <div class="grade">
+          <div class="campo"><label for="apacCep">CEP</label><input type="text" id="apacCep" maxlength="9" inputmode="numeric" placeholder="00000-000" autocomplete="off"><p id="apacCepAviso" class="text-[12px] text-ink/55 mt-1" aria-live="polite"></p></div>
+          <div class="campo"><div class="grade !mt-0 grid-cols-[1fr_4.5rem]"><div class="campo"><label for="apacMunicipio">Município</label><input type="text" id="apacMunicipio" maxlength="60" autocomplete="off"></div><div class="campo"><label for="apacUf">UF</label><input type="text" id="apacUf" maxlength="2" autocomplete="off"></div></div></div>
+          <div class="campo sm:col-span-2"><label for="apacEndereco">Endereço (rua, nº, bairro)</label><input type="text" id="apacEndereco" maxlength="150" autocomplete="off"></div>
           <div class="campo"><label for="apacCns">CNS do paciente</label><input type="text" id="apacCns" maxlength="20" inputmode="numeric" autocomplete="off"></div>
           <div class="campo"><label for="apacNascimento">Data de nascimento</label><input type="text" id="apacNascimento" maxlength="10" inputmode="numeric" placeholder="dd/mm/aaaa" autocomplete="off"></div>
           <div class="campo sm:col-span-2"><label for="apacMae">Nome da mãe</label><input type="text" id="apacMae" maxlength="120" autocomplete="off"></div>
-          <div class="campo"><label for="apacTelefone">Telefone</label><input type="text" id="apacTelefone" maxlength="20" inputmode="tel" autocomplete="off"></div>
+          <div class="campo"><label for="apacTelefone">Telefone</label><input type="text" id="apacTelefone" maxlength="15" inputmode="tel" placeholder="(00) 00000-0000" autocomplete="off"></div>
+          <div class="campo sm:col-span-2"><label for="apacAnamnese">Resumo da anamnese e exame físico</label><textarea id="apacAnamnese" rows="3" maxlength="600" autocomplete="off"></textarea></div>
+          <div class="campo sm:col-span-2"><label for="apacExames">Exames complementares realizados</label><textarea id="apacExames" rows="3" maxlength="900" autocomplete="off"></textarea><p class="text-[12px] text-ink/55 mt-1">Em "Justificativa do procedimento" sai "Os acima."</p></div>
           <div class="campo"><label for="apacCid">CID-10 principal (opcional)</label><input type="text" id="apacCid" maxlength="6" placeholder="Automático pelas comorbidades" autocomplete="off"></div>
-          <div class="campo sm:col-span-2"><label for="apacEndereco">Endereço (rua, nº, bairro)</label><input type="text" id="apacEndereco" maxlength="150" autocomplete="off"></div>
-          <div class="campo"><label for="apacMunicipio">Município</label><input type="text" id="apacMunicipio" maxlength="60" autocomplete="off"></div>
-          <div class="campo"><div class="grade !mt-0 grid-cols-2"><div class="campo"><label for="apacUf">UF</label><input type="text" id="apacUf" maxlength="2" autocomplete="off"></div><div class="campo"><label for="apacCep">CEP</label><input type="text" id="apacCep" maxlength="9" inputmode="numeric" autocomplete="off"></div></div></div>
         </div>
       </div>
       <p data-guia-campo class="text-[13px] text-ink/55 mt-3" style="display: none;">A guia SP/SADT sai no mesmo PDF, logo depois do pedido, com os seus dados no plano e os códigos TUSS. O número da carteira não é guardado.</p>
@@ -1876,6 +1893,7 @@
                 });
                 (dados.nao_reconhecidos || []).forEach(n => { if (!naoReconhecidos.includes(n)) naoReconhecidos.push(n); });
                 (dados.sem_data || []).forEach(n => { if (!semData.includes(n)) semData.push(n); });
+                guardarResumoDoLaudo(dados.resumo);
             }
             entrada.value = '';
             const partes = [];
@@ -2106,6 +2124,49 @@
             return html;
         }
 
+        // Subtópicos das orientações (o servidor diz o grupo de cada uma: grupo_da_orientacao).
+        const GRUPOS_DE_ORIENTACAO = [['divergencia', 'Divergências entre diretrizes'],
+                                      ['indicado', 'Outros rastreios e intervenções indicados'],
+                                      ['nao_rotina', 'Não indicado de rotina ou decisão individual']];
+
+        // Exames já realizados, lidos dos laudos: uma linha por data de coleta, sem nome do paciente.
+        const resumoDosLaudos = new Map();      // 'AAAA-MM-DD' → 'Hb 13,7 | ... | Cr 0,71'
+        function guardarResumoDoLaudo(linhas) {
+            (linhas || []).forEach(({ data, texto }) => {
+                const partes = new Set((resumoDosLaudos.get(data) || '').split(' | ').filter(Boolean));
+                texto.split(' | ').forEach(p => partes.add(p));
+                resumoDosLaudos.set(data, [...partes].join(' | '));
+            });
+            exibirResumoDosExames();
+        }
+        function exibirResumoDosExames() {
+            const alvo = document.getElementById('examesResumo');
+            alvo.replaceChildren();
+            if (!resumoDosLaudos.size) return;
+            const linhas = [...resumoDosLaudos.keys()].sort().reverse()
+                .map(data => data.split('-').reverse().join('/') + ' - ' + resumoDosLaudos.get(data));
+            const cartao = document.createElement('div'); cartao.className = 'risco-cartao';
+            const topo = document.createElement('div'); topo.className = 'flex flex-wrap items-center justify-between gap-2';
+            const titulo = document.createElement('p'); titulo.className = 'campo-rotulo !mb-0'; titulo.textContent = T('Exames já realizados');
+            const acoes = document.createElement('div'); acoes.className = 'flex items-center gap-4 text-[13px]';
+            const copiar = document.createElement('button'); copiar.type = 'button'; copiar.className = 'text-teal underline underline-offset-2';
+            copiar.textContent = T('Copiar');
+            copiar.addEventListener('click', async () => {
+                try { await navigator.clipboard.writeText(linhas.join('\n')); copiar.textContent = T('Copiado'); }
+                catch (e) { copiar.textContent = T('Selecione o texto para copiar'); }
+            });
+            const limpar = document.createElement('button'); limpar.type = 'button'; limpar.className = 'text-ink/55 underline underline-offset-2';
+            limpar.textContent = T('Limpar');
+            limpar.addEventListener('click', () => { resumoDosLaudos.clear(); exibirResumoDosExames(); });
+            acoes.append(copiar, limpar); topo.append(titulo, acoes); cartao.appendChild(topo);
+            linhas.forEach(linha => {
+                const p = document.createElement('p'); p.className = 'text-[13px] text-ink/80 mt-2 font-mono leading-relaxed break-words';
+                p.setAttribute('data-resumo-exames', ''); p.textContent = linha;
+                cartao.appendChild(p);
+            });
+            alvo.appendChild(cartao);
+        }
+
         // Orientações que não viram pedido nem receita (idade de início, aconselhamento, alertas).
         function exibirOrientacoes(itens) {
             const alvo = document.getElementById('orientacoesContent');
@@ -2121,7 +2182,12 @@
                       <span class="campo-rotulo !mb-0">${T('Orientações')} <span class="text-ink/40">${demais.length}</span></span>
                       <span class="text-[13px] text-teal flex items-center gap-1.5"><span data-rotulo-abrir>${T('Ver orientações')}</span><i class="fa-solid fa-chevron-down text-[11px] transition-transform"></i></span>
                     </summary>
-                    <div class="mt-3">${demais.map(item).join('')}</div>
+                    <div class="mt-3">${GRUPOS_DE_ORIENTACAO.map(([grupo, nome]) => {
+                        const doGrupo = demais.filter(o => (o.grupo || 'indicado') === grupo);
+                        return doGrupo.length ? `<div class="mt-4 first:mt-0" data-grupo-orientacao="${grupo}">
+                            <p class="text-[12px] tracking-[0.12em] uppercase text-teal font-medium mb-1">${T(nome)} <span class="text-ink/40">${doGrupo.length}</span></p>
+                            ${doGrupo.map(item).join('')}</div>` : '';
+                    }).join('')}</div>
                   </details>` : '');
             const caixa = alvo.querySelector('[data-orientacoes]');
             if (caixa) caixa.addEventListener('toggle', () => {
@@ -2300,7 +2366,7 @@
                                 ${(subtitulo || referencia_html) ? `<p class="rec-sub">${subtitulo ? escapeHtml(subtitulo) : ''}${subtitulo && referencia_html ? '<span class="text-ink/30 mx-1.5">·</span>' : ''}${referencia_html ? `<span class="referencia-links">${referencia_html}</span>` : ''}</p>` : ''}
                                 ${rec.ultimo_exame ? `<p class="text-[13px] text-teal-dark mt-1.5"><i class="fa-regular fa-calendar-check mr-1.5"></i>${escapeHtml(rec.ultimo_exame)}</p>` : ''}
                             </div>
-                            ${grau ? `<span class="rec-grau" title="Grau de evidência ${escapeHtml(grau)}">${escapeHtml(grau)}</span>` : '<span></span>'}
+                            ${grau ? `<span class="rec-grau ${/^(C|E|PP|D|I)$/.test(grau) ? 'rec-grau-' + grau.toLowerCase() : ''}" title="Grau de evidência ${escapeHtml(grau)}">${escapeHtml(grau)}</span>` : '<span></span>'}
                             <button type="button" onclick="removeRecommendation(this)" aria-label="Retirar esta recomendação" class="rec-remover"><i class="fa-solid fa-xmark"></i></button>
                         </div>`;
                     });
@@ -2397,10 +2463,68 @@
 
         // Dados do paciente no laudo de APAC: identificam uma pessoa e não podem passar para a próxima.
         const CAMPOS_DA_APAC = ['apacCns', 'apacNascimento', 'apacMae', 'apacTelefone', 'apacCid', 'apacEndereco',
-                                'apacMunicipio', 'apacUf', 'apacCep'];
+                                'apacMunicipio', 'apacUf', 'apacCep', 'apacAnamnese', 'apacExames'];
+        let apacIbge = '';     // código IBGE do município, vindo da busca do CEP
+        let cepBuscado = '';   // último CEP consultado (o mesmo CEP não é buscado duas vezes seguidas)
         function limparApac() {
             CAMPOS_DA_APAC.forEach(id => { document.getElementById(id).value = ''; });
+            apacIbge = ''; cepBuscado = '';     // outro paciente com o mesmo CEP: a busca é refeita
+            document.getElementById('apacCepAviso').textContent = '';
         }
+
+        // Máscaras dos campos da APAC: só dígitos entram; a pontuação é posta enquanto se digita.
+        const soDigitos = (texto, maximo) => String(texto || '').replace(/\D/g, '').slice(0, maximo);
+        const MASCARAS_DA_APAC = {
+            apacNascimento: v => { const d = soDigitos(v, 8); return [d.slice(0, 2), d.slice(2, 4), d.slice(4)].filter(Boolean).join('/'); },
+            apacTelefone: v => {
+                const d = soDigitos(v, 11);
+                if (d.length <= 2) return d.length ? '(' + d : '';
+                const meio = d.length > 10 ? 7 : 6;
+                return '(' + d.slice(0, 2) + ') ' + d.slice(2, meio) + (d.length > meio ? '-' + d.slice(meio) : '');
+            },
+            apacCep: v => { const d = soDigitos(v, 8); return d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d; },
+            apacCns: v => soDigitos(v, 15),
+        };
+        Object.entries(MASCARAS_DA_APAC).forEach(([id, mascara]) => {
+            const campo = document.getElementById(id);
+            campo.addEventListener('input', () => { campo.value = mascara(campo.value); });
+        });
+
+        // CEP completo: busca o endereço no ViaCEP (só o CEP sai do site) e preenche município, UF, código IBGE e
+        // a rua e o bairro; o número fica para o médico. O que já foi digitado no endereço não é trocado.
+        async function buscarCepDaApac() {
+            const cep = soDigitos(document.getElementById('apacCep').value, 8);
+            const aviso = document.getElementById('apacCepAviso');
+            if (cep.length !== 8) { apacIbge = ''; cepBuscado = ''; aviso.textContent = ''; return; }
+            if (cep === cepBuscado) return;
+            cepBuscado = cep;
+            aviso.textContent = T('Buscando o endereço…');
+            let dados = null;
+            try {
+                const r = await fetch('https://viacep.com.br/ws/' + cep + '/json/');
+                if (r.ok) dados = await r.json();
+            } catch (e) { dados = null; }
+            if (soDigitos(document.getElementById('apacCep').value, 8) !== cep) return;     // o CEP mudou durante a busca
+            if (!dados || dados.erro) {
+                apacIbge = '';
+                aviso.textContent = T(dados ? 'CEP não encontrado: preencha o endereço.' : 'Não foi possível buscar o CEP: preencha o endereço.');
+                return;
+            }
+            apacIbge = soDigitos(dados.ibge, 7);
+            document.getElementById('apacMunicipio').value = dados.localidade || '';
+            document.getElementById('apacUf').value = (dados.uf || '').toUpperCase();
+            const endereco = document.getElementById('apacEndereco');
+            if (!endereco.value.trim() && dados.logradouro) {
+                const inicio = dados.logradouro + ', nº ';
+                endereco.value = inicio + (dados.bairro ? ', ' + dados.bairro : '');
+                endereco.focus();
+                endereco.setSelectionRange(inicio.length, inicio.length);      // o cursor fica no lugar do número
+                aviso.textContent = T('Endereço preenchido pelo CEP: informe o número.');
+            } else {
+                aviso.textContent = T('Município e UF preenchidos pelo CEP.');
+            }
+        }
+        document.getElementById('apacCep').addEventListener('input', buscarCepDaApac);
 
         function pedirConfirmacaoDoPlano() {
             if (campoPlano().value || campoCarteira().value) planoAConfirmar = true;
@@ -2527,6 +2651,42 @@
             document.getElementById('justificativaPainel').style.display = exames ? '' : 'none';
             const campo = document.getElementById('guiaIndicacao');
             if (exames && !campo.value) campo.value = indicacaoSugerida();
+            // Laudo de APAC: resumo da anamnese e exames já realizados, a partir do que foi informado (editáveis).
+            const anamnese = document.getElementById('apacAnamnese'), feitos = document.getElementById('apacExames');
+            if (exames && !anamnese.value) anamnese.value = anamneseSugerida();
+            if (exames && !feitos.value) feitos.value = examesRealizadosSugeridos();
+        }
+
+        const minuscula = texto => texto.trim().replace(/^[A-ZÀ-Ý](?=[a-zà-ÿ])/, c => c.toLowerCase());
+        // "Check-up de paciente de 77 anos, sexo masculino, com diabetes tipo 2 e hipertensão, em uso de losartana e metformina."
+        function anamneseSugerida() {
+            const data = lerFormulario();
+            const lista = itens => itens.length > 1 ? itens.slice(0, -1).join(', ') + ' e ' + itens[itens.length - 1] : itens.join('');
+            const marcados = nome => [...checkupForm.querySelectorAll(`input[name="${nome}"]:checked`)]
+                .map(c => minuscula(c.dataset.rotulo || (c.closest('label') || c).textContent || '')).filter(Boolean);
+            let texto = (modo === 'preop' ? 'Avaliação pré-operatória' : 'Check-up') + ' de paciente'
+                + (data.idade ? ` de ${data.idade} anos` : '')
+                + (data.sexo ? `, sexo ${data.sexo === 'feminino' ? 'feminino' : 'masculino'}` : '')
+                + (data.gestante === 'sim' ? ', gestante' : '');
+            const comorbidades = marcados('comorbidades'), medicacoes = marcados('medicacoes');
+            texto += comorbidades.length ? ', com ' + lista(comorbidades) : ', sem comorbidades informadas';
+            if (medicacoes.length) texto += ', em uso de ' + lista(medicacoes);
+            return (texto + '.').slice(0, 600);
+        }
+        // Exames já realizados: as linhas lidas dos laudos e, das demais datas, os exames informados à mão.
+        function examesRealizadosSugeridos() {
+            const br = data => data.split('-').reverse().join('/');
+            const linhas = [...resumoDosLaudos.keys()].sort().reverse().map(data => br(data) + ' - ' + resumoDosLaudos.get(data));
+            const outros = new Map();
+            document.querySelectorAll('.exame-anterior').forEach(cartao => {
+                const nome = cartao.querySelector('[data-exame-anterior]').value.trim();
+                const data = cartao.querySelector('[data-data-anterior]').value;
+                if (!nome || !data || resumoDosLaudos.has(data)) return;
+                const valores = [...cartao.querySelectorAll('[data-campo]')].map(c => c.value.trim()).filter(Boolean);
+                outros.set(data, (outros.get(data) || []).concat(nome + (valores.length ? ' ' + valores.join('/') : '')));
+            });
+            [...outros.keys()].sort().reverse().forEach(data => linhas.push(br(data) + ' - ' + outros.get(data).join(' | ')));
+            return linhas.join('; ').slice(0, 900);
         }
         function justificativaDoDialogo(categoria) {
             return categoria === 'vacina' ? '' : document.getElementById('guiaIndicacao').value.trim();
@@ -2561,9 +2721,11 @@
             [['cns', 'apacCns'], ['nascimento', 'apacNascimento'], ['mae', 'apacMae'], ['telefone', 'apacTelefone'],
              ['endereco', 'apacEndereco'], ['municipio', 'apacMunicipio'], ['uf', 'apacUf'], ['cep', 'apacCep']]
                 .forEach(([campo, id]) => { if (v(id)) paciente[campo] = campo === 'uf' ? v(id).toUpperCase() : v(id); });
+            if (apacIbge && paciente.cep) paciente.ibge = apacIbge;
             // CID: em branco, o servidor escolhe por exame a partir das comorbidades marcadas (src/utils/sigtap.py).
             const comorbidades = [...checkupForm.querySelectorAll('input[name="comorbidades"]:checked')].map(c => c.value);
-            return { vinculo_id: Number(plano.slice(4)), paciente, cid: v('apacCid').toUpperCase(), comorbidades };
+            return { vinculo_id: Number(plano.slice(4)), paciente, cid: v('apacCid').toUpperCase(), comorbidades,
+                     anamnese: v('apacAnamnese'), exames: v('apacExames') };
         }
 
         function guiaDoDialogo() {

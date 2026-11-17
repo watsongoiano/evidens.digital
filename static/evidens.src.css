@@ -128,6 +128,12 @@ html.lenis, html.lenis body { height: auto; }
   .rec-sub { @apply text-[12px] text-ink/55 leading-snug; }
   .rec-fonte { @apply text-[11px] text-ink/45 leading-snug; }
   .rec-grau { @apply inline-flex items-center justify-center w-6 h-6 rounded-md bg-ink text-white text-[11px] font-semibold; }
+  /* Graus abaixo de A e B têm cor própria: C (decisão individual), E e PP (consenso, sem estudo), D e I */
+  .rec-grau-c { @apply bg-[#B7791F]; }
+  .rec-grau-e, .rec-grau-pp { @apply bg-white text-ink border border-ink/40; }
+  .rec-grau-pp { @apply w-7 text-[10px]; }
+  .rec-grau-d { @apply bg-[#C0392B]; }
+  .rec-grau-i { @apply bg-ink/35; }
   .rec-remover { @apply w-7 h-7 rounded-full text-ink/50 hover:text-ink hover:bg-paper transition; }
   dialog#dialogoAcrescimo::backdrop { background: rgba(20,41,47,.45); }
   .nao-incluida-card { @apply rounded-2xl bg-white border px-5 py-4 mb-3; }
