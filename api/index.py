@@ -194,7 +194,16 @@ def classificar_pedidos_de_operadora():
         planilha, pdfs = request.files.get('arquivo'), request.files.getlist('laudos')
     except Exception:  # corpo maior que o limite
         return jsonify({'error': 'O envio passa de 4 MB. Divida em arquivos menores.'}), 413
-    avisos = []
+    avisos, do_paciente, paciente = [], None, {}
+    if request.form.get('paciente'):          # dados completos do paciente, no formato do formulário do check-up
+        try:
+            paciente = json.loads(request.form['paciente'])
+            assert isinstance(paciente, dict)
+        except (ValueError, AssertionError):
+            return jsonify({'error': 'Dados do paciente em formato inválido.'}), 400
+        do_paciente, erro = operadora.perfil_do_paciente(paciente)
+        if erro:
+            return jsonify({'error': erro}), 422
     if planilha is not None:
         dados = planilha.read(operadora.TAMANHO_MAXIMO_DO_ENVIO + 1)
         if len(dados) > operadora.TAMANHO_MAXIMO_DO_ENVIO:
@@ -216,6 +225,8 @@ def classificar_pedidos_de_operadora():
         idade = request.form.get('idade', '').strip()
         idade = int(idade) if idade.isdigit() and 0 < int(idade) <= 120 else None
         sexo = request.form.get('sexo') if request.form.get('sexo') in ('F', 'M') else None
+        if do_paciente is not None:          # idade e sexo já validados pelo motor do check-up
+            idade, sexo = int(paciente['idade']), {'feminino': 'F', 'masculino': 'M'}.get(paciente.get('sexo'), sexo)
         internados = 0
         for numero, pdf in enumerate(pdfs, 1):
             nome = os.path.splitext(os.path.basename(pdf.filename or ''))[0][:60] or f'laudo{numero}'
@@ -241,7 +252,9 @@ def classificar_pedidos_de_operadora():
         return jsonify({'error': 'Anexe a planilha de pedidos ou os laudos em PDF.'}), 400
     if not brutas:
         return jsonify({'error': 'Nenhum pedido foi lido. ' + ' '.join(avisos)}), 422
-    resultados, resumo = operadora.classificar_lote(brutas)
+    resultados, resumo = operadora.classificar_lote(brutas, do_paciente)
+    if do_paciente is not None:
+        avisos.insert(0, 'Comparado com o check-up do paciente informado no formulário completo.')
     return jsonify({'resumo': resumo, 'avisos': avisos, 'csv': operadora.escrever_csv(brutas, resultados),
                     'linhas': operadora.linhas_para_a_tela(brutas, resultados)})
 

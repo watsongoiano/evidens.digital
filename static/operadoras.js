@@ -150,6 +150,17 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     carregarListas();
+    // Resultado vindo do formulário completo do check-up (/intelligent-tools?modo=operadora): mostra e apaga.
+    try {
+      const guardado = sessionStorage.getItem('operadoras_resultado');
+      if (guardado) {
+        sessionStorage.removeItem('operadoras_resultado');
+        dados = JSON.parse(guardado); filtro = '';
+        $('[data-resultado]').style.display = '';
+        resumo(); tabela();
+        $('[data-resultado]').scrollIntoView({ block: 'start' });
+      }
+    } catch (e) { /* sem o resultado guardado, a tela abre vazia */ }
     $('[data-form-csv]').addEventListener('submit', e => { e.preventDefault(); enviar(e.target); });
     $('[data-form-laudos]').addEventListener('submit', e => { e.preventDefault(); enviar(e.target); });
     $('[data-modelo]').addEventListener('click', () => baixar('modelo_pedidos.csv', MODELO));

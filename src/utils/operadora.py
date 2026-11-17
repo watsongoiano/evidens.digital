@@ -443,6 +443,28 @@ def _perfil(idade, sexo, comorbidades=frozenset(), medicacoes=frozenset()):
         return None
     if status != 200:
         raise RuntimeError(f'o motor do check-up falhou (status {status})')
+    return _da_resposta(resposta, sexo)
+
+
+def perfil_do_paciente(bruto):
+    """Perfil a partir dos dados completos do paciente, no mesmo formato que o formulário do check-up envia (e que, no
+    futuro, virá do cadastro da operadora). Devolve (perfil, erro): erro é a mensagem do motor para dado inválido.
+
+    `exames_anteriores` não entra: o pedido em análise é que está sendo julgado, e o exame "em dia" sairia da lista do
+    check-up como se não fosse recomendado. O nome do paciente também não entra."""
+    from src.routes.checkup_intelligent import recomendar
+    dados = {k: v for k, v in (bruto or {}).items() if k not in ('exames_anteriores', 'nome_paciente')}
+    with contextlib.redirect_stdout(io.StringIO()):
+        resposta, status = recomendar(dados)
+    if status == 400:
+        return None, resposta.get('error') or 'Dados do paciente inválidos.'
+    if status != 200:
+        raise RuntimeError(f'o motor do check-up falhou (status {status})')
+    return _da_resposta(resposta, {'F': 'feminino', 'M': 'masculino'}.get(dados.get('sexo'), dados.get('sexo'))), None
+
+
+def _da_resposta(resposta, sexo):
+    """(recomendados, contrários) por código TUSS, a partir da resposta do motor do check-up."""
     recomendados, contrarios = {}, {}
     for rec in resposta.get('recommendations') or []:
         if rec.get('categoria') == 'laboratorio':
@@ -472,7 +494,7 @@ def _condicional(texto):
     return 'se normal' in texto.lower()
 
 
-def classificar(linha):
+def classificar(linha, do_paciente=None):
     """Classifica uma linha já normalizada (ler_linha). Devolve as colunas de SAIDA, menos 'erro'."""
     pedido = linha['codigo_tuss']
     codigo = EQUIVALENTES.get(pedido, pedido)          # as regras valem para o exame equivalente
@@ -497,7 +519,10 @@ def classificar(linha):
     finalidade, origem = finalidade_usada(linha)
     comum = {'finalidade_usada': finalidade, 'origem_da_finalidade': origem}
     comorbidades, medicacoes = linha.get('comorbidades') or frozenset(), linha.get('medicacoes') or frozenset()
-    perfil = _perfil(linha['idade'], linha['sexo'], comorbidades, medicacoes) if finalidade == 'rastreio' else None
+    if do_paciente is not None:          # dados completos do paciente (formulário do check-up): valem no lugar das colunas
+        perfil, comorbidades = (do_paciente if finalidade == 'rastreio' else None), frozenset({'dados_do_paciente'})
+    else:
+        perfil = _perfil(linha['idade'], linha['sexo'], comorbidades, medicacoes) if finalidade == 'rastreio' else None
     parecer = parecer_contrario(codigo, linha['sexo'], finalidade, linha['idade'])
     if parecer and not (perfil and codigo in perfil[0]):
         return saida(parecer['cor'], parecer['codigo_do_motivo'], parecer['motivo'], referencia=parecer['referencia'],
@@ -571,7 +596,8 @@ def classificar(linha):
         return saida('vermelho', 'recomendacao_contraria', contra.get('motivo') or 'Recomendação contrária ao rastreio.',
                      **comum, **_referencia(contra.get('referencia'), links))
     return saida('vermelho', 'sem_recomendacao_para_o_perfil',
-                 ('O check-up não recomenda este exame para a idade, o sexo, as comorbidades e as medicações informadas. '
+                 ('O check-up não recomenda este exame para os dados do paciente informados. ' if do_paciente is not None else
+                  'O check-up não recomenda este exame para a idade, o sexo, as comorbidades e as medicações informadas. '
                   if comorbidades or medicacoes else
                   'O check-up não recomenda este exame como rastreio para a idade e o sexo informados, sem comorbidade '
                   'nem gestação informadas. ') + 'SBMFC 2018 e CFPC (Choosing Wisely) são contra exames de sangue anuais de '
@@ -605,7 +631,7 @@ def _com_o_ultimo_do_arquivo(linhas):
             linha['origem_do_ultimo_exame'] = 'informada'
 
 
-def classificar_lote(brutas):
+def classificar_lote(brutas, do_paciente=None):
     """Classifica as linhas do arquivo. Devolve (resultados, resumo); cada resultado traz as colunas de SAIDA."""
     lidas = [ler_linha(bruta) for bruta in brutas]
     _com_o_ultimo_do_arquivo([linha for linha, _ in lidas])
@@ -613,7 +639,7 @@ def classificar_lote(brutas):
     for linha, erros in lidas:
         if not erros:
             try:
-                resultados.append({**classificar(linha), 'erro': ''})
+                resultados.append({**classificar(linha, do_paciente), 'erro': ''})
                 valores.append(linha.get('valor') or 0.0)
                 continue
             except RuntimeError as falha:

@@ -30,6 +30,11 @@ nem consegue usar a rota. A conta própria de operadora ainda não existe.
 - **Dados do paciente.** Com comorbidades e medicações informadas (nas colunas da planilha ou, na tela, no envio dos
   laudos), o pedido é comparado com o que o check-up recomenda para aquele paciente, e não só para a idade e o sexo. A
   lista de chaves é a do check-up e está em `/api/admin/operadoras/listas`; chave fora da lista invalida a linha.
+- **Formulário completo do check-up.** Em `/intelligent-tools?modo=operadora` (só administrador; há um botão em
+  `/operadoras`), o mesmo formulário do check-up recebe os laudos do pedido: peso, pressão, tabagismo, história
+  familiar, gestação, resultados e os demais itens entram na comparação. A rota aceita esses dados no campo `paciente`
+  (JSON no formato que o formulário do check-up envia), que é também a porta de entrada prevista para os dados vindos
+  do cadastro da operadora. `exames_anteriores` e o nome do paciente não entram.
 - **Cálcio.** O cálcio total (40301400) é tratado como o cálcio iônico (40301419) nas regras, por decisão do
   responsável clínico. No check-up, o cálcio total já feito também conta como cálcio iônico feito.
 - **Exames que não são de rastreio.** Exame que aparece nos laudos das operadoras e não tem regra no check-up é
