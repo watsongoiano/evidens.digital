@@ -1,6 +1,14 @@
 
 # Patches applied (2025-08-26T12:12:23)
 
+## 2026-11-17 — APAC no formulário do SUS, orientações em subtópicos e resumo dos exames
+
+- O laudo de APAC passa a usar o formulário do SUS como fundo (`src/data/apac_sus.pdf`; do modelo recebido só saiu
+  "Estado de Santa Catarina"). O Evidēns escreve os dados nas caixas e não redesenha nada.
+- Formulário da APAC: CEP primeiro, com busca do endereço (ViaCEP), e máscaras de data, telefone, CEP e CNS.
+- Orientações em três subtópicos; legenda de todos os graus de evidência, com cor própria abaixo de A e B.
+- Caixa "Exames já realizados": os exames lidos dos laudos em uma linha por data, sem referência e sem nome.
+
 ## 2026-11-17 — Conta de operadora: modo sombra
 
 - `scripts/modo_sombra.py` classifica um arquivo de pedidos de exame laboratorial de operadora (liberaria, pediria

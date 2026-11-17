@@ -981,6 +981,25 @@ def generate_intelligent_recommendations():
         return jsonify({'error': 'Erro interno do servidor'}), 500
 
 
+# Subtópicos das orientações na tela. A ordem é a de exibição.
+GRUPOS_DE_ORIENTACAO = (
+    ('divergencia', 'Divergências entre diretrizes'),
+    ('indicado', 'Outros rastreios e intervenções indicados'),
+    ('nao_rotina', 'Não indicado de rotina ou decisão individual'),
+)
+_NAO_ROTINA = re.compile(r'não recomendado|sem rastreio|decisão individual|nunca fumou|antes dos 65|depois dos 65|'
+                         r'só com fator|a critério|quando encerrar', re.IGNORECASE)
+
+
+def grupo_da_orientacao(orientacao):
+    """Subtópico da orientação, pelo título: divergência entre diretrizes; o que não é indicado de rotina (idade
+    de encerrar, decisão individual, oferta seletiva); e as demais, que são rastreios e intervenções indicados."""
+    titulo = orientacao.get('titulo') or ''
+    if re.search(r'diverg', titulo, re.IGNORECASE):
+        return 'divergencia'
+    return 'nao_rotina' if _NAO_ROTINA.search(titulo) else 'indicado'
+
+
 def recomendar(bruto, registrar_uso=False):
     """O motor do check-up, sem depender do servidor: recebe o JSON do formulário e devolve (resposta, status).
 
@@ -1484,8 +1503,9 @@ def recomendar(bruto, registrar_uso=False):
         aviso_exames = periodicidade.orientacao_dos_nao_reconhecidos(exames_anteriores)
         if aviso_exames:
             response['orientacoes'] = response['orientacoes'] + [aviso_exames]
-        # Orientações também levam a fonte clicável.
+        # Orientações também levam a fonte clicável e o subtópico em que aparecem na tela.
         for o in response['orientacoes']:
+            o['grupo'] = grupo_da_orientacao(o)
             links = build_reference_links(o.get('titulo', ''), o.get('referencia', ''))
             if links:
                 o['referencias'] = links
@@ -1723,6 +1743,13 @@ def _ler_apac(usuario, categoria):
         paciente[campo] = ' '.join(valor.split())[:maximo]
     if paciente.get('cns') and not contas.cns_valido(paciente['cns']):
         raise PedidoDePdfInvalido('Confira o CNS do paciente: 15 dígitos válidos.')
+    if paciente.get('nascimento'):
+        try:
+            nascimento = datetime.strptime(paciente['nascimento'], '%d/%m/%Y')
+        except ValueError:
+            nascimento = None
+        if not nascimento or not 1900 <= nascimento.year or nascimento > datetime.now():
+            raise PedidoDePdfInvalido('Confira a data de nascimento do paciente (dd/mm/aaaa).')
     cid = pedido.get('cid') or ''
     if not isinstance(cid, str) or not re.fullmatch(r'([A-Z]\d{2}(\.?\d)?)?', cid.strip().upper()):
         raise PedidoDePdfInvalido('Confira o CID-10 (ex.: Z12.2).')

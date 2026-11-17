@@ -504,99 +504,135 @@ TABELA_TUSS = '22'
 
 
 # ── Laudo de solicitação de APAC (SUS) ──────────────────────────────────────
-# Formulário do Ministério da Saúde "APAC – Laudo de Solicitação/Autorização", A4 retrato. O Evidēns preenche a
-# solicitação (estabelecimento solicitante, paciente, procedimento, justificativa e profissional solicitante);
-# autorização e estabelecimento executante ficam em branco, para a regulação.
-_X_APAC, _L_APAC = 12.0, 186.0
+# O fundo é o formulário do SUS "Laudo médico para procedimentos de alta complexidade - APAC", tal como é
+# (src/data/apac_sus.pdf; do modelo recebido só saiu o texto "Estado de Santa Catarina" do cabeçalho). O Evidēns
+# não redesenha nada: escreve os dados dentro das caixas e junta a folha escrita ao formulário
+# (_com_o_modelo_da_apac). Preenche a solicitação; autorização e executante ficam em branco, para a regulação.
+# Medidas em pontos do PDF do modelo, a partir do canto superior esquerdo.
+_PT = 25.4 / 72
+_MODELO_DA_APAC = Path(__file__).resolve().parent.parent / 'data' / 'apac_sus.pdf'
 
 
-def _faixa_apac(pdf, y, texto):
-    pdf.set_fill_color(225, 232, 234)
-    pdf.set_draw_color(20, 41, 47)
-    pdf.set_xy(_X_APAC, y)
-    pdf.set_font('DejaVu', 'B', 7.5)
+def _na_caixa(pdf, x0, y0, x1, y1, valor, tamanho=9):
+    """Texto dentro da caixa do formulário (cantos em pontos), abaixo do rótulo impresso."""
+    if valor:
+        _encaixar(pdf, (x0 + 3) * _PT, (y0 + 5.5) * _PT, (x1 - x0 - 6) * _PT, (y1 - y0 - 6) * _PT, valor, tamanho)
+
+
+def _nas_casas(pdf, divisas, y0, y1, texto, tamanho=9):
+    """Um caractere por casa. `divisas`: as bordas das casas, da esquerda para a direita (pontos)."""
+    pdf.set_font('DejaVu', '', tamanho)
     pdf.set_text_color(20, 41, 47)
-    pdf.cell(_L_APAC, 5, texto, fill=True, align='C', border=1)
-    return y + 5
+    for caractere, x0, x1 in zip(texto, divisas, divisas[1:]):
+        pdf.set_xy(x0 * _PT, y0 * _PT)
+        pdf.cell((x1 - x0) * _PT, (y1 - y0) * _PT, caractere, align='C')
 
 
-def _linha_apac(pdf, y, altura, campos):
-    """campos: [(largura, rótulo, valor)], da esquerda para a direita, ocupando a largura do formulário."""
-    x = _X_APAC
-    for largura, rotulo, valor in campos:
-        _campo(pdf, x, y, largura, altura, rotulo, valor, 8.5)
-        x += largura
-    return y + altura
+def _no_centro(pdf, x0, y0, x1, y1, texto, tamanho=9):
+    pdf.set_font('DejaVu', '', tamanho)
+    pdf.set_text_color(20, 41, 47)
+    pdf.set_xy(x0 * _PT, y0 * _PT)
+    pdf.cell((x1 - x0) * _PT, (y1 - y0) * _PT, texto, align='C')
+
+
+def _casas(inicio, fim, n):
+    return [inicio + (fim - inicio) * i / n for i in range(n + 1)]
+
+
+def _telefone_na_apac(pdf, y0, y1, x_ddd, x_meio, x_numero, x_fim, telefone):
+    """DDD nas duas casas; o número, um dígito por casa. O formulário tem 8 casas: no celular (9 dígitos), os
+    dois primeiros dividem a primeira casa."""
+    digitos = re.sub(r'\D', '', telefone or '')
+    if len(digitos) in (12, 13) and digitos.startswith('55'):
+        digitos = digitos[2:]
+    if len(digitos) not in (10, 11):
+        if digitos:
+            _no_centro(pdf, x_numero, y0, x_fim, y1, digitos, 8.5)
+        return
+    _nas_casas(pdf, [x_ddd, x_meio, x_numero], y0, y1, digitos[:2])
+    numero = digitos[2:]
+    casas = _casas(x_numero, x_fim, 8)
+    if len(numero) == 9:
+        _no_centro(pdf, casas[0], y0, casas[1], y1, numero[:2], 7)
+        numero = ' ' + numero[2:]
+    _nas_casas(pdf, casas, y0, y1, numero)
+
+
+def _data_na_apac(pdf, x0, barra1, barra2, x1, y0, y1, data):
+    """dd / mm / aaaa em volta das barras já impressas no formulário. `barra`: (início, fim) de cada barra."""
+    m = re.fullmatch(r'(\d{2})/(\d{2})/(\d{4})', (data or '').strip())
+    if not m:
+        return
+    _no_centro(pdf, x0, y0, barra1[0], y1, m.group(1), 8.5)
+    _no_centro(pdf, barra1[1], y0, barra2[0], y1, m.group(2), 8.5)
+    _no_centro(pdf, barra2[1], y0, x1, y1, m.group(3), 8.5)
 
 
 def _pagina_da_apac(pdf, dados_paciente, exame, apac):
+    """Folha só com os dados, nas posições das caixas do formulário do SUS (o fundo entra depois)."""
     from src.utils import sigtap
     pdf.add_page(orientation='P', format='A4')
     vinculo, paciente, resp = apac['vinculo'], apac.get('paciente') or {}, apac.get('responsavel') or {}
     titulo = exame.get('titulo') or ''
-    codigo = sigtap.formatado(sigtap.codigo(titulo))
-    sexo = {'feminino': 'Feminino', 'masculino': 'Masculino', 'F': 'Feminino', 'M': 'Masculino'}.get(
-        dados_paciente.get('sexo'), '')
-    # Cabeçalho
-    pdf.set_draw_color(20, 41, 47)
-    pdf.rect(_X_APAC, 10, 58, 16)
-    pdf.rect(_X_APAC + 60, 10, _L_APAC - 60, 16)
-    pdf.set_text_color(20, 41, 47)
-    pdf.set_font('DejaVu', 'B', 9)
-    pdf.set_xy(_X_APAC + 2, 12.5)
-    pdf.multi_cell(54, 4.5, 'MINISTÉRIO DA SAÚDE\nSUS – Sistema Único de Saúde', align='C')
-    pdf.set_font('DejaVu', 'B', 11.5)
-    pdf.set_xy(_X_APAC + 62, 11.5)
-    pdf.cell(_L_APAC - 64, 6, 'APAC – Autorização de Procedimentos Ambulatoriais', align='C')
-    pdf.set_font('DejaVu', '', 10)
-    pdf.set_xy(_X_APAC + 62, 18)
-    pdf.cell(_L_APAC - 64, 6, 'Laudo de Solicitação / Autorização', align='C')
-
-    y = _faixa_apac(pdf, 28, 'IDENTIFICAÇÃO DO ESTABELECIMENTO DE SAÚDE (SOLICITANTE)')
-    y = _linha_apac(pdf, y, 10, [(150, 'Nome do estabelecimento de saúde solicitante', vinculo['nome']),
-                                 (36, 'CNES', vinculo['cnes'])])
-    y = _faixa_apac(pdf, y + 1.5, 'IDENTIFICAÇÃO DO PACIENTE')
+    so_digitos = lambda valor: re.sub(r'\D', '', valor or '')
+    # Estabelecimento solicitante
+    _na_caixa(pdf, 33.4, 88.1, 441.7, 106.0, vinculo['nome'])
+    _nas_casas(pdf, _casas(447.1, 546.2, 7), 94, 106, so_digitos(vinculo['cnes'])[:7])
+    # Paciente
     nome = dados_paciente.get('nome') or ''
     if nome in ('Paciente', 'Não informado'):
         nome = ''
-    y = _linha_apac(pdf, y, 10, [(150, 'Nome do paciente', _texto(nome, 150)), (36, 'Nº do prontuário', paciente.get('prontuario'))])
-    y = _linha_apac(pdf, y, 10, [(76, 'Cartão Nacional de Saúde (CNS)', paciente.get('cns')),
-                                 (34, 'Data de nascimento', paciente.get('nascimento')), (30, 'Sexo', sexo),
-                                 (23, 'Raça/cor', paciente.get('raca')), (23, 'Etnia', '')])
-    y = _linha_apac(pdf, y, 10, [(130, 'Nome da mãe', paciente.get('mae')), (56, 'Telefone celular', paciente.get('telefone'))])
-    y = _linha_apac(pdf, y, 10, [(130, 'Nome do responsável', paciente.get('responsavel')), (56, 'Telefone de contato', '')])
-    y = _linha_apac(pdf, y, 10, [(186, 'Endereço (rua, nº, bairro)', paciente.get('endereco'))])
-    y = _linha_apac(pdf, y, 10, [(96, 'Município de residência', paciente.get('municipio')),
-                                 (34, 'Cód. IBGE município', paciente.get('ibge')), (16, 'UF', paciente.get('uf')),
-                                 (40, 'CEP', paciente.get('cep'))])
-    y = _faixa_apac(pdf, y + 1.5, 'PROCEDIMENTO SOLICITADO')
-    y = _linha_apac(pdf, y, 11, [(42, 'Código do procedimento principal', codigo), (16, 'Serviço', ''),
-                                 (16, 'Class.', ''), (96, 'Nome do procedimento principal', pdf.t(titulo)),
-                                 (16, 'Qtde.', '1')])
-    y = _faixa_apac(pdf, y + 1.5, 'PROCEDIMENTO(S) SECUNDÁRIO(S)')
-    for _ in range(3):
-        y = _linha_apac(pdf, y, 8, [(42, 'Código do procedimento secundário', ''),
-                                    (128, 'Nome do procedimento secundário', ''), (16, 'Qtde.', '')])
-    y = _faixa_apac(pdf, y + 1.5, 'JUSTIFICATIVA DO(S) PROCEDIMENTO(S) SOLICITADO(S)')
-    y = _linha_apac(pdf, y, 12, [(108, 'Descrição do diagnóstico', apac.get('diagnostico')),
-                                 (26, 'CID-10 principal', apac.get('cid')), (26, 'CID-10 secundário', apac.get('cid_secundario')),
-                                 (26, 'CID-10 causas associadas', '')])
-    y = _linha_apac(pdf, y, 14, [(186, 'Observações', apac.get('observacoes'))])
-    y = _faixa_apac(pdf, y + 1.5, 'SOLICITAÇÃO')
+    _na_caixa(pdf, 33.4, 128.4, 458.5, 146.1, _texto(nome, 150))
+    _na_caixa(pdf, 462.9, 128.4, 545.6, 146.1, paciente.get('prontuario'))
+    _nas_casas(pdf, _casas(33.4, 290.9, 15), 157.3, 169.4, so_digitos(paciente.get('cns'))[:15])
+    _data_na_apac(pdf, 298.0, (319.7, 324.1), (342.1, 346.4), 382.9, 158.4, 169.5, paciente.get('nascimento'))
+    sexo = {'feminino': 'F', 'masculino': 'M'}.get(dados_paciente.get('sexo'), dados_paciente.get('sexo'))
+    if sexo == 'M':
+        _no_centro(pdf, 407.7, 155.1, 419.4, 165.5, 'X')
+    elif sexo == 'F':
+        _no_centro(pdf, 463.9, 155.1, 474.4, 165.5, 'X')
+    _na_caixa(pdf, 485.5, 150.4, 546.2, 168.2, paciente.get('raca'), 8)
+    _na_caixa(pdf, 33.4, 175.0, 388.9, 192.8, paciente.get('mae'))
+    _telefone_na_apac(pdf, 182.8, 192.8, 393.2, 408.4, 423.7, 545.6, paciente.get('telefone'))
+    _na_caixa(pdf, 33.1, 199.1, 388.6, 216.8, paciente.get('responsavel'))
+    _na_caixa(pdf, 33.4, 220.3, 545.6, 238.0, paciente.get('endereco'))
+    _na_caixa(pdf, 33.4, 244.2, 345.3, 261.9, paciente.get('municipio'))
+    _no_centro(pdf, 345.3, 250.5, 424.0, 261.9, so_digitos(paciente.get('ibge'))[:7])
+    _nas_casas(pdf, [424.0, 440.2, 456.5], 252.5, 261.9, (paciente.get('uf') or '').upper()[:2])
+    _nas_casas(pdf, [456.5, 468.1, 479.0, 489.8, 500.7, 511.5, 523.1, 533.9, 545.6], 252.5, 261.9,
+               so_digitos(paciente.get('cep'))[:8], 8.5)
+    # Procedimento solicitado (o principal); os secundários ficam em branco
+    _nas_casas(pdf, _casas(33.4, 206.5, 10), 291.1, 304.4, sigtap.codigo(titulo))
+    _na_caixa(pdf, 210.9, 282.2, 480.8, 304.4, pdf.t(titulo))
+    _no_centro(pdf, 485.2, 288.0, 537.5, 304.4, '1')
+    # Justificativa
+    _na_caixa(pdf, 33.4, 397.3, 327.4, 419.5, apac.get('diagnostico'), 8.5)
+    _no_centro(pdf, 327.4, 402.5, 387.2, 418.9, apac.get('cid') or '')
+    _no_centro(pdf, 387.2, 402.5, 454.3, 418.9, apac.get('cid_secundario') or '')
+    _na_caixa(pdf, 33.4, 428.9, 546.2, 477.4, apac.get('observacoes'), 8.5)
+    # Solicitação
     profissional = resp.get('nome', '') + (f" – {resp['crm']}" if resp.get('crm') else '')
-    _campo(pdf, _X_APAC + 140, y, 46, 20, 'Assinatura e carimbo (nº do registro do conselho)')
-    _linha_apac(pdf, y, 10, [(110, 'Nome do profissional solicitante', profissional),
-                             (30, 'Data da solicitação', data_de_emissao())])
-    _linha_apac(pdf, y + 10, 10, [(140, 'Cartão Nacional de Saúde (CNS) do profissional solicitante', vinculo.get('cns'))])
-    y = _faixa_apac(pdf, y + 21.5, 'AUTORIZAÇÃO')
-    _campo(pdf, _X_APAC + 140, y, 46, 20, 'Nº da autorização (APAC)')
-    _linha_apac(pdf, y, 10, [(110, 'Nome do profissional autorizador', ''), (30, 'Cód. órgão emissor', '')])
-    _linha_apac(pdf, y + 10, 10, [(140, 'Cartão Nacional de Saúde (CNS) do profissional autorizador', '')])
-    y = _linha_apac(pdf, y + 20, 10, [(40, 'Data da autorização', ''),
-                                      (100, 'Assinatura e carimbo (nº do registro do conselho)', ''),
-                                      (46, 'Período de validade da APAC', '')])
-    y = _faixa_apac(pdf, y + 1.5, 'IDENTIFICAÇÃO DO ESTABELECIMENTO DE SAÚDE (EXECUTANTE)')
-    _linha_apac(pdf, y, 10, [(150, 'Nome fantasia do estabelecimento de saúde executante', ''), (36, 'CNES', '')])
+    _na_caixa(pdf, 33.5, 616.2, 290.3, 633.9, profissional)
+    _data_na_apac(pdf, 293.6, (313.7, 318.1), (336.1, 340.4), 371.5, 623.2, 633.6, data_de_emissao())
+    cns = so_digitos(vinculo.get('cns'))[:15]
+    if cns:
+        _no_centro(pdf, 51.2, 645.4, 60.4, 653.6, 'X', 7)             # documento: ( X ) CNS
+        _nas_casas(pdf, _casas(142.9, 371.5, 15), 645.0, 657.1, cns)
+
+
+def _com_o_modelo_da_apac(conteudo, quantas):
+    """Põe o formulário do SUS por baixo das `quantas` últimas páginas (as folhas de APAC)."""
+    if not quantas:
+        return conteudo
+    import io
+    from pypdf import PdfReader, PdfWriter
+    modelo = PdfReader(str(_MODELO_DA_APAC)).pages[0]
+    saida = PdfWriter(clone_from=io.BytesIO(conteudo))
+    for pagina in saida.pages[-quantas:]:
+        pagina.merge_page(modelo, over=False)
+    resultado = io.BytesIO()
+    saida.write(resultado)
+    return resultado.getvalue()
 
 
 def _anexar_apacs(pdf, dados_paciente, exames, apac):
@@ -688,8 +724,9 @@ def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='
     if guia:
         _anexar_guias(pdf, dados_paciente, exames, dict(guia, responsavel=responsavel))
     elif apac:
-        _anexar_apacs(pdf, dados_paciente, exames, dict(apac, responsavel=responsavel,
-                                                         diagnostico=apac.get('diagnostico') or justificativa))
+        laudos = _anexar_apacs(pdf, dados_paciente, exames, dict(apac, responsavel=responsavel,
+                                                                  diagnostico=apac.get('diagnostico') or justificativa))
+        return _com_o_modelo_da_apac(_com_timbrado(pdf, timbrado, paginas_do_pedido), laudos)
     return _com_timbrado(pdf, timbrado, paginas_do_pedido)
 
 

@@ -84,18 +84,39 @@ def test_pedido_de_imagem_pelo_sus_sai_com_laudo_de_apac_so_nos_exames_que_pedem
     itens = [{'titulo': 'Tomografia computadorizada de tórax de baixa dose (LDCT)', 'categoria': 'imagem'},
              {'titulo': 'Ultrassonografia de abdome total', 'categoria': 'imagem'}]
     apac = {'vinculo_id': vid, 'cid': 'z12.2',
-            'paciente': {'cns': _cns('8'), 'nascimento': '01/02/1960', 'mae': 'Mãe Fictícia', 'municipio': 'Goiânia', 'uf': 'GO'}}
+            'paciente': {'cns': _cns('8'), 'nascimento': '01/02/1960', 'mae': 'Mãe Fictícia', 'municipio': 'Goiânia', 'uf': 'GO',
+                         'telefone': '(62) 98888-7777', 'cep': '74000-000', 'ibge': '5208707',
+                         'endereco': 'Rua de Teste, nº 10, Setor Fictício'}}
     r = cliente.post('/api/gerar-pdf-exames-imagem', json={
         'dados_paciente': PACIENTE, 'recomendacoes': itens, 'apac': apac, 'justificativa': 'Rastreamento de câncer de pulmão'})
     assert r.status_code == 200
     paginas = _paginas(r.data)
     assert len(paginas) == 3                                     # 2 pedidos + 1 APAC (só a tomografia)
     laudo = paginas[2]
-    for esperado in ('APAC', 'Laudo de Solicitação', 'Policlínica Fictícia', '2223334', '02.06.02.003-1',
-                     'Tomografia computadorizada de tórax', 'Z12.2', 'Mãe Fictícia', _cns('8'), _cns(),
-                     'Rastreamento de câncer de pulmão', medico['nome']):
+    for esperado in ('Policlínica Fictícia', 'Tomografia computadorizada de tórax', 'Z12.2', 'Mãe Fictícia',
+                     'Rastreamento de câncer de pulmão', medico['nome'], 'Rua de Teste, nº 10, Setor Fictício', 'Goiânia'):
         assert esperado in laudo, esperado
     assert 'Ultrassonografia' not in laudo
+    # O fundo é o formulário do SUS, sem o nome do estado do modelo recebido
+    for impresso in ('LAUDO MÉDICO PARA PROCEDIMENTOS DE ALTA', 'IDENTIFICAÇÃO DO PACIENTE', 'PROCEDIMENTO SOLICITADO',
+                     'RESUMO DA ANANNESE E EXAME FÍSICO', 'AUTORIZAÇÃO', 'Ministério'):
+        assert impresso in laudo, impresso
+    assert 'Santa' not in laudo and 'Catarina' not in laudo and 'Estado' not in laudo
+    # O que vai nas casas (um caractere por casa) aparece na ordem, com espaços entre os caracteres
+    junto = re.sub(r'\s', '', laudo)
+    for esperado in ('2223334', '0206020031', _cns('8'), _cns(), '01021960', '5208707', '74000000', '62', '8887777'):
+        assert esperado in junto, esperado
+
+
+def test_formulario_do_sus_e_o_modelo_sem_o_nome_do_estado():
+    from src.utils import pdf_minutas
+    pagina = PdfReader(str(pdf_minutas._MODELO_DA_APAC)).pages
+    assert len(pagina) == 1
+    texto = pagina[0].extract_text()
+    assert 'COMPLEXIDADE - APAC' in texto and 'Ministério' in texto and 'Saúde' in texto
+    assert not any(palavra in texto for palavra in ('Estado', 'Santa', 'Catarina'))
+    # 17 campos numerados do paciente e do estabelecimento, como no modelo
+    assert all(f'{n} -' in texto or f'{n} - ' in texto for n in range(1, 18))
 
 
 def test_apac_recusada_fora_da_imagem_com_cns_ou_cid_errados(app, contas):
@@ -156,3 +177,53 @@ def test_dados_da_apac_somem_quando_muda_o_paciente():
     confirmacao = html.split('function pedirConfirmacaoDoPlano()')[1].split('\n        }')[0]
     limpeza = html.split('function limparGuia()')[1].split('\n        }')[0]
     assert 'limparApac()' in confirmacao and 'limparApac()' in limpeza
+
+
+def test_apac_recusa_data_de_nascimento_impossivel(app, contas):
+    cliente, _ = _conta(app, contas)
+    vid = _vinculo(cliente)
+    itens = [{'titulo': 'Ressonância magnética de crânio', 'categoria': 'imagem'}]
+    for nascimento, status in (('20011996', 400), ('31/02/1990', 400), ('01/01/2999', 400), ('20/01/1996', 200)):
+        r = cliente.post('/api/gerar-pdf-exames-imagem', json={
+            'dados_paciente': PACIENTE, 'recomendacoes': itens, 'apac': {'vinculo_id': vid, 'paciente': {'nascimento': nascimento}}})
+        assert r.status_code == status, nascimento
+
+
+def test_telefone_da_apac_cabe_nas_casas_do_formulario():
+    """Fixo (8 dígitos): um por casa. Celular (9): os dois primeiros dividem a primeira casa."""
+    from src.utils import pdf_minutas
+    apac = {'vinculo': {'nome': 'Policlínica Fictícia', 'cnes': '2223334', 'cns': ''}, 'paciente': {}}
+    for telefone, esperado in (('(62) 3333-4444', '6233334444'), ('(62) 98888-7777', '62988887777'), ('+55 62 98888-7777', '62988887777')):
+        apac['paciente'] = {'telefone': telefone}
+        dados = pdf_minutas.gerar_pdf_exames_imagem(PACIENTE, [{'titulo': 'Colonoscopia'}], apac=apac)
+        assert esperado in re.sub(r'\D', '', _paginas(dados)[1].split('TELEFONE DE CONTATO')[0][-400:] + _paginas(dados)[1]), telefone
+
+
+def test_tela_tem_mascaras_cep_primeiro_e_busca_do_endereco():
+    from pathlib import Path
+    html = (Path(__file__).resolve().parent.parent / 'intelligent-tools.html').read_text(encoding='utf-8')
+    campos = html[html.index('id="apacCampos"'):html.index('id="apacCid"')]
+    assert campos.index('id="apacCep"') < campos.index('id="apacEndereco"') < campos.index('id="apacCns"')
+    for trecho in ('MASCARAS_DA_APAC', 'apacNascimento: v =>', 'apacTelefone: v =>', "'https://viacep.com.br/ws/' + cep + '/json/'",
+                   'paciente.ibge = apacIbge'):
+        assert trecho in html, trecho
+
+
+def test_orientacoes_saem_em_subtopicos(client):
+    from src.routes.checkup_intelligent import GRUPOS_DE_ORIENTACAO, grupo_da_orientacao, recomendar
+    grupos = {g for g, _ in GRUPOS_DE_ORIENTACAO}
+    assert grupo_da_orientacao({'titulo': 'Câncer de próstata: as diretrizes divergem'}) == 'divergencia'
+    assert grupo_da_orientacao({'titulo': 'Divergência entre diretrizes: rastreio de hepatite B'}) == 'divergencia'
+    assert grupo_da_orientacao({'titulo': 'Rastreio colorretal depois dos 85 anos: não recomendado'}) == 'nao_rotina'
+    assert grupo_da_orientacao({'titulo': 'Mamografia a partir de 75 anos: decisão individual'}) == 'nao_rotina'
+    assert grupo_da_orientacao({'titulo': 'Medir a pressão arterial'}) == 'indicado'
+    for idade, sexo in ((30, 'feminino'), (60, 'masculino'), (88, 'feminino')):
+        resposta, status = recomendar({'idade': idade, 'sexo': sexo, 'tabagismo': 'nunca_fumou'})
+        assert status == 200 and resposta['orientacoes']
+        assert all(o['grupo'] in grupos for o in resposta['orientacoes'])
+    html = __import__('pathlib').Path(__file__).resolve().parent.parent.joinpath('intelligent-tools.html').read_text(encoding='utf-8')
+    for _, nome in GRUPOS_DE_ORIENTACAO:
+        assert nome in html, nome
+    for grau in ('rec-grau-c', 'rec-grau-e', 'rec-grau-pp', 'rec-grau-d', 'rec-grau-i'):
+        assert grau in html and grau in __import__('pathlib').Path('static/evidens.css').read_text(encoding='utf-8')
+    assert 'id="examesResumo"' in html and 'guardarResumoDoLaudo(dados.resumo)' in html

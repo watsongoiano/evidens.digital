@@ -220,7 +220,7 @@ def test_data_futura_ou_ausente_nao_vira_data():
     futura = [['UREIA', '[DATA DA COLETA : 01/01/2030 08:00]', 'Material: Soro']]
     sem = [['CREATININA', 'Metodo: Jaffe', 'Material: Soro']]
     assert laudos.ler(_pdf(futura), HOJE)['sem_data'] == ['UREIA']
-    assert laudos.ler(_pdf(sem), HOJE) == {'exames': [], 'nao_reconhecidos': [], 'sem_data': ['CREATININA']}
+    assert laudos.ler(_pdf(sem), HOJE) == {'exames': [], 'nao_reconhecidos': [], 'sem_data': ['CREATININA'], 'resumo': []}
 
 
 @pytest.mark.parametrize('nome, titulo', [
@@ -373,3 +373,19 @@ def test_laudo_matrix_mv_le_titulo_sem_coluna_e_coleta_no_fim_do_exame():
     }
     assert lido['sem_data'] == [] and lido['nao_reconhecidos'] == []
     assert '2026-11-01' not in _nomes(lido).values()      # "Cadastro" não é coleta
+
+
+def test_resumo_em_uma_linha_por_data_sem_referencia_e_sem_nome():
+    """"14/11/2026 - RNI 1,35 | ... | Cr 0,90": só o que o laudo traz escrito, na ordem da evolução clínica."""
+    lido = laudos.ler(_pdf(FORMATO_C), HOJE)
+    assert lido['resumo'] == [
+        {'data': '2026-11-14', 'texto': 'RNI 1,35 | TTPA 1,10 | Cr 0,90 | Ur 33 | Na 140 | CaT 9,10 | CaI 1,14 | P 3,5 | '
+                                        'TGO 20 | TGP 28 | BT 0,90 (BD 0,20 / BI 0,70) | PT 6,50 (Alb 3,90) | CPK 80 | '
+                                        'PCR 12,50 | Lact 1,8'},
+        {'data': '2026-11-13', 'texto': 'Hb 12,3 | Ht 37,0% | Leuc 7.500 | Plaq 250.000'}]
+    # Nada da referência entra ("Até 1,2", "2,0 a 3,0", "10-50 mg/L"), nem dado de identificação
+    texto = str(lido['resumo'])
+    assert '1,20' not in texto and '2,0' not in texto and 'Até' not in texto
+    assert PACIENTE.lower() not in texto.lower() and 'resumo' not in lido['exames'][0]
+    assert laudos.ler(_pdf(FORMATO_A), HOJE)['resumo'] == [{'data': '2026-09-23', 'texto': 'Gli 90'}]
+    assert laudos.ler(_pdf(FORMATO_B), HOJE)['resumo'] == []          # sem valor reconhecível: nada é inventado
