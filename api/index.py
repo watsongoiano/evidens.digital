@@ -197,8 +197,11 @@ def classificar_pedidos_de_operadora():
                 pedidos, soltos = operadora.pedidos_do_laudo(
                     pdf.read(laudos.TAMANHO_MAXIMO + 1), nome, carater='eletivo',
                     regime=request.form.get('regime') or None, finalidade=request.form.get('finalidade') or '')
-            except (ValueError, laudos.LaudoIlegivel) as erro:
-                avisos.append(f'{nome}: não lido ({laudos.MENSAGENS.get(getattr(erro, "codigo", ""), str(erro))})')
+            except laudos.LaudoIlegivel as erro:
+                avisos.append(f'{nome}: não lido ({laudos.MENSAGENS.get(erro.codigo, laudos.MENSAGENS["invalido"])})')
+                continue
+            except ValueError:      # texto fixo: a mensagem da exceção não vai para a resposta
+                avisos.append(f'{nome}: não lido (o cabeçalho do laudo não traz o sexo ou a data de nascimento)')
                 continue
             brutas += pedidos
             avisos.append(f'{nome}: {len(pedidos)} exames identificados'
