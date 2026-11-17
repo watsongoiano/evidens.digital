@@ -319,3 +319,18 @@ def test_indicacao_a_criterio_clinico_continua_sem_prazo():
     pedidos, em_dia = _has([{'exame': 'Relação Aldosterona/Renina (A/R)', 'data': '2026-11-16'}])
     assert not em_dia
     assert 'não tem intervalo definido' in pedidos['Relação Aldosterona/Renina (A/R)']['ultimo_exame']
+
+
+def test_exame_combinado_julga_o_ultimo_resultado_de_cada_parte():
+    from datetime import date
+    from src.utils import periodicidade
+    rec = [{'titulo': 'Sódio e potássio, soro', 'categoria': 'laboratorio', 'subtitulo': 'Fibrilação atrial | Avaliação inicial'}]
+    if len(periodicidade.chaves(rec[0]['titulo'])) < 2:
+        pytest.skip('o exame combinado não tem um código por parte')
+    lidos, erros = periodicidade.ler_exames_anteriores([
+        {'exame': 'Sódio, soro', 'data': '2026-11-15', 'resultados': {'sodio': '140'}},
+        {'exame': 'Potássio, soro', 'data': '2026-11-16', 'resultados': {'potassio': '6,5'}}], date(2026, 11, 17))
+    assert not erros
+    mantidas, em_dia = periodicidade.aplicar(rec, lidos, 'M', date(2026, 11, 17))
+    assert not em_dia
+    assert mantidas[0]['ultimo_exame'] == 'Feito em 15/11/2026, com alteração (Potássio 6,5 mEq/L): sugerimos nova amostra.'

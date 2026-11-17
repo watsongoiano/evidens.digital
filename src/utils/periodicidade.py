@@ -314,11 +314,19 @@ def julgar(itens, sexo=None):
     return ('normal', []) if julgados else (None, [])
 
 
-def _resultados_do_dia(titulo, sexo, exames_anteriores, feito):
-    """Resultados informados, na data `feito`, dos exames que cobrem a recomendação."""
-    da_recomendacao = chaves(titulo, sexo)
-    return [item for e in exames_anteriores if e['data'] == feito and chaves(e['exame'], sexo) & da_recomendacao
-            for item in e.get('resultados') or []]
+def _resultados_mais_recentes(titulo, sexo, exames_anteriores):
+    """Resultados informados que cobrem a recomendação: de cada parte dela, os da coleta mais recente.
+
+    A validade conta da parte mais antiga (`_ultima_data`), mas o julgamento olha o último resultado de cada
+    parte: o potássio alterado de ontem não pode sumir porque o sódio é de anteontem.
+    """
+    escolhidos = {}
+    for chave in chaves(titulo, sexo):
+        da_parte = [e for e in exames_anteriores if chave in chaves(e['exame'], sexo)]
+        if da_parte:
+            ultima = max(e['data'] for e in da_parte)
+            escolhidos.update({id(e): e for e in da_parte if e['data'] == ultima})
+    return [item for e in escolhidos.values() for item in e.get('resultados') or []]
 
 
 # ── Aplicação ────────────────────────────────────────────────────────────────
@@ -359,7 +367,7 @@ def aplicar(recomendacoes, exames_anteriores, sexo=None, hoje_=None):
                                                    'na referência: avalie se o resultado ainda serve.'))
         elif regra['tipo'] == AVALIACAO_INICIAL:
             validade = feito + timedelta(days=VALIDADE_DA_AVALIACAO_INICIAL)
-            estado, fora = julgar(_resultados_do_dia(rec.get('titulo'), sexo, exames_anteriores, feito), sexo)
+            estado, fora = julgar(_resultados_mais_recentes(rec.get('titulo'), sexo, exames_anteriores), sexo)
             if hoje_ >= validade:
                 mantidas.append(dict(rec, ultimo_exame=f'Feito em {_br(feito)}. Avaliação inicial: validade de '
                                                        f'{VALIDADE_DA_AVALIACAO_INICIAL} dias vencida em {_br(validade)}.'))
