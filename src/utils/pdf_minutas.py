@@ -510,6 +510,7 @@ TABELA_TUSS = '22'
 # (_com_o_modelo_da_apac). Preenche a solicitação; autorização e executante ficam em branco, para a regulação.
 # Medidas em pontos do PDF do modelo, a partir do canto superior esquerdo.
 _PT = 25.4 / 72
+JUSTIFICATIVA_DA_APAC = 'Os acima.'      # remete ao resumo da anamnese e aos exames já realizados
 _MODELO_DA_APAC = Path(__file__).resolve().parent.parent / 'data' / 'apac_sus.pdf'
 
 
@@ -539,23 +540,15 @@ def _casas(inicio, fim, n):
     return [inicio + (fim - inicio) * i / n for i in range(n + 1)]
 
 
-def _telefone_na_apac(pdf, y0, y1, x_ddd, x_meio, x_numero, x_fim, telefone):
-    """DDD nas duas casas; o número, um dígito por casa. O formulário tem 8 casas: no celular (9 dígitos), os
-    dois primeiros dividem a primeira casa."""
+def _telefone_na_apac(pdf, y0, y1, x_ddd, x_fim, telefone):
+    """Telefone escrito por inteiro, no modelo (XX) XXXXX-XXXX (fixo: (XX) XXXX-XXXX), na linha das casas."""
     digitos = re.sub(r'\D', '', telefone or '')
     if len(digitos) in (12, 13) and digitos.startswith('55'):
         digitos = digitos[2:]
-    if len(digitos) not in (10, 11):
-        if digitos:
-            _no_centro(pdf, x_numero, y0, x_fim, y1, digitos, 8.5)
-        return
-    _nas_casas(pdf, [x_ddd, x_meio, x_numero], y0, y1, digitos[:2])
-    numero = digitos[2:]
-    casas = _casas(x_numero, x_fim, 8)
-    if len(numero) == 9:
-        _no_centro(pdf, casas[0], y0, casas[1], y1, numero[:2], 7)
-        numero = ' ' + numero[2:]
-    _nas_casas(pdf, casas, y0, y1, numero)
+    if len(digitos) in (10, 11):
+        digitos = f'({digitos[:2]}) {digitos[2:-4]}-{digitos[-4:]}'
+    if digitos:
+        _no_centro(pdf, x_ddd, y0, x_fim, y1, digitos, 9)
 
 
 def _data_na_apac(pdf, x0, barra1, barra2, x1, y0, y1, data):
@@ -593,7 +586,7 @@ def _pagina_da_apac(pdf, dados_paciente, exame, apac):
         _no_centro(pdf, 463.9, 155.1, 474.4, 165.5, 'X')
     _na_caixa(pdf, 485.5, 150.4, 546.2, 168.2, paciente.get('raca'), 8)
     _na_caixa(pdf, 33.4, 175.0, 388.9, 192.8, paciente.get('mae'))
-    _telefone_na_apac(pdf, 182.8, 192.8, 393.2, 408.4, 423.7, 545.6, paciente.get('telefone'))
+    _telefone_na_apac(pdf, 182.8, 192.8, 393.2, 545.6, paciente.get('telefone'))
     _na_caixa(pdf, 33.1, 199.1, 388.6, 216.8, paciente.get('responsavel'))
     _na_caixa(pdf, 33.4, 220.3, 545.6, 238.0, paciente.get('endereco'))
     _na_caixa(pdf, 33.4, 244.2, 345.3, 261.9, paciente.get('municipio'))
@@ -609,7 +602,9 @@ def _pagina_da_apac(pdf, dados_paciente, exame, apac):
     _na_caixa(pdf, 33.4, 397.3, 327.4, 419.5, apac.get('diagnostico'), 8.5)
     _no_centro(pdf, 327.4, 402.5, 387.2, 418.9, apac.get('cid') or '')
     _no_centro(pdf, 387.2, 402.5, 454.3, 418.9, apac.get('cid_secundario') or '')
-    _na_caixa(pdf, 33.4, 428.9, 546.2, 477.4, apac.get('observacoes'), 8.5)
+    _na_caixa(pdf, 33.4, 428.9, 546.2, 477.4, apac.get('anamnese'), 8)
+    _na_caixa(pdf, 34.3, 488.0, 547.0, 536.5, apac.get('exames'), 8)
+    _na_caixa(pdf, 35.5, 543.5, 548.3, 592.0, apac.get('justificativa_do_procedimento') or JUSTIFICATIVA_DA_APAC, 8.5)
     # Solicitação
     profissional = resp.get('nome', '') + (f" – {resp['crm']}" if resp.get('crm') else '')
     _na_caixa(pdf, 33.5, 616.2, 290.3, 633.9, profissional)

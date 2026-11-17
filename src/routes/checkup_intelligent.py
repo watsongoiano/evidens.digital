@@ -1758,7 +1758,13 @@ def _ler_apac(usuario, categoria):
     if not isinstance(comorbidades, list) or len(comorbidades) > 40:
         raise PedidoDePdfInvalido('Comorbidades da APAC inválidas')
     comorbidades = [c for c in comorbidades if isinstance(c, str) and c in sigtap.CID_DA_COMORBIDADE]
-    return {'vinculo': vinculo, 'paciente': paciente, 'cid': cid.strip().upper(), 'comorbidades': comorbidades}
+    textos = {}
+    for campo, maximo in (('anamnese', 600), ('exames', 900)):       # resumo da anamnese e exames já realizados
+        valor = pedido.get(campo) or ''
+        if not isinstance(valor, str) or len(valor) > maximo + 100:
+            raise PedidoDePdfInvalido('Texto do laudo de APAC inválido ou longo demais')
+        textos[campo] = ' '.join(valor.split())[:maximo]
+    return {'vinculo': vinculo, 'paciente': paciente, 'cid': cid.strip().upper(), 'comorbidades': comorbidades, **textos}
 
 
 def _ler_justificativa():

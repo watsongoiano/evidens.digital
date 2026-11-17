@@ -104,7 +104,7 @@ def test_pedido_de_imagem_pelo_sus_sai_com_laudo_de_apac_so_nos_exames_que_pedem
     assert 'Santa' not in laudo and 'Catarina' not in laudo and 'Estado' not in laudo
     # O que vai nas casas (um caractere por casa) aparece na ordem, com espaços entre os caracteres
     junto = re.sub(r'\s', '', laudo)
-    for esperado in ('2223334', '0206020031', _cns('8'), _cns(), '01021960', '5208707', '74000000', '62', '8887777'):
+    for esperado in ('2223334', '0206020031', _cns('8'), _cns(), '01021960', '5208707', '74000000', '(62)98888-7777'):
         assert esperado in junto, esperado
 
 
@@ -189,14 +189,34 @@ def test_apac_recusa_data_de_nascimento_impossivel(app, contas):
         assert r.status_code == status, nascimento
 
 
-def test_telefone_da_apac_cabe_nas_casas_do_formulario():
-    """Fixo (8 dígitos): um por casa. Celular (9): os dois primeiros dividem a primeira casa."""
+def test_telefone_da_apac_sai_no_modelo_com_ddd_entre_parenteses():
     from src.utils import pdf_minutas
     apac = {'vinculo': {'nome': 'Policlínica Fictícia', 'cnes': '2223334', 'cns': ''}, 'paciente': {}}
-    for telefone, esperado in (('(62) 3333-4444', '6233334444'), ('(62) 98888-7777', '62988887777'), ('+55 62 98888-7777', '62988887777')):
+    for telefone, esperado in (('(62) 3333-4444', '(62) 3333-4444'), ('62988887777', '(62) 98888-7777'),
+                               ('+55 62 98888-7777', '(62) 98888-7777')):
         apac['paciente'] = {'telefone': telefone}
         dados = pdf_minutas.gerar_pdf_exames_imagem(PACIENTE, [{'titulo': 'Colonoscopia'}], apac=apac)
-        assert esperado in re.sub(r'\D', '', _paginas(dados)[1].split('TELEFONE DE CONTATO')[0][-400:] + _paginas(dados)[1]), telefone
+        assert esperado in _paginas(dados)[1], telefone
+
+
+def test_apac_leva_anamnese_exames_realizados_e_os_acima(app, contas):
+    cliente, _ = _conta(app, contas)
+    vid = _vinculo(cliente)
+    itens = [{'titulo': 'Colonoscopia', 'categoria': 'imagem'}]
+    anamnese = 'Check-up de paciente de 77 anos, sexo masculino, com diabetes tipo 2 e hipertensão, em uso de losartana e metformina.'
+    exames = '16/11/2026 - Hb 13,7 | Cr 0,71 | K 4,41'
+    r = cliente.post('/api/gerar-pdf-exames-imagem', json={
+        'dados_paciente': PACIENTE, 'recomendacoes': itens, 'apac': {'vinculo_id': vid, 'anamnese': anamnese, 'exames': exames}})
+    assert r.status_code == 200
+    laudo = ' '.join(_paginas(r.data)[1].split())
+    assert 'em uso de losartana e metformina.' in laudo and exames in laudo and 'Os acima.' in laudo
+    for errado in ({'anamnese': 'x' * 800}, {'exames': ['a']}):
+        assert cliente.post('/api/gerar-pdf-exames-imagem', json={
+            'dados_paciente': PACIENTE, 'recomendacoes': itens, 'apac': dict(errado, vinculo_id=vid)}).status_code == 400
+    html = __import__('pathlib').Path(__file__).resolve().parent.parent.joinpath('intelligent-tools.html').read_text(encoding='utf-8')
+    for trecho in ('id="apacAnamnese"', 'id="apacExames"', 'function anamneseSugerida()', 'function examesRealizadosSugeridos()',
+                   "anamnese: v('apacAnamnese'), exames: v('apacExames')"):
+        assert trecho in html, trecho
 
 
 def test_tela_tem_mascaras_cep_primeiro_e_busca_do_endereco():

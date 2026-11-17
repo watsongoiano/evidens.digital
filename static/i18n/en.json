@@ -4243,7 +4243,11 @@
   "Não foi possível buscar o CEP: preencha o endereço.": "Could not look up the postal code: fill in the address.",
   "Endereço preenchido pelo CEP: informe o número.": "Address filled in from the postal code: enter the number.",
   "Município e UF preenchidos pelo CEP.": "City and state filled in from the postal code.",
-  "Confira a data de nascimento do paciente (dd/mm/aaaa).": "Check the patient's date of birth (dd/mm/yyyy)."
+  "Confira a data de nascimento do paciente (dd/mm/aaaa).": "Check the patient's date of birth (dd/mm/yyyy).",
+  "Resumo da anamnese e exame físico": "Summary of history and physical examination",
+  "Exames complementares realizados": "Complementary tests already done",
+  "Em \"Justificativa do procedimento\" sai \"Os acima.\"": "Under \"Justificativa do procedimento\" the form says \"Os acima.\" (the above).",
+  "Texto do laudo de APAC inválido ou longo demais": "Invalid or too long APAC report text"
  },
  "padroes": [
   [

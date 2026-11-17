@@ -1353,6 +1353,8 @@
           <div class="campo"><label for="apacNascimento">Data de nascimento</label><input type="text" id="apacNascimento" maxlength="10" inputmode="numeric" placeholder="dd/mm/aaaa" autocomplete="off"></div>
           <div class="campo sm:col-span-2"><label for="apacMae">Nome da mãe</label><input type="text" id="apacMae" maxlength="120" autocomplete="off"></div>
           <div class="campo"><label for="apacTelefone">Telefone</label><input type="text" id="apacTelefone" maxlength="15" inputmode="tel" placeholder="(00) 00000-0000" autocomplete="off"></div>
+          <div class="campo sm:col-span-2"><label for="apacAnamnese">Resumo da anamnese e exame físico</label><textarea id="apacAnamnese" rows="3" maxlength="600" autocomplete="off"></textarea></div>
+          <div class="campo sm:col-span-2"><label for="apacExames">Exames complementares realizados</label><textarea id="apacExames" rows="3" maxlength="900" autocomplete="off"></textarea><p class="text-[12px] text-ink/55 mt-1">Em "Justificativa do procedimento" sai "Os acima."</p></div>
           <div class="campo"><label for="apacCid">CID-10 principal (opcional)</label><input type="text" id="apacCid" maxlength="6" placeholder="Automático pelas comorbidades" autocomplete="off"></div>
         </div>
       </div>
@@ -2461,7 +2463,7 @@
 
         // Dados do paciente no laudo de APAC: identificam uma pessoa e não podem passar para a próxima.
         const CAMPOS_DA_APAC = ['apacCns', 'apacNascimento', 'apacMae', 'apacTelefone', 'apacCid', 'apacEndereco',
-                                'apacMunicipio', 'apacUf', 'apacCep'];
+                                'apacMunicipio', 'apacUf', 'apacCep', 'apacAnamnese', 'apacExames'];
         let apacIbge = '';     // código IBGE do município, vindo da busca do CEP
         let cepBuscado = '';   // último CEP consultado (o mesmo CEP não é buscado duas vezes seguidas)
         function limparApac() {
@@ -2649,6 +2651,42 @@
             document.getElementById('justificativaPainel').style.display = exames ? '' : 'none';
             const campo = document.getElementById('guiaIndicacao');
             if (exames && !campo.value) campo.value = indicacaoSugerida();
+            // Laudo de APAC: resumo da anamnese e exames já realizados, a partir do que foi informado (editáveis).
+            const anamnese = document.getElementById('apacAnamnese'), feitos = document.getElementById('apacExames');
+            if (exames && !anamnese.value) anamnese.value = anamneseSugerida();
+            if (exames && !feitos.value) feitos.value = examesRealizadosSugeridos();
+        }
+
+        const minuscula = texto => texto.trim().replace(/^[A-ZÀ-Ý](?=[a-zà-ÿ])/, c => c.toLowerCase());
+        // "Check-up de paciente de 77 anos, sexo masculino, com diabetes tipo 2 e hipertensão, em uso de losartana e metformina."
+        function anamneseSugerida() {
+            const data = lerFormulario();
+            const lista = itens => itens.length > 1 ? itens.slice(0, -1).join(', ') + ' e ' + itens[itens.length - 1] : itens.join('');
+            const marcados = nome => [...checkupForm.querySelectorAll(`input[name="${nome}"]:checked`)]
+                .map(c => minuscula(c.dataset.rotulo || (c.closest('label') || c).textContent || '')).filter(Boolean);
+            let texto = (modo === 'preop' ? 'Avaliação pré-operatória' : 'Check-up') + ' de paciente'
+                + (data.idade ? ` de ${data.idade} anos` : '')
+                + (data.sexo ? `, sexo ${data.sexo === 'feminino' ? 'feminino' : 'masculino'}` : '')
+                + (data.gestante === 'sim' ? ', gestante' : '');
+            const comorbidades = marcados('comorbidades'), medicacoes = marcados('medicacoes');
+            texto += comorbidades.length ? ', com ' + lista(comorbidades) : ', sem comorbidades informadas';
+            if (medicacoes.length) texto += ', em uso de ' + lista(medicacoes);
+            return (texto + '.').slice(0, 600);
+        }
+        // Exames já realizados: as linhas lidas dos laudos e, das demais datas, os exames informados à mão.
+        function examesRealizadosSugeridos() {
+            const br = data => data.split('-').reverse().join('/');
+            const linhas = [...resumoDosLaudos.keys()].sort().reverse().map(data => br(data) + ' - ' + resumoDosLaudos.get(data));
+            const outros = new Map();
+            document.querySelectorAll('.exame-anterior').forEach(cartao => {
+                const nome = cartao.querySelector('[data-exame-anterior]').value.trim();
+                const data = cartao.querySelector('[data-data-anterior]').value;
+                if (!nome || !data || resumoDosLaudos.has(data)) return;
+                const valores = [...cartao.querySelectorAll('[data-campo]')].map(c => c.value.trim()).filter(Boolean);
+                outros.set(data, (outros.get(data) || []).concat(nome + (valores.length ? ' ' + valores.join('/') : '')));
+            });
+            [...outros.keys()].sort().reverse().forEach(data => linhas.push(br(data) + ' - ' + outros.get(data).join(' | ')));
+            return linhas.join('; ').slice(0, 900);
         }
         function justificativaDoDialogo(categoria) {
             return categoria === 'vacina' ? '' : document.getElementById('guiaIndicacao').value.trim();
@@ -2686,7 +2724,8 @@
             if (apacIbge && paciente.cep) paciente.ibge = apacIbge;
             // CID: em branco, o servidor escolhe por exame a partir das comorbidades marcadas (src/utils/sigtap.py).
             const comorbidades = [...checkupForm.querySelectorAll('input[name="comorbidades"]:checked')].map(c => c.value);
-            return { vinculo_id: Number(plano.slice(4)), paciente, cid: v('apacCid').toUpperCase(), comorbidades };
+            return { vinculo_id: Number(plano.slice(4)), paciente, cid: v('apacCid').toUpperCase(), comorbidades,
+                     anamnese: v('apacAnamnese'), exames: v('apacExames') };
         }
 
         function guiaDoDialogo() {
