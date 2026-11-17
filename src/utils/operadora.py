@@ -125,8 +125,14 @@ NAO_SAO_DE_RASTREIO = {
 
 
 def comorbidades_validas():
+    """Chave → rótulo de tudo o que o check-up aceita em `comorbidades`: as caixas fixas, a lista e os detalhes de
+    cada condição (nefrite lúpica, osteoporose recém-diagnosticada...), com o nome da condição à frente."""
     from src.utils import condicoes
-    return {**CONDICOES_FIXAS, **{chave: item['rotulo'] for chave, item in condicoes.COMORBIDADES.items()}}
+    validas = {**CONDICOES_FIXAS, **{chave: item['rotulo'] for chave, item in condicoes.COMORBIDADES.items()}}
+    for condicao, (_titulo, _nota, opcoes) in condicoes.DETALHES_COMORBIDADE.items():
+        for chave, rotulo in opcoes:
+            validas.setdefault(chave, f'{validas.get(condicao, condicao)}: {rotulo[0].lower()}{rotulo[1:]}')
+    return validas
 
 
 def medicacoes_validas():

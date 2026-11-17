@@ -478,3 +478,12 @@ def test_calcio_total_feito_cobre_o_calcio_ionico_no_check_up():
     assert not erros
     mantidas, em_dia = periodicidade.aplicar(rec, lidos, 'M', date(2026, 11, 17))
     assert not mantidas and em_dia[0]['titulo'] == 'Cálcio iônico, soro'
+
+
+def test_detalhes_das_condicoes_do_check_up_sao_aceitos_no_perfil():
+    """Com "osteoporose recém-diagnosticada", o check-up pede fosfatase alcalina; o modo sombra tem de aceitar a chave."""
+    validas = op.comorbidades_validas()
+    assert 'osteoporose_diagnostico' in validas and validas['les_nefrite'].startswith('Lúpus eritematoso sistêmico: ')
+    fosfatase = '40301885'
+    assert _um(codigo_tuss=fosfatase, finalidade='rastreio', comorbidades='osteoporose')['cor'] == 'vermelho'
+    assert _um(codigo_tuss=fosfatase, finalidade='rastreio', comorbidades='osteoporose|osteoporose_diagnostico')['cor'] == 'verde'
