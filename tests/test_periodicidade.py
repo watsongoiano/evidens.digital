@@ -249,3 +249,88 @@ def test_nenhuma_resposta_do_motor_leva_o_campo_interno(client):
     for dados in _casos_do_motor():
         resposta = client.post('/api/checkup-intelligent', json=dados)
         assert '_subtitulos' not in resposta.get_data(as_text=True), dados
+
+
+# ── Avaliação inicial: validade de 90 dias e resultado alterado ──────────────
+
+def _has(feitos, hoje_=None, sexo='M'):
+    from datetime import date
+    from src.utils import periodicidade
+    recs = [{'titulo': t, 'categoria': 'laboratorio', 'subtitulo': sub, 'referencia': 'AHA 2025'} for t, sub in (
+        ('Sódio, soro', 'Em uso de diurético | Anual | Também: Adultos com HAS | Avaliação inicial'),
+        ('Cálcio iônico, soro', 'Adultos com HAS | Avaliação inicial'),
+        ('Hemograma completo com plaquetas', 'Adultos com HAS | Avaliação inicial'),
+        ('EAS - Elementos Anormais e Sedimentoscopia', 'Adultos com HAS | Avaliação inicial'),
+        ('Relação Aldosterona/Renina (A/R)', 'Adultos com HAS resistente | Conforme necessidade'))]
+    lidos, erros = periodicidade.ler_exames_anteriores(feitos, hoje_ or date(2026, 11, 17))
+    assert not erros, erros
+    mantidas, em_dia = periodicidade.aplicar(recs, lidos, sexo, hoje_ or date(2026, 11, 17))
+    return {r['titulo']: r for r in mantidas}, {i['titulo']: i for i in em_dia}
+
+
+def test_avaliacao_inicial_recente_e_sem_alteracao_nao_se_repete():
+    pedidos, em_dia = _has([{'exame': 'Sódio, soro', 'data': '2026-11-16', 'resultados': {'sodio': '137'}},
+                            {'exame': 'Cálcio iônico, soro', 'data': '2026-11-16', 'resultados': {'calcio_ionico': '1,16'}}])
+    assert 'Sódio, soro' not in pedidos and 'Cálcio iônico, soro' not in pedidos
+    assert em_dia['Cálcio iônico, soro']['motivo'] == (
+        'Feito em 16/11/2026, sem alteração. Avaliação inicial: resultado válido por 90 dias (critério do Evidēns), '
+        'até 14/02/2027.')
+    assert em_dia['Sódio, soro']['link']['url'].startswith('https://www.abim.org/')
+
+
+def test_avaliacao_inicial_com_resultado_alterado_pede_nova_amostra():
+    hemograma = {'exame': 'Hemograma completo com plaquetas', 'data': '2026-11-16',
+                 'resultados': {'hemoglobina': '11,6', 'leucocitos': '18400', 'plaquetas': '357000'}}
+    pedidos, em_dia = _has([hemograma])
+    assert not em_dia
+    aviso = pedidos['Hemograma completo com plaquetas']
+    assert aviso['ultimo_exame'] == ('Feito em 16/11/2026, com alteração (Hemoglobina 11,6 g/dL; Leucócitos 18400 /mm³): '
+                                     'sugerimos nova amostra.')
+    assert aviso['ultimo_exame_link']['rotulo'] == 'Faixas de referência: ABIM 2026'
+    # A hemoglobina de 12,5 g/dL é normal na mulher e baixa no homem (ABIM: 12-16 e 14-18).
+    hemograma['resultados'] = {'hemoglobina': '12,5'}
+    assert 'Hemograma completo com plaquetas' in _has([hemograma], sexo='F')[1]
+    assert 'Hemograma completo com plaquetas' in _has([hemograma], sexo='M')[0]
+
+
+def test_avaliacao_inicial_sem_resultado_julgavel_sai_do_pedido_e_avisa():
+    pedidos, em_dia = _has([{'exame': 'EAS - Elementos Anormais e Sedimentoscopia', 'data': '2026-10-01'},
+                            {'exame': 'Hemograma completo com plaquetas', 'data': '2026-10-01', 'resultados': {'hemoglobina': '13'}}],
+                           sexo=None)
+    for titulo in ('EAS - Elementos Anormais e Sedimentoscopia', 'Hemograma completo com plaquetas'):
+        assert titulo not in pedidos
+        assert em_dia[titulo]['motivo'].endswith('O sistema não conferiu o resultado: se estiver alterado, peça nova amostra.')
+        assert 'link' not in em_dia[titulo]
+
+
+def test_avaliacao_inicial_com_mais_de_90_dias_volta_ao_pedido():
+    from datetime import date
+    feitos = [{'exame': 'Cálcio iônico, soro', 'data': '2026-08-19', 'resultados': {'calcio_ionico': '1,2'}},
+              {'exame': 'Sódio, soro', 'data': '2026-08-19', 'resultados': {'sodio': '140'}}]
+    pedidos, em_dia = _has(feitos, date(2026, 11, 16))          # 89 dias: ainda vale
+    assert set(em_dia) == {'Cálcio iônico, soro', 'Sódio, soro'}
+    pedidos, em_dia = _has(feitos, date(2026, 11, 17))          # 90 dias: venceu, mesmo com a indicação anual em dia
+    assert not em_dia
+    assert pedidos['Cálcio iônico, soro']['ultimo_exame'] == (
+        'Feito em 19/08/2026. Avaliação inicial: validade de 90 dias vencida em 17/11/2026.')
+
+
+def test_indicacao_a_criterio_clinico_continua_sem_prazo():
+    pedidos, em_dia = _has([{'exame': 'Relação Aldosterona/Renina (A/R)', 'data': '2026-11-16'}])
+    assert not em_dia
+    assert 'não tem intervalo definido' in pedidos['Relação Aldosterona/Renina (A/R)']['ultimo_exame']
+
+
+def test_exame_combinado_julga_o_ultimo_resultado_de_cada_parte():
+    from datetime import date
+    from src.utils import periodicidade
+    rec = [{'titulo': 'Sódio e potássio, soro', 'categoria': 'laboratorio', 'subtitulo': 'Fibrilação atrial | Avaliação inicial'}]
+    if len(periodicidade.chaves(rec[0]['titulo'])) < 2:
+        pytest.skip('o exame combinado não tem um código por parte')
+    lidos, erros = periodicidade.ler_exames_anteriores([
+        {'exame': 'Sódio, soro', 'data': '2026-11-15', 'resultados': {'sodio': '140'}},
+        {'exame': 'Potássio, soro', 'data': '2026-11-16', 'resultados': {'potassio': '6,5'}}], date(2026, 11, 17))
+    assert not erros
+    mantidas, em_dia = periodicidade.aplicar(rec, lidos, 'M', date(2026, 11, 17))
+    assert not em_dia
+    assert mantidas[0]['ultimo_exame'] == 'Feito em 15/11/2026, com alteração (Potássio 6,5 mEq/L): sugerimos nova amostra.'

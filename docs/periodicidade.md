@@ -33,11 +33,23 @@ conservadoras (na dúvida, o exame continua sendo pedido):
 | Faixa ("A cada 3-6 meses", "A cada 4-6 anos") | Usa o limite inferior: só adia se foi feito há menos que o menor intervalo admitido |
 | Uma vez ("Dose única na vida", "Pelo menos 1x na vida") | Feito uma vez, não repete |
 | Sem intervalo ("Basal", "Conforme necessidade", pré-natal) | Não adia; mostra a data no cartão do exame e o médico decide |
-| Duas indicações no mesmo exame ("Anual / Também: Em uso de lítio / A cada 6 meses") | Vale o menor intervalo; se uma delas não tem intervalo, não adia |
+| "Avaliação inicial" | Critério do Evidēns, porque as diretrizes não dizem por quanto tempo o resultado vale: feito há menos de 90 dias e sem alteração, não repete e avisa o prescritor da validade; com resultado alterado, continua no pedido como nova amostra; depois de 90 dias, volta ao pedido |
+| Duas indicações no mesmo exame ("Anual / Também: Em uso de lítio / A cada 6 meses") | Vale o menor intervalo (a avaliação inicial conta como 90 dias); se uma delas não tem intervalo, não adia |
 | "Junto da HbA1c" (glicemia do diabético) | Só é adiada se a HbA1c também estiver em dia |
 | Intervalo vencido | Continua no pedido, com "Intervalo vencido desde ..." |
 
 Meses e anos são de calendário (01/10 + 3 meses = 01/01).
+
+### Resultado alterado na avaliação inicial
+
+O resultado informado é comparado com a faixa de referência do adulto da tabela do
+[ABIM (revisão de janeiro de 2026)](https://www.abim.org/Media/bfijryql/laboratory-reference-ranges.pdf):
+sódio 136-145 mEq/L, potássio 3,5-5,0 mEq/L, cálcio iônico 1,16-1,31 mmol/L, hemoglobina 12-16 g/dL
+(mulher) e 14-18 g/dL (homem), leucócitos 4.000-11.000/µL, plaquetas 150.000-450.000/µL, TSH 0,5-4,0 mUI/L,
+ácido úrico 3,0-7,0 mg/dL e PTH intacto 10-65 pg/mL. Resultado não informado, exame sem faixa nessa lista
+(sorologias, urina, imagem) ou hemoglobina sem o sexo não são julgados: o exame sai do pedido dentro dos
+90 dias, e o aviso pede ao médico que confira o resultado. A faixa do próprio laboratório pode ser
+diferente da do ABIM; o aviso traz o link da tabela usada.
 
 ## Como se sabe que é o mesmo exame
 
@@ -67,7 +79,6 @@ referência atual e por isso nunca são adiados:
 | (só o grupo: Osteoporose) | 25-hidroxivitamina D, soro |
 | (só o grupo: Em uso de inibidor de aromatase) | Densitometria óssea (DEXA) |
 | Avaliação inicial ou falha virológica | Genotipagem do HIV (Teste de Resistência) |
-| Avaliação inicial | Anticorpos anti-HBc total, soro; Anticorpos anti-HBs, soro; Antígeno HBs, soro |
 | Periódico | Avaliação oftalmológica com tonometria e fundoscopia; Vitamina B12, soro |
 | Basal e periódico | Colesterol total e frações, soro; Glicose, soro; Hemoglobina glicada (HbA1c), soro |
 | Basal | 25-hidroxivitamina D, soro; Alanina aminotransferase, soro; Albumina, soro; Aspartato aminotransferase, soro; Bilirrubinas totais e frações, soro; Creatinina, soro; Cálcio iônico, soro; Fosfatase alcalina, soro; Hemograma completo com plaquetas; Potássio, soro; Sódio, soro; Ureia, soro |
