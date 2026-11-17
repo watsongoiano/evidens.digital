@@ -72,3 +72,20 @@ def test_arquivo_enviado_nao_passa_para_o_disco(app):
                                   content_type='multipart/form-data'):
         from flask import request
         assert isinstance(request.files['arquivo'].stream, io.BytesIO)
+
+
+def test_listas_do_check_up_e_dados_do_paciente_no_envio_dos_laudos(admin, client):
+    assert client.get('/api/admin/operadoras/listas').status_code == 403
+    listas = admin.get('/api/admin/operadoras/listas').get_json()
+    assert {'valor': 'hipertensao', 'rotulo': 'Hipertensão'} in listas['comorbidades']
+    assert any(item['valor'] == 'sinvastatina' for item in listas['medicacoes'])
+
+    def cores(**campos):
+        resposta = _envio(admin, laudos=[(io.BytesIO(_pdf(FORMATO_C)), 'beneficiario-7.pdf')], finalidade='rastreio',
+                          regime='ambulatorial', **campos)
+        assert resposta.status_code == 200, resposta.get_data(as_text=True)
+        return {linha['exame']: linha['cor'] for linha in resposta.get_json()['linhas']}
+
+    sem, com = cores(), cores(comorbidades=['hipertensao', 'chave_inventada'], medicacoes=['sinvastatina'])
+    liberados = [exame for exame in com if com[exame] == 'verde' and sem[exame] != 'verde']
+    assert liberados, (sem, com)                  # a hipertensão informada libera exames que sem ela seriam barrados

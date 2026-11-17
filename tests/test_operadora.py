@@ -427,3 +427,54 @@ def test_o_motor_fora_do_servidor_nao_registra_uso(monkeypatch):
     assert status == 200 and resposta['recommendations']
     resposta, status = recomendar({'idade': 12, 'sexo': 'masculino', 'tabagismo': 'nunca_fumou'})
     assert status == 400 and resposta['codigo'] == 'entrada_invalida'
+
+
+# ── Perfil do paciente (comorbidades e medicações), equivalência do cálcio e exames que não são de rastreio ──
+
+SODIO, CALCIO_TOTAL, LACTATO, CK = '40302423', '40301400', '40301109', '40301648'
+
+
+def test_com_comorbidade_informada_vale_o_que_o_check_up_recomenda_para_o_paciente():
+    assert _um(codigo_tuss=SODIO, finalidade='rastreio')['cor'] == 'vermelho'
+    com_has = _um(codigo_tuss=SODIO, finalidade='rastreio', comorbidades='hipertensao')
+    assert com_has['cor'] == 'verde' and com_has['motivo'] == 'Adultos com HAS: exame recomendado (grau B).'
+    sem_indicacao = _um(codigo_tuss='40302237', finalidade='rastreio', comorbidades='hipertensao|dislipidemia',
+                        medicacoes='sinvastatina')                                   # magnésio
+    assert sem_indicacao['cor'] == 'vermelho' and 'as comorbidades e as medicações informadas' in sem_indicacao['motivo']
+
+
+def test_comorbidade_ou_medicacao_fora_da_lista_do_check_up_invalida_a_linha():
+    for campos, trecho in ((dict(comorbidades='hipertensao|inventada'), 'comorbidades fora da lista'),
+                           (dict(medicacoes='remedio_inventado'), 'medicacoes fora da lista')):
+        resultados, _ = op.classificar_lote([_linha(codigo_tuss=SODIO, **campos)])
+        assert trecho in resultados[0]['erro']
+
+
+def test_calcio_total_e_tratado_como_calcio_ionico():
+    total = _um(codigo_tuss=CALCIO_TOTAL, finalidade='rastreio', comorbidades='hipertensao')
+    ionico = _um(codigo_tuss='40301419', finalidade='rastreio', comorbidades='hipertensao')
+    assert total['cor'] == ionico['cor'] == 'verde' and total['motivo'] == ionico['motivo']
+    assert total['exame'] == 'Cálcio (tratado como Cálcio iônico, soro)'
+    assert _um(codigo_tuss=CALCIO_TOTAL, finalidade='rastreio')['codigo_do_motivo'] == 'sem_recomendacao_para_o_perfil'
+
+
+def test_exames_registrados_como_fora_de_rastreio_trazem_a_indicacao_e_a_fonte():
+    lactato = _um(codigo_tuss=LACTATO, finalidade='rastreio')
+    assert lactato['cor'] == 'vermelho' and lactato['codigo_do_motivo'] == 'nao_e_de_rastreio'
+    assert 'sepse' in lactato['motivo'] and lactato['link'].startswith('https://doi.org/')
+    ck = _um(codigo_tuss=CK, finalidade='rastreio', medicacoes='sinvastatina')
+    assert ck['cor'] == 'vermelho' and ck['referencia'] == 'AHA/ACC 2018 (colesterol)'
+    assert _um(codigo_tuss=LACTATO, finalidade='diagnostico')['cor'] == 'verde'
+    assert _um(codigo_tuss='40302385', finalidade='rastreio')['link'].startswith('https://')      # sem fonte própria: Choosing Wisely
+    for item in op.NAO_SAO_DE_RASTREIO.values():
+        assert item['motivo'] and (item['link'] is None or item['link'].startswith('https://'))
+
+
+def test_calcio_total_feito_cobre_o_calcio_ionico_no_check_up():
+    from datetime import date
+    from src.utils import periodicidade
+    rec = [{'titulo': 'Cálcio iônico, soro', 'categoria': 'laboratorio', 'subtitulo': 'Adultos com HAS | Avaliação inicial'}]
+    lidos, erros = periodicidade.ler_exames_anteriores([{'exame': 'Cálcio', 'data': '2026-11-16'}], date(2026, 11, 17))
+    assert not erros
+    mantidas, em_dia = periodicidade.aplicar(rec, lidos, 'M', date(2026, 11, 17))
+    assert not mantidas and em_dia[0]['titulo'] == 'Cálcio iônico, soro'
