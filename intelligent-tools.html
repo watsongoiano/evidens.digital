@@ -2139,6 +2139,12 @@
             });
             exibirResumoDosExames();
         }
+        // Quantos exames há no resumo (não quantas datas): o hemograma conta uma vez, pelo "Hb".
+        const PARTES_DO_HEMOGRAMA = /^(Ht|VCM|HCM|RDW|Leuc|Plaq) /;
+        function quantosExamesNoResumo() {
+            return [...resumoDosLaudos.values()].reduce((soma, texto) =>
+                soma + texto.split(' | ').filter(parte => parte && !PARTES_DO_HEMOGRAMA.test(parte)).length, 0);
+        }
         function exibirResumoDosExames() {
             const alvo = document.getElementById('examesResumo');
             alvo.replaceChildren();
@@ -2150,7 +2156,7 @@
             cartao.setAttribute('data-exames-resumo', '');
             const topo = document.createElement('summary'); topo.className = 'flex items-center justify-between gap-4 cursor-pointer list-none';
             const titulo = document.createElement('span'); titulo.className = 'campo-rotulo !mb-0';
-            const quantos = document.createElement('span'); quantos.className = 'text-ink/40'; quantos.textContent = linhas.length;
+            const quantos = document.createElement('span'); quantos.className = 'text-ink/40'; quantos.textContent = quantosExamesNoResumo();
             titulo.append(T('Exames já realizados') + ' ', quantos);
             const abrir = document.createElement('span'); abrir.className = 'text-[13px] text-teal flex items-center gap-1.5';
             const rotulo = document.createElement('span'); rotulo.textContent = T('Ver exames');
@@ -2377,7 +2383,7 @@
                             <div class="min-w-0">
                                 <h5 class="rec-titulo">${escapeHtml(titulo)}</h5>
                                 ${(subtitulo || referencia_html) ? `<p class="rec-sub">${subtitulo ? escapeHtml(subtitulo) : ''}${subtitulo && referencia_html ? '<span class="text-ink/30 mx-1.5">·</span>' : ''}${referencia_html ? `<span class="referencia-links">${referencia_html}</span>` : ''}</p>` : ''}
-                                ${rec.ultimo_exame ? `<p class="text-[13px] text-teal-dark mt-1.5"><i class="fa-regular fa-calendar-check mr-1.5"></i>${escapeHtml(rec.ultimo_exame)}</p>` : ''}
+                                ${rec.ultimo_exame ? `<p class="text-[13px] text-[#C0392B] mt-1.5" data-aviso-exame><i class="fa-regular fa-calendar-check mr-1.5"></i>${escapeHtml(rec.ultimo_exame)}${linkDoAviso(rec.ultimo_exame_link)}</p>` : ''}
                             </div>
                             ${grau ? `<span class="rec-grau ${/^(C|E|PP|D|I)$/.test(grau) ? 'rec-grau-' + grau.toLowerCase() : ''}" title="Grau de evidência ${escapeHtml(grau)}">${escapeHtml(grau)}</span>` : '<span></span>'}
                             <button type="button" onclick="removeRecommendation(this)" aria-label="Retirar esta recomendação" class="rec-remover"><i class="fa-solid fa-xmark"></i></button>
@@ -2405,6 +2411,12 @@
             em_dia: { texto: 'Em dia', classe: 'bg-mist text-teal-dark', borda: 'border-teal/20' }
         };
 
+        // Link da fonte citada no aviso de exame já feito (só endereço https enviado pelo servidor).
+        function linkDoAviso(link) {
+            if (!link || !/^https:\/\/[^\s"'<>]+$/.test(link.url || '')) return '';
+            return ` <a href='${link.url}' target="_blank" rel="noopener noreferrer" class="underline">${escapeHtml(link.rotulo)}</a>`;
+        }
+
         function displayNaoIncluidas(itens) {
             const container = document.getElementById('naoIncluidasContent');
             container.innerHTML = '';
@@ -2421,7 +2433,7 @@
                 html += `<div class="nao-incluida-card ${rotulo.borda}">
                     <span class="selo ${rotulo.classe}">${rotulo.texto}</span>
                     <h5>${escapeHtml(item.titulo)}</h5>
-                    <p class="text-[14px] text-ink/70 mt-1">${escapeHtml(item.motivo)}</p>
+                    <p class="text-[14px] text-ink/70 mt-1">${escapeHtml(item.motivo)}${linkDoAviso(item.link)}</p>
                     ${item.referencia ? `<p class="text-[12px] text-ink/50 mt-3 flex gap-2"><i class="fa-solid fa-book-medical text-teal/70 mt-0.5"></i><span>${escapeHtml(item.referencia)}</span></p>` : ''}
                 </div>`;
             });

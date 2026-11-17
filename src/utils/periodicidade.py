@@ -13,8 +13,14 @@ Regras de leitura (todas conservadoras: na dúvida, o exame continua sendo pedid
 - "Uma vez na vida" ("dose única", "pelo menos 1x na vida"): feito uma vez, não se repete.
 - Indicação sem intervalo ("basal", "conforme necessidade", "1ª consulta" do pré-natal, "antes do
   tratamento"): não se adia. A data informada aparece como aviso, e o médico decide.
+- "Avaliação inicial": as diretrizes não dizem por quanto tempo o resultado vale. Por decisão do responsável
+  clínico do Evidēns (não é prazo de diretriz, e o aviso ao prescritor diz isso), o exame feito há menos de
+  90 dias não é repetido, salvo se o resultado informado estiver fora da faixa de referência: nesse caso
+  o exame continua no pedido, como nova amostra. A faixa é a da tabela do ABIM (`FAIXAS`); resultado sem
+  faixa na tabela, ou não informado, não é julgado, e o aviso pede ao médico que confira.
 - Recomendação com mais de uma indicação ("Anual | Também: Em uso de lítio | A cada 6 meses"):
-  vale o menor intervalo; se alguma indicação não tem intervalo, não se adia.
+  vale o menor intervalo (a avaliação inicial conta como 90 dias); se alguma indicação não tem intervalo,
+  não se adia.
 - "Junto da HbA1c": acompanha a HbA1c do mesmo atendimento.
 
 Como se sabe que é o mesmo exame
@@ -37,6 +43,24 @@ MAX_EXAMES_ANTERIORES = 80
 FUSO_BRASILIA = timezone(timedelta(hours=-3))
 
 UMA_VEZ = 'uma_vez'
+AVALIACAO_INICIAL = 'avaliacao_inicial'
+VALIDADE_DA_AVALIACAO_INICIAL = 90      # dias; critério do Evidēns (ver o texto no alto do módulo)
+
+# Faixas de referência do adulto para julgar "alterado" na avaliação inicial. Fonte única: ABIM Laboratory Test
+# Reference Ranges, revisão de janeiro de 2026. Campo (src/utils/exames_comuns.py) → (mínimo, máximo), ou por sexo.
+ABIM = {'rotulo': 'Faixas de referência: ABIM 2026',
+        'url': 'https://www.abim.org/Media/bfijryql/laboratory-reference-ranges.pdf'}
+FAIXAS = {
+    'sodio': (136, 145),                 # mEq/L
+    'potassio': (3.5, 5.0),              # mEq/L
+    'calcio_ionico': (1.16, 1.31),       # mmol/L
+    'hemoglobina': {'feminino': (12, 16), 'masculino': (14, 18)},   # g/dL
+    'leucocitos': (4000, 11000),         # /µL
+    'plaquetas': (150000, 450000),       # /µL
+    'tsh': (0.5, 4.0),                   # mUI/L
+    'acido_urico': (3.0, 7.0),           # mg/dL
+    'pth': (10, 65),                     # pg/mL (PTH intacto)
+}
 JUNTO_DA_HBA1C = 'junto_da_hba1c'
 TITULO_HBA1C = 'Hemoglobina glicada (HbA1c), soro'
 
@@ -48,7 +72,7 @@ _UMA_VEZ = {'dose única', 'dose única na vida', 'pelo menos 1x na vida', 'uma 
 SEM_INTERVALO = {
     # momento único ligado a um tratamento ou a um diagnóstico: a data sozinha não diz se serve
     'basal', 'basal e periódico', 'periódico', 'durante o uso', 'antes do tratamento',
-    'antes ou no início do tratamento', 'até 6 meses do início', 'avaliação inicial',
+    'antes ou no início do tratamento', 'até 6 meses do início',
     'avaliação inicial ou falha virológica', 'avaliação de fratura', 'reavaliação',
     'para confirmar o diagnóstico', 'rastreio em cascata', 'conforme uso de medicações', 'após teste de hpv positivo',
     'antes de iniciar a tarv', 'após 8 semanas do início ou mudança de tarv', 'após 4-8 semanas do início',
@@ -84,9 +108,12 @@ _SEMESTRAL = re.compile(r'^semestral(?: ou conforme indicação)?$')
 def intervalo_do_trecho(trecho):
     """O que um trecho do subtítulo diz sobre periodicidade.
 
-    Devolve ('semanas'|'meses'|'anos', n), UMA_VEZ, JUNTO_DA_HBA1C, ou None (o trecho não traz intervalo).
+    Devolve ('semanas'|'meses'|'anos', n), UMA_VEZ, JUNTO_DA_HBA1C, AVALIACAO_INICIAL, ou None (o trecho não
+    traz intervalo).
     """
     t = ' '.join(str(trecho or '').lower().split())
+    if t == 'avaliação inicial':
+        return AVALIACAO_INICIAL
     if t in _UMA_VEZ:
         return UMA_VEZ
     if t == 'junto da hba1c':
@@ -123,6 +150,8 @@ def indicacoes(subtitulo):
 
 
 def _em_dias(intervalo):
+    if intervalo == AVALIACAO_INICIAL:
+        return VALIDADE_DA_AVALIACAO_INICIAL
     unidade, n = intervalo
     return n * {'semanas': 7, 'meses': 30.44, 'anos': 365.25}[unidade]
 
@@ -133,8 +162,9 @@ def intervalo(subtitulo, outros=()):
     `outros` são os subtítulos das demais regras que pediram o mesmo exame e foram unidas a esta
     na resposta (o diabético que também vive com HIV): todas as indicações contam.
 
-    Devolve {'tipo': 'intervalo', 'unidade', 'n', 'texto'}, {'tipo': UMA_VEZ, 'texto'},
-    {'tipo': JUNTO_DA_HBA1C, 'texto'} ou None (alguma indicação não tem intervalo: não adiar).
+    Devolve {'tipo': 'intervalo', 'unidade', 'n', 'texto'}, {'tipo': AVALIACAO_INICIAL, 'texto'},
+    {'tipo': UMA_VEZ, 'texto'}, {'tipo': JUNTO_DA_HBA1C, 'texto'} ou None (alguma indicação não tem intervalo:
+    não adiar).
     """
     achados = []
     for texto in [subtitulo, *outros]:
@@ -149,9 +179,12 @@ def intervalo(subtitulo, outros=()):
             achados.extend(da_indicacao)
     if not achados:
         return None
-    com_prazo = [(i, t) for i, t in achados if isinstance(i, tuple)]
+    com_prazo = [(i, t) for i, t in achados if isinstance(i, tuple) or i == AVALIACAO_INICIAL]
     if com_prazo:      # o menor intervalo manda, mesmo que outra indicação seja "uma vez na vida"
-        (unidade, n), texto = min(com_prazo, key=lambda par: _em_dias(par[0]))
+        menor, texto = min(com_prazo, key=lambda par: _em_dias(par[0]))
+        if menor == AVALIACAO_INICIAL:
+            return {'tipo': AVALIACAO_INICIAL, 'texto': texto}
+        unidade, n = menor
         return {'tipo': 'intervalo', 'unidade': unidade, 'n': n, 'texto': texto}
     if any(i == JUNTO_DA_HBA1C for i, _ in achados):
         return {'tipo': JUNTO_DA_HBA1C, 'texto': next(t for i, t in achados if i == JUNTO_DA_HBA1C)}
@@ -250,6 +283,44 @@ def _ultima_data(titulo, sexo, feitos):
     return min(datas)
 
 
+# ── Resultado da avaliação inicial: dentro ou fora da faixa ──────────────────
+
+def _numero(valor):
+    try:
+        return float(str(valor).replace('.', '').replace(',', '.')) if ',' in str(valor) else float(valor)
+    except (TypeError, ValueError):
+        return None
+
+
+def julgar(itens, sexo=None):
+    """Julga os resultados informados de um exame pelas `FAIXAS`.
+
+    Devolve ('alterado', [textos dos resultados fora da faixa]), ('normal', []) ou (None, []) quando nenhum
+    resultado pôde ser julgado (não informado, sem faixa na tabela ou faixa que depende do sexo não informado).
+    """
+    fora, julgados = [], 0
+    for item in itens or []:
+        faixa = FAIXAS.get(item.get('campo'))
+        if isinstance(faixa, dict):
+            faixa = faixa.get(sexo)
+        numero = _numero(item.get('valor'))
+        if not faixa or numero is None:
+            continue
+        julgados += 1
+        if not faixa[0] <= numero <= faixa[1]:
+            fora.append(' '.join(str(p) for p in (item.get('rotulo'), item.get('valor'), item.get('unidade')) if p))
+    if fora:
+        return 'alterado', fora
+    return ('normal', []) if julgados else (None, [])
+
+
+def _resultados_do_dia(titulo, sexo, exames_anteriores, feito):
+    """Resultados informados, na data `feito`, dos exames que cobrem a recomendação."""
+    da_recomendacao = chaves(titulo, sexo)
+    return [item for e in exames_anteriores if e['data'] == feito and chaves(e['exame'], sexo) & da_recomendacao
+            for item in e.get('resultados') or []]
+
+
 # ── Aplicação ────────────────────────────────────────────────────────────────
 
 def aplicar(recomendacoes, exames_anteriores, sexo=None, hoje_=None):
@@ -266,10 +337,13 @@ def aplicar(recomendacoes, exames_anteriores, sexo=None, hoje_=None):
     mantidas, em_dia, junto = [], [], []
     hba1c_em_dia = False
 
-    def adiar(rec, feito, motivo):
-        em_dia.append({'titulo': rec.get('titulo'), 'categoria': rec.get('categoria'), 'estado': 'em_dia',
-                       'motivo': motivo, 'referencia': re.sub(r'<[^>]+>', '', rec.get('referencia') or ''),
-                       'feito_em': feito.isoformat()})
+    def adiar(rec, feito, motivo, link=None):
+        item = {'titulo': rec.get('titulo'), 'categoria': rec.get('categoria'), 'estado': 'em_dia',
+                'motivo': motivo, 'referencia': re.sub(r'<[^>]+>', '', rec.get('referencia') or ''),
+                'feito_em': feito.isoformat()}
+        if link:
+            item['link'] = link
+        em_dia.append(item)
 
     for rec in recomendacoes:
         if rec.get('categoria') not in ('laboratorio', 'imagem'):
@@ -283,6 +357,22 @@ def aplicar(recomendacoes, exames_anteriores, sexo=None, hoje_=None):
         if regra is None:
             mantidas.append(dict(rec, ultimo_exame=f'Feito em {_br(feito)}. Esta indicação não tem intervalo definido '
                                                    'na referência: avalie se o resultado ainda serve.'))
+        elif regra['tipo'] == AVALIACAO_INICIAL:
+            validade = feito + timedelta(days=VALIDADE_DA_AVALIACAO_INICIAL)
+            estado, fora = julgar(_resultados_do_dia(rec.get('titulo'), sexo, exames_anteriores, feito), sexo)
+            if hoje_ >= validade:
+                mantidas.append(dict(rec, ultimo_exame=f'Feito em {_br(feito)}. Avaliação inicial: validade de '
+                                                       f'{VALIDADE_DA_AVALIACAO_INICIAL} dias vencida em {_br(validade)}.'))
+            elif estado == 'alterado':
+                mantidas.append(dict(rec, ultimo_exame=f'Feito em {_br(feito)}, com alteração ({"; ".join(fora)}): '
+                                                       'sugerimos nova amostra.', ultimo_exame_link=ABIM))
+            elif estado == 'normal':
+                adiar(rec, feito, f'Feito em {_br(feito)}, sem alteração. Avaliação inicial: resultado válido por '
+                                  f'{VALIDADE_DA_AVALIACAO_INICIAL} dias (critério do Evidēns), até {_br(validade)}.', ABIM)
+            else:
+                adiar(rec, feito, f'Feito em {_br(feito)}. Avaliação inicial: resultado válido por '
+                                  f'{VALIDADE_DA_AVALIACAO_INICIAL} dias (critério do Evidēns), até {_br(validade)}. '
+                                  'O sistema não conferiu o resultado: se estiver alterado, peça nova amostra.')
         elif regra['tipo'] == UMA_VEZ:
             adiar(rec, feito, f'Feito em {_br(feito)}. Indicação de uma única vez ({regra["texto"]}): não precisa repetir.')
         elif regra['tipo'] == JUNTO_DA_HBA1C:

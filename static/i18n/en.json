@@ -4249,7 +4249,8 @@
   "Em \"Justificativa do procedimento\" sai \"Os acima.\"": "Under \"Justificativa do procedimento\" the form says \"Os acima.\" (the above).",
   "Texto do laudo de APAC inválido ou longo demais": "Invalid or too long APAC report text",
   "Ver exames": "Show tests",
-  "Fechar exames": "Hide tests"
+  "Fechar exames": "Hide tests",
+  "Faixas de referência: ABIM 2026": "Reference ranges: ABIM 2026"
  },
  "padroes": [
   [
@@ -5115,6 +5116,22 @@
   [
    "^Modificador de risco \\((.+)\\), mas boa capacidade funcional: liberar sem prova funcional\\.$",
    "Risk modifier ($1), but good functional capacity: clear without stress testing."
+  ],
+  [
+   "^Feito em (\\d{2})/(\\d{2})/(\\d{4})\\. Avaliação inicial: validade de (\\d+) dias vencida em (\\d{2})/(\\d{2})/(\\d{4})\\.$",
+   "Done on %3-%2-%1. Initial evaluation: the %4-day validity expired on %7-%6-%5."
+  ],
+  [
+   "^Feito em (\\d{2})/(\\d{2})/(\\d{4}), com alteração \\((.+)\\): sugerimos nova amostra\\.$",
+   "Done on %3-%2-%1, with an abnormal result ($4): we suggest a new sample."
+  ],
+  [
+   "^Feito em (\\d{2})/(\\d{2})/(\\d{4}), sem alteração\\. Avaliação inicial: resultado válido por (\\d+) dias \\(critério do Evidēns\\), até (\\d{2})/(\\d{2})/(\\d{4})\\.$",
+   "Done on %3-%2-%1, with no abnormal result. Initial evaluation: result valid for %4 days (Evidēns criterion), until %7-%6-%5."
+  ],
+  [
+   "^Feito em (\\d{2})/(\\d{2})/(\\d{4})\\. Avaliação inicial: resultado válido por (\\d+) dias \\(critério do Evidēns\\), até (\\d{2})/(\\d{2})/(\\d{4})\\. O sistema não conferiu o resultado: se estiver alterado, peça nova amostra\\.$",
+   "Done on %3-%2-%1. Initial evaluation: result valid for %4 days (Evidēns criterion), until %7-%6-%5. The system did not check the result: if it is abnormal, order a new sample."
   ]
  ],
  "manter": [
