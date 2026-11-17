@@ -1,7 +1,7 @@
 // Termos de Uso: para quem está com o aceite pendente, mostra o pedido de aceite no topo da página.
 (function () {
   'use strict';
-  const DESTINOS = { 'check-up': '/intelligent-tools', conta: '/conta', admin: '/admin', analytics: '/analytics' };
+  const DESTINOS = { 'check-up': '/intelligent-tools', conta: '/conta', admin: '/admin', analytics: '/analytics', operadoras: '/operadoras' };
   const params = new URLSearchParams(window.location.search);
   const destino = DESTINOS[params.get('destino')] || '/intelligent-tools';
   const caixa = document.querySelector('[data-aceite]');

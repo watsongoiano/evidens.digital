@@ -147,6 +147,71 @@ def analytics_page():
         return redirect('/termos?aceitar=1&destino=analytics')
     return _pagina('analytics.html', privada=True)
 
+@app.route('/operadoras')
+def operadoras_page():
+    """Modo sombra das operadoras: por enquanto, só para o administrador."""
+    u = usuario_atual()
+    if u is None:
+        return redirect('/login')
+    if not u['administrador']:
+        return redirect('/intelligent-tools')
+    if auth.termos_pendentes(u):
+        return redirect('/termos?aceitar=1&destino=operadoras')
+    return _pagina('operadoras.html', privada=True)
+
+
+@app.route('/api/admin/operadoras/classificar', methods=['POST'])
+@exigir_administrador
+def classificar_pedidos_de_operadora():
+    """Classifica uma planilha de pedidos (campo `arquivo`) ou laudos em PDF (campo `laudos`), em modo sombra.
+
+    Tudo é lido em memória e descartado: nada do arquivo é gravado nem registrado."""
+    from src.utils import laudos, operadora
+    if not auth.origem_confiavel():
+        return jsonify({'error': 'Envio recusado.'}), 403
+    request.max_content_length = operadora.TAMANHO_MAXIMO_DO_ENVIO + 64 * 1024
+    try:
+        planilha, pdfs = request.files.get('arquivo'), request.files.getlist('laudos')
+    except Exception:  # corpo maior que o limite
+        return jsonify({'error': 'O envio passa de 4 MB. Divida em arquivos menores.'}), 413
+    avisos = []
+    if planilha is not None:
+        dados = planilha.read(operadora.TAMANHO_MAXIMO_DO_ENVIO + 1)
+        if len(dados) > operadora.TAMANHO_MAXIMO_DO_ENVIO:
+            return jsonify({'error': 'O envio passa de 4 MB. Divida em arquivos menores.'}), 413
+        try:
+            texto = dados.decode('utf-8-sig')
+        except UnicodeDecodeError:
+            texto = dados.decode('cp1252')
+        brutas = operadora.ler_csv(texto)
+        if len(brutas) > operadora.MAXIMO_DE_LINHAS_NA_TELA:
+            return jsonify({'error': f'A planilha tem {len(brutas)} linhas; a tela aceita até '
+                                     f'{operadora.MAXIMO_DE_LINHAS_NA_TELA}. Divida o arquivo.'}), 413
+    elif pdfs:
+        if len(pdfs) > operadora.MAXIMO_DE_LAUDOS_NA_TELA:
+            return jsonify({'error': f'Envie até {operadora.MAXIMO_DE_LAUDOS_NA_TELA} laudos por vez.'}), 413
+        brutas = []
+        for numero, pdf in enumerate(pdfs, 1):
+            nome = os.path.splitext(os.path.basename(pdf.filename or ''))[0][:60] or f'laudo{numero}'
+            try:
+                pedidos, soltos = operadora.pedidos_do_laudo(
+                    pdf.read(laudos.TAMANHO_MAXIMO + 1), nome, carater='eletivo',
+                    regime=request.form.get('regime') or None, finalidade=request.form.get('finalidade') or '')
+            except (ValueError, laudos.LaudoIlegivel) as erro:
+                avisos.append(f'{nome}: não lido ({laudos.MENSAGENS.get(getattr(erro, "codigo", ""), str(erro))})')
+                continue
+            brutas += pedidos
+            avisos.append(f'{nome}: {len(pedidos)} exames identificados'
+                          + (f'; não identificados: {", ".join(soltos)}' if soltos else ''))
+    else:
+        return jsonify({'error': 'Anexe a planilha de pedidos ou os laudos em PDF.'}), 400
+    if not brutas:
+        return jsonify({'error': 'Nenhum pedido foi lido. ' + ' '.join(avisos)}), 422
+    resultados, resumo = operadora.classificar_lote(brutas)
+    return jsonify({'resumo': resumo, 'avisos': avisos, 'csv': operadora.escrever_csv(brutas, resultados),
+                    'linhas': operadora.linhas_para_a_tela(brutas, resultados)})
+
+
 @app.route('/api/analytics/stats')
 @exigir_administrador
 def get_analytics_stats():
@@ -164,6 +229,7 @@ ARQUIVOS_PUBLICOS = frozenset({
     'static/termos.js',
     'static/termos/evidens-termos-de-uso-v2.0.pdf',
     'static/analytics.js',
+    'static/operadoras.js',
     'static/i18n.js',
     'static/i18n/en.json',
     'favicon.ico',

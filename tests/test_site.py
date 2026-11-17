@@ -13,7 +13,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 
 # Páginas vistas por uma médica com conta aprovada (o fixture `client`).
 PAGINAS = ['/', '/intelligent-tools', '/contact', '/cadastro', '/conta']
-PAGINAS_DO_ADMIN = ['/admin', '/analytics']
+PAGINAS_DO_ADMIN = ['/admin', '/analytics', '/operadoras']
 
 
 # --- Arquivos publicados ----------------------------------------------------
@@ -22,6 +22,7 @@ PAGINAS_DO_ADMIN = ['/admin', '/analytics']
     '/index.html',
     '/static/conta.js',
     '/static/analytics.js',
+    '/static/operadoras.js',
     '/favicon.ico',
     '/favicon.png',
     '/src/static/styles/base.css',
@@ -35,6 +36,7 @@ def test_paginas_e_recursos_publicos_respondem(client, rota):
     '/src/static/index.html',                 # tela antiga, com cálculo de risco próprio
     '/intelligent-tools.html',                # só pela rota /intelligent-tools, que exige login
     '/analytics.html',
+    '/operadoras.html',
     '/admin.html',
     '/conta.html',
     '/src/utils/contas.py',
@@ -394,8 +396,8 @@ def test_paginas_do_administrador_respondem_e_nao_tem_referencia_quebrada(admin,
 
 
 @pytest.mark.parametrize('pagina', ['index.html', 'intelligent-tools.html', 'login.html', 'cadastro.html',
-                                    'conta.html', 'configurar.html', 'admin.html', 'analytics.html', 'termos.html',
-                                    'contact.html'])
+                                    'conta.html', 'configurar.html', 'admin.html', 'analytics.html', 'operadoras.html',
+                                    'termos.html', 'contact.html'])
 def test_logo_do_cabecalho_e_a_mesma_palavra_do_rodape(pagina):
     """Cabeçalho mantém o ícone de pontos e usa a palavra "evidēns" no mesmo tamanho do rodapé (28 px)."""
     html = (RAIZ / pagina).read_text(encoding='utf-8')
