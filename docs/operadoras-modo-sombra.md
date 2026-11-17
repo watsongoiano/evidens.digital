@@ -8,6 +8,7 @@ fila. O escopo completo (auditor, prazos, Rol da ANS, LGPD) está no documento d
 
 ```
 python scripts/modo_sombra.py pedidos.csv [resultado.csv]
+python scripts/modo_sombra.py --laudos laudo1.pdf laudo2.pdf [--saida resultado.csv]
 ```
 
 O resultado repete as colunas da entrada e acrescenta `cor`, `acao`, `codigo_do_motivo`, `motivo`, `exame`, `grau`,
@@ -42,6 +43,24 @@ linha por exame pedido. Valor inválido em qualquer coluna, mesmo opcional, inva
 **Último exame.** Sem `data_ultimo_exame`, vale o pedido anterior do mesmo beneficiário e do mesmo código no próprio
 arquivo (`origem_do_ultimo_exame` igual a `arquivo`). Quando a coluna vem preenchida, vale a data mais recente entre a
 informada e a do arquivo. Por isso o arquivo histórico rende mais quando cobre vários meses.
+
+## Entrada por laudo em PDF
+
+Com `--laudos`, cada exame identificado no laudo vira um pedido. A leitura é a mesma do check-up
+(`src/utils/laudos.py`, por código e sem IA); o laudo é lido em memória e nada dele é gravado.
+
+| Dado do pedido | De onde vem |
+|---|---|
+| `id_beneficiario` | Nome do arquivo, sem a extensão. Não use o nome do paciente |
+| `codigo_tuss` | Código do exame identificado (`src/utils/tuss.py`) |
+| `data_pedido` | Data da coleta do exame; sem ela, a data da solicitação do cabeçalho |
+| `sexo` e `idade` | "Sexo" e "Nasc." do cabeçalho do laudo, ou `--sexo` e `--idade` |
+| `regime` | `--regime`; sem ele, o setor do laudo (unidade de internação, UTI, enfermaria ou pronto-socorro) ou ambulatorial |
+| `carater`, `finalidade`, `cid` | `--carater` (eletivo), `--finalidade` e `--cid`, iguais para todos os exames |
+
+O resumo lista, por laudo, quantos exames foram identificados e quais títulos ficaram de fora (nome não reconhecido,
+sem data ou sem código TUSS conferido). Laudo de paciente internado sai como fora do escopo, como qualquer pedido de
+internado.
 
 ## Regras
 

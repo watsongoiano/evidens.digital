@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from src.utils import operadora as op, tuss
+from tests.test_laudos import FORMATO_A, FORMATO_B, FORMATO_C, _pdf
 
 RAIZ = Path(__file__).resolve().parents[1]
 HBA1C = tuss.CODIGOS['Hemoglobina glicada (HbA1c), soro'][0]
@@ -107,7 +108,7 @@ def test_sem_recomendacao_para_o_perfil_sai_com_a_fonte_da_regra_geral():
 def test_exame_alternativo_ao_recomendado_e_aceito():
     """O check-up aceita a glicemia pela HbA1c e, onde não há DNA-HPV, a citologia (MS 2025)."""
     r = _um(codigo_tuss=GLICEMIA, idade='50')
-    assert (r['cor'], r['codigo_do_motivo'], r['exame']) == ('verde', 'alternativa_aceita', 'Glicemia de jejum, soro')
+    assert (r['cor'], r['codigo_do_motivo'], r['exame']) == ('verde', 'alternativa_aceita', 'Glicose, soro')
     assert r['referencia'] == 'ADA 2026 / USPSTF 2021' and r['link'].startswith('https://')
     assert _cor(codigo_tuss=GLICEMIA, idade='50', data_ultimo_exame='2025-11-01') == ('amarelo', 'intervalo_depende_do_resultado')
     assert _cor(codigo_tuss=GLICEMIA, idade='25') == ('vermelho', 'sem_recomendacao_para_o_perfil')      # fora de 35-70
@@ -226,6 +227,73 @@ def test_nome_do_exame_no_codigo_de_exame_combinado():
     """O ferro sérico não leva o nome do exame combinado do check-up (saturação de transferrina)."""
     assert _um(codigo_tuss='40301842')['exame'].startswith('Ferro sérico')
     assert _um(codigo_tuss=UROCULTURA)['exame'] == 'Cultura, urina com contagem de colônias'
+
+
+def test_com_dois_titulos_para_o_mesmo_codigo_vale_o_da_lista_de_exames_comuns():
+    assert _um(codigo_tuss='40308391')['exame'] == 'Proteína C reativa, soro'      # não "ultrassensível"
+    assert _um(codigo_tuss='40304361')['exame'] == 'Hemograma completo com plaquetas'
+
+
+def test_pedidos_do_laudo_em_pdf():
+    """O laudo vira uma linha de pedido por exame identificado, com o código TUSS, a data da coleta, o sexo e a
+    idade do cabeçalho e o regime indicado pelo setor."""
+    linhas, soltos = op.pedidos_do_laudo(_pdf(FORMATO_C), 'laudo-teste')
+    assert soltos == [] and len(linhas) == 16
+    por_codigo = {linha['codigo_tuss']: linha for linha in linhas}
+    assert set(por_codigo) == {
+        '40304361', '40304590', '40304639', '40301630', '40301931', '40302580', '40301419', '40302423', '40301397',
+        '40302504', '40302512', '40301648', '40302385', '40308391', '40301109', '40301400'}
+    hemograma, creatinina = por_codigo['40304361'], por_codigo[CREATININA]
+    assert (hemograma['data_pedido'], creatinina['data_pedido']) == ('2026-11-13', '2026-11-14')
+    assert (creatinina['sexo'], creatinina['idade'], creatinina['regime']) == ('F', '46', 'internado')
+    assert creatinina['id_beneficiario'] == 'laudo-teste' and len({linha['id_pedido'] for linha in linhas}) == 16
+    assert not any('teste' in valor.lower() for linha in linhas for chave, valor in linha.items()
+                   if chave not in ('id_pedido', 'id_beneficiario'))
+    # Internado: o modo sombra não julga
+    resultados, resumo = op.classificar_lote(linhas)
+    assert resumo['por_cor'] == {'fora_do_escopo': 16} and not any(r['erro'] for r in resultados)
+    # Informando o regime, o exame é classificado como qualquer pedido
+    linhas, _ = op.pedidos_do_laudo(_pdf(FORMATO_C), 'laudo-teste', regime='ambulatorial', cid='N18.3')
+    resultados, resumo = op.classificar_lote(linhas)
+    assert set(resumo['por_cor']) == {'verde'} and not any(r['erro'] for r in resultados)
+    assert all(r['exame'] for r in resultados)
+
+
+def test_laudo_sem_sexo_ou_nascimento_pede_os_dados():
+    with pytest.raises(ValueError, match='informe o sexo'):
+        op.pedidos_do_laudo(_pdf(FORMATO_A), 'laudo-a')
+    with pytest.raises(ValueError, match='informe a idade'):
+        op.pedidos_do_laudo(_pdf(FORMATO_B), 'laudo-b', sexo='F')          # o nascimento vem em outra linha
+    linhas, soltos = op.pedidos_do_laudo(_pdf(FORMATO_A), 'laudo-a', sexo='F')
+    assert {linha['codigo_tuss'] for linha in linhas} == {GLICEMIA, '40302512', '40304361'}
+    assert soltos == ['GASOMETRIA VENOSA'] and {linha['regime'] for linha in linhas} == {'ambulatorial'}
+    assert {linha['idade'] for linha in linhas} == {'46'}                 # nascida em 01/01/1980, coleta em 23/09/2026
+    assert {linha['idade'] for linha in op.pedidos_do_laudo(_pdf(FORMATO_A), 'laudo-a', sexo='F', idade=50)[0]} == {'50'}
+
+
+@pytest.mark.parametrize('setor, regime', [
+    ('HOSPITAL DE TESTE - U.I CLINICA MEDICA', 'internado'), ('UTI ADULTO 2', 'internado'),
+    ('Enfermaria B', 'internado'), ('PRONTO SOCORRO ADULTO', 'pronto-socorro'), ('Emergência', 'pronto-socorro'),
+    ('AMBULATORIO DE CLINICA MEDICA', None), ('Coleta externa', None), ('', None),
+])
+def test_regime_pelo_setor_do_laudo(setor, regime):
+    assert op.regime_do_setor(setor) == regime
+
+
+def test_script_le_laudos_em_pdf(tmp_path):
+    laudo = tmp_path / 'beneficiario-01.pdf'
+    laudo.write_bytes(_pdf(FORMATO_C))
+    script = [sys.executable, str(RAIZ / 'scripts' / 'modo_sombra.py')]
+    execucao = subprocess.run(script + ['--laudos', str(laudo)], capture_output=True, text=True, cwd=RAIZ)
+    assert execucao.returncode == 0, execucao.stderr
+    assert 'beneficiario-01.pdf: 16 exames identificados, regime internado.' in execucao.stdout
+    linhas = op.ler_csv((tmp_path / 'laudos_classificado.csv').read_text(encoding='utf-8'))
+    assert len(linhas) == 16 and {x['cor'] for x in linhas} == {'fora_do_escopo'}
+    assert {x['id_beneficiario'] for x in linhas} == {'beneficiario-01'}
+    # Não é PDF: avisa e sai com 2, sem derrubar
+    (tmp_path / 'nao_e_laudo.pdf').write_text('texto', encoding='utf-8')
+    execucao = subprocess.run(script + ['--laudos', str(tmp_path / 'nao_e_laudo.pdf')], capture_output=True, text=True, cwd=RAIZ)
+    assert execucao.returncode == 2 and 'não lido (O arquivo não é um PDF.)' in execucao.stdout
 
 
 def test_linha_invalida_nao_e_classificada():

@@ -7,6 +7,19 @@ automaticamente", com a data do exame e a data a partir da qual volta a ser indi
 Esta é a etapa 1 (data digitada). A etapa 2 lê o laudo em PDF, por código e sem IA, e
 preenche os mesmos campos; o laudo é lido em memória e descartado.
 
+Modelos de laudo conferidos (`src/utils/laudos.py`, com laudos fictícios em `tests/test_laudos.py`):
+
+| Modelo | Onde está a data da coleta |
+| --- | --- |
+| Um exame por página | "Coleta" no cabeçalho da página |
+| Vários exames por página | "[Data da coleta: ...]" abaixo de cada título, ou "Coletado(...)" no fim do exame |
+| Laboratório de hospital | "Data Coleta" abaixo de parte dos títulos; nos demais, a "Dt. Solic" (data da solicitação) do cabeçalho. A "Dt. Atendimento" é a data da internação e não é usada |
+
+O resultado só é lido quando está escrito de forma reconhecível. Da linha "Valores de referência" em diante, o limite
+("Até 1,2") e a faixa ("2,0 a 3,0") nunca são lidos como resultado. Exame fora da lista de exames comuns, com um
+resultado só ("RESULTADO: 70 U/L"), fica com o texto do resultado; com vários valores (TTPA, proteínas totais e
+frações), só o exame e a data são preenchidos.
+
 ## De onde vem o intervalo
 
 Nenhum intervalo novo foi criado. Cada recomendação do motor já traz a periodicidade no

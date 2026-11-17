@@ -8,7 +8,9 @@ o médico conferir e para regras futuras.
 O leitor de laudos (src/utils/laudos.py) usa ``valores_do_bloco`` para tirar do texto do laudo o resultado de
 cada campo, quando ele está escrito de forma reconhecível ("Resultado: 0,9 mg/dL", "HDL: 45 mg/dL",
 "NÃO REAGENTE"). Valor de referência nunca é lido como resultado: vale o primeiro número depois do nome do
-analito ou de "Resultado".
+analito ou de "Resultado"; depois da linha "Valores de referência", o limite ("BILIRRUBINA TOTAL: Até 1,2",
+"RNI: Até 1,20") e a faixa ("INR: 2,0 a 3,0") não contam, e a primeira linha que começa por número também não.
+Exame fora da lista, com um resultado só ("RESULTADO: 70 U/L"), fica com o texto do resultado.
 """
 import re
 
@@ -60,9 +62,11 @@ EXAMES = [
     ('Fígado', 'Gama-GT, soro', [_n('ggt', 'Gama-GT', 'U/L', 1, 5000)]),
     ('Fígado', 'Fosfatase alcalina, soro', [_n('fosfatase_alcalina', 'Fosfatase alcalina', 'U/L', 5, 5000)]),
     ('Fígado', 'Bilirrubinas totais e frações, soro', [
-        _n('bilirrubina_total', 'Bilirrubina total', 'mg/dL', 0.1, 50, r'bilirrubina\s+total')]),
+        _n('bilirrubina_total', 'Bilirrubina total', 'mg/dL', 0.1, 50,
+           r'bilirrubinas?\s+tota(?:l|is)\b(?!\s+e\s+fra)|(?:^|resultado\s*:)\s*total\b')]),
     ('Fígado', 'Albumina, soro', [_n('albumina', 'Albumina', 'g/dL', 0.5, 7)]),
-    ('Fígado', 'Tempo de protrombina (TP/INR), plasma', [_n('inr', 'INR', '', 0.5, 15, r'\binr\b|\brni\b')]),
+    ('Fígado', 'Tempo de protrombina (TP/INR), plasma', [
+        _n('inr', 'INR', '', 0.5, 15, r'\binr\b|\brni\b|\br\.\s*n\.\s*i\b|\bi\.\s*n\.\s*r\b')]),
     ('Sangue, ferro e vitaminas', 'Hemograma completo com plaquetas', [
         _n('hemoglobina', 'Hemoglobina', 'g/dL', 2, 25, r'hemoglobina(?!\s+(glicada|corpuscular))'),
         _n('leucocitos', 'Leucócitos', '/mm³', 100, 500000, r'leuc[oó]citos'),
@@ -147,7 +151,10 @@ def apelidos():
     mapa = {t: (t, [c['nome'] for c in campos]) for t, campos in POR_TITULO.items()}
     for titulo, (base, campo) in COMPONENTES.items():
         mapa[titulo] = (base, [campo])
-    for titulo in list(catalogo().get('laboratorio', [])) + list(periodicidade.exames_conhecidos()):
+    from src.utils import tuss
+    # Os títulos do motor entram também: "Fósforo, soro" é o mesmo exame da lista "Fósforo" (mesmo código TUSS).
+    for titulo in (list(catalogo().get('laboratorio', [])) + list(periodicidade.exames_conhecidos())
+                   + list(tuss.CODIGOS)):
         if titulo in mapa:
             continue
         base = por_chave.get(periodicidade.chaves(titulo))
@@ -167,10 +174,18 @@ def campos_do_exame(titulo):
 
 # ── Leitura do laudo ─────────────────────────────────────────────────────────
 
-_NUMERO = re.compile(r'(?<![\w/])(\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?)(?![\w/])')
+# "9.200/mm³" vale (a unidade vem colada); "0/100" e "16/11/2026" não (fração e data).
+_NUMERO = re.compile(r'(?<![\w/])(\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?)(?!\w|/\d)')
 _RESULTADO = re.compile(r'resultado\s*:?', re.IGNORECASE)
 _REFERENCIA = re.compile(r'valor(es)?\s+de\s+refer|refer[eê]ncia|desej[aá]vel|ideal\b|limite', re.IGNORECASE)
 _NAO_E_RESULTADO = re.compile(r'^\s*(m[ée]todo|material|coletad|liberad|data|hash|nota|obs|amostra)', re.IGNORECASE)
+# Seção de referência do exame: a linha que começa por "Valor(es) de referência" (o cabeçalho de coluna
+# "Valores Obtidos   Valores de Referência" não começa por ele e não abre a seção).
+_SECAO_DE_REFERENCIA = re.compile(r'^\s*valor(es)?\s+de\s+refer[eê]ncia', re.IGNORECASE)
+_LIMITE = re.compile(r'\bat[ée]\b|\binferior\b|\bsuperior\b|\bmaior\b|\bmenor\b|\bacima\b|\babaixo\b|\bentre\b',
+                     re.IGNORECASE)
+_FAIXA = re.compile(r'^[\s:.]*\d+(?:[.,]\d+)?\s*(?:a|at[ée]|-|–)\s*\d', re.IGNORECASE)
+_RESULTADO_UNICO = re.compile(r'^\s*resultado\s*:\s*(\d+(?:[.,]\d+)?)\s*([^\s\d:][^\s:]{0,14})?\s*$', re.IGNORECASE)
 _QUALITATIVO = re.compile(r'n[ãa]o\s+reagente|n[ãa]o\s+detectad[oa]|negativ[oa]|indetermin|inconclusiv|reagente|'
                           r'detectad[oa]|positiv[oa]', re.IGNORECASE)
 
@@ -217,6 +232,12 @@ def _ler(campo, trecho):
     return _qualitativo(trecho, campo) if 'opcoes' in campo else _numero(trecho, campo)
 
 
+def _e_referencia(trecho):
+    """O número do trecho é um limite ("Até 1,2", "Inferior a 40") ou uma faixa ("2,0 a 3,0") de referência?"""
+    m = _NUMERO.search(trecho)
+    return bool(_LIMITE.search(trecho[:m.start()] if m else trecho) or _FAIXA.match(trecho))
+
+
 def _limpar(linha):
     """Linha sem o que vem depois de "Valores de referência" (a referência nunca é o resultado)."""
     m = _REFERENCIA.search(linha)
@@ -230,7 +251,10 @@ def valores_do_bloco(titulo, linhas, campos=None):
     Um campo só é lido pelo nome do analito ("HDL: 45"), por "Resultado: ..." ou pela primeira linha que começa
     pelo resultado; com vários campos (perfil lipídico, hemograma), só pelo nome do analito."""
     nomes = campos or [c['nome'] for c in POR_TITULO.get(titulo, [])]
-    linhas = [_limpar(l) for l in linhas if not _NAO_E_RESULTADO.match(l)]
+    linhas = [l for l in linhas if not _NAO_E_RESULTADO.match(l)]
+    # Da linha "Valores de referência" em diante, o que vem escrito como limite ou faixa não é resultado.
+    referencia = next((i for i, l in enumerate(linhas) if _SECAO_DE_REFERENCIA.match(l)), len(linhas))
+    linhas = [_limpar(l) for l in linhas]
     if 'hpv_resultado' in nomes and any(re.search(r'(?<!n[ãa]o )(?<!n[ãa]o\s)\b(detectad|positiv)', l, re.IGNORECASE)
                                         for l in linhas):
         nomes = [n for n in nomes if n != 'hpv_resultado']   # algum tipo detectado: o médico escolhe a opção
@@ -239,20 +263,25 @@ def valores_do_bloco(titulo, linhas, campos=None):
         campo = CAMPOS[nome]
         valor, rotulo = None, campo.get('no_laudo')
         if rotulo:
-            for linha in linhas:
+            for i, linha in enumerate(linhas):
                 m = re.search(rotulo, linha, re.IGNORECASE)
-                if m and (valor := _ler(campo, linha[m.end():])) is not None:
+                if not m or (i > referencia and 'opcoes' not in campo and _e_referencia(linha[m.end():])):
+                    continue
+                if (valor := _ler(campo, linha[m.end():])) is not None:
                     break
         if valor is None and len(nomes) == 1:
             for linha in linhas:
                 m = _RESULTADO.search(linha)
                 if m:
                     resto = linha[m.end():]
+                    # "RESULTADO: DIRETA : 0,20": o número é de outro analito, não do campo procurado
+                    if rotulo and re.search(r'[^\W\d_]{3,}\s*:', resto) and not re.search(rotulo, linha, re.IGNORECASE):
+                        continue
                     valor = _ler(campo, resto.rsplit(':', 1)[-1])
                     if valor is not None:
                         break
             if valor is None:
-                for linha in linhas:
+                for linha in linhas[:referencia]:
                     if re.match(r'^[\s:.]*\d', linha) or ('opcoes' in campo and _QUALITATIVO.match(linha.strip())):
                         if (valor := _ler(campo, linha)) is not None:
                             break
@@ -265,8 +294,19 @@ def do_laudo(titulo, linhas):
     """Resultados do exame lido no laudo, pelos campos do exame da lista a que o título corresponde."""
     achado = apelidos().get(titulo)
     if not achado or not achado[1]:
-        return {}
+        return _resultado_livre(linhas)
     return valores_do_bloco(achado[0], linhas, achado[1])
+
+
+def _resultado_livre(linhas):
+    """Exame fora da lista: o texto do resultado, quando o laudo traz um só ("RESULTADO: 70 U/L")."""
+    for linha in linhas:
+        if _SECAO_DE_REFERENCIA.match(linha):
+            break
+        m = _RESULTADO_UNICO.match(linha)
+        if m:
+            return {'resultado': ' '.join(parte for parte in m.groups() if parte)}
+    return {}
 
 
 # ── Entrada do formulário e saída para a tela ───────────────────────────────

@@ -62,6 +62,50 @@ def test_resultado_lido_no_bloco_do_exame(titulo, linhas, esperado):
     assert E.valores_do_bloco(titulo, linhas) == esperado
 
 
+@pytest.mark.parametrize('texto, campo, esperado', [
+    (' Totais 9.200/mm³ 4.000 a 11.000/mm³', 'leucocitos', 9200),       # unidade colada no número
+    (' 299.000 /mm³ 150.000 a 600.000 /mm³', 'plaquetas', 299000),
+    (' 0/100 leuc 0/100 leuc', 'leucocitos', None),                      # fração não é resultado
+    (' 16/11/2026', 'creatinina', None),                                 # data não é resultado
+    (' 0,71 mg/dL', 'creatinina', 0.71),
+])
+def test_numero_com_unidade_colada(texto, campo, esperado):
+    assert E._numero(texto, E.CAMPOS[campo]) == esperado
+
+
+def test_limite_e_faixa_de_referencia_nao_sao_resultado():
+    """Depois de "Valores de referência", "Até 1,2" e "2,0 a 3,0" não são lidos como o resultado do campo."""
+    bilirrubinas = ['RESULTADO: DIRETA : 0,20 mg/dL', 'INDIRETA: 0,70 mg/dL', 'TOTAL : 0,90 mg/dL',
+                    'VALORES DE REFERÊNCIA:', 'BILIRRUBINA TOTAL (ADULTO): Até 1,2 mg/dL']
+    assert E.valores_do_bloco('Bilirrubinas totais e frações, soro', bilirrubinas) == {'bilirrubina_total': 0.9}
+    # Sem a linha do total, nada é lido: nem a direta, nem o limite da referência
+    assert E.valores_do_bloco('Bilirrubinas totais e frações, soro', bilirrubinas[:2] + bilirrubinas[3:]) == {}
+    tap = ['RESULTADO: TEMPO : 14,0 SEGUNDOS', 'ATIVIDADE: 60,0 %', 'R.N.I. : 1,35',
+           'Valor de referência: Maior ou igual a 70%', 'RNI: Até 1,20', '- Faixa Terapêutica em INR: 2,0 a 3,0']
+    assert E.valores_do_bloco('Tempo de protrombina (TP/INR), plasma', tap) == {'inr': 1.35}
+    assert E.valores_do_bloco('Tempo de protrombina (TP/INR), plasma', tap[:2] + tap[3:]) == {}
+    # Antes da seção de referência, o resultado escrito ao lado do nome continua valendo
+    assert E.valores_do_bloco('Tempo de protrombina (TP/INR), plasma', ['INR: 2,5', 'Valor de referência: até 1,2']) == {'inr': 2.5}
+    # A primeira linha que começa por número só vale antes da seção de referência
+    pcr = ['RESULTADO:', 'Valor de referência:', '10-50 mg/L - Inflamação ligeira']
+    assert E.valores_do_bloco('Proteína C reativa, soro', pcr) == {}
+    assert E.valores_do_bloco('Proteína C reativa, soro', ['RESULTADO:', '12,5 mg/L'] + pcr[1:]) == {'pcr': 12.5}
+
+
+def test_exame_fora_da_lista_fica_com_o_texto_do_resultado_unico():
+    assert E.do_laudo('Creatino fosfoquinase total (CK)', ['Material: Soro', 'RESULTADO: 80 U/L',
+                                                           'Valor de Referência: 30 - 223 U/L']) == {'resultado': '80 U/L'}
+    assert E.do_laudo('Creatino fosfoquinase total (CK)', ['RESULTADO:', 'TEMPO: 30,0 seg.']) == {}
+    assert E.do_laudo('Creatino fosfoquinase total (CK)', ['Valor de referência:', 'RESULTADO: 80 U/L']) == {}
+    assert E.do_laudo('Creatino fosfoquinase total (CK)', ['RESULTADO: NEGATIVO PARA CELULAS NEOPLASICAS']) == {}
+
+
+def test_titulo_do_motor_leva_aos_campos_do_exame_da_lista():
+    """"Fósforo, soro" (título do motor) é o exame "Fósforo" da lista: o resultado vai para o campo numérico."""
+    assert E.apelidos()['Fósforo, soro'] == ('Fósforo', ['fosforo'])
+    assert E.do_laudo('Fósforo, soro', ['Material: Soro', 'RESULTADO: 3,5 mg/dL']) == {'fosforo': 3.5}
+
+
 def test_laudo_devolve_os_resultados_de_cada_exame():
     paginas = [_cabecalho('10/11/2026') + [
         'COLESTEROL TOTAL E FRACOES', 'Metodo: Enzimatico', 'Colesterol total: 198 mg/dL', 'HDL: 52 mg/dL',

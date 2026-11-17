@@ -56,8 +56,136 @@ FORMATO_B = [[
 ]]
 
 
+# Laboratório de hospital: vários exames por página; "Data Coleta" só em parte dos exames; no cabeçalho, a data
+# da internação ("Dt. Atendimento") e a da solicitação ("Dt. Solic"), o sexo, o nascimento e o setor.
+def _cabecalho_c():
+    return ['Laboratorio de Analises Clinicas',
+            'Dt. Atendimento: 05/11/2026                                         Dt. Solic:     14/11/2026',
+            'Atendimento: 123456                                                 Sexo:          F',
+            'Paciente: 654321                                                    Nasc.:         01/01/1980',
+            f'Nome Paciente: {PACIENTE.upper()}                                  Pedido no:     999',
+            'Medico Solic.: MEDICO DE TESTE                                      Dt. Laudo:     14/11/2026',
+            'Nome da Mae: MAE DE TESTE FICTICIA',
+            'Setor:                  HOSPITAL DE TESTE - U.I CLINICA MEDICA', '',
+            'BIOMEDICO DE TESTE', ' CRBM - 0000', 'Endereco: Rua de Teste, 1', '(62 0000-0000)']
+
+
+FORMATO_C = [
+    _cabecalho_c() + [
+        'HEMOGRAMA', '', 'Material: Sangue', 'Método: Contador automatizado e microscopia óptica',
+        'Data Coleta: 13/11/2026', 'Hora Coleta: 08:00', '',
+        '                           Valores Obtidos                         Valores de Referência',
+        'Hemácias 4,58 x106/mm³ 4,50 a 6,00³x106/mm', 'Hemoglobina 12,30 g/dL 13,00 a 18,00 g/dL',
+        'Hematócrito 37,00 % 40,00 a 52,00 %', 'Eritroblastos 0/100 leuc 0/100 leuc',
+        'Plaquetas 250.000 /mm³ 150.000 a 600.000 /mm³', 'Leucócitos Totais 7.500/mm³ 4.000 a 11.000/mm³',
+        'Neutrófilos', 'Segmentados 60% 4.500/mm³ 39 a 70% 1.560 a 7.700/mm³'],
+    _cabecalho_c() + ['Basófilos 0% 0/mm³ 0 a 1% 0 a 110 /mm³', 'Linfócitos', 'Atípicos 0% 0/mm³  0% 0/mm³',
+                      'OBSERVAÇÕES:'],
+    _cabecalho_c() + [
+        'TAP - TEMPO DE ATIVIDADE DA PROTROMBINA (RNI)', '', 'Material: Plasma', 'Método: Coagulometria automatizada',
+        '', 'RESULTADO: TEMPO    : 14,0 SEGUNDOS', '           ATIVIDADE: 60,0 %', '           R.N.I.   : 1,35',
+        '                        ISI      : 0,97', '           PLASMA CONTROLE: 10,5', '',
+        'Valor de referência: Maior ou igual a 70%', '                     RNI: Até 1,20', '',
+        'Obs.:O valor do INR é indicado para controle de tratamento com anticoagulante oral.',
+        '- Faixa Terapêutica em INR: 2,0 a 3,0', '',
+        'TEMPO PARCIAL DE TROMBOPLASTINA ATIVADO', '', 'Material: Plasma', 'Método: Coagulometria automatizada', '',
+        'RESULTADO:', 'TEMPO: 30,0 seg.', 'RELAÇÃO PACIENTE/CONTROLE:1,10', 'PLASMA NORMAL: 26,90 seg.', '',
+        'Valor de referência: Inferior A 1,22'],
+    _cabecalho_c() + [
+        'CREATININA', '', 'Material: Soro', 'Método: Colorimétrico Automatizado', '', 'RESULTADO: 0,90 mg/dL', '',
+        'Valor de Referência :   Homem : De 0,70 a 1,30 mg/dL', '                          Mulher: De 0,60 a 1,20 mg/dL',
+        'FÓSFORO', '', 'Material: Soro', 'Método: Colorimétrico Automatizado.', '', 'RESULTADO: 3,5 mg/dL', '',
+        'Valores de Referência: Adultos  : DE 2,5 A 5,0 mg/dL'],
+    _cabecalho_c() + [
+        'URÉIA', '', 'Material: Soro', 'Método: Enzimático automatizado.', 'Data coleta: 14/11/2026',
+        'Hora coleta: 08:00', '', 'RESULTADO: 33 mg/dL', '', 'Valor de Referência: 7 - 40 mg/dL', '',
+        'CÁLCIO IÔNICO', '', 'Material: Sangue', 'Método: Colorimétrico automatizado / Cálculo', '',
+        'RESULTADO: 1,14 mmol/L', '', 'Valor de referência: 1,02 a 1,27 mmol/L',
+        'SÓDIO', 'Material: Sangue', 'Método: Eletrodo Seletivo.', 'RESULTADO:140 mEq/L',
+        'Valor de Referência: 136 a 145 mEq/L'],
+    _cabecalho_c() + [
+        'BILIRRUBINAS TOTAIS E FRAÇÕES', '', 'Material: Soro', 'Método: Colorimétrico Automatizado', '',
+        'RESULTADO: DIRETA  : 0,20 mg/dL', ' INDIRETA: 0,70 mg/dL', ' TOTAL   : 0,90 mg/dL', '',
+        'VALORES DE REFERÊNCIA:', '   BILIRRUBINA DIRETA  : Até 0,5 mg/dL', '   BILIRRUBINA INDIRETA: Até 0,7 mg/dL',
+        '   BILIRRUBINA TOTAL (ADULTO): Até 1,2 mg/dL',
+        'Obs: A dosagem de Bilirrubinas sofre alta variação, chegando a um erro total de até 31%.'],
+    _cabecalho_c() + [
+        'TRANSAMINASE OXALACÉTICA (TGO-AST)', '', 'Material: Soro', 'Método: Colorimétrico', '', 'RESULTADO:20 U/L',
+        '', 'Valor de Referência: Inferior a 40,0 U/L',
+        'TRANSAMINASE PIRÚVICA - TGP', '', 'Material: Soro', 'Método: Colorimétrico', '', 'RESULTADO: 28 U/L', '',
+        'VALORES DE REFERÊNCIA: HOMEM : Inferior a 45,0 U/L', '                       MULHER: Inferior a 34,0 U/L'],
+    _cabecalho_c() + [
+        'CREATINOFOSFOQUINASE - CPK', '', 'Material: Soro', 'Método: Colorimétrico cinético', '', 'RESULTADO: 80 U/L',
+        '', 'Valor de Referência: 30 - 223 U/L',
+        'PROTEÍNAS TOTAIS E FRAÇÕES', '', 'Material: Soro', 'Método: Colorimétrico Automatizado', '',
+        'RESULTADO: ALBUMINA', ':', '3,90 g/dL', ':', '2,60 g/dL', ' PROTEÍNAS', 'TOTAIS:', '6,50 g/dL', '',
+        'VALORES DE REFERÊNCIA:', '    ALBUMINA:         3,5 - 5,5 g/dL', '    PROTEÍNAS TOTAIS: 6,3 - 8,2 g/dL'],
+    _cabecalho_c() + [
+        'PROTEINA C REATIVA', '', 'Material: Soro', 'Método: Imunoensaio Turbidimétrico Automatizado.', '',
+        'RESULTADO:12,50 mg/L', '', 'Valor de referência:', '10-50 mg/L  - Inflamação ligeira',
+        '50-100 mg/L - Inflamação mais grave', '',
+        'ÁCIDO LÁCTICO - LACTATO', '', 'Material: Plasma Fluoretado', 'Método: Enzimático colorimétrico', '',
+        'RESULTADO: 1,8 mmol/L', '', 'Valor de referência: 0,5 a 2,2 mmol/L',
+        'CÁLCIO TOTAL', '', 'Material: Soro', 'Método: Colorimétrico Automatizado', '', 'RESULTADO: 9,10 mg/dL', '',
+        'Valor de Referência: 8,6 a 10,3 mg/dL',
+        'Obs: A dosagem de Cálcio total é influenciada pelas proteínas séricas.'],
+]
+
+
 def _nomes(lido):
     return {e['exame']: e['data'] for e in lido['exames']}
+
+
+def _resultados(lido):
+    return {e['exame']: e['resultados'] for e in lido['exames']}
+
+
+def test_formato_de_laboratorio_de_hospital():
+    """Todos os exames do laudo são identificados; a data é a "Data Coleta" do exame ou, sem ela, a "Dt. Solic"
+    do cabeçalho. A "Dt. Atendimento" (internação) nunca é usada."""
+    lido = laudos.ler(_pdf(FORMATO_C), HOJE)
+    assert lido['nao_reconhecidos'] == [] and lido['sem_data'] == []
+    nomes = _nomes(lido)
+    assert nomes == {
+        'Hemograma completo': '2026-11-13',                      # "Data Coleta" do próprio exame
+        'Tempo de protrombina (TP/INR), plasma': '2026-11-14', 'Tempo de tromboplastina parcial ativada': '2026-11-14',
+        'Creatinina, soro': '2026-11-14', 'Fósforo': '2026-11-14', 'Ureia, soro': '2026-11-14',
+        'Cálcio iônico, soro': '2026-11-14', 'Sódio, soro': '2026-11-14',
+        'Bilirrubinas totais e frações, soro': '2026-11-14', 'Aspartato aminotransferase, soro': '2026-11-14',
+        'Alanina aminotransferase, soro': '2026-11-14', 'Creatino fosfoquinase total (CK)': '2026-11-14',
+        'Proteínas totais albumina e globulina': '2026-11-14', 'Proteína C reativa ultrassensível, soro': '2026-11-14',
+        'Ácido láctico (lactato)': '2026-11-14', 'Cálcio': '2026-11-14'}
+    assert '2026-11-05' not in nomes.values()
+
+
+def test_resultados_do_laudo_de_hospital_nunca_vem_da_referencia():
+    r = _resultados(laudos.ler(_pdf(FORMATO_C), HOJE))
+    assert r['Hemograma completo'] == {'hemoglobina': 12.3, 'leucocitos': 7500, 'plaquetas': 250000}
+    assert r['Tempo de protrombina (TP/INR), plasma'] == {'inr': 1.35}        # não "RNI: Até 1,20" nem "INR: 2,0 a 3,0"
+    assert r['Bilirrubinas totais e frações, soro'] == {'bilirrubina_total': 0.9}   # não a direta nem "Até 1,2"
+    assert r['Creatinina, soro'] == {'creatinina': 0.9} and r['Fósforo'] == {'fosforo': 3.5}
+    assert r['Ureia, soro'] == {'ureia': 33} and r['Sódio, soro'] == {'sodio': 140}
+    assert r['Cálcio iônico, soro'] == {'calcio_ionico': 1.14}
+    assert r['Aspartato aminotransferase, soro'] == {'tgo': 20} and r['Alanina aminotransferase, soro'] == {'tgp': 28}
+    assert r['Proteína C reativa ultrassensível, soro'] == {'pcr': 12.5}      # não o "10-50 mg/L" da referência
+    # Exame fora da lista, com um resultado só: fica o texto do resultado
+    assert r['Creatino fosfoquinase total (CK)'] == {'resultado': '80 U/L'}
+    assert r['Cálcio'] == {'resultado': '9,10 mg/dL'} and r['Ácido láctico (lactato)'] == {'resultado': '1,8 mmol/L'}
+    # Vários valores no mesmo exame, sem campo na lista: nada é lido (o médico confere no laudo)
+    assert r['Tempo de tromboplastina parcial ativada'] == {} and r['Proteínas totais albumina e globulina'] == {}
+
+
+def test_nomes_do_cabecalho_do_laudo_de_hospital_nunca_voltam():
+    lido = str(laudos.ler(_pdf(FORMATO_C), HOJE)).lower()
+    for nome in (PACIENTE, 'mae de teste', 'medico de teste', 'biomedico de teste', '654321', '01/01/1980'):
+        assert nome.lower() not in lido
+
+
+def test_cabecalho_do_laudo_para_o_modo_sombra():
+    dados = laudos.cabecalho(laudos.textos_do_pdf(_pdf(FORMATO_C)), HOJE)
+    assert dados == {'sexo': 'feminino', 'nascimento': date(1980, 1, 1),
+                     'setor': 'HOSPITAL DE TESTE - U.I CLINICA MEDICA'}
+    assert laudos.cabecalho(laudos.textos_do_pdf(_pdf(FORMATO_B)), HOJE) == {'sexo': None, 'nascimento': None, 'setor': ''}
 
 
 def test_formato_com_coleta_no_cabecalho():
@@ -103,6 +231,12 @@ def test_data_futura_ou_ausente_nao_vira_data():
     ('URINA TIPO I', 'EAS - Elementos Anormais e Sedimentoscopia, urina'),
     ('COMPLEMENTO SÉRICO C3', 'Complemento C3'),
     ('Ferritina', 'Ferritina, soro'),
+    ('TAP - TEMPO DE ATIVIDADE DA PROTROMBINA (RNI)', 'Tempo de protrombina (TP/INR), plasma'),
+    ('TEMPO PARCIAL DE TROMBOPLASTINA ATIVADO', 'Tempo de tromboplastina parcial ativada'),
+    ('TRANSAMINASE OXALACÉTICA (TGO-AST)', 'Aspartato aminotransferase, soro'),
+    ('CREATINOFOSFOQUINASE - CPK', 'Creatino fosfoquinase total (CK)'),
+    ('CÁLCIO TOTAL', 'Cálcio'),
+    ('PROTEÍNAS TOTAIS E FRAÇÕES', 'Proteínas totais albumina e globulina'),
 ])
 def test_sinonimos_dos_laboratorios(nome, titulo):
     assert laudos.reconhecer(nome) == titulo

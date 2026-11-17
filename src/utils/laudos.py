@@ -8,8 +8,10 @@ Como lê (por código, sem IA)
 - Título de exame: linha em maiúsculas, sem dois-pontos, com o nome de um exame conhecido; ou, se o
   nome não é conhecido, imediatamente acima de "Método", "Material" ou "[Data da coleta" (é assim que os laudos
   separam um exame do outro).
-- Data: a "Data da coleta" logo abaixo do título (antes do exame seguinte); sem ela, a "Coleta" do
-  cabeçalho da página (antes do primeiro exame). Data própria inválida não herda a do cabeçalho.
+- Data: a "Data da coleta" (ou "Data Coleta") logo abaixo do título (antes do exame seguinte); sem ela, a
+  "Coleta" do cabeçalho da página (antes do primeiro exame) ou, nos laudos que só trazem a coleta em parte dos
+  exames, a "Dt. Solic" (data da solicitação) do cabeçalho. A "Dt. Atendimento" é a data da internação e não é
+  usada. Data própria inválida não herda a do cabeçalho.
 - Nome: sinônimos usados pelos laboratórios (abaixo) e, depois, os nomes do catálogo do motor. Partes
   entre parênteses ou depois de " - " só valem se todas forem nomes do mesmo exame.
   Título que não bate com nenhum fica em `nao_reconhecidos` (o médico vê e decide).
@@ -61,10 +63,10 @@ _SINONIMOS = {
     TITULO_HBA1C: ['hemoglobina glicada', 'hemoglobina glicada (hba1c)', 'hemoglobina glicada hba1c',
                    'hemoglobina glicada - hba1c', 'hemoglobina glicosilada', 'hba1c', 'hemoglobina a1c'],
     'Alanina aminotransferase, soro': ['transaminase glutamico piruvica', 'transaminase piruvica', 'tgp', 'alt',
-                                       'tgp - alt', 'tgp (alt)', 'alanina aminotransferase',
+                                       'tgp - alt', 'tgp-alt', 'tgp (alt)', 'alanina aminotransferase',
                                        'alanina aminotransferase (alt)', 'alanina aminotransferase - alt'],
     'Aspartato aminotransferase, soro': ['transaminase glutamico oxalacetica', 'transaminase oxalacetica', 'tgo',
-                                         'ast', 'tgo - ast', 'tgo (ast)', 'aspartato aminotransferase',
+                                         'ast', 'tgo - ast', 'tgo-ast', 'tgo (ast)', 'aspartato aminotransferase',
                                          'aspartato aminotransferase (ast)', 'aspartato aminotransferase - ast'],
     'Bilirrubinas totais e frações, soro': ['bilirrubinas', 'bilirrubinas totais e fracoes', 'bilirrubina total e fracoes',
                                             'bilirrubina total e fracoes', 'bilirrubinas total e fracoes'],
@@ -98,7 +100,7 @@ _SINONIMOS = {
     'PSA total, soro': ['psa total', 'psa', 'antigeno prostatico especifico', 'antigeno prostatico especifico total'],
     'PSA total e livre, soro': ['psa total e livre', 'psa livre e total'],
     'Tempo de protrombina (TP/INR), plasma': ['tempo de protrombina', 'tp', 'tap', 'tempo de protrombina (tp)',
-                                              'tempo de atividade da protrombina'],
+                                              'tempo de atividade da protrombina', 'rni', 'inr'],
     'Ácido láctico (lactato)': ['lactato', 'acido latico', 'acido lactico'],
     'Anticorpos anti-HCV, soro': ['anti-hcv', 'anti hcv', 'hepatite c - anti-hcv', 'hepatite c anti-hcv',
                                   'hepatite c - anti hcv', 'sorologia para hepatite c'],
@@ -131,7 +133,13 @@ _SINONIMOS = {
     'Lipase': ['lipase'],
     'Ferro sérico': ['ferro', 'ferro serico'],
     'Reticulócitos, contagem': ['reticulocitos', 'contagem de reticulocitos'],
-    'Tempo de tromboplastina parcial ativada': ['tempo de tromboplastina parcial ativado', 'ttpa', 'ttpa - tempo de tromboplastina parcial ativada'],
+    'Tempo de tromboplastina parcial ativada': ['tempo de tromboplastina parcial ativado', 'ttpa', 'ttpa - tempo de tromboplastina parcial ativada',
+                                                'tempo parcial de tromboplastina ativado',
+                                                'tempo parcial de tromboplastina ativada'],
+    'Creatino fosfoquinase total (CK)': ['creatinofosfoquinase', 'creatino fosfoquinase', 'cpk', 'ck', 'ck total',
+                                         'cpk total', 'creatinoquinase', 'creatinoquinase total'],
+    'Cálcio': ['calcio total', 'calcio serico', 'calcio total serico'],
+    'Proteínas totais albumina e globulina': ['proteinas totais e fracoes', 'proteina total e fracoes'],
     'Gasometria arterial, sangue arterial': ['gasometria arterial'],
     'Colesterol (HDL)': ['hdl colesterol', 'colesterol hdl', 'hdl', 'hdl-colesterol'],
     'Colesterol (LDL)': ['ldl colesterol', 'colesterol ldl', 'ldl', 'ldl-colesterol'],
@@ -145,15 +153,17 @@ _SINONIMOS = {
 _RUIDO = re.compile(r'^(resultado|valor(es)? de referencia|material|metodo|nota|notas|observ|paciente|nome|medico|'
                     r'solicitante|liberado|assinado|pagina|data|unidade|atendimento|identidade|cnes|laudo|amostra|'
                     r'interpreta|referencia)')
-_MARCA = re.compile(r'^(m[ée]todo|material|\[?\s*data\s+d[ae]\s+coleta|amostra)\b', re.IGNORECASE)
-_DATA_DO_EXAME = re.compile(r'data\s+d[ae]\s+coleta\s*:?\s*(\d{2})/(\d{2})/(\d{4})', re.IGNORECASE)
+_MARCA = re.compile(r'^(m[ée]todo|material|\[?\s*data\s+(?:d[ae]\s+)?coleta|amostra)\b', re.IGNORECASE)
+_DATA_DO_EXAME = re.compile(r'data\s+(?:d[ae]\s+)?coleta\s*:?\s*(\d{2})/(\d{2})/(\d{4})', re.IGNORECASE)
 # "Coletado(13/11/2026 10:49) Liberado(...)": no fim de cada exame (laudos do sistema Matrix/MV). O "Cadastro"
 # do cabeçalho é a data do pedido, não da coleta, e não é usado.
 _COLETADO = re.compile(r'coletad[oa]\s*\(\s*(\d{2})/(\d{2})/(\d{4})', re.IGNORECASE)
 # Sobra no título: "TEMPO DE PROTROMBINA   Valores de Referência" (cabeçalho da coluna na mesma linha).
 _COLUNA_DE_REFERENCIA = re.compile(r'\s+valor(es)?\s+de\s+refer[eê]ncias?\s*$', re.IGNORECASE)
-_DATA_DA_PAGINA = re.compile(r'(?:data\s+d[ae]\s+coleta|coletad[oa]\s+em|\bcoleta)\s*:?\s+(\d{2})/(\d{2})/(\d{4})',
-                             re.IGNORECASE)
+# "Dt. Solic: 16/11/2026": data da solicitação, no cabeçalho dos laudos que só trazem "Data Coleta" em parte dos
+# exames. A "Dt. Atendimento" da mesma linha é a data da internação e fica de fora.
+_DATA_DA_PAGINA = re.compile(r'(?:data\s+(?:d[ae]\s+)?coleta|coletad[oa]\s+em|\bcoleta|\bdt\.?\s*solic\w*\.?)\s*:?\s+'
+                             r'(\d{2})/(\d{2})/(\d{4})', re.IGNORECASE)
 
 
 def _normalizar(texto):
@@ -229,12 +239,12 @@ def textos_do_pdf(conteudo):
     return textos
 
 
-def _data(dia, mes, ano, hoje_):
+def _data(dia, mes, ano, hoje_, minima=date(1990, 1, 1)):
     try:
         d = date(int(ano), int(mes), int(dia))
     except ValueError:
         return None
-    return d if date(1990, 1, 1) <= d <= hoje_ else None
+    return d if minima <= d <= hoje_ else None
 
 
 def _sem_coluna(linha):
@@ -335,8 +345,33 @@ def _como_na_lista(titulo):
 _LISTA = None
 
 
+_SEXO = re.compile(r'\bsexo\s*:?\s*(masculino|feminino|m|f)\b', re.IGNORECASE)
+_NASCIMENTO = re.compile(r'\bnasc\w*\.?\s*:?\s*(\d{2})/(\d{2})/(\d{4})', re.IGNORECASE)
+_SETOR = re.compile(r'^\s*setor\s*:\s*(\S.*)$', re.IGNORECASE)
+
+
+def cabecalho(textos, hoje_=None):
+    """Sexo, data de nascimento e setor do cabeçalho do laudo:
+    {'sexo': 'feminino'|'masculino'|None, 'nascimento': date|None, 'setor': str}.
+
+    Serve ao modo sombra das operadoras (src/utils/operadora.py), que precisa da idade, do sexo e do regime de
+    atendimento para classificar. O leitor do check-up não usa nem devolve esses dados."""
+    hoje_ = hoje_ or hoje()
+    texto = ' '.join(re.sub(r'\s+', ' ', t) for t in textos)
+    sexo, nascimento = _SEXO.search(texto), _NASCIMENTO.search(texto)
+    setor = next((m.group(1) for t in textos for m in map(_SETOR.match, t.splitlines()) if m), '')
+    return {'sexo': {'m': 'masculino', 'f': 'feminino'}[sexo.group(1)[0].lower()] if sexo else None,
+            'nascimento': _data(*nascimento.groups(), hoje_, date(1900, 1, 1)) if nascimento else None,
+            'setor': re.sub(r'\s+', ' ', setor).strip()[:80]}
+
+
 def ler(conteudo, hoje_=None):
-    lido = extrair(textos_do_pdf(conteudo), hoje_)
+    return dos_textos(textos_do_pdf(conteudo), hoje_)
+
+
+def dos_textos(textos, hoje_=None):
+    """O mesmo que `ler`, a partir do texto das páginas (textos_do_pdf)."""
+    lido = extrair(textos, hoje_)
     vistos, exames = {}, []
     for exame in lido['exames']:
         nome = _como_na_lista(exame['exame'])

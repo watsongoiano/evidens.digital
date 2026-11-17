@@ -11,6 +11,11 @@
   de pré-operatório, de suspeita e de seguimento (Z01.8, Z03, Z04, Z08, Z09) era lido como rastreio; glicemia de jejum
   e citologia, aceitas pelas diretrizes do check-up, saíam como "barraria"; falha do motor virava liberação; valor em
   formato ambíguo era somado errado.
+- Leitura de laudos: novo modelo de laboratório de hospital ("Data Coleta" em parte dos exames e "Dt. Solic" no
+  cabeçalho), com seis nomes de exame novos. Corrigido: o limite de referência era lido como resultado quando vinha
+  em linha separada (bilirrubina total "Até 1,2", "RNI: Até 1,20"); leucócitos com a unidade colada ("9.200/mm³") e
+  fósforo não eram lidos. Exame fora da lista com um resultado só fica com o texto do resultado.
+- O modo sombra aceita laudos em PDF (`--laudos`): cada exame identificado vira um pedido, com o código TUSS.
 - O motor do check-up virou a função `recomendar`, chamável fora do servidor; a rota só entrega o resultado e registra
   o uso. Nenhuma saída do motor mudou (`tests/test_caracterizacao.py`).
 

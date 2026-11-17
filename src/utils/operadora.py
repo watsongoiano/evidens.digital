@@ -24,6 +24,11 @@ citologia pelo teste de DNA-HPV) é tratado como recomendado.
 O último exame vem da coluna data_ultimo_exame ou, na falta dela, do pedido anterior do mesmo beneficiário e código
 no próprio arquivo.
 
+Entrada por laudo em PDF
+- `pedidos_do_laudo` lê o laudo com o mesmo leitor do check-up (src/utils/laudos.py) e devolve uma linha de pedido
+  por exame identificado, com o código TUSS e a data da coleta. Sexo e idade saem do cabeçalho do laudo quando não
+  são informados. Nada do laudo é gravado.
+
 Pareceres de sociedades médicas (PARECERES_CONTRARIOS)
 - Contra o pedido de rotina em assintomático (vitamina D, testosterona, VHS, FAN e outros): vermelho quando a
   finalidade é rastreio, com o parecer e o link.
@@ -325,8 +330,10 @@ def _conhecidos():
 
     O nome é o título do check-up quando o título é só daquele código; no exame combinado (ferro e saturação de
     transferrina, por exemplo), cada código fica com a descrição da TUSS."""
+    from src.utils import exames_comuns
     do_titulo, da_tuss = {}, {}
-    for titulo in tuss.CODIGOS:
+    # Com dois títulos para o mesmo código (PCR e PCR ultrassensível), vale o da lista de exames comuns.
+    for titulo in sorted(tuss.CODIGOS, key=lambda t: t not in exames_comuns.POR_TITULO):
         codigos = _codigos_do_titulo(titulo)
         for codigo in codigos:
             if codigo[:3] not in _LABORATORIO:
@@ -551,6 +558,54 @@ def resumir(resultados, valores=()):
         'valor_por_cor': {cor: round(total, 2) for cor, total in valor_por_cor.items() if total},
         'mais_barrados': sorted(barrados.items(), key=lambda par: (-par[1], par[0]))[:10],
     }
+
+
+# Setor do cabeçalho do laudo que indica paciente internado ou em pronto atendimento
+_SETOR_INTERNADO = re.compile(r'\bu\.?\s?i\b|\buti\b|\bcti\b|enfermaria|interna', re.IGNORECASE)
+_SETOR_DE_URGENCIA = re.compile(r'pronto|emerg|urg[eê]ncia|\bupa\b', re.IGNORECASE)
+
+
+def regime_do_setor(setor):
+    """'internado' ou 'pronto-socorro' quando o setor do laudo diz isso ("U.I CLÍNICA MÉDICA", "UTI"); senão None."""
+    if _SETOR_DE_URGENCIA.search(setor or ''):
+        return 'pronto-socorro'
+    return 'internado' if _SETOR_INTERNADO.search(setor or '') else None
+
+
+def pedidos_do_laudo(conteudo, id_beneficiario, idade=None, sexo=None, carater='eletivo', regime=None,
+                     finalidade='', cid=''):
+    """Linhas de pedido, no formato do arquivo do modo sombra, para os exames de um laudo em PDF.
+
+    Devolve (linhas, nao_identificados). Cada exame identificado vira uma linha por código TUSS, com a data da coleta
+    como data do pedido. `sexo` (F ou M) e `idade` vêm do cabeçalho do laudo ("Sexo:", "Nasc.:") quando não são
+    informados; sem eles, levanta ValueError. Sem `regime`, vale o que o setor do laudo indicar (unidade de
+    internação, UTI, pronto-socorro) e, se ele não indicar nada, ambulatorial. `nao_identificados` traz os títulos
+    que o leitor não reconheceu, os que ficaram sem data e os exames sem código TUSS conferido."""
+    from src.utils import laudos
+    textos = laudos.textos_do_pdf(conteudo)
+    lido, dados = laudos.dos_textos(textos), laudos.cabecalho(textos)
+    sexo = _SEXOS.get(_sem_acento(sexo)) if sexo else dados['sexo']
+    if not sexo:
+        raise ValueError('o laudo não traz o sexo: informe o sexo')
+    if idade is None and not dados['nascimento']:
+        raise ValueError('o laudo não traz a data de nascimento: informe a idade')
+    regime = regime or regime_do_setor(dados['setor']) or 'ambulatorial'
+    linhas, nao_identificados = [], list(lido['nao_reconhecidos']) + list(lido['sem_data'])
+    for exame in lido['exames']:
+        coleta = date.fromisoformat(exame['data'])
+        codigos = [item['codigo'] for item in tuss.linhas_da_guia(exame['exame'], sexo) if item['codigo']]
+        if not codigos:
+            nao_identificados.append(exame['nome_no_laudo'])
+            continue
+        nascimento = dados['nascimento']
+        anos = idade if idade is not None else (
+            coleta.year - nascimento.year - ((coleta.month, coleta.day) < (nascimento.month, nascimento.day)))
+        for codigo in codigos:
+            linhas.append({'id_pedido': f'{id_beneficiario}-{len(linhas) + 1:02d}', 'id_beneficiario': id_beneficiario,
+                           'idade': str(anos), 'sexo': sexo[0].upper(), 'data_pedido': coleta.isoformat(),
+                           'codigo_tuss': codigo, 'carater': carater, 'regime': regime, 'finalidade': finalidade,
+                           'cid': cid})
+    return linhas, nao_identificados
 
 
 def ler_csv(texto):
