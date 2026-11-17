@@ -70,6 +70,12 @@ from src.utils import periodicidade, tuss
 
 VERSAO = '0.2'
 
+# Limites do envio pela tela do administrador (o script não tem limite).
+TAMANHO_MAXIMO_DO_ENVIO = 4 * 1024 * 1024
+MAXIMO_DE_LINHAS_NA_TELA = 2000
+MAXIMO_DE_LAUDOS_NA_TELA = 8
+LINHAS_MOSTRADAS_NA_TELA = 300
+
 OBRIGATORIAS = ('id_pedido', 'id_beneficiario', 'idade', 'sexo', 'data_pedido', 'codigo_tuss', 'carater', 'regime')
 OPCIONAIS = ('segmentacao', 'finalidade', 'cid', 'indicacao_clinica', 'data_ultimo_exame', 'valor')
 SAIDA = ('cor', 'acao', 'codigo_do_motivo', 'motivo', 'exame', 'grau', 'referencia', 'link', 'aviso', 'finalidade_usada',
@@ -629,3 +635,13 @@ def escrever_csv(brutas, resultados):
     for bruta, resultado in zip(brutas, resultados):
         escritor.writerow({**{nome[c]: bruta.get(c, '') for c in entrada}, **resultado})
     return destino.getvalue()
+
+
+def linhas_para_a_tela(brutas, resultados):
+    """As primeiras linhas, só com o que a tela mostra: identificadores do pedido, exame, cor, motivo e referência."""
+    def texto(valor):
+        return str(valor or '')[:300]
+    return [{'id_pedido': texto(b.get('id_pedido')), 'id_beneficiario': texto(b.get('id_beneficiario')),
+             'data_pedido': texto(b.get('data_pedido')), 'codigo_tuss': texto(b.get('codigo_tuss')),
+             **{c: texto(r.get(c)) for c in ('cor', 'acao', 'motivo', 'exame', 'grau', 'referencia', 'link', 'aviso', 'erro')}}
+            for b, r in list(zip(brutas, resultados))[:LINHAS_MOSTRADAS_NA_TELA]]

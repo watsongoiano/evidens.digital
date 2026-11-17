@@ -17,6 +17,14 @@ O resultado repete as colunas da entrada e acrescenta `cor`, `acao`, `codigo_do_
 divergência entre diretrizes, quando há. Coluna da entrada com nome igual ao de uma coluna de saída sai com o sufixo
 `_entrada`.
 
+## Pela tela (só o administrador)
+
+Em `/operadoras`, com a conta de administrador (botão "Operadoras (modo sombra)" na página da conta): enviar a
+planilha de pedidos (até 2.000 linhas) ou até 8 laudos em PDF (4 MB no total). A tela mostra o resumo por cor, a
+tabela dos primeiros 300 pedidos com motivo e referência, e o botão para baixar o resultado completo em CSV. Os
+arquivos são lidos em memória e descartados; nada é gravado nem registrado. Conta de médico comum não vê a página
+nem consegue usar a rota. A conta própria de operadora ainda não existe.
+
 ## Arquivo de entrada
 
 CSV em UTF-8 (o script também lê Windows-1252, o que o Excel grava), separado por vírgula ou ponto e vírgula, uma

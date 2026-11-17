@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operadoras — Evidēns</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico?v=2" sizes="32x32">
+<link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="/static/evidens.css">
+<script defer src="/static/conta.js"></script>
+<script defer src="/static/operadoras.js"></script>
+</head>
+<body class="bg-paper text-ink font-sans min-h-screen flex flex-col">
+
+<header class="px-4 sm:px-6 lg:px-[6%] pt-4 lg:pt-6">
+  <div class="max-w-[1240px] mx-auto bg-white h-[60px] pl-5 pr-2.5 lg:pl-6 flex items-center justify-between rounded-[3px] border border-ink/5">
+    <a href="/" class="flex items-center gap-2.5" aria-label="Evidēns — início">
+      <span class="grid grid-cols-3 gap-[3px]" aria-hidden="true">
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i>
+      </span>
+      <span class="text-[28px] font-medium tracking-tight leading-none"><span class="whitespace-nowrap">evidēns<sup class="marca-r">®</sup></span></span>
+    </a>
+    <nav class="flex items-center gap-2 lg:gap-6 text-[13px] uppercase tracking-[0.12em] text-ink/75"><a href="/intelligent-tools" class="hover:text-teal transition">Check-up</a><a href="/conta" class="hidden sm:inline hover:text-teal transition">Conta</a><button type="button" data-sair class="inline-flex items-center bg-ink text-white font-medium uppercase tracking-[0.12em] rounded-[3px] px-4 h-10 hover:bg-teal transition">Sair</button></nav>
+  </div>
+</header>
+
+<main class="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 pt-14 lg:pt-20 pb-24">
+  <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">ADMINISTRAÇÃO</p>
+  <h1 class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Operadoras <span class="font-serif italic text-teal tracking-tight">em modo sombra.</span></h1>
+  <p class="text-[16px] text-ink/65 leading-relaxed mt-5">Classifica pedidos de exame laboratorial que a operadora já recebeu. Nada é barrado: a tela mostra o que seria liberado, o que pediria esclarecimento e o que seria barrado. Os arquivos são lidos na memória e descartados; nada é gravado.</p>
+  <p class="text-[13px] text-ink/55 mt-3">Não envie nome, CPF nem número da carteira: use identificador pseudonimizado. O nome do arquivo do laudo vira o identificador do beneficiário.</p>
+  <div data-erro role="alert" class="aviso aviso-erro mt-8" style="display: none;"></div>
+
+  <section class="mt-10 grid md:grid-cols-2 gap-4">
+    <form data-form-csv class="recommendation-card">
+      <h2 class="categoria-titulo">Planilha de pedidos</h2>
+      <p class="text-[14px] text-ink/65">Arquivo CSV, uma linha por exame pedido, até 2.000 linhas.</p>
+      <input type="file" name="arquivo" accept=".csv,text/csv" required class="block w-full text-[14px] mt-4">
+      <div class="flex flex-wrap items-center gap-4 mt-5">
+        <button type="submit" class="btn-escuro">Classificar planilha</button>
+        <button type="button" class="text-[13px] text-teal underline underline-offset-2" data-modelo>Baixar modelo da planilha</button>
+      </div>
+    </form>
+    <form data-form-laudos class="recommendation-card">
+      <h2 class="categoria-titulo">Laudos em PDF</h2>
+      <p class="text-[14px] text-ink/65">Até 8 laudos, 4 MB no total. Cada exame identificado vira um pedido.</p>
+      <input type="file" name="laudos" accept="application/pdf,.pdf" multiple required class="block w-full text-[14px] mt-4">
+      <div class="grid grid-cols-2 gap-3 mt-4 text-[13px]">
+        <label>Finalidade<select name="finalidade" class="block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white">
+          <option value="">Não informada</option><option value="rastreio">Rastreio (rotina)</option><option value="diagnostico">Diagnóstico</option><option value="seguimento">Seguimento</option></select></label>
+        <label>Regime<select name="regime" class="block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white">
+          <option value="">Pelo setor do laudo</option><option value="ambulatorial">Ambulatorial</option><option value="internado">Internado</option><option value="pronto-socorro">Pronto-socorro</option></select></label>
+      </div>
+      <button type="submit" class="btn-escuro mt-5">Classificar laudos</button>
+    </form>
+  </section>
+
+  <p data-andamento class="text-[14px] text-ink/60 mt-6" style="display: none;">Classificando…</p>
+
+  <section data-resultado class="mt-12" style="display: none;">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <h2 class="categoria-titulo !mb-0">Resumo <span data-versao class="text-ink/30"></span></h2>
+      <button type="button" class="btn-claro" data-baixar>Baixar resultado (CSV)</button>
+    </div>
+    <div data-cartoes class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6"></div>
+    <p data-notas class="text-[13px] text-ink/60 mt-4"></p>
+
+    <div class="flex flex-wrap items-end justify-between gap-4 mt-10">
+      <h2 class="categoria-titulo !mb-0">Pedidos <span data-contagem class="text-ink/30"></span></h2>
+      <div class="opcoes" role="radiogroup" aria-label="Filtro por cor" data-filtros>
+        <button type="button" class="opcao" role="radio" data-filtro="" aria-checked="true">Todos</button>
+        <button type="button" class="opcao" role="radio" data-filtro="vermelho">Barraria</button>
+        <button type="button" class="opcao" role="radio" data-filtro="amarelo">Esclarecimento</button>
+        <button type="button" class="opcao" role="radio" data-filtro="verde">Liberaria</button>
+        <button type="button" class="opcao" role="radio" data-filtro="fora_do_escopo">Fora do escopo</button>
+      </div>
+    </div>
+    <div class="overflow-x-auto rounded-[14px] border border-ink/10 bg-white mt-6">
+      <table class="w-full text-[14px] md:min-w-[860px]">
+        <thead class="text-[11px] uppercase tracking-[0.12em] text-ink/50 text-left border-b border-ink/10">
+          <tr><th class="px-4 py-3 font-medium">Pedido</th><th class="px-3 py-3 font-medium">Exame</th><th class="px-3 py-3 font-medium">Parecer</th><th class="px-3 py-3 font-medium hidden md:table-cell">Motivo e referência</th></tr>
+        </thead>
+        <tbody data-linhas></tbody>
+      </table>
+    </div>
+    <p class="text-[12px] text-ink/50 mt-3">A tabela mostra até 300 pedidos; o arquivo de resultado traz todos, com as demais colunas.</p>
+  </section>
+</main>
+
+<footer class="max-w-[1100px] w-full mx-auto px-4 sm:px-6 pb-10">
+  <div class="flex flex-col md:flex-row md:justify-between gap-3 pt-8 border-t border-ink/10 text-[12px] text-ink/50">
+    <p>Responsável técnico: Dr. Rodolfo Cambraia Frota · CRM-GO 26815</p>
+    <p>© 2026 Evidēns · <a href="/contact" class="hover:text-teal">Contato</a></p>
+  </div>
+</footer>
+</body>
+</html>
