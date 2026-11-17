@@ -125,6 +125,8 @@ class Paciente:
         meds = set(c.get('medicacoes', []))
         if any(m.startswith('insulina') for m in meds):
             cond.add('diabetes_insulina')
+        if any(m.endswith('statina') for m in meds):
+            cond.add('dislipidemia')             # colesterol alto em tratamento segue fator de risco (AHA Figura 1)
         if 'diabetes_insulina' in cond:
             cond.add('diabetes')
         if cond & {'ic_fe_reduzida', 'ic_recente'}:
@@ -281,6 +283,32 @@ class Paciente:
         return round(v * (0.85 if self.sexo == 'feminino' else 1), 1)
 
     # ── fluxo de indicação (AHA 2026 Figura 1; SBC 2024 seção 2.1 e Figura Central)
+    def saudavel(self):
+        """AHA Figura 1, primeira pergunta: sem fator de risco (nota *), doença ou sintoma cardiovascular → opera.
+        O módulo só libera aqui se o escore também não estiver elevado e não houver doença renal (item do RCRI)."""
+        fator = bool(self.cond & {'hipertensao', 'tabagismo', 'dislipidemia', 'diabetes', 'obesidade',
+                                  'historia_familiar_dac'}) \
+            or (self.sexo == 'feminino' and self.idade > 65) or (self.sexo == 'masculino' and self.idade > 55)
+        return not (fator or self.dcv or self.sint or self.inst or self.pa_descontrolada or self.pac_ia()
+                    or 'doenca_renal' in self.cond)
+
+    def modificadores(self):
+        """AHA Figura 1: valvopatia grave, hipertensão pulmonar grave, cardiopatia congênita de risco elevado, stent
+        coronário ou revascularização cirúrgica, AVC recente, dispositivo implantado, fragilidade."""
+        return bool(self.cond & {'valvopatia', 'hipertensao_pulmonar', 'cardiopatia_congenita', 'stent',
+                                 'revascularizacao_cirurgica', 'avc_ait_recente', 'marcapasso_cdi'}) \
+            or (self.cfs is not None and 5 <= self.cfs <= 8)
+
+    def liberado(self):
+        """O fluxo libera sem exames cardíacos: sem fatores, cirurgia de baixo risco ou risco calculado baixo sem
+        modificador (inclusive quando falta dado e a boa capacidade funcional libera). Quem passa pelo risco elevado
+        ou por um modificador e é liberado pela capacidade não entra."""
+        if self.tipo() != 'nao_indicada':
+            return False
+        if self.saudavel() or self.risco == B:
+            return True
+        return not self.pac_ia() and not self.modificadores()
+
     def tipo(self):
         if self.urg == 'emergencia':
             return 'emergencia'
@@ -291,9 +319,9 @@ class Paciente:
         if self.sint & {'dispneia_nova', 'sinais_ic', 'sopro'}:
             # AHA função do VE rec. 1 (1 B-NR) e valvas (1 C-EO): avaliar VE/valva antes da cirurgia, qualquer risco
             return 'indicada'
-        if self.risco == B:
+        if self.saudavel() or self.risco == B:
             return 'nao_indicada'
-        if not self.pac_ia():
+        if not self.pac_ia() and not self.modificadores():
             # Sem o dado, o risco não é "baixo": com boa capacidade libera de qualquer jeito; sem ela, falta o exame.
             return 'incompleto' if self.faltam() and self.capacidade() != 'boa' else 'nao_indicada'
         # AHA: boa capacidade dispensa prova funcional (recomendações de estresse e CCTA, 3: sem benefício). Sintoma
@@ -905,9 +933,11 @@ def _esperado_exames(pac):
             aha='2a')
     elif pac.eletiva and (idade >= 35 or cond & {'hipertensao', 'obesidade', 'dac', 'iam_previo', 'avc_ait',
                                                   'doenca_arterial_periferica'}):
-        # Rastreio: AHA 2a ("at risk for diabetes"); SBD/SBA/ABESO 2026 R1, I-B (doi:10.1186/s13098-025-02060-5)
-        poe('Hemoglobina glicada (HbA1c), soro', {'indicado', 'ja_feito'})
-        poe('Glicose, soro', {'indicado', 'ja_feito'})
+        # Rastreio: AHA 2a ("at risk for diabetes"); SBD/SBA/ABESO 2026 R1, I-B (doi:10.1186/s13098-025-02060-5).
+        # É oportunístico: com o paciente liberado pelo fluxo, não é marcado sozinho.
+        rastreio = 'considerar' if pac.liberado() else 'indicado'
+        poe('Hemoglobina glicada (HbA1c), soro', {rastreio, 'ja_feito'})
+        poe('Glicose, soro', {rastreio, 'ja_feito'})
 
     # NICE NG45 (porte × ASA)
     asa = pac.asa
@@ -924,6 +954,15 @@ def _esperado_exames(pac):
             poe('Creatinina, soro', 'indicado')
         if 'hemoglobina' in pac.faltam():
             poe('Hemograma completo com plaquetas', 'indicado')
+    # AHA Figura 1: liberado para a cirurgia → nenhum exame cardíaco marcado sozinho (classe 1 da AHA e as
+    # recomendações próprias dos transplantes ficam)
+    if pac.liberado() and not pac.cir.startswith('transplante'):
+        for titulo in ('Eletrocardiograma de repouso', 'Ecocardiograma transtorácico',
+                       'Peptídeo natriurético BNP/PROBNP', 'Troponina, soro'):
+            esp = x.get(titulo)
+            if esp and 'indicado' in esp['estado'] and esp['aha'] != '1':
+                esp['estado'] = (esp['estado'] - {'indicado'}) | {'considerar'}
+                esp['div'] = True
     if 'varfarina' in pac.meds:
         poe('Tempo de protrombina (TP/INR), plasma', 'indicado')
     elif 'hepatopatia' in cond and asa and asa >= 3 and pac.porte in ('intermediaria', 'maior'):
@@ -971,7 +1010,8 @@ def _check_exames(c, r, pac, erros):
             e = titulos.get(t)
             if e is None or e['estado'] != 'considerar' or e['aha'] != aha or e['sbc'] != sbc:
                 erros.append(f'{t}: esperado considerar (AHA {aha}, SBC {sbc}), veio {e and (e["estado"], e["aha"], e["sbc"])}')
-    elif (pac.tipo() == 'nao_indicada' and pac.cir_ia and pac.capacidade() != 'boa' and pac.urg == 'eletiva'
+    elif (pac.tipo() in ('nao_indicada', 'indicada') and not pac.pac_ia() and pac.cir_ia
+          and pac.capacidade() != 'boa' and pac.urg == 'eletiva'
           and pac.cond & {'dac', 'iam_previo', 'stent', 'revascularizacao_cirurgica'}):
         # SBC Quadro 6 (IIb-B): capacidade baixa, assintomático, DAC conhecida; AHA: risco < 1% → sem teste
         if not pac.sint & {'angina', 'dispneia', 'dispneia_nova'}:

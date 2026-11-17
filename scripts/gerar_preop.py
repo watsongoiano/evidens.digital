@@ -48,12 +48,15 @@ GRUPOS = [
         ('c', 'avc_ait', 'AVC ou AIT', [('c', 'avc_ait_recente', 'Há menos de 3 meses')]),
         ('c', 'doenca_arterial_periferica', 'Doença arterial periférica', []),
         ('c', 'hipertensao_pulmonar', 'Hipertensão pulmonar', [('i', 'hap_sintomatica', 'Sintomática')]),
+        ('c', 'cardiopatia_congenita', 'Cardiopatia congênita de risco elevado', []),
     ]),
     ('outras', 'Outras doenças', '', [
         ('c', 'diabetes', 'Diabetes', [('c', 'diabetes_insulina', 'Em uso de insulina')]),
+        ('c', 'dislipidemia', 'Dislipidemia', []),
         ('c', 'obesidade', 'Obesidade', []),
         ('c', 'dpoc', 'DPOC', []),
         ('c', 'tabagismo', 'Tabagismo atual', []),
+        ('c', 'historia_familiar_dac', 'História familiar de doença coronária precoce', []),
         ('c', 'doenca_renal', 'Doença renal crônica', []),
         ('c', 'hepatopatia', 'Hepatopatia crônica', []),
         ('c', 'tev', 'Trombose venosa ou TEP prévio', [
