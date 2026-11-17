@@ -205,7 +205,7 @@ def test_tela_tem_mascaras_cep_primeiro_e_busca_do_endereco():
     campos = html[html.index('id="apacCampos"'):html.index('id="apacCid"')]
     assert campos.index('id="apacCep"') < campos.index('id="apacEndereco"') < campos.index('id="apacCns"')
     for trecho in ('MASCARAS_DA_APAC', 'apacNascimento: v =>', 'apacTelefone: v =>', "'https://viacep.com.br/ws/' + cep + '/json/'",
-                   'paciente.ibge = apacIbge'):
+                   'paciente.ibge = apacIbge', "apacIbge = ''; cepBuscado = '';"):
         assert trecho in html, trecho
 
 

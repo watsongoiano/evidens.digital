@@ -337,7 +337,8 @@ def extrair(textos, hoje_=None):
 
 # ── Resumo em uma linha ("16/11/2026 - Hb 13,7 | Ht 40,3% | ... | Cr 0,71") ─────────────────────────────────
 # Só o que o laudo traz escrito, sem valor de referência e sem julgar se está alterado. A ordem é a da lista.
-_N = r'(\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?)'
+# Milhar com ponto ("9.200"), decimal com vírgula ou com ponto ("0,71", "1.25"); nunca só um pedaço do número.
+_N = r'(\d{1,3}(?:\.\d{3})+(?:,\d+)?(?![\d.,/]*\d)|\d+(?:[.,]\d+)?(?![\d.,/]*\d))'
 _SEP = r'[\s.:]*'
 # (trecho do título do exame, [(sigla, expressão do valor, sufixo)]); None = exame de um resultado só ("RESULTADO: x")
 _RESUMO = (
@@ -368,7 +369,10 @@ _REFERENCIA = re.compile(r'^\s*valor(es)?\s+de\s+refer[eê]ncia', re.IGNORECASE)
 
 
 def _valor_do_resumo(sigla, texto):
-    """O valor como está no laudo; no hemograma, com uma casa ("13,70" → "13,7")."""
+    """O valor como está no laudo, com vírgula decimal ("1.25" → "1,25"; o milhar "9.200" fica); no hemograma,
+    com uma casa ("13,70" → "13,7")."""
+    if re.fullmatch(r'\d+\.\d{1,2}', texto) or (re.fullmatch(r'\d+\.\d+', texto) and not re.fullmatch(r'\d{1,3}\.\d{3}', texto)):
+        texto = texto.replace('.', ',')
     return texto[:-1] if sigla in _UMA_CASA and re.fullmatch(r'\d+,\d\d', texto) else texto
 
 

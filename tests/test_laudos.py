@@ -389,3 +389,12 @@ def test_resumo_em_uma_linha_por_data_sem_referencia_e_sem_nome():
     assert PACIENTE.lower() not in texto.lower() and 'resumo' not in lido['exames'][0]
     assert laudos.ler(_pdf(FORMATO_A), HOJE)['resumo'] == [{'data': '2026-09-23', 'texto': 'Gli 90'}]
     assert laudos.ler(_pdf(FORMATO_B), HOJE)['resumo'] == []          # sem valor reconhecível: nada é inventado
+
+
+@pytest.mark.parametrize('resultado, esperado', [('1.25 mg/dL', 'Cr 1,25'), ('0.71 mg/dL', 'Cr 0,71'), ('0,71 mg/dL', 'Cr 0,71'),
+                                                  ('2 mg/dL', 'Cr 2'), ('1.2.3', None), ('16/11/2026', None)])
+def test_resumo_nunca_fica_com_um_pedaco_do_numero(resultado, esperado):
+    paginas = [['CREATININA', '[DATA DA COLETA : 13/11/2026 08:06]', 'Material: Soro', f'RESULTADO: {resultado}']]
+    resumo = laudos.ler(_pdf(paginas), HOJE)['resumo']
+    assert resumo == ([{'data': '2026-11-13', 'texto': esperado}] if esperado else [])
+    assert laudos._itens_do_resumo('Hemograma completo', ['Leucócitos Totais 9.200/mm³', 'Plaquetas 299.000 /mm³']) == [(0, 'Leuc 9.200 | Plaq 299.000')]

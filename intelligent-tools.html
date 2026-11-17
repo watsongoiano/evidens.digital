@@ -2463,9 +2463,10 @@
         const CAMPOS_DA_APAC = ['apacCns', 'apacNascimento', 'apacMae', 'apacTelefone', 'apacCid', 'apacEndereco',
                                 'apacMunicipio', 'apacUf', 'apacCep'];
         let apacIbge = '';     // código IBGE do município, vindo da busca do CEP
+        let cepBuscado = '';   // último CEP consultado (o mesmo CEP não é buscado duas vezes seguidas)
         function limparApac() {
             CAMPOS_DA_APAC.forEach(id => { document.getElementById(id).value = ''; });
-            apacIbge = '';
+            apacIbge = ''; cepBuscado = '';     // outro paciente com o mesmo CEP: a busca é refeita
             document.getElementById('apacCepAviso').textContent = '';
         }
 
@@ -2489,7 +2490,6 @@
 
         // CEP completo: busca o endereço no ViaCEP (só o CEP sai do site) e preenche município, UF, código IBGE e
         // a rua e o bairro; o número fica para o médico. O que já foi digitado no endereço não é trocado.
-        let cepBuscado = '';
         async function buscarCepDaApac() {
             const cep = soDigitos(document.getElementById('apacCep').value, 8);
             const aviso = document.getElementById('apacCepAviso');
