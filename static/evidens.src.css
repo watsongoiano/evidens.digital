@@ -84,12 +84,12 @@ html.lenis, html.lenis body { height: auto; }
   .combo-vazio { @apply px-4 py-3 text-[13px] text-ink/50; }
   .bloco-condicional { @apply mt-4 rounded-2xl bg-mist/50 border border-teal/15 p-5; }
   /* Exames já realizados: um cartão por exame, no desenho do bloco dos exames do PREVENT. */
-  .exame-cartao { @apply rounded-2xl bg-mist/50 border border-teal/15 p-4 sm:p-5; }
-  .exame-titulo { @apply inline-flex items-baseline text-left text-[15px] font-medium text-ink leading-snug pt-1.5 hover:text-teal; }
-  .exame-retirar { @apply shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white border border-ink/15 text-ink/55 hover:border-teal hover:text-teal transition; }
-  .exame-campos { @apply grid grid-cols-2 items-end gap-3 mt-3; }
-  .exame-campos .campo > label { @apply text-[10px] tracking-[0.1em] mb-1.5; }
-  .exame-campos .campo input, .exame-campos .campo select { @apply h-11 px-3 text-[15px] bg-white; }
+  .exame-cartao { @apply rounded-xl bg-mist/40 border border-teal/15 px-3 py-2; }
+  .exame-titulo { @apply inline-flex items-baseline text-left text-[13px] font-medium text-ink leading-snug pt-0.5 hover:text-teal; }
+  .exame-retirar { @apply shrink-0 inline-flex items-center justify-center w-6 h-6 text-[11px] rounded-full bg-white border border-ink/15 text-ink/55 hover:border-teal hover:text-teal transition; }
+  .exame-campos { @apply grid grid-cols-2 sm:grid-cols-3 items-end gap-x-2 gap-y-1.5 mt-1.5; }
+  .exame-campos .campo > label { @apply text-[9px] tracking-[0.08em] mb-0.5 leading-tight; }
+  .exame-campos .campo input, .exame-campos .campo select { @apply h-8 px-2 text-[13px] rounded-lg bg-white; }
   .exame-campos .campo:has(.opcoes) { @apply col-span-2; }
   .exame-titulo[hidden], .exame-cartao [hidden], #examesComunsPainel .opcao[hidden] { display: none; }
   /* Cada grupo é o mesmo rótulo de antes (mono, maiúsculas, azul-petróleo), agora clicável; os botões dos exames
@@ -100,7 +100,7 @@ html.lenis, html.lenis body { height: auto; }
   .exames-comuns-conta[hidden], .exames-comuns-grupo .opcoes[hidden] { display: none; }
   .exames-comuns-seta { @apply ml-auto text-[10px] text-teal-dark/60 transition-transform; }
   .exames-comuns-abrir[aria-expanded="true"] .exames-comuns-seta { @apply rotate-180; }
-  .exames-comuns-cartoes { @apply flex flex-col gap-3 mt-3 empty:mt-0; }
+  .exames-comuns-cartoes { @apply flex flex-col gap-1.5 mt-2 empty:mt-0; }
   .resultado-informado { @apply py-3 border-t border-ink/5 first-of-type:border-t-0; }
 
   .risco-cartao { @apply mt-8 rounded-[22px] bg-white border border-ink/10 p-6 sm:p-7; }

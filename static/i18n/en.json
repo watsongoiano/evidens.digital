@@ -4247,7 +4247,9 @@
   "Resumo da anamnese e exame físico": "Summary of history and physical examination",
   "Exames complementares realizados": "Complementary tests already done",
   "Em \"Justificativa do procedimento\" sai \"Os acima.\"": "Under \"Justificativa do procedimento\" the form says \"Os acima.\" (the above).",
-  "Texto do laudo de APAC inválido ou longo demais": "Invalid or too long APAC report text"
+  "Texto do laudo de APAC inválido ou longo demais": "Invalid or too long APAC report text",
+  "Ver exames": "Show tests",
+  "Fechar exames": "Hide tests"
  },
  "padroes": [
   [
