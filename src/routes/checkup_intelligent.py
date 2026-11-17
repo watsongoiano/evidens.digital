@@ -973,28 +973,41 @@ PREVENT_LIMITACAO = {
 
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
 def generate_intelligent_recommendations():
+    resposta, status = recomendar(request.get_json(silent=True), registrar_uso=True)
+    try:
+        return jsonify(resposta), status
+    except Exception as e:                      # falha ao serializar: a mesma resposta de erro do motor
+        print(f"Erro na geração de recomendações: {e}")
+        return jsonify({'error': 'Erro interno do servidor'}), 500
+
+
+def recomendar(bruto, registrar_uso=False):
+    """O motor do check-up, sem depender do servidor: recebe o JSON do formulário e devolve (resposta, status).
+
+    A rota acima só entrega o resultado; o modo sombra das operadoras (src/utils/operadora.py) chama esta função
+    direto, sem registrar uso."""
     try:
         # Validar e normalizar a entrada. Nada é presumido: idade, sexo e tabagismo são
         # obrigatórios, valores impossíveis são recusados e dado ausente não vira valor padrão.
         try:
-            data, triagem = validar_entrada(request.get_json(silent=True))
+            data, triagem = validar_entrada(bruto)
         except EntradaInvalida as exc:
-            return jsonify({
+            return {
                 'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in exc.erros),
                 'codigo': 'entrada_invalida',
                 'erros': exc.erros,
-            }), 400
+            }, 400
 
         # Exames que o paciente já fez (opcional): o que estiver em dia não é pedido de novo.
         from src.utils import periodicidade
         exames_anteriores, erros_exames = periodicidade.ler_exames_anteriores(
-            (request.get_json(silent=True) or {}).get('exames_anteriores'))
+            (bruto or {}).get('exames_anteriores'))
         if erros_exames:
-            return jsonify({
+            return {
                 'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in erros_exames),
                 'codigo': 'entrada_invalida',
                 'erros': erros_exames,
-            }), 400
+            }, 400
 
         # Dados do paciente (já normalizados)
         age = data['idade']
@@ -1003,13 +1016,13 @@ def generate_intelligent_recommendations():
         gestacao = None
         if is_pregnant:
             try:
-                gestacao = prenatal.normalizar(request.get_json(silent=True) or {})
+                gestacao = prenatal.normalizar(bruto or {})
             except prenatal.GestacaoInvalida as exc:
-                return jsonify({
+                return {
                     'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in exc.erros),
                     'codigo': 'entrada_invalida',
                     'erros': exc.erros,
-                }), 400
+                }, 400
         weight = data.get('peso')
         height = data.get('altura')
         sbp_value = data.get('pas') or 0
@@ -1058,10 +1071,10 @@ def generate_intelligent_recommendations():
         from src.utils import doses, medicamentos
         escolhidas = list(medicacoes_checkboxes)
         try:
-            detalhes_doses = doses.ler(request.get_json(silent=True) or {}, escolhidas)
+            detalhes_doses = doses.ler(bruto or {}, escolhidas)
         except doses.DetalheInvalido as exc:
-            return jsonify({'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in exc.erros),
-                            'codigo': 'entrada_invalida', 'erros': exc.erros}), 400
+            return {'error': 'Dados inválidos: ' + ' '.join(e['mensagem'] for e in exc.erros),
+                            'codigo': 'entrada_invalida', 'erros': exc.erros}, 400
         # Dose e duração (corticoide, metotrexato, azatioprina, hidroxicloroquina, bisfosfonato) ajustam as
         # classes: a exclusão vale só para o medicamento avaliado, não para outro que traga a mesma classe.
         mais, excluir_por_medicamento, orientacoes_doses = doses.avaliar(
@@ -1071,7 +1084,7 @@ def generate_intelligent_recommendations():
         medicacoes_checkboxes += [c for c in sorted(mais) if c not in medicacoes_checkboxes]
         comorbidades, medicacoes_checkboxes, inferencias = coerencia.inferir(
             {**data, 'comorbidades': comorbidades, 'medicacoes': medicacoes_checkboxes}, egfr=egfr_inferencia,
-            gestante=is_pregnant, recusados=_lista_curta((request.get_json(silent=True) or {}).get('inferencias_recusadas')),
+            gestante=is_pregnant, recusados=_lista_curta((bruto or {}).get('inferencias_recusadas')),
             escolhidas=escolhidas)
         familia = data.get('historia_familiar') or []
         familia = [k for k, v in familia.items() if v] if isinstance(familia, dict) else list(familia)
@@ -1122,7 +1135,7 @@ def generate_intelligent_recommendations():
             age, imc, fatores_risco_dm(data, comorbidades, medicacoes_checkboxes, familia, has_hypertension))
         risco_drc = has_hypertension or has_dcv_aterosclerotica or has_ic or 'rim_policistico' in familia
         prep = 'hiv' not in comorbidades and bool({'tenofovir_entricitabina', 'cabotegravir'} & set(escolhidas))
-        alcool = (request.get_json(silent=True) or {}).get('alcoolismo')
+        alcool = (bruto or {}).get('alcoolismo')
         fatores_osso = (tabagismo == 'atual' or (imc is not None and imc < 20) or alcool == 'pesado'
                         or 'artrite_reumatoide' in comorbidades)
 
@@ -1312,9 +1325,10 @@ def generate_intelligent_recommendations():
         # Nenhum dado do paciente é gravado: a consulta é calculada e descartada.
 
         # Uso do sistema (painel /analytics): quem gerou o check-up, sem dado do paciente
-        from src.routes.auth import usuario_atual
-        from src.utils import uso
-        uso.registrar('checkup', usuario_atual())
+        if registrar_uso:
+            from src.routes.auth import usuario_atual
+            from src.utils import uso
+            uso.registrar('checkup', usuario_atual())
         
         # Listas de comorbidades, medicações e história familiar (src/utils/condicoes.py)
         orientacoes = condicoes.aplicar(recommendations, age, sex, comorbidades, medicacoes_checkboxes, familia,
@@ -1461,7 +1475,7 @@ def generate_intelligent_recommendations():
         orientacoes_aconselhamento = aconselhamento.orientacoes(
             age, sex, gestante=is_pregnant, lactante=triagem.get('lactante') in ('sim_menor_6m', 'sim_6m_ou_mais'), tabagismo=tabagismo, imc=imc,
             comorbidades=comorbidades, historia_familiar=familia, medicacoes=list(escolhidas) + list(medicacoes_checkboxes), prep=prep,
-            alcool=(request.get_json(silent=True) or {}).get('alcoolismo'))
+            alcool=(bruto or {}).get('alcoolismo'))
         todas = (orientacoes_gestacao + orientacoes_doses + orientacoes + orientacoes_colo + orientacoes_ist
                  + orientacoes_hiv + orientacoes_cancer + orientacoes_rastreio + orientacoes_aconselhamento)
         # Urgências (PA em faixa grave na gestação) no topo; depois as da gestação (alto risco, AAS, divergências).
@@ -1486,11 +1500,11 @@ def generate_intelligent_recommendations():
             for item in response.get(lista) or []:
                 if isinstance(item, dict):
                     item.pop('_subtitulos', None)
-        return jsonify(response)
+        return response, 200
         
     except Exception as e:
         print(f"Erro na geração de recomendações: {e}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+        return {'error': 'Erro interno do servidor'}, 500
 
 # ==================== ENDPOINTS DESATIVADOS ====================
 #

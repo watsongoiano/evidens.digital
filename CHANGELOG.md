@@ -1,6 +1,24 @@
 
 # Patches applied (2025-08-26T12:12:23)
 
+## 2026-11-17 — Conta de operadora: modo sombra
+
+- `scripts/modo_sombra.py` classifica um arquivo de pedidos de exame laboratorial de operadora (liberaria, pediria
+  esclarecimento, barraria), sem barrar nada. Regras em `src/utils/operadora.py`: as do check-up, mais pareceres de
+  sociedades médicas (listas do Choosing Wisely dos EUA, do Canadá e do Brasil), o intervalo mínimo da HbA1c e os
+  exames alternativos que as diretrizes aceitam. Formato do arquivo e regras em `docs/operadoras-modo-sombra.md`.
+- Uma auditoria com quatro agentes, antes do merge, corrigiu: exame de imagem recomendado saía como "barraria"; CID
+  de pré-operatório, de suspeita e de seguimento (Z01.8, Z03, Z04, Z08, Z09) era lido como rastreio; glicemia de jejum
+  e citologia, aceitas pelas diretrizes do check-up, saíam como "barraria"; falha do motor virava liberação; valor em
+  formato ambíguo era somado errado.
+- Leitura de laudos: novo modelo de laboratório de hospital ("Data Coleta" em parte dos exames e "Dt. Solic" no
+  cabeçalho), com seis nomes de exame novos. Corrigido: o limite de referência era lido como resultado quando vinha
+  em linha separada (bilirrubina total "Até 1,2", "RNI: Até 1,20"); leucócitos com a unidade colada ("9.200/mm³") e
+  fósforo não eram lidos. Exame fora da lista com um resultado só fica com o texto do resultado.
+- O modo sombra aceita laudos em PDF (`--laudos`): cada exame identificado vira um pedido, com o código TUSS.
+- O motor do check-up virou a função `recomendar`, chamável fora do servidor; a rota só entrega o resultado e registra
+  o uso. Nenhuma saída do motor mudou (`tests/test_caracterizacao.py`).
+
 ## 2026-11-12 — Limpeza de código fora do caminho de produção
 
 - Removidos pontos de entrada alternativos, banco de dados e rotas de pacientes, motor antigo, geradores de PDF
