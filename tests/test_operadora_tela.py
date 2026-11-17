@@ -63,3 +63,12 @@ def test_envio_vazio_grande_demais_ou_de_outro_site_e_recusado(admin):
     de_fora = admin.post(ROTA, data={'arquivo': _planilha()}, content_type='multipart/form-data',
                          headers={'Origin': 'https://outro.exemplo'})
     assert de_fora.status_code == 403
+
+
+def test_arquivo_enviado_nao_passa_para_o_disco(app):
+    """O Werkzeug grava em arquivo temporário o envio com mais de 500 KiB; aqui ele fica na memória."""
+    grande = io.BytesIO(b'x' * 700 * 1024)
+    with app.test_request_context(ROTA, method='POST', data={'arquivo': (grande, 'pedidos.csv')},
+                                  content_type='multipart/form-data'):
+        from flask import request
+        assert isinstance(request.files['arquivo'].stream, io.BytesIO)

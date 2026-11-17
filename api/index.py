@@ -5,6 +5,7 @@ Sistema de Check-up Médico Inteligente
 from datetime import timedelta
 
 from flask import Flask, request, jsonify, redirect, send_from_directory
+import io
 import json
 import os
 import sys
@@ -25,6 +26,17 @@ from src.utils import i18n
 # Sem a pasta estática automática do Flask: tudo o que é publicado passa pela
 # lista ARQUIVOS_PUBLICOS abaixo (a rota /static/<arquivo> serviria a pasta inteira).
 app = Flask(__name__, static_folder=None)
+
+
+class _PedidoEmMemoria(app.request_class):
+    """Arquivo enviado fica só na memória. O padrão do Werkzeug passa para um arquivo temporário em disco o que
+    tem mais de 500 KiB, e os laudos e as planilhas (limitados a 4 MB pelas rotas) não devem tocar o disco."""
+
+    def _get_file_stream(self, total_content_length, content_type, filename=None, content_length=None):
+        return io.BytesIO()
+
+
+app.request_class = _PedidoEmMemoria
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', auth.CHAVE_PADRAO)
 
 # Sessão: cookie assinado, inacessível a scripts, só por HTTPS na Vercel,
