@@ -5,7 +5,12 @@
 
 - `scripts/modo_sombra.py` classifica um arquivo de pedidos de exame laboratorial de operadora (liberaria, pediria
   esclarecimento, barraria), sem barrar nada. Regras em `src/utils/operadora.py`: as do check-up, mais pareceres de
-  sociedades contra o pedido de rotina. Formato do arquivo e regras em `docs/operadoras-modo-sombra.md`.
+  sociedades médicas (listas do Choosing Wisely dos EUA, do Canadá e do Brasil), o intervalo mínimo da HbA1c e os
+  exames alternativos que as diretrizes aceitam. Formato do arquivo e regras em `docs/operadoras-modo-sombra.md`.
+- Uma auditoria com quatro agentes, antes do merge, corrigiu: exame de imagem recomendado saía como "barraria"; CID
+  de pré-operatório, de suspeita e de seguimento (Z01.8, Z03, Z04, Z08, Z09) era lido como rastreio; glicemia de jejum
+  e citologia, aceitas pelas diretrizes do check-up, saíam como "barraria"; falha do motor virava liberação; valor em
+  formato ambíguo era somado errado.
 - O motor do check-up virou a função `recomendar`, chamável fora do servidor; a rota só entrega o resultado e registra
   o uso. Nenhuma saída do motor mudou (`tests/test_caracterizacao.py`).
 

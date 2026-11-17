@@ -974,7 +974,11 @@ PREVENT_LIMITACAO = {
 @checkup_intelligent_bp.route('/checkup-intelligent', methods=['POST'])
 def generate_intelligent_recommendations():
     resposta, status = recomendar(request.get_json(silent=True), registrar_uso=True)
-    return jsonify(resposta), status
+    try:
+        return jsonify(resposta), status
+    except Exception as e:                      # falha ao serializar: a mesma resposta de erro do motor
+        print(f"Erro na geração de recomendações: {e}")
+        return jsonify({'error': 'Erro interno do servidor'}), 500
 
 
 def recomendar(bruto, registrar_uso=False):
