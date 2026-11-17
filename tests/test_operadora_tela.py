@@ -72,3 +72,49 @@ def test_arquivo_enviado_nao_passa_para_o_disco(app):
                                   content_type='multipart/form-data'):
         from flask import request
         assert isinstance(request.files['arquivo'].stream, io.BytesIO)
+
+
+def test_listas_do_check_up_e_dados_do_paciente_no_envio_dos_laudos(admin, client):
+    assert client.get('/api/admin/operadoras/listas').status_code == 403
+    listas = admin.get('/api/admin/operadoras/listas').get_json()
+    assert {'valor': 'hipertensao', 'rotulo': 'Hipertensão'} in listas['comorbidades']
+    assert any(item['valor'] == 'sinvastatina' for item in listas['medicacoes'])
+
+    def cores(**campos):
+        resposta = _envio(admin, laudos=[(io.BytesIO(_pdf(FORMATO_C)), 'beneficiario-7.pdf')], finalidade='rastreio',
+                          regime='ambulatorial', **campos)
+        assert resposta.status_code == 200, resposta.get_data(as_text=True)
+        return {linha['exame']: linha['cor'] for linha in resposta.get_json()['linhas']}
+
+    sem, com = cores(), cores(comorbidades=['hipertensao', 'chave_inventada'], medicacoes=['sinvastatina'])
+    liberados = [exame for exame in com if com[exame] == 'verde' and sem[exame] != 'verde']
+    assert liberados, (sem, com)                  # a hipertensão informada libera exames que sem ela seriam barrados
+
+
+def test_dados_completos_do_paciente_no_formato_do_check_up(admin):
+    """O formulário completo do check-up (ou, no futuro, o cadastro da operadora) envia `paciente` em JSON."""
+    import json
+
+    def envio(paciente):
+        return _envio(admin, laudos=[(io.BytesIO(_pdf(FORMATO_C)), 'beneficiario-7.pdf')], finalidade='rastreio',
+                      regime='ambulatorial', paciente=json.dumps(paciente))
+
+    base = {'idade': 61, 'sexo': 'masculino', 'tabagismo': 'nunca_fumou'}
+    sem = envio(base)
+    assert sem.status_code == 200, sem.get_data(as_text=True)
+    com = envio({**base, 'comorbidades': ['hipertensao', 'diabetes'], 'nome_paciente': 'não entra',
+                 'exames_anteriores': [{'exame': 'Creatinina, soro', 'data': '2026-11-01'}]})
+    assert com.status_code == 200, com.get_data(as_text=True)
+    cores = lambda r: {l['exame']: l['cor'] for l in r.get_json()['linhas']}
+    assert [e for e in cores(com) if cores(com)[e] == 'verde' and cores(sem)[e] != 'verde']
+    assert com.get_json()['avisos'][0].startswith('Comparado com o check-up do paciente')
+    assert {l['id_pedido'][:14] for l in com.get_json()['linhas']} == {'beneficiario-7'}
+    # Dado inválido volta com a mensagem do motor; JSON quebrado é recusado.
+    assert envio({'idade': 300, 'sexo': 'masculino', 'tabagismo': 'nunca_fumou'}).status_code == 422
+    assert _envio(admin, laudos=[(io.BytesIO(_pdf(FORMATO_C)), 'x.pdf')], paciente='{').status_code == 400
+
+
+def test_check_up_tem_o_modo_operadora_ligado_a_rota_do_administrador(admin):
+    pagina = admin.get('/intelligent-tools?modo=operadora').get_data(as_text=True)
+    assert 'id="operadoraPedido"' in pagina and "/api/admin/operadoras/classificar" in pagina
+    assert 'href="/intelligent-tools?modo=operadora"' in admin.get('/operadoras').get_data(as_text=True)

@@ -59,6 +59,16 @@
         <label>Regime<select name="regime" class="block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white">
           <option value="">Pelo setor do laudo</option><option value="ambulatorial">Ambulatorial</option><option value="internado">Internado</option><option value="pronto-socorro">Pronto-socorro</option></select></label>
       </div>
+      <p class="mt-5"><a href="/intelligent-tools?modo=operadora" class="btn-claro">Usar o formulário completo do check-up</a></p>
+      <p class="text-[13px] text-ink/60 mt-2">Com todos os itens do check-up (peso, pressão, tabagismo, história familiar, gestação, exames com resultado). Ou informe aqui só o básico:</p>
+      <p class="text-[13px] text-ink/60 mt-3">Dados do paciente, como no check-up. Valem para todos os laudos deste envio: envie um paciente por vez. Sem eles, a comparação usa só idade e sexo.</p>
+      <div class="grid grid-cols-2 gap-3 mt-3 text-[13px]">
+        <label>Idade<input type="number" name="idade" min="1" max="120" inputmode="numeric" placeholder="Do laudo" class="block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white"></label>
+        <label>Sexo<select name="sexo" class="block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white">
+          <option value="">Do laudo</option><option value="F">Feminino</option><option value="M">Masculino</option></select></label>
+      </div>
+      <div data-perfil="comorbidades" class="mt-4 text-[13px]"></div>
+      <div data-perfil="medicacoes" class="mt-4 text-[13px]"></div>
       <button type="submit" class="btn-escuro mt-5">Classificar laudos</button>
     </form>
   </section>

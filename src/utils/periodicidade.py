@@ -322,11 +322,21 @@ def _resultados_mais_recentes(titulo, sexo, exames_anteriores):
     """
     escolhidos = {}
     for chave in chaves(titulo, sexo):
-        da_parte = [e for e in exames_anteriores if chave in chaves(e['exame'], sexo)]
+        da_parte = [e for e in exames_anteriores if chave in cobertos(e['exame'], sexo)]
         if da_parte:
             ultima = max(e['data'] for e in da_parte)
             escolhidos.update({id(e): e for e in da_parte if e['data'] == ultima})
     return [item for e in escolhidos.values() for item in e.get('resultados') or []]
+
+
+# Exame feito que vale por outro: o cálcio total conta como o cálcio iônico (decisão do responsável clínico).
+EQUIVALENTES = {'40301400': '40301419'}
+
+
+def cobertos(titulo, sexo=None):
+    """Códigos que o exame feito cobre: os dele e os dos exames a que equivale."""
+    proprios = chaves(titulo, sexo)
+    return proprios | {EQUIVALENTES[c] for c in proprios if c in EQUIVALENTES}
 
 
 # ── Aplicação ────────────────────────────────────────────────────────────────
@@ -341,7 +351,7 @@ def aplicar(recomendacoes, exames_anteriores, sexo=None, hoje_=None):
         return recomendacoes, []
     hoje_ = hoje_ or hoje()
     sexo = {'F': 'feminino', 'M': 'masculino'}.get(sexo, sexo)
-    feitos = [(chaves(e['exame'], sexo), e['data']) for e in exames_anteriores]
+    feitos = [(cobertos(e['exame'], sexo), e['data']) for e in exames_anteriores]
     mantidas, em_dia, junto = [], [], []
     hba1c_em_dia = False
 

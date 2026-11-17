@@ -25,6 +25,28 @@ tabela dos primeiros 300 pedidos com motivo e referência, e o botão para baixa
 arquivos são lidos em memória e descartados; nada é gravado nem registrado. Conta de médico comum não vê a página
 nem consegue usar a rota. A conta própria de operadora ainda não existe.
 
+## Dados do paciente, cálcio e exames que não são de rastreio
+
+- **Dados do paciente.** Com comorbidades e medicações informadas (nas colunas da planilha ou, na tela, no envio dos
+  laudos), o pedido é comparado com o que o check-up recomenda para aquele paciente, e não só para a idade e o sexo. A
+  lista de chaves é a do check-up e está em `/api/admin/operadoras/listas`; chave fora da lista invalida a linha.
+- **Formulário completo do check-up.** Em `/intelligent-tools?modo=operadora` (só administrador; há um botão em
+  `/operadoras`), o mesmo formulário do check-up recebe os laudos do pedido: peso, pressão, tabagismo, história
+  familiar, gestação, resultados e os demais itens entram na comparação. A rota aceita esses dados no campo `paciente`
+  (JSON no formato que o formulário do check-up envia), que é também a porta de entrada prevista para os dados vindos
+  do cadastro da operadora. `exames_anteriores` e o nome do paciente não entram.
+- **Cálcio.** O cálcio total (40301400) é tratado como o cálcio iônico (40301419) nas regras, por decisão do
+  responsável clínico. No check-up, o cálcio total já feito também conta como cálcio iônico feito.
+- **Exames que não são de rastreio.** Exame que aparece nos laudos das operadoras e não tem regra no check-up é
+  pesquisado e registrado em `NAO_SAO_DE_RASTREIO` (`src/utils/operadora.py`), com a indicação reconhecida e a fonte.
+  Como rastreio, seria barrado; com finalidade diagnóstica ou de seguimento, liberado.
+
+| Exame | Indicação reconhecida | Fonte |
+|---|---|---|
+| Lactato (40301109) | Suspeita de sepse ou de hipoperfusão | [Surviving Sepsis Campaign 2021](https://doi.org/10.1007/s00134-021-06506-y) |
+| CK total (40301648) | Sintoma muscular grave ou fraqueza objetiva em uso de estatina; a dosagem de rotina não é útil | [AHA/ACC 2018](https://doi.org/10.1161/CIR.0000000000000625) |
+| Proteínas totais e frações (40302385) | Nenhum rastreio recomendado a inclui | [SBMFC 2018 e CFPC, Choosing Wisely](https://choosingwiselycanada.org/wp-content/uploads/2022/10/Choosing-Wisely-Canada-Labs-Recommendations-Full-List.pdf) |
+
 ## Arquivo de entrada
 
 CSV em UTF-8 (o script também lê Windows-1252, o que o Excel grava), separado por vírgula ou ponto e vírgula, uma
@@ -46,6 +68,8 @@ linha por exame pedido. Valor inválido em qualquer coluna, mesmo opcional, inva
 | `cid` | não | CID-10 informado no pedido |
 | `indicacao_clinica` | não | Texto livre da guia (ainda não usado) |
 | `data_ultimo_exame` | não | Data do último exame com o mesmo código |
+| `comorbidades` | não | Chaves das comorbidades do check-up, separadas por barra vertical: `hipertensao\|doenca_renal` |
+| `medicacoes` | não | Chaves das medicações de uso contínuo do check-up, separadas por barra vertical: `sinvastatina\|levotiroxina` |
 | `valor` | não | Valor pago, para estimar a economia: 1234,56, 1.234,56 ou 1234.56. "1.234" é ambíguo e dá erro |
 
 **Último exame.** Sem `data_ultimo_exame`, vale o pedido anterior do mesmo beneficiário e do mesmo código no próprio

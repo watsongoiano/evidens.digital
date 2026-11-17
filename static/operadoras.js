@@ -110,7 +110,57 @@
     }
   }
 
+  // Lista com busca para comorbidades e medicações (as mesmas chaves do check-up). O marcado segue no envio.
+  const TITULOS = { comorbidades: 'Comorbidades', medicacoes: 'Medicações de uso contínuo' };
+  function listaComBusca(campo, itens) {
+    const alvo = $(`[data-perfil="${campo}"]`);
+    const titulo = el('p', 'font-medium', TITULOS[campo] + ' ');
+    const quantos = el('span', 'text-ink/45', '(nenhuma)');
+    titulo.append(quantos);
+    const busca = el('input', 'block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white');
+    busca.type = 'search'; busca.placeholder = 'Buscar…'; busca.setAttribute('aria-label', 'Buscar em ' + TITULOS[campo]);
+    const caixa = el('div', 'mt-2 max-h-[180px] overflow-y-auto border border-ink/10 rounded-[8px] bg-white p-2');
+    const linhas = itens.map(item => {
+      const linha = el('label', 'flex items-start gap-2 py-1');
+      const marca = el('input'); marca.type = 'checkbox'; marca.name = campo; marca.value = item.valor;
+      linha.append(marca, el('span', '', item.rotulo));
+      linha.dataset.busca = item.rotulo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      marca.addEventListener('change', () => {
+        const n = caixa.querySelectorAll('input:checked').length;
+        quantos.textContent = n ? `(${n})` : '(nenhuma)';
+      });
+      return linha;
+    });
+    caixa.append(...linhas);
+    busca.addEventListener('input', () => {
+      const termo = busca.value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+      linhas.forEach(l => { l.style.display = !termo || l.dataset.busca.includes(termo) || l.querySelector('input').checked ? '' : 'none'; });
+    });
+    alvo.replaceChildren(titulo, busca, caixa);
+  }
+  async function carregarListas() {
+    try {
+      const r = await fetch('/api/admin/operadoras/listas', { credentials: 'same-origin' });
+      if (!r.ok) return;
+      const listas = await r.json();
+      listaComBusca('comorbidades', listas.comorbidades);
+      listaComBusca('medicacoes', listas.medicacoes);
+    } catch (e) { /* sem as listas, a tela segue só com idade e sexo */ }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
+    carregarListas();
+    // Resultado vindo do formulário completo do check-up (/intelligent-tools?modo=operadora): mostra e apaga.
+    try {
+      const guardado = sessionStorage.getItem('operadoras_resultado');
+      if (guardado) {
+        sessionStorage.removeItem('operadoras_resultado');
+        dados = JSON.parse(guardado); filtro = '';
+        $('[data-resultado]').style.display = '';
+        resumo(); tabela();
+        $('[data-resultado]').scrollIntoView({ block: 'start' });
+      }
+    } catch (e) { /* sem o resultado guardado, a tela abre vazia */ }
     $('[data-form-csv]').addEventListener('submit', e => { e.preventDefault(); enviar(e.target); });
     $('[data-form-laudos]').addEventListener('submit', e => { e.preventDefault(); enviar(e.target); });
     $('[data-modelo]').addEventListener('click', () => baixar('modelo_pedidos.csv', MODELO));
