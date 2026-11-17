@@ -149,7 +149,7 @@ def test_formato_de_laboratorio_de_hospital():
     assert nomes == {
         'Hemograma completo': '2026-11-13',                      # "Data Coleta" do próprio exame
         'Tempo de protrombina (TP/INR), plasma': '2026-11-14', 'Tempo de tromboplastina parcial ativada': '2026-11-14',
-        'Creatinina, soro': '2026-11-14', 'Fósforo': '2026-11-14', 'Ureia, soro': '2026-11-14',
+        'Creatinina, soro': '2026-11-14', 'Fósforo, soro': '2026-11-14', 'Ureia, soro': '2026-11-14',
         'Cálcio iônico, soro': '2026-11-14', 'Sódio, soro': '2026-11-14',
         'Bilirrubinas totais e frações, soro': '2026-11-14', 'Aspartato aminotransferase, soro': '2026-11-14',
         'Alanina aminotransferase, soro': '2026-11-14', 'Creatino fosfoquinase total (CK)': '2026-11-14',
@@ -163,7 +163,7 @@ def test_resultados_do_laudo_de_hospital_nunca_vem_da_referencia():
     assert r['Hemograma completo'] == {'hemoglobina': 12.3, 'leucocitos': 7500, 'plaquetas': 250000}
     assert r['Tempo de protrombina (TP/INR), plasma'] == {'inr': 1.35}        # não "RNI: Até 1,20" nem "INR: 2,0 a 3,0"
     assert r['Bilirrubinas totais e frações, soro'] == {'bilirrubina_total': 0.9}   # não a direta nem "Até 1,2"
-    assert r['Creatinina, soro'] == {'creatinina': 0.9} and r['Fósforo'] == {'fosforo': 3.5}
+    assert r['Creatinina, soro'] == {'creatinina': 0.9} and r['Fósforo, soro'] == {'fosforo': 3.5}
     assert r['Ureia, soro'] == {'ureia': 33} and r['Sódio, soro'] == {'sodio': 140}
     assert r['Cálcio iônico, soro'] == {'calcio_ionico': 1.14}
     assert r['Aspartato aminotransferase, soro'] == {'tgo': 20} and r['Alanina aminotransferase, soro'] == {'tgp': 28}

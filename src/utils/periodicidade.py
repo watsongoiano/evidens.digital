@@ -414,11 +414,9 @@ def aplicar(recomendacoes, exames_anteriores, sexo=None, hoje_=None):
 
 def exames_conhecidos():
     """Nomes de exame oferecidos em "Exames já realizados": um por exame (sem os sinônimos), em ordem alfabética."""
-    from src.utils import exames_comuns
     from src.utils.catalogo import catalogo
     cat, vistos, nomes = catalogo(), set(), []
-    # Entre dois nomes do mesmo exame, vale o da lista de exames comuns (o que a tela já mostra).
-    for titulo in list(exames_comuns.POR_TITULO) + list(cat.get('laboratorio', [])) + list(cat.get('imagem', [])):
+    for titulo in list(cat.get('laboratorio', [])) + list(cat.get('imagem', [])):
         chave = chaves(titulo)
         if chave not in vistos:
             vistos.add(chave)
