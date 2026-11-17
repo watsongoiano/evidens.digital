@@ -82,7 +82,7 @@ SEM_INTERVALO = {
     'repetir em 3 meses',  # confirmação de DRC: a data do exame alterado não adia a repetição
     # a critério clínico
     'conforme necessidade', 'conforme indicação clínica', 'fator de risco', 'adulto em risco',
-    'repetir conforme o resultado (t-score)', 'decisão individual (expectativa de vida, prevenção secundária)',
+    'conforme o padrão ultrassonográfico', 'repetir conforme o resultado (t-score)', 'decisão individual (expectativa de vida, prevenção secundária)',
     'alvo < 6 mg/dl', 'não solicitar se >500 em 2 exames consecutivos com intervalo de 6 meses',
     # quem e a partir de quando, sem dizer de quanto em quanto tempo
     'portador ou parente de 1º grau não testado', 'a partir de 40 anos', 'a partir de 45 anos', '65-75 anos',
@@ -404,9 +404,11 @@ def aplicar(recomendacoes, exames_anteriores, sexo=None, hoje_=None):
 
 def exames_conhecidos():
     """Nomes de exame oferecidos em "Exames já realizados": um por exame (sem os sinônimos), em ordem alfabética."""
+    from src.utils import exames_comuns
     from src.utils.catalogo import catalogo
     cat, vistos, nomes = catalogo(), set(), []
-    for titulo in list(cat.get('laboratorio', [])) + list(cat.get('imagem', [])):
+    # Entre dois nomes do mesmo exame, vale o da lista de exames comuns (o que a tela já mostra).
+    for titulo in list(exames_comuns.POR_TITULO) + list(cat.get('laboratorio', [])) + list(cat.get('imagem', [])):
         chave = chaves(titulo)
         if chave not in vistos:
             vistos.add(chave)

@@ -32,6 +32,10 @@ COMORBIDADES = {
     'pre_diabetes': {'rotulo': 'Pré-diabetes', 'busca': 'glicemia de jejum alterada intolerancia'},
     'hipotireoidismo': {'rotulo': 'Hipotireoidismo', 'busca': 'tireoide hashimoto'},
     'hipertireoidismo': {'rotulo': 'Hipertireoidismo', 'busca': 'tireoide graves'},
+    'nodulo_tireoide': {'rotulo': 'Nódulo de tireoide', 'busca': 'tireoidiano bocio nodular cisto tirads paaf'},
+    'hiperparatireoidismo_primario': {'rotulo': 'Hiperparatireoidismo primário', 'busca': 'paratireoide pth calcio hipercalcemia hptp'},
+    'incidentaloma_adrenal': {'rotulo': 'Incidentaloma adrenal', 'busca': 'nodulo de suprarrenal adenoma adrenal massa adrenal'},
+    'hipogonadismo_masculino': {'rotulo': 'Hipogonadismo masculino', 'busca': 'testosterona baixa deficiencia androgenica'},
     'masld': {'rotulo': 'Esteatose hepática (MASLD)', 'agravante': 'esteatose hepática (MASLD)',
               'busca': 'gordura no figado nafld'},
     'cirrose': {'rotulo': 'Cirrose / hepatopatia crônica', 'busca': 'figado'},
@@ -338,6 +342,9 @@ EMA_ZOLEDRONICO = 'EMA (bula do ácido zoledrônico)'
 EMA_DENOSUMABE = 'EMA (bula do denosumabe)'
 EMA_VALPROATO = 'EMA 2018 (valproato)'
 ENDO_TESTOSTERONA = 'Endocrine Society 2018 (hipogonadismo)'
+ATA_NODULO = 'ATA 2015 (nódulo de tireoide)'
+HPTP_2022 = 'Workshop Internacional 2022 (hiperparatireoidismo primário)'
+ESE_INCIDENTALOMA = 'ESE/ENSAT 2023 (incidentaloma adrenal)'
 ENDO_VITAMINA_D = 'Endocrine Society 2024 (vitamina D)'
 ENDO_PA_2016 = 'Endocrine Society 2016 (hiperaldosteronismo)'
 ENDO_PA_2025 = 'Endocrine Society 2025 (hiperaldosteronismo)'
@@ -1707,6 +1714,78 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Colesterol total e frações, soro', 'laboratorio',
             'Síndrome dos ovários policísticos: perfil lipídico no diagnóstico; depois, conforme o risco cardiovascular.',
             'Síndrome dos ovários policísticos | Avaliação inicial', PCOS, 'B')
+
+    # ---------------- Endocrinologia: nódulo de tireoide, hiperparatireoidismo, adrenal, hipogonadismo ----------------
+    if 'nodulo_tireoide' in com:
+        # ATA 2015: recomendações 2 (TSH), 6 (ultrassonografia com linfonodos cervicais), 23 e 24 (seguimento).
+        add('Hormônio Tireoestimulante (TSH), soro', 'laboratorio',
+            'Nódulo de tireoide: TSH na avaliação inicial. Com TSH baixo, cintilografia para saber se o nódulo é '
+            'hiperfuncionante (nesse caso não precisa de punção).', 'Nódulo de tireoide | Avaliação inicial', ATA_NODULO, 'B')
+        add('Ultrassonografia de tireoide', 'imagem',
+            'Nódulo de tireoide: ultrassonografia com avaliação dos linfonodos cervicais em todo paciente com nódulo. O '
+            'seguimento do nódulo com citologia benigna depende do padrão ultrassonográfico: alta suspeita, repetir a '
+            'ultrassonografia e a punção em até 12 meses; suspeita baixa ou intermediária, repetir em 12-24 meses; suspeita '
+            'muito baixa, se repetir, depois de 24 meses.', 'Nódulo de tireoide | Conforme o padrão ultrassonográfico',
+            ATA_NODULO, 'B')
+        orientar('Nódulo de tireoide: o que a ATA não recomenda de rotina',
+                 'A tireoglobulina sérica não é recomendada na avaliação inicial do nódulo. Sobre a calcitonina de '
+                 'rotina, a ATA não se posiciona a favor nem contra. A indicação de punção depende do tamanho e do padrão '
+                 'ultrassonográfico do nódulo.', ATA_NODULO)
+    if 'hiperparatireoidismo_primario' in com:
+        # 5º Workshop Internacional (2022): itens 3 (avaliação) e 9 (seguimento de quem não opera) do resumo.
+        inicial = 'Hiperparatireoidismo primário | Avaliação inicial'
+        for titulo in ('Paratormônio (PTH), soro', 'Fósforo, soro', 'Calciúria de 24 horas'):
+            add(titulo, 'laboratorio', 'Hiperparatireoidismo primário: avaliação inicial com cálcio, fósforo, PTH, '
+                '25-hidroxivitamina D, creatinina e calciúria de 24 horas.', inicial, HPTP_2022, 'E')
+        for titulo in ('Cálcio iônico, soro', '25-hidroxivitamina D, soro', 'Creatinina, soro'):
+            add(titulo, 'laboratorio', 'Hiperparatireoidismo primário: na avaliação inicial e, em quem não foi operado, '
+                'cálcio, 25-hidroxivitamina D e função renal uma vez por ano. A diretriz cita o cálcio total corrigido pela '
+                'albumina; pedimos o iônico, que ela indica na suspeita da forma normocalcêmica.',
+                'Hiperparatireoidismo primário | Anual',
+                HPTP_2022, 'E')
+        add('Densitometria óssea (DEXA)', 'imagem',
+            'Hiperparatireoidismo primário: densitometria em três sítios (coluna lombar, fêmur e terço distal do rádio) na '
+            'avaliação inicial e a cada 1-2 anos em quem não foi operado.', 'Hiperparatireoidismo primário | A cada 1-2 anos',
+            HPTP_2022, 'E')
+        add('Radiografia de coluna torácica e lombar (perfil)', 'imagem',
+            'Hiperparatireoidismo primário: imagem da coluna (radiografia ou avaliação de fratura vertebral pela '
+            'densitometria) na avaliação inicial, para fratura vertebral.', inicial, HPTP_2022, 'E')
+        add('Ultrassonografia de rins e vias urinárias', 'imagem',
+            'Hiperparatireoidismo primário: imagem dos rins na avaliação inicial, para nefrolitíase e nefrocalcinose.',
+            inicial, HPTP_2022, 'E')
+    if 'incidentaloma_adrenal' in com:
+        # ESE/ENSAT 2023: R.3.2 (dexametasona), R.3.9 (metanefrinas), R.3.10 (aldosterona/renina), R.2.3, R.5.1-R.5.4.
+        add('Cortisol após 1 mg de dexametasona, soro', 'laboratorio',
+            'Incidentaloma adrenal: teste de supressão com 1 mg de dexametasona à noite em todos os pacientes; cortisol de '
+            'até 1,8 µg/dL (50 nmol/L) afasta secreção autônoma de cortisol.', 'Incidentaloma adrenal | Avaliação inicial',
+            ESE_INCIDENTALOMA, 'B')
+        if hipertenso:
+            add('Relação Aldosterona/Renina (A/R)', 'laboratorio',
+                'Incidentaloma adrenal com hipertensão ou hipocalemia sem explicação: relação aldosterona/renina.',
+                'Incidentaloma adrenal com HAS | Avaliação inicial', ESE_INCIDENTALOMA, 'C')
+        orientar('Incidentaloma adrenal: metanefrinas, imagem e seguimento',
+                 'Sugerimos metanefrinas (plasma ou urina) quando a lesão não tem aspecto de adenoma benigno na '
+                 'tomografia sem contraste. Lesão homogênea com até 10 UH é benigna e não precisa de nova imagem, qualquer que '
+                 'seja o tamanho. Lesão indeterminada não operada: repetir a tomografia sem contraste ou a ressonância uma '
+                 'vez, em 6-12 meses. Com avaliação hormonal inicial normal, não repetir os exames, salvo sinal clínico novo ou '
+                 'piora de hipertensão ou diabetes. Na secreção autônoma leve de cortisol: rastrear hipertensão, diabetes '
+                 'tipo 2 e fratura vertebral, e reavaliar essas comorbidades uma vez por ano.' + ('' if hipertenso else
+                 ' Com hipertensão ou hipocalemia sem explicação, pedir a relação aldosterona/renina.'), ESE_INCIDENTALOMA)
+    if 'hipogonadismo_masculino' in com and sexo == 'masculino':
+        # Endocrine Society 2018: 1.1 (duas dosagens matinais em jejum), 1.3 (LH e FSH), 3.x (seguimento do tratamento).
+        add('FSH e LH, soro', 'laboratorio',
+            'Hipogonadismo masculino: LH e FSH para separar a causa testicular (primária) da hipotálamo-hipofisária '
+            '(secundária).', 'Hipogonadismo masculino | Avaliação inicial', ENDO_TESTOSTERONA, 'B')
+        if 'testosterona' not in med:
+            add('Testosterona total, soro', 'laboratorio',
+                'Hipogonadismo masculino: o diagnóstico pede testosterona total baixa em duas dosagens, pela manhã e em '
+                'jejum, junto de sintomas ou sinais de deficiência.', 'Hipogonadismo masculino | Para confirmar o diagnóstico',
+                ENDO_TESTOSTERONA, 'B')
+        orientar('Hipogonadismo masculino: seguimento da reposição de testosterona',
+                 'Em quem repõe testosterona: testosterona 3-6 meses após o início; hematócrito antes, aos 3-6 meses e depois '
+                 'uma vez por ano; PSA e toque retal antes e 3-12 meses após o início nos homens de 55 a 69 anos (ou de 40 a 69 '
+                 'com risco aumentado) que optam pelo rastreio. Marque a testosterona na lista de medicações para o sistema '
+                 'pedir esses exames. A diretriz não recomenda rastrear hipogonadismo na população geral.', ENDO_TESTOSTERONA)
 
     # ---------------- Vacinas por condição de risco ----------------
     # SBIm 2026/2027 (adulto, idoso, gestante) e SBIm Pacientes Especiais 2026/2027; esquemas do PNI pela IN CNV 2026.

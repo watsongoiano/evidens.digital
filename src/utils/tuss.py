@@ -367,6 +367,10 @@ SEM_CODIGO = {
         'é consulta com o oftalmologista, não exame com código próprio',
     'Fundoscopia (Exame de fundo de olho)':
         'é consulta com o oftalmologista, não exame com código próprio',
+    'Calciúria de 24 horas':
+        'código da dosagem de cálcio em urina não conferido na TUSS',
+    'Cortisol após 1 mg de dexametasona, soro':
+        'o cortisol sérico fica fora da planilha conferida (hormônios, 40316...); código não conferido',
     'Ressonância magnética de corpo inteiro':
         'sem código conferido na TUSS',
     'Angiotomografia de coronárias':
