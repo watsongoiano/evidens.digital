@@ -67,6 +67,8 @@ html.lenis, html.lenis body { height: auto; }
   .opcao::before { content: ''; @apply inline-block w-0 h-3 overflow-hidden transition-all; }
   button.opcao { @apply font-sans; }
   button.opcao:focus-visible { @apply outline-none ring-2 ring-teal/30; }
+  button.opcao:disabled { @apply opacity-40 cursor-not-allowed line-through; }
+  button.opcao:disabled:hover { @apply border-ink/15 text-ink/65; }
   .opcao:has(input:checked) { @apply bg-teal border-teal text-white; }
   .opcao[aria-checked="true"] { @apply bg-teal border-teal text-white; }
   .opcao:has(input:checked)::before, .opcao[aria-checked="true"]::before {

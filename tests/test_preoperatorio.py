@@ -436,7 +436,12 @@ def test_tela_gerada_das_tabelas_do_motor():
 
 def test_sugestoes_da_tela_tem_fonte_e_chaves_validas():
     s = po.sugestoes_da_tela()
-    assert set(s['duracao']) <= set(po.CIRURGIAS) and set(s['sangramento']) <= set(po.CIRURGIAS)
+    # Toda cirurgia tem risco de sangramento vinculado; a duração, só onde há série publicada e o ARISCAT se aplica
+    assert set(s['sangramento']) == set(po.CIRURGIAS)
+    assert set(s['duracao']) <= set(po.CIRURGIAS) - set(s['sem_duracao'])
+    assert set(s['sem_duracao']) == {k for k, c in po.CIRURGIAS.items() if not c['ariscat']}
+    ordem = list(po.SANGRAMENTOS)
+    assert all(ordem.index(d['piso']) <= ordem.index(d['classe']) for d in s['sangramento'].values())
     assert all(d['faixa'] in po.DURACOES and d['url'].startswith('https://') for d in s['duracao'].values())
     assert all(d['classe'] in po.SANGRAMENTOS and d['url'].startswith('https://') for d in s['sangramento'].values())
     # Onde a SBC diverge de si mesma (prótese de quadril ou joelho), a sugestão avisa
@@ -448,8 +453,37 @@ def test_sugestoes_da_tela_tem_fonte_e_chaves_validas():
     # Tudo o que a tela mostra dessas sugestões tem par em inglês
     from src.utils import i18n
     textos = ([d['texto'] for d in s['duracao'].values()] + [d['fonte'] for d in s['duracao'].values()]
+              + [d['nota'] for d in s['duracao'].values() if d['nota']]
               + [d['fonte'] for d in s['sangramento'].values()] + [d['nota'] for d in s['sangramento'].values() if d['nota']])
     assert not [t for t in textos if not i18n.coberto(t)]
+
+
+def test_risco_de_sangramento_nao_fica_abaixo_do_da_cirurgia():
+    """Esplenectomia é cirurgia abdominal (alto na Tabela 12 da SBC): mínimo ou baixo não são aceitos; o motor sobe."""
+    assert po.SANGRAMENTO_TIPICO['esplenectomia'][:2] == ('alto', 'alto')
+    assert po.SANGRAMENTO_TIPICO['colecistectomia'][:2] == ('baixo_moderado', 'baixo_moderado')
+    assert po.SANGRAMENTO_TIPICO['hernia_hiatal'][:2] == ('alto', 'alto')
+    assert _p(cirurgia='esplenectomia', sangramento='minimo')['sangramento'] == 'alto'
+    assert _p(cirurgia='esplenectomia', sangramento='baixo_moderado')['sangramento'] == 'alto'
+    assert _p(cirurgia='colecistectomia', sangramento='minimo')['sangramento'] == 'baixo_moderado'
+    # Acima do piso o médico escolhe; sem resposta continua sem resposta (a tela é que preenche)
+    assert _p(cirurgia='colecistectomia', sangramento='alto')['sangramento'] == 'alto'
+    assert _p(cirurgia='esplenectomia')['sangramento'] is None
+    # Linha com procedimentos de riscos diferentes: marca o maior, aceita o menor que a diretriz nomeia
+    assert po.SANGRAMENTO_TIPICO['mama'][:2] == ('alto', 'baixo_moderado')
+    assert _p(cirurgia='mama', sangramento='baixo_moderado')['sangramento'] == 'baixo_moderado'
+    assert _p(cirurgia='mama', sangramento='minimo')['sangramento'] == 'baixo_moderado'
+    assert _p(cirurgia='catarata', sangramento='minimo')['sangramento'] == 'minimo'
+
+
+def test_linha_intraperitoneal_em_tres_cirurgias_com_o_mesmo_risco_cardiaco():
+    tres = [po.CIRURGIAS[k] for k in ('colecistectomia', 'hernia_hiatal', 'esplenectomia')]
+    assert all((c['risco'], c['rcri'], c['incisao'], c['porte']) == ('intermediario', True, 'abdome_superior', 'maior')
+               for c in tres)
+    # Gupta 2011: vesícula e baço em GBAAS; hérnia hiatal (esôfago/estômago) em foregut
+    assert [c['mica'] for c in tres] == ['gbaas', 'foregut_hpb', 'gbaas']
+    assert {po.DURACAO_TIPICA[k][0] for k in ('hernia_hiatal', 'esplenectomia')} == {'2_3h'}
+    assert po.DURACAO_TIPICA['colecistectomia'][0] == 'menos_2h'
 
 
 def test_condicao_grave_implica_o_antecedente():
