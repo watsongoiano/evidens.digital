@@ -1,6 +1,14 @@
 
 # Patches applied (2025-08-26T12:12:23)
 
+## 2026-11-17 — Conta de operadora: modo sombra
+
+- `scripts/modo_sombra.py` classifica um arquivo de pedidos de exame laboratorial de operadora (liberaria, pediria
+  esclarecimento, barraria), sem barrar nada. Regras em `src/utils/operadora.py`: as do check-up, mais pareceres de
+  sociedades contra o pedido de rotina. Formato do arquivo e regras em `docs/operadoras-modo-sombra.md`.
+- O motor do check-up virou a função `recomendar`, chamável fora do servidor; a rota só entrega o resultado e registra
+  o uso. Nenhuma saída do motor mudou (`tests/test_caracterizacao.py`).
+
 ## 2026-11-12 — Limpeza de código fora do caminho de produção
 
 - Removidos pontos de entrada alternativos, banco de dados e rotas de pacientes, motor antigo, geradores de PDF

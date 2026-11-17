@@ -18,6 +18,8 @@ FERRAMENTAS = {
     'scripts/gerar_preop.py',      # regera as condições e as sugestões automáticas da aba Pré-operatório
     'scripts/generate_favicon.py',
     'scripts/extrair_textos.py',   # lista os textos das páginas sem tradução para o inglês
+    'scripts/modo_sombra.py',      # classifica um arquivo de pedidos de exame de operadora, sem barrar nada
+    'src/utils/operadora.py',      # regras do modo sombra; usado pelo script acima enquanto a conta de operadora não tem rota
 }
 
 IGNORAR = {'.git', 'tests', '__pycache__', '.venv', 'venv', 'node_modules'}
