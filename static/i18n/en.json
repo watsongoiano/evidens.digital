@@ -4251,7 +4251,21 @@
   "Ver exames": "Show tests",
   "Fechar exames": "Hide tests",
   "Faixas de referência: ABIM 2026": "Reference ranges: ABIM 2026",
-  "Operadoras (modo sombra)": "Payers (shadow mode)"
+  "Operadoras (modo sombra)": "Payers (shadow mode)",
+  "Pedido da operadora (modo sombra)": "Payer request (shadow mode)",
+  "Anexe os laudos em PDF do pedido. Cada exame é comparado com o check-up deste paciente. Nada é barrado nem gravado.": "Attach the PDF reports of the request. Each test is compared with this patient's check-up. Nothing is blocked or stored.",
+  "Finalidade": "Purpose",
+  "Rastreio (rotina)": "Screening (routine)",
+  "Diagnóstico": "Diagnosis",
+  "Seguimento": "Follow-up",
+  "Regime": "Setting",
+  "Pelo setor do laudo": "From the report's unit",
+  "Ambulatorial": "Outpatient",
+  "Internado": "Inpatient",
+  "Pronto-socorro": "Emergency department",
+  "Classificar pedido da operadora": "Classify payer request",
+  "Anexe os laudos em PDF do pedido.": "Attach the PDF reports of the request.",
+  "Não foi possível classificar o pedido.": "The request could not be classified."
  },
  "padroes": [
   [

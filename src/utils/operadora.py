@@ -77,7 +77,8 @@ MAXIMO_DE_LAUDOS_NA_TELA = 8
 LINHAS_MOSTRADAS_NA_TELA = 300
 
 OBRIGATORIAS = ('id_pedido', 'id_beneficiario', 'idade', 'sexo', 'data_pedido', 'codigo_tuss', 'carater', 'regime')
-OPCIONAIS = ('segmentacao', 'finalidade', 'cid', 'indicacao_clinica', 'data_ultimo_exame', 'valor')
+OPCIONAIS = ('segmentacao', 'finalidade', 'cid', 'indicacao_clinica', 'data_ultimo_exame', 'valor', 'comorbidades',
+             'medicacoes')
 SAIDA = ('cor', 'acao', 'codigo_do_motivo', 'motivo', 'exame', 'grau', 'referencia', 'link', 'aviso', 'finalidade_usada',
          'origem_da_finalidade', 'ultimo_exame_usado', 'origem_do_ultimo_exame', 'proxima_data_elegivel', 'versao',
          'erro')
@@ -95,6 +96,64 @@ _FINALIDADES = {'': None, 'nao_informada': None, 'nao informada': None, 'rastrei
                 'diagnostico': 'diagnostico', 'seguimento': 'seguimento', 'acompanhamento': 'seguimento'}
 # Grupos da TUSS que esta versão julga: medicina laboratorial (403) e anatomia patológica e citopatologia (406)
 _LABORATORIO = ('403', '406')
+
+# Comorbidades que o check-up traz como caixa fixa (as demais vêm de condicoes.COMORBIDADES).
+CONDICOES_FIXAS = {
+    'hipertensao': 'Hipertensão', 'has_resistente': 'HAS resistente', 'diabetes': 'Diabetes tipo 2',
+    'diabetes_tipo_1': 'Diabetes tipo 1', 'dislipidemia': 'Dislipidemia', 'doenca_renal': 'Doença renal crônica',
+    'dcv_aterosclerotica': 'DCV aterosclerótica (IAM, AVC, DAP)', 'insuficiencia_cardiaca': 'Insuficiência cardíaca',
+    'obesidade': 'Obesidade', 'hiv': 'HIV', 'dpoc': 'DPOC',
+}
+
+# Exame que vale por outro nas regras: o cálcio total é tratado como o cálcio iônico (decisão do responsável clínico).
+EQUIVALENTES = periodicidade.EQUIVALENTES
+
+# Exames que chegaram nos laudos das operadoras e não são de rastreio: o que a literatura diz de cada um. Entram aqui à
+# medida que aparecem, para não voltarem como "sem regra". Com finalidade diagnóstica ou de seguimento, são liberados.
+_SSC_2021 = 'https://doi.org/10.1007/s00134-021-06506-y'
+_ACC_AHA_2018 = 'https://doi.org/10.1161/CIR.0000000000000625'
+NAO_SAO_DE_RASTREIO = {
+    '40301109': {'referencia': 'Surviving Sepsis Campaign 2021', 'link': _SSC_2021,
+                 'motivo': 'Lactato não é exame de rastreio. Indicação reconhecida: suspeita de sepse ou de hipoperfusão '
+                           '(recomendação fraca, evidência de baixa qualidade).'},
+    '40301648': {'referencia': 'AHA/ACC 2018 (colesterol)', 'link': _ACC_AHA_2018,
+                 'motivo': 'CK não é exame de rastreio, nem de rotina em quem usa estatina (classe III, sem benefício). '
+                           'Indicação reconhecida: sintoma muscular grave ou fraqueza objetiva em uso de estatina.'},
+    '40302385': {'referencia': None, 'link': None,
+                 'motivo': 'Proteínas totais e frações não fazem parte de nenhum rastreio recomendado.'},
+}
+
+
+def comorbidades_validas():
+    """Chave → rótulo de tudo o que o check-up aceita em `comorbidades`: as caixas fixas, a lista e os detalhes de
+    cada condição (nefrite lúpica, osteoporose recém-diagnosticada...), com o nome da condição à frente."""
+    from src.utils import condicoes
+    validas = {**CONDICOES_FIXAS, **{chave: item['rotulo'] for chave, item in condicoes.COMORBIDADES.items()}}
+    for condicao, (_titulo, _nota, opcoes) in condicoes.DETALHES_COMORBIDADE.items():
+        for chave, rotulo in opcoes:
+            validas.setdefault(chave, f'{validas.get(condicao, condicao)}: {rotulo[0].lower()}{rotulo[1:]}')
+    return validas
+
+
+def medicacoes_validas():
+    from src.utils import medicamentos
+    return {chave: item['rotulo'] for chave, item in medicamentos.MEDICAMENTOS.items()}
+
+
+def listas_para_a_tela():
+    """Comorbidades e medicações de uso contínuo que a tela oferece (as mesmas do check-up)."""
+    def ordenadas(itens):
+        return [{'valor': chave, 'rotulo': rotulo} for chave, rotulo in sorted(itens.items(), key=lambda par: _sem_acento(par[1]))]
+    return {'comorbidades': ordenadas(comorbidades_validas()), 'medicacoes': ordenadas(medicacoes_validas())}
+
+
+def _chaves_do_perfil(texto, validas, coluna, erros):
+    """Chaves separadas por "|" (ou espaço) → frozenset; chave fora da lista é erro da linha."""
+    chaves = frozenset(parte for parte in re.split(r'[|\s]+', str(texto or '').strip().lower()) if parte)
+    fora = sorted(chaves - set(validas))
+    if fora:
+        erros.append(f'{coluna} fora da lista do check-up: {", ".join(fora)}')
+    return chaves
 
 # Listas do Choosing Wisely abertas e conferidas em 17/11/2026
 _ENDOCRINE_CW = ('https://www.mainlinehealth.org/-/media/files/pdf/basic-content/physicians/mlhpp/choosing-wisely/'
@@ -308,6 +367,8 @@ def ler_linha(bruta):
     if cid and not _CID.match(cid):
         erros.append('cid inválido')
     linha['cid'] = cid
+    linha['comorbidades'] = _chaves_do_perfil(bruta.get('comorbidades'), comorbidades_validas(), 'comorbidades', erros)
+    linha['medicacoes'] = _chaves_do_perfil(bruta.get('medicacoes'), medicacoes_validas(), 'medicacoes', erros)
     if bruta.get('valor'):
         try:
             linha['valor'] = _valor(bruta['valor'])
@@ -367,20 +428,43 @@ def _mais_permissiva(a, b):
     return b if peso(b) < peso(a) else a
 
 
-@lru_cache(maxsize=None)
-def _perfil(idade, sexo):
-    """O que o check-up recomenda e o que recomenda não fazer, como rastreio, para a idade e o sexo.
+@lru_cache(maxsize=4096)
+def _perfil(idade, sexo, comorbidades=frozenset(), medicacoes=frozenset()):
+    """O que o check-up recomenda e o que recomenda não fazer para a idade, o sexo e, quando o pedido informa, as
+    comorbidades e as medicações de uso contínuo (as mesmas entradas do check-up).
 
-    Sem comorbidade e com tabagismo "nunca fumou": a guia não traz esses dados. O tabagismo só muda rastreios de
-    fumante, que não são laboratoriais. None se a idade está fora do que o motor atende (18 a 120 anos); falha do
+    Tabagismo "nunca fumou": a guia não traz esse dado, e ele só muda rastreios de fumante, que não são laboratoriais. None se a idade está fora do que o motor atende (18 a 120 anos); falha do
     motor levanta RuntimeError, para não virar liberação."""
     from src.routes.checkup_intelligent import recomendar
     with contextlib.redirect_stdout(io.StringIO()):       # o motor imprime cada recomendação que acrescenta
-        resposta, status = recomendar({'idade': idade, 'sexo': sexo, 'tabagismo': 'nunca_fumou'})
+        resposta, status = recomendar({'idade': idade, 'sexo': sexo, 'tabagismo': 'nunca_fumou',
+                                       'comorbidades': sorted(comorbidades), 'medicacoes': sorted(medicacoes)})
     if status == 400:
         return None
     if status != 200:
         raise RuntimeError(f'o motor do check-up falhou (status {status})')
+    return _da_resposta(resposta, sexo)
+
+
+def perfil_do_paciente(bruto):
+    """Perfil a partir dos dados completos do paciente, no mesmo formato que o formulário do check-up envia (e que, no
+    futuro, virá do cadastro da operadora). Devolve (perfil, erro): erro é a mensagem do motor para dado inválido.
+
+    `exames_anteriores` não entra: o pedido em análise é que está sendo julgado, e o exame "em dia" sairia da lista do
+    check-up como se não fosse recomendado. O nome do paciente também não entra."""
+    from src.routes.checkup_intelligent import recomendar
+    dados = {k: v for k, v in (bruto or {}).items() if k not in ('exames_anteriores', 'nome_paciente')}
+    with contextlib.redirect_stdout(io.StringIO()):
+        resposta, status = recomendar(dados)
+    if status == 400:
+        return None, resposta.get('error') or 'Dados do paciente inválidos.'
+    if status != 200:
+        raise RuntimeError(f'o motor do check-up falhou (status {status})')
+    return _da_resposta(resposta, {'F': 'feminino', 'M': 'masculino'}.get(dados.get('sexo'), dados.get('sexo'))), None
+
+
+def _da_resposta(resposta, sexo):
+    """(recomendados, contrários) por código TUSS, a partir da resposta do motor do check-up."""
     recomendados, contrarios = {}, {}
     for rec in resposta.get('recommendations') or []:
         if rec.get('categoria') == 'laboratorio':
@@ -410,10 +494,12 @@ def _condicional(texto):
     return 'se normal' in texto.lower()
 
 
-def classificar(linha):
+def classificar(linha, do_paciente=None):
     """Classifica uma linha já normalizada (ler_linha). Devolve as colunas de SAIDA, menos 'erro'."""
-    codigo = linha['codigo_tuss']
-    nome = _conhecidos().get(codigo) or tuss.DESCRICOES.get(codigo) or tuss.DA_TABELA.get(codigo) or ''
+    pedido = linha['codigo_tuss']
+    codigo = EQUIVALENTES.get(pedido, pedido)          # as regras valem para o exame equivalente
+    nome = _conhecidos().get(pedido) or (f'{tuss.DA_TABELA.get(pedido) or pedido} (tratado como {_conhecidos().get(codigo)})'
+                                          if pedido != codigo else None) or _conhecidos().get(codigo) or tuss.DESCRICOES.get(codigo) or tuss.DA_TABELA.get(codigo) or ''
     ultimo = linha.get('data_ultimo_exame')
     feito = f'{_br(ultimo)} (pedido anterior no arquivo)' if linha.get('origem_do_ultimo_exame') == 'arquivo' else (
         _br(ultimo) if ultimo else '')
@@ -432,7 +518,11 @@ def classificar(linha):
         return saida('fora_do_escopo', 'nao_laboratorial', 'Exame que não é de laboratório: fora do escopo desta versão.')
     finalidade, origem = finalidade_usada(linha)
     comum = {'finalidade_usada': finalidade, 'origem_da_finalidade': origem}
-    perfil = _perfil(linha['idade'], linha['sexo']) if finalidade == 'rastreio' else None
+    comorbidades, medicacoes = linha.get('comorbidades') or frozenset(), linha.get('medicacoes') or frozenset()
+    if do_paciente is not None:          # dados completos do paciente (formulário do check-up): valem no lugar das colunas
+        perfil, comorbidades = (do_paciente if finalidade == 'rastreio' else None), frozenset({'dados_do_paciente'})
+    else:
+        perfil = _perfil(linha['idade'], linha['sexo'], comorbidades, medicacoes) if finalidade == 'rastreio' else None
     parecer = parecer_contrario(codigo, linha['sexo'], finalidade, linha['idade'])
     if parecer and not (perfil and codigo in perfil[0]):
         return saida(parecer['cor'], parecer['codigo_do_motivo'], parecer['motivo'], referencia=parecer['referencia'],
@@ -445,6 +535,16 @@ def classificar(linha):
                          f'{minimo["referencia"]}: {minimo["texto"]}; último em {feito}, próximo a partir de '
                          f'{_br(proxima)}.', referencia=minimo['referencia'], link=minimo['link'],
                          proxima_data_elegivel=proxima.isoformat(), **comum)
+    fora = NAO_SAO_DE_RASTREIO.get(codigo)
+    if fora and finalidade == 'rastreio' and not (perfil and codigo in perfil[0]):
+        fonte = {'referencia': fora['referencia'], 'link': fora['link']} if fora['link'] else _SEM_RECOMENDACAO
+        return saida('vermelho', 'nao_e_de_rastreio', fora['motivo'] + ('' if fora['link'] else
+                     ' SBMFC 2018 e CFPC (Choosing Wisely) são contra exames de sangue de rotina sem indicação pelo '
+                     'risco individual.'), **fonte, **comum)
+    if fora:
+        return saida('verde', 'indicacao_informada' if origem == 'informada' else 'indicacao_pelo_cid',
+                     'Finalidade diagnóstica ou de seguimento informada no pedido.' if origem == 'informada'
+                     else f'CID {_cid(linha["cid"])} informado: indicação diagnóstica ou de seguimento.', **comum)
     if codigo not in _conhecidos():
         if codigo in tuss.DA_TABELA:
             return saida('verde', 'sem_regra', 'Exame sem regra no Evidēns.', **comum)
@@ -487,8 +587,8 @@ def classificar(linha):
             return saida('amarelo', 'decisao_individual', f'{grupo}: decisão individual (grau C).', **comum)
         if rec.get('_alternativa'):
             return saida('verde', 'alternativa_aceita', f'{grupo}: alternativa aceita. {rec["_alternativa"]}', **comum)
-        return saida('verde', 'recomendado', f'{grupo}: rastreio recomendado (grau {grau}).' if grau else
-                     f'{grupo}: rastreio recomendado.', **comum)
+        tipo = 'exame recomendado' if comorbidades or medicacoes else 'rastreio recomendado'
+        return saida('verde', 'recomendado', f'{grupo}: {tipo} (grau {grau}).' if grau else f'{grupo}: {tipo}.', **comum)
     contra = contrarios.get(codigo)
     if contra:
         from src.utils.reference_links import build_reference_links
@@ -496,8 +596,11 @@ def classificar(linha):
         return saida('vermelho', 'recomendacao_contraria', contra.get('motivo') or 'Recomendação contrária ao rastreio.',
                      **comum, **_referencia(contra.get('referencia'), links))
     return saida('vermelho', 'sem_recomendacao_para_o_perfil',
-                 'O check-up não recomenda este exame como rastreio para a idade e o sexo informados, sem comorbidade '
-                 'nem gestação informadas. SBMFC 2018 e CFPC (Choosing Wisely) são contra exames de sangue anuais de '
+                 ('O check-up não recomenda este exame para os dados do paciente informados. ' if do_paciente is not None else
+                  'O check-up não recomenda este exame para a idade, o sexo, as comorbidades e as medicações informadas. '
+                  if comorbidades or medicacoes else
+                  'O check-up não recomenda este exame como rastreio para a idade e o sexo informados, sem comorbidade '
+                  'nem gestação informadas. ') + 'SBMFC 2018 e CFPC (Choosing Wisely) são contra exames de sangue anuais de '
                  'rotina sem indicação pelo risco individual.', **_SEM_RECOMENDACAO, **comum)
 
 
@@ -528,7 +631,7 @@ def _com_o_ultimo_do_arquivo(linhas):
             linha['origem_do_ultimo_exame'] = 'informada'
 
 
-def classificar_lote(brutas):
+def classificar_lote(brutas, do_paciente=None):
     """Classifica as linhas do arquivo. Devolve (resultados, resumo); cada resultado traz as colunas de SAIDA."""
     lidas = [ler_linha(bruta) for bruta in brutas]
     _com_o_ultimo_do_arquivo([linha for linha, _ in lidas])
@@ -536,7 +639,7 @@ def classificar_lote(brutas):
     for linha, erros in lidas:
         if not erros:
             try:
-                resultados.append({**classificar(linha), 'erro': ''})
+                resultados.append({**classificar(linha, do_paciente), 'erro': ''})
                 valores.append(linha.get('valor') or 0.0)
                 continue
             except RuntimeError as falha:
@@ -579,7 +682,7 @@ def regime_do_setor(setor):
 
 
 def pedidos_do_laudo(conteudo, id_beneficiario, idade=None, sexo=None, carater='eletivo', regime=None,
-                     finalidade='', cid=''):
+                     finalidade='', cid='', comorbidades=(), medicacoes=()):
     """Linhas de pedido, no formato do arquivo do modo sombra, para os exames de um laudo em PDF.
 
     Devolve (linhas, nao_identificados). Cada exame identificado vira uma linha por código TUSS, com a data da coleta
@@ -610,7 +713,8 @@ def pedidos_do_laudo(conteudo, id_beneficiario, idade=None, sexo=None, carater='
             linhas.append({'id_pedido': f'{id_beneficiario}-{len(linhas) + 1:02d}', 'id_beneficiario': id_beneficiario,
                            'idade': str(anos), 'sexo': sexo[0].upper(), 'data_pedido': coleta.isoformat(),
                            'codigo_tuss': codigo, 'carater': carater, 'regime': regime, 'finalidade': finalidade,
-                           'cid': cid})
+                           'cid': cid, 'comorbidades': '|'.join(sorted(comorbidades)),
+                           'medicacoes': '|'.join(sorted(medicacoes))})
     return linhas, nao_identificados
 
 
