@@ -119,14 +119,89 @@ def test_formulario_do_sus_e_o_modelo_sem_o_nome_do_estado():
     assert all(f'{n} -' in texto or f'{n} - ' in texto for n in range(1, 18))
 
 
-def test_apac_recusada_fora_da_imagem_com_cns_ou_cid_errados(app, contas):
+def test_apac_no_laboratorio_so_para_exame_da_tabela_de_alta_complexidade(app, contas):
+    """Decisão do responsável clínico (18/11/2026): todo exame da tabela de alta complexidade (PAC) sai com laudo de
+    APAC, de laboratório inclusive. Pedido de laboratório sem nenhum deles sai sem laudo."""
+    cliente, _ = _conta(app, contas)
+    vid = _vinculo(cliente)
+    def paginas(titulos):
+        r = cliente.post('/api/gerar-pdf-exames-laboratoriais', json={
+            'dados_paciente': PACIENTE, 'apac': {'vinculo_id': vid, 'comorbidades': ['hiv']},
+            'recomendacoes': [{'titulo': t, 'categoria': 'laboratorio'} for t in titulos]})
+        assert r.status_code == 200, r.get_json()
+        return PdfReader(io.BytesIO(r.data)).pages
+    sem = paginas(['Creatinina, soro', 'Hemograma completo'])
+    assert not any('COMPLEXIDADE - APAC' in p.extract_text() for p in sem)
+    com = paginas(['Creatinina, soro', 'Carga Viral do HIV (HIV RNA)', 'Contagem de linfócitos T CD4+'])
+    laudos = [p.extract_text() for p in com if 'COMPLEXIDADE - APAC' in p.extract_text()]
+    # Laboratório: os exames de mesmo CID dividem o laudo (decisão do responsável clínico, 18/11/2026)
+    assert len(laudos) == 1 and len(com) == len(sem) + 1
+    assert 'Carga Viral do HIV' in laudos[0] and 'CD4' in laudos[0] and 'B24' in laudos[0]
+    assert 'Creatinina' not in laudos[0]
+    # Cada procedimento na sua linha, com a quantidade: a carga viral (principal) acima do CD4
+    assert laudos[0].index('Carga Viral do HIV') < laudos[0].index('CD4')
+    # CID diferente, laudo à parte: o teste de DNA-HPV (rastreio, Z12.4) não divide o laudo com os exames do HIV
+    misto = paginas(['Carga Viral do HIV (HIV RNA)', 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular',
+                     'Contagem de linfócitos T CD4+'])
+    laudos = [p.extract_text() for p in misto if 'COMPLEXIDADE - APAC' in p.extract_text()]
+    assert len(laudos) == 2
+    assert 'Carga Viral do HIV' in laudos[0] and 'CD4' in laudos[0] and 'Papilomavírus' not in laudos[0]
+    assert 'Papilomavírus' in laudos[1] and 'Z12.4' in laudos[1] and 'CD4' not in laudos[1]
+
+
+def test_laudo_de_apac_agrupa_ate_tres_exames_de_laboratorio_e_nenhum_de_imagem():
+    """O formulário do SUS tem três linhas de procedimento: o quarto exame de laboratório abre outro laudo.
+    Exame de imagem continua com um laudo por exame."""
+    from src.utils import pdf_minutas
+    assert len(pdf_minutas._PROCEDIMENTOS_DA_APAC) == 3
+    hiv = ['Carga Viral do HIV (HIV RNA)', 'Contagem de linfócitos T CD4+', 'Genotipagem do HIV (Teste de Resistência)']
+    hpv = 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular'
+    exames = [{'titulo': t} for t in hiv + [hpv, 'Creatinina, soro']]
+    titulos = lambda laudos: [([e['titulo'] for e in do_laudo], cid, sec) for do_laudo, cid, sec in laudos]
+    # CID de cada exame: os três do HIV num laudo, o do HPV em outro; a creatinina não vai em APAC
+    apac = {'comorbidades': ['hiv']}
+    assert titulos(pdf_minutas.laudos_de_apac(exames, apac, agrupar=True)) == [(hiv, 'B24', ''), ([hpv], 'Z12.4', 'B24')]
+    # CID digitado vale para todos: quatro exames, três linhas por laudo
+    apac = {'comorbidades': ['hiv'], 'cid': 'B24'}
+    assert titulos(pdf_minutas.laudos_de_apac(exames, apac, agrupar=True)) == [(hiv, 'B24', ''), ([hpv], 'B24', '')]
+    # Sem agrupar (imagem): um laudo por exame, na ordem do pedido
+    assert titulos(pdf_minutas.laudos_de_apac(exames, apac)) == [([t], 'B24', '') for t in hiv + [hpv]]
+    imagem = [{'titulo': t} for t in ('Ressonância magnética de crânio', 'Tomografia computadorizada de tórax de baixa dose (LDCT)')]
+    assert [len(do_laudo) for do_laudo, _, _ in pdf_minutas.laudos_de_apac(imagem, {})] == [1, 1]
+
+
+def test_tabela_de_alta_complexidade_decide_a_apac():
+    pac = sigtap.tabela_de_pac()
+    assert 'TRFMED' in pac['fonte'] and len(pac['codigos']) == 717
+    assert all(len(c) == 8 and c.isdigit() and nome for c, nome in pac['codigos'].items())
+    # Da tabela: tomografia, ressonância, mamografia digital, carga viral e CD4 do HIV, teste de DNA-HPV.
+    for titulo in ('Tomografia computadorizada de tórax de baixa dose (LDCT)', 'Ressonância magnética de crânio',
+                   'Mamografia Digital - Bilateral', 'Carga Viral do HIV (HIV RNA)', 'Contagem de linfócitos T CD4+',
+                   'Genotipagem do HIV (Teste de Resistência)',
+                   'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular'):
+        assert sigtap.na_tabela_de_pac(titulo) and sigtap.vai_em_apac(titulo), titulo
+    # Fora da tabela, mas em APAC pela regulação (SES-GO): continuam.
+    for titulo in ('Colonoscopia', 'Endoscopia digestiva alta', 'Densitometria óssea (DEXA)'):
+        assert not sigtap.na_tabela_de_pac(titulo) and sigtap.vai_em_apac(titulo), titulo
+    for titulo in ('Hemograma completo', 'Creatinina, soro', 'Ultrassonografia de abdome total', 'Exame digitado à mão'):
+        assert not sigtap.vai_em_apac(titulo), titulo
+    assert sigtap.cid_do_exame('Carga Viral do HIV (HIV RNA)', ['hiv'])[0] == 'B24'
+    assert sigtap.cid_do_exame('Mamografia Digital - Bilateral')[0] == 'Z12.3'
+    assert sigtap.cid_do_exame('Pesquisa do Papilomavírus Humano (HPV), por técnica molecular')[0] == 'Z12.4'
+
+
+def test_rota_diz_a_tela_quais_exames_vao_em_apac(app, contas):
+    cliente, _ = _conta(app, contas)
+    dados = cliente.get('/api/apac/exames').get_json()
+    assert 'Carga Viral do HIV (HIV RNA)' in dados['titulos'] and 'Colonoscopia' in dados['titulos']
+    assert 'Hemograma completo' not in dados['titulos'] and 'TRFMED' in dados['fonte']
+    assert app.test_client().get('/api/apac/exames').status_code == 401
+
+
+def test_apac_recusada_com_cns_ou_cid_errados(app, contas):
     cliente, _ = _conta(app, contas)
     vid = _vinculo(cliente)
     itens = [{'titulo': 'Ressonância magnética de crânio', 'categoria': 'imagem'}]
-    lab = cliente.post('/api/gerar-pdf-exames-laboratoriais', json={
-        'dados_paciente': PACIENTE, 'recomendacoes': [{'titulo': 'Creatinina, soro', 'categoria': 'laboratorio'}],
-        'apac': {'vinculo_id': vid}})
-    assert lab.status_code == 400
     for apac in ({'vinculo_id': vid, 'paciente': {'cns': '123456789012345'}}, {'vinculo_id': vid, 'cid': 'abc'},
                  {'vinculo_id': 99999}):
         assert cliente.post('/api/gerar-pdf-exames-imagem', json={
@@ -148,6 +223,19 @@ def test_tela_tem_o_sus_no_seletor_e_os_campos_da_apac():
     html = (raiz / 'intelligent-tools.html').read_text(encoding='utf-8')
     assert "fetch('/api/auth/vinculos-sus'" in html and "o.value = 'sus:' + v.id" in html
     assert 'id="apacCampos"' in html and 'function apacDoDialogo(categoria)' in html
+    # Os campos do laudo aparecem quando o pedido (imagem ou laboratório) tem exame que vai em APAC.
+    assert "fetch('/api/apac/exames'" in html and 'function examesEmApacDoPedido(categoria)' in html
+    assert "ehSus(valor) && pedidoPodeTerApac(categoriaDoDialogo)" in html and "categoriaDoDialogo === 'imagem'" not in html
+    # Busca da lista falhou: nada de guardar lista vazia (o pedido sairia sem o laudo, sem aviso). A lista fica
+    # nula, a tela avisa, os dados do laudo seguem com o pedido e o servidor decide quais exames levam laudo.
+    carga = html[html.index('async function carregarExamesEmApac()'):html.index('function examesEmApacDoPedido(categoria)')]
+    assert "if (!r.ok) throw" in carga and 'titulosEmApac = null;' in carga and 'new Set()' not in carga
+    assert 'return titulosEmApac ? examesEmApacDoPedido(categoria).length > 0 : true;' in html
+    assert "if (!pedidoPodeTerApac(categoria) || painel.style.display === 'none' || !ehSus(plano)) return null;" in html
+    assert 'id="apacSemLista" hidden' in html and "getElementById('apacSemLista').hidden = !!titulosEmApac" in html
+    # A tela diz como o laudo sai: laboratório agrupado (até três por laudo), imagem um por exame
+    assert 'id="apacComoSai"' in html and "categoriaDoDialogo === 'laboratorio'" in html
+    assert 'saem juntos no mesmo laudo de solicitação de APAC (até três por laudo)' in html
     conta = (raiz / 'conta.html').read_text(encoding='utf-8')
     assert 'data-sus' in conta and 'name="cns"' in conta
 

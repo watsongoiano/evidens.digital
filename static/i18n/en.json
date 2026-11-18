@@ -3041,7 +3041,6 @@
   "Com consumo pesado informado, sugerimos aplicar o AUDIT para estimar a gravidade, fazer aconselhamento breve e, com sinais de dependência, encaminhar para tratamento.": "With reported heavy drinking, we suggest using the AUDIT to estimate severity, providing brief counseling and, with signs of dependence, referring for treatment.",
   "USPSTF A e B (álcool 2018)": "USPSTF A and B (alcohol 2018)",
   "Opcional. Escolha entre os exames mais comuns, adicione outro do catálogo ou anexe o laudo em PDF; informe a data e, se quiser, o resultado. O que ainda estiver dentro da periodicidade da diretriz não é pedido de novo. Colesterol, HDL, creatinina, HbA1c, relação albumina/creatinina e DNA-HPV entram nos cálculos (PREVENT, TFG pela CKD-EPI, risco renal e colo do útero); os outros ficam registrados no cartão do exame. O laudo é lido e descartado; nada é guardado.": "Optional. Pick from the most common tests, add another one from the catalog or attach the lab report as a PDF; enter the date and, if you wish, the result. Anything still within the guideline interval is not ordered again. Cholesterol, HDL, creatinine, HbA1c, albumin/creatinine ratio and HPV DNA feed the calculations (PREVENT, eGFR by CKD-EPI, kidney risk and cervical screening); the others stay recorded on the test card. The report is read and discarded; nothing is stored.",
-  "Tomografia, ressonância, endoscopia, colonoscopia e densitometria saem com o laudo de solicitação de APAC, logo depois do pedido. Os campos abaixo são opcionais (o que ficar em branco é preenchido à mão) e não são guardados.": "CT, MRI, upper endoscopy, colonoscopy and bone densitometry come with the APAC request form (Brazilian public health system), right after the order. The fields below are optional (blank ones are filled in by hand) and are not stored.",
   "CNS do paciente": "Patient's CNS (national health card)",
   "Data de nascimento": "Date of birth",
   "dd/mm/aaaa": "dd/mm/yyyy",
@@ -4269,7 +4268,13 @@
   "Conferir pedido": "Check request",
   "Anexe o PDF com os exames pedidos, no alto desta página.": "Attach the PDF with the requested tests, at the top of this page.",
   "Não foi possível conferir o pedido.": "The request could not be checked.",
-  "Sem dose do D-5 ao D0 (AHA, Tabela 13): última dose no D-6 e operar com INR <1,5 (SBC I-C); INR na véspera e, se ≥1,5, vitamina K oral 1–2 mg e nova medida (texto da SBC).": "No dose from D-5 to D0 (AHA, Table 13): last dose on D-6 and operate with INR <1.5 (SBC I-C); INR the day before and, if ≥1.5, oral vitamin K 1–2 mg and repeat measurement (SBC text)."
+  "Sem dose do D-5 ao D0 (AHA, Tabela 13): última dose no D-6 e operar com INR <1,5 (SBC I-C); INR na véspera e, se ≥1,5, vitamina K oral 1–2 mg e nova medida (texto da SBC).": "No dose from D-5 to D0 (AHA, Table 13): last dose on D-6 and operate with INR <1.5 (SBC I-C); INR the day before and, if ≥1.5, oral vitamin K 1–2 mg and repeat measurement (SBC text).",
+  "Este pedido tem exame de alta complexidade:": "This request has a high-complexity exam:",
+  "O laudo de APAC é só para pedidos de exames.": "The APAC report is only for exam orders.",
+  "Os campos abaixo são opcionais (o que ficar em branco é preenchido à mão) e não são guardados.": "The fields below are optional (whatever is left blank is filled in by hand) and are not stored.",
+  "Os exames de laboratório saem juntos no mesmo laudo de solicitação de APAC (até três por laudo), logo depois do pedido.": "The laboratory tests go together on the same APAC request report (up to three per report), right after the order.",
+  "Cada um sai com o laudo de solicitação de APAC, logo depois do pedido.": "Each one comes with its APAC request report, right after the order.",
+  "Não foi possível conferir agora quais exames deste pedido são de alta complexidade: o laudo de APAC sai para os que forem.": "It was not possible to check right now which tests in this order are high-complexity: the APAC report will be issued for those that are."
  },
  "padroes": [
   [

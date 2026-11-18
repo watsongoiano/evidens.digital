@@ -1713,14 +1713,16 @@ _CAMPOS_PACIENTE_APAC = {'cns': 20, 'nascimento': 10, 'mae': 120, 'telefone': 20
 
 
 def _ler_apac(usuario, categoria):
-    """{'apac': {'vinculo_id', 'paciente': {...}, 'cid'}} do pedido de exames de imagem."""
+    """{'apac': {'vinculo_id', 'paciente': {...}, 'cid'}} do pedido de exames (imagem ou laboratório).
+
+    O laudo sai para cada exame que vai em APAC (src/utils/sigtap.py): os que a regulação pede e os da tabela de
+    alta complexidade (PAC), que inclui exames de laboratório."""
     pedido = (request.get_json(silent=True) or {}).get('apac')
     if pedido is None:
         return None
     from src.utils import contas
-    if categoria != 'imagem':
-        raise PedidoDePdfInvalido('O laudo de APAC é só para exames de imagem e procedimentos (tomografia, ressonância, '
-                                  'endoscopia, colonoscopia e densitometria).')
+    if categoria not in ('imagem', 'laboratorio'):
+        raise PedidoDePdfInvalido('O laudo de APAC é só para pedidos de exames.')
     if not isinstance(pedido, dict):
         raise PedidoDePdfInvalido('Dados da APAC em formato inválido')
     if not contas.pode_ter_credenciamento(usuario):
@@ -1947,6 +1949,16 @@ def _links_do_preoperatorio(valor):
     elif isinstance(valor, list):
         for v in valor:
             _links_do_preoperatorio(v)
+
+
+@checkup_intelligent_bp.route('/apac/exames')
+def exames_em_apac_endpoint():
+    """Títulos do catálogo que saem com laudo de APAC, para a tela saber quando pedir os dados do laudo."""
+    from src.utils import sigtap
+    from src.utils.catalogo import catalogo
+    dados = catalogo()
+    return jsonify({'titulos': sigtap.titulos_em_apac(dados['laboratorio'] + dados['imagem']),
+                    'fonte': sigtap.tabela_de_pac()['fonte']})
 
 
 @checkup_intelligent_bp.route('/catalogo')
