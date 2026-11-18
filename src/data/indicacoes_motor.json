@@ -1,0 +1,7173 @@
+{
+ "25-hidroxivitamina D, soro": {
+  "grupos": [
+   "Cirurgia bariátrica prévia",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Doença celíaca",
+   "Osteoporose"
+  ],
+  "referencias": [
+   {
+    "label": "ACR 2022 (osteoporose por corticoide)",
+    "url": "https://doi.org/10.1002/art.42646"
+   },
+   {
+    "label": "ASMBS 2019",
+    "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+   },
+   {
+    "label": "BHOF 2022",
+    "url": "https://doi.org/10.1007/s00198-021-05900-y"
+   },
+   {
+    "label": "BSG 2014 (doença celíaca)",
+    "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   }
+  ],
+  "por_grupo": {
+   "Cirurgia bariátrica prévia": [
+    {
+     "label": "ASMBS 2019",
+     "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "ACR 2022 (osteoporose por corticoide)",
+     "url": "https://doi.org/10.1002/art.42646"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Doença celíaca": [
+    {
+     "label": "BSG 2014 (doença celíaca)",
+     "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+    }
+   ],
+   "Osteoporose": [
+    {
+     "label": "BHOF 2022",
+     "url": "https://doi.org/10.1007/s00198-021-05900-y"
+    }
+   ]
+  }
+ },
+ "Alanina aminotransferase, soro": {
+  "grupos": [
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Diabetes tipo 2 ou pré-diabetes",
+   "Em uso de amiodarona",
+   "Em uso de anticoagulante oral direto",
+   "Em uso de azatioprina",
+   "Em uso de fingolimode",
+   "Em uso de inibidor de JAK",
+   "Em uso de leflunomida",
+   "Em uso de metotrexato",
+   "Em uso de natalizumabe",
+   "Em uso de sulfassalazina",
+   "Em uso de tocilizumabe",
+   "Hepatite B crônica",
+   "Hepatite C",
+   "Hipertireoidismo",
+   "HIV+",
+   "MASLD",
+   "Obesidade com fator de risco metabólico"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD 2018 (hepatite B)",
+    "url": "https://doi.org/10.1002/hep.29800"
+   },
+   {
+    "label": "AASLD 2023",
+    "url": "https://doi.org/10.1097/HEP.0000000000000323"
+   },
+   {
+    "label": "AASLD/IDSA (hepatite C)",
+    "url": "https://www.hcvguidelines.org/"
+   },
+   {
+    "label": "ADA 2026 (seção 4)",
+    "url": "https://doi.org/10.2337/dc26-S004"
+   },
+   {
+    "label": "ATA 2016",
+    "url": "https://doi.org/10.1089/thy.2016.0229"
+   },
+   {
+    "label": "BSR 2017",
+    "url": "https://doi.org/10.1093/rheumatology/kew479"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "EHRA 2021",
+    "url": "https://doi.org/10.1093/europace/euab065"
+   },
+   {
+    "label": "EMA (bula do fingolimode)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+   },
+   {
+    "label": "EMA (bula do natalizumabe)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/tysabri"
+   },
+   {
+    "label": "FDA (bula do tocilizumabe)",
+    "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/125276s114lbl.pdf"
+   },
+   {
+    "label": "FDA (bula do tofacitinibe)",
+    "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/203214s038,208246s025,213082s010lbl.pdf"
+   },
+   {
+    "label": "HRS 2007 (Goldschlager)",
+    "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Diabetes tipo 2 ou pré-diabetes": [
+    {
+     "label": "AASLD 2023",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    },
+    {
+     "label": "ADA 2026 (seção 4)",
+     "url": "https://doi.org/10.2337/dc26-S004"
+    }
+   ],
+   "Em uso de amiodarona": [
+    {
+     "label": "HRS 2007 (Goldschlager)",
+     "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+    }
+   ],
+   "Em uso de anticoagulante oral direto": [
+    {
+     "label": "EHRA 2021",
+     "url": "https://doi.org/10.1093/europace/euab065"
+    }
+   ],
+   "Em uso de azatioprina": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de fingolimode": [
+    {
+     "label": "EMA (bula do fingolimode)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+    }
+   ],
+   "Em uso de inibidor de JAK": [
+    {
+     "label": "FDA (bula do tofacitinibe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/203214s038,208246s025,213082s010lbl.pdf"
+    }
+   ],
+   "Em uso de leflunomida": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de metotrexato": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de natalizumabe": [
+    {
+     "label": "EMA (bula do natalizumabe)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/tysabri"
+    }
+   ],
+   "Em uso de sulfassalazina": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de tocilizumabe": [
+    {
+     "label": "FDA (bula do tocilizumabe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/125276s114lbl.pdf"
+    }
+   ],
+   "Hepatite B crônica": [
+    {
+     "label": "AASLD 2018 (hepatite B)",
+     "url": "https://doi.org/10.1002/hep.29800"
+    }
+   ],
+   "Hepatite C": [
+    {
+     "label": "AASLD/IDSA (hepatite C)",
+     "url": "https://www.hcvguidelines.org/"
+    }
+   ],
+   "Hipertireoidismo": [
+    {
+     "label": "ATA 2016",
+     "url": "https://doi.org/10.1089/thy.2016.0229"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ],
+   "MASLD": [
+    {
+     "label": "AASLD 2023",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    },
+    {
+     "label": "ADA 2026 (seção 4)",
+     "url": "https://doi.org/10.2337/dc26-S004"
+    }
+   ],
+   "Obesidade com fator de risco metabólico": [
+    {
+     "label": "AASLD 2023",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    }
+   ]
+  }
+ },
+ "Albumina, soro": {
+  "grupos": [
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Em uso de azatioprina",
+   "Em uso de leflunomida",
+   "Em uso de metotrexato",
+   "Em uso de sulfassalazina",
+   "Lúpus eritematoso sistêmico"
+  ],
+  "referencias": [
+   {
+    "label": "BSR 2017",
+    "url": "https://doi.org/10.1093/rheumatology/kew479"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   }
+  ],
+  "por_grupo": {
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Em uso de azatioprina": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de leflunomida": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de metotrexato": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de sulfassalazina": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ]
+  }
+ },
+ "Alfa-1 antitripsina, soro": {
+  "grupos": [
+   "Deficiência de alfa-1 antitripsina na família",
+   "DPOC"
+  ],
+  "referencias": [
+   {
+    "label": "ATS/ERS 2003",
+    "url": "https://doi.org/10.1164/rccm.168.7.818"
+   },
+   {
+    "label": "GOLD 2026",
+    "url": "https://goldcopd.org/"
+   }
+  ],
+  "por_grupo": {
+   "Deficiência de alfa-1 antitripsina na família": [
+    {
+     "label": "ATS/ERS 2003",
+     "url": "https://doi.org/10.1164/rccm.168.7.818"
+    }
+   ],
+   "DPOC": [
+    {
+     "label": "GOLD 2026",
+     "url": "https://goldcopd.org/"
+    }
+   ]
+  }
+ },
+ "Angiorressonância de crânio": {
+  "grupos": [
+   "Aneurisma cerebral em 2 ou mais parentes de 1º grau"
+  ],
+  "referencias": [
+   {
+    "label": "AHA/ASA 2015",
+    "url": "https://doi.org/10.1161/STR.0000000000000070"
+   }
+  ],
+  "por_grupo": {
+   "Aneurisma cerebral em 2 ou mais parentes de 1º grau": [
+    {
+     "label": "AHA/ASA 2015",
+     "url": "https://doi.org/10.1161/STR.0000000000000070"
+    }
+   ]
+  }
+ },
+ "Anti-DNA": {
+  "grupos": [
+   "Lúpus eritematoso sistêmico"
+  ],
+  "referencias": [
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   }
+  ],
+  "por_grupo": {
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ]
+  }
+ },
+ "Anti-HCV IgG, soro": {
+  "grupos": [
+   "Adultos ≥18 anos",
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "MS 2026 (PCDT Hepatite C)",
+    "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes"
+   },
+   {
+    "label": "PCDT TV MS 2022",
+    "url": "https://portaldeboaspraticas.iff.fiocruz.br/biblioteca/pcdt-2022-transmissao-vertical-do-hiv-sifilis-e-hepatites-virais"
+   },
+   {
+    "label": "USPSTF 2020",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Adultos ≥18 anos": [
+    {
+     "label": "MS 2026 (PCDT Hepatite C)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening"
+    }
+   ],
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "PCDT TV MS 2022",
+     "url": "https://portaldeboaspraticas.iff.fiocruz.br/biblioteca/pcdt-2022-transmissao-vertical-do-hiv-sifilis-e-hepatites-virais"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Anti-HIV 1 e 2, soro": {
+  "grupos": [
+   "Adolescentes e jovens ≤30 anos",
+   "Adultos 15-65 anos",
+   "Hepatite B crônica",
+   "Hepatite C",
+   "Lúpus eritematoso sistêmico",
+   "PrEP"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD 2018 (hepatite B)",
+    "url": "https://doi.org/10.1002/hep.29800"
+   },
+   {
+    "label": "AASLD/IDSA (hepatite C)",
+    "url": "https://www.hcvguidelines.org/"
+   },
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   },
+   {
+    "label": "EULAR 2022 (infecções em DRAI)",
+    "url": "https://doi.org/10.1136/ard-2022-223335"
+   },
+   {
+    "label": "MS 2024 (PCDT PrEP)",
+    "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+   },
+   {
+    "label": "PCDT-IST MS 2022",
+    "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+   },
+   {
+    "label": "USPSTF 2019",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening"
+   }
+  ],
+  "por_grupo": {
+   "Adolescentes e jovens ≤30 anos": [
+    {
+     "label": "AASLD 2018 (hepatite B)",
+     "url": "https://doi.org/10.1002/hep.29800"
+    },
+    {
+     "label": "AASLD/IDSA (hepatite C)",
+     "url": "https://www.hcvguidelines.org/"
+    },
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    },
+    {
+     "label": "EULAR 2022 (infecções em DRAI)",
+     "url": "https://doi.org/10.1136/ard-2022-223335"
+    },
+    {
+     "label": "MS 2024 (PCDT PrEP)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2019",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening"
+    }
+   ],
+   "Adultos 15-65 anos": [
+    {
+     "label": "AASLD 2018 (hepatite B)",
+     "url": "https://doi.org/10.1002/hep.29800"
+    },
+    {
+     "label": "AASLD/IDSA (hepatite C)",
+     "url": "https://www.hcvguidelines.org/"
+    },
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    },
+    {
+     "label": "EULAR 2022 (infecções em DRAI)",
+     "url": "https://doi.org/10.1136/ard-2022-223335"
+    },
+    {
+     "label": "MS 2024 (PCDT PrEP)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+    },
+    {
+     "label": "USPSTF 2019",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening"
+    }
+   ],
+   "Hepatite B crônica": [
+    {
+     "label": "AASLD 2018 (hepatite B)",
+     "url": "https://doi.org/10.1002/hep.29800"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2019",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening"
+    }
+   ],
+   "Hepatite C": [
+    {
+     "label": "AASLD/IDSA (hepatite C)",
+     "url": "https://www.hcvguidelines.org/"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2019",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening"
+    }
+   ],
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    },
+    {
+     "label": "EULAR 2022 (infecções em DRAI)",
+     "url": "https://doi.org/10.1136/ard-2022-223335"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2019",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening"
+    }
+   ],
+   "PrEP": [
+    {
+     "label": "MS 2024 (PCDT PrEP)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2019",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening"
+    }
+   ]
+  }
+ },
+ "Anticardiolipina - IgG": {
+  "grupos": [
+   "Lúpus eritematoso sistêmico"
+  ],
+  "referencias": [
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   }
+  ],
+  "por_grupo": {
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ]
+  }
+ },
+ "Anticardiolipina - IgM": {
+  "grupos": [
+   "Lúpus eritematoso sistêmico"
+  ],
+  "referencias": [
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   }
+  ],
+  "por_grupo": {
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ]
+  }
+ },
+ "Anticoagulante lúpico, pesquisa": {
+  "grupos": [
+   "Lúpus eritematoso sistêmico"
+  ],
+  "referencias": [
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   }
+  ],
+  "por_grupo": {
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ]
+  }
+ },
+ "Anticorpo anti-JCV (vírus JC), soro": {
+  "grupos": [
+   "Em uso de natalizumabe"
+  ],
+  "referencias": [
+   {
+    "label": "EMA (bula do natalizumabe)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/tysabri"
+   }
+  ],
+  "por_grupo": {
+   "Em uso de natalizumabe": [
+    {
+     "label": "EMA (bula do natalizumabe)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/tysabri"
+    }
+   ]
+  }
+ },
+ "Anticorpo antitransglutaminase tecidual IgA, soro": {
+  "grupos": [
+   "Doença celíaca",
+   "Doença celíaca na família"
+  ],
+  "referencias": [
+   {
+    "label": "ACG 2023",
+    "url": "https://gi.org/clinical-guidelines/"
+   },
+   {
+    "label": "AGA 2019 (doença celíaca)",
+    "url": "https://doi.org/10.1053/j.gastro.2018.12.010"
+   }
+  ],
+  "por_grupo": {
+   "Doença celíaca": [
+    {
+     "label": "AGA 2019 (doença celíaca)",
+     "url": "https://doi.org/10.1053/j.gastro.2018.12.010"
+    }
+   ],
+   "Doença celíaca na família": [
+    {
+     "label": "ACG 2023",
+     "url": "https://gi.org/clinical-guidelines/"
+    }
+   ]
+  }
+ },
+ "Anticorpos anti-HAV IgG, soro": {
+  "grupos": [
+   "Hepatite B crônica",
+   "Hepatite C",
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD 2018 (hepatite B)",
+    "url": "https://doi.org/10.1002/hep.29800"
+   },
+   {
+    "label": "AASLD/IDSA (hepatite C)",
+    "url": "https://www.hcvguidelines.org/"
+   },
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Hepatite B crônica": [
+    {
+     "label": "AASLD 2018 (hepatite B)",
+     "url": "https://doi.org/10.1002/hep.29800"
+    }
+   ],
+   "Hepatite C": [
+    {
+     "label": "AASLD/IDSA (hepatite C)",
+     "url": "https://www.hcvguidelines.org/"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Anticorpos anti-HBc total, soro": {
+  "grupos": [
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "HIV+": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Anticorpos anti-HBs, soro": {
+  "grupos": [
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "HIV+": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Anticorpos anti-HCV, soro": {
+  "grupos": [
+   "Adultos ≥18 anos",
+   "Em uso de leflunomida",
+   "Em uso de metotrexato",
+   "Hepatite B crônica",
+   "HIV+",
+   "Imunobiológico",
+   "Lúpus eritematoso sistêmico",
+   "PrEP"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD 2018 (hepatite B)",
+    "url": "https://doi.org/10.1002/hep.29800"
+   },
+   {
+    "label": "BSR 2017",
+    "url": "https://doi.org/10.1093/rheumatology/kew479"
+   },
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   },
+   {
+    "label": "EULAR 2022 (infecções em DRAI)",
+    "url": "https://doi.org/10.1136/ard-2022-223335"
+   },
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   },
+   {
+    "label": "MS 2024 (PCDT PrEP)",
+    "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+   },
+   {
+    "label": "MS 2026 (PCDT Hepatite C)",
+    "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes"
+   },
+   {
+    "label": "USPSTF 2020",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening"
+   }
+  ],
+  "por_grupo": {
+   "Adultos ≥18 anos": [
+    {
+     "label": "AASLD 2018 (hepatite B)",
+     "url": "https://doi.org/10.1002/hep.29800"
+    },
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    },
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    },
+    {
+     "label": "EULAR 2022 (infecções em DRAI)",
+     "url": "https://doi.org/10.1136/ard-2022-223335"
+    },
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    },
+    {
+     "label": "MS 2024 (PCDT PrEP)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+    },
+    {
+     "label": "MS 2026 (PCDT Hepatite C)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening"
+    }
+   ],
+   "Em uso de leflunomida": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    },
+    {
+     "label": "MS 2026 (PCDT Hepatite C)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening"
+    }
+   ],
+   "Em uso de metotrexato": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    },
+    {
+     "label": "MS 2026 (PCDT Hepatite C)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening"
+    }
+   ],
+   "Hepatite B crônica": [
+    {
+     "label": "AASLD 2018 (hepatite B)",
+     "url": "https://doi.org/10.1002/hep.29800"
+    },
+    {
+     "label": "MS 2026 (PCDT Hepatite C)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    },
+    {
+     "label": "MS 2026 (PCDT Hepatite C)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening"
+    }
+   ],
+   "Imunobiológico": [
+    {
+     "label": "EULAR 2022 (infecções em DRAI)",
+     "url": "https://doi.org/10.1136/ard-2022-223335"
+    },
+    {
+     "label": "MS 2026 (PCDT Hepatite C)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening"
+    }
+   ],
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    },
+    {
+     "label": "EULAR 2022 (infecções em DRAI)",
+     "url": "https://doi.org/10.1136/ard-2022-223335"
+    },
+    {
+     "label": "MS 2026 (PCDT Hepatite C)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening"
+    }
+   ],
+   "PrEP": [
+    {
+     "label": "MS 2024 (PCDT PrEP)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+    },
+    {
+     "label": "MS 2026 (PCDT Hepatite C)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/h/hepatite-c-coinfeccoes"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening"
+    }
+   ]
+  }
+ },
+ "Anticorpos Beta 2 glicoproteina I - IgG/IgM/IgA": {
+  "grupos": [
+   "Lúpus eritematoso sistêmico"
+  ],
+  "referencias": [
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   }
+  ],
+  "por_grupo": {
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ]
+  }
+ },
+ "Aspartato aminotransferase, soro": {
+  "grupos": [
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Diabetes tipo 2 ou pré-diabetes",
+   "Em uso de amiodarona",
+   "Em uso de anticoagulante oral direto",
+   "Em uso de azatioprina",
+   "Em uso de fingolimode",
+   "Em uso de inibidor de JAK",
+   "Em uso de leflunomida",
+   "Em uso de metotrexato",
+   "Em uso de natalizumabe",
+   "Em uso de sulfassalazina",
+   "Em uso de tocilizumabe",
+   "Hepatite C",
+   "HIV+",
+   "MASLD",
+   "Obesidade com fator de risco metabólico"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD 2023",
+    "url": "https://doi.org/10.1097/HEP.0000000000000323"
+   },
+   {
+    "label": "AASLD/IDSA (hepatite C)",
+    "url": "https://www.hcvguidelines.org/"
+   },
+   {
+    "label": "ADA 2026 (seção 4)",
+    "url": "https://doi.org/10.2337/dc26-S004"
+   },
+   {
+    "label": "BSR 2017",
+    "url": "https://doi.org/10.1093/rheumatology/kew479"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "EHRA 2021",
+    "url": "https://doi.org/10.1093/europace/euab065"
+   },
+   {
+    "label": "EMA (bula do fingolimode)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+   },
+   {
+    "label": "EMA (bula do natalizumabe)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/tysabri"
+   },
+   {
+    "label": "FDA (bula do tocilizumabe)",
+    "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/125276s114lbl.pdf"
+   },
+   {
+    "label": "FDA (bula do tofacitinibe)",
+    "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/203214s038,208246s025,213082s010lbl.pdf"
+   },
+   {
+    "label": "HRS 2007 (Goldschlager)",
+    "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Diabetes tipo 2 ou pré-diabetes": [
+    {
+     "label": "AASLD 2023",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    },
+    {
+     "label": "ADA 2026 (seção 4)",
+     "url": "https://doi.org/10.2337/dc26-S004"
+    }
+   ],
+   "Em uso de amiodarona": [
+    {
+     "label": "HRS 2007 (Goldschlager)",
+     "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+    }
+   ],
+   "Em uso de anticoagulante oral direto": [
+    {
+     "label": "EHRA 2021",
+     "url": "https://doi.org/10.1093/europace/euab065"
+    }
+   ],
+   "Em uso de azatioprina": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de fingolimode": [
+    {
+     "label": "EMA (bula do fingolimode)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+    }
+   ],
+   "Em uso de inibidor de JAK": [
+    {
+     "label": "FDA (bula do tofacitinibe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/203214s038,208246s025,213082s010lbl.pdf"
+    }
+   ],
+   "Em uso de leflunomida": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de metotrexato": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de natalizumabe": [
+    {
+     "label": "EMA (bula do natalizumabe)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/tysabri"
+    }
+   ],
+   "Em uso de sulfassalazina": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de tocilizumabe": [
+    {
+     "label": "FDA (bula do tocilizumabe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/125276s114lbl.pdf"
+    }
+   ],
+   "Hepatite C": [
+    {
+     "label": "AASLD/IDSA (hepatite C)",
+     "url": "https://www.hcvguidelines.org/"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ],
+   "MASLD": [
+    {
+     "label": "AASLD 2023",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    },
+    {
+     "label": "ADA 2026 (seção 4)",
+     "url": "https://doi.org/10.2337/dc26-S004"
+    }
+   ],
+   "Obesidade com fator de risco metabólico": [
+    {
+     "label": "AASLD 2023",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    }
+   ]
+  }
+ },
+ "Atividade da TPMT ou genotipagem TPMT/NUDT15": {
+  "grupos": [
+   "Em uso de azatioprina"
+  ],
+  "referencias": [
+   {
+    "label": "BSR 2017",
+    "url": "https://doi.org/10.1093/rheumatology/kew479"
+   },
+   {
+    "label": "CPIC 2018 (TPMT/NUDT15)",
+    "url": "https://doi.org/10.1002/cpt.1304"
+   }
+  ],
+  "por_grupo": {
+   "Em uso de azatioprina": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    },
+    {
+     "label": "CPIC 2018 (TPMT/NUDT15)",
+     "url": "https://doi.org/10.1002/cpt.1304"
+    }
+   ]
+  }
+ },
+ "Avaliação oftalmológica (fundo de olho)": {
+  "grupos": [
+   "Doença falciforme",
+   "Em uso de fingolimode"
+  ],
+  "referencias": [
+   {
+    "label": "EMA (bula do fingolimode)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+   },
+   {
+    "label": "NHLBI 2014 (doença falciforme)",
+    "url": "https://doi.org/10.1001/jama.2014.10517"
+   }
+  ],
+  "por_grupo": {
+   "Doença falciforme": [
+    {
+     "label": "NHLBI 2014 (doença falciforme)",
+     "url": "https://doi.org/10.1001/jama.2014.10517"
+    }
+   ],
+   "Em uso de fingolimode": [
+    {
+     "label": "EMA (bula do fingolimode)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+    }
+   ]
+  }
+ },
+ "Avaliação oftalmológica com tonometria e fundoscopia": {
+  "grupos": [
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico",
+   "Corticoide sistêmico ≥ 3 meses"
+  ],
+  "referencias": [
+   {
+    "label": "CGH 2025 (Feuerstein)",
+    "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   }
+  ],
+  "por_grupo": {
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico": [
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ]
+  }
+ },
+ "Beta-hCG, soro": {
+  "grupos": [
+   "HIV+",
+   "PrEP"
+  ],
+  "referencias": [
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   },
+   {
+    "label": "MS 2024 (PCDT PrEP)",
+    "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+   }
+  ],
+  "por_grupo": {
+   "HIV+": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    }
+   ],
+   "PrEP": [
+    {
+     "label": "MS 2024 (PCDT PrEP)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+    }
+   ]
+  }
+ },
+ "Bilirrubinas totais e frações, soro": {
+  "grupos": [
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico ≥ 3 meses",
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Calcitonina, soro": {
+  "grupos": [
+   "NEM2 na família"
+  ],
+  "referencias": [
+   {
+    "label": "ATA 2015",
+    "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+   }
+  ],
+  "por_grupo": {
+   "NEM2 na família": [
+    {
+     "label": "ATA 2015",
+     "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+    }
+   ]
+  }
+ },
+ "Carga viral da hepatite B (HBV-DNA quantitativo), plasma": {
+  "grupos": [
+   "Hepatite B crônica"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD 2018 (hepatite B)",
+    "url": "https://doi.org/10.1002/hep.29800"
+   }
+  ],
+  "por_grupo": {
+   "Hepatite B crônica": [
+    {
+     "label": "AASLD 2018 (hepatite B)",
+     "url": "https://doi.org/10.1002/hep.29800"
+    }
+   ]
+  }
+ },
+ "Carga viral da hepatite C (HCV-RNA quantitativo), plasma": {
+  "grupos": [
+   "Hepatite C"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD/IDSA (hepatite C)",
+    "url": "https://www.hcvguidelines.org/"
+   }
+  ],
+  "por_grupo": {
+   "Hepatite C": [
+    {
+     "label": "AASLD/IDSA (hepatite C)",
+     "url": "https://www.hcvguidelines.org/"
+    }
+   ]
+  }
+ },
+ "Carga Viral do HIV (HIV RNA)": {
+  "grupos": [
+   "Gestante com HIV",
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "FEBRASGO 2025 (HIV na gestação)",
+    "url": "https://www.febrasgo.org.br/images/pec/posicionamentos-febrasgo/2025/novo/FPS---2025---N10---portugues.pdf"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Gestante com HIV": [
+    {
+     "label": "FEBRASGO 2025 (HIV na gestação)",
+     "url": "https://www.febrasgo.org.br/images/pec/posicionamentos-febrasgo/2025/novo/FPS---2025---N10---portugues.pdf"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Citologia cervicovaginal (Papanicolaou)": {
+  "grupos": [
+   "Mulheres 21-24 anos"
+  ],
+  "referencias": [
+   {
+    "label": "ACOG 2026",
+    "url": "https://doi.org/10.1097/AOG.0000000000006257"
+   }
+  ],
+  "por_grupo": {
+   "Mulheres 21-24 anos": [
+    {
+     "label": "ACOG 2026",
+     "url": "https://doi.org/10.1097/AOG.0000000000006257"
+    }
+   ]
+  }
+ },
+ "Citomegalovírus IgG e IgM, soro": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    }
+   ]
+  }
+ },
+ "Clamídia e gonococo, PCR (urina ou swab)": {
+  "grupos": [
+   "HIV+",
+   "Mulheres sexualmente ativas ≤ 24 anos",
+   "PrEP",
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   },
+   {
+    "label": "MS 2024 (PCDT PrEP)",
+    "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+   },
+   {
+    "label": "USPSTF 2021 (clamídia e gonococo)",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/chlamydia-and-gonorrhea-screening"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "HIV+": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    },
+    {
+     "label": "USPSTF 2021 (clamídia e gonococo)",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/chlamydia-and-gonorrhea-screening"
+    }
+   ],
+   "Mulheres sexualmente ativas ≤ 24 anos": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    },
+    {
+     "label": "USPSTF 2021 (clamídia e gonococo)",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/chlamydia-and-gonorrhea-screening"
+    }
+   ],
+   "PrEP": [
+    {
+     "label": "MS 2024 (PCDT PrEP)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+    }
+   ],
+   "Pré-natal": [
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Colesterol total e frações, soro": {
+  "grupos": [
+   "Adultos 20-39 anos",
+   "Adultos ≥40 anos",
+   "Adultos ≥76 anos",
+   "Artrite psoriásica",
+   "Artrite reumatoide",
+   "Bloqueio androgênico",
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico",
+   "Corticoide sistêmico ≥ 3 meses",
+   "DCV aterosclerótica",
+   "Diabéticos",
+   "Diabéticos sem estatina, menos de 40 anos",
+   "Dislipidemia ou tratamento hipolipemiante",
+   "Em uso de antipsicótico de 2ª geração",
+   "Em uso de inibidor de JAK",
+   "Em uso de sirolimo ou everolimo",
+   "Em uso de tocilizumabe",
+   "Espondiloartrite axial (espondilite anquilosante)",
+   "Hipercolesterolemia familiar na família",
+   "HIV+",
+   "Lúpus eritematoso sistêmico",
+   "Psoríase",
+   "Síndrome dos ovários policísticos"
+  ],
+  "referencias": [
+   {
+    "label": "AAD-NPF 2019 (comorbidades da psoríase)",
+    "url": "https://doi.org/10.1016/j.jaad.2018.11.058"
+   },
+   {
+    "label": "ACC/AHA 2018 (colesterol)",
+    "url": "https://doi.org/10.1016/j.jacc.2018.11.003"
+   },
+   {
+    "label": "ACC/AHA 2026",
+    "url": "https://doi.org/10.1161/CIR.0000000000001423"
+   },
+   {
+    "label": "ADA 2026 (seção 10)",
+    "url": "https://doi.org/10.2337/dc26-S010"
+   },
+   {
+    "label": "ADA/APA 2004",
+    "url": "https://doi.org/10.2337/diacare.27.2.596"
+   },
+   {
+    "label": "AHA/ACS/AUA 2010 (bloqueio androgênico)",
+    "url": "https://doi.org/10.1161/CIRCULATIONAHA.109.192695"
+   },
+   {
+    "label": "CGH 2025 (Feuerstein)",
+    "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+   },
+   {
+    "label": "Diretriz internacional de SOP 2023",
+    "url": "https://doi.org/10.1210/clinem/dgad463"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "EMA (bula do sirolimo)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/rapamune"
+   },
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   },
+   {
+    "label": "EULAR 2016 (risco CV nas artrites inflamatórias)",
+    "url": "https://doi.org/10.1136/annrheumdis-2016-209775"
+   },
+   {
+    "label": "EULAR 2022 (risco CV no LES e outras DRM)",
+    "url": "https://doi.org/10.1136/annrheumdis-2021-221733"
+   },
+   {
+    "label": "FDA (bula do tocilizumabe)",
+    "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/125276s114lbl.pdf"
+   },
+   {
+    "label": "FDA (bula do tofacitinibe)",
+    "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/203214s038,208246s025,213082s010lbl.pdf"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   },
+   {
+    "label": "SBC 2025 (dislipidemia)",
+    "url": "https://doi.org/10.36660/abc.20250640"
+   },
+   {
+    "label": "USPSTF 2022 (estatina)",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/statin-use-in-adults-preventive-medication"
+   }
+  ],
+  "por_grupo": {
+   "Adultos 20-39 anos": [
+    {
+     "label": "AAD-NPF 2019 (comorbidades da psoríase)",
+     "url": "https://doi.org/10.1016/j.jaad.2018.11.058"
+    },
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "ADA/APA 2004",
+     "url": "https://doi.org/10.2337/diacare.27.2.596"
+    },
+    {
+     "label": "AHA/ACS/AUA 2010 (bloqueio androgênico)",
+     "url": "https://doi.org/10.1161/CIRCULATIONAHA.109.192695"
+    },
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Diretriz internacional de SOP 2023",
+     "url": "https://doi.org/10.1210/clinem/dgad463"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    },
+    {
+     "label": "EMA (bula do sirolimo)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/rapamune"
+    },
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    },
+    {
+     "label": "EULAR 2016 (risco CV nas artrites inflamatórias)",
+     "url": "https://doi.org/10.1136/annrheumdis-2016-209775"
+    },
+    {
+     "label": "EULAR 2022 (risco CV no LES e outras DRM)",
+     "url": "https://doi.org/10.1136/annrheumdis-2021-221733"
+    },
+    {
+     "label": "FDA (bula do tocilizumabe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/125276s114lbl.pdf"
+    },
+    {
+     "label": "FDA (bula do tofacitinibe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/203214s038,208246s025,213082s010lbl.pdf"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "Adultos ≥40 anos": [
+    {
+     "label": "AAD-NPF 2019 (comorbidades da psoríase)",
+     "url": "https://doi.org/10.1016/j.jaad.2018.11.058"
+    },
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "ADA/APA 2004",
+     "url": "https://doi.org/10.2337/diacare.27.2.596"
+    },
+    {
+     "label": "AHA/ACS/AUA 2010 (bloqueio androgênico)",
+     "url": "https://doi.org/10.1161/CIRCULATIONAHA.109.192695"
+    },
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Diretriz internacional de SOP 2023",
+     "url": "https://doi.org/10.1210/clinem/dgad463"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    },
+    {
+     "label": "EMA (bula do sirolimo)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/rapamune"
+    },
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    },
+    {
+     "label": "EULAR 2016 (risco CV nas artrites inflamatórias)",
+     "url": "https://doi.org/10.1136/annrheumdis-2016-209775"
+    },
+    {
+     "label": "EULAR 2022 (risco CV no LES e outras DRM)",
+     "url": "https://doi.org/10.1136/annrheumdis-2021-221733"
+    },
+    {
+     "label": "FDA (bula do tocilizumabe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/125276s114lbl.pdf"
+    },
+    {
+     "label": "FDA (bula do tofacitinibe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/203214s038,208246s025,213082s010lbl.pdf"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "Adultos ≥76 anos": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    },
+    {
+     "label": "USPSTF 2022 (estatina)",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/statin-use-in-adults-preventive-medication"
+    }
+   ],
+   "Artrite psoriásica": [
+    {
+     "label": "AAD-NPF 2019 (comorbidades da psoríase)",
+     "url": "https://doi.org/10.1016/j.jaad.2018.11.058"
+    },
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "EULAR 2016 (risco CV nas artrites inflamatórias)",
+     "url": "https://doi.org/10.1136/annrheumdis-2016-209775"
+    }
+   ],
+   "Artrite reumatoide": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "EULAR 2016 (risco CV nas artrites inflamatórias)",
+     "url": "https://doi.org/10.1136/annrheumdis-2016-209775"
+    }
+   ],
+   "Bloqueio androgênico": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "AHA/ACS/AUA 2010 (bloqueio androgênico)",
+     "url": "https://doi.org/10.1161/CIRCULATIONAHA.109.192695"
+    }
+   ],
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "DCV aterosclerótica": [
+    {
+     "label": "ACC/AHA 2018 (colesterol)",
+     "url": "https://doi.org/10.1016/j.jacc.2018.11.003"
+    },
+    {
+     "label": "SBC 2025 (dislipidemia)",
+     "url": "https://doi.org/10.36660/abc.20250640"
+    }
+   ],
+   "Diabéticos": [
+    {
+     "label": "ADA 2026 (seção 10)",
+     "url": "https://doi.org/10.2337/dc26-S010"
+    }
+   ],
+   "Diabéticos sem estatina, menos de 40 anos": [
+    {
+     "label": "ADA 2026 (seção 10)",
+     "url": "https://doi.org/10.2337/dc26-S010"
+    }
+   ],
+   "Dislipidemia ou tratamento hipolipemiante": [
+    {
+     "label": "ACC/AHA 2018 (colesterol)",
+     "url": "https://doi.org/10.1016/j.jacc.2018.11.003"
+    }
+   ],
+   "Em uso de antipsicótico de 2ª geração": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "ADA/APA 2004",
+     "url": "https://doi.org/10.2337/diacare.27.2.596"
+    }
+   ],
+   "Em uso de inibidor de JAK": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "FDA (bula do tofacitinibe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/203214s038,208246s025,213082s010lbl.pdf"
+    }
+   ],
+   "Em uso de sirolimo ou everolimo": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "EMA (bula do sirolimo)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/rapamune"
+    }
+   ],
+   "Em uso de tocilizumabe": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "FDA (bula do tocilizumabe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/125276s114lbl.pdf"
+    }
+   ],
+   "Espondiloartrite axial (espondilite anquilosante)": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "EULAR 2016 (risco CV nas artrites inflamatórias)",
+     "url": "https://doi.org/10.1136/annrheumdis-2016-209775"
+    }
+   ],
+   "Hipercolesterolemia familiar na família": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    },
+    {
+     "label": "USPSTF 2022 (estatina)",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/statin-use-in-adults-preventive-medication"
+    }
+   ],
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    },
+    {
+     "label": "EULAR 2022 (risco CV no LES e outras DRM)",
+     "url": "https://doi.org/10.1136/annrheumdis-2021-221733"
+    }
+   ],
+   "Psoríase": [
+    {
+     "label": "AAD-NPF 2019 (comorbidades da psoríase)",
+     "url": "https://doi.org/10.1016/j.jaad.2018.11.058"
+    },
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "EULAR 2016 (risco CV nas artrites inflamatórias)",
+     "url": "https://doi.org/10.1136/annrheumdis-2016-209775"
+    }
+   ],
+   "Síndrome dos ovários policísticos": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    },
+    {
+     "label": "Diretriz internacional de SOP 2023",
+     "url": "https://doi.org/10.1210/clinem/dgad463"
+    }
+   ]
+  }
+ },
+ "Colonoscopia de Rastreio com ou sem biópsia": {
+  "grupos": [
+   "Adultos 45-75 anos",
+   "História familiar de CCR antes dos 60 anos",
+   "História familiar de CCR aos 60 anos ou mais",
+   "Li-Fraumeni na família",
+   "Polipose adenomatosa familiar",
+   "Síndrome de Cowden na família",
+   "Síndrome de Lynch na família"
+  ],
+  "referencias": [
+   {
+    "label": "ACG 2015",
+    "url": "https://gi.org/clinical-guidelines/"
+   },
+   {
+    "label": "Kratz 2017",
+    "url": "https://doi.org/10.1158/1078-0432.CCR-17-0408"
+   },
+   {
+    "label": "NCCN 2025",
+    "url": "https://www.nccn.org/guidelines/category_2"
+   },
+   {
+    "label": "USMSTF 2017",
+    "url": "https://doi.org/10.1038/ajg.2017.174"
+   },
+   {
+    "label": "USPSTF 2021",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening"
+   }
+  ],
+  "por_grupo": {
+   "Adultos 45-75 anos": [
+    {
+     "label": "USPSTF 2021",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening"
+    }
+   ],
+   "História familiar de CCR antes dos 60 anos": [
+    {
+     "label": "USMSTF 2017",
+     "url": "https://doi.org/10.1038/ajg.2017.174"
+    }
+   ],
+   "História familiar de CCR aos 60 anos ou mais": [
+    {
+     "label": "USMSTF 2017",
+     "url": "https://doi.org/10.1038/ajg.2017.174"
+    }
+   ],
+   "Li-Fraumeni na família": [
+    {
+     "label": "Kratz 2017",
+     "url": "https://doi.org/10.1158/1078-0432.CCR-17-0408"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ],
+   "Polipose adenomatosa familiar": [
+    {
+     "label": "ACG 2015",
+     "url": "https://gi.org/clinical-guidelines/"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ],
+   "Síndrome de Cowden na família": [
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ],
+   "Síndrome de Lynch na família": [
+    {
+     "label": "ACG 2015",
+     "url": "https://gi.org/clinical-guidelines/"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ]
+  }
+ },
+ "Colposcopia (cérvice uterina e vagina)": {
+  "grupos": [
+   "HPV 16 e/ou 18 detectado",
+   "HPV oncogênico detectado com HIV ou imunossupressão",
+   "HPV oncogênico não 16-18 com citologia reflexa ASC-US ou mais"
+  ],
+  "referencias": [
+   {
+    "label": "MS 2025 (DNA-HPV)",
+    "url": "https://www.gov.br/conitec/pt-br/midias/relatorios/portaria/2025/portaria-conjunta-saes-sectics-no-13-de-29-de-julho-de-2025"
+   },
+   {
+    "label": "SBOC 2026",
+    "url": "https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-Colo-do-%E2%94%9C%E2%95%91tero-v5-VERS%E2%94%9CaO-FINAL.pdf"
+   }
+  ],
+  "por_grupo": {
+   "HPV 16 e/ou 18 detectado": [
+    {
+     "label": "MS 2025 (DNA-HPV)",
+     "url": "https://www.gov.br/conitec/pt-br/midias/relatorios/portaria/2025/portaria-conjunta-saes-sectics-no-13-de-29-de-julho-de-2025"
+    },
+    {
+     "label": "SBOC 2026",
+     "url": "https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-Colo-do-%E2%94%9C%E2%95%91tero-v5-VERS%E2%94%9CaO-FINAL.pdf"
+    }
+   ],
+   "HPV oncogênico detectado com HIV ou imunossupressão": [
+    {
+     "label": "MS 2025 (DNA-HPV)",
+     "url": "https://www.gov.br/conitec/pt-br/midias/relatorios/portaria/2025/portaria-conjunta-saes-sectics-no-13-de-29-de-julho-de-2025"
+    },
+    {
+     "label": "SBOC 2026",
+     "url": "https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-Colo-do-%E2%94%9C%E2%95%91tero-v5-VERS%E2%94%9CaO-FINAL.pdf"
+    }
+   ],
+   "HPV oncogênico não 16-18 com citologia reflexa ASC-US ou mais": [
+    {
+     "label": "MS 2025 (DNA-HPV)",
+     "url": "https://www.gov.br/conitec/pt-br/midias/relatorios/portaria/2025/portaria-conjunta-saes-sectics-no-13-de-29-de-julho-de-2025"
+    },
+    {
+     "label": "SBOC 2026",
+     "url": "https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-Colo-do-%E2%94%9C%E2%95%91tero-v5-VERS%E2%94%9CaO-FINAL.pdf"
+    }
+   ]
+  }
+ },
+ "Complemento C3": {
+  "grupos": [
+   "Lúpus eritematoso sistêmico"
+  ],
+  "referencias": [
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   }
+  ],
+  "por_grupo": {
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ]
+  }
+ },
+ "Complemento C4": {
+  "grupos": [
+   "Lúpus eritematoso sistêmico"
+  ],
+  "referencias": [
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   }
+  ],
+  "por_grupo": {
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ]
+  }
+ },
+ "Contagem de linfócitos T CD4+": {
+  "grupos": [
+   "Gestante com HIV",
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "FEBRASGO 2025 (HIV na gestação)",
+    "url": "https://www.febrasgo.org.br/images/pec/posicionamentos-febrasgo/2025/novo/FPS---2025---N10---portugues.pdf"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Gestante com HIV": [
+    {
+     "label": "FEBRASGO 2025 (HIV na gestação)",
+     "url": "https://www.febrasgo.org.br/images/pec/posicionamentos-febrasgo/2025/novo/FPS---2025---N10---portugues.pdf"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Coombs indireto, soro": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Creatinina, soro": {
+  "grupos": [
+   "Adultos com fator de risco para DRC (HAS, DCV, insuficiência cardíaca, doença renal na família)",
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Diabéticos",
+   "Doença renal crônica",
+   "Em uso de anticoagulante oral direto",
+   "Em uso de azatioprina",
+   "Em uso de ciclosporina ou tacrolimo",
+   "Em uso de Diurético de alça",
+   "Em uso de Diurético tiazídico",
+   "Em uso de Espironolactona / eplerenona",
+   "Em uso de IECA ou BRA",
+   "Em uso de leflunomida",
+   "Em uso de lítio",
+   "Em uso de mesalazina",
+   "Em uso de metotrexato",
+   "Em uso de sacubitril/valsartana",
+   "Em uso de sotalol",
+   "Em uso de sulfassalazina",
+   "Em uso de ácido zoledrônico",
+   "Fibrilação atrial",
+   "Gota",
+   "Hepatite C",
+   "HIV+",
+   "Lúpus eritematoso sistêmico",
+   "PrEP",
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD/IDSA (hepatite C)",
+    "url": "https://www.hcvguidelines.org/"
+   },
+   {
+    "label": "ACOG PB 222 (2020)",
+    "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia"
+   },
+   {
+    "label": "ACR 2020",
+    "url": "https://doi.org/10.1002/acr.24180"
+   },
+   {
+    "label": "ADA 2026 (seção 4)",
+    "url": "https://doi.org/10.2337/dc26-S004"
+   },
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "AHA/ACC/ACCP/HRS 2023 (FA)",
+    "url": "https://doi.org/10.1161/CIR.0000000000001193"
+   },
+   {
+    "label": "AHA/ACC/HFSA 2022",
+    "url": "https://doi.org/10.1161/CIR.0000000000001063"
+   },
+   {
+    "label": "BSG 2019 (DII)",
+    "url": "https://doi.org/10.1136/gutjnl-2019-318484"
+   },
+   {
+    "label": "BSR 2017",
+    "url": "https://doi.org/10.1093/rheumatology/kew479"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "EHRA 2021",
+    "url": "https://doi.org/10.1093/europace/euab065"
+   },
+   {
+    "label": "EMA (bula do ácido zoledrônico)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/aclasta"
+   },
+   {
+    "label": "ESC 2021 (insuficiência cardíaca)",
+    "url": "https://doi.org/10.1093/eurheartj/ehab368"
+   },
+   {
+    "label": "ESC 2024 (fibrilação atrial)",
+    "url": "https://doi.org/10.1093/eurheartj/ehae176"
+   },
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   },
+   {
+    "label": "KDIGO 2009 (transplante)",
+    "url": "https://kdigo.org/guidelines/transplant-recipient/"
+   },
+   {
+    "label": "KDIGO 2024",
+    "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+   },
+   {
+    "label": "KDIGO 2024 (DRC)",
+    "url": "https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   },
+   {
+    "label": "MS 2024 (PCDT PrEP)",
+    "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+   },
+   {
+    "label": "NICE CG185 (2023)",
+    "url": "https://www.nice.org.uk/guidance/cg185"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com fator de risco para DRC (HAS, DCV, insuficiência cardíaca, doença renal na família)": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    },
+    {
+     "label": "KDIGO 2024 (DRC)",
+     "url": "https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf"
+    }
+   ],
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Diabéticos": [
+    {
+     "label": "ADA 2026 (seção 4)",
+     "url": "https://doi.org/10.2337/dc26-S004"
+    }
+   ],
+   "Doença renal crônica": [
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    },
+    {
+     "label": "KDIGO 2024 (DRC)",
+     "url": "https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf"
+    }
+   ],
+   "Em uso de anticoagulante oral direto": [
+    {
+     "label": "EHRA 2021",
+     "url": "https://doi.org/10.1093/europace/euab065"
+    }
+   ],
+   "Em uso de azatioprina": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de ciclosporina ou tacrolimo": [
+    {
+     "label": "KDIGO 2009 (transplante)",
+     "url": "https://kdigo.org/guidelines/transplant-recipient/"
+    }
+   ],
+   "Em uso de Diurético de alça": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    }
+   ],
+   "Em uso de Diurético tiazídico": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    }
+   ],
+   "Em uso de Espironolactona / eplerenona": [
+    {
+     "label": "AHA/ACC/HFSA 2022",
+     "url": "https://doi.org/10.1161/CIR.0000000000001063"
+    },
+    {
+     "label": "ESC 2021 (insuficiência cardíaca)",
+     "url": "https://doi.org/10.1093/eurheartj/ehab368"
+    }
+   ],
+   "Em uso de IECA ou BRA": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    }
+   ],
+   "Em uso de leflunomida": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de lítio": [
+    {
+     "label": "NICE CG185 (2023)",
+     "url": "https://www.nice.org.uk/guidance/cg185"
+    }
+   ],
+   "Em uso de mesalazina": [
+    {
+     "label": "BSG 2019 (DII)",
+     "url": "https://doi.org/10.1136/gutjnl-2019-318484"
+    }
+   ],
+   "Em uso de metotrexato": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de sacubitril/valsartana": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    }
+   ],
+   "Em uso de sotalol": [
+    {
+     "label": "AHA/ACC/ACCP/HRS 2023 (FA)",
+     "url": "https://doi.org/10.1161/CIR.0000000000001193"
+    }
+   ],
+   "Em uso de sulfassalazina": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de ácido zoledrônico": [
+    {
+     "label": "EMA (bula do ácido zoledrônico)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/aclasta"
+    }
+   ],
+   "Fibrilação atrial": [
+    {
+     "label": "ESC 2024 (fibrilação atrial)",
+     "url": "https://doi.org/10.1093/eurheartj/ehae176"
+    }
+   ],
+   "Gota": [
+    {
+     "label": "ACR 2020",
+     "url": "https://doi.org/10.1002/acr.24180"
+    }
+   ],
+   "Hepatite C": [
+    {
+     "label": "AASLD/IDSA (hepatite C)",
+     "url": "https://www.hcvguidelines.org/"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ],
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ],
+   "PrEP": [
+    {
+     "label": "MS 2024 (PCDT PrEP)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+    }
+   ],
+   "Pré-natal": [
+    {
+     "label": "ACOG PB 222 (2020)",
+     "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia"
+    }
+   ]
+  }
+ },
+ "Cultura para estreptococo do grupo B (swab vaginal e retal)": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "ACOG CO 797 (2020)",
+    "url": "https://doi.org/10.1097/AOG.0000000000003668"
+   },
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "ACOG CO 797 (2020)",
+     "url": "https://doi.org/10.1097/AOG.0000000000003668"
+    },
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Cálcio iônico, soro": {
+  "grupos": [
+   "Adultos com HAS",
+   "Cirurgia bariátrica prévia",
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Em uso de denosumabe",
+   "Em uso de lítio",
+   "Em uso de ácido zoledrônico",
+   "NEM1 na família",
+   "NEM2 na família"
+  ],
+  "referencias": [
+   {
+    "label": "ACC/AHA 2017 (hipertensão)",
+    "url": "https://doi.org/10.1161/HYP.0000000000000065"
+   },
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "ASMBS 2019",
+    "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+   },
+   {
+    "label": "ATA 2015",
+    "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "EMA (bula do denosumabe)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/prolia"
+   },
+   {
+    "label": "EMA (bula do ácido zoledrônico)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/aclasta"
+   },
+   {
+    "label": "Endocrine Society 2012",
+    "url": "https://doi.org/10.1210/jc.2012-1230"
+   },
+   {
+    "label": "NICE CG185 (2023)",
+    "url": "https://www.nice.org.uk/guidance/cg185"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS": [
+    {
+     "label": "ACC/AHA 2017 (hipertensão)",
+     "url": "https://doi.org/10.1161/HYP.0000000000000065"
+    },
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    }
+   ],
+   "Cirurgia bariátrica prévia": [
+    {
+     "label": "ASMBS 2019",
+     "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+    }
+   ],
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Em uso de denosumabe": [
+    {
+     "label": "EMA (bula do denosumabe)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/prolia"
+    }
+   ],
+   "Em uso de lítio": [
+    {
+     "label": "NICE CG185 (2023)",
+     "url": "https://www.nice.org.uk/guidance/cg185"
+    }
+   ],
+   "Em uso de ácido zoledrônico": [
+    {
+     "label": "EMA (bula do ácido zoledrônico)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/aclasta"
+    }
+   ],
+   "NEM1 na família": [
+    {
+     "label": "Endocrine Society 2012",
+     "url": "https://doi.org/10.1210/jc.2012-1230"
+    }
+   ],
+   "NEM2 na família": [
+    {
+     "label": "ATA 2015",
+     "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+    }
+   ]
+  }
+ },
+ "Densitometria óssea (DEXA)": {
+  "grupos": [
+   "Agonista ou antagonista de GnRH",
+   "Bisfosfonato por tempo prolongado",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Em uso de inibidor de aromatase",
+   "Fratura de quadril em pai ou mãe",
+   "Mulheres ≥65 anos",
+   "Osteoporose",
+   "Pós-menopausa <65 anos com fator de risco"
+  ],
+  "referencias": [
+   {
+    "label": "ACR 2022",
+    "url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines"
+   },
+   {
+    "label": "ASBMR 2016",
+    "url": "https://doi.org/10.1002/jbmr.2708"
+   },
+   {
+    "label": "ASCO 2019",
+    "url": "https://doi.org/10.1200/JCO.19.01696"
+   },
+   {
+    "label": "BHOF 2022",
+    "url": "https://doi.org/10.1007/s00198-021-05900-y"
+   },
+   {
+    "label": "CGH 2025 (Feuerstein)",
+    "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+   },
+   {
+    "label": "NCCN (saúde óssea no câncer)",
+    "url": "https://www.nccn.org/guidelines/category_3"
+   },
+   {
+    "label": "USPSTF 2025",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+   }
+  ],
+  "por_grupo": {
+   "Agonista ou antagonista de GnRH": [
+    {
+     "label": "BHOF 2022",
+     "url": "https://doi.org/10.1007/s00198-021-05900-y"
+    },
+    {
+     "label": "NCCN (saúde óssea no câncer)",
+     "url": "https://www.nccn.org/guidelines/category_3"
+    },
+    {
+     "label": "USPSTF 2025",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+    }
+   ],
+   "Bisfosfonato por tempo prolongado": [
+    {
+     "label": "ASBMR 2016",
+     "url": "https://doi.org/10.1002/jbmr.2708"
+    },
+    {
+     "label": "BHOF 2022",
+     "url": "https://doi.org/10.1007/s00198-021-05900-y"
+    },
+    {
+     "label": "USPSTF 2025",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "ACR 2022",
+     "url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines"
+    },
+    {
+     "label": "BHOF 2022",
+     "url": "https://doi.org/10.1007/s00198-021-05900-y"
+    },
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "USPSTF 2025",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+    }
+   ],
+   "Em uso de inibidor de aromatase": [
+    {
+     "label": "ASCO 2019",
+     "url": "https://doi.org/10.1200/JCO.19.01696"
+    },
+    {
+     "label": "BHOF 2022",
+     "url": "https://doi.org/10.1007/s00198-021-05900-y"
+    },
+    {
+     "label": "USPSTF 2025",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+    }
+   ],
+   "Fratura de quadril em pai ou mãe": [
+    {
+     "label": "BHOF 2022",
+     "url": "https://doi.org/10.1007/s00198-021-05900-y"
+    }
+   ],
+   "Mulheres ≥65 anos": [
+    {
+     "label": "ACR 2022",
+     "url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines"
+    },
+    {
+     "label": "ASBMR 2016",
+     "url": "https://doi.org/10.1002/jbmr.2708"
+    },
+    {
+     "label": "ASCO 2019",
+     "url": "https://doi.org/10.1200/JCO.19.01696"
+    },
+    {
+     "label": "BHOF 2022",
+     "url": "https://doi.org/10.1007/s00198-021-05900-y"
+    },
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "NCCN (saúde óssea no câncer)",
+     "url": "https://www.nccn.org/guidelines/category_3"
+    },
+    {
+     "label": "USPSTF 2025",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+    }
+   ],
+   "Osteoporose": [
+    {
+     "label": "BHOF 2022",
+     "url": "https://doi.org/10.1007/s00198-021-05900-y"
+    },
+    {
+     "label": "USPSTF 2025",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+    }
+   ],
+   "Pós-menopausa <65 anos com fator de risco": [
+    {
+     "label": "BHOF 2022",
+     "url": "https://doi.org/10.1007/s00198-021-05900-y"
+    },
+    {
+     "label": "USPSTF 2025",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+    }
+   ]
+  }
+ },
+ "Doppler de artérias renais": {
+  "grupos": [
+   "Adultos com HAS resistente"
+  ],
+  "referencias": [
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS resistente": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ]
+  }
+ },
+ "EAS - Elementos Anormais e Sedimentoscopia": {
+  "grupos": [
+   "Adultos com HAS",
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "EAS - Elementos Anormais e Sedimentoscopia, urina": {
+  "grupos": [
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Ecocardiograma fetal": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "ACOG PB 201",
+    "url": "https://doi.org/10.1097/AOG.0000000000002961"
+   },
+   {
+    "label": "AHA 2014 (ecocardiograma fetal)",
+    "url": "https://doi.org/10.1161/01.cir.0000437597.44550.5d"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "ACOG PB 201",
+     "url": "https://doi.org/10.1097/AOG.0000000000002961"
+    },
+    {
+     "label": "AHA 2014 (ecocardiograma fetal)",
+     "url": "https://doi.org/10.1161/01.cir.0000437597.44550.5d"
+    }
+   ]
+  }
+ },
+ "Ecocardiograma transtorácico": {
+  "grupos": [
+   "Antraciclina ou anti-HER2",
+   "Cardiomiopatia dilatada familiar na família",
+   "Cardiomiopatia hipertrófica na família",
+   "Doença da aorta torácica na família",
+   "Em terapia anti-HER2",
+   "Esclerose sistêmica",
+   "Fibrilação atrial",
+   "HAS resistente"
+  ],
+  "referencias": [
+   {
+    "label": "ACC/AHA 2022",
+    "url": "https://doi.org/10.1161/CIR.0000000000001106"
+   },
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "AHA/ACC 2024",
+    "url": "https://doi.org/10.1161/CIR.0000000000001250"
+   },
+   {
+    "label": "AHA/ACC/HFSA 2022",
+    "url": "https://doi.org/10.1161/CIR.0000000000001063"
+   },
+   {
+    "label": "ESC 2022 (cardio-oncologia)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac244"
+   },
+   {
+    "label": "ESC 2024 (fibrilação atrial)",
+    "url": "https://doi.org/10.1093/eurheartj/ehae176"
+   },
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Antraciclina ou anti-HER2": [
+    {
+     "label": "ESC 2022 (cardio-oncologia)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac244"
+    }
+   ],
+   "Cardiomiopatia dilatada familiar na família": [
+    {
+     "label": "AHA/ACC/HFSA 2022",
+     "url": "https://doi.org/10.1161/CIR.0000000000001063"
+    }
+   ],
+   "Cardiomiopatia hipertrófica na família": [
+    {
+     "label": "AHA/ACC 2024",
+     "url": "https://doi.org/10.1161/CIR.0000000000001250"
+    }
+   ],
+   "Doença da aorta torácica na família": [
+    {
+     "label": "ACC/AHA 2022",
+     "url": "https://doi.org/10.1161/CIR.0000000000001106"
+    }
+   ],
+   "Em terapia anti-HER2": [
+    {
+     "label": "ESC 2022 (cardio-oncologia)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac244"
+    }
+   ],
+   "Esclerose sistêmica": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
+    }
+   ],
+   "Fibrilação atrial": [
+    {
+     "label": "ESC 2024 (fibrilação atrial)",
+     "url": "https://doi.org/10.1093/eurheartj/ehae176"
+    }
+   ],
+   "HAS resistente": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ]
+  }
+ },
+ "Eletrocardiograma de repouso": {
+  "grupos": [
+   "Adultos com HAS",
+   "Antraciclina ou anti-HER2",
+   "Canalopatia na família",
+   "Cardiomiopatia dilatada familiar na família",
+   "Cardiomiopatia hipertrófica na família",
+   "Em uso de fingolimode",
+   "Em uso de sotalol",
+   "Inibidor de checkpoint",
+   "Morte súbita precoce na família"
+  ],
+  "referencias": [
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "AHA/ACC 2024",
+    "url": "https://doi.org/10.1161/CIR.0000000000001250"
+   },
+   {
+    "label": "AHA/ACC/ACCP/HRS 2023 (FA)",
+    "url": "https://doi.org/10.1161/CIR.0000000000001193"
+   },
+   {
+    "label": "AHA/ACC/HFSA 2022",
+    "url": "https://doi.org/10.1161/CIR.0000000000001063"
+   },
+   {
+    "label": "AHA/ACC/HRS 2017",
+    "url": "https://www.ahajournals.org/journal/circ"
+   },
+   {
+    "label": "EMA (bula do fingolimode)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+   },
+   {
+    "label": "ESC 2022 (cardio-oncologia)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac244"
+   },
+   {
+    "label": "HRS/EHRA/APHRS 2013",
+    "url": "https://doi.org/10.1016/j.hrthm.2013.05.014"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "Antraciclina ou anti-HER2": [
+    {
+     "label": "ESC 2022 (cardio-oncologia)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac244"
+    }
+   ],
+   "Canalopatia na família": [
+    {
+     "label": "HRS/EHRA/APHRS 2013",
+     "url": "https://doi.org/10.1016/j.hrthm.2013.05.014"
+    }
+   ],
+   "Cardiomiopatia dilatada familiar na família": [
+    {
+     "label": "AHA/ACC/HFSA 2022",
+     "url": "https://doi.org/10.1161/CIR.0000000000001063"
+    }
+   ],
+   "Cardiomiopatia hipertrófica na família": [
+    {
+     "label": "AHA/ACC 2024",
+     "url": "https://doi.org/10.1161/CIR.0000000000001250"
+    }
+   ],
+   "Em uso de fingolimode": [
+    {
+     "label": "EMA (bula do fingolimode)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+    }
+   ],
+   "Em uso de sotalol": [
+    {
+     "label": "AHA/ACC/ACCP/HRS 2023 (FA)",
+     "url": "https://doi.org/10.1161/CIR.0000000000001193"
+    }
+   ],
+   "Inibidor de checkpoint": [
+    {
+     "label": "ESC 2022 (cardio-oncologia)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac244"
+    }
+   ],
+   "Morte súbita precoce na família": [
+    {
+     "label": "AHA/ACC/HRS 2017",
+     "url": "https://www.ahajournals.org/journal/circ"
+    }
+   ]
+  }
+ },
+ "Endoscopia digestiva alta": {
+  "grupos": [
+   "CDH1 na família",
+   "PAF na família",
+   "Síndrome de Lynch na família"
+  ],
+  "referencias": [
+   {
+    "label": "ACG 2015",
+    "url": "https://gi.org/clinical-guidelines/"
+   },
+   {
+    "label": "IGCLC 2020",
+    "url": "https://doi.org/10.1016/S1470-2045(20)30219-9"
+   },
+   {
+    "label": "NCCN 2025",
+    "url": "https://www.nccn.org/guidelines/category_2"
+   }
+  ],
+  "por_grupo": {
+   "CDH1 na família": [
+    {
+     "label": "IGCLC 2020",
+     "url": "https://doi.org/10.1016/S1470-2045(20)30219-9"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ],
+   "PAF na família": [
+    {
+     "label": "ACG 2015",
+     "url": "https://gi.org/clinical-guidelines/"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ],
+   "Síndrome de Lynch na família": [
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ]
+  }
+ },
+ "Espirometria, com broncodilatador": {
+  "grupos": [
+   "Asma moderada ou grave",
+   "DPOC"
+  ],
+  "referencias": [
+   {
+    "label": "GINA 2025",
+    "url": "https://ginasthma.org/reports/"
+   },
+   {
+    "label": "GOLD 2026",
+    "url": "https://goldcopd.org/"
+   }
+  ],
+  "por_grupo": {
+   "Asma moderada ou grave": [
+    {
+     "label": "GINA 2025",
+     "url": "https://ginasthma.org/reports/"
+    }
+   ],
+   "DPOC": [
+    {
+     "label": "GOLD 2026",
+     "url": "https://goldcopd.org/"
+    }
+   ]
+  }
+ },
+ "Ferritina, soro": {
+  "grupos": [
+   "Cirurgia bariátrica prévia",
+   "Doença celíaca",
+   "Doença de Crohn",
+   "Hemocromatose na família",
+   "Insuficiência cardíaca",
+   "Retocolite ulcerativa"
+  ],
+  "referencias": [
+   {
+    "label": "ACG 2019",
+    "url": "https://gi.org/clinical-guidelines/"
+   },
+   {
+    "label": "ASMBS 2019",
+    "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+   },
+   {
+    "label": "BSG 2014 (doença celíaca)",
+    "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+   },
+   {
+    "label": "EASL 2022",
+    "url": "https://doi.org/10.1016/j.jhep.2022.03.033"
+   },
+   {
+    "label": "ECCO 2015 (anemia na DII)",
+    "url": "https://doi.org/10.1093/ecco-jcc/jju009"
+   },
+   {
+    "label": "ESC 2021 (insuficiência cardíaca)",
+    "url": "https://doi.org/10.1093/eurheartj/ehab368"
+   },
+   {
+    "label": "ESC 2023 (insuficiência cardíaca)",
+    "url": "https://doi.org/10.1093/eurheartj/ehad195"
+   }
+  ],
+  "por_grupo": {
+   "Cirurgia bariátrica prévia": [
+    {
+     "label": "ASMBS 2019",
+     "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+    }
+   ],
+   "Doença celíaca": [
+    {
+     "label": "BSG 2014 (doença celíaca)",
+     "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+    }
+   ],
+   "Doença de Crohn": [
+    {
+     "label": "ECCO 2015 (anemia na DII)",
+     "url": "https://doi.org/10.1093/ecco-jcc/jju009"
+    }
+   ],
+   "Hemocromatose na família": [
+    {
+     "label": "ACG 2019",
+     "url": "https://gi.org/clinical-guidelines/"
+    },
+    {
+     "label": "EASL 2022",
+     "url": "https://doi.org/10.1016/j.jhep.2022.03.033"
+    }
+   ],
+   "Insuficiência cardíaca": [
+    {
+     "label": "ESC 2021 (insuficiência cardíaca)",
+     "url": "https://doi.org/10.1093/eurheartj/ehab368"
+    },
+    {
+     "label": "ESC 2023 (insuficiência cardíaca)",
+     "url": "https://doi.org/10.1093/eurheartj/ehad195"
+    }
+   ],
+   "Retocolite ulcerativa": [
+    {
+     "label": "ECCO 2015 (anemia na DII)",
+     "url": "https://doi.org/10.1093/ecco-jcc/jju009"
+    }
+   ]
+  }
+ },
+ "Fosfatase alcalina, soro": {
+  "grupos": [
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico ≥ 3 meses",
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Fundoscopia (Exame de fundo de olho)": {
+  "grupos": [
+   "Diabéticos",
+   "DM pré-gestacional"
+  ],
+  "referencias": [
+   {
+    "label": "ADA 2026 (seção 12)",
+    "url": "https://doi.org/10.2337/dc26-S012"
+   },
+   {
+    "label": "ADA 2026 (seção 15)",
+    "url": "https://doi.org/10.2337/dc26-S015"
+   }
+  ],
+  "por_grupo": {
+   "Diabéticos": [
+    {
+     "label": "ADA 2026 (seção 12)",
+     "url": "https://doi.org/10.2337/dc26-S012"
+    }
+   ],
+   "DM pré-gestacional": [
+    {
+     "label": "ADA 2026 (seção 15)",
+     "url": "https://doi.org/10.2337/dc26-S015"
+    }
+   ]
+  }
+ },
+ "Gasometria arterial, sangue arterial": {
+  "grupos": [
+   "DPOC"
+  ],
+  "referencias": [
+   {
+    "label": "GOLD 2026",
+    "url": "https://goldcopd.org/"
+   }
+  ],
+  "por_grupo": {
+   "DPOC": [
+    {
+     "label": "GOLD 2026",
+     "url": "https://goldcopd.org/"
+    }
+   ]
+  }
+ },
+ "Genotipagem do gene DPYD (deficiência de DPD)": {
+  "grupos": [
+   "Fluoropirimidina"
+  ],
+  "referencias": [
+   {
+    "label": "EMA 2020 (teste de DPD)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/referrals/fluorouracil-fluorouracil-related-substances-capecitabine-tegafur-flucytosine-containing-medicinal-products"
+   }
+  ],
+  "por_grupo": {
+   "Fluoropirimidina": [
+    {
+     "label": "EMA 2020 (teste de DPD)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/referrals/fluorouracil-fluorouracil-related-substances-capecitabine-tegafur-flucytosine-containing-medicinal-products"
+    }
+   ]
+  }
+ },
+ "Genotipagem do HIV (Teste de Resistência)": {
+  "grupos": [
+   "HIV+ gestante"
+  ],
+  "referencias": [
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "HIV+ gestante": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Glicemia de jejum, soro": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Glicose, soro": {
+  "grupos": [
+   "Adultos com HAS",
+   "Bloqueio androgênico",
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Diabetes gestacional prévio",
+   "Diabéticos",
+   "Em uso de antipsicótico de 2ª geração",
+   "Em uso de sirolimo ou everolimo",
+   "HIV+",
+   "Inibidor de checkpoint",
+   "Lúpus eritematoso sistêmico"
+  ],
+  "referencias": [
+   {
+    "label": "ADA 2026",
+    "url": "https://doi.org/10.2337/dc26-S002"
+   },
+   {
+    "label": "ADA 2026 (seção 6)",
+    "url": "https://doi.org/10.2337/dc26-S006"
+   },
+   {
+    "label": "ADA/APA 2004",
+    "url": "https://doi.org/10.2337/diacare.27.2.596"
+   },
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "AHA/ACS/AUA 2010 (bloqueio androgênico)",
+    "url": "https://doi.org/10.1161/CIRCULATIONAHA.109.192695"
+   },
+   {
+    "label": "ASCO 2021 (eventos imunomediados)",
+    "url": "https://doi.org/10.1200/JCO.21.01440"
+   },
+   {
+    "label": "CGH 2025 (Feuerstein)",
+    "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "EMA (bula do sirolimo)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/rapamune"
+   },
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   },
+   {
+    "label": "EULAR 2022 (risco CV no LES e outras DRM)",
+    "url": "https://doi.org/10.1136/annrheumdis-2021-221733"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "Bloqueio androgênico": [
+    {
+     "label": "AHA/ACS/AUA 2010 (bloqueio androgênico)",
+     "url": "https://doi.org/10.1161/CIRCULATIONAHA.109.192695"
+    }
+   ],
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico": [
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Diabetes gestacional prévio": [
+    {
+     "label": "ADA 2026",
+     "url": "https://doi.org/10.2337/dc26-S002"
+    }
+   ],
+   "Diabéticos": [
+    {
+     "label": "ADA 2026 (seção 6)",
+     "url": "https://doi.org/10.2337/dc26-S006"
+    }
+   ],
+   "Em uso de antipsicótico de 2ª geração": [
+    {
+     "label": "ADA/APA 2004",
+     "url": "https://doi.org/10.2337/diacare.27.2.596"
+    }
+   ],
+   "Em uso de sirolimo ou everolimo": [
+    {
+     "label": "EMA (bula do sirolimo)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/rapamune"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ],
+   "Inibidor de checkpoint": [
+    {
+     "label": "ASCO 2021 (eventos imunomediados)",
+     "url": "https://doi.org/10.1200/JCO.21.01440"
+    }
+   ],
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    },
+    {
+     "label": "EULAR 2022 (risco CV no LES e outras DRM)",
+     "url": "https://doi.org/10.1136/annrheumdis-2021-221733"
+    }
+   ]
+  }
+ },
+ "HBsAg, anti-HBc total e anti-HBs": {
+  "grupos": [
+   "Adultos ≥18 anos sem vacinação documentada",
+   "Câncer em tratamento",
+   "Em uso de leflunomida",
+   "Em uso de metotrexato",
+   "Hepatite C",
+   "HIV+",
+   "Imunobiológico",
+   "Lúpus eritematoso sistêmico",
+   "PrEP"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD 2018",
+    "url": "https://doi.org/10.1097/HEP.0000000000000323"
+   },
+   {
+    "label": "AASLD/IDSA (hepatite C)",
+    "url": "https://www.hcvguidelines.org/"
+   },
+   {
+    "label": "ACR 2022",
+    "url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines"
+   },
+   {
+    "label": "ASCO 2020 (hepatite B no câncer)",
+    "url": "https://doi.org/10.1200/JCO.20.01757"
+   },
+   {
+    "label": "BSR 2017",
+    "url": "https://doi.org/10.1093/rheumatology/kew479"
+   },
+   {
+    "label": "CDC 2023 (hepatite B)",
+    "url": "https://doi.org/10.15585/mmwr.rr7201a1"
+   },
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   },
+   {
+    "label": "EULAR 2022 (infecções em DRAI)",
+    "url": "https://doi.org/10.1136/ard-2022-223335"
+   },
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   },
+   {
+    "label": "MS 2024 (PCDT PrEP)",
+    "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+   },
+   {
+    "label": "PCDT-IST MS 2022",
+    "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+   },
+   {
+    "label": "USPSTF 2020",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-in-adults-screening"
+   }
+  ],
+  "por_grupo": {
+   "Adultos ≥18 anos sem vacinação documentada": [
+    {
+     "label": "AASLD 2018",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    },
+    {
+     "label": "AASLD/IDSA (hepatite C)",
+     "url": "https://www.hcvguidelines.org/"
+    },
+    {
+     "label": "ACR 2022",
+     "url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines"
+    },
+    {
+     "label": "ASCO 2020 (hepatite B no câncer)",
+     "url": "https://doi.org/10.1200/JCO.20.01757"
+    },
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    },
+    {
+     "label": "CDC 2023 (hepatite B)",
+     "url": "https://doi.org/10.15585/mmwr.rr7201a1"
+    },
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    },
+    {
+     "label": "EULAR 2022 (infecções em DRAI)",
+     "url": "https://doi.org/10.1136/ard-2022-223335"
+    },
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    },
+    {
+     "label": "MS 2024 (PCDT PrEP)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-in-adults-screening"
+    }
+   ],
+   "Câncer em tratamento": [
+    {
+     "label": "ASCO 2020 (hepatite B no câncer)",
+     "url": "https://doi.org/10.1200/JCO.20.01757"
+    },
+    {
+     "label": "CDC 2023 (hepatite B)",
+     "url": "https://doi.org/10.15585/mmwr.rr7201a1"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-in-adults-screening"
+    }
+   ],
+   "Em uso de leflunomida": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    },
+    {
+     "label": "CDC 2023 (hepatite B)",
+     "url": "https://doi.org/10.15585/mmwr.rr7201a1"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-in-adults-screening"
+    }
+   ],
+   "Em uso de metotrexato": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    },
+    {
+     "label": "CDC 2023 (hepatite B)",
+     "url": "https://doi.org/10.15585/mmwr.rr7201a1"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-in-adults-screening"
+    }
+   ],
+   "Hepatite C": [
+    {
+     "label": "AASLD/IDSA (hepatite C)",
+     "url": "https://www.hcvguidelines.org/"
+    },
+    {
+     "label": "CDC 2023 (hepatite B)",
+     "url": "https://doi.org/10.15585/mmwr.rr7201a1"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-in-adults-screening"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "CDC 2023 (hepatite B)",
+     "url": "https://doi.org/10.15585/mmwr.rr7201a1"
+    },
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-in-adults-screening"
+    }
+   ],
+   "Imunobiológico": [
+    {
+     "label": "AASLD 2018",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    },
+    {
+     "label": "ACR 2022",
+     "url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines"
+    },
+    {
+     "label": "CDC 2023 (hepatite B)",
+     "url": "https://doi.org/10.15585/mmwr.rr7201a1"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-in-adults-screening"
+    }
+   ],
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "CDC 2023 (hepatite B)",
+     "url": "https://doi.org/10.15585/mmwr.rr7201a1"
+    },
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    },
+    {
+     "label": "EULAR 2022 (infecções em DRAI)",
+     "url": "https://doi.org/10.1136/ard-2022-223335"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-in-adults-screening"
+    }
+   ],
+   "PrEP": [
+    {
+     "label": "CDC 2023 (hepatite B)",
+     "url": "https://doi.org/10.15585/mmwr.rr7201a1"
+    },
+    {
+     "label": "MS 2024 (PCDT PrEP)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+    },
+    {
+     "label": "PCDT-IST MS 2022",
+     "url": "https://www.gov.br/aids/pt-br/central-de-conteudo/pcdts"
+    },
+    {
+     "label": "USPSTF 2020",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-in-adults-screening"
+    }
+   ]
+  }
+ },
+ "HBsAg, soro": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "PCDT TV MS 2022",
+    "url": "https://portaldeboaspraticas.iff.fiocruz.br/biblioteca/pcdt-2022-transmissao-vertical-do-hiv-sifilis-e-hepatites-virais"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "PCDT TV MS 2022",
+     "url": "https://portaldeboaspraticas.iff.fiocruz.br/biblioteca/pcdt-2022-transmissao-vertical-do-hiv-sifilis-e-hepatites-virais"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Hemoglobina glicada (HbA1c), soro": {
+  "grupos": [
+   "Adultos 35-70 anos",
+   "Adultos com HAS",
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Diabetes gestacional prévio",
+   "Diabéticos",
+   "DM pré-gestacional",
+   "Pré-diabetes",
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "ADA 2026",
+    "url": "https://doi.org/10.2337/dc26-S002"
+   },
+   {
+    "label": "ADA 2026 (seção 15)",
+    "url": "https://doi.org/10.2337/dc26-S015"
+   },
+   {
+    "label": "ADA 2026 (seção 6)",
+    "url": "https://doi.org/10.2337/dc26-S006"
+   },
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "CGH 2025 (Feuerstein)",
+    "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   },
+   {
+    "label": "USPSTF 2021",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes"
+   }
+  ],
+  "por_grupo": {
+   "Adultos 35-70 anos": [
+    {
+     "label": "ADA 2026",
+     "url": "https://doi.org/10.2337/dc26-S002"
+    },
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    },
+    {
+     "label": "USPSTF 2021",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes"
+    }
+   ],
+   "Adultos com HAS": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "ADA 2026",
+     "url": "https://doi.org/10.2337/dc26-S002"
+    },
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    },
+    {
+     "label": "USPSTF 2021",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes"
+    }
+   ],
+   "Corticoide sistêmico": [
+    {
+     "label": "ADA 2026",
+     "url": "https://doi.org/10.2337/dc26-S002"
+    },
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    },
+    {
+     "label": "USPSTF 2021",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "ADA 2026",
+     "url": "https://doi.org/10.2337/dc26-S002"
+    },
+    {
+     "label": "CGH 2025 (Feuerstein)",
+     "url": "https://doi.org/10.1016/j.cgh.2025.05.019"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    },
+    {
+     "label": "USPSTF 2021",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes"
+    }
+   ],
+   "Diabetes gestacional prévio": [
+    {
+     "label": "ADA 2026",
+     "url": "https://doi.org/10.2337/dc26-S002"
+    },
+    {
+     "label": "USPSTF 2021",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes"
+    }
+   ],
+   "Diabéticos": [
+    {
+     "label": "ADA 2026 (seção 6)",
+     "url": "https://doi.org/10.2337/dc26-S006"
+    }
+   ],
+   "DM pré-gestacional": [
+    {
+     "label": "ADA 2026 (seção 15)",
+     "url": "https://doi.org/10.2337/dc26-S015"
+    }
+   ],
+   "Pré-diabetes": [
+    {
+     "label": "ADA 2026",
+     "url": "https://doi.org/10.2337/dc26-S002"
+    },
+    {
+     "label": "USPSTF 2021",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes"
+    }
+   ],
+   "Pré-natal": [
+    {
+     "label": "ADA 2026 (seção 15)",
+     "url": "https://doi.org/10.2337/dc26-S015"
+    }
+   ]
+  }
+ },
+ "Hemograma completo": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Hemograma completo com plaquetas": {
+  "grupos": [
+   "Adultos com HAS",
+   "Cirurgia bariátrica prévia",
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Diabetes tipo 2 ou pré-diabetes",
+   "Diabéticos",
+   "Doença celíaca",
+   "Doença de Crohn",
+   "DPOC",
+   "Em uso de anticoagulante oral direto",
+   "Em uso de azatioprina",
+   "Em uso de clozapina",
+   "Em uso de fingolimode",
+   "Em uso de inibidor de JAK",
+   "Em uso de leflunomida",
+   "Em uso de metotrexato",
+   "Em uso de micofenolato",
+   "Em uso de sulfassalazina",
+   "Em uso de testosterona",
+   "Em uso de tocilizumabe",
+   "Fibrilação atrial",
+   "Hepatite C",
+   "Hipertireoidismo",
+   "HIV+",
+   "Insuficiência cardíaca",
+   "Lúpus eritematoso sistêmico",
+   "MASLD",
+   "Obesidade com fator de risco metabólico",
+   "Retocolite ulcerativa"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD 2023",
+    "url": "https://doi.org/10.1097/HEP.0000000000000323"
+   },
+   {
+    "label": "AASLD/IDSA (hepatite C)",
+    "url": "https://www.hcvguidelines.org/"
+   },
+   {
+    "label": "ACC/AHA 2017 (hipertensão)",
+    "url": "https://doi.org/10.1161/HYP.0000000000000065"
+   },
+   {
+    "label": "ADA 2026 (seção 4)",
+    "url": "https://doi.org/10.2337/dc26-S004"
+   },
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "ANVISA (bula do Leponex)",
+    "url": "https://consultas.anvisa.gov.br/#/bulario/q/?nomeProduto=Leponex"
+   },
+   {
+    "label": "ASMBS 2019",
+    "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+   },
+   {
+    "label": "ATA 2016",
+    "url": "https://doi.org/10.1089/thy.2016.0229"
+   },
+   {
+    "label": "BSG 2014 (doença celíaca)",
+    "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+   },
+   {
+    "label": "BSR 2017",
+    "url": "https://doi.org/10.1093/rheumatology/kew479"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "ECCO 2015 (anemia na DII)",
+    "url": "https://doi.org/10.1093/ecco-jcc/jju009"
+   },
+   {
+    "label": "EHRA 2021",
+    "url": "https://doi.org/10.1093/europace/euab065"
+   },
+   {
+    "label": "EMA (bula do fingolimode)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+   },
+   {
+    "label": "EMA (bula do micofenolato)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/cellcept"
+   },
+   {
+    "label": "ESC 2021 (insuficiência cardíaca)",
+    "url": "https://doi.org/10.1093/eurheartj/ehab368"
+   },
+   {
+    "label": "ESC 2023 (insuficiência cardíaca)",
+    "url": "https://doi.org/10.1093/eurheartj/ehad195"
+   },
+   {
+    "label": "ESC 2024 (fibrilação atrial)",
+    "url": "https://doi.org/10.1093/eurheartj/ehae176"
+   },
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   },
+   {
+    "label": "Endocrine Society 2018 (hipogonadismo)",
+    "url": "https://doi.org/10.1210/jc.2018-00229"
+   },
+   {
+    "label": "FDA (bula do tocilizumabe)",
+    "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/125276s114lbl.pdf"
+   },
+   {
+    "label": "FDA (bula do tofacitinibe)",
+    "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/203214s038,208246s025,213082s010lbl.pdf"
+   },
+   {
+    "label": "FDA 2025 (clozapina)",
+    "url": "https://www.fda.gov/drugs/drug-safety-and-availability/fda-removes-risk-evaluation-and-mitigation-strategy-rems-program-antipsychotic-drug-clozapine"
+   },
+   {
+    "label": "GOLD 2026",
+    "url": "https://goldcopd.org/"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS": [
+    {
+     "label": "ACC/AHA 2017 (hipertensão)",
+     "url": "https://doi.org/10.1161/HYP.0000000000000065"
+    },
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    }
+   ],
+   "Cirurgia bariátrica prévia": [
+    {
+     "label": "ASMBS 2019",
+     "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+    }
+   ],
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Diabetes tipo 2 ou pré-diabetes": [
+    {
+     "label": "AASLD 2023",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    },
+    {
+     "label": "ADA 2026 (seção 4)",
+     "url": "https://doi.org/10.2337/dc26-S004"
+    }
+   ],
+   "Diabéticos": [
+    {
+     "label": "AASLD 2023",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    },
+    {
+     "label": "ADA 2026 (seção 4)",
+     "url": "https://doi.org/10.2337/dc26-S004"
+    }
+   ],
+   "Doença celíaca": [
+    {
+     "label": "BSG 2014 (doença celíaca)",
+     "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+    }
+   ],
+   "Doença de Crohn": [
+    {
+     "label": "ECCO 2015 (anemia na DII)",
+     "url": "https://doi.org/10.1093/ecco-jcc/jju009"
+    }
+   ],
+   "DPOC": [
+    {
+     "label": "GOLD 2026",
+     "url": "https://goldcopd.org/"
+    }
+   ],
+   "Em uso de anticoagulante oral direto": [
+    {
+     "label": "EHRA 2021",
+     "url": "https://doi.org/10.1093/europace/euab065"
+    }
+   ],
+   "Em uso de azatioprina": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de clozapina": [
+    {
+     "label": "ANVISA (bula do Leponex)",
+     "url": "https://consultas.anvisa.gov.br/#/bulario/q/?nomeProduto=Leponex"
+    },
+    {
+     "label": "FDA 2025 (clozapina)",
+     "url": "https://www.fda.gov/drugs/drug-safety-and-availability/fda-removes-risk-evaluation-and-mitigation-strategy-rems-program-antipsychotic-drug-clozapine"
+    }
+   ],
+   "Em uso de fingolimode": [
+    {
+     "label": "EMA (bula do fingolimode)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+    }
+   ],
+   "Em uso de inibidor de JAK": [
+    {
+     "label": "FDA (bula do tofacitinibe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2025/203214s038,208246s025,213082s010lbl.pdf"
+    }
+   ],
+   "Em uso de leflunomida": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de metotrexato": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de micofenolato": [
+    {
+     "label": "EMA (bula do micofenolato)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/cellcept"
+    }
+   ],
+   "Em uso de sulfassalazina": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "Em uso de testosterona": [
+    {
+     "label": "Endocrine Society 2018 (hipogonadismo)",
+     "url": "https://doi.org/10.1210/jc.2018-00229"
+    }
+   ],
+   "Em uso de tocilizumabe": [
+    {
+     "label": "FDA (bula do tocilizumabe)",
+     "url": "https://www.accessdata.fda.gov/drugsatfda_docs/label/2017/125276s114lbl.pdf"
+    }
+   ],
+   "Fibrilação atrial": [
+    {
+     "label": "ESC 2024 (fibrilação atrial)",
+     "url": "https://doi.org/10.1093/eurheartj/ehae176"
+    }
+   ],
+   "Hepatite C": [
+    {
+     "label": "AASLD/IDSA (hepatite C)",
+     "url": "https://www.hcvguidelines.org/"
+    }
+   ],
+   "Hipertireoidismo": [
+    {
+     "label": "ATA 2016",
+     "url": "https://doi.org/10.1089/thy.2016.0229"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ],
+   "Insuficiência cardíaca": [
+    {
+     "label": "ESC 2021 (insuficiência cardíaca)",
+     "url": "https://doi.org/10.1093/eurheartj/ehab368"
+    },
+    {
+     "label": "ESC 2023 (insuficiência cardíaca)",
+     "url": "https://doi.org/10.1093/eurheartj/ehad195"
+    }
+   ],
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ],
+   "MASLD": [
+    {
+     "label": "AASLD 2023",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    },
+    {
+     "label": "ADA 2026 (seção 4)",
+     "url": "https://doi.org/10.2337/dc26-S004"
+    }
+   ],
+   "Obesidade com fator de risco metabólico": [
+    {
+     "label": "AASLD 2023",
+     "url": "https://doi.org/10.1097/HEP.0000000000000323"
+    }
+   ],
+   "Retocolite ulcerativa": [
+    {
+     "label": "ECCO 2015 (anemia na DII)",
+     "url": "https://doi.org/10.1093/ecco-jcc/jju009"
+    }
+   ]
+  }
+ },
+ "Hepatite B - HBeAC (anti HBE)": {
+  "grupos": [
+   "Hepatite B crônica"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD 2018 (hepatite B)",
+    "url": "https://doi.org/10.1002/hep.29800"
+   }
+  ],
+  "por_grupo": {
+   "Hepatite B crônica": [
+    {
+     "label": "AASLD 2018 (hepatite B)",
+     "url": "https://doi.org/10.1002/hep.29800"
+    }
+   ]
+  }
+ },
+ "Hepatite B - HBeAG (antígeno \"E\")": {
+  "grupos": [
+   "Hepatite B crônica"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD 2018 (hepatite B)",
+    "url": "https://doi.org/10.1002/hep.29800"
+   }
+  ],
+  "por_grupo": {
+   "Hepatite B crônica": [
+    {
+     "label": "AASLD 2018 (hepatite B)",
+     "url": "https://doi.org/10.1002/hep.29800"
+    }
+   ]
+  }
+ },
+ "Hepatite delta, anticorpo IgG": {
+  "grupos": [
+   "Hepatite B crônica"
+  ],
+  "referencias": [
+   {
+    "label": "OMS 2024 (hepatite B)",
+    "url": "https://www.who.int/publications/i/item/9789240090903"
+   }
+  ],
+  "por_grupo": {
+   "Hepatite B crônica": [
+    {
+     "label": "OMS 2024 (hepatite B)",
+     "url": "https://www.who.int/publications/i/item/9789240090903"
+    }
+   ]
+  }
+ },
+ "HIV 1/2 (anticorpos e antígeno p24), soro": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "PCDT TV MS 2022",
+    "url": "https://portaldeboaspraticas.iff.fiocruz.br/biblioteca/pcdt-2022-transmissao-vertical-do-hiv-sifilis-e-hepatites-virais"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "PCDT TV MS 2022",
+     "url": "https://portaldeboaspraticas.iff.fiocruz.br/biblioteca/pcdt-2022-transmissao-vertical-do-hiv-sifilis-e-hepatites-virais"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Hormônio Tireoestimulante (TSH), soro": {
+  "grupos": [
+   "Adultos com HAS",
+   "Doença celíaca",
+   "Em uso de amiodarona",
+   "Em uso de lítio",
+   "Fibrilação atrial",
+   "Hipertireoidismo / antitireoidiano",
+   "Hipotireoidismo / levotiroxina",
+   "Inibidor de checkpoint",
+   "Insuficiência cardíaca",
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "ACC/AHA 2017 (hipertensão)",
+    "url": "https://doi.org/10.1161/HYP.0000000000000065"
+   },
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "ASCO 2021 (eventos imunomediados)",
+    "url": "https://doi.org/10.1200/JCO.21.01440"
+   },
+   {
+    "label": "ATA 2014",
+    "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+   },
+   {
+    "label": "ATA 2016",
+    "url": "https://doi.org/10.1089/thy.2016.0229"
+   },
+   {
+    "label": "BSG 2014 (doença celíaca)",
+    "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+   },
+   {
+    "label": "ESC 2021 (insuficiência cardíaca)",
+    "url": "https://doi.org/10.1093/eurheartj/ehab368"
+   },
+   {
+    "label": "ESC 2024 (fibrilação atrial)",
+    "url": "https://doi.org/10.1093/eurheartj/ehae176"
+   },
+   {
+    "label": "FEBRASGO/SBEM 2022 (tireoide na gestação)",
+    "url": "https://www.febrasgo.org.br/images/pec/posicionamentos-febrasgo/FPS-N10-Outubro-2022-portugues.pdf"
+   },
+   {
+    "label": "HRS 2007 (Goldschlager)",
+    "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+   },
+   {
+    "label": "NICE CG185 (2023)",
+    "url": "https://www.nice.org.uk/guidance/cg185"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS": [
+    {
+     "label": "ACC/AHA 2017 (hipertensão)",
+     "url": "https://doi.org/10.1161/HYP.0000000000000065"
+    },
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    }
+   ],
+   "Doença celíaca": [
+    {
+     "label": "BSG 2014 (doença celíaca)",
+     "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+    }
+   ],
+   "Em uso de amiodarona": [
+    {
+     "label": "HRS 2007 (Goldschlager)",
+     "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+    }
+   ],
+   "Em uso de lítio": [
+    {
+     "label": "NICE CG185 (2023)",
+     "url": "https://www.nice.org.uk/guidance/cg185"
+    }
+   ],
+   "Fibrilação atrial": [
+    {
+     "label": "ESC 2024 (fibrilação atrial)",
+     "url": "https://doi.org/10.1093/eurheartj/ehae176"
+    }
+   ],
+   "Hipertireoidismo / antitireoidiano": [
+    {
+     "label": "ATA 2016",
+     "url": "https://doi.org/10.1089/thy.2016.0229"
+    }
+   ],
+   "Hipotireoidismo / levotiroxina": [
+    {
+     "label": "ATA 2014",
+     "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+    }
+   ],
+   "Inibidor de checkpoint": [
+    {
+     "label": "ASCO 2021 (eventos imunomediados)",
+     "url": "https://doi.org/10.1200/JCO.21.01440"
+    }
+   ],
+   "Insuficiência cardíaca": [
+    {
+     "label": "ESC 2021 (insuficiência cardíaca)",
+     "url": "https://doi.org/10.1093/eurheartj/ehab368"
+    }
+   ],
+   "Pré-natal": [
+    {
+     "label": "FEBRASGO/SBEM 2022 (tireoide na gestação)",
+     "url": "https://www.febrasgo.org.br/images/pec/posicionamentos-febrasgo/FPS-N10-Outubro-2022-portugues.pdf"
+    }
+   ]
+  }
+ },
+ "Imunoglobulina A (IgA), soro": {
+  "grupos": [
+   "Doença celíaca na família"
+  ],
+  "referencias": [
+   {
+    "label": "ACG 2023",
+    "url": "https://gi.org/clinical-guidelines/"
+   }
+  ],
+  "por_grupo": {
+   "Doença celíaca na família": [
+    {
+     "label": "ACG 2023",
+     "url": "https://gi.org/clinical-guidelines/"
+    }
+   ]
+  }
+ },
+ "Imunoglobulina G (IgG), soro": {
+  "grupos": [
+   "Em uso de ocrelizumabe",
+   "Em uso de rituximabe"
+  ],
+  "referencias": [
+   {
+    "label": "Buch 2011 (consenso do rituximabe)",
+    "url": "https://doi.org/10.1136/ard.2010.144998"
+   },
+   {
+    "label": "FDA (bula do ocrelizumabe)",
+    "url": "https://www.gene.com/download/pdf/ocrevus_prescribing.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Em uso de ocrelizumabe": [
+    {
+     "label": "FDA (bula do ocrelizumabe)",
+     "url": "https://www.gene.com/download/pdf/ocrevus_prescribing.pdf"
+    }
+   ],
+   "Em uso de rituximabe": [
+    {
+     "label": "Buch 2011 (consenso do rituximabe)",
+     "url": "https://doi.org/10.1136/ard.2010.144998"
+    }
+   ]
+  }
+ },
+ "Lipoproteína(a) - Lp(a), soro": {
+  "grupos": [
+   "Adultos 20-75 anos"
+  ],
+  "referencias": [
+   {
+    "label": "ACC/AHA 2026",
+    "url": "https://doi.org/10.1161/CIR.0000000000001423"
+   }
+  ],
+  "por_grupo": {
+   "Adultos 20-75 anos": [
+    {
+     "label": "ACC/AHA 2026",
+     "url": "https://doi.org/10.1161/CIR.0000000000001423"
+    }
+   ]
+  }
+ },
+ "Lítio, soro": {
+  "grupos": [
+   "Em uso de lítio"
+  ],
+  "referencias": [
+   {
+    "label": "NICE CG185 (2023)",
+    "url": "https://www.nice.org.uk/guidance/cg185"
+   }
+  ],
+  "por_grupo": {
+   "Em uso de lítio": [
+    {
+     "label": "NICE CG185 (2023)",
+     "url": "https://www.nice.org.uk/guidance/cg185"
+    }
+   ]
+  }
+ },
+ "Magnésio, soro": {
+  "grupos": [
+   "Em uso de ciclosporina ou tacrolimo"
+  ],
+  "referencias": [
+   {
+    "label": "KDIGO 2009 (transplante)",
+    "url": "https://kdigo.org/guidelines/transplant-recipient/"
+   }
+  ],
+  "por_grupo": {
+   "Em uso de ciclosporina ou tacrolimo": [
+    {
+     "label": "KDIGO 2009 (transplante)",
+     "url": "https://kdigo.org/guidelines/transplant-recipient/"
+    }
+   ]
+  }
+ },
+ "Mamografia Digital - Bilateral": {
+  "grupos": [
+   "BRCA1/2 na família",
+   "Câncer de mama na família",
+   "Mulheres 40-74 anos",
+   "Síndrome de Cowden na família"
+  ],
+  "referencias": [
+   {
+    "label": "ACR 2023",
+    "url": "https://doi.org/10.1016/j.jacr.2023.04.002"
+   },
+   {
+    "label": "NCCN 2025",
+    "url": "https://www.nccn.org/guidelines/category_2"
+   },
+   {
+    "label": "USPSTF 2024",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening"
+   }
+  ],
+  "por_grupo": {
+   "BRCA1/2 na família": [
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ],
+   "Câncer de mama na família": [
+    {
+     "label": "ACR 2023",
+     "url": "https://doi.org/10.1016/j.jacr.2023.04.002"
+    }
+   ],
+   "Mulheres 40-74 anos": [
+    {
+     "label": "USPSTF 2024",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening"
+    }
+   ],
+   "Síndrome de Cowden na família": [
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ]
+  }
+ },
+ "MAPA - Monitorização Ambulatorial da Pressão Arterial (24h)": {
+  "grupos": [
+   "Adultos com HAS (avaliar controle, avental branco ou hipertensão mascarada)"
+  ],
+  "referencias": [
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS (avaliar controle, avental branco ou hipertensão mascarada)": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ]
+  }
+ },
+ "Metanefrinas, plasma ou urina de 24h": {
+  "grupos": [
+   "Adultos com HAS resistente",
+   "NEM2 na família"
+  ],
+  "referencias": [
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "ATA 2015",
+    "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS resistente": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "NEM2 na família": [
+    {
+     "label": "ATA 2015",
+     "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+    }
+   ]
+  }
+ },
+ "Parasitológico de fezes": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    }
+   ]
+  }
+ },
+ "Paratormônio (PTH), soro": {
+  "grupos": [
+   "Cirurgia bariátrica prévia",
+   "NEM1 na família"
+  ],
+  "referencias": [
+   {
+    "label": "ASMBS 2019",
+    "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+   },
+   {
+    "label": "Endocrine Society 2012",
+    "url": "https://doi.org/10.1210/jc.2012-1230"
+   }
+  ],
+  "por_grupo": {
+   "Cirurgia bariátrica prévia": [
+    {
+     "label": "ASMBS 2019",
+     "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+    }
+   ],
+   "NEM1 na família": [
+    {
+     "label": "Endocrine Society 2012",
+     "url": "https://doi.org/10.1210/jc.2012-1230"
+    }
+   ]
+  }
+ },
+ "Peptídeo natriurético BNP/PROBNP": {
+  "grupos": [
+   "Antraciclina ou anti-HER2",
+   "Esclerose sistêmica",
+   "Inibidor de checkpoint",
+   "Insuficiência cardíaca"
+  ],
+  "referencias": [
+   {
+    "label": "ESC 2021 (insuficiência cardíaca)",
+    "url": "https://doi.org/10.1093/eurheartj/ehab368"
+   },
+   {
+    "label": "ESC 2022 (cardio-oncologia)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac244"
+   },
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
+   }
+  ],
+  "por_grupo": {
+   "Antraciclina ou anti-HER2": [
+    {
+     "label": "ESC 2022 (cardio-oncologia)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac244"
+    }
+   ],
+   "Esclerose sistêmica": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
+    }
+   ],
+   "Inibidor de checkpoint": [
+    {
+     "label": "ESC 2022 (cardio-oncologia)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac244"
+    }
+   ],
+   "Insuficiência cardíaca": [
+    {
+     "label": "ESC 2021 (insuficiência cardíaca)",
+     "url": "https://doi.org/10.1093/eurheartj/ehab368"
+    }
+   ]
+  }
+ },
+ "Pesquisa do Papilomavírus Humano (HPV), por técnica molecular": {
+  "grupos": [
+   "Colposcopia sem doença após HPV detectado",
+   "HPV oncogênico não 16-18 com citologia reflexa negativa",
+   "Mulheres 25-64 anos (ACOG: até 65)",
+   "Mulheres com HIV ou imunossupressão"
+  ],
+  "referencias": [
+   {
+    "label": "ACOG 2026",
+    "url": "https://doi.org/10.1097/AOG.0000000000006257"
+   },
+   {
+    "label": "MS 2025 (DNA-HPV)",
+    "url": "https://www.gov.br/conitec/pt-br/midias/relatorios/portaria/2025/portaria-conjunta-saes-sectics-no-13-de-29-de-julho-de-2025"
+   },
+   {
+    "label": "SBOC 2026",
+    "url": "https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-Colo-do-%E2%94%9C%E2%95%91tero-v5-VERS%E2%94%9CaO-FINAL.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Colposcopia sem doença após HPV detectado": [
+    {
+     "label": "MS 2025 (DNA-HPV)",
+     "url": "https://www.gov.br/conitec/pt-br/midias/relatorios/portaria/2025/portaria-conjunta-saes-sectics-no-13-de-29-de-julho-de-2025"
+    },
+    {
+     "label": "SBOC 2026",
+     "url": "https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-Colo-do-%E2%94%9C%E2%95%91tero-v5-VERS%E2%94%9CaO-FINAL.pdf"
+    }
+   ],
+   "HPV oncogênico não 16-18 com citologia reflexa negativa": [
+    {
+     "label": "MS 2025 (DNA-HPV)",
+     "url": "https://www.gov.br/conitec/pt-br/midias/relatorios/portaria/2025/portaria-conjunta-saes-sectics-no-13-de-29-de-julho-de-2025"
+    },
+    {
+     "label": "SBOC 2026",
+     "url": "https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-Colo-do-%E2%94%9C%E2%95%91tero-v5-VERS%E2%94%9CaO-FINAL.pdf"
+    }
+   ],
+   "Mulheres 25-64 anos (ACOG: até 65)": [
+    {
+     "label": "ACOG 2026",
+     "url": "https://doi.org/10.1097/AOG.0000000000006257"
+    },
+    {
+     "label": "MS 2025 (DNA-HPV)",
+     "url": "https://www.gov.br/conitec/pt-br/midias/relatorios/portaria/2025/portaria-conjunta-saes-sectics-no-13-de-29-de-julho-de-2025"
+    },
+    {
+     "label": "SBOC 2026",
+     "url": "https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-Colo-do-%E2%94%9C%E2%95%91tero-v5-VERS%E2%94%9CaO-FINAL.pdf"
+    }
+   ],
+   "Mulheres com HIV ou imunossupressão": [
+    {
+     "label": "MS 2025 (DNA-HPV)",
+     "url": "https://www.gov.br/conitec/pt-br/midias/relatorios/portaria/2025/portaria-conjunta-saes-sectics-no-13-de-29-de-julho-de-2025"
+    },
+    {
+     "label": "SBOC 2026",
+     "url": "https://sboc.org.br/wp-content/uploads/2026/04/Diretrizes-SBOC-2026-Colo-do-%E2%94%9C%E2%95%91tero-v5-VERS%E2%94%9CaO-FINAL.pdf"
+    }
+   ]
+  }
+ },
+ "Polissonografia": {
+  "grupos": [
+   "Adultos com HAS resistente"
+  ],
+  "referencias": [
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS resistente": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ]
+  }
+ },
+ "Potássio, soro": {
+  "grupos": [
+   "Adultos com HAS",
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Em uso de ciclosporina ou tacrolimo",
+   "Em uso de Diurético de alça",
+   "Em uso de Diurético tiazídico",
+   "Em uso de Espironolactona / eplerenona",
+   "Em uso de IECA ou BRA",
+   "Em uso de sacubitril/valsartana",
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "AHA/ACC/HFSA 2022",
+    "url": "https://doi.org/10.1161/CIR.0000000000001063"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "ESC 2021 (insuficiência cardíaca)",
+    "url": "https://doi.org/10.1093/eurheartj/ehab368"
+   },
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   },
+   {
+    "label": "KDIGO 2009 (transplante)",
+    "url": "https://kdigo.org/guidelines/transplant-recipient/"
+   },
+   {
+    "label": "KDIGO 2024",
+    "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Em uso de ciclosporina ou tacrolimo": [
+    {
+     "label": "KDIGO 2009 (transplante)",
+     "url": "https://kdigo.org/guidelines/transplant-recipient/"
+    }
+   ],
+   "Em uso de Diurético de alça": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    }
+   ],
+   "Em uso de Diurético tiazídico": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "Em uso de Espironolactona / eplerenona": [
+    {
+     "label": "AHA/ACC/HFSA 2022",
+     "url": "https://doi.org/10.1161/CIR.0000000000001063"
+    },
+    {
+     "label": "ESC 2021 (insuficiência cardíaca)",
+     "url": "https://doi.org/10.1093/eurheartj/ehab368"
+    }
+   ],
+   "Em uso de IECA ou BRA": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "Em uso de sacubitril/valsartana": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    }
+   ]
+  }
+ },
+ "Prolactina, soro": {
+  "grupos": [
+   "NEM1 na família"
+  ],
+  "referencias": [
+   {
+    "label": "Endocrine Society 2012",
+    "url": "https://doi.org/10.1210/jc.2012-1230"
+   }
+  ],
+  "por_grupo": {
+   "NEM1 na família": [
+    {
+     "label": "Endocrine Society 2012",
+     "url": "https://doi.org/10.1210/jc.2012-1230"
+    }
+   ]
+  }
+ },
+ "Proteína C reativa, soro": {
+  "grupos": [
+   "Doença de Crohn",
+   "Lúpus eritematoso sistêmico",
+   "Retocolite ulcerativa"
+  ],
+  "referencias": [
+   {
+    "label": "ECCO 2015 (anemia na DII)",
+    "url": "https://doi.org/10.1093/ecco-jcc/jju009"
+   },
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   }
+  ],
+  "por_grupo": {
+   "Doença de Crohn": [
+    {
+     "label": "ECCO 2015 (anemia na DII)",
+     "url": "https://doi.org/10.1093/ecco-jcc/jju009"
+    }
+   ],
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ],
+   "Retocolite ulcerativa": [
+    {
+     "label": "ECCO 2015 (anemia na DII)",
+     "url": "https://doi.org/10.1093/ecco-jcc/jju009"
+    }
+   ]
+  }
+ },
+ "Prova de função pulmonar completa com difusão (DLCO)": {
+  "grupos": [
+   "Em uso de amiodarona",
+   "Esclerose sistêmica"
+  ],
+  "referencias": [
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
+   },
+   {
+    "label": "HRS 2007 (Goldschlager)",
+    "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+   }
+  ],
+  "por_grupo": {
+   "Em uso de amiodarona": [
+    {
+     "label": "HRS 2007 (Goldschlager)",
+     "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+    }
+   ],
+   "Esclerose sistêmica": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
+    }
+   ]
+  }
+ },
+ "Prova tuberculínica (PPD) ou IGRA": {
+  "grupos": [
+   "Corticoide sistêmico sem dose informada",
+   "HIV+",
+   "Imunossupressão"
+  ],
+  "referencias": [
+   {
+    "label": "ACR 2022",
+    "url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   },
+   {
+    "label": "MS 2019 (Manual de Tuberculose)",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/manual_recomendacoes_controle_tuberculose_brasil_2_ed.pdf"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Corticoide sistêmico sem dose informada": [
+    {
+     "label": "ACR 2022",
+     "url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    },
+    {
+     "label": "MS 2019 (Manual de Tuberculose)",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/manual_recomendacoes_controle_tuberculose_brasil_2_ed.pdf"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    },
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ],
+   "Imunossupressão": [
+    {
+     "label": "ACR 2022",
+     "url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    },
+    {
+     "label": "MS 2019 (Manual de Tuberculose)",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/manual_recomendacoes_controle_tuberculose_brasil_2_ed.pdf"
+    }
+   ]
+  }
+ },
+ "PSA total, soro": {
+  "grupos": [
+   "BRCA1/2 na família",
+   "Em uso de testosterona",
+   "História familiar de câncer de próstata",
+   "Homens 55-69 anos, decisão compartilhada"
+  ],
+  "referencias": [
+   {
+    "label": "AUA/SUO 2023",
+    "url": "https://www.auanet.org/guidelines-and-quality/guidelines/early-detection-of-prostate-cancer-guidelines"
+   },
+   {
+    "label": "EAU 2024",
+    "url": "https://uroweb.org/guidelines/prostate-cancer"
+   },
+   {
+    "label": "Endocrine Society 2018 (hipogonadismo)",
+    "url": "https://doi.org/10.1210/jc.2018-00229"
+   },
+   {
+    "label": "NCCN 2025",
+    "url": "https://www.nccn.org/guidelines/category_2"
+   },
+   {
+    "label": "USPSTF 2018",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening"
+   }
+  ],
+  "por_grupo": {
+   "BRCA1/2 na família": [
+    {
+     "label": "AUA/SUO 2023",
+     "url": "https://www.auanet.org/guidelines-and-quality/guidelines/early-detection-of-prostate-cancer-guidelines"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    },
+    {
+     "label": "USPSTF 2018",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening"
+    }
+   ],
+   "Em uso de testosterona": [
+    {
+     "label": "AUA/SUO 2023",
+     "url": "https://www.auanet.org/guidelines-and-quality/guidelines/early-detection-of-prostate-cancer-guidelines"
+    },
+    {
+     "label": "Endocrine Society 2018 (hipogonadismo)",
+     "url": "https://doi.org/10.1210/jc.2018-00229"
+    },
+    {
+     "label": "USPSTF 2018",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening"
+    }
+   ],
+   "História familiar de câncer de próstata": [
+    {
+     "label": "AUA/SUO 2023",
+     "url": "https://www.auanet.org/guidelines-and-quality/guidelines/early-detection-of-prostate-cancer-guidelines"
+    },
+    {
+     "label": "EAU 2024",
+     "url": "https://uroweb.org/guidelines/prostate-cancer"
+    },
+    {
+     "label": "USPSTF 2018",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening"
+    }
+   ],
+   "Homens 55-69 anos, decisão compartilhada": [
+    {
+     "label": "AUA/SUO 2023",
+     "url": "https://www.auanet.org/guidelines-and-quality/guidelines/early-detection-of-prostate-cancer-guidelines"
+    },
+    {
+     "label": "EAU 2024",
+     "url": "https://uroweb.org/guidelines/prostate-cancer"
+    },
+    {
+     "label": "Endocrine Society 2018 (hipogonadismo)",
+     "url": "https://doi.org/10.1210/jc.2018-00229"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    },
+    {
+     "label": "USPSTF 2018",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening"
+    }
+   ]
+  }
+ },
+ "Radiografia de coluna torácica e lombar (perfil)": {
+  "grupos": [
+   "Corticoide sistêmico ≥ 3 meses"
+  ],
+  "referencias": [
+   {
+    "label": "ACR 2022",
+    "url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   }
+  ],
+  "por_grupo": {
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "ACR 2022",
+     "url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines"
+    },
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ]
+  }
+ },
+ "Radiografia de tórax": {
+  "grupos": [
+   "DPOC",
+   "Em uso de amiodarona",
+   "Em uso de metotrexato",
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "BSR 2017",
+    "url": "https://doi.org/10.1093/rheumatology/kew479"
+   },
+   {
+    "label": "GOLD 2026",
+    "url": "https://goldcopd.org/"
+   },
+   {
+    "label": "HRS 2007 (Goldschlager)",
+    "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "DPOC": [
+    {
+     "label": "GOLD 2026",
+     "url": "https://goldcopd.org/"
+    }
+   ],
+   "Em uso de amiodarona": [
+    {
+     "label": "HRS 2007 (Goldschlager)",
+     "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+    }
+   ],
+   "Em uso de metotrexato": [
+    {
+     "label": "BSR 2017",
+     "url": "https://doi.org/10.1093/rheumatology/kew479"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Relação albumina/creatinina urinária (uACR)": {
+  "grupos": [
+   "Adultos com fator de risco para DRC (HAS, DCV, insuficiência cardíaca, doença renal na família)",
+   "Diabéticos",
+   "Doença falciforme",
+   "Doença renal crônica"
+  ],
+  "referencias": [
+   {
+    "label": "ADA 2026 (seção 11)",
+    "url": "https://doi.org/10.2337/dc26-S011"
+   },
+   {
+    "label": "KDIGO 2024",
+    "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+   },
+   {
+    "label": "KDIGO 2024 (DRC)",
+    "url": "https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf"
+   },
+   {
+    "label": "NHLBI 2014 (doença falciforme)",
+    "url": "https://doi.org/10.1001/jama.2014.10517"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com fator de risco para DRC (HAS, DCV, insuficiência cardíaca, doença renal na família)": [
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    },
+    {
+     "label": "KDIGO 2024 (DRC)",
+     "url": "https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf"
+    }
+   ],
+   "Diabéticos": [
+    {
+     "label": "ADA 2026 (seção 11)",
+     "url": "https://doi.org/10.2337/dc26-S011"
+    }
+   ],
+   "Doença falciforme": [
+    {
+     "label": "NHLBI 2014 (doença falciforme)",
+     "url": "https://doi.org/10.1001/jama.2014.10517"
+    }
+   ],
+   "Doença renal crônica": [
+    {
+     "label": "KDIGO 2024",
+     "url": "https://kdigo.org/guidelines/ckd-evaluation-and-management/"
+    },
+    {
+     "label": "KDIGO 2024 (DRC)",
+     "url": "https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf"
+    }
+   ]
+  }
+ },
+ "Relação Aldosterona/Renina (A/R)": {
+  "grupos": [
+   "Adultos com HAS resistente"
+  ],
+  "referencias": [
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "Endocrine Society 2025 (hiperaldosteronismo)",
+    "url": "https://doi.org/10.1210/clinem/dgaf284"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS resistente": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "Endocrine Society 2025 (hiperaldosteronismo)",
+     "url": "https://doi.org/10.1210/clinem/dgaf284"
+    }
+   ]
+  }
+ },
+ "Relação proteína/creatinina, urina": {
+  "grupos": [
+   "Em uso de sirolimo ou everolimo",
+   "Lúpus eritematoso sistêmico",
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "ACOG PB 222 (2020)",
+    "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia"
+   },
+   {
+    "label": "ACR 2024 (nefrite lúpica)",
+    "url": "https://doi.org/10.1002/art.43212"
+   },
+   {
+    "label": "EMA (bula do sirolimo)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/rapamune"
+   }
+  ],
+  "por_grupo": {
+   "Em uso de sirolimo ou everolimo": [
+    {
+     "label": "EMA (bula do sirolimo)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/rapamune"
+    }
+   ],
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "ACR 2024 (nefrite lúpica)",
+     "url": "https://doi.org/10.1002/art.43212"
+    }
+   ],
+   "Pré-natal": [
+    {
+     "label": "ACOG PB 222 (2020)",
+     "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia"
+    }
+   ]
+  }
+ },
+ "Ressonância magnética de corpo inteiro": {
+  "grupos": [
+   "Li-Fraumeni na família"
+  ],
+  "referencias": [
+   {
+    "label": "Kratz 2017",
+    "url": "https://doi.org/10.1158/1078-0432.CCR-17-0408"
+   },
+   {
+    "label": "NCCN 2025",
+    "url": "https://www.nccn.org/guidelines/category_2"
+   }
+  ],
+  "por_grupo": {
+   "Li-Fraumeni na família": [
+    {
+     "label": "Kratz 2017",
+     "url": "https://doi.org/10.1158/1078-0432.CCR-17-0408"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ]
+  }
+ },
+ "Ressonância magnética de crânio": {
+  "grupos": [
+   "Li-Fraumeni na família"
+  ],
+  "referencias": [
+   {
+    "label": "Kratz 2017",
+    "url": "https://doi.org/10.1158/1078-0432.CCR-17-0408"
+   },
+   {
+    "label": "NCCN 2025",
+    "url": "https://www.nccn.org/guidelines/category_2"
+   }
+  ],
+  "por_grupo": {
+   "Li-Fraumeni na família": [
+    {
+     "label": "Kratz 2017",
+     "url": "https://doi.org/10.1158/1078-0432.CCR-17-0408"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ]
+  }
+ },
+ "Ressonância magnética de mamas": {
+  "grupos": [
+   "BRCA1/2 na família",
+   "CDH1 na família",
+   "Li-Fraumeni na família",
+   "Síndrome de Cowden na família"
+  ],
+  "referencias": [
+   {
+    "label": "ACS 2007",
+    "url": "https://doi.org/10.3322/canjclin.57.2.75"
+   },
+   {
+    "label": "IGCLC 2020",
+    "url": "https://doi.org/10.1016/S1470-2045(20)30219-9"
+   },
+   {
+    "label": "Kratz 2017",
+    "url": "https://doi.org/10.1158/1078-0432.CCR-17-0408"
+   },
+   {
+    "label": "NCCN 2025",
+    "url": "https://www.nccn.org/guidelines/category_2"
+   }
+  ],
+  "por_grupo": {
+   "BRCA1/2 na família": [
+    {
+     "label": "ACS 2007",
+     "url": "https://doi.org/10.3322/canjclin.57.2.75"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ],
+   "CDH1 na família": [
+    {
+     "label": "IGCLC 2020",
+     "url": "https://doi.org/10.1016/S1470-2045(20)30219-9"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ],
+   "Li-Fraumeni na família": [
+    {
+     "label": "Kratz 2017",
+     "url": "https://doi.org/10.1158/1078-0432.CCR-17-0408"
+    },
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ],
+   "Síndrome de Cowden na família": [
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ]
+  }
+ },
+ "Rubéola IgG, soro": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Sangue oculto nas fezes (FIT)": {
+  "grupos": [
+   "Adultos 45-75 anos, alternativa à colonoscopia"
+  ],
+  "referencias": [
+   {
+    "label": "MS/INCA 2026",
+    "url": "https://www.gov.br/inca/pt-br/assuntos/noticias/2026/sus-adota-novo-exame-para-detectar-cancer-de-intestino-antes-dos-sintomas"
+   },
+   {
+    "label": "USPSTF 2021",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening"
+   }
+  ],
+  "por_grupo": {
+   "Adultos 45-75 anos, alternativa à colonoscopia": [
+    {
+     "label": "MS/INCA 2026",
+     "url": "https://www.gov.br/inca/pt-br/assuntos/noticias/2026/sus-adota-novo-exame-para-detectar-cancer-de-intestino-antes-dos-sintomas"
+    },
+    {
+     "label": "USPSTF 2021",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening"
+    }
+   ]
+  }
+ },
+ "Sorologia para HTLV 1 e 2, soro": {
+  "grupos": [
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Sífilis: teste treponêmico ou VDRL, soro": {
+  "grupos": [
+   "HIV+",
+   "PrEP",
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   },
+   {
+    "label": "MS 2024 (PCDT PrEP)",
+    "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+   },
+   {
+    "label": "PCDT TV MS 2022",
+    "url": "https://portaldeboaspraticas.iff.fiocruz.br/biblioteca/pcdt-2022-transmissao-vertical-do-hiv-sifilis-e-hepatites-virais"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ],
+   "PrEP": [
+    {
+     "label": "MS 2024 (PCDT PrEP)",
+     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+    }
+   ],
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "PCDT TV MS 2022",
+     "url": "https://portaldeboaspraticas.iff.fiocruz.br/biblioteca/pcdt-2022-transmissao-vertical-do-hiv-sifilis-e-hepatites-virais"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Sódio e potássio, soro": {
+  "grupos": [
+   "Fibrilação atrial"
+  ],
+  "referencias": [
+   {
+    "label": "ESC 2024 (fibrilação atrial)",
+    "url": "https://doi.org/10.1093/eurheartj/ehae176"
+   }
+  ],
+  "por_grupo": {
+   "Fibrilação atrial": [
+    {
+     "label": "ESC 2024 (fibrilação atrial)",
+     "url": "https://doi.org/10.1093/eurheartj/ehae176"
+    }
+   ]
+  }
+ },
+ "Sódio, soro": {
+  "grupos": [
+   "Adultos com HAS",
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Em uso de diurético",
+   "Em uso de lítio",
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "ACC/AHA 2017 (hipertensão)",
+    "url": "https://doi.org/10.1161/HYP.0000000000000065"
+   },
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   },
+   {
+    "label": "NICE CG185 (2023)",
+    "url": "https://www.nice.org.uk/guidance/cg185"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS": [
+    {
+     "label": "ACC/AHA 2017 (hipertensão)",
+     "url": "https://doi.org/10.1161/HYP.0000000000000065"
+    },
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    }
+   ],
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Em uso de diurético": [
+    {
+     "label": "ACC/AHA 2017 (hipertensão)",
+     "url": "https://doi.org/10.1161/HYP.0000000000000065"
+    },
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    }
+   ],
+   "Em uso de lítio": [
+    {
+     "label": "NICE CG185 (2023)",
+     "url": "https://www.nice.org.uk/guidance/cg185"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    }
+   ]
+  }
+ },
+ "T4 livre, soro": {
+  "grupos": [
+   "Em uso de amiodarona",
+   "Hipertireoidismo / antitireoidiano",
+   "Inibidor de checkpoint"
+  ],
+  "referencias": [
+   {
+    "label": "ASCO 2021 (eventos imunomediados)",
+    "url": "https://doi.org/10.1200/JCO.21.01440"
+   },
+   {
+    "label": "ATA 2016",
+    "url": "https://doi.org/10.1089/thy.2016.0229"
+   },
+   {
+    "label": "HRS 2007 (Goldschlager)",
+    "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+   }
+  ],
+  "por_grupo": {
+   "Em uso de amiodarona": [
+    {
+     "label": "HRS 2007 (Goldschlager)",
+     "url": "https://doi.org/10.1016/j.hrthm.2007.07.020"
+    }
+   ],
+   "Hipertireoidismo / antitireoidiano": [
+    {
+     "label": "ATA 2016",
+     "url": "https://doi.org/10.1089/thy.2016.0229"
+    }
+   ],
+   "Inibidor de checkpoint": [
+    {
+     "label": "ASCO 2021 (eventos imunomediados)",
+     "url": "https://doi.org/10.1200/JCO.21.01440"
+    }
+   ]
+  }
+ },
+ "Tempo de protrombina (TP/INR), plasma": {
+  "grupos": [
+   "Em uso de varfarina"
+  ],
+  "referencias": [
+   {
+    "label": "CHEST 2012",
+    "url": "https://doi.org/10.1378/chest.11-2292"
+   }
+  ],
+  "por_grupo": {
+   "Em uso de varfarina": [
+    {
+     "label": "CHEST 2012",
+     "url": "https://doi.org/10.1378/chest.11-2292"
+    }
+   ]
+  }
+ },
+ "Teste de caminhada de 6 minutos": {
+  "grupos": [
+   "DPOC"
+  ],
+  "referencias": [
+   {
+    "label": "GOLD 2026",
+    "url": "https://goldcopd.org/"
+   }
+  ],
+  "por_grupo": {
+   "DPOC": [
+    {
+     "label": "GOLD 2026",
+     "url": "https://goldcopd.org/"
+    }
+   ]
+  }
+ },
+ "TGO e TGP, soro": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "ACOG PB 222 (2020)",
+    "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "ACOG PB 222 (2020)",
+     "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia"
+    }
+   ]
+  }
+ },
+ "Tipagem sanguínea ABO e fator Rh": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Tomografia computadorizada de tórax de alta resolução": {
+  "grupos": [
+   "Esclerose sistêmica"
+  ],
+  "referencias": [
+   {
+    "label": "ACR/CHEST 2023 (doença pulmonar intersticial)",
+    "url": "https://doi.org/10.1002/art.42860"
+   }
+  ],
+  "por_grupo": {
+   "Esclerose sistêmica": [
+    {
+     "label": "ACR/CHEST 2023 (doença pulmonar intersticial)",
+     "url": "https://doi.org/10.1002/art.42860"
+    }
+   ]
+  }
+ },
+ "Tomografia computadorizada de tórax de baixa dose (LDCT)": {
+  "grupos": [
+   "Adultos 50-80 anos com ≥20 maços-ano"
+  ],
+  "referencias": [
+   {
+    "label": "SBCT-SBPT-CBR 2024",
+    "url": "https://dx.doi.org/10.36416/1806-3756/e20230233"
+   },
+   {
+    "label": "USPSTF 2021",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening"
+   }
+  ],
+  "por_grupo": {
+   "Adultos 50-80 anos com ≥20 maços-ano": [
+    {
+     "label": "SBCT-SBPT-CBR 2024",
+     "url": "https://dx.doi.org/10.36416/1806-3756/e20230233"
+    },
+    {
+     "label": "USPSTF 2021",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening"
+    }
+   ]
+  }
+ },
+ "TOTG-75g (Teste Oral de Tolerância à Glicose), soro": {
+  "grupos": [
+   "Glicemia ou HbA1c limítrofes (pré-diabetes)",
+   "Síndrome dos ovários policísticos"
+  ],
+  "referencias": [
+   {
+    "label": "ADA 2026",
+    "url": "https://doi.org/10.2337/dc26-S002"
+   },
+   {
+    "label": "Diretriz internacional de SOP 2023",
+    "url": "https://doi.org/10.1210/clinem/dgad463"
+   },
+   {
+    "label": "SBD 2024",
+    "url": "https://doi.org/10.29327/5412848.2024-1"
+   }
+  ],
+  "por_grupo": {
+   "Glicemia ou HbA1c limítrofes (pré-diabetes)": [
+    {
+     "label": "ADA 2026",
+     "url": "https://doi.org/10.2337/dc26-S002"
+    },
+    {
+     "label": "SBD 2024",
+     "url": "https://doi.org/10.29327/5412848.2024-1"
+    }
+   ],
+   "Síndrome dos ovários policísticos": [
+    {
+     "label": "Diretriz internacional de SOP 2023",
+     "url": "https://doi.org/10.1210/clinem/dgad463"
+    }
+   ]
+  }
+ },
+ "TOTG-75g gestacional (jejum, 1 h e 2 h), soro": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Consenso brasileiro de DMG 2017",
+    "url": "https://iris.paho.org/handle/10665.2/34278"
+   },
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Consenso brasileiro de DMG 2017",
+     "url": "https://iris.paho.org/handle/10665.2/34278"
+    },
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Toxoplasmose IgG e IgM, soro": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Toxoplasmose IgG, soro": {
+  "grupos": [
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "MS 2024 (PCDT HIV)",
+    "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   }
+  ],
+  "por_grupo": {
+   "HIV+": [
+    {
+     "label": "MS 2024 (PCDT HIV)",
+     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+    }
+   ]
+  }
+ },
+ "Trichomonas vaginalis, PCR (swab vaginal)": {
+  "grupos": [
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   }
+  ],
+  "por_grupo": {
+   "HIV+": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    }
+   ]
+  }
+ },
+ "Troponina, soro": {
+  "grupos": [
+   "Antraciclina ou anti-HER2",
+   "Inibidor de checkpoint"
+  ],
+  "referencias": [
+   {
+    "label": "ESC 2022 (cardio-oncologia)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac244"
+   }
+  ],
+  "por_grupo": {
+   "Antraciclina ou anti-HER2": [
+    {
+     "label": "ESC 2022 (cardio-oncologia)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac244"
+    }
+   ],
+   "Inibidor de checkpoint": [
+    {
+     "label": "ESC 2022 (cardio-oncologia)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac244"
+    }
+   ]
+  }
+ },
+ "Ultrassonografia com Doppler de Aorta Abdominal": {
+  "grupos": [
+   "História familiar de AAA",
+   "Homens 65-75 anos que já fumaram"
+  ],
+  "referencias": [
+   {
+    "label": "SVS 2018",
+    "url": "https://doi.org/10.1016/j.jvs.2017.10.044"
+   },
+   {
+    "label": "USPSTF 2019",
+    "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/abdominal-aortic-aneurysm-screening"
+   }
+  ],
+  "por_grupo": {
+   "História familiar de AAA": [
+    {
+     "label": "SVS 2018",
+     "url": "https://doi.org/10.1016/j.jvs.2017.10.044"
+    }
+   ],
+   "Homens 65-75 anos que já fumaram": [
+    {
+     "label": "USPSTF 2019",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/abdominal-aortic-aneurysm-screening"
+    }
+   ]
+  }
+ },
+ "Ultrassonografia de abdome superior": {
+  "grupos": [
+   "Cirrose"
+  ],
+  "referencias": [
+   {
+    "label": "AASLD 2023",
+    "url": "https://doi.org/10.1097/HEP.0000000000000466"
+   }
+  ],
+  "por_grupo": {
+   "Cirrose": [
+    {
+     "label": "AASLD 2023",
+     "url": "https://doi.org/10.1097/HEP.0000000000000466"
+    }
+   ]
+  }
+ },
+ "Ultrassonografia de rins e vias urinárias": {
+  "grupos": [
+   "DRPAD na família",
+   "Síndrome de Cowden na família"
+  ],
+  "referencias": [
+   {
+    "label": "KDIGO 2025 (DRPAD)",
+    "url": "https://kdigo.org/guidelines/adpkd/"
+   },
+   {
+    "label": "NCCN 2025",
+    "url": "https://www.nccn.org/guidelines/category_2"
+   }
+  ],
+  "por_grupo": {
+   "DRPAD na família": [
+    {
+     "label": "KDIGO 2025 (DRPAD)",
+     "url": "https://kdigo.org/guidelines/adpkd/"
+    }
+   ],
+   "Síndrome de Cowden na família": [
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ]
+  }
+ },
+ "Ultrassonografia de tireoide": {
+  "grupos": [
+   "NEM2 na família",
+   "Síndrome de Cowden na família"
+  ],
+  "referencias": [
+   {
+    "label": "ATA 2015",
+    "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+   },
+   {
+    "label": "NCCN 2025",
+    "url": "https://www.nccn.org/guidelines/category_2"
+   }
+  ],
+  "por_grupo": {
+   "NEM2 na família": [
+    {
+     "label": "ATA 2015",
+     "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+    }
+   ],
+   "Síndrome de Cowden na família": [
+    {
+     "label": "NCCN 2025",
+     "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ]
+  }
+ },
+ "Ultrassonografia morfológica de 1º trimestre (translucência nucal)": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Ultrassonografia morfológica de 2º trimestre": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Ultrassonografia obstétrica": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Ultrassonografia obstétrica com Doppler": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "ACOG PB 222 (2020)",
+    "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia"
+   },
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "ACOG PB 222 (2020)",
+     "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia"
+    },
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    }
+   ]
+  }
+ },
+ "Ultrassonografia obstétrica transvaginal": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Ultrassonografia transvaginal para medida do colo uterino": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Ureia, soro": {
+  "grupos": [
+   "Corticoide em dose imunossupressora",
+   "Corticoide sistêmico ≥ 3 meses",
+   "Em uso de lítio",
+   "HIV+"
+  ],
+  "referencias": [
+   {
+    "label": "Drugs Aging 2024 (Sparling)",
+    "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "HIVMA/IDSA 2024",
+    "url": "https://doi.org/10.1093/cid/ciae479"
+   },
+   {
+    "label": "NICE CG185 (2023)",
+    "url": "https://www.nice.org.uk/guidance/cg185"
+   }
+  ],
+  "por_grupo": {
+   "Corticoide em dose imunossupressora": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Corticoide sistêmico ≥ 3 meses": [
+    {
+     "label": "Drugs Aging 2024 (Sparling)",
+     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Em uso de lítio": [
+    {
+     "label": "NICE CG185 (2023)",
+     "url": "https://www.nice.org.uk/guidance/cg185"
+    }
+   ],
+   "HIV+": [
+    {
+     "label": "HIVMA/IDSA 2024",
+     "url": "https://doi.org/10.1093/cid/ciae479"
+    }
+   ]
+  }
+ },
+ "Urina tipo I (EAS)": {
+  "grupos": [
+   "Lúpus eritematoso sistêmico"
+  ],
+  "referencias": [
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   }
+  ],
+  "por_grupo": {
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ]
+  }
+ },
+ "Urocultura com antibiograma": {
+  "grupos": [
+   "Pré-natal"
+  ],
+  "referencias": [
+   {
+    "label": "Einstein Pré-Natal v.3 (2024)",
+    "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+   },
+   {
+    "label": "MS 2012-2016",
+    "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+   },
+   {
+    "label": "Williams 26e",
+    "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+   }
+  ],
+  "por_grupo": {
+   "Pré-natal": [
+    {
+     "label": "Einstein Pré-Natal v.3 (2024)",
+     "url": "https://medicalsuite.einstein.br/pratica-medica/Pathways/Pr%C3%A9%20Natal%20de%20Baixo%20Risco%20v.3.pdf"
+    },
+    {
+     "label": "MS 2012-2016",
+     "url": "https://bvsms.saude.gov.br/bvs/publicacoes/cadernos_atencao_basica_32_prenatal.pdf"
+    },
+    {
+     "label": "Williams 26e",
+     "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Varicela, IgG": {
+  "grupos": [
+   "Em uso de fingolimode"
+  ],
+  "referencias": [
+   {
+    "label": "EMA (bula do fingolimode)",
+    "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+   }
+  ],
+  "por_grupo": {
+   "Em uso de fingolimode": [
+    {
+     "label": "EMA (bula do fingolimode)",
+     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/gilenya"
+    }
+   ]
+  }
+ },
+ "VHS": {
+  "grupos": [
+   "Lúpus eritematoso sistêmico"
+  ],
+  "referencias": [
+   {
+    "label": "EULAR 2010 (monitorização do LES)",
+    "url": "https://doi.org/10.1136/ard.2009.117200"
+   }
+  ],
+  "por_grupo": {
+   "Lúpus eritematoso sistêmico": [
+    {
+     "label": "EULAR 2010 (monitorização do LES)",
+     "url": "https://doi.org/10.1136/ard.2009.117200"
+    }
+   ]
+  }
+ },
+ "Vitamina B12, soro": {
+  "grupos": [
+   "Cirurgia bariátrica prévia",
+   "Doença celíaca",
+   "Em uso de metformina"
+  ],
+  "referencias": [
+   {
+    "label": "ADA 2026 (seção 9)",
+    "url": "https://doi.org/10.2337/dc26-S009"
+   },
+   {
+    "label": "ASMBS 2019",
+    "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+   },
+   {
+    "label": "BSG 2014 (doença celíaca)",
+    "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+   }
+  ],
+  "por_grupo": {
+   "Cirurgia bariátrica prévia": [
+    {
+     "label": "ASMBS 2019",
+     "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+    }
+   ],
+   "Doença celíaca": [
+    {
+     "label": "BSG 2014 (doença celíaca)",
+     "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+    }
+   ],
+   "Em uso de metformina": [
+    {
+     "label": "ADA 2026 (seção 9)",
+     "url": "https://doi.org/10.2337/dc26-S009"
+    }
+   ]
+  }
+ },
+ "Ácido fólico, soro": {
+  "grupos": [
+   "Cirurgia bariátrica prévia",
+   "Doença celíaca"
+  ],
+  "referencias": [
+   {
+    "label": "ASMBS 2019",
+    "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+   },
+   {
+    "label": "BSG 2014 (doença celíaca)",
+    "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+   }
+  ],
+  "por_grupo": {
+   "Cirurgia bariátrica prévia": [
+    {
+     "label": "ASMBS 2019",
+     "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+    }
+   ],
+   "Doença celíaca": [
+    {
+     "label": "BSG 2014 (doença celíaca)",
+     "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+    }
+   ]
+  }
+ },
+ "Ácido úrico, soro": {
+  "grupos": [
+   "Adultos com HAS",
+   "Gota"
+  ],
+  "referencias": [
+   {
+    "label": "ACR 2020",
+    "url": "https://doi.org/10.1002/acr.24180"
+   },
+   {
+    "label": "AHA 2025",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+   },
+   {
+    "label": "SBC 2025",
+    "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+   }
+  ],
+  "por_grupo": {
+   "Adultos com HAS": [
+    {
+     "label": "AHA 2025",
+     "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    },
+    {
+     "label": "SBC 2025",
+     "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "Gota": [
+    {
+     "label": "ACR 2020",
+     "url": "https://doi.org/10.1002/acr.24180"
+    }
+   ]
+  }
+ },
+ "Índice de saturação de transferrina, soro": {
+  "grupos": [
+   "Hemocromatose na família",
+   "Insuficiência cardíaca"
+  ],
+  "referencias": [
+   {
+    "label": "ACG 2019",
+    "url": "https://gi.org/clinical-guidelines/"
+   },
+   {
+    "label": "EASL 2022",
+    "url": "https://doi.org/10.1016/j.jhep.2022.03.033"
+   },
+   {
+    "label": "ESC 2021 (insuficiência cardíaca)",
+    "url": "https://doi.org/10.1093/eurheartj/ehab368"
+   },
+   {
+    "label": "ESC 2023 (insuficiência cardíaca)",
+    "url": "https://doi.org/10.1093/eurheartj/ehad195"
+   }
+  ],
+  "por_grupo": {
+   "Hemocromatose na família": [
+    {
+     "label": "ACG 2019",
+     "url": "https://gi.org/clinical-guidelines/"
+    },
+    {
+     "label": "EASL 2022",
+     "url": "https://doi.org/10.1016/j.jhep.2022.03.033"
+    }
+   ],
+   "Insuficiência cardíaca": [
+    {
+     "label": "ESC 2021 (insuficiência cardíaca)",
+     "url": "https://doi.org/10.1093/eurheartj/ehab368"
+    },
+    {
+     "label": "ESC 2023 (insuficiência cardíaca)",
+     "url": "https://doi.org/10.1093/eurheartj/ehad195"
+    }
+   ]
+  }
+ }
+}

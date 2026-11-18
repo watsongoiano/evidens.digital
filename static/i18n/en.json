@@ -4265,7 +4265,11 @@
   "Pronto-socorro": "Emergency department",
   "Classificar pedido da operadora": "Classify payer request",
   "Anexe os laudos em PDF do pedido.": "Attach the PDF reports of the request.",
-  "Não foi possível classificar o pedido.": "The request could not be classified."
+  "Não foi possível classificar o pedido.": "The request could not be classified.",
+  "Operadoras (conferência do pedido)": "Payers (request check)",
+  "Conferir pedido": "Check request",
+  "Anexe o PDF com os exames pedidos, no alto desta página.": "Attach the PDF with the requested tests, at the top of this page.",
+  "Não foi possível conferir o pedido.": "The request could not be checked."
  },
  "padroes": [
   [

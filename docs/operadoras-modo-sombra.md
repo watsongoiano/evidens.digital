@@ -17,24 +17,91 @@ O resultado repete as colunas da entrada e acrescenta `cor`, `acao`, `codigo_do_
 divergência entre diretrizes, quando há. Coluna da entrada com nome igual ao de uma coluna de saída sai com o sufixo
 `_entrada`.
 
-## Pela tela (só o administrador)
+## Na tela: conferência do pedido pelo check-up
 
-Em `/operadoras`, com a conta de administrador (botão "Operadoras (modo sombra)" na página da conta): enviar a
-planilha de pedidos (até 2.000 linhas) ou até 8 laudos em PDF (4 MB no total). A tela mostra o resumo por cor, a
-tabela dos primeiros 300 pedidos com motivo e referência, e o botão para baixar o resultado completo em CSV. Os
-arquivos são lidos em memória e descartados; nada é gravado nem registrado. Conta de médico comum não vê a página
-nem consegue usar a rota. A conta própria de operadora ainda não existe.
+`/operadoras` (por enquanto só a conta de administrador; botão "Operadoras (conferência do pedido)" na página da
+conta). A ideia é uma só: usar o check-up do Evidēns como ele é, sem regra a mais nem a menos, para saber se o que o
+médico pediu tem evidência para aquele paciente.
 
-## Dados do paciente, cálcio e exames que não são de rastreio
+1. **Pedido do médico.** PDF com os exames pedidos (até 8 arquivos, 4 MB no total). O leitor entende o laudo de
+   laboratório nos formatos conhecidos e, se o PDF não for laudo, uma lista de nomes de exame ou de códigos TUSS.
+   PDF escaneado, sem texto, não é lido.
+2. **Dados do paciente.** O formulário é o do check-up, com os mesmos itens, dentro da própria página (um quadro com
+   o formulário do check-up: há um formulário só, sem cópia para manter).
+3. **Resultado.** O motor do check-up roda para o paciente e cada exame pedido sai como:
+   - **Indicado**: está entre os exames que o check-up recomenda para o paciente. Vêm o grupo, a periodicidade, o
+     grau e as referências da própria recomendação.
+   - **Não indicado**: não está. Se o check-up o deixou de fora por um motivo que ele mesmo declara (já feito e em
+     dia, adiado na gestação, recomendação de não fazer), o motivo aparece. Senão, vai a justificativa formal, com a
+     fonte e o link (ver "Justificativa do exame não indicado").
+   A tela mostra também a lista do que o check-up indica para o paciente, com o que foi e o que não foi pedido, e
+   baixa o resultado em CSV.
 
-- **Dados do paciente.** Com comorbidades e medicações informadas (nas colunas da planilha ou, na tela, no envio dos
-  laudos), o pedido é comparado com o que o check-up recomenda para aquele paciente, e não só para a idade e o sexo. A
-  lista de chaves é a do check-up e está em `/api/admin/operadoras/listas`; chave fora da lista invalida a linha.
-- **Formulário completo do check-up.** Em `/intelligent-tools?modo=operadora` (só administrador; há um botão em
-  `/operadoras`), o mesmo formulário do check-up recebe os laudos do pedido: peso, pressão, tabagismo, história
-  familiar, gestação, resultados e os demais itens entram na comparação. A rota aceita esses dados no campo `paciente`
-  (JSON no formato que o formulário do check-up envia), que é também a porta de entrada prevista para os dados vindos
-  do cadastro da operadora. `exames_anteriores` e o nome do paciente não entram.
+### Justificativa do exame não indicado
+
+Não basta dizer que o exame não está no check-up. Para cada exame não indicado, a tela mostra:
+
+1. **O que a diretriz diz sobre pedir o exame de rotina**, com a referência e o link. A ordem de busca é: parecer de
+   sociedade médica já cadastrado (tabela "Pareceres de sociedades médicas", abaixo), se a sociedade é aceita, e,
+   depois, o registro `SEM_INDICACAO_DE_ROTINA` em `src/utils/operadora.py`.
+2. **Para quem o check-up indica o exame** ("Adultos com HAS", "Em uso de lítio"...), cada situação com a referência
+   que o check-up usa nela, e a observação de que nenhuma foi informada. Vem de `src/data/indicacoes_motor.json`,
+   gerado pela varredura do motor (`python scripts/gerar_catalogo.py`; o teste falha se o arquivo estiver
+   desatualizado).
+
+Exame que ainda não foi pesquisado sai com "Ainda não há justificativa de diretriz registrada para ele", e a linha
+fica marcada (`sem_justificativa`) para a pesquisa e o registro. Nenhum texto entra no registro sem conferência na
+fonte.
+
+#### Só sociedade que o algoritmo já cita
+
+Decisão do responsável clínico (17/11/2026): a fonte da justificativa é só **sociedade que o check-up já cita**.
+Referência, aqui, é a sociedade (USPSTF, AHA/ACC, KDIGO, AASLD, NICE...), não uma diretriz específica: qualquer
+recomendação de uma sociedade aceita pode ser usada. Fonte de fora pode contradizer o que o check-up recomenda.
+
+- `sociedades_do_algoritmo()` lê as sociedades das referências que o motor cita (`indicacoes_motor.json`).
+- Aceitas à parte por ele: a **Surviving Sepsis Campaign** (qualquer exame) e a **CSCC, Choosing Wisely Canada**,
+  só na TGO (`SOCIEDADES_ACEITAS_A_PARTE` e `FONTES_ACEITAS_POR_EXAME`).
+- Recusadas por ele: o **ACP** na creatinina (vale a KDIGO) e a **CSCC** na ureia e nas bilirrubinas.
+- Parecer do modo em lote cuja fonte é só de sociedade de fora (CAMB, ASCP, CRA, CSEM, SBPC/ML) não vai para a tela:
+  o exame sai com o que a USPSTF diz. Volta quando a sociedade for aprovada.
+- O teste `test_justificativa_so_cita_sociedade_que_o_algoritmo_ja_cita` falha se entrar fonte de fora.
+
+| Exame | O que a diretriz diz | Fonte |
+|---|---|---|
+| TGP (ALT) | Sem rastreio de doença hepática esteatótica na população geral; a pesquisa de fibrose (FIB-4) fica para diabetes tipo 2, obesidade com complicações, consumo de álcool ou história familiar de cirrose | [AASLD 2023](https://doi.org/10.1097/HEP.0000000000000323); [USPSTF, recomendações A e B](https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations) |
+| TGO (AST) | Não pedir de rotina na avaliação inicial, nem junto da TGP, que é mais específica | [CSCC 2024, Choosing Wisely Canada](https://choosingwiselycanada.org/download/17612); [AASLD 2023](https://doi.org/10.1097/HEP.0000000000000323) |
+| Creatinina | Pesquisar doença renal crônica, com a TFG estimada pela creatinina e a albuminúria, em quem tem risco para a doença ou já a tem (ponto de prática 1.1.1.1; recomendação 1.1.2.1, grau 1B). Sem recomendação de testar o adulto assintomático sem fator de risco | [KDIGO 2024](https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf); [USPSTF, recomendações A e B](https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations) |
+| PCR | Evidência insuficiente para somar a PCR ultrassensível à avaliação do risco cardiovascular (declaração I) | [USPSTF 2018](https://doi.org/10.1001/jama.2018.8359) |
+| TP/INR e TTPA | Fora dos rastreios recomendados. Nem antes de cirurgia eletiva são de rotina: só se consideram na doença hepática crônica (ASA 3 ou 4, cirurgia de porte intermediário ou maior) | [USPSTF, recomendações A e B](https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations); [NICE NG45](https://www.nice.org.uk/guidance/ng45/chapter/recommendations) |
+| Lactato | Não é exame de rastreio; indicado na suspeita de sepse ou de hipoperfusão | [Surviving Sepsis Campaign 2021](https://doi.org/10.1007/s00134-021-06506-y) |
+| CK total | Não é exame de rastreio, nem de rotina em uso de estatina (classe III) | [AHA/ACC 2018](https://doi.org/10.1161/CIR.0000000000000625) |
+| T4 livre e provas de função tireoidiana | Evidência insuficiente para o rastreio de disfunção tireoidiana em adultos assintomáticos fora da gestação (grau I) | [USPSTF 2015](https://www.uspreventiveservicestaskforce.org/uspstf/document/clinical-summary142/thyroid-dysfunction-screening) |
+| Ureia, bilirrubinas, sódio, potássio, cálcio, cálcio iônico, magnésio, fósforo, proteínas totais e frações, hemograma | Fora dos rastreios que a USPSTF recomenda ao adulto assintomático (graus A e B) | [USPSTF, recomendações A e B](https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations) |
+| VHS, ácido úrico, eletroforese de proteínas, FAN, perfil reumatológico, anti-TPO, tempo de sangramento, sorologia para Helicobacter pylori, folato eritrocitário | Fora dos rastreios que a USPSTF recomenda (graus A e B). O parecer do modo em lote é de sociedade que o algoritmo não cita e não vai para a tela | [USPSTF, recomendações A e B](https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations) |
+
+O que **não** entra na conferência: cores, finalidade, CID, regime, pareceres de sociedades e intervalos mínimos do
+modo em lote (abaixo). O veredito (indicado ou não indicado) é sempre o do check-up; os pareceres e o registro acima
+só explicam o exame não indicado. O cálcio total conta como cálcio iônico.
+
+Os dados do paciente vão à rota `POST /api/admin/operadoras/conferir` no campo `paciente`, em JSON no formato que o
+formulário do check-up envia; é a porta de entrada prevista para os dados que virão do cadastro da operadora. "Exames
+já realizados" vai junto, como no check-up. Nada é gravado: o PDF e os dados são lidos em memória e descartados.
+
+**Limite conhecido.** O check-up pede um exame por indicação. Quando ele recomenda a HbA1c para rastrear diabetes, a
+glicemia de jejum pedida no lugar sai como não indicada, embora a própria recomendação a cite como alternativa.
+
+O modo em lote, por planilha, continua disponível pelo script (seções seguintes) e não aparece na tela.
+
+## Modo em lote: dados do paciente, cálcio e exames que não são de rastreio
+
+- **Dados do paciente.** Com comorbidades e medicações informadas nas colunas da planilha, o pedido é comparado com o
+  que o check-up recomenda para aquele paciente, e não só para a idade e o sexo. As chaves são as do check-up
+  (`comorbidades_validas()` e `medicacoes_validas()` em `src/utils/operadora.py`); chave fora da lista invalida a linha.
+- **Exame que o check-up não indica.** Sem recomendação do check-up e sem parecer contrário específico de sociedade,
+  o pedido sai como "pediria esclarecimento" (pedir a indicação clínica), e não como barrado. A regra geral contra
+  exames de sangue de rotina (SBMFC e CFPC, Choosing Wisely) foi retirada por decisão do responsável clínico; os
+  pareceres específicos por exame continuam valendo.
 - **Cálcio.** O cálcio total (40301400) é tratado como o cálcio iônico (40301419) nas regras, por decisão do
   responsável clínico. No check-up, o cálcio total já feito também conta como cálcio iônico feito.
 - **Exames que não são de rastreio.** Exame que aparece nos laudos das operadoras e não tem regra no check-up é
@@ -45,7 +112,7 @@ nem consegue usar a rota. A conta própria de operadora ainda não existe.
 |---|---|---|
 | Lactato (40301109) | Suspeita de sepse ou de hipoperfusão | [Surviving Sepsis Campaign 2021](https://doi.org/10.1007/s00134-021-06506-y) |
 | CK total (40301648) | Sintoma muscular grave ou fraqueza objetiva em uso de estatina; a dosagem de rotina não é útil | [AHA/ACC 2018](https://doi.org/10.1161/CIR.0000000000000625) |
-| Proteínas totais e frações (40302385) | Nenhum rastreio recomendado a inclui | [SBMFC 2018 e CFPC, Choosing Wisely](https://choosingwiselycanada.org/wp-content/uploads/2022/10/Choosing-Wisely-Canada-Labs-Recommendations-Full-List.pdf) |
+| Proteínas totais e frações (40302385) | Nenhum rastreio recomendado a inclui; sem fonte própria, pede esclarecimento em vez de barrar | — |
 
 ## Arquivo de entrada
 
@@ -131,10 +198,8 @@ Exame alternativo ao recomendado, aceito pelas mesmas diretrizes do check-up:
   após dois exames anuais normais.
 Os dois exames no mesmo pedido ainda não são apontados como duplicidade.
 
-O exame sem recomendação de rastreio para o perfil sai com a referência da regra geral: SBMFC 2018 e CFPC, no
-Choosing Wisely, são contra exames de sangue anuais de rotina sem indicação pelo risco individual
-([lista de laboratório do Choosing Wisely Canada](https://choosingwiselycanada.org/wp-content/uploads/2022/10/Choosing-Wisely-Canada-Labs-Recommendations-Full-List.pdf);
-[lista da SBMFC, em reportagem](https://portal.afya.com.br/saude/choosing-wisely-veja-dicas-para-manejo-de-pacientes-ambulatoriais)).
+O exame sem recomendação do check-up para o perfil, e sem parecer contrário específico, sai como "pediria
+esclarecimento", sem referência: a regra geral do Choosing Wisely contra exames de rotina foi retirada.
 
 ## Pareceres de sociedades médicas
 
@@ -152,12 +217,12 @@ esse ponto entra na análise jurídica do escopo.
 
 | Exame | Parecer | Fonte |
 |---|---|---|
-| 25-hidroxivitamina D, até 60 anos | Sugestão condicional contra a dosagem de rotina em adultos sem indicação estabelecida. Aviso de divergência: para o USPSTF 2021 a evidência é insuficiente (grau I); SBPC/ML e SBEM 2017 indicam a dosagem em grupos de risco, como gestantes e lactantes | [Endocrine Society 2024](https://doi.org/10.1210/clinem/dgae290); no mesmo sentido, [ASCP 2014](https://www.ascp.org/content/docs/default-source/get-involved-pdfs/25-things-to-question.pdf), [CFPC](https://choosingwiselycanada.org/wp-content/uploads/2022/10/Choosing-Wisely-Canada-Labs-Recommendations-Full-List.pdf) e [SBMFC 2018](https://portal.afya.com.br/saude/choosing-wisely-veja-dicas-para-manejo-de-pacientes-ambulatoriais); [USPSTF 2021](https://einstein.elsevierpure.com/en/publications/screening-for-vitamin-d-deficiency-in-adults-us-preventive-servic/); [SBPC/ML e SBEM 2017](https://www.redalyc.org/pdf/3935/393554303005.pdf) |
+| 25-hidroxivitamina D, até 60 anos | Sugestão condicional contra a dosagem de rotina em adultos sem indicação estabelecida. Aviso de divergência: para o USPSTF 2021 a evidência é insuficiente (grau I); SBPC/ML e SBEM 2017 indicam a dosagem em grupos de risco, como gestantes e lactantes | [Endocrine Society 2024](https://doi.org/10.1210/clinem/dgae290); [USPSTF 2021](https://einstein.elsevierpure.com/en/publications/screening-for-vitamin-d-deficiency-in-adults-us-preventive-servic/); [SBPC/ML e SBEM 2017](https://www.redalyc.org/pdf/3935/393554303005.pdf) |
 | 1,25-di-hidroxivitamina D | Não dosar de rotina; só com hipercalcemia ou função renal reduzida | [Endocrine Society, Choosing Wisely 2013, atualizado em 2017](https://www.mainlinehealth.org/-/media/files/pdf/basic-content/physicians/mlhpp/choosing-wisely/endocrine-society--choosing-wisely.pdf?la=en) |
 | Testosterona total, em mulheres | Contra o diagnóstico de deficiência androgênica em mulheres saudáveis; a testosterona total não diagnostica o transtorno do desejo sexual hipoativo. Não vale para investigação de hiperandrogenismo nem para controle de terapia com testosterona | [Endocrine Society 2014](https://doi.org/10.1210/jc.2014-2260); [Consenso Global 2019](https://doi.org/10.1080/13697137.2019.1637079) |
-| Testosterona total, em homens | Contra o rastreio de hipogonadismo na população geral (recomendação forte, evidência de baixa qualidade). Não vale para busca de casos em doença hipofisária, uso crônico de opioide ou glicocorticoide, infertilidade e osteoporose | [Endocrine Society 2018](https://doi.org/10.1210/jc.2018-00229); no mesmo sentido, [CUA](https://choosingwiselycanada.org/wp-content/uploads/2022/10/Choosing-Wisely-Canada-Labs-Recommendations-Full-List.pdf) |
-| Herpes simples, IgG e IgM | Contra o rastreio sorológico de herpes genital em assintomáticos, gestantes incluídas (grau D); a SBI é contra a sorologia de herpes simples para diagnóstico ou rastreio na população geral. Não vale para pessoas com HIV ou imunossupressão | [USPSTF 2023](https://pubmed.ncbi.nlm.nih.gov/36786784/); [SBI 2019](https://doi.org/10.1016/j.bjid.2019.08.004) |
-| Urocultura, em homens e em mulheres a partir de 50 anos | Contra a urocultura de rastreio em adulto assintomático fora da gestação e sem doença urológica crônica (grau D). Não vale antes de procedimento urológico (IDSA 2019) | [USPSTF 2019](https://www.uspreventiveservicestaskforce.org/uspstf/document/ClinicalSummaryFinal/asymptomatic-bacteriuria-in-adults-screening); [SBI 2019](https://doi.org/10.1016/j.bjid.2019.08.004) |
+| Testosterona total, em homens | Contra o rastreio de hipogonadismo na população geral (recomendação forte, evidência de baixa qualidade). Não vale para busca de casos em doença hipofisária, uso crônico de opioide ou glicocorticoide, infertilidade e osteoporose | [Endocrine Society 2018](https://doi.org/10.1210/jc.2018-00229) |
+| Herpes simples, IgG e IgM | Contra o rastreio sorológico de herpes genital em assintomáticos, gestantes incluídas (grau D). Não vale para pessoas com HIV ou imunossupressão | [USPSTF 2023](https://pubmed.ncbi.nlm.nih.gov/36786784/) |
+| Urocultura, em homens e em mulheres a partir de 50 anos | Contra a urocultura de rastreio em adulto assintomático fora da gestação e sem doença urológica crônica (grau D). Não vale antes de procedimento urológico (IDSA 2019) | [USPSTF 2019](https://www.uspreventiveservicestaskforce.org/uspstf/document/ClinicalSummaryFinal/asymptomatic-bacteriuria-in-adults-screening) |
 | VHS | Não usar para rastrear assintomáticos nem como teste geral de inflamação; a proteína C reativa é preferível | [CAMB 2020](https://choosingwiselycanada.org/wp-content/uploads/2020/03/Medical-Biochemistry_EN.pdf); [ASCP 2015](https://www.ascp.org/content/docs/default-source/get-involved-pdfs/25-things-to-question.pdf) |
 | Ácido úrico | Não pedir na avaliação de rotina de risco cardiovascular, obesidade ou diabetes | [CAMB 2020](https://choosingwiselycanada.org/wp-content/uploads/2020/03/Medical-Biochemistry_EN.pdf) |
 | Eletroforese de proteínas séricas | Não pedir em assintomáticos; cabe com hipercalcemia, insuficiência renal, anemia ou lesão óssea lítica sem explicação | [CAMB 2020](https://choosingwiselycanada.org/wp-content/uploads/2020/03/Medical-Biochemistry_EN.pdf) |
