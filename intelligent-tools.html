@@ -1349,7 +1349,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
       <!-- SUS: laudo de APAC dos exames que vão em APAC: os que a regulação pede e os da tabela de alta complexidade
            (src/utils/sigtap.py). Aparece só quando o pedido tem um deles. Nada disto é guardado. -->
       <div id="apacCampos" class="mt-3" style="display: none;">
-        <p class="text-[13px] text-ink/60 mb-3">Este pedido tem exame de alta complexidade: <span id="apacExamesDoPedido" data-i18n-manter></span>. Cada um sai com o laudo de solicitação de APAC, logo depois do pedido. Os campos abaixo são opcionais (o que ficar em branco é preenchido à mão) e não são guardados.</p>
+        <p class="text-[13px] text-ink/60 mb-3">Este pedido tem exame de alta complexidade: <span id="apacExamesDoPedido" data-i18n-manter></span>. <span id="apacComoSai"></span> Os campos abaixo são opcionais (o que ficar em branco é preenchido à mão) e não são guardados.</p>
         <div class="grade">
           <div class="campo"><label for="apacCep">CEP</label><input type="text" id="apacCep" maxlength="9" inputmode="numeric" placeholder="00000-000" autocomplete="off"><p id="apacCepAviso" class="text-[12px] text-ink/55 mt-1" aria-live="polite"></p></div>
           <div class="campo"><div class="grade !mt-0 grid-cols-[1fr_4.5rem]"><div class="campo"><label for="apacMunicipio">Município</label><input type="text" id="apacMunicipio" maxlength="60" autocomplete="off"></div><div class="campo"><label for="apacUf">UF</label><input type="text" id="apacUf" maxlength="2" autocomplete="off"></div></div></div>
@@ -2719,6 +2719,10 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             // sai sem anexo e não pergunta os dados do laudo.
             const emApac = examesEmApacDoPedido(categoriaDoDialogo);
             document.getElementById('apacExamesDoPedido').textContent = emApac.map(t => T(t)).join('; ');
+            // Imagem: um laudo por exame. Laboratório: os exames de mesmo CID dividem o laudo (três linhas de procedimento).
+            document.getElementById('apacComoSai').textContent = T(categoriaDoDialogo === 'laboratorio'
+                ? 'Os exames de laboratório saem juntos no mesmo laudo de solicitação de APAC (até três por laudo), logo depois do pedido.'
+                : 'Cada um sai com o laudo de solicitação de APAC, logo depois do pedido.');
             document.getElementById('apacCampos').style.display = ehSus(valor) && emApac.length ? '' : 'none';
         }
 

@@ -134,8 +134,40 @@ def test_apac_no_laboratorio_so_para_exame_da_tabela_de_alta_complexidade(app, c
     assert not any('COMPLEXIDADE - APAC' in p.extract_text() for p in sem)
     com = paginas(['Creatinina, soro', 'Carga Viral do HIV (HIV RNA)', 'Contagem de linfócitos T CD4+'])
     laudos = [p.extract_text() for p in com if 'COMPLEXIDADE - APAC' in p.extract_text()]
-    assert len(laudos) == 2 and len(com) == len(sem) + 2
-    assert 'Carga Viral do HIV' in laudos[0] and 'B24' in laudos[0] and 'CD4' in laudos[1]
+    # Laboratório: os exames de mesmo CID dividem o laudo (decisão do responsável clínico, 18/11/2026)
+    assert len(laudos) == 1 and len(com) == len(sem) + 1
+    assert 'Carga Viral do HIV' in laudos[0] and 'CD4' in laudos[0] and 'B24' in laudos[0]
+    assert 'Creatinina' not in laudos[0]
+    # Cada procedimento na sua linha, com a quantidade: a carga viral (principal) acima do CD4
+    assert laudos[0].index('Carga Viral do HIV') < laudos[0].index('CD4')
+    # CID diferente, laudo à parte: o teste de DNA-HPV (rastreio, Z12.4) não divide o laudo com os exames do HIV
+    misto = paginas(['Carga Viral do HIV (HIV RNA)', 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular',
+                     'Contagem de linfócitos T CD4+'])
+    laudos = [p.extract_text() for p in misto if 'COMPLEXIDADE - APAC' in p.extract_text()]
+    assert len(laudos) == 2
+    assert 'Carga Viral do HIV' in laudos[0] and 'CD4' in laudos[0] and 'Papilomavírus' not in laudos[0]
+    assert 'Papilomavírus' in laudos[1] and 'Z12.4' in laudos[1] and 'CD4' not in laudos[1]
+
+
+def test_laudo_de_apac_agrupa_ate_tres_exames_de_laboratorio_e_nenhum_de_imagem():
+    """O formulário do SUS tem três linhas de procedimento: o quarto exame de laboratório abre outro laudo.
+    Exame de imagem continua com um laudo por exame."""
+    from src.utils import pdf_minutas
+    assert len(pdf_minutas._PROCEDIMENTOS_DA_APAC) == 3
+    hiv = ['Carga Viral do HIV (HIV RNA)', 'Contagem de linfócitos T CD4+', 'Genotipagem do HIV (Teste de Resistência)']
+    hpv = 'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular'
+    exames = [{'titulo': t} for t in hiv + [hpv, 'Creatinina, soro']]
+    titulos = lambda laudos: [([e['titulo'] for e in do_laudo], cid, sec) for do_laudo, cid, sec in laudos]
+    # CID de cada exame: os três do HIV num laudo, o do HPV em outro; a creatinina não vai em APAC
+    apac = {'comorbidades': ['hiv']}
+    assert titulos(pdf_minutas.laudos_de_apac(exames, apac, agrupar=True)) == [(hiv, 'B24', ''), ([hpv], 'Z12.4', 'B24')]
+    # CID digitado vale para todos: quatro exames, três linhas por laudo
+    apac = {'comorbidades': ['hiv'], 'cid': 'B24'}
+    assert titulos(pdf_minutas.laudos_de_apac(exames, apac, agrupar=True)) == [(hiv, 'B24', ''), ([hpv], 'B24', '')]
+    # Sem agrupar (imagem): um laudo por exame, na ordem do pedido
+    assert titulos(pdf_minutas.laudos_de_apac(exames, apac)) == [([t], 'B24', '') for t in hiv + [hpv]]
+    imagem = [{'titulo': t} for t in ('Ressonância magnética de crânio', 'Tomografia computadorizada de tórax de baixa dose (LDCT)')]
+    assert [len(do_laudo) for do_laudo, _, _ in pdf_minutas.laudos_de_apac(imagem, {})] == [1, 1]
 
 
 def test_tabela_de_alta_complexidade_decide_a_apac():
@@ -194,6 +226,9 @@ def test_tela_tem_o_sus_no_seletor_e_os_campos_da_apac():
     # Os campos do laudo aparecem quando o pedido (imagem ou laboratório) tem exame que vai em APAC.
     assert "fetch('/api/apac/exames'" in html and 'function examesEmApacDoPedido(categoria)' in html
     assert "ehSus(valor) && emApac.length" in html and "categoriaDoDialogo === 'imagem'" not in html
+    # A tela diz como o laudo sai: laboratório agrupado (até três por laudo), imagem um por exame
+    assert 'id="apacComoSai"' in html and "categoriaDoDialogo === 'laboratorio'" in html
+    assert 'saem juntos no mesmo laudo de solicitação de APAC (até três por laudo)' in html
     conta = (raiz / 'conta.html').read_text(encoding='utf-8')
     assert 'data-sus' in conta and 'name="cns"' in conta
 
