@@ -226,7 +226,7 @@ def _ctx_dos_medicamentos(p, resultado):
     return {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr'], 'tfg': resultado['tfg'], 'cirurgia': p['cirurgia'],
             'sangramento': p['sangramento'], 'cirurgia_risco_elevado': resultado['contexto']['cir_elev'],
             'urgencia': p['urgencia'], 'neuroaxial': p['neuroaxial'], 'condicoes': set(p['condicoes']),
-            'stent': p['stent'], 'aas_indicacao': p['aas_indicacao'],
+            'stent': p['stent'], 'aas_indicacao': p['aas_indicacao'], 'dose_heparina': p['dose_heparina'],
             'pa_controlada': (pas < 140 and pad < 90) if pas and pad else None}
 
 
@@ -326,6 +326,11 @@ def _casos_do_preoperatorio():
               for cirurgia in ('neurocirurgia', 'rtu', 'colectomia', 'catarata') for com in ([], ['dac'], ['stent'])
               for indicacao in (None, 'primaria', 'secundaria')
               for meds in (['aas_acido_acetilsalicilico'], ['aas_acido_acetilsalicilico', 'clopidogrel'])]
+    # Enoxaparina pela dose (não informada, plena ou profilática), sozinha e com um DOAC, em cada urgência e sangramento
+    casos += [dict(base, peso=75, creatinina=1.0, condicoes=['tev'], medicacoes=meds, dose_heparina=dose, urgencia=urgencia,
+                   sangramento=sang, neuroaxial=neuro)
+              for meds in (['enoxaparina'], ['enoxaparina', 'rivaroxabana']) for dose in (None, '', 'plena', 'profilatica')
+              for urgencia in po.URGENCIAS for sang in (None, 'minimo', 'baixo_moderado', 'alto') for neuro in (None, 'sim')]
     # Exames já realizados: ECG, eco e HbA1c recentes ou antigos, e resultados que alimentam os escores
     for meses, sintomas, com in itertools.product((0, 1, 2, 5, 11, 20, 40), ([], ['dispneia'], ['sopro']), (['dac', 'diabetes'], ['valvopatia'])):
         data = (HOJE_PREOP - timedelta(days=30 * meses + 3)).isoformat()
@@ -372,6 +377,10 @@ def _ctx_extras_dos_medicamentos():
     for com, clcr, neuro in itertools.product(({'protese_mecanica'}, {'protese_mecanica_mitral', 'fa'}, {'fa'}), (None, 20.0, 45.0, 80.0),
                                               (False, True)):
         ctxs.append(dict(base, condicoes=com, clcr=clcr, neuraxial=neuro, sangramento='alto'))
+    # dose da enoxaparina (plena, profilática, não informada ou valor inválido) em cada urgência e risco de sangramento
+    for dose, urg, sang, neuro in itertools.product(('plena', 'profilatica', '', 'x'), ('eletiva', 'tempo_sensivel', 'urgencia', 'emergencia'),
+                                                    (None, 'minimo', 'baixo_moderado', 'alto'), (False, True)):
+        ctxs.append(dict(base, condicoes={'tev'}, dose_heparina=dose, urgencia=urg, sangramento=sang, neuraxial=neuro))
     return ctxs
 
 
@@ -399,7 +408,8 @@ def _textos_do_preoperatorio():
                dict(certo, cirurgia=''), dict(certo, cirurgia='x'), dict(certo, urgencia=''), dict(certo, urgencia='x'),
                dict(certo, peso='x'), dict(certo, peso=500), dict(certo, asa=7), dict(certo, duracao='x'), dict(certo, sangramento='x'),
                dict(certo, pas=20), dict(certo, pad=300), dict(certo, spo2=30), dict(certo, escadas='x'), dict(certo, cfs=12),
-               dict(certo, aas_indicacao='x'), dict(certo, creatinina=40), dict(certo, hemoglobina=1), dict(certo, hba1c_dias=-1),
+               dict(certo, aas_indicacao='x'), dict(certo, dose_heparina='x'), dict(certo, creatinina=40), dict(certo, hemoglobina=1),
+               dict(certo, hba1c_dias=-1),
                dict(certo, pas=120, pad=130), dict(certo, instaveis={'x': 1}), dict(certo, condicoes={'x': 1}),
                dict(certo, sintomas={'x': 1}), dict(certo, dasi={'x': 1}), dict(certo, stop_bang={'x': 1}),
                dict(certo, condicoes=['stent'], stent={'tipo': 'x'}), dict(certo, condicoes=['stent'], stent={'indicacao': 'x'}),
@@ -420,6 +430,34 @@ def test_tudo_o_que_o_preoperatorio_devolve_tem_traducao():
     par em inglês."""
     faltando = sorted(t for t in _textos_do_preoperatorio() if not i18n.coberto(t))
     assert not faltando, f'{len(faltando)} frases do pré-operatório sem par em inglês, por exemplo: {faltando[:8]}'
+
+
+def test_dose_da_enoxaparina_e_frase_do_doac_tem_traducao():
+    """Campo "Dose da enoxaparina" e os textos que ele muda no motor (dose plena, profilática e não informada), mais a
+    frase da dose nos anticoagulantes diretos: cada um com par em inglês."""
+    from src.utils import preop_medicamentos as pm, preoperatorio as po
+
+    t = i18n.traduzir
+    assert t('Dose da enoxaparina') == 'Enoxaparin dose' and t('Não informada') == 'Not provided'
+    assert [t(rotulo) for rotulo in po.DOSES_HEPARINA.values()] == ['Full (therapeutic)', 'Prophylactic']
+    itens = {dose: pm.condutas(['enoxaparina'], {'dose_heparina': dose, 'sangramento': 'alto'})['itens'][0]
+             for dose in ('', 'plena', 'profilatica')}
+    doacs = pm.condutas(['apixabana', 'rivaroxabana', 'edoxabana', 'dabigatrana'], {'clcr': 60.0, 'sangramento': 'alto'})['itens']
+    frases = set(_frases_do_preop({'itens': list(itens.values()) + doacs}))
+    assert len(frases) > 20 and not sorted(f for f in frases if not i18n.coberto(f))
+    assert t(itens['']['texto']).startswith('Enter whether the dose is full or prophylactic. At full dose, last injection 24 h before')
+    assert t(itens['plena']['resumo']) == 'Full dose: last dose on the morning of the day before, at half the daily dose'
+    assert t(itens['plena']['divergencia']).endswith('SBC 2024 (IIa-C): last dose 24 h before. We chose to follow the ACCP 2022.')
+    assert t(itens['profilatica']['resumo']) == 'Prophylactic dose: timing of the last dose agreed with the team'
+    assert 'do not set the interval between the last dose and surgery' in t(itens['profilatica']['texto'])
+    for item in doacs:
+        assert t(item['texto']).endswith('The DOAC dose (full or reduced) does not change this interval in the guidelines used here: '
+                                         'it depends on the drug, CrCl and bleeding risk.'), item['chave']
+    # nenhuma sobra de português nos textos novos
+    for item in list(itens.values()) + doacs:
+        for campo in ('resumo', 'texto', 'divergencia'):
+            assert not re.search(r'\b(última|véspera|cirurgia|sangramento|depois|antes|após|plena|profilática|não)\b', t(item[campo])), t(item[campo])
+    assert t('Opção inválida em a dose da enoxaparina.') == 'Invalid option for the enoxaparin dose.'
 
 
 def test_textos_fixos_da_aba_pre_operatorio_tem_traducao():

@@ -221,6 +221,14 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             <option value="sim">Sim</option>
           </select>
         </div>
+        <div class="campo" id="po_dose_heparina_campo" hidden>
+          <label for="po_dose_heparina">Dose da enoxaparina</label>
+          <select id="po_dose_heparina">
+            <option value="">Não informada</option>
+            <option value="plena">Plena (terapêutica)</option>
+            <option value="profilatica">Profilática</option>
+          </select>
+        </div>
       </div>
     </section>
 
@@ -3987,6 +3995,8 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             // AAS: com doença aterosclerótica ou inibidor de P2Y12 a indicação já é prevenção secundária; só se pergunta sem elas.
             const secundaria = PO_SUGESTOES.aas_secundaria.some(k => marcado('po_c_' + k)) || meds.some(m => PO_SUGESTOES.p2y12.includes(m));
             document.getElementById('po_aas_campo').hidden = !meds.includes('aas_acido_acetilsalicilico') || secundaria;
+            // Dose da enoxaparina (plena ou profilática): só se pergunta com a enoxaparina entre as medicações em uso.
+            document.getElementById('po_dose_heparina_campo').hidden = !meds.includes('enoxaparina');
             // Classe ASA mínima pelos exemplos da ASA (tabela ASA_MINIMA do motor, nos atributos data-asa)
             let asa = 0, motivo = '';
             const sobe = (classe, texto) => { if (classe > asa) { asa = classe; motivo = texto; } };
@@ -4053,6 +4063,8 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
                 cirurgia: v('po_cirurgia'), urgencia: v('po_urgencia') || 'eletiva', asa: v('po_asa') || null,
                 duracao: v('po_duracao') || null, sangramento: v('po_sangramento') || null,
                 neuroaxial: v('po_neuroaxial') === 'sim',
+                // Campo escondido (sem enoxaparina entre as medicações): o valor vai vazio.
+                dose_heparina: document.getElementById('po_dose_heparina_campo').hidden ? '' : v('po_dose_heparina'),
                 instaveis: marcadosPreop('po_instaveis'), condicoes, sintomas: marcadosPreop('po_sintomas'),
                 spo2: v('po_spo2') || null, fc: v('po_fc') || null, infeccao_respiratoria: document.getElementById('po_infeccao').checked,
                 escadas: v('po_escadas') || null, dasi, dasi_respondido: dasi.length > 0,

@@ -436,6 +436,135 @@ def test_enoxaparina_extrapolada_e_rotulada():
     assert i['resumo'] == 'Dose plena: última dose 24 h antes' and 'extrapolado' in i['classe']
 
 
+# --- Enoxaparina pela dose e DOAC (pedido do responsável clínico: dose plena ou profilática) --------------------------
+# Fontes: ACCP 2022 conforme a revisão de Douketis e Spyropoulos (NEJM Evidence 2023;2(6), doi 10.1056/EVIDra2200322,
+# Figuras 1 e 2 e texto), SBC 2024 (Quadro 25 e texto do 4.3.2.6) e AHA/ACC (Tabela 13).
+NEUROAXIAL_DA_HBPM = 'Na anestesia neuroaxial (ASRA): punção ≥24 h após dose plena e ≥12 h após dose profilática.'
+DOSE_DO_DOAC = ('A dose do DOAC (plena ou reduzida) não muda este intervalo nas diretrizes usadas aqui: ele depende do '
+                'fármaco, do ClCr e do risco de sangramento.')
+URL_ACCP = 'https://doi.org/10.1056/EVIDra2200322'
+DOACS = ('apixabana', 'rivaroxabana', 'edoxabana', 'dabigatrana')
+
+
+def _referencias_com_link(i):
+    assert i['referencias'] and all(r['label'] and r['url'].startswith('https://') for r in i['referencias']), i
+    return {r['label']: r['url'] for r in i['referencias']}
+
+
+def test_enoxaparina_dose_plena_segue_a_accp_e_mostra_a_sbc():
+    i = item('enoxaparina', dose_heparina='plena', urgencia='eletiva', sangramento='alto')
+    assert i['conduta'] == 'suspender'
+    assert i['resumo'] == 'Dose plena: última dose na manhã da véspera, com metade da dose diária'
+    t = i['texto']
+    # antes: ACCP 2022 (manhã da véspera, meia dose) e SBC (24 h antes, IIa-C), cada uma com o seu nome
+    assert ('ACCP 2022, dose plena (enoxaparina 1 mg/kg de 12/12 h ou 1,5 mg/kg/dia): última dose na manhã da véspera '
+            '(D-1), com metade da dose diária total.') in t
+    assert 'SBC 2024 (Quadro 25, IIa-C): última dose 24 h antes' in t
+    # depois: retorno da dose plena e dose baixa nos primeiros dias
+    assert ('Retorno da dose plena (ACCP 2022): cerca de 24 h após cirurgia de sangramento baixo ou moderado; 48 a 72 h '
+            'após sangramento alto.') in t
+    assert 'enoxaparina 40 mg/dia' in t and 'primeiras 24 a 72 h após cirurgia de sangramento alto' in t
+    assert 'a SBC 2024 fala em iniciar a HBPM profilática 12 h após o procedimento' in t
+    assert t.endswith(NEUROAXIAL_DA_HBPM)                      # a frase do neuroeixo fica como estava
+    assert 'Informe se a dose' not in t
+    assert i['classe'] == 'ACCP 2022 · SBC IIa-C (extrapolado da ponte) · ASRA 2025'
+    refs = _referencias_com_link(i)
+    assert refs['ACCP 2022, antitrombóticos no perioperatório (resumo em NEJM Evidence 2023;2(6))'] == URL_ACCP
+    assert 'SBC 2024, Quadro 25 e texto do 4.3.2.6' in refs and any(r.startswith('ASRA 2025') for r in refs)
+    # ACCP e SBC escrevem a última dose de modo diferente: a divergência mostra as duas e diz qual seguimos
+    d = i['divergencia']
+    assert 'ACCP 2022: última dose plena na manhã da véspera (D-1), com metade da dose diária total.' in d
+    assert 'SBC 2024 (IIa-C): última dose 24 h antes.' in d and d.endswith('Nós optamos por seguir a ACCP 2022.')
+
+
+def test_enoxaparina_dose_profilatica_diz_que_as_fontes_nao_fixam_o_intervalo():
+    i = item('enoxaparina', dose_heparina='profilatica', urgencia='eletiva', sangramento='alto')
+    assert i['conduta'] == 'individualizar'
+    assert i['resumo'] == 'Dose profilática: horário da última dose combinado com a equipe'
+    t = i['texto']
+    assert 'ACCP 2022, SBC 2024 e AHA/ACC não fixam o intervalo entre a última dose e a cirurgia' in t
+    assert 'enoxaparina 40 mg/dia' in t and 'primeiras 24 a 72 h após cirurgia de sangramento alto' in t
+    assert 'a SBC 2024 fala em iniciar a HBPM profilática 12 h após o procedimento' in t
+    assert '≥12 h após dose profilática' in t and t.endswith(NEUROAXIAL_DA_HBPM)
+    # nada do esquema da dose plena: nem "manhã da véspera", nem "24 h antes", nem divergência
+    assert 'manhã da véspera' not in t and '24 h antes' not in t and 'metade da dose' not in t
+    assert i['divergencia'] == '' and i['classe'] == 'Intervalo não fixado nas fontes · ASRA 2025'
+    refs = _referencias_com_link(i)
+    assert refs['ACCP 2022, antitrombóticos no perioperatório (resumo em NEJM Evidence 2023;2(6))'] == URL_ACCP
+    assert 'SBC 2024, Quadro 25 e texto do 4.3.2.6' in refs and 'AHA/ACC 2026, Tabela 13' in refs
+    assert any(r.startswith('ASRA 2025') for r in refs)
+
+
+@pytest.mark.parametrize('dose', [None, '', 'x', 'PLENA', 'terapeutica', ['plena'], 1, True],
+                         ids=['ausente', 'vazia', 'x', 'maiusculas', 'terapeutica', 'lista', 'numero', 'booleano'])
+def test_enoxaparina_dose_nao_informada_ou_invalida_pede_a_dose(dose):
+    ctx = {} if dose is None else {'dose_heparina': dose}
+    i = pm.condutas(['enoxaparina'], ctx)['itens'][0]
+    assert i == item('enoxaparina')                           # valor inválido conta como dose não informada
+    assert i['conduta'] == 'suspender' and i['resumo'] == 'Dose plena: última dose 24 h antes'
+    assert i['texto'] == ('Informe se a dose é plena ou profilática. Em dose plena, última aplicação 24 h antes e '
+                          'retorno ≥24 h depois (48–72 h se sangramento alto), com hemostasia: intervalos que a SBC '
+                          'define para a HBPM na ponte, aqui estendidos ao uso contínuo. ' + NEUROAXIAL_DA_HBPM)
+    assert i['classe'] == 'SBC IIa-C (extrapolado da ponte) · ASRA 2025' and i['divergencia'] == ''
+    assert list(_referencias_com_link(i)) == ['SBC 2024, Quadro 25',
+                                              'ASRA 2025 (5ª ed.), anestesia regional e antitrombóticos (Reg Anesth Pain Med)']
+
+
+@pytest.mark.parametrize('urgencia', ['urgencia', 'emergencia'])
+def test_enoxaparina_na_urgencia_nao_muda_com_a_dose(urgencia):
+    sem = item('enoxaparina', urgencia=urgencia)
+    assert sem['resumo'] == 'Urgência: informar a hora da última dose' and 'Informe se a dose' not in sem['texto']
+    for dose in ('plena', 'profilatica', 'x'):
+        assert item('enoxaparina', urgencia=urgencia, dose_heparina=dose) == sem
+
+
+def test_referencia_da_accp_esta_no_dicionario_do_modulo():
+    assert pm.REFERENCIAS['accp'] == {
+        'label': 'ACCP 2022, antitrombóticos no perioperatório (resumo em NEJM Evidence 2023;2(6))', 'url': URL_ACCP}
+    assert [k for k, r in pm.REFERENCIAS.items() if 'ACCP' in r['label'] or 'CHEST' in r['label']] == ['accp']
+
+
+@pytest.mark.parametrize('chave', DOACS)
+@pytest.mark.parametrize('urgencia', [None, 'eletiva', 'tempo_sensivel'])
+def test_doac_na_cirurgia_eletiva_diz_que_a_dose_nao_muda_o_intervalo(chave, urgencia):
+    ctx = dict(clcr=60.0, sangramento='alto', condicoes={'fa'})
+    if urgencia:
+        ctx['urgencia'] = urgencia
+    i = item(chave, **ctx)
+    assert i['conduta'] == 'suspender' and i['texto'].endswith(' ' + DOSE_DO_DOAC) and i['texto'].count(DOSE_DO_DOAC) == 1
+    # só o texto muda: resumo e dias são os da Tabela 13 (os mesmos de test_matriz_doac)
+    assert i['resumo'] == 'Sem dose do D-2 ao D+2 (última no D-3); reiniciar no D+3'
+    assert 'com a última dose no D-3 e o reinício no D+3' in i['texto']
+    # a dose da enoxaparina não interfere no item do DOAC
+    assert item(chave, dose_heparina='profilatica', **ctx) == i
+    # sem o ClCr ou sem o risco de sangramento o item ainda fala do intervalo, e a frase vem junto
+    for falta in ('clcr', 'sangramento'):
+        j = item(chave, **{k: v for k, v in ctx.items() if k != falta})
+        assert j['conduta'] == 'individualizar' and j['texto'].endswith(' ' + DOSE_DO_DOAC), falta
+
+
+@pytest.mark.parametrize('chave', DOACS)
+def test_doac_sem_a_frase_da_dose_onde_ela_nao_se_aplica(chave):
+    base = dict(clcr=60.0, sangramento='alto', condicoes={'fa'})
+    fora = [dict(base, urgencia='urgencia'), dict(base, urgencia='emergencia'),      # reversão, não intervalo
+            dict(base, sangramento='minimo'),                                        # não interrompe
+            dict(base, condicoes={'protese_mecanica'}),                              # DOAC contraindicado
+            dict(base, condicoes={'fa', 'protese_mecanica_mitral'}),
+            dict(base, neuraxial=True), dict(base, neuroaxial=True, clcr=25.0)]      # o item cita a ASRA, que separa as doses
+    for ctx in fora:
+        assert 'A dose do DOAC' not in item(chave, **ctx)['texto'], ctx
+
+
+@pytest.mark.parametrize('chave', ['varfarina', 'enoxaparina'])
+def test_varfarina_e_enoxaparina_nao_levam_a_frase_do_doac(chave):
+    for dose in ('', 'plena', 'profilatica'):
+        for urgencia in ('eletiva', 'tempo_sensivel', 'urgencia'):
+            for sangramento in (None, 'minimo', 'baixo_moderado', 'alto'):
+                i = item(chave, dose_heparina=dose, urgencia=urgencia, sangramento=sangramento, clcr=60.0,
+                         condicoes={'fa'}, idade=70, sexo='feminino')
+                assert 'A dose do DOAC' not in i['texto'] + i['divergencia'], (dose, urgencia, sangramento)
+
+
 # --- AAS ------------------------------------------------------------------------------------------------------------
 def test_aas_prevencao_primaria_suspende_7_dias():
     i = item('aas_acido_acetilsalicilico', aas_indicacao='primaria')

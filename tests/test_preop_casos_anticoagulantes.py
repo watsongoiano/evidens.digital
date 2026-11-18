@@ -19,6 +19,13 @@ reaproveitar a lógica do módulo, que só é chamado pela API pública):
 - ACCP/CHEST 2022 (Douketis et al., Chest 2022;162:e207–e243, https://doi.org/10.1016/j.chest.2022.07.025): DOAC
   suspenso 1–2 dias antes (1–4 para dabigatrana), reinício ~24 h (baixo/moderado) ou 48–72 h (alto); contra ponte
   com heparina na interrupção de DOAC (condicional); contra ponte na FA (forte) e na prótese mecânica (condicional).
+- ACCP 2022 conforme a revisão de Douketis e Spyropoulos (NEJM Evidence 2023;2(6),
+  https://doi.org/10.1056/EVIDra2200322), Figuras 1 e 2 e texto: HBPM em dose plena (enoxaparina 1 mg/kg de 12/12 h
+  ou 1,5 mg/kg/dia) com a última dose na manhã da véspera (D-1), metade da dose diária total; retorno da dose plena
+  cerca de 24 h depois (sangramento baixo ou moderado) ou 48 a 72 h (alto); dose baixa (enoxaparina 40 mg/dia) nas
+  primeiras 24 a 72 h após sangramento alto. A SBC 2024 (Quadro 25 e texto do 4.3.2.6) fala em última dose 24 h antes
+  (IIa-C) e em HBPM profilática 12 h após o procedimento no alto risco de TEV. Nenhuma delas, nem a AHA/ACC (Tabela
+  13), fixa o intervalo entre a última dose profilática e a cirurgia.
 - ASRA 2025, 5ª edição (Kopp et al., Reg Anesth Pain Med, https://doi.org/10.1136/rapm-2024-105766): neuroaxial
   com DOAC em dose plena ≥72 h; dabigatrana ≥72 h (ClCr ≥50), ≥120 h (ClCr 30–49), bloqueio neuroaxial não
   sugerido com ClCr <30; primeira dose ≥24 h depois; varfarina 5 dias com INR normal; HBPM em dose plena 24 h.
@@ -287,6 +294,17 @@ RE_HEPARINA_POS = re.compile(r'heparina retomada no D\+(\d+)')
 RE_VARF_VOLTA = re.compile(r'Varfarina de volta no D\+(\d+)')
 RE_ENOXA_ANTES = re.compile(r'última dose (\d+) h antes')
 RE_ENOXA_DEPOIS = re.compile(r'retorno ≥(\d+) h depois \((\d+)–(\d+) h se sangramento alto\)')
+# Enoxaparina com a dose informada (campo "Dose da enoxaparina")
+RE_ENOXA_PLENA_ACCP = re.compile(r'ACCP 2022, dose plena \(enoxaparina 1 mg/kg de 12/12 h ou 1,5 mg/kg/dia\): última '
+                                 r'dose na manhã da véspera \(D-(\d+)\), com metade da dose diária total')
+RE_ENOXA_PLENA_SBC = re.compile(r'SBC 2024 \(Quadro 25, IIa-C\): última dose (\d+) h antes')
+RE_ENOXA_RETORNO = re.compile(r'Retorno da dose plena \(ACCP 2022\): cerca de (\d+) h após cirurgia de sangramento '
+                              r'baixo ou moderado; (\d+) a (\d+) h após sangramento alto')
+RE_ENOXA_BAIXA = re.compile(r'\(enoxaparina 40 mg/dia\) pode ser usada nas primeiras (\d+) a (\d+) h após cirurgia de '
+                            r'sangramento alto, até voltar a dose plena \(ACCP 2022\)')
+RE_ENOXA_PROFILATICA_SBC = re.compile(r'SBC 2024 fala em iniciar a HBPM profilática (\d+) h após o procedimento em alto '
+                                      r'risco de tromboembolismo venoso')
+URL_ACCP_NEJM = 'https://doi.org/10.1056/EVIDra2200322'
 RE_REVERSAO_DOAC = {'dabigatrana': re.compile(r'idarucizumab', re.I),
                     'anti_xa': re.compile(r'andexanet|complexo protrombínico', re.I)}
 
@@ -312,7 +330,7 @@ def esquema_doac(resumo):
 # ---------------------------------------------------------------------------------------------------------------
 BASE = dict(idade=60, sexo='masculino', peso=75.0, clcr=80.0, sang='baixo_moderado', neuro=False, urg='eletiva',
             fa=False, has=False, dm=False, ic=False, vasc=None, avc=None, tev=None, protese=None, cancer=False,
-            tromb_grave=False, valvopatia=False)
+            tromb_grave=False, valvopatia=False, dose=None)   # dose: a da enoxaparina ('plena' | 'profilatica')
 PERFIS = [  # (idade, sexo, peso, indicação) — rodízio para variar os pacientes da grade de DOAC
     (34, 'feminino', 58.0, dict(tev='>12m')), (47, 'masculino', 82.0, dict(fa=True, has=True)),
     (58, 'feminino', 64.0, dict(tev='3-12m')), (66, 'masculino', 90.0, dict(fa=True, dm=True)),
@@ -492,6 +510,19 @@ CASOS = _grade() + [
     P('enoxaparina-clcr20-alto', med='enoxaparina', clcr=20.0, sang='alto', idade=84, sexo='feminino',
       tev='1-3m'),
     P('enoxaparina-sangNA', med='enoxaparina', sang=None, idade=46, tev='<1m'),
+    # --- Enoxaparina com a dose informada: plena (ACCP 2022 e SBC) e profilática (sem intervalo nas fontes) --------
+    P('enoxaparina-plena-baixo', med='enoxaparina', dose='plena', idade=57, sexo='feminino', tev='1-3m'),
+    P('enoxaparina-plena-alto', med='enoxaparina', dose='plena', sang='alto', idade=69, cancer=True, tev='3-12m'),
+    P('enoxaparina-plena-sangNA', med='enoxaparina', dose='plena', sang=None, idade=43, sexo='feminino', tev='<1m'),
+    P('enoxaparina-plena-neuroaxial', med='enoxaparina', dose='plena', neuro=True, idade=51, tev='1-3m'),
+    P('enoxaparina-plena-tempo-sensivel', med='enoxaparina', dose='plena', sang='alto', urg='tempo_sensivel', idade=74,
+      sexo='feminino', cancer=True, tev='<1m'),
+    P('enoxaparina-profilatica-baixo', med='enoxaparina', dose='profilatica', idade=62, sexo='feminino', cancer=True),
+    P('enoxaparina-profilatica-alto', med='enoxaparina', dose='profilatica', sang='alto', idade=78, tev='>12m'),
+    P('enoxaparina-profilatica-sangNA', med='enoxaparina', dose='profilatica', sang=None, idade=39, sexo='feminino',
+      tev='>12m'),
+    P('enoxaparina-profilatica-neuroaxial', med='enoxaparina', dose='profilatica', neuro=True, idade=66,
+      cancer=True),
 ]
 
 
@@ -520,7 +551,8 @@ def contexto(p):
         if p['protese'] == 'mitral':
             c.add('protese_mecanica_mitral')
     return {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': p['clcr'],
-            'sangramento': p['sang'], 'neuroaxial': p['neuro'], 'urgencia': p['urg'], 'condicoes': c}
+            'sangramento': p['sang'], 'neuroaxial': p['neuro'], 'urgencia': p['urg'], 'condicoes': c,
+            'dose_heparina': p['dose'] or ''}
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -736,8 +768,55 @@ def verifica_varfarina(p, it, r):
         verifica_aviso_neuro(r)
 
 
+def verifica_enoxaparina_depois(texto, it):
+    """Dose baixa depois da cirurgia: ACCP 2022 (primeiras 24 a 72 h após sangramento alto, até voltar a dose plena) e
+    SBC 2024 (HBPM profilática 12 h após o procedimento no alto risco de TEV)."""
+    mb, ms = RE_ENOXA_BAIXA.search(texto), RE_ENOXA_PROFILATICA_SBC.search(texto)
+    assert mb and ms, texto
+    assert tuple(map(int, mb.groups())) == (24, 72), mb.group(0)
+    _confere(int(ms.group(1)), [('SBC 2024', 12, INF)], 'HBPM profilática: horas depois', it)
+    verifica_intervalos_hbpm_asra(texto, it)
+
+
+def verifica_enoxaparina_plena(p, it, r):
+    """ACCP 2022 (revisão em NEJM Evidence): manhã da véspera, com metade da dose diária; SBC: 24 h antes (IIa-C)."""
+    texto = it['texto']
+    assert it['conduta'] == 'suspender' and 'manhã da véspera' in it['resumo'] and 'metade da dose' in it['resumo']
+    ma, ms, mr = RE_ENOXA_PLENA_ACCP.search(texto), RE_ENOXA_PLENA_SBC.search(texto), RE_ENOXA_RETORNO.search(texto)
+    assert ma and ms and mr, texto
+    assert int(ma.group(1)) == 1, 'ACCP 2022: a última dose plena é na manhã da véspera (D-1)'
+    _confere(int(ms.group(1)), [('SBC Quadro 25', 24, INF)], 'HBPM plena pela SBC: horas antes', it)
+    depois, lo, hi = map(int, mr.groups())
+    _confere(depois, [('ACCP 2022', 24, INF)], 'HBPM plena: horas depois (sangramento baixo ou moderado)', it)
+    assert (lo, hi) == (48, 72), 'ACCP 2022: 48 a 72 h após sangramento alto'
+    # A redação da última dose difere entre ACCP e SBC: tem de aparecer como divergência
+    assert 'ACCP 2022' in it['divergencia'] and 'SBC 2024' in it['divergencia'], it['divergencia']
+    assert 'manhã da véspera' in it['divergencia'] and '24 h antes' in it['divergencia']
+    assert URL_ACCP_NEJM in [ref['url'] for ref in it['referencias']], 'sem a referência da ACCP 2022'
+    verifica_enoxaparina_depois(texto, it)
+
+
+def verifica_enoxaparina_profilatica(p, it, r):
+    """Dose profilática antes da cirurgia: nenhuma das fontes fixa o intervalo, e o item não pode inventar um."""
+    texto = it['texto']
+    assert it['conduta'] == 'individualizar', it['conduta']
+    assert not RE_ENOXA_ANTES.search(it['resumo'] + ' ' + texto) and 'manhã da véspera' not in it['resumo'] + texto, \
+        f'dose profilática com o esquema da dose plena: {it["resumo"]} {texto}'
+    assert not re.search(r'D-\d', it['resumo'] + texto), 'dose profilática com dia de suspensão que as fontes não dão'
+    assert re.search(r'não fixam o intervalo entre a última dose e a cirurgia', texto), texto
+    assert it['divergencia'] == ''
+    assert URL_ACCP_NEJM in [ref['url'] for ref in it['referencias']], 'sem a referência da ACCP 2022'
+    verifica_enoxaparina_depois(texto, it)
+
+
 def verifica_enoxaparina(p, it, r):
     sang = 'alto' if p['neuro'] else p['sang']
+    if p['dose']:
+        {'plena': verifica_enoxaparina_plena, 'profilatica': verifica_enoxaparina_profilatica}[p['dose']](p, it, r)
+        if p['neuro']:
+            verifica_aviso_neuro(r)
+        return
+    assert it['texto'].startswith('Informe se a dose é plena ou profilática.'), it['texto']
     m = RE_ENOXA_ANTES.search(it['resumo'])
     assert m, it['resumo']
     # Última dose plena 24 h antes: SBC Quadro 25 (IIa-C), CHEST 2022 (~24 h), ASRA 2025 (dose alta, 24 h)
