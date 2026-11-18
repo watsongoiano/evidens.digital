@@ -2433,7 +2433,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
                                 ${(subtitulo || referencia_html) ? `<p class="rec-sub">${subtitulo ? escapeHtml(subtitulo) : ''}${subtitulo && referencia_html ? '<span class="text-ink/30 mx-1.5">·</span>' : ''}${referencia_html ? `<span class="referencia-links">${referencia_html}</span>` : ''}</p>` : ''}
                                 ${rec.ultimo_exame ? `<p class="text-[13px] text-[#C0392B] mt-1.5" data-aviso-exame><i class="fa-regular fa-calendar-check mr-1.5"></i>${escapeHtml(rec.ultimo_exame)}${linkDoAviso(rec.ultimo_exame_link)}</p>` : ''}
                             </div>
-                            ${grau ? `<span class="rec-grau ${/^(C|E|PP|D|I)$/.test(grau) ? 'rec-grau-' + grau.toLowerCase() : ''}" title="Grau de evidência ${escapeHtml(grau)}">${escapeHtml(grau)}</span>` : '<span></span>'}
+                            ${grau ? `<span class="rec-grau ${/^(C|E|PP|D|I)$/.test(grau) ? 'rec-grau-' + grau.toLowerCase() : ''}" tabindex="0" role="img" data-dica="${escapeHtml(dicaDoGrau(grau))}" aria-label="${escapeHtml(dicaDoGrau(grau))}">${escapeHtml(grau)}</span>` : '<span></span>'}
                             <button type="button" onclick="removeRecommendation(this)" aria-label="Retirar esta recomendação" class="rec-remover"><i class="fa-solid fa-xmark"></i></button>
                         </div>`;
                     });
@@ -2460,6 +2460,24 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
         };
 
         // Link da fonte citada no aviso de exame já feito (só endereço https enviado pelo servidor).
+        // O que o grau significa, para o selo de cada recomendação: lido da legenda da página (um texto só, já no
+        // idioma em uso), sem o trecho entre parênteses. "C" → "Decisão individual, com o paciente: benefício pequeno
+        // ou evidência limitada".
+        function significadoDoGrau(grau) {
+            for (const item of document.querySelectorAll('#legendaGraus li')) {
+                const selo = item.querySelector('.rec-grau');
+                if (selo && selo.textContent.trim() === grau) {
+                    return item.textContent.slice(item.textContent.indexOf(selo.textContent) + selo.textContent.length)
+                        .replace(/\s*\(.*$/s, '').replace(/[.\s]+$/, '').trim();
+                }
+            }
+            return '';
+        }
+        function dicaDoGrau(grau) {
+            const significado = significadoDoGrau(grau);
+            return T('Grau de evidência') + ' ' + grau + (significado ? ': ' + significado : '');
+        }
+
         function linkDoAviso(link) {
             if (!link || !/^https:\/\/[^\s"'<>]+$/.test(link.url || '')) return '';
             return ` <a href='${link.url}' target="_blank" rel="noopener noreferrer" class="underline">${escapeHtml(link.rotulo)}</a>`;
