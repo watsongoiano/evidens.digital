@@ -36,6 +36,8 @@ COMORBIDADES = {
     'hiperparatireoidismo_primario': {'rotulo': 'Hiperparatireoidismo primário', 'busca': 'paratireoide pth calcio hipercalcemia hptp'},
     'incidentaloma_adrenal': {'rotulo': 'Incidentaloma adrenal', 'busca': 'nodulo de suprarrenal adenoma adrenal massa adrenal'},
     'hipogonadismo_masculino': {'rotulo': 'Hipogonadismo masculino', 'busca': 'testosterona baixa deficiencia androgenica'},
+    'hiperprolactinemia': {'rotulo': 'Hiperprolactinemia ou prolactinoma',
+                           'busca': 'prolactina alta galactorreia adenoma de hipofise cabergolina'},
     'masld': {'rotulo': 'Esteatose hepática (MASLD)', 'agravante': 'esteatose hepática (MASLD)',
               'busca': 'gordura no figado nafld'},
     'cirrose': {'rotulo': 'Cirrose / hepatopatia crônica', 'busca': 'figado'},
@@ -345,6 +347,8 @@ ENDO_TESTOSTERONA = 'Endocrine Society 2018 (hipogonadismo)'
 ATA_NODULO = 'ATA 2015 (nódulo de tireoide)'
 HPTP_2022 = 'Workshop Internacional 2022 (hiperparatireoidismo primário)'
 ESE_INCIDENTALOMA = 'ESE/ENSAT 2023 (incidentaloma adrenal)'
+ENDO_PROLACTINA = 'Endocrine Society 2011 (hiperprolactinemia)'
+PITUITARY_PROLACTINOMA = 'Pituitary Society 2023 (prolactinoma)'
 ENDO_VITAMINA_D = 'Endocrine Society 2024 (vitamina D)'
 ENDO_PA_2016 = 'Endocrine Society 2016 (hiperaldosteronismo)'
 ENDO_PA_2025 = 'Endocrine Society 2025 (hiperaldosteronismo)'
@@ -1786,6 +1790,45 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                  'uma vez por ano; PSA e toque retal antes e 3-12 meses após o início nos homens de 55 a 69 anos (ou de 40 a 69 '
                  'com risco aumentado) que optam pelo rastreio. Marque a testosterona na lista de medicações para o sistema '
                  'pedir esses exames. A diretriz não recomenda rastrear hipogonadismo na população geral.', ENDO_TESTOSTERONA)
+
+    if 'hiperprolactinemia' in com:
+        # Endocrine Society 2011: 1.1-1.3 (diagnóstico), 2.1 (excluir medicação, insuficiência renal, hipotireoidismo e
+        # tumor parasselar: forte, evidência alta) e o seguimento do tratamento. Pituitary Society 2023 (consenso):
+        # repetir a prolactina abaixo de 5x o limite, gravidez, ressonância, IGF-1, densitometria e ecocardiograma.
+        inicial = 'Hiperprolactinemia | Avaliação inicial'
+        for titulo in ('Hormônio Tireoestimulante (TSH), soro', 'Creatinina, soro'):
+            add(titulo, 'laboratorio',
+                'Hiperprolactinemia: antes de investigar a hipófise, excluir medicação, insuficiência renal e '
+                'hipotireoidismo como causa.', inicial, ENDO_PROLACTINA, 'A')
+        if sexo == 'feminino' and idade <= 50 and not gestante:
+            add('Beta-hCG, soro', 'laboratorio',
+                'Hiperprolactinemia em quem pode engravidar: afastar gravidez, causa fisiológica de prolactina alta.',
+                inicial, PITUITARY_PROLACTINOMA, 'E')
+        add('Ressonância magnética de sela túrcica', 'imagem',
+            'Hiperprolactinemia sem causa medicamentosa, renal ou tireoidiana: ressonância da região selar, para tumor de '
+            'hipófise ou lesão parasselar.', inicial, ENDO_PROLACTINA + ' / ' + PITUITARY_PROLACTINOMA, 'A')
+        add('Prolactina, soro', 'laboratorio',
+            'Hiperprolactinemia em tratamento com agonista dopaminérgico: prolactina a partir de 1 mês do início, para '
+            'ajustar a dose. Depois de suspender o tratamento: a cada 3 meses no primeiro ano e, depois, uma vez por ano.',
+            'Hiperprolactinemia | Conforme o tratamento', ENDO_PROLACTINA + ' / ' + PITUITARY_PROLACTINOMA, 'E')
+        orientar('Hiperprolactinemia: confirmar a prolactina alta',
+                 'Aviso de divergência: a Endocrine Society (2011) aceita uma única dosagem acima do limite, colhida sem '
+                 'estresse de punção, e não recomenda testes dinâmicos; a Pituitary Society (2023) pede repetir a dosagem '
+                 'quando a prolactina está abaixo de 5 vezes o limite superior. Macroprolactina: pesquisar na '
+                 'hiperprolactinemia assintomática (Endocrine Society) ou com prolactina abaixo de 200 ng/mL e clínica ou '
+                 'imagem discordantes (Pituitary Society). Tumor grande com prolactina pouco elevada: pedir a dosagem com '
+                 'diluição, por causa do efeito gancho.', ENDO_PROLACTINA + ' / ' + PITUITARY_PROLACTINOMA)
+        orientar('Hiperprolactinemia: hipófise, osso e seguimento',
+                 'A Pituitary Society (2023) recomenda dosar o IGF-1 na avaliação inicial e avaliar a densidade óssea '
+                 'conforme a idade, a duração da hiperprolactinemia e do hipogonadismo e outros fatores de risco. No '
+                 'macroadenoma com risco para o quiasma óptico, campo visual (Endocrine Society). Ressonância de controle: '
+                 'em 1 ano de tratamento, ou em 3 meses no macroprolactinoma se a prolactina continua a subir ou surge '
+                 'sintoma novo (Endocrine Society); a Pituitary Society pede a imagem 3-6 meses após o início no '
+                 'macroprolactinoma. Aviso de divergência sobre o ecocardiograma em uso de cabergolina: para a Endocrine '
+                 'Society, a dose habitual (1-2 mg por semana) provavelmente não exige ecocardiograma periódico; a Pituitary '
+                 'Society sugere ecocardiograma inicial se a dose prevista passa de 2 mg por semana, a cada 2-3 anos acima '
+                 'dessa dose e depois de 5-6 anos com até 2 mg por semana (recomendação fraca).',
+                 ENDO_PROLACTINA + ' / ' + PITUITARY_PROLACTINOMA)
 
     # ---------------- Vacinas por condição de risco ----------------
     # SBIm 2026/2027 (adulto, idoso, gestante) e SBIm Pacientes Especiais 2026/2027; esquemas do PNI pela IN CNV 2026.

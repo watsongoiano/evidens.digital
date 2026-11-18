@@ -4,6 +4,7 @@
    "Cirurgia bariátrica prévia",
    "Corticoide sistêmico ≥ 3 meses",
    "Doença celíaca",
+   "Hiperparatireoidismo primário",
    "Osteoporose"
   ],
   "referencias": [
@@ -26,6 +27,10 @@
    {
     "label": "Drugs Aging 2024 (Sparling)",
     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+    "url": "https://doi.org/10.1002/jbmr.4677"
    }
   ],
   "por_grupo": {
@@ -49,6 +54,12 @@
     {
      "label": "BSG 2014 (doença celíaca)",
      "url": "https://doi.org/10.1136/gutjnl-2013-306578"
+    }
+   ],
+   "Hiperparatireoidismo primário": [
+    {
+     "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+     "url": "https://doi.org/10.1002/jbmr.4677"
     }
    ],
    "Osteoporose": [
@@ -1336,6 +1347,7 @@
  },
  "Beta-hCG, soro": {
   "grupos": [
+   "Hiperprolactinemia",
    "HIV+",
    "PrEP"
   ],
@@ -1347,9 +1359,19 @@
    {
     "label": "MS 2024 (PCDT PrEP)",
     "url": "https://www.gov.br/saude/pt-br/assuntos/pcdt/p/profilaxia-pre-exposicao-prep-oral-a-infeccao-pelo-hiv"
+   },
+   {
+    "label": "Pituitary Society 2023 (prolactinoma)",
+    "url": "https://doi.org/10.1038/s41574-023-00886-5"
    }
   ],
   "por_grupo": {
+   "Hiperprolactinemia": [
+    {
+     "label": "Pituitary Society 2023 (prolactinoma)",
+     "url": "https://doi.org/10.1038/s41574-023-00886-5"
+    }
+   ],
    "HIV+": [
     {
      "label": "HIVMA/IDSA 2024",
@@ -1416,6 +1438,25 @@
     {
      "label": "ATA 2015",
      "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+    }
+   ]
+  }
+ },
+ "Calciúria de 24 horas": {
+  "grupos": [
+   "Hiperparatireoidismo primário"
+  ],
+  "referencias": [
+   {
+    "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+    "url": "https://doi.org/10.1002/jbmr.4677"
+   }
+  ],
+  "por_grupo": {
+   "Hiperparatireoidismo primário": [
+    {
+     "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+     "url": "https://doi.org/10.1002/jbmr.4677"
     }
    ]
   }
@@ -2288,6 +2329,25 @@
    ]
   }
  },
+ "Cortisol após 1 mg de dexametasona, soro": {
+  "grupos": [
+   "Incidentaloma adrenal"
+  ],
+  "referencias": [
+   {
+    "label": "ESE/ENSAT 2023 (incidentaloma adrenal)",
+    "url": "https://doi.org/10.1093/ejendo/lvad066"
+   }
+  ],
+  "por_grupo": {
+   "Incidentaloma adrenal": [
+    {
+     "label": "ESE/ENSAT 2023 (incidentaloma adrenal)",
+     "url": "https://doi.org/10.1093/ejendo/lvad066"
+    }
+   ]
+  }
+ },
  "Creatinina, soro": {
   "grupos": [
    "Adultos com fator de risco para DRC (HAS, DCV, insuficiência cardíaca, doença renal na família)",
@@ -2313,6 +2373,8 @@
    "Fibrilação atrial",
    "Gota",
    "Hepatite C",
+   "Hiperparatireoidismo primário",
+   "Hiperprolactinemia",
    "HIV+",
    "Lúpus eritematoso sistêmico",
    "PrEP",
@@ -2380,6 +2442,10 @@
     "url": "https://doi.org/10.1136/ard.2009.117200"
    },
    {
+    "label": "Endocrine Society 2011 (hiperprolactinemia)",
+    "url": "https://doi.org/10.1210/jc.2010-1692"
+   },
+   {
     "label": "KDIGO 2009 (transplante)",
     "url": "https://kdigo.org/guidelines/transplant-recipient/"
    },
@@ -2402,6 +2468,10 @@
    {
     "label": "NICE CG185 (2023)",
     "url": "https://www.nice.org.uk/guidance/cg185"
+   },
+   {
+    "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+    "url": "https://doi.org/10.1002/jbmr.4677"
    }
   ],
   "por_grupo": {
@@ -2575,6 +2645,18 @@
      "url": "https://www.hcvguidelines.org/"
     }
    ],
+   "Hiperparatireoidismo primário": [
+    {
+     "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+     "url": "https://doi.org/10.1002/jbmr.4677"
+    }
+   ],
+   "Hiperprolactinemia": [
+    {
+     "label": "Endocrine Society 2011 (hiperprolactinemia)",
+     "url": "https://doi.org/10.1210/jc.2010-1692"
+    }
+   ],
    "HIV+": [
     {
      "label": "MS 2024 (PCDT HIV)",
@@ -2653,6 +2735,7 @@
    "Em uso de denosumabe",
    "Em uso de lítio",
    "Em uso de ácido zoledrônico",
+   "Hiperparatireoidismo primário",
    "NEM1 na família",
    "NEM2 na família"
   ],
@@ -2692,6 +2775,10 @@
    {
     "label": "NICE CG185 (2023)",
     "url": "https://www.nice.org.uk/guidance/cg185"
+   },
+   {
+    "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+    "url": "https://doi.org/10.1002/jbmr.4677"
    }
   ],
   "por_grupo": {
@@ -2741,6 +2828,12 @@
      "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/aclasta"
     }
    ],
+   "Hiperparatireoidismo primário": [
+    {
+     "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+     "url": "https://doi.org/10.1002/jbmr.4677"
+    }
+   ],
    "NEM1 na família": [
     {
      "label": "Endocrine Society 2012",
@@ -2762,6 +2855,7 @@
    "Corticoide sistêmico ≥ 3 meses",
    "Em uso de inibidor de aromatase",
    "Fratura de quadril em pai ou mãe",
+   "Hiperparatireoidismo primário",
    "Mulheres ≥65 anos",
    "Osteoporose",
    "Pós-menopausa <65 anos com fator de risco"
@@ -2794,6 +2888,10 @@
    {
     "label": "USPSTF 2025",
     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+   },
+   {
+    "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+    "url": "https://doi.org/10.1002/jbmr.4677"
    }
   ],
   "por_grupo": {
@@ -2863,6 +2961,20 @@
      "url": "https://doi.org/10.1007/s00198-021-05900-y"
     }
    ],
+   "Hiperparatireoidismo primário": [
+    {
+     "label": "BHOF 2022",
+     "url": "https://doi.org/10.1007/s00198-021-05900-y"
+    },
+    {
+     "label": "USPSTF 2025",
+     "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+    },
+    {
+     "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+     "url": "https://doi.org/10.1002/jbmr.4677"
+    }
+   ],
    "Mulheres ≥65 anos": [
     {
      "label": "ACR 2022",
@@ -2891,6 +3003,10 @@
     {
      "label": "USPSTF 2025",
      "url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening"
+    },
+    {
+     "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+     "url": "https://doi.org/10.1002/jbmr.4677"
     }
    ],
    "Osteoporose": [
@@ -3455,6 +3571,25 @@
    ]
   }
  },
+ "FSH e LH, soro": {
+  "grupos": [
+   "Hipogonadismo masculino"
+  ],
+  "referencias": [
+   {
+    "label": "Endocrine Society 2018 (hipogonadismo)",
+    "url": "https://doi.org/10.1210/jc.2018-00229"
+   }
+  ],
+  "por_grupo": {
+   "Hipogonadismo masculino": [
+    {
+     "label": "Endocrine Society 2018 (hipogonadismo)",
+     "url": "https://doi.org/10.1210/jc.2018-00229"
+    }
+   ]
+  }
+ },
  "Fundoscopia (Exame de fundo de olho)": {
   "grupos": [
    "Diabéticos",
@@ -3481,6 +3616,25 @@
     {
      "label": "ADA 2026 (seção 15)",
      "url": "https://doi.org/10.2337/dc26-S015"
+    }
+   ]
+  }
+ },
+ "Fósforo, soro": {
+  "grupos": [
+   "Hiperparatireoidismo primário"
+  ],
+  "referencias": [
+   {
+    "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+    "url": "https://doi.org/10.1002/jbmr.4677"
+   }
+  ],
+  "por_grupo": {
+   "Hiperparatireoidismo primário": [
+    {
+     "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+     "url": "https://doi.org/10.1002/jbmr.4677"
     }
    ]
   }
@@ -4710,10 +4864,12 @@
    "Em uso de amiodarona",
    "Em uso de lítio",
    "Fibrilação atrial",
+   "Hiperprolactinemia",
    "Hipertireoidismo / antitireoidiano",
    "Hipotireoidismo / levotiroxina",
    "Inibidor de checkpoint",
    "Insuficiência cardíaca",
+   "Nódulo de tireoide",
    "Pré-natal"
   ],
   "referencias": [
@@ -4734,6 +4890,10 @@
     "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
    },
    {
+    "label": "ATA 2015 (nódulo de tireoide)",
+    "url": "https://doi.org/10.1089/thy.2015.0020"
+   },
+   {
     "label": "ATA 2016",
     "url": "https://doi.org/10.1089/thy.2016.0229"
    },
@@ -4748,6 +4908,10 @@
    {
     "label": "ESC 2024 (fibrilação atrial)",
     "url": "https://doi.org/10.1093/eurheartj/ehae176"
+   },
+   {
+    "label": "Endocrine Society 2011 (hiperprolactinemia)",
+    "url": "https://doi.org/10.1210/jc.2010-1692"
    },
    {
     "label": "FEBRASGO/SBEM 2022 (tireoide na gestação)",
@@ -4797,6 +4961,12 @@
      "url": "https://doi.org/10.1093/eurheartj/ehae176"
     }
    ],
+   "Hiperprolactinemia": [
+    {
+     "label": "Endocrine Society 2011 (hiperprolactinemia)",
+     "url": "https://doi.org/10.1210/jc.2010-1692"
+    }
+   ],
    "Hipertireoidismo / antitireoidiano": [
     {
      "label": "ATA 2016",
@@ -4819,6 +4989,12 @@
     {
      "label": "ESC 2021 (insuficiência cardíaca)",
      "url": "https://doi.org/10.1093/eurheartj/ehab368"
+    }
+   ],
+   "Nódulo de tireoide": [
+    {
+     "label": "ATA 2015 (nódulo de tireoide)",
+     "url": "https://doi.org/10.1089/thy.2015.0020"
     }
    ],
    "Pré-natal": [
@@ -5070,6 +5246,7 @@
  "Paratormônio (PTH), soro": {
   "grupos": [
    "Cirurgia bariátrica prévia",
+   "Hiperparatireoidismo primário",
    "NEM1 na família"
   ],
   "referencias": [
@@ -5080,6 +5257,10 @@
    {
     "label": "Endocrine Society 2012",
     "url": "https://doi.org/10.1210/jc.2012-1230"
+   },
+   {
+    "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+    "url": "https://doi.org/10.1002/jbmr.4677"
    }
   ],
   "por_grupo": {
@@ -5087,6 +5268,12 @@
     {
      "label": "ASMBS 2019",
      "url": "https://doi.org/10.1016/j.soard.2019.10.025"
+    }
+   ],
+   "Hiperparatireoidismo primário": [
+    {
+     "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+     "url": "https://doi.org/10.1002/jbmr.4677"
     }
    ],
    "NEM1 na família": [
@@ -5388,15 +5575,34 @@
  },
  "Prolactina, soro": {
   "grupos": [
+   "Hiperprolactinemia",
    "NEM1 na família"
   ],
   "referencias": [
    {
+    "label": "Endocrine Society 2011 (hiperprolactinemia)",
+    "url": "https://doi.org/10.1210/jc.2010-1692"
+   },
+   {
     "label": "Endocrine Society 2012",
     "url": "https://doi.org/10.1210/jc.2012-1230"
+   },
+   {
+    "label": "Pituitary Society 2023 (prolactinoma)",
+    "url": "https://doi.org/10.1038/s41574-023-00886-5"
    }
   ],
   "por_grupo": {
+   "Hiperprolactinemia": [
+    {
+     "label": "Endocrine Society 2011 (hiperprolactinemia)",
+     "url": "https://doi.org/10.1210/jc.2010-1692"
+    },
+    {
+     "label": "Pituitary Society 2023 (prolactinoma)",
+     "url": "https://doi.org/10.1038/s41574-023-00886-5"
+    }
+   ],
    "NEM1 na família": [
     {
      "label": "Endocrine Society 2012",
@@ -5639,7 +5845,8 @@
  },
  "Radiografia de coluna torácica e lombar (perfil)": {
   "grupos": [
-   "Corticoide sistêmico ≥ 3 meses"
+   "Corticoide sistêmico ≥ 3 meses",
+   "Hiperparatireoidismo primário"
   ],
   "referencias": [
    {
@@ -5649,6 +5856,10 @@
    {
     "label": "Drugs Aging 2024 (Sparling)",
     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+    "url": "https://doi.org/10.1002/jbmr.4677"
    }
   ],
   "por_grupo": {
@@ -5660,6 +5871,12 @@
     {
      "label": "Drugs Aging 2024 (Sparling)",
      "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Hiperparatireoidismo primário": [
+    {
+     "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+     "url": "https://doi.org/10.1002/jbmr.4677"
     }
    ]
   }
@@ -5958,6 +6175,33 @@
     {
      "label": "NCCN 2025",
      "url": "https://www.nccn.org/guidelines/category_2"
+    }
+   ]
+  }
+ },
+ "Ressonância magnética de sela túrcica": {
+  "grupos": [
+   "Hiperprolactinemia"
+  ],
+  "referencias": [
+   {
+    "label": "Endocrine Society 2011 (hiperprolactinemia)",
+    "url": "https://doi.org/10.1210/jc.2010-1692"
+   },
+   {
+    "label": "Pituitary Society 2023 (prolactinoma)",
+    "url": "https://doi.org/10.1038/s41574-023-00886-5"
+   }
+  ],
+  "por_grupo": {
+   "Hiperprolactinemia": [
+    {
+     "label": "Endocrine Society 2011 (hiperprolactinemia)",
+     "url": "https://doi.org/10.1210/jc.2010-1692"
+    },
+    {
+     "label": "Pituitary Society 2023 (prolactinoma)",
+     "url": "https://doi.org/10.1038/s41574-023-00886-5"
     }
    ]
   }
@@ -6280,6 +6524,25 @@
     {
      "label": "GOLD 2026",
      "url": "https://goldcopd.org/"
+    }
+   ]
+  }
+ },
+ "Testosterona total, soro": {
+  "grupos": [
+   "Hipogonadismo masculino"
+  ],
+  "referencias": [
+   {
+    "label": "Endocrine Society 2018 (hipogonadismo)",
+    "url": "https://doi.org/10.1210/jc.2018-00229"
+   }
+  ],
+  "por_grupo": {
+   "Hipogonadismo masculino": [
+    {
+     "label": "Endocrine Society 2018 (hipogonadismo)",
+     "url": "https://doi.org/10.1210/jc.2018-00229"
     }
    ]
   }
@@ -6616,6 +6879,7 @@
  "Ultrassonografia de rins e vias urinárias": {
   "grupos": [
    "DRPAD na família",
+   "Hiperparatireoidismo primário",
    "Síndrome de Cowden na família"
   ],
   "referencias": [
@@ -6626,6 +6890,10 @@
    {
     "label": "NCCN 2025",
     "url": "https://www.nccn.org/guidelines/category_2"
+   },
+   {
+    "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+    "url": "https://doi.org/10.1002/jbmr.4677"
    }
   ],
   "por_grupo": {
@@ -6633,6 +6901,12 @@
     {
      "label": "KDIGO 2025 (DRPAD)",
      "url": "https://kdigo.org/guidelines/adpkd/"
+    }
+   ],
+   "Hiperparatireoidismo primário": [
+    {
+     "label": "Workshop Internacional 2022 (hiperparatireoidismo primário)",
+     "url": "https://doi.org/10.1002/jbmr.4677"
     }
    ],
    "Síndrome de Cowden na família": [
@@ -6646,12 +6920,17 @@
  "Ultrassonografia de tireoide": {
   "grupos": [
    "NEM2 na família",
+   "Nódulo de tireoide",
    "Síndrome de Cowden na família"
   ],
   "referencias": [
    {
     "label": "ATA 2015",
     "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+   },
+   {
+    "label": "ATA 2015 (nódulo de tireoide)",
+    "url": "https://doi.org/10.1089/thy.2015.0020"
    },
    {
     "label": "NCCN 2025",
@@ -6663,6 +6942,12 @@
     {
      "label": "ATA 2015",
      "url": "https://www.thyroid.org/professionals/ata-professional-guidelines/"
+    }
+   ],
+   "Nódulo de tireoide": [
+    {
+     "label": "ATA 2015 (nódulo de tireoide)",
+     "url": "https://doi.org/10.1089/thy.2015.0020"
     }
    ],
    "Síndrome de Cowden na família": [

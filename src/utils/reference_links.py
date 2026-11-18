@@ -257,6 +257,8 @@ _FONTES_DIRETAS = [
     ('ata 2015 (nódulo de tireoide)', 'https://doi.org/10.1089/thy.2015.0020'),
     ('workshop internacional 2022 (hiperparatireoidismo primário)', 'https://doi.org/10.1002/jbmr.4677'),
     ('ese/ensat 2023 (incidentaloma adrenal)', 'https://doi.org/10.1093/ejendo/lvad066'),
+    ('endocrine society 2011 (hiperprolactinemia)', 'https://doi.org/10.1210/jc.2010-1692'),
+    ('pituitary society 2023 (prolactinoma)', 'https://doi.org/10.1038/s41574-023-00886-5'),
     ('endocrine society 2024 (vitamina d)', 'https://doi.org/10.1210/clinem/dgae290'),
     ('endocrine society 2016 (hiperaldosteronismo)', 'https://doi.org/10.1210/jc.2015-4061'),
     ('endocrine society 2025 (hiperaldosteronismo)', 'https://doi.org/10.1210/clinem/dgaf284'),

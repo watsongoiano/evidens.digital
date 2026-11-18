@@ -140,6 +140,9 @@ DO_MOTOR = ('colesterol', 'hdl', 'creatinina', 'uacr', 'hba1c', 'hpv_resultado')
 _APELIDOS = None
 
 
+NOMES_ANTIGOS = {'Fósforo': 'Fósforo, soro'}
+
+
 def apelidos():
     """Título do catálogo (ou da lista de "Exames já realizados") → (título da lista, nomes dos campos)."""
     global _APELIDOS
@@ -160,6 +163,9 @@ def apelidos():
         base = por_chave.get(periodicidade.chaves(titulo))
         if base:
             mapa[titulo] = (base, [c['nome'] for c in POR_TITULO[base]])
+    # Nome que o exame já teve na lista: o registro antigo continua indo para o campo numérico.
+    for antigo, atual in NOMES_ANTIGOS.items():
+        mapa.setdefault(antigo, (atual, [c['nome'] for c in POR_TITULO[atual]]))
     _APELIDOS = mapa
     return mapa
 
