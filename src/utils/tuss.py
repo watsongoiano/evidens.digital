@@ -177,6 +177,7 @@ DESCRICOES = {
     '41001079': 'TC - Tórax',
     '41001087': 'TC - Coração - para avaliação do escore de cálcio coronariano',
     '41101014': 'RM - Crânio (encéfalo)',
+    '41101022': 'RM - Sela túrcica (hipófise)',
     '41101162': 'RM - Mama (unilateral)',
     '41101324': 'Angio-RM (crânio ou pescoço ou tórax ou abdome superior ou pelve) - arterial ou venosa',
 }
@@ -316,6 +317,7 @@ CODIGOS = {
     'Radiografia de tórax': ['40805026'],
     'Radiografia de tórax (PA e perfil)': ['40805026'],
     'Ressonância magnética de crânio': ['41101014'],
+    'Ressonância magnética de sela túrcica': ['41101022'],
     'Ressonância magnética de mamas': [('41101162', 2)],
     'Teste de caminhada de 6 minutos': ['41401115'],
     'Tomografia computadorizada de tórax de baixa dose (LDCT)': ['41001079'],
@@ -367,6 +369,10 @@ SEM_CODIGO = {
         'é consulta com o oftalmologista, não exame com código próprio',
     'Fundoscopia (Exame de fundo de olho)':
         'é consulta com o oftalmologista, não exame com código próprio',
+    'Calciúria de 24 horas':
+        'código da dosagem de cálcio em urina não conferido na TUSS',
+    'Cortisol após 1 mg de dexametasona, soro':
+        'o cortisol sérico fica fora da planilha conferida (hormônios, 40316...); código não conferido',
     'Ressonância magnética de corpo inteiro':
         'sem código conferido na TUSS',
     'Angiotomografia de coronárias':

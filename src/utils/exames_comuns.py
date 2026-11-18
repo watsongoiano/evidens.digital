@@ -54,7 +54,7 @@ EXAMES = [
     ('Rim e eletrólitos', 'Sódio, soro', [_n('sodio', 'Sódio', 'mEq/L', 100, 180)]),
     ('Rim e eletrólitos', 'Potássio, soro', [_n('potassio', 'Potássio', 'mEq/L', 1.5, 9)]),
     ('Rim e eletrólitos', 'Cálcio iônico, soro', [_n('calcio_ionico', 'Cálcio iônico', 'mmol/L', 0.5, 2.5)]),
-    ('Rim e eletrólitos', 'Fósforo', [_n('fosforo', 'Fósforo', 'mg/dL', 0.5, 15)]),
+    ('Rim e eletrólitos', 'Fósforo, soro', [_n('fosforo', 'Fósforo', 'mg/dL', 0.5, 15)]),
     ('Rim e eletrólitos', 'Magnésio, soro', [_n('magnesio', 'Magnésio', 'mg/dL', 0.5, 8)]),
     ('Rim e eletrólitos', 'Paratormônio (PTH), soro', [_n('pth', 'PTH', 'pg/mL', 1, 3000)]),
     ('Fígado', 'Aspartato aminotransferase, soro', [_n('tgo', 'TGO (AST)', 'U/L', 1, 10000)]),
@@ -104,7 +104,7 @@ CURTO = {
     'Apolipoproteína B, soro': 'ApoB', 'Creatinina, soro': 'Creatinina',
     'Relação albumina/creatinina urinária (uACR)': 'Albumina/creatinina (urina)', 'Ureia, soro': 'Ureia',
     'Ácido úrico, soro': 'Ácido úrico', 'EAS - Elementos Anormais e Sedimentoscopia': 'EAS (urina tipo 1)',
-    'Sódio, soro': 'Sódio', 'Potássio, soro': 'Potássio', 'Cálcio iônico, soro': 'Cálcio iônico', 'Fósforo': 'Fósforo',
+    'Sódio, soro': 'Sódio', 'Potássio, soro': 'Potássio', 'Cálcio iônico, soro': 'Cálcio iônico', 'Fósforo, soro': 'Fósforo',
     'Magnésio, soro': 'Magnésio', 'Paratormônio (PTH), soro': 'PTH', 'Aspartato aminotransferase, soro': 'TGO (AST)',
     'Alanina aminotransferase, soro': 'TGP (ALT)', 'Gama-GT, soro': 'Gama-GT', 'Fosfatase alcalina, soro': 'Fosfatase alcalina',
     'Bilirrubinas totais e frações, soro': 'Bilirrubinas', 'Albumina, soro': 'Albumina sérica',
@@ -140,6 +140,9 @@ DO_MOTOR = ('colesterol', 'hdl', 'creatinina', 'uacr', 'hba1c', 'hpv_resultado')
 _APELIDOS = None
 
 
+NOMES_ANTIGOS = {'Fósforo': 'Fósforo, soro'}
+
+
 def apelidos():
     """Título do catálogo (ou da lista de "Exames já realizados") → (título da lista, nomes dos campos)."""
     global _APELIDOS
@@ -160,6 +163,9 @@ def apelidos():
         base = por_chave.get(periodicidade.chaves(titulo))
         if base:
             mapa[titulo] = (base, [c['nome'] for c in POR_TITULO[base]])
+    # Nome que o exame já teve na lista: o registro antigo continua indo para o campo numérico.
+    for antigo, atual in NOMES_ANTIGOS.items():
+        mapa.setdefault(antigo, (atual, [c['nome'] for c in POR_TITULO[atual]]))
     _APELIDOS = mapa
     return mapa
 

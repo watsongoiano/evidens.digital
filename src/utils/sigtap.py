@@ -30,6 +30,7 @@ PROCEDIMENTOS = {
     'Escore de cálcio coronariano (TC)': ('', True),
     # Ressonância (SES-GO: APAC)
     'Ressonância magnética de crânio': ('0207010064', True),
+    'Ressonância magnética de sela túrcica': ('', True),          # SES-GO: ressonância em APAC; código não conferido
     'Angiorressonância de crânio': ('', True),
     'Ressonância magnética de mamas': ('', True),
     'Ressonância magnética de corpo inteiro': ('', True),
