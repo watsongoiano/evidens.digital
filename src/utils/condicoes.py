@@ -61,6 +61,8 @@ COMORBIDADES = {
                    'busca': 'rcu colite ulcerativa dii doenca inflamatoria intestinal autoimune'},
     'esclerose_sistemica': {'rotulo': 'Esclerose sistêmica (esclerodermia)', 'busca': 'autoimune colagenose'},
     'asma_grave': {'rotulo': 'Asma moderada ou grave'},
+    'hipertensao_arterial_pulmonar': {'rotulo': 'Hipertensão arterial pulmonar (grupo 1)',
+                                      'busca': 'hipertensao pulmonar hap pah bosentana ambrisentana sildenafila'},
     'asplenia': {'rotulo': 'Asplenia / esplenectomia', 'busca': 'baco'},
     'anemia_falciforme': {'rotulo': 'Doença falciforme', 'busca': 'anemia falciforme hemoglobinopatia'},
     'transplante': {'rotulo': 'Transplante de órgão sólido ou de medula', 'imunossupressao': True},
@@ -1680,6 +1682,48 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Espirometria, com broncodilatador', 'imagem',
             'Asma: função pulmonar no diagnóstico, 3-6 meses após iniciar o controlador e depois periodicamente, pelo menos a '
             'cada 1-2 anos.', 'Asma moderada ou grave | A cada 1-2 anos', GINA, 'C')
+    if 'hipertensao_arterial_pulmonar' in com:
+        # ESC/ERS 2022, texto integral lido em 18/11/2026: Tabela 17 (avaliações e momentos do seguimento, com as notas:
+        # exames básicos = hemograma, INR em uso de antagonista da vitamina K, creatinina, sódio, potássio, TGO/TGP,
+        # bilirrubina e BNP/NT-proBNP; estendidos = TSH, troponina, ácido úrico e ferro, conforme o quadro),
+        # Recommendation Table 4 (gravidade por painel de dados e risco em quatro estratos no seguimento: classe I,
+        # nível B), seção 6.3.1.6 (ferro) e Recommendation Table 5 (ferro e vacinas: classe I, nível C).
+        hap = 'Hipertensão arterial pulmonar'
+        for titulo, categoria in (('Peptídeo natriurético BNP/PROBNP', 'laboratorio'),
+                                  ('Teste de caminhada de 6 minutos', 'imagem')):
+            add(titulo, categoria,
+                'Hipertensão arterial pulmonar: no seguimento, o risco é estratificado em quatro níveis pela classe funcional '
+                '(OMS), pela distância no teste de caminhada de 6 minutos e pelo BNP ou NT-proBNP. Reavaliar 3-6 meses após '
+                'mudança do tratamento e a cada 3-6 meses no paciente estável, com o intervalo ajustado ao caso.',
+                hap + ' | A cada 3-6 meses', ESC_ERS_HP, 'A', 'alta')
+        add('Ecocardiograma transtorácico', 'imagem',
+            'Hipertensão arterial pulmonar: a gravidade é avaliada por um painel de dados (avaliação clínica, teste de '
+            'exercício, biomarcadores, ecocardiograma e hemodinâmica). O ecocardiograma, ou a ressonância cardíaca, entra na '
+            'avaliação inicial e no seguimento.', hap + ' | Conforme a evolução', ESC_ERS_HP, 'A')
+        for titulo in ('Hemograma completo com plaquetas', 'Creatinina, soro', 'Sódio e potássio, soro',
+                       'Aspartato aminotransferase, soro', 'Alanina aminotransferase, soro',
+                       'Bilirrubinas totais e frações, soro'):
+            add(titulo, 'laboratorio',
+                'Hipertensão arterial pulmonar: exames básicos sugeridos na avaliação inicial e em cada reavaliação '
+                '(hemograma, creatinina, sódio, potássio, TGO, TGP e bilirrubinas, além do BNP ou NT-proBNP).',
+                hap + ' | A cada 3-6 meses', ESC_ERS_HP, 'E')
+        for titulo in ('Ferritina, soro', 'Ferro sérico e saturação de transferrina'):
+            add(titulo, 'laboratorio',
+                'Hipertensão arterial pulmonar: monitorar o estado do ferro com regularidade (ferro sérico, ferritina e '
+                'saturação de transferrina). Deficiência de ferro: ferritina abaixo de 100 µg/L, ou de 100 a 299 µg/L com '
+                'saturação de transferrina abaixo de 20%. Com anemia ferropriva, corrigir o ferro.',
+                hap + ' | Periódico', ESC_ERS_HP, 'E')
+        if idade < 50:
+            add(PNEUMO, 'vacina',
+                'Dose única. Hipertensão arterial pulmonar: vacinar contra pneumococo, influenza e COVID-19. Já recebeu '
+                'VPP23: aguardar 1 ano.', hap + ' | Dose única', ESC_ERS_HP, 'A', 'alta')
+        orientar('Hipertensão arterial pulmonar: seguimento e vacinas',
+                 'O seguimento é feito em centro de referência. Além dos exames pedidos, a diretriz lista: gasometria '
+                 'arterial na avaliação inicial (a oximetria de pulso pode substituí-la no paciente estável), '
+                 'eletrocardiograma, qualidade de vida, teste cardiopulmonar de exercício e cateterismo direito, conforme o '
+                 'caso. Exames estendidos (TSH, troponina, ácido úrico) conforme o quadro clínico; INR em uso de antagonista '
+                 'da vitamina K. Vacinas recomendadas: influenza, pneumocócica e COVID-19. Na deficiência de ferro sem '
+                 'anemia, a reposição pode ser considerada.', ESC_ERS_HP)
     if 'fibrilacao_atrial' in com:
         add('Ecocardiograma transtorácico', 'imagem',
             'Fibrilação atrial: ecocardiograma transtorácico para orientar o tratamento (cardiopatia estrutural, função '
@@ -1927,7 +1971,9 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'grave ou descompensação.', 'Diabetes, nefropatia ou hepatopatia ≥ 50 anos | Dose única | Rede privada',
             SBIM_ESPECIAIS, 'B')
     if 60 <= idade < 70:
-        risco_vsr = bool({'dpoc', 'asma_grave', 'dcv_aterosclerotica', 'cardiopatia', 'insuficiencia_cardiaca'} & com) \
+        # A hipertensão arterial pulmonar é doença cardiopulmonar crônica: entra como as demais pneumopatias e cardiopatias.
+        risco_vsr = bool({'dpoc', 'asma_grave', 'dcv_aterosclerotica', 'cardiopatia', 'insuficiencia_cardiaca',
+                          'hipertensao_arterial_pulmonar'} & com) \
             or tem_diabetes or drc or hepatopatia or obeso or imuno or hiv
         if risco_vsr:
             add(VSR, 'vacina', 'Dose única para 60-69 anos com maior risco: cardiopatia, pneumopatia, diabetes, obesidade, '

@@ -87,6 +87,7 @@
    "Em uso de tocilizumabe",
    "Hepatite B crônica",
    "Hepatite C",
+   "Hipertensão arterial pulmonar",
    "Hipertireoidismo",
    "HIV+",
    "MASLD",
@@ -132,6 +133,10 @@
    {
     "label": "EMA (bula do natalizumabe)",
     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/tysabri"
+   },
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
    },
    {
     "label": "FDA (bula do tocilizumabe)",
@@ -243,6 +248,12 @@
     {
      "label": "AASLD/IDSA (hepatite C)",
      "url": "https://www.hcvguidelines.org/"
+    }
+   ],
+   "Hipertensão arterial pulmonar": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
     }
    ],
    "Hipertireoidismo": [
@@ -1072,6 +1083,7 @@
    "Em uso de sulfassalazina",
    "Em uso de tocilizumabe",
    "Hepatite C",
+   "Hipertensão arterial pulmonar",
    "HIV+",
    "MASLD",
    "Obesidade com fator de risco metabólico"
@@ -1108,6 +1120,10 @@
    {
     "label": "EMA (bula do natalizumabe)",
     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/tysabri"
+   },
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
    },
    {
     "label": "FDA (bula do tocilizumabe)",
@@ -1213,6 +1229,12 @@
     {
      "label": "AASLD/IDSA (hepatite C)",
      "url": "https://www.hcvguidelines.org/"
+    }
+   ],
+   "Hipertensão arterial pulmonar": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
     }
    ],
    "HIV+": [
@@ -1390,12 +1412,17 @@
   "grupos": [
    "Corticoide em dose imunossupressora",
    "Corticoide sistêmico ≥ 3 meses",
+   "Hipertensão arterial pulmonar",
    "HIV+"
   ],
   "referencias": [
    {
     "label": "Drugs Aging 2024 (Sparling)",
     "url": "https://doi.org/10.1007/s40266-024-01143-8"
+   },
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
    },
    {
     "label": "MS 2024 (PCDT HIV)",
@@ -1413,6 +1440,12 @@
     {
      "label": "Drugs Aging 2024 (Sparling)",
      "url": "https://doi.org/10.1007/s40266-024-01143-8"
+    }
+   ],
+   "Hipertensão arterial pulmonar": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
     }
    ],
    "HIV+": [
@@ -2375,6 +2408,7 @@
    "Hepatite C",
    "Hiperparatireoidismo primário",
    "Hiperprolactinemia",
+   "Hipertensão arterial pulmonar",
    "HIV+",
    "Lúpus eritematoso sistêmico",
    "PrEP",
@@ -2436,6 +2470,10 @@
    {
     "label": "ESC 2024 (fibrilação atrial)",
     "url": "https://doi.org/10.1093/eurheartj/ehae176"
+   },
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
    },
    {
     "label": "EULAR 2010 (monitorização do LES)",
@@ -2655,6 +2693,12 @@
     {
      "label": "Endocrine Society 2011 (hiperprolactinemia)",
      "url": "https://doi.org/10.1210/jc.2010-1692"
+    }
+   ],
+   "Hipertensão arterial pulmonar": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
     }
    ],
    "HIV+": [
@@ -3167,7 +3211,8 @@
    "Em terapia anti-HER2",
    "Esclerose sistêmica",
    "Fibrilação atrial",
-   "HAS resistente"
+   "HAS resistente",
+   "Hipertensão arterial pulmonar"
   ],
   "referencias": [
    {
@@ -3254,6 +3299,12 @@
     {
      "label": "SBC 2025",
      "url": "https://abccardiol.org/wp-content/uploads/articles_xml/0066-782X-abc-122-09-e20250624/0066-782X-abc-122-09-e20250624.x66747.pdf"
+    }
+   ],
+   "Hipertensão arterial pulmonar": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
     }
    ]
   }
@@ -3454,6 +3505,7 @@
    "Doença celíaca",
    "Doença de Crohn",
    "Hemocromatose na família",
+   "Hipertensão arterial pulmonar",
    "Insuficiência cardíaca",
    "Retocolite ulcerativa"
   ],
@@ -3485,6 +3537,10 @@
    {
     "label": "ESC 2023 (insuficiência cardíaca)",
     "url": "https://doi.org/10.1093/eurheartj/ehad195"
+   },
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
    }
   ],
   "por_grupo": {
@@ -3516,6 +3572,12 @@
      "url": "https://doi.org/10.1016/j.jhep.2022.03.033"
     }
    ],
+   "Hipertensão arterial pulmonar": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
+    }
+   ],
    "Insuficiência cardíaca": [
     {
      "label": "ESC 2021 (insuficiência cardíaca)",
@@ -3530,6 +3592,25 @@
     {
      "label": "ECCO 2015 (anemia na DII)",
      "url": "https://doi.org/10.1093/ecco-jcc/jju009"
+    }
+   ]
+  }
+ },
+ "Ferro sérico e saturação de transferrina": {
+  "grupos": [
+   "Hipertensão arterial pulmonar"
+  ],
+  "referencias": [
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
+   }
+  ],
+  "por_grupo": {
+   "Hipertensão arterial pulmonar": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
     }
    ]
   }
@@ -4446,6 +4527,7 @@
    "Em uso de tocilizumabe",
    "Fibrilação atrial",
    "Hepatite C",
+   "Hipertensão arterial pulmonar",
    "Hipertireoidismo",
    "HIV+",
    "Insuficiência cardíaca",
@@ -4526,6 +4608,10 @@
    {
     "label": "ESC 2024 (fibrilação atrial)",
     "url": "https://doi.org/10.1093/eurheartj/ehae176"
+   },
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
    },
    {
     "label": "EULAR 2010 (monitorização do LES)",
@@ -4703,6 +4789,12 @@
     {
      "label": "AASLD/IDSA (hepatite C)",
      "url": "https://www.hcvguidelines.org/"
+    }
+   ],
+   "Hipertensão arterial pulmonar": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
     }
    ],
    "Hipertireoidismo": [
@@ -5288,6 +5380,7 @@
   "grupos": [
    "Antraciclina ou anti-HER2",
    "Esclerose sistêmica",
+   "Hipertensão arterial pulmonar",
    "Inibidor de checkpoint",
    "Insuficiência cardíaca"
   ],
@@ -5313,6 +5406,12 @@
     }
    ],
    "Esclerose sistêmica": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
+    }
+   ],
+   "Hipertensão arterial pulmonar": [
     {
      "label": "ESC/ERS 2022 (hipertensão pulmonar)",
      "url": "https://doi.org/10.1093/eurheartj/ehac237"
@@ -6354,12 +6453,17 @@
  },
  "Sódio e potássio, soro": {
   "grupos": [
-   "Fibrilação atrial"
+   "Fibrilação atrial",
+   "Hipertensão arterial pulmonar"
   ],
   "referencias": [
    {
     "label": "ESC 2024 (fibrilação atrial)",
     "url": "https://doi.org/10.1093/eurheartj/ehae176"
+   },
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
    }
   ],
   "por_grupo": {
@@ -6367,6 +6471,12 @@
     {
      "label": "ESC 2024 (fibrilação atrial)",
      "url": "https://doi.org/10.1093/eurheartj/ehae176"
+    }
+   ],
+   "Hipertensão arterial pulmonar": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
     }
    ]
   }
@@ -6511,9 +6621,14 @@
  },
  "Teste de caminhada de 6 minutos": {
   "grupos": [
-   "DPOC"
+   "DPOC",
+   "Hipertensão arterial pulmonar"
   ],
   "referencias": [
+   {
+    "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+    "url": "https://doi.org/10.1093/eurheartj/ehac237"
+   },
    {
     "label": "GOLD 2026",
     "url": "https://goldcopd.org/"
@@ -6524,6 +6639,12 @@
     {
      "label": "GOLD 2026",
      "url": "https://goldcopd.org/"
+    }
+   ],
+   "Hipertensão arterial pulmonar": [
+    {
+     "label": "ESC/ERS 2022 (hipertensão pulmonar)",
+     "url": "https://doi.org/10.1093/eurheartj/ehac237"
     }
    ]
   }
