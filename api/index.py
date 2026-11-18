@@ -58,6 +58,32 @@ def _recusar_envio_de_outro_site():
         return jsonify({'error': 'Requisição recusada: origem não reconhecida.'}), 403
 
 
+# Cabeçalhos de segurança de toda resposta (páginas, arquivos e API).
+# - nosniff: o navegador usa o tipo declarado, sem adivinhar pelo conteúdo.
+# - X-Frame-Options e frame-ancestors: só o próprio site pode exibir as páginas em moldura (a página das
+#   operadoras embute o formulário do check-up); impede que outro site as sobreponha para capturar cliques.
+# - base-uri e form-action: uma marcação injetada não muda a base dos links nem envia formulário para fora.
+#   Os destinos externos de formulário ficam em DESTINOS_DE_FORMULARIO (tests/test_cabecalhos.py confere as páginas).
+# - object-src: só o próprio site (o PDF dos Termos de Uso é exibido por <object>).
+# - HSTS (Strict-Transport-Security) não entra aqui: a Vercel já o envia em todo domínio (max-age de dois anos).
+# Não há script-src: as páginas têm scripts embutidos, e restringi-los pede tirá-los do HTML primeiro.
+DESTINOS_DE_FORMULARIO = ('https://formspree.io',)      # formulário de contato (contact.html)
+CABECALHOS_DE_SEGURANCA = {
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'SAMEORIGIN',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Content-Security-Policy': "frame-ancestors 'self'; base-uri 'self'; object-src 'self'; form-action "
+                               + ' '.join(("'self'",) + DESTINOS_DE_FORMULARIO),
+}
+
+
+@app.after_request
+def _cabecalhos_de_seguranca(resposta):
+    for nome, valor in CABECALHOS_DE_SEGURANCA.items():
+        resposta.headers.setdefault(nome, valor)       # a rota que já definiu o seu (ex.: Referrer-Policy) mantém
+    return resposta
+
+
 # Todo o check-up (recomendações e PDFs) exige conta aprovada.
 @checkup_intelligent_bp.before_request
 def _checkup_exige_login():

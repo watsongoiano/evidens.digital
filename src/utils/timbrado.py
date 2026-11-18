@@ -12,6 +12,7 @@ import logging
 logging.getLogger('pypdf').setLevel(logging.ERROR)
 
 TAMANHO_MAXIMO = 3 * 1024 * 1024
+PIXELS_MAXIMOS = 40_000_000   # imagem do timbrado; uma página A4 a 600 dpi tem 35 milhões de pixels
 PT_EM_MM = 25.4 / 72
 FOLGA = 4.0              # mm entre o que está desenhado no timbrado e o texto do pedido
 MARGEM_PADRAO = 20.0     # mm, quando o timbrado não tem nada naquela borda
@@ -131,13 +132,16 @@ def imagem_para_pdf(conteudo):
     try:
         from PIL import Image
         imagem = Image.open(io.BytesIO(conteudo))
-        imagem.load()
+        # As dimensões vêm do cabeçalho do arquivo e são conferidas antes de descomprimir: um PNG de poucos KB
+        # pode declarar milhares de pixels de lado e ocupar centenas de MB de memória ao ser aberto.
         largura_px, altura_px = imagem.size
-        if not (100 <= largura_px <= 10000 and 100 <= altura_px <= 10000):
+        if not (100 <= largura_px <= 10000 and 100 <= altura_px <= 10000) or largura_px * altura_px > PIXELS_MAXIMOS:
             raise TimbradoInvalido('imagem')
+        imagem.load()
         if imagem.mode not in ('RGB', 'L'):
-            fundo = Image.new('RGB', imagem.size, 'white')       # transparência vira branco
-            fundo.paste(imagem.convert('RGBA'), mask=imagem.convert('RGBA').split()[-1])
+            rgba = imagem.convert('RGBA')
+            fundo = Image.new('RGB', rgba.size, 'white')         # transparência vira branco
+            fundo.paste(rgba, mask=rgba.split()[-1])
             imagem = fundo
     except TimbradoInvalido:
         raise

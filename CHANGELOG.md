@@ -1,6 +1,18 @@
 
 # Patches applied (2025-08-26T12:12:23)
 
+## 2026-11-18 — Imagens conferidas antes de abrir e cabeçalhos de segurança
+
+- Timbrado e logo em imagem: as dimensões passam a ser conferidas antes de descomprimir o arquivo. Antes, a
+  conferência vinha depois: um PNG de poucos KB que declarasse uma imagem enorme era aberto por inteiro na
+  memória da função antes de ser recusado. O timbrado ganhou também um teto de 40 milhões de pixels (uma página
+  A4 a 600 dpi tem 35 milhões).
+- Toda resposta leva `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy` e uma
+  `Content-Security-Policy` com `frame-ancestors`, `base-uri`, `object-src` e `form-action`: as páginas só podem
+  ser emolduradas pelo próprio site (a das operadoras embute o check-up) e formulário só é enviado ao próprio
+  site ou ao Formspree (contato). A política ainda não restringe scripts, porque as páginas têm scripts embutidos.
+  O HSTS continua vindo da Vercel. `tests/test_cabecalhos.py` confere os cabeçalhos e o que as páginas usam.
+
 ## 2026-11-17 — APAC no formulário do SUS, orientações em subtópicos e resumo dos exames
 
 - O laudo de APAC passa a usar o formulário do SUS como fundo (`src/data/apac_sus.pdf`; do modelo recebido só saiu
