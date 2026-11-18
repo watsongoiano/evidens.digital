@@ -17,24 +17,48 @@ O resultado repete as colunas da entrada e acrescenta `cor`, `acao`, `codigo_do_
 divergência entre diretrizes, quando há. Coluna da entrada com nome igual ao de uma coluna de saída sai com o sufixo
 `_entrada`.
 
-## Pela tela (só o administrador)
+## Na tela: conferência do pedido pelo check-up
 
-Em `/operadoras`, com a conta de administrador (botão "Operadoras (modo sombra)" na página da conta): enviar a
-planilha de pedidos (até 2.000 linhas) ou até 8 laudos em PDF (4 MB no total). A tela mostra o resumo por cor, a
-tabela dos primeiros 300 pedidos com motivo e referência, e o botão para baixar o resultado completo em CSV. Os
-arquivos são lidos em memória e descartados; nada é gravado nem registrado. Conta de médico comum não vê a página
-nem consegue usar a rota. A conta própria de operadora ainda não existe.
+`/operadoras` (por enquanto só a conta de administrador; botão "Operadoras (conferência do pedido)" na página da
+conta). A ideia é uma só: usar o check-up do Evidēns como ele é, sem regra a mais nem a menos, para saber se o que o
+médico pediu tem evidência para aquele paciente.
 
-## Dados do paciente, cálcio e exames que não são de rastreio
+1. **Pedido do médico.** PDF com os exames pedidos (até 8 arquivos, 4 MB no total). O leitor entende o laudo de
+   laboratório nos formatos conhecidos e, se o PDF não for laudo, uma lista de nomes de exame ou de códigos TUSS.
+   PDF escaneado, sem texto, não é lido.
+2. **Dados do paciente.** O formulário é o do check-up, com os mesmos itens, dentro da própria página (um quadro com
+   o formulário do check-up: há um formulário só, sem cópia para manter).
+3. **Resultado.** O motor do check-up roda para o paciente e cada exame pedido sai como:
+   - **Indicado**: está entre os exames que o check-up recomenda para o paciente. Vêm o grupo, a periodicidade, o
+     grau e as referências da própria recomendação.
+   - **Não indicado**: não está. Se o check-up o deixou de fora por um motivo que ele mesmo declara (já feito e em
+     dia, adiado na gestação, recomendação de não fazer), o motivo aparece; senão, "O check-up não indica este exame
+     para este paciente".
+   A tela mostra também a lista do que o check-up indica para o paciente, com o que foi e o que não foi pedido, e
+   baixa o resultado em CSV.
 
-- **Dados do paciente.** Com comorbidades e medicações informadas (nas colunas da planilha ou, na tela, no envio dos
-  laudos), o pedido é comparado com o que o check-up recomenda para aquele paciente, e não só para a idade e o sexo. A
-  lista de chaves é a do check-up e está em `/api/admin/operadoras/listas`; chave fora da lista invalida a linha.
-- **Formulário completo do check-up.** Em `/intelligent-tools?modo=operadora` (só administrador; há um botão em
-  `/operadoras`), o mesmo formulário do check-up recebe os laudos do pedido: peso, pressão, tabagismo, história
-  familiar, gestação, resultados e os demais itens entram na comparação. A rota aceita esses dados no campo `paciente`
-  (JSON no formato que o formulário do check-up envia), que é também a porta de entrada prevista para os dados vindos
-  do cadastro da operadora. `exames_anteriores` e o nome do paciente não entram.
+O que **não** entra na conferência: cores, finalidade, CID, regime, pareceres de sociedades e intervalos mínimos do
+modo em lote (abaixo). Entram só dois ajustes de identidade do exame: o cálcio total conta como cálcio iônico, e o
+exame já pesquisado (lactato, CK) traz, como observação, a indicação reconhecida e a fonte.
+
+Os dados do paciente vão à rota `POST /api/admin/operadoras/conferir` no campo `paciente`, em JSON no formato que o
+formulário do check-up envia; é a porta de entrada prevista para os dados que virão do cadastro da operadora. "Exames
+já realizados" vai junto, como no check-up. Nada é gravado: o PDF e os dados são lidos em memória e descartados.
+
+**Limite conhecido.** O check-up pede um exame por indicação. Quando ele recomenda a HbA1c para rastrear diabetes, a
+glicemia de jejum pedida no lugar sai como não indicada, embora a própria recomendação a cite como alternativa.
+
+O modo em lote, por planilha, continua disponível pelo script (seções seguintes) e não aparece na tela.
+
+## Modo em lote: dados do paciente, cálcio e exames que não são de rastreio
+
+- **Dados do paciente.** Com comorbidades e medicações informadas nas colunas da planilha, o pedido é comparado com o
+  que o check-up recomenda para aquele paciente, e não só para a idade e o sexo. As chaves são as do check-up
+  (`comorbidades_validas()` e `medicacoes_validas()` em `src/utils/operadora.py`); chave fora da lista invalida a linha.
+- **Exame que o check-up não indica.** Sem recomendação do check-up e sem parecer contrário específico de sociedade,
+  o pedido sai como "pediria esclarecimento" (pedir a indicação clínica), e não como barrado. A regra geral contra
+  exames de sangue de rotina (SBMFC e CFPC, Choosing Wisely) foi retirada por decisão do responsável clínico; os
+  pareceres específicos por exame continuam valendo.
 - **Cálcio.** O cálcio total (40301400) é tratado como o cálcio iônico (40301419) nas regras, por decisão do
   responsável clínico. No check-up, o cálcio total já feito também conta como cálcio iônico feito.
 - **Exames que não são de rastreio.** Exame que aparece nos laudos das operadoras e não tem regra no check-up é
@@ -45,7 +69,7 @@ nem consegue usar a rota. A conta própria de operadora ainda não existe.
 |---|---|---|
 | Lactato (40301109) | Suspeita de sepse ou de hipoperfusão | [Surviving Sepsis Campaign 2021](https://doi.org/10.1007/s00134-021-06506-y) |
 | CK total (40301648) | Sintoma muscular grave ou fraqueza objetiva em uso de estatina; a dosagem de rotina não é útil | [AHA/ACC 2018](https://doi.org/10.1161/CIR.0000000000000625) |
-| Proteínas totais e frações (40302385) | Nenhum rastreio recomendado a inclui | [SBMFC 2018 e CFPC, Choosing Wisely](https://choosingwiselycanada.org/wp-content/uploads/2022/10/Choosing-Wisely-Canada-Labs-Recommendations-Full-List.pdf) |
+| Proteínas totais e frações (40302385) | Nenhum rastreio recomendado a inclui; sem fonte própria, pede esclarecimento em vez de barrar | — |
 
 ## Arquivo de entrada
 
@@ -131,10 +155,8 @@ Exame alternativo ao recomendado, aceito pelas mesmas diretrizes do check-up:
   após dois exames anuais normais.
 Os dois exames no mesmo pedido ainda não são apontados como duplicidade.
 
-O exame sem recomendação de rastreio para o perfil sai com a referência da regra geral: SBMFC 2018 e CFPC, no
-Choosing Wisely, são contra exames de sangue anuais de rotina sem indicação pelo risco individual
-([lista de laboratório do Choosing Wisely Canada](https://choosingwiselycanada.org/wp-content/uploads/2022/10/Choosing-Wisely-Canada-Labs-Recommendations-Full-List.pdf);
-[lista da SBMFC, em reportagem](https://portal.afya.com.br/saude/choosing-wisely-veja-dicas-para-manejo-de-pacientes-ambulatoriais)).
+O exame sem recomendação do check-up para o perfil, e sem parecer contrário específico, sai como "pediria
+esclarecimento", sem referência: a regra geral do Choosing Wisely contra exames de rotina foi retirada.
 
 ## Pareceres de sociedades médicas
 

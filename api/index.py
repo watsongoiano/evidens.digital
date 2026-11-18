@@ -172,91 +172,54 @@ def operadoras_page():
     return _pagina('operadoras.html', privada=True)
 
 
-@app.route('/api/admin/operadoras/listas')
+@app.route('/api/admin/operadoras/conferir', methods=['POST'])
 @exigir_administrador
-def listas_do_modo_sombra():
-    """Comorbidades e medicações de uso contínuo oferecidas na tela (as mesmas entradas do check-up)."""
-    from src.utils import operadora
-    return jsonify(operadora.listas_para_a_tela())
+def conferir_pedido_de_exames():
+    """Confere um pedido de exames pelo check-up: `paciente` (JSON com os dados do formulário do check-up) e `pedido`
+    (um ou mais PDFs com os exames pedidos). Devolve cada exame pedido como indicado ou não indicado pelo check-up.
 
-
-@app.route('/api/admin/operadoras/classificar', methods=['POST'])
-@exigir_administrador
-def classificar_pedidos_de_operadora():
-    """Classifica uma planilha de pedidos (campo `arquivo`) ou laudos em PDF (campo `laudos`), em modo sombra.
-
-    Tudo é lido em memória e descartado: nada do arquivo é gravado nem registrado."""
+    Tudo é lido em memória e descartado: nada dos arquivos nem do paciente é gravado ou registrado."""
     from src.utils import laudos, operadora
     if not auth.origem_confiavel():
         return jsonify({'error': 'Envio recusado.'}), 403
     request.max_content_length = operadora.TAMANHO_MAXIMO_DO_ENVIO + 64 * 1024
     try:
-        planilha, pdfs = request.files.get('arquivo'), request.files.getlist('laudos')
+        pdfs, bruto = request.files.getlist('pedido'), request.form.get('paciente') or ''
     except Exception:  # corpo maior que o limite
         return jsonify({'error': 'O envio passa de 4 MB. Divida em arquivos menores.'}), 413
-    avisos, do_paciente, paciente = [], None, {}
-    if request.form.get('paciente'):          # dados completos do paciente, no formato do formulário do check-up
+    try:
+        paciente = json.loads(bruto)
+    except ValueError:
+        paciente = None
+    if not isinstance(paciente, dict):
+        return jsonify({'error': 'Informe os dados do paciente.'}), 400
+    if not pdfs:
+        return jsonify({'error': 'Anexe o PDF com os exames pedidos.'}), 400
+    if len(pdfs) > operadora.MAXIMO_DE_ARQUIVOS_NA_TELA:
+        return jsonify({'error': f'Envie até {operadora.MAXIMO_DE_ARQUIVOS_NA_TELA} arquivos por vez.'}), 413
+    pedidos, avisos, internacao = [], [], False
+    for numero, pdf in enumerate(pdfs, 1):
+        nome = os.path.splitext(os.path.basename(pdf.filename or ''))[0][:60] or f'pedido{numero}'
         try:
-            paciente = json.loads(request.form['paciente'])
-            assert isinstance(paciente, dict)
-        except (ValueError, AssertionError):
-            return jsonify({'error': 'Dados do paciente em formato inválido.'}), 400
-        do_paciente, erro = operadora.perfil_do_paciente(paciente)
-        if erro:
-            return jsonify({'error': erro}), 422
-    if planilha is not None:
-        dados = planilha.read(operadora.TAMANHO_MAXIMO_DO_ENVIO + 1)
-        if len(dados) > operadora.TAMANHO_MAXIMO_DO_ENVIO:
-            return jsonify({'error': 'O envio passa de 4 MB. Divida em arquivos menores.'}), 413
-        try:
-            texto = dados.decode('utf-8-sig')
-        except UnicodeDecodeError:
-            texto = dados.decode('cp1252')
-        brutas = operadora.ler_csv(texto)
-        if len(brutas) > operadora.MAXIMO_DE_LINHAS_NA_TELA:
-            return jsonify({'error': f'A planilha tem {len(brutas)} linhas; a tela aceita até '
-                                     f'{operadora.MAXIMO_DE_LINHAS_NA_TELA}. Divida o arquivo.'}), 413
-    elif pdfs:
-        if len(pdfs) > operadora.MAXIMO_DE_LAUDOS_NA_TELA:
-            return jsonify({'error': f'Envie até {operadora.MAXIMO_DE_LAUDOS_NA_TELA} laudos por vez.'}), 413
-        brutas = []
-        comorbidades = set(request.form.getlist('comorbidades')) & set(operadora.comorbidades_validas())
-        medicacoes = set(request.form.getlist('medicacoes')) & set(operadora.medicacoes_validas())
-        idade = request.form.get('idade', '').strip()
-        idade = int(idade) if idade.isdigit() and 0 < int(idade) <= 120 else None
-        sexo = request.form.get('sexo') if request.form.get('sexo') in ('F', 'M') else None
-        if do_paciente is not None:          # idade e sexo já validados pelo motor do check-up
-            idade, sexo = int(paciente['idade']), {'feminino': 'F', 'masculino': 'M'}.get(paciente.get('sexo'), sexo)
-        internados = 0
-        for numero, pdf in enumerate(pdfs, 1):
-            nome = os.path.splitext(os.path.basename(pdf.filename or ''))[0][:60] or f'laudo{numero}'
-            try:
-                pedidos, soltos = operadora.pedidos_do_laudo(
-                    pdf.read(laudos.TAMANHO_MAXIMO + 1), nome, idade=idade, sexo=sexo, carater='eletivo',
-                    regime=request.form.get('regime') or None, finalidade=request.form.get('finalidade') or '',
-                    comorbidades=comorbidades, medicacoes=medicacoes)
-            except laudos.LaudoIlegivel as erro:
-                avisos.append(f'{nome}: não lido ({laudos.MENSAGENS.get(erro.codigo, laudos.MENSAGENS["invalido"])})')
-                continue
-            except ValueError:      # texto fixo: a mensagem da exceção não vai para a resposta
-                avisos.append(f'{nome}: não lido (o cabeçalho do laudo não traz o sexo ou a data de nascimento)')
-                continue
-            brutas += pedidos
-            internados += bool(pedidos) and pedidos[0]['regime'] != 'ambulatorial'
-            avisos.append(f'{nome}: {len(pedidos)} exames identificados'
-                          + (f'; não identificados: {", ".join(soltos)}' if soltos else ''))
-        if internados:
-            avisos.append('Laudo de internação ou de pronto-socorro fica fora do escopo. Para comparar com o check-up, '
-                          'escolha "Ambulatorial" em Regime.')
-    else:
-        return jsonify({'error': 'Anexe a planilha de pedidos ou os laudos em PDF.'}), 400
-    if not brutas:
-        return jsonify({'error': 'Nenhum pedido foi lido. ' + ' '.join(avisos)}), 422
-    resultados, resumo = operadora.classificar_lote(brutas, do_paciente)
-    if do_paciente is not None:
-        avisos.insert(0, 'Comparado com o check-up do paciente informado no formulário completo.')
-    return jsonify({'resumo': resumo, 'avisos': avisos, 'csv': operadora.escrever_csv(brutas, resultados),
-                    'linhas': operadora.linhas_para_a_tela(brutas, resultados)})
+            do_arquivo, soltos, regime = operadora.exames_do_pedido(pdf.read(laudos.TAMANHO_MAXIMO + 1), nome)
+        except laudos.LaudoIlegivel as erro:
+            avisos.append(f'{nome}: não lido ({laudos.MENSAGENS.get(erro.codigo, laudos.MENSAGENS["invalido"])})')
+            continue
+        internacao = internacao or bool(regime)
+        vistos = {p['exame'] for p in pedidos}
+        pedidos += [p for p in do_arquivo if p['exame'] not in vistos]
+        if soltos:
+            avisos.append(f'{nome}: exames não identificados, que ficaram fora da conferência: {", ".join(soltos)}.')
+        if not do_arquivo:
+            avisos.append(f'{nome}: nenhum exame identificado.')
+    if not pedidos:
+        return jsonify({'error': 'Nenhum exame foi identificado no pedido. ' + ' '.join(avisos)}), 422
+    resultado, erro = operadora.conferir_pedido(paciente, pedidos)
+    if erro:
+        return jsonify({'error': erro}), 422
+    if internacao:
+        avisos.append('O PDF é de internação ou de pronto-socorro. O check-up avalia exames de rotina de consultório.')
+    return jsonify({**resultado, 'avisos': avisos})
 
 
 @app.route('/api/analytics/stats')

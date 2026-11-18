@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Operadoras — Evidēns</title>
+<title>Conferência do pedido — Evidēns</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.ico?v=2" sizes="32x32">
 <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
@@ -33,75 +33,48 @@
 </header>
 
 <main class="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 pt-14 lg:pt-20 pb-24">
-  <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">ADMINISTRAÇÃO</p>
-  <h1 class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Operadoras <span class="font-serif italic text-teal tracking-tight">em modo sombra.</span></h1>
-  <p class="text-[16px] text-ink/65 leading-relaxed mt-5">Classifica pedidos de exame laboratorial que a operadora já recebeu. Nada é barrado: a tela mostra o que seria liberado, o que pediria esclarecimento e o que seria barrado. Os arquivos são lidos na memória e descartados; nada é gravado.</p>
-  <p class="text-[13px] text-ink/55 mt-3">Não envie nome, CPF nem número da carteira: use identificador pseudonimizado. O nome do arquivo do laudo vira o identificador do beneficiário.</p>
-  <div data-erro role="alert" class="aviso aviso-erro mt-8" style="display: none;"></div>
+  <p class="text-[12px] tracking-[0.2em] text-teal font-medium mb-6">OPERADORAS</p>
+  <h1 class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Conferência do pedido, <span class="font-serif italic text-teal tracking-tight">pelo check-up.</span></h1>
+  <p class="text-[16px] text-ink/65 leading-relaxed mt-5 max-w-[720px]">Anexe o PDF com os exames que o médico pediu e informe os dados do paciente, como no check-up. O sistema roda o check-up do Evidēns para este paciente e mostra, exame por exame, o que tem indicação e o que não tem.</p>
+  <p class="text-[13px] text-ink/55 mt-3">Nada é barrado nem gravado: o PDF e os dados são lidos na memória e descartados.</p>
 
-  <section class="mt-10 grid md:grid-cols-2 gap-4">
-    <form data-form-csv class="recommendation-card">
-      <h2 class="categoria-titulo">Planilha de pedidos</h2>
-      <p class="text-[14px] text-ink/65">Arquivo CSV, uma linha por exame pedido, até 2.000 linhas.</p>
-      <input type="file" name="arquivo" accept=".csv,text/csv" required class="block w-full text-[14px] mt-4">
-      <div class="flex flex-wrap items-center gap-4 mt-5">
-        <button type="submit" class="btn-escuro">Classificar planilha</button>
-        <button type="button" class="text-[13px] text-teal underline underline-offset-2" data-modelo>Baixar modelo da planilha</button>
-      </div>
-    </form>
-    <form data-form-laudos class="recommendation-card">
-      <h2 class="categoria-titulo">Laudos em PDF</h2>
-      <p class="text-[14px] text-ink/65">Até 8 laudos, 4 MB no total. Cada exame identificado vira um pedido.</p>
-      <input type="file" name="laudos" accept="application/pdf,.pdf" multiple required class="block w-full text-[14px] mt-4">
-      <div class="grid grid-cols-2 gap-3 mt-4 text-[13px]">
-        <label>Finalidade<select name="finalidade" class="block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white">
-          <option value="">Não informada</option><option value="rastreio">Rastreio (rotina)</option><option value="diagnostico">Diagnóstico</option><option value="seguimento">Seguimento</option></select></label>
-        <label>Regime<select name="regime" class="block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white">
-          <option value="">Pelo setor do laudo</option><option value="ambulatorial">Ambulatorial</option><option value="internado">Internado</option><option value="pronto-socorro">Pronto-socorro</option></select></label>
-      </div>
-      <p class="mt-5"><a href="/intelligent-tools?modo=operadora" class="btn-claro">Usar o formulário completo do check-up</a></p>
-      <p class="text-[13px] text-ink/60 mt-2">Com todos os itens do check-up (peso, pressão, tabagismo, história familiar, gestação, exames com resultado). Ou informe aqui só o básico:</p>
-      <p class="text-[13px] text-ink/60 mt-3">Dados do paciente, como no check-up. Valem para todos os laudos deste envio: envie um paciente por vez. Sem eles, a comparação usa só idade e sexo.</p>
-      <div class="grid grid-cols-2 gap-3 mt-3 text-[13px]">
-        <label>Idade<input type="number" name="idade" min="1" max="120" inputmode="numeric" placeholder="Do laudo" class="block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white"></label>
-        <label>Sexo<select name="sexo" class="block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white">
-          <option value="">Do laudo</option><option value="F">Feminino</option><option value="M">Masculino</option></select></label>
-      </div>
-      <div data-perfil="comorbidades" class="mt-4 text-[13px]"></div>
-      <div data-perfil="medicacoes" class="mt-4 text-[13px]"></div>
-      <button type="submit" class="btn-escuro mt-5">Classificar laudos</button>
-    </form>
+  <section class="mt-10 recommendation-card">
+    <h2 class="categoria-titulo">1. Pedido do médico</h2>
+    <label class="block text-[14px] text-ink/65" for="pedidoPdf">PDF com os exames pedidos (até 8 arquivos, 4 MB no total).</label>
+    <input type="file" id="pedidoPdf" data-pedido-pdf accept="application/pdf,.pdf" multiple class="block w-full text-[14px] mt-4">
   </section>
 
-  <p data-andamento class="text-[14px] text-ink/60 mt-6" style="display: none;">Classificando…</p>
+  <section class="mt-10">
+    <h2 class="categoria-titulo">2. Dados do paciente</h2>
+    <p class="text-[14px] text-ink/65 max-w-[720px]">Os mesmos itens do check-up. Ao final, clique em "Conferir pedido".</p>
+    <iframe data-formulario src="/intelligent-tools?modo=operadora&amp;embutido=1" title="Dados do paciente, como no check-up" class="block w-full mt-6 border-0" style="height: 2400px;"></iframe>
+  </section>
+
+  <p data-andamento class="text-[14px] text-ink/60 mt-6" style="display: none;">Conferindo…</p>
 
   <section data-resultado class="mt-12" style="display: none;">
     <div class="flex flex-wrap items-end justify-between gap-4">
-      <h2 class="categoria-titulo !mb-0">Resumo <span data-versao class="text-ink/30"></span></h2>
+      <h2 class="categoria-titulo !mb-0">3. Resultado da conferência</h2>
       <button type="button" class="btn-claro" data-baixar>Baixar resultado (CSV)</button>
     </div>
-    <div data-cartoes class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6"></div>
+    <p data-desatualizado role="status" class="aviso aviso-atencao mt-6" style="display: none;">O pedido ou os dados do paciente mudaram depois desta conferência. Clique em "Conferir pedido" de novo.</p>
+    <div data-cartoes class="grid grid-cols-3 gap-3 mt-6"></div>
     <p data-notas class="text-[13px] text-ink/60 mt-4"></p>
 
     <div class="flex flex-wrap items-end justify-between gap-4 mt-10">
-      <h2 class="categoria-titulo !mb-0">Pedidos <span data-contagem class="text-ink/30"></span></h2>
-      <div class="opcoes" role="radiogroup" aria-label="Filtro por cor" data-filtros>
+      <h3 class="categoria-titulo !mb-0">Exames do pedido <span data-contagem class="text-ink/30"></span></h3>
+      <div class="opcoes" role="radiogroup" aria-label="Filtro" data-filtros>
         <button type="button" class="opcao" role="radio" data-filtro="" aria-checked="true">Todos</button>
-        <button type="button" class="opcao" role="radio" data-filtro="vermelho">Barraria</button>
-        <button type="button" class="opcao" role="radio" data-filtro="amarelo">Esclarecimento</button>
-        <button type="button" class="opcao" role="radio" data-filtro="verde">Liberaria</button>
-        <button type="button" class="opcao" role="radio" data-filtro="fora_do_escopo">Fora do escopo</button>
+        <button type="button" class="opcao" role="radio" data-filtro="indicado">Indicados</button>
+        <button type="button" class="opcao" role="radio" data-filtro="nao_indicado">Não indicados</button>
       </div>
     </div>
-    <div class="overflow-x-auto rounded-[14px] border border-ink/10 bg-white mt-6">
-      <table class="w-full text-[14px] md:min-w-[860px]">
-        <thead class="text-[11px] uppercase tracking-[0.12em] text-ink/50 text-left border-b border-ink/10">
-          <tr><th class="px-4 py-3 font-medium">Pedido</th><th class="px-3 py-3 font-medium">Exame</th><th class="px-3 py-3 font-medium">Parecer</th><th class="px-3 py-3 font-medium hidden md:table-cell">Motivo e referência</th></tr>
-        </thead>
-        <tbody data-linhas></tbody>
-      </table>
-    </div>
-    <p class="text-[12px] text-ink/50 mt-3">A tabela mostra até 300 pedidos; o arquivo de resultado traz todos, com as demais colunas.</p>
+    <div data-linhas class="mt-6"></div>
+
+    <details class="recommendation-card mt-10">
+      <summary class="cursor-pointer text-[14px]">O que o check-up indica para este paciente <span data-do-checkup-contagem class="text-ink/45"></span></summary>
+      <ul data-do-checkup class="mt-4 text-[14px] flex flex-col gap-2"></ul>
+    </details>
   </section>
 </main>
 

@@ -70,11 +70,9 @@ from src.utils import periodicidade, tuss
 
 VERSAO = '0.2'
 
-# Limites do envio pela tela do administrador (o script não tem limite).
+# Limites do envio pela tela (/operadoras).
 TAMANHO_MAXIMO_DO_ENVIO = 4 * 1024 * 1024
-MAXIMO_DE_LINHAS_NA_TELA = 2000
-MAXIMO_DE_LAUDOS_NA_TELA = 8
-LINHAS_MOSTRADAS_NA_TELA = 300
+MAXIMO_DE_ARQUIVOS_NA_TELA = 8
 
 OBRIGATORIAS = ('id_pedido', 'id_beneficiario', 'idade', 'sexo', 'data_pedido', 'codigo_tuss', 'carater', 'regime')
 OPCIONAIS = ('segmentacao', 'finalidade', 'cid', 'indicacao_clinica', 'data_ultimo_exame', 'valor', 'comorbidades',
@@ -138,13 +136,6 @@ def comorbidades_validas():
 def medicacoes_validas():
     from src.utils import medicamentos
     return {chave: item['rotulo'] for chave, item in medicamentos.MEDICAMENTOS.items()}
-
-
-def listas_para_a_tela():
-    """Comorbidades e medicações de uso contínuo que a tela oferece (as mesmas do check-up)."""
-    def ordenadas(itens):
-        return [{'valor': chave, 'rotulo': rotulo} for chave, rotulo in sorted(itens.items(), key=lambda par: _sem_acento(par[1]))]
-    return {'comorbidades': ordenadas(comorbidades_validas()), 'medicacoes': ordenadas(medicacoes_validas())}
 
 
 def _chaves_do_perfil(texto, validas, coluna, erros):
@@ -276,7 +267,6 @@ AVISOS_DE_DIVERGENCIA = {
 }
 
 # Sem recomendação de rastreio para o perfil: a fonte da regra geral.
-_SEM_RECOMENDACAO = {'referencia': 'SBMFC 2018 e CFPC (Choosing Wisely)', 'link': _CW_CANADA}
 
 
 def parecer_contrario(codigo, sexo, finalidade='rastreio', idade=40):
@@ -446,23 +436,6 @@ def _perfil(idade, sexo, comorbidades=frozenset(), medicacoes=frozenset()):
     return _da_resposta(resposta, sexo)
 
 
-def perfil_do_paciente(bruto):
-    """Perfil a partir dos dados completos do paciente, no mesmo formato que o formulário do check-up envia (e que, no
-    futuro, virá do cadastro da operadora). Devolve (perfil, erro): erro é a mensagem do motor para dado inválido.
-
-    `exames_anteriores` não entra: o pedido em análise é que está sendo julgado, e o exame "em dia" sairia da lista do
-    check-up como se não fosse recomendado. O nome do paciente também não entra."""
-    from src.routes.checkup_intelligent import recomendar
-    dados = {k: v for k, v in (bruto or {}).items() if k not in ('exames_anteriores', 'nome_paciente')}
-    with contextlib.redirect_stdout(io.StringIO()):
-        resposta, status = recomendar(dados)
-    if status == 400:
-        return None, resposta.get('error') or 'Dados do paciente inválidos.'
-    if status != 200:
-        raise RuntimeError(f'o motor do check-up falhou (status {status})')
-    return _da_resposta(resposta, {'F': 'feminino', 'M': 'masculino'}.get(dados.get('sexo'), dados.get('sexo'))), None
-
-
 def _da_resposta(resposta, sexo):
     """(recomendados, contrários) por código TUSS, a partir da resposta do motor do check-up."""
     recomendados, contrarios = {}, {}
@@ -494,7 +467,7 @@ def _condicional(texto):
     return 'se normal' in texto.lower()
 
 
-def classificar(linha, do_paciente=None):
+def classificar(linha):
     """Classifica uma linha já normalizada (ler_linha). Devolve as colunas de SAIDA, menos 'erro'."""
     pedido = linha['codigo_tuss']
     codigo = EQUIVALENTES.get(pedido, pedido)          # as regras valem para o exame equivalente
@@ -519,10 +492,7 @@ def classificar(linha, do_paciente=None):
     finalidade, origem = finalidade_usada(linha)
     comum = {'finalidade_usada': finalidade, 'origem_da_finalidade': origem}
     comorbidades, medicacoes = linha.get('comorbidades') or frozenset(), linha.get('medicacoes') or frozenset()
-    if do_paciente is not None:          # dados completos do paciente (formulário do check-up): valem no lugar das colunas
-        perfil, comorbidades = (do_paciente if finalidade == 'rastreio' else None), frozenset({'dados_do_paciente'})
-    else:
-        perfil = _perfil(linha['idade'], linha['sexo'], comorbidades, medicacoes) if finalidade == 'rastreio' else None
+    perfil = _perfil(linha['idade'], linha['sexo'], comorbidades, medicacoes) if finalidade == 'rastreio' else None
     parecer = parecer_contrario(codigo, linha['sexo'], finalidade, linha['idade'])
     if parecer and not (perfil and codigo in perfil[0]):
         return saida(parecer['cor'], parecer['codigo_do_motivo'], parecer['motivo'], referencia=parecer['referencia'],
@@ -537,10 +507,8 @@ def classificar(linha, do_paciente=None):
                          proxima_data_elegivel=proxima.isoformat(), **comum)
     fora = NAO_SAO_DE_RASTREIO.get(codigo)
     if fora and finalidade == 'rastreio' and not (perfil and codigo in perfil[0]):
-        fonte = {'referencia': fora['referencia'], 'link': fora['link']} if fora['link'] else _SEM_RECOMENDACAO
-        return saida('vermelho', 'nao_e_de_rastreio', fora['motivo'] + ('' if fora['link'] else
-                     ' SBMFC 2018 e CFPC (Choosing Wisely) são contra exames de sangue de rotina sem indicação pelo '
-                     'risco individual.'), **fonte, **comum)
+        fonte = {'referencia': fora['referencia'], 'link': fora['link']} if fora['link'] else {}
+        return saida('vermelho' if fora['link'] else 'amarelo', 'nao_e_de_rastreio', fora['motivo'], **fonte, **comum)
     if fora:
         return saida('verde', 'indicacao_informada' if origem == 'informada' else 'indicacao_pelo_cid',
                      'Finalidade diagnóstica ou de seguimento informada no pedido.' if origem == 'informada'
@@ -595,13 +563,12 @@ def classificar(linha, do_paciente=None):
         links = build_reference_links(contra.get('titulo') or '', contra.get('referencia') or '')
         return saida('vermelho', 'recomendacao_contraria', contra.get('motivo') or 'Recomendação contrária ao rastreio.',
                      **comum, **_referencia(contra.get('referencia'), links))
-    return saida('vermelho', 'sem_recomendacao_para_o_perfil',
-                 ('O check-up não recomenda este exame para os dados do paciente informados. ' if do_paciente is not None else
-                  'O check-up não recomenda este exame para a idade, o sexo, as comorbidades e as medicações informadas. '
+    # Sem recomendação do check-up e sem parecer contrário de sociedade: não se barra, pede-se a indicação clínica.
+    return saida('amarelo', 'sem_recomendacao_para_o_perfil',
+                 ('O check-up não indica este exame para a idade, o sexo, as comorbidades e as medicações informadas. '
                   if comorbidades or medicacoes else
-                  'O check-up não recomenda este exame como rastreio para a idade e o sexo informados, sem comorbidade '
-                  'nem gestação informadas. ') + 'SBMFC 2018 e CFPC (Choosing Wisely) são contra exames de sangue anuais de '
-                 'rotina sem indicação pelo risco individual.', **_SEM_RECOMENDACAO, **comum)
+                  'O check-up não indica este exame como rastreio para a idade e o sexo informados, sem comorbidade nem '
+                  'gestação informadas. ') + 'Pedir a indicação clínica.', **comum)
 
 
 def _br(data):
@@ -631,7 +598,7 @@ def _com_o_ultimo_do_arquivo(linhas):
             linha['origem_do_ultimo_exame'] = 'informada'
 
 
-def classificar_lote(brutas, do_paciente=None):
+def classificar_lote(brutas):
     """Classifica as linhas do arquivo. Devolve (resultados, resumo); cada resultado traz as colunas de SAIDA."""
     lidas = [ler_linha(bruta) for bruta in brutas]
     _com_o_ultimo_do_arquivo([linha for linha, _ in lidas])
@@ -639,7 +606,7 @@ def classificar_lote(brutas, do_paciente=None):
     for linha, erros in lidas:
         if not erros:
             try:
-                resultados.append({**classificar(linha, do_paciente), 'erro': ''})
+                resultados.append({**classificar(linha), 'erro': ''})
                 valores.append(linha.get('valor') or 0.0)
                 continue
             except RuntimeError as falha:
@@ -741,11 +708,130 @@ def escrever_csv(brutas, resultados):
     return destino.getvalue()
 
 
-def linhas_para_a_tela(brutas, resultados):
-    """As primeiras linhas, só com o que a tela mostra: identificadores do pedido, exame, cor, motivo e referência."""
-    def texto(valor):
-        return str(valor or '')[:300]
-    return [{'id_pedido': texto(b.get('id_pedido')), 'id_beneficiario': texto(b.get('id_beneficiario')),
-             'data_pedido': texto(b.get('data_pedido')), 'codigo_tuss': texto(b.get('codigo_tuss')),
-             **{c: texto(r.get(c)) for c in ('cor', 'acao', 'motivo', 'exame', 'grau', 'referencia', 'link', 'aviso', 'erro')}}
-            for b, r in list(zip(brutas, resultados))[:LINHAS_MOSTRADAS_NA_TELA]]
+# ── Conferência do pedido pelo check-up (tela /operadoras) ───────────────────────────────────────────────────────────
+# A operadora informa os dados do paciente, os mesmos do check-up, e envia o PDF com os exames que o médico pediu. O
+# motor do check-up roda como está, sem nenhuma regra a mais, e cada exame pedido é só comparado com o que ele devolve:
+# está entre os recomendados para o paciente (indicado) ou não está (não indicado). Os pareceres, as cores e a
+# finalidade do modo em lote (acima) não entram aqui.
+
+_DE_EXAME = ('laboratorio', 'imagem')
+_NAO_INDICADO_AGORA = {
+    'em_dia': 'Já feito e ainda em dia',
+    'nao_recomendado': 'O check-up recomenda não fazer',
+    'adiado_gestacao': 'Adiado na gestação',
+    'proxima_janela': 'Fora da etapa atual da gestação',
+    'etapa_anterior': 'Etapa da gestação já passada',
+    'dados_insuficientes': 'Faltam dados para o check-up indicar',
+}
+_MARCADOR_DE_LISTA = re.compile(r'^\s*(?:[-•*·–]+|\d{1,2}\s*[.)-])\s*')
+_CODIGO_TUSS = re.compile(r'(?<!\d)(4\d{7})(?!\d)')
+
+
+def _da_lista_de_exames(textos):
+    """Exames de um pedido que não tem o formato de laudo: uma lista de nomes ou de códigos TUSS, um por linha (ou
+    separados por vírgula ou ponto e vírgula). Devolve [{'exame', 'nome_no_pedido', 'codigos'}]."""
+    from src.utils import laudos
+    achados = {}
+    for texto in textos:
+        for linha in texto.splitlines():
+            linha = ' '.join(linha.split())
+            for codigo in _CODIGO_TUSS.findall(linha):
+                nome = _conhecidos().get(codigo) or tuss.DESCRICOES.get(codigo) or tuss.DA_TABELA.get(codigo)
+                if nome:
+                    achados.setdefault(nome, {'exame': nome, 'nome_no_pedido': linha[:120], 'codigos': {codigo}})
+            sem_codigo = _CODIGO_TUSS.sub(' ', linha)
+            for trecho in [sem_codigo] + re.split(r'[,;]', sem_codigo):
+                trecho = _MARCADOR_DE_LISTA.sub('', trecho).strip(' -–:.')
+                titulo = laudos.reconhecer(trecho) if 2 < len(trecho) <= 90 else None
+                if titulo:
+                    achados.setdefault(titulo, {'exame': titulo, 'nome_no_pedido': trecho, 'codigos': None})
+    return list(achados.values())
+
+
+def exames_do_pedido(conteudo, arquivo):
+    """Exames pedidos que estão num PDF. Devolve (pedidos, nao_identificados, regime_do_setor).
+
+    Lê o laudo de laboratório nos formatos conhecidos; se o PDF não tiver esse formato, lê uma lista de nomes de
+    exame ou de códigos TUSS. A data é opcional (a conferência não depende dela). PDF escaneado, sem texto, levanta
+    laudos.LaudoIlegivel."""
+    from src.utils import laudos
+    textos = laudos.textos_do_pdf(conteudo)
+    lido, dados = laudos.dos_textos(textos), laudos.cabecalho(textos)
+    pedidos = [{'exame': e['exame'], 'nome_no_pedido': e['nome_no_laudo'], 'data': e['data'], 'codigos': None}
+               for e in lido['exames']]
+    vistos = {p['exame'] for p in pedidos}
+    for linha in lido['sem_data']:                      # reconhecido, só sem data de coleta: conta do mesmo jeito
+        titulo = laudos.reconhecer(linha)
+        if titulo and titulo not in vistos:
+            vistos.add(titulo)
+            pedidos.append({'exame': titulo, 'nome_no_pedido': linha, 'data': '', 'codigos': None})
+    if not pedidos:
+        pedidos = [dict(p, data='') for p in _da_lista_de_exames(textos)]
+    for pedido in pedidos:
+        pedido['arquivo'] = arquivo
+    return pedidos, list(lido['nao_reconhecidos']), regime_do_setor(dados['setor'])
+
+
+def conferir_pedido(paciente, pedidos):
+    """Compara os exames pedidos com o que o check-up recomenda para o paciente. Devolve (resultado, erro).
+
+    `paciente`: os dados no formato que o formulário do check-up envia (é também o formato previsto para os dados que
+    virão do cadastro da operadora). Vão ao motor como estão, menos o nome; "exames já realizados" inclusive, de modo
+    que o exame ainda em dia sai como não indicado agora, com a data do próximo. `pedidos`: saída de exames_do_pedido.
+    `erro` é a mensagem do motor quando os dados do paciente são inválidos."""
+    from src.routes.checkup_intelligent import recomendar
+    from src.utils.reference_links import build_reference_links
+    dados = {k: v for k, v in (paciente or {}).items() if k != 'nome_paciente'}
+    with contextlib.redirect_stdout(io.StringIO()):       # o motor imprime cada recomendação que acrescenta
+        resposta, status = recomendar(dados)
+    if status == 400:
+        return None, resposta.get('error') or 'Dados do paciente inválidos.'
+    if status != 200:
+        raise RuntimeError(f'o motor do check-up falhou (status {status})')
+    sexo = dados.get('sexo')
+    do_checkup = [r for r in resposta.get('recommendations') or [] if r.get('categoria') in _DE_EXAME]
+    indicados, nao_agora = {}, {}
+    for rec in do_checkup:
+        for chave in periodicidade.chaves(rec['titulo'], sexo):
+            indicados.setdefault(chave, rec)
+    for lista in ('nao_incluidas', 'adiados_gestacao', 'proximas_gestacao'):
+        for item in resposta.get(lista) or []:
+            if item.get('categoria') in _DE_EXAME and item.get('titulo'):
+                for chave in periodicidade.chaves(item['titulo'], sexo):
+                    nao_agora.setdefault(chave, item)
+
+    linhas, atendidos = [], set()
+    for pedido in pedidos:
+        chaves = set(pedido.get('codigos') or periodicidade.chaves(pedido['exame'], sexo))
+        chaves |= {EQUIVALENTES[c] for c in chaves if c in EQUIVALENTES}
+        rec = next((indicados[c] for c in sorted(chaves) if c in indicados), None)
+        item = next((nao_agora[c] for c in sorted(chaves) if c in nao_agora), None)
+        linha = {'exame': pedido['exame'], 'nome_no_pedido': pedido.get('nome_no_pedido') or '',
+                 'data': pedido.get('data') or '', 'arquivo': pedido.get('arquivo') or '', 'no_checkup': '',
+                 'grau': '', 'referencias': [], 'aviso': '', 'observacao': '', 'observacao_link': None}
+        if rec:
+            atendidos.add(rec['titulo'])
+            linha.update(veredito='indicado', estado='indicado', motivo=rec.get('subtitulo') or 'Recomendado pelo check-up.',
+                         no_checkup=rec['titulo'], grau=rec.get('grau_evidencia') or '',
+                         referencias=rec.get('referencias') or [], aviso=rec.get('ultimo_exame') or '')
+        elif item:
+            estado = item.get('estado') or 'nao_incluido'
+            rotulo = _NAO_INDICADO_AGORA.get(estado, 'Não incluído pelo check-up')
+            linha.update(veredito='nao_indicado', estado=estado, motivo=f'{rotulo}. {item.get("motivo") or ""}'.strip(),
+                         no_checkup=item['titulo'],
+                         referencias=build_reference_links(item['titulo'], item.get('referencia') or ''))
+        else:
+            linha.update(veredito='nao_indicado', estado='sem_indicacao',
+                         motivo='O check-up não indica este exame para este paciente.')
+            nota = next((NAO_SAO_DE_RASTREIO[c] for c in sorted(chaves) if c in NAO_SAO_DE_RASTREIO), None)
+            if nota and nota['link']:
+                linha.update(observacao=nota['motivo'], observacao_link={'label': nota['referencia'], 'url': nota['link']})
+        linhas.append(linha)
+    indicadas = sum(1 for linha in linhas if linha['veredito'] == 'indicado')
+    return {
+        'resumo': {'pedidos': len(linhas), 'indicados': indicadas, 'nao_indicados': len(linhas) - indicadas,
+                   'do_checkup': len(do_checkup)},
+        'linhas': linhas,
+        'do_checkup': [{'titulo': r['titulo'], 'motivo': r.get('subtitulo') or '', 'grau': r.get('grau_evidencia') or '',
+                        'categoria': r['categoria'], 'pedido': r['titulo'] in atendidos} for r in do_checkup],
+    }, None

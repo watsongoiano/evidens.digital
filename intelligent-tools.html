@@ -16,6 +16,10 @@
 <link rel="stylesheet" href="/static/evidens.css">
 <script defer src="/static/conta.js"></script>
 <script defer src="/_vercel/insights/script.js"></script>
+<script>
+// Formulário embutido na página das operadoras (/operadoras): some o que é da página e fica só o formulário.
+if (new URLSearchParams(window.location.search).get('embutido') === '1') document.documentElement.classList.add('embutido');
+</script>
 </head>
 <body class="bg-paper text-ink font-sans">
 
@@ -1228,18 +1232,6 @@
       </div>
     </section>
 
-    <section id="operadoraPedido" class="risco-cartao" hidden>
-      <h3 class="campo-rotulo">Pedido da operadora (modo sombra)</h3>
-      <p class="text-[14px] text-ink/65">Anexe os laudos em PDF do pedido. Cada exame é comparado com o check-up deste paciente. Nada é barrado nem gravado.</p>
-      <input type="file" id="operadoraLaudos" accept="application/pdf,.pdf" multiple class="block w-full text-[14px] mt-4">
-      <div class="grid grid-cols-2 gap-3 mt-4 text-[13px]">
-        <label>Finalidade<select id="operadoraFinalidade" class="block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white">
-          <option value="">Não informada</option><option value="rastreio">Rastreio (rotina)</option><option value="diagnostico">Diagnóstico</option><option value="seguimento">Seguimento</option></select></label>
-        <label>Regime<select id="operadoraRegime" class="block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white">
-          <option value="">Pelo setor do laudo</option><option value="ambulatorial">Ambulatorial</option><option value="internado">Internado</option><option value="pronto-socorro">Pronto-socorro</option></select></label>
-      </div>
-    </section>
-
     <div id="formErrors" role="alert" class="aviso aviso-erro" style="display: none;"></div>
 
     <div class="flex flex-wrap items-center gap-4 pt-2">
@@ -2004,31 +1996,39 @@
             recommendationsDiv.style.display = 'none';
         }
 
-        // Modo Operadora (/intelligent-tools?modo=operadora, só administrador): o mesmo formulário do check-up serve
-        // para comparar um pedido de exames com o que o check-up recomenda para este paciente.
+        // Formulário embutido na página das operadoras (/operadoras): os mesmos campos do check-up informam o paciente,
+        // e o envio confere o pedido de exames (o PDF anexado naquela página) pelo check-up. Fora do quadro, não vale.
         const MODO_OPERADORA = new URLSearchParams(window.location.search).get('modo') === 'operadora';
-        if (MODO_OPERADORA) {
-            document.getElementById('operadoraPedido').hidden = false;
-            document.querySelector('[data-rotulo-do-envio]').textContent = T('Classificar pedido da operadora');
+        const EMBUTIDO = document.documentElement.classList.contains('embutido') && window.parent !== window;
+        if (MODO_OPERADORA && !EMBUTIDO) window.location.replace('/operadoras');
+        const avisarPaginaDeFora = mensagem => window.parent.postMessage(mensagem, window.location.origin);
+        if (MODO_OPERADORA && EMBUTIDO) {
+            document.querySelector('[data-rotulo-do-envio]').textContent = T('Conferir pedido');
+            const avisarAltura = () => avisarPaginaDeFora(      // a página de fora ajusta a altura do quadro
+                { tipo: 'operadoras_altura', altura: Math.ceil(document.documentElement.getBoundingClientRect().height) });
+            new ResizeObserver(avisarAltura).observe(document.body);
+            window.addEventListener('load', avisarAltura);
+            ['input', 'change'].forEach(evento => checkupForm.addEventListener(evento, () => avisarPaginaDeFora({ tipo: 'operadoras_alterado' })));
         }
-        async function classificarPedidoDaOperadora(data) {
-            const arquivos = document.getElementById('operadoraLaudos').files;
-            if (!arquivos.length) { mostrarErrosDaTela([T('Anexe os laudos em PDF do pedido.')]); return; }
-            const paciente = Object.assign({}, data);
-            delete paciente.nome_paciente; delete paciente.exames_anteriores;
+        async function conferirPedidoDaOperadora(data) {
+            const campo = window.parent.document.querySelector('[data-pedido-pdf]');
+            const arquivos = campo ? Array.from(campo.files) : [];
+            if (!arquivos.length) { mostrarErrosDaTela([T('Anexe o PDF com os exames pedidos, no alto desta página.')]); return; }
+            const paciente = Object.assign({}, data);      // o mesmo que o check-up envia, menos o nome
+            delete paciente.nome_paciente;
+            paciente.inferencias_recusadas = window.inferenciasRecusadas ? window.inferenciasRecusadas() : [];
             const envio = new FormData();
             envio.append('paciente', JSON.stringify(paciente));
-            envio.append('finalidade', document.getElementById('operadoraFinalidade').value);
-            envio.append('regime', document.getElementById('operadoraRegime').value);
-            Array.from(arquivos).forEach(arquivo => envio.append('laudos', arquivo));
+            arquivos.forEach(arquivo => envio.append('pedido', arquivo));
+            avisarPaginaDeFora({ tipo: 'operadoras_enviando' });
             try {
-                const resposta = await fetch('/api/admin/operadoras/classificar', { method: 'POST', body: envio, credentials: 'same-origin' });
+                const resposta = await fetch('/api/admin/operadoras/conferir', { method: 'POST', body: envio, credentials: 'same-origin' });
                 const corpo = await resposta.json().catch(() => ({}));
-                if (!resposta.ok) { mostrarErrosDaTela([corpo.error || T('Não foi possível classificar o pedido.')]); return; }
-                sessionStorage.setItem('operadoras_resultado', JSON.stringify(corpo));
-                window.location.href = '/operadoras';
+                if (!resposta.ok) throw new Error(corpo.error || T('Não foi possível conferir o pedido.'));
+                avisarPaginaDeFora({ tipo: 'operadoras_resultado', corpo });
             } catch (erro) {
-                mostrarErrosDaTela([T('Não foi possível classificar o pedido.')]);
+                avisarPaginaDeFora({ tipo: 'operadoras_erro' });
+                mostrarErrosDaTela([erro.message || T('Não foi possível conferir o pedido.')]);
             }
         }
 
@@ -2046,7 +2046,7 @@
             const data = lerFormulario();
             const problemas = conferirNumeros();
             if (problemas.length) { limparResultados(); mostrarErrosDaTela(problemas); return; }
-            if (MODO_OPERADORA) { classificarPedidoDaOperadora(data); return; }
+            if (MODO_OPERADORA) { conferirPedidoDaOperadora(data); return; }
 
             // O nome do paciente não é necessário para calcular as recomendações
             // e não é enviado nesta etapa; ele só acompanha o pedido de PDF.

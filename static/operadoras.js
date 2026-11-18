@@ -1,170 +1,128 @@
-// Modo sombra das operadoras (/operadoras, só administrador). Envia a planilha ou os laudos para
-// /api/admin/operadoras/classificar e mostra o resultado. Nada fica guardado: recarregar a página apaga tudo.
+// Conferência do pedido pelo check-up (/operadoras, por enquanto só administrador).
+// O formulário do paciente é o do check-up, num quadro com a própria página do check-up (um formulário só, sem
+// cópia). Ele envia os dados e o PDF anexado aqui para /api/admin/operadoras/conferir e entrega o resultado, que
+// esta página mostra. Nada fica guardado: recarregar a página apaga tudo.
 (function () {
   'use strict';
-  const ROTULOS = { verde: 'Liberaria', amarelo: 'Pediria esclarecimento', vermelho: 'Barraria', fora_do_escopo: 'Fora do escopo' };
-  const CORES = { verde: 'bg-mist text-teal-dark', amarelo: 'bg-sand text-ink', vermelho: 'bg-[#C0392B] text-white', fora_do_escopo: 'bg-ink/10 text-ink' };
-  const MODELO = 'id_pedido;id_beneficiario;idade;sexo;data_pedido;codigo_tuss;carater;regime;finalidade;cid;data_ultimo_exame;valor\n'
-    + 'P0001;B0001;52;F;2026-11-10;40316521;eletivo;ambulatorial;rastreio;Z00.0;;18,50\n'
-    + 'P0001;B0001;52;F;2026-11-10;40302830;eletivo;ambulatorial;rastreio;Z00.0;;45,00\n';
+  const VEREDITOS = {
+    indicado: { rotulo: 'Indicado', classe: 'bg-mist text-teal-dark', borda: 'border-teal/20' },
+    nao_indicado: { rotulo: 'Não indicado', classe: 'bg-[#C0392B] text-white', borda: 'border-[#E5B7B1]' },
+  };
   let dados = null;
   let filtro = '';
 
   const $ = sel => document.querySelector(sel);
   const numero = n => Number(n || 0).toLocaleString('pt-BR');
-  const reais = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   function el(tag, classe, texto) {
     const e = document.createElement(tag);
     if (classe) e.className = classe;
     if (texto !== undefined) e.textContent = texto;
     return e;
   }
-  function erro(mensagem) {
-    const caixa = $('[data-erro]');
-    caixa.textContent = mensagem || '';
-    caixa.style.display = mensagem ? '' : 'none';
-  }
-  function baixar(nome, texto) {
-    const link = el('a');
-    link.href = URL.createObjectURL(new Blob(['﻿' + texto], { type: 'text/csv;charset=utf-8' }));
-    link.download = nome;
-    document.body.appendChild(link); link.click(); link.remove();
-    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  const dataBr = iso => (/^\d{4}-\d{2}-\d{2}$/.test(iso || '') ? iso.split('-').reverse().join('/') : '');
+  function fontes(referencias, grau) {
+    const linha = el('p', 'text-[12px] text-ink/50 mt-2');
+    (referencias || []).forEach((r, i) => {
+      if (i) linha.append(' | ');
+      if (/^https:\/\/[^\s"'<>]+$/.test(r.url || '')) {
+        const a = el('a', 'underline', r.label); a.href = r.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        linha.append(a);
+      } else linha.append(r.label || '');
+    });
+    if (grau) linha.append((referencias || []).length ? ' · ' : '', `grau ${grau}`);
+    return linha.childNodes.length ? linha : null;
   }
 
   function resumo() {
     const r = dados.resumo;
-    const validas = r.linhas - r.invalidas;
-    $('[data-versao]').textContent = `versão ${r.versao}`;
-    $('[data-cartoes]').replaceChildren(...Object.keys(ROTULOS).map(cor => {
-      const n = (r.por_cor || {})[cor] || 0;
+    const cartao = (rotulo, valor, nota) => {
       const c = el('div', 'recommendation-card');
-      c.append(el('p', 'text-[12px] text-ink/55 leading-snug', ROTULOS[cor]),
-               el('p', 'text-[32px] font-light tracking-tightest leading-none mt-3', numero(n)),
-               el('p', 'text-[12px] text-ink/50 mt-2', (validas ? (100 * n / validas).toFixed(1).replace('.', ',') + '%' : '')
-                 + ((r.valor_por_cor || {})[cor] ? ' · ' + reais(r.valor_por_cor[cor]) : '')));
+      c.append(el('p', 'text-[12px] text-ink/55 leading-snug', rotulo),
+               el('p', 'text-[32px] font-light tracking-tightest leading-none mt-3', numero(valor)),
+               el('p', 'text-[12px] text-ink/50 mt-2', nota));
       return c;
+    };
+    $('[data-cartoes]').replaceChildren(
+      cartao('Exames no pedido', r.pedidos, ''),
+      cartao('Indicados pelo check-up', r.indicados, 'liberaria'),
+      cartao('Não indicados', r.nao_indicados, 'barraria'));
+    $('[data-notas]').replaceChildren(...(dados.avisos || []).map(t => el('span', 'block', t)));
+    $('[data-do-checkup-contagem]').textContent = `(${r.do_checkup})`;
+    $('[data-do-checkup]').replaceChildren(...dados.do_checkup.map(item => {
+      const li = el('li', 'flex flex-wrap items-baseline gap-x-2');
+      li.append(el('span', item.pedido ? 'text-teal-dark' : 'text-ink/45', item.pedido ? '✓ pedido' : 'não pedido'),
+                el('span', '', item.titulo), el('span', 'text-[12px] text-ink/50', item.motivo));
+      return li;
     }));
-    const notas = [`${numero(r.linhas)} linhas lidas; ${numero(r.invalidas)} com erro de preenchimento.`]
-      .concat(dados.avisos || []);
-    if ((r.mais_barrados || []).length) notas.push('Mais barrados: ' + r.mais_barrados.map(([exame, n]) => `${exame} (${n})`).join('; ') + '.');
-    $('[data-notas]').replaceChildren(...notas.map(t => el('span', 'block', t)));
   }
 
-  function tabela() {
-    const linhas = dados.linhas.filter(l => !filtro || l.cor === filtro);
+  function lista() {
+    const linhas = dados.linhas.filter(l => !filtro || l.veredito === filtro);
     $('[data-contagem]').textContent = `(${linhas.length})`;
     document.querySelectorAll('[data-filtro]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.filtro === filtro)));
-    if (!linhas.length) {
-      const tr = el('tr'); const td = el('td', 'px-4 py-6 text-ink/50', 'Nenhum pedido neste filtro.'); td.colSpan = 4;
-      tr.append(td); $('[data-linhas]').replaceChildren(tr); return;
-    }
+    if (!linhas.length) { $('[data-linhas]').replaceChildren(el('p', 'text-[14px] text-ink/50', 'Nenhum exame neste filtro.')); return; }
     $('[data-linhas]').replaceChildren(...linhas.map(l => {
-      const tr = el('tr', 'border-b border-ink/5 last:border-0 align-top');
-      const pedido = el('td', 'px-4 py-3');
-      pedido.append(el('span', 'block', l.id_pedido || '—'),
-                    el('span', 'block text-[12px] text-ink/50', [l.id_beneficiario, l.data_pedido].filter(Boolean).join(' · ')));
-      const exame = el('td', 'px-3 py-3');
-      exame.append(el('span', 'block', l.exame || '—'), el('span', 'block text-[12px] text-ink/50 font-mono', l.codigo_tuss));
-      const parecer = el('td', 'px-3 py-3 whitespace-nowrap');
-      parecer.append(l.erro ? el('span', 'selo bg-ink/15 text-ink', 'Linha com erro')
-                            : el('span', 'selo ' + (CORES[l.cor] || 'bg-ink/10 text-ink'), ROTULOS[l.cor] || l.cor));
-      // No celular a coluna do motivo some e o texto vai para baixo do exame.
-      exame.append(el('span', 'block md:hidden text-[13px] text-ink/75 mt-2', l.erro || l.motivo));
-      const motivo = el('td', 'px-3 py-3 hidden md:table-cell');
-      motivo.append(el('span', 'block', l.erro || l.motivo));
-      if (l.aviso) motivo.append(el('span', 'block text-[12px] text-[#C0392B] mt-1', l.aviso));
-      if (l.referencia) {
-        const fonte = el('span', 'block text-[12px] text-ink/50 mt-1');
-        const url = (l.link || '').split(' | ')[0];
-        if (/^https:\/\/[^\s"'<>]+$/.test(url)) {
-          const a = el('a', 'underline', l.referencia); a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-          fonte.append(a);
-        } else fonte.textContent = l.referencia;
-        if (l.grau) fonte.append(` · grau ${l.grau}`);
-        motivo.append(fonte);
+      const v = VEREDITOS[l.veredito] || VEREDITOS.nao_indicado;
+      const cartao = el('div', 'nao-incluida-card ' + v.borda);
+      cartao.append(el('span', 'selo ' + v.classe, v.rotulo), el('h5', '', l.exame));
+      const detalhe = [l.nome_no_pedido && l.nome_no_pedido !== l.exame ? `No pedido: ${l.nome_no_pedido}` : '', dataBr(l.data)].filter(Boolean).join(' · ');
+      if (detalhe) cartao.append(el('p', 'text-[12px] text-ink/50', detalhe));
+      if (l.no_checkup && l.no_checkup !== l.exame) cartao.append(el('p', 'text-[12px] text-ink/50', `No check-up: ${l.no_checkup}`));
+      cartao.append(el('p', 'text-[14px] text-ink/75 mt-2', l.motivo));
+      if (l.aviso) cartao.append(el('p', 'text-[13px] text-[#C0392B] mt-1', l.aviso));
+      if (l.observacao) {
+        const obs = el('p', 'text-[13px] text-ink/60 mt-2', l.observacao + ' ');
+        const fonte = l.observacao_link;
+        if (fonte && /^https:\/\/[^\s"'<>]+$/.test(fonte.url || '')) {
+          const a = el('a', 'underline', fonte.label); a.href = fonte.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+          obs.append(a);
+        }
+        cartao.append(obs);
       }
-      tr.append(pedido, exame, parecer, motivo);
-      return tr;
+      const rodape = fontes(l.referencias, l.grau);
+      if (rodape) cartao.append(rodape);
+      return cartao;
     }));
   }
 
-  async function enviar(formulario) {
-    erro('');
-    $('[data-andamento]').style.display = '';
-    formulario.querySelectorAll('button').forEach(b => { b.disabled = true; });
-    try {
-      const r = await fetch('/api/admin/operadoras/classificar', { method: 'POST', body: new FormData(formulario), credentials: 'same-origin' });
-      const corpo = await r.json().catch(() => ({}));
-      if (r.status === 401) { window.location.href = '/login'; return; }
-      if (!r.ok) throw new Error(corpo.error || 'Não foi possível classificar o arquivo.');
-      dados = corpo; filtro = '';
-      $('[data-resultado]').style.display = '';
-      resumo(); tabela();
-      $('[data-resultado]').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } catch (e) {
-      erro(e.message);
-    } finally {
-      $('[data-andamento]').style.display = 'none';
-      formulario.querySelectorAll('button').forEach(b => { b.disabled = false; });
-    }
+  function baixar() {
+    if (!dados) return;
+    const campo = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const linhas = [['exame', 'nome_no_pedido', 'data', 'arquivo', 'conferencia', 'motivo', 'no_checkup', 'grau', 'referencias', 'observacao']]
+      .concat(dados.linhas.map(l => [l.exame, l.nome_no_pedido, l.data, l.arquivo, (VEREDITOS[l.veredito] || {}).rotulo || l.veredito,
+        [l.motivo, l.aviso].filter(Boolean).join(' '), l.no_checkup, l.grau, (l.referencias || []).map(r => r.label).join(' | '), l.observacao]));
+    const link = el('a');
+    link.href = URL.createObjectURL(new Blob(['﻿' + linhas.map(l => l.map(campo).join(';')).join('\n')], { type: 'text/csv;charset=utf-8' }));
+    link.download = 'conferencia_do_pedido.csv';
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   }
 
-  // Lista com busca para comorbidades e medicações (as mesmas chaves do check-up). O marcado segue no envio.
-  const TITULOS = { comorbidades: 'Comorbidades', medicacoes: 'Medicações de uso contínuo' };
-  function listaComBusca(campo, itens) {
-    const alvo = $(`[data-perfil="${campo}"]`);
-    const titulo = el('p', 'font-medium', TITULOS[campo] + ' ');
-    const quantos = el('span', 'text-ink/45', '(nenhuma)');
-    titulo.append(quantos);
-    const busca = el('input', 'block w-full mt-1 border border-ink/15 rounded-[8px] px-2 py-2 bg-white');
-    busca.type = 'search'; busca.placeholder = 'Buscar…'; busca.setAttribute('aria-label', 'Buscar em ' + TITULOS[campo]);
-    const caixa = el('div', 'mt-2 max-h-[180px] overflow-y-auto border border-ink/10 rounded-[8px] bg-white p-2');
-    const linhas = itens.map(item => {
-      const linha = el('label', 'flex items-start gap-2 py-1');
-      const marca = el('input'); marca.type = 'checkbox'; marca.name = campo; marca.value = item.valor;
-      linha.append(marca, el('span', '', item.rotulo));
-      linha.dataset.busca = item.rotulo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-      marca.addEventListener('change', () => {
-        const n = caixa.querySelectorAll('input:checked').length;
-        quantos.textContent = n ? `(${n})` : '(nenhuma)';
-      });
-      return linha;
-    });
-    caixa.append(...linhas);
-    busca.addEventListener('input', () => {
-      const termo = busca.value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-      linhas.forEach(l => { l.style.display = !termo || l.dataset.busca.includes(termo) || l.querySelector('input').checked ? '' : 'none'; });
-    });
-    alvo.replaceChildren(titulo, busca, caixa);
-  }
-  async function carregarListas() {
-    try {
-      const r = await fetch('/api/admin/operadoras/listas', { credentials: 'same-origin' });
-      if (!r.ok) return;
-      const listas = await r.json();
-      listaComBusca('comorbidades', listas.comorbidades);
-      listaComBusca('medicacoes', listas.medicacoes);
-    } catch (e) { /* sem as listas, a tela segue só com idade e sexo */ }
+  function desatualizar() {
+    if (dados) $('[data-desatualizado]').style.display = '';
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    carregarListas();
-    // Resultado vindo do formulário completo do check-up (/intelligent-tools?modo=operadora): mostra e apaga.
-    try {
-      const guardado = sessionStorage.getItem('operadoras_resultado');
-      if (guardado) {
-        sessionStorage.removeItem('operadoras_resultado');
-        dados = JSON.parse(guardado); filtro = '';
+    $('[data-baixar]').addEventListener('click', baixar);
+    $('[data-pedido-pdf]').addEventListener('change', desatualizar);
+    document.querySelectorAll('[data-filtro]').forEach(b => b.addEventListener('click', () => { filtro = b.dataset.filtro; if (dados) lista(); }));
+    // Mensagens do formulário (mesma origem): altura que ele ocupa, andamento e resultado da conferência.
+    window.addEventListener('message', e => {
+      if (e.origin !== window.location.origin || !e.data) return;
+      const quadro = $('[data-formulario]');
+      if (e.source !== quadro.contentWindow) return;
+      if (e.data.tipo === 'operadoras_altura' && e.data.altura > 0) quadro.style.height = (e.data.altura + 24) + 'px';
+      if (e.data.tipo === 'operadoras_alterado') desatualizar();
+      if (e.data.tipo === 'operadoras_enviando') $('[data-andamento]').style.display = '';
+      if (e.data.tipo === 'operadoras_erro') $('[data-andamento]').style.display = 'none';
+      if (e.data.tipo === 'operadoras_resultado' && e.data.corpo) {
+        dados = e.data.corpo; filtro = '';
+        $('[data-andamento]').style.display = 'none';
+        $('[data-desatualizado]').style.display = 'none';
         $('[data-resultado]').style.display = '';
-        resumo(); tabela();
-        $('[data-resultado]').scrollIntoView({ block: 'start' });
+        resumo(); lista();
+        $('[data-resultado]').scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-    } catch (e) { /* sem o resultado guardado, a tela abre vazia */ }
-    $('[data-form-csv]').addEventListener('submit', e => { e.preventDefault(); enviar(e.target); });
-    $('[data-form-laudos]').addEventListener('submit', e => { e.preventDefault(); enviar(e.target); });
-    $('[data-modelo]').addEventListener('click', () => baixar('modelo_pedidos.csv', MODELO));
-    $('[data-baixar]').addEventListener('click', () => { if (dados) baixar('pedidos_classificados.csv', dados.csv); });
-    document.querySelectorAll('[data-filtro]').forEach(b => b.addEventListener('click', () => { filtro = b.dataset.filtro; if (dados) tabela(); }));
+    });
   });
 })();
