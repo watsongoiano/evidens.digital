@@ -561,12 +561,21 @@ def _data_na_apac(pdf, x0, barra1, barra2, x1, y0, y1, data):
     _no_centro(pdf, barra2[1], y0, x1, y1, m.group(3), 8.5)
 
 
-def _pagina_da_apac(pdf, dados_paciente, exame, apac):
-    """Folha só com os dados, nas posições das caixas do formulário do SUS (o fundo entra depois)."""
+# As três linhas de "Procedimento solicitado" do formulário: casas do código (x0, x1, y0, y1), caixa do nome e
+# caixa da quantidade (cantos em pontos). A primeira é a do procedimento principal.
+_PROCEDIMENTOS_DA_APAC = (
+    ((33.4, 206.5, 291.1, 304.4), (210.9, 282.2, 480.8, 304.4), (485.2, 288.0, 537.5, 304.4)),
+    ((33.0, 206.0, 318.7, 332.0), (210.5, 309.0, 480.5, 331.2), (487.0, 313.4, 539.2, 329.8)),
+    ((33.0, 206.0, 349.9, 363.2), (210.5, 341.0, 480.5, 363.2), (487.0, 345.8, 539.2, 362.2)),
+)
+
+
+def _pagina_da_apac(pdf, dados_paciente, exames, apac):
+    """Folha só com os dados, nas posições das caixas do formulário do SUS (o fundo entra depois).
+    `exames`: os procedimentos do laudo, um por linha do formulário (até três)."""
     from src.utils import sigtap
     pdf.add_page(orientation='P', format='A4')
     vinculo, paciente, resp = apac['vinculo'], apac.get('paciente') or {}, apac.get('responsavel') or {}
-    titulo = exame.get('titulo') or ''
     so_digitos = lambda valor: re.sub(r'\D', '', valor or '')
     # Estabelecimento solicitante
     _na_caixa(pdf, 33.4, 88.1, 441.7, 106.0, vinculo['nome'])
@@ -594,10 +603,12 @@ def _pagina_da_apac(pdf, dados_paciente, exame, apac):
     _nas_casas(pdf, [424.0, 440.2, 456.5], 252.5, 261.9, (paciente.get('uf') or '').upper()[:2])
     _nas_casas(pdf, [456.5, 468.1, 479.0, 489.8, 500.7, 511.5, 523.1, 533.9, 545.6], 252.5, 261.9,
                so_digitos(paciente.get('cep'))[:8], 8.5)
-    # Procedimento solicitado (o principal); os secundários ficam em branco
-    _nas_casas(pdf, _casas(33.4, 206.5, 10), 291.1, 304.4, sigtap.codigo(titulo))
-    _na_caixa(pdf, 210.9, 282.2, 480.8, 304.4, pdf.t(titulo))
-    _no_centro(pdf, 485.2, 288.0, 537.5, 304.4, '1')
+    # Procedimentos solicitados: um por linha (o primeiro é o principal); linha sem exame fica em branco
+    for exame, (casas, nome_do_exame, quantidade) in zip(exames, _PROCEDIMENTOS_DA_APAC):
+        titulo = exame.get('titulo') or ''
+        _nas_casas(pdf, _casas(casas[0], casas[1], 10), casas[2], casas[3], sigtap.codigo(titulo))
+        _na_caixa(pdf, *nome_do_exame, pdf.t(titulo))
+        _no_centro(pdf, *quantidade, '1')
     # Justificativa
     _na_caixa(pdf, 33.4, 397.3, 327.4, 419.5, apac.get('diagnostico'), 8.5)
     _no_centro(pdf, 327.4, 402.5, 387.2, 418.9, apac.get('cid') or '')
@@ -630,17 +641,34 @@ def _com_o_modelo_da_apac(conteudo, quantas):
     return resultado.getvalue()
 
 
-def _anexar_apacs(pdf, dados_paciente, exames, apac):
-    """Um laudo de APAC por exame que a regulação pede em APAC (src/utils/sigtap.py). Devolve quantos."""
+def laudos_de_apac(exames, apac, agrupar=False):
+    """Os laudos de APAC do pedido: [(exames do laudo, CID principal, CID secundário)], só com os exames que vão
+    em APAC (src/utils/sigtap.py). Imagem: um laudo por exame. Laboratório (`agrupar`): os exames de mesmo CID
+    dividem o laudo, um por linha de procedimento do formulário (decisão do responsável clínico, 18/11/2026)."""
     from src.utils import sigtap
-    alvos = [e for e in exames if sigtap.vai_em_apac(e.get('titulo'))]
+    grupos = {}
+    for posicao, exame in enumerate(exames):
+        if not sigtap.vai_em_apac(exame.get('titulo')):
+            continue
+        cids = sigtap.cid_do_exame(exame.get('titulo'), apac.get('comorbidades') or (), apac.get('cid') or '')
+        grupos.setdefault(cids if agrupar else (cids, posicao), []).append(exame)
+    por_laudo = len(_PROCEDIMENTOS_DA_APAC)
+    laudos = []
+    for chave, do_grupo in grupos.items():
+        principal, secundario = chave if agrupar else chave[0]
+        for i in range(0, len(do_grupo), por_laudo):
+            laudos.append((do_grupo[i:i + por_laudo], principal, secundario))
+    return laudos
+
+
+def _anexar_apacs(pdf, dados_paciente, exames, apac, agrupar=False):
+    """Acrescenta ao pedido os laudos de APAC (laudos_de_apac). Devolve quantos."""
+    laudos = laudos_de_apac(exames, apac, agrupar)
     pdf.em_guia = True
     pdf.set_auto_page_break(auto=False)
-    for exame in alvos:
-        principal, secundario = sigtap.cid_do_exame(exame.get('titulo'), apac.get('comorbidades') or (),
-                                                    apac.get('cid') or '')
-        _pagina_da_apac(pdf, dados_paciente, exame, dict(apac, cid=principal, cid_secundario=secundario))
-    return len(alvos)
+    for do_laudo, principal, secundario in laudos:
+        _pagina_da_apac(pdf, dados_paciente, do_laudo, dict(apac, cid=principal, cid_secundario=secundario))
+    return len(laudos)
 
 
 def _anexar_guias(pdf, dados_paciente, exames, guia):
@@ -719,15 +747,17 @@ def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='
     if guia:
         _anexar_guias(pdf, dados_paciente, exames, dict(guia, responsavel=responsavel))
     elif apac:
-        laudos = _anexar_apacs(pdf, dados_paciente, exames, dict(apac, responsavel=responsavel,
-                                                                  diagnostico=apac.get('diagnostico') or justificativa))
+        laudos = _anexar_apacs(pdf, dados_paciente, exames,
+                               dict(apac, responsavel=responsavel, diagnostico=apac.get('diagnostico') or justificativa),
+                               agrupar=categoria == 'laboratorio')
         return _com_o_modelo_da_apac(_com_timbrado(pdf, timbrado, paginas_do_pedido), laudos)
     return _com_timbrado(pdf, timbrado, paginas_do_pedido)
 
 
 def gerar_pdf_exames_laboratoriais(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None,
-                                   assinatura=None, justificativa=''):
-    return _pdf_de_exames(dados_paciente, exames, 'laboratorio', responsavel, idioma, guia, timbrado, assinatura, justificativa)
+                                   assinatura=None, justificativa='', apac=None):
+    return _pdf_de_exames(dados_paciente, exames, 'laboratorio', responsavel, idioma, guia, timbrado, assinatura,
+                          justificativa, apac)
 
 
 def gerar_pdf_exames_imagem(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None,

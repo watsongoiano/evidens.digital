@@ -229,3 +229,29 @@ def test_justificativa_so_cita_sociedade_que_o_algoritmo_ja_cita():
         vai = operadora.justificativa_de_nao_indicacao({codigo}, sexo, 55)
         assert vai['texto'].startswith(inicio), codigo
         assert not any(fora in vai['texto'] for fora in ('SBI', 'CUA', 'ASCP', 'CFPC', 'SBMFC')), codigo
+
+
+def test_glicemia_de_jejum_vale_pela_hba1c_no_rastreio():
+    """Decisão do responsável clínico (18/11/2026): a glicemia de jejum pedida conta como indicada quando o check-up
+    recomenda a HbA1c e a própria recomendação a cita como alternativa. Um exame basta: com a HbA1c no mesmo pedido,
+    a glicemia não entra."""
+    from src.utils import operadora
+    paciente = {'idade': '45', 'sexo': 'masculino', 'tabagismo': 'nunca_fumou', 'peso': '90', 'altura': '170'}
+    def conferir(*exames):
+        resultado, erro = operadora.conferir_pedido(paciente, [{'exame': e} for e in exames])
+        assert erro is None
+        return {linha['exame']: linha for linha in resultado['linhas']}, resultado
+    linhas, resultado = conferir('Glicose, soro')
+    glicemia = linhas['Glicose, soro']
+    assert glicemia['veredito'] == 'indicado' and glicemia['no_checkup'] == 'Hemoglobina glicada (HbA1c), soro'
+    assert 'aceita a glicemia de jejum como alternativa' in glicemia['motivo'] and glicemia['grau'] == 'B'
+    assert any(f['url'].startswith('https://') for f in glicemia['referencias'])
+    assert next(r for r in resultado['do_checkup'] if r['titulo'].startswith('Hemoglobina glicada'))['pedido'] is True
+    linhas, _ = conferir('Glicose, soro', 'Hemoglobina glicada (HbA1c), soro')
+    assert linhas['Hemoglobina glicada (HbA1c), soro']['veredito'] == 'indicado'
+    assert linhas['Glicose, soro']['veredito'] == 'nao_indicado' and 'um exame basta' in linhas['Glicose, soro']['motivo']
+    assert linhas['Glicose, soro']['referencias']
+    # No diabético a glicemia não é alternativa à HbA1c: o check-up a recomenda por si, junto da HbA1c.
+    paciente = dict(paciente, comorbidades=['diabetes_tipo_2'])
+    linhas, _ = conferir('Glicose, soro', 'Hemoglobina glicada (HbA1c), soro')
+    assert linhas['Glicose, soro']['veredito'] == 'indicado' and linhas['Glicose, soro']['no_checkup'] == 'Glicose, soro'
