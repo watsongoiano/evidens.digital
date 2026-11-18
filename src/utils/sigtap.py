@@ -6,10 +6,19 @@ endoscopia digestiva alta, colonoscopia e densitometria óssea vão em APAC; rad
 ecocardiograma, mamografia, teste ergométrico, Holter e MAPA, não.
 https://goias.gov.br/saude/wp-content/uploads/sites/34/regulacao_estadual/protocolos-regulacao-acesso-ambulatorial-eletivo/Policl%C3%ADnica%20Estadual%20da%20Regi%C3%A3o%20Nordeste%20%E2%80%93%20Posse.pdf
 
+Além desses, todo exame da Tabela de Procedimentos de Alta Complexidade (PAC) sai com laudo de APAC, de laboratório
+inclusive (carga viral e CD4 do HIV, teste de DNA-HPV): decisão do responsável clínico, 18/11/2026. A tabela é a que
+ele enviou (TRFMED, publicada em 21/02/2022), guardada em src/data/tabela_pac.json por código TUSS; o exame entra
+quando um dos códigos TUSS dele (src/utils/tuss.py) está na tabela.
+
 Código só entra quando conferido em documento público (protocolo da SES-GO acima, tabelas SUS de consórcios
 públicos, parâmetros técnicos do INCA para mama). Exame em APAC sem código conferido sai com o campo em branco,
 para a regulação preencher: nunca um código adivinhado.
 """
+
+import json
+from functools import lru_cache
+from pathlib import Path
 
 # título do catálogo → (código SIGTAP ou '', vai em APAC?)
 PROCEDIMENTOS = {
@@ -58,8 +67,30 @@ def codigo(titulo):
     return PROCEDIMENTOS.get(titulo, ('', False))[0]
 
 
+_ARQUIVO_DA_PAC = Path(__file__).resolve().parent.parent / 'data' / 'tabela_pac.json'
+
+
+@lru_cache(maxsize=1)
+def tabela_de_pac():
+    """{'fonte': ..., 'codigos': {código TUSS: nome do procedimento}} da tabela de alta complexidade."""
+    return json.loads(_ARQUIVO_DA_PAC.read_text(encoding='utf-8'))
+
+
+def na_tabela_de_pac(titulo):
+    """O exame tem código TUSS na Tabela de Procedimentos de Alta Complexidade (PAC)?"""
+    from src.utils import tuss
+    pac = tabela_de_pac()['codigos']
+    return any(linha['codigo'] in pac for sexo in ('feminino', 'masculino') for linha in tuss.linhas_da_guia(titulo, sexo))
+
+
 def vai_em_apac(titulo):
-    return PROCEDIMENTOS.get(titulo, ('', False))[1]
+    """O exame sai com laudo de APAC: a regulação pede (SES-GO) ou ele está na tabela de alta complexidade (PAC)."""
+    return PROCEDIMENTOS.get(titulo, ('', False))[1] or na_tabela_de_pac(titulo)
+
+
+def titulos_em_apac(titulos):
+    """Dos títulos dados, os que saem com laudo de APAC (para a tela saber quando pedir os dados do laudo)."""
+    return sorted({t for t in titulos if vai_em_apac(t)}, key=str.lower)
 
 
 def formatado(cod):
@@ -88,6 +119,8 @@ _COMORBIDADES_DO_EXAME = {
                                                     'rcu_alem_reto', 'rcu_cep'),
     'Densitometria óssea (DEXA)': ('osteoporose_diagnostico',),
     'Densitometria óssea (coluna lombar e fêmur)': ('osteoporose_diagnostico',),
+    'Carga Viral do HIV (HIV RNA)': ('hiv',), 'Contagem de linfócitos T CD4+': ('hiv',),
+    'Genotipagem do HIV (Teste de Resistência)': ('hiv',),
 }
 # Exame de rastreamento → CID-10 de "exame especial de rastreamento" (Z12.1 intestino, Z12.2 aparelho respiratório,
 # Z12.3 mama, Z12.8 outras localizações, Z13.6 doenças cardiovasculares, Z13.8 outras doenças especificadas).
@@ -99,6 +132,8 @@ _CID_DO_RASTREIO = {
     'Angiotomografia de coronárias': 'Z13.6', 'Escore de cálcio coronariano (TC)': 'Z13.6',
     'Densitometria óssea (DEXA)': 'Z13.8', 'Densitometria óssea (coluna lombar e fêmur)': 'Z13.8',
     'Ressonância magnética de crânio': 'Z13.8', 'Angiorressonância de crânio': 'Z13.8',
+    'Mamografia Digital - Bilateral': 'Z12.3', 'Mamografia bilateral': 'Z12.3',       # tabela de PAC
+    'Pesquisa do Papilomavírus Humano (HPV), por técnica molecular': 'Z12.4',
 }
 
 

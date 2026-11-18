@@ -726,8 +726,9 @@ def _pdf_de_exames(dados_paciente, exames, categoria, responsavel=None, idioma='
 
 
 def gerar_pdf_exames_laboratoriais(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None,
-                                   assinatura=None, justificativa=''):
-    return _pdf_de_exames(dados_paciente, exames, 'laboratorio', responsavel, idioma, guia, timbrado, assinatura, justificativa)
+                                   assinatura=None, justificativa='', apac=None):
+    return _pdf_de_exames(dados_paciente, exames, 'laboratorio', responsavel, idioma, guia, timbrado, assinatura,
+                          justificativa, apac)
 
 
 def gerar_pdf_exames_imagem(dados_paciente, exames, responsavel=None, idioma='pt', guia=None, timbrado=None,
