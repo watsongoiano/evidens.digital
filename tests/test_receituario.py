@@ -67,6 +67,59 @@ def test_imagem_invalida_e_recusada():
         timbrado.imagem_para_pdf(b'\x89PNG\r\n\x1a\n' + b'0' * 100)
 
 
+def _png_gigante(lado_x, lado_y):
+    """PNG de poucos KB que declara uma imagem enorme (1 bit por pixel: cabe na memória do teste)."""
+    saida = io.BytesIO()
+    Image.new('1', (lado_x, lado_y)).save(saida, 'PNG')
+    return saida.getvalue()
+
+
+@pytest.fixture()
+def descompressoes(monkeypatch):
+    """Lista das imagens que o Pillow chegou a descomprimir (dimensões), para provar que a recusa vem antes."""
+    from PIL import ImageFile
+    feitas, original = [], ImageFile.ImageFile.load
+
+    def load(self, *args, **kwargs):
+        feitas.append(self.size)
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(ImageFile.ImageFile, 'load', load)
+    return feitas
+
+
+@pytest.mark.filterwarnings('ignore::PIL.Image.DecompressionBombWarning')
+@pytest.mark.parametrize('tamanho', [(12000, 12000),      # lado acima do limite
+                                     (8000, 8000),        # lados dentro do limite, pixels demais (64 milhões)
+                                     (50, 50)])           # pequena demais
+def test_timbrado_de_dimensoes_fora_do_limite_e_recusado_sem_descomprimir(tamanho, descompressoes):
+    conteudo = _png_gigante(*tamanho)
+    assert len(conteudo) < timbrado.TAMANHO_MAXIMO        # passaria pelo limite de bytes do arquivo
+    with pytest.raises(timbrado.TimbradoInvalido) as erro:
+        timbrado.imagem_para_pdf(conteudo)
+    assert erro.value.codigo == 'imagem' and descompressoes == []
+
+
+def test_timbrado_a4_a_600_dpi_cabe_no_limite_de_pixels():
+    assert 4961 * 7016 <= timbrado.PIXELS_MAXIMOS
+
+
+@pytest.mark.parametrize('tamanho', [(9000, 9000), (8, 8)])
+def test_logo_de_dimensoes_fora_do_limite_e_recusado_sem_descomprimir(tamanho, descompressoes):
+    conteudo = _png_gigante(*tamanho)
+    assert len(conteudo) < receituario.LOGO_MAXIMO
+    with pytest.raises(receituario.ReceituarioInvalido):
+        receituario.conferir_logo(conteudo)
+    assert descompressoes == []
+
+
+def test_imagens_validas_continuam_sendo_abertas_por_inteiro(descompressoes):
+    """O teste acima só vale se a lista registra as aberturas: timbrado e logo válidos aparecem nela."""
+    timbrado.imagem_para_pdf(_png(_timbrado_escaneado))
+    receituario.conferir_logo(LOGO)
+    assert (1240, 1754) in descompressoes and (100, 100) in descompressoes
+
+
 def test_envio_de_png_pela_conta_passa_a_valer(app, contas):
     cliente, _ = _conta(app, contas)
     r = cliente.post('/api/auth/timbrado', data={'arquivo': (io.BytesIO(_png(_timbrado_escaneado)), 'timbrado.png')},

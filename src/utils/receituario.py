@@ -74,10 +74,13 @@ def conferir_logo(logo):
     try:
         from PIL import Image
         imagem = Image.open(io.BytesIO(logo))
+        # Dimensões conferidas antes de descomprimir (ver timbrado.imagem_para_pdf).
+        if not (16 <= imagem.size[0] <= 6000 and 16 <= imagem.size[1] <= 6000):
+            raise ReceituarioInvalido('logo')
         imagem.load()
+    except ReceituarioInvalido:
+        raise
     except Exception:
-        raise ReceituarioInvalido('logo')
-    if not (16 <= imagem.size[0] <= 6000 and 16 <= imagem.size[1] <= 6000):
         raise ReceituarioInvalido('logo')
 
 
