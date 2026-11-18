@@ -2727,6 +2727,33 @@
    ]
   }
  },
+ "Cultura de escarro (bactérias)": {
+  "grupos": [
+   "Bronquiectasias"
+  ],
+  "referencias": [
+   {
+    "label": "ERS 2025 (bronquiectasias)",
+    "url": "https://doi.org/10.1183/13993003.01126-2025"
+   },
+   {
+    "label": "Mosgrove 2026 (resumo da ERS 2025)",
+    "url": "https://doi.org/10.1038/s41533-026-00528-z"
+   }
+  ],
+  "por_grupo": {
+   "Bronquiectasias": [
+    {
+     "label": "ERS 2025 (bronquiectasias)",
+     "url": "https://doi.org/10.1183/13993003.01126-2025"
+    },
+    {
+     "label": "Mosgrove 2026 (resumo da ERS 2025)",
+     "url": "https://doi.org/10.1038/s41533-026-00528-z"
+    }
+   ]
+  }
+ },
  "Cultura para estreptococo do grupo B (swab vaginal e retal)": {
   "grupos": [
    "Pré-natal"
@@ -2766,6 +2793,33 @@
     {
      "label": "Williams 26e",
      "url": "https://www.mheducation.com/highered/mhp/product/williams-obstetrics-26e.html"
+    }
+   ]
+  }
+ },
+ "Cultura para micobactérias, escarro": {
+  "grupos": [
+   "Bronquiectasias"
+  ],
+  "referencias": [
+   {
+    "label": "ERS 2025 (bronquiectasias)",
+    "url": "https://doi.org/10.1183/13993003.01126-2025"
+   },
+   {
+    "label": "Mosgrove 2026 (resumo da ERS 2025)",
+    "url": "https://doi.org/10.1038/s41533-026-00528-z"
+   }
+  ],
+  "por_grupo": {
+   "Bronquiectasias": [
+    {
+     "label": "ERS 2025 (bronquiectasias)",
+     "url": "https://doi.org/10.1183/13993003.01126-2025"
+    },
+    {
+     "label": "Mosgrove 2026 (resumo da ERS 2025)",
+     "url": "https://doi.org/10.1038/s41533-026-00528-z"
     }
    ]
   }
@@ -3416,6 +3470,33 @@
     {
      "label": "AHA/ACC/HRS 2017",
      "url": "https://www.ahajournals.org/journal/circ"
+    }
+   ]
+  }
+ },
+ "Eletroforese de proteínas, soro": {
+  "grupos": [
+   "Bronquiectasias"
+  ],
+  "referencias": [
+   {
+    "label": "ERS 2025 (bronquiectasias)",
+    "url": "https://doi.org/10.1183/13993003.01126-2025"
+   },
+   {
+    "label": "Mosgrove 2026 (resumo da ERS 2025)",
+    "url": "https://doi.org/10.1038/s41533-026-00528-z"
+   }
+  ],
+  "por_grupo": {
+   "Bronquiectasias": [
+    {
+     "label": "ERS 2025 (bronquiectasias)",
+     "url": "https://doi.org/10.1183/13993003.01126-2025"
+    },
+    {
+     "label": "Mosgrove 2026 (resumo da ERS 2025)",
+     "url": "https://doi.org/10.1038/s41533-026-00528-z"
     }
    ]
   }
@@ -4506,6 +4587,7 @@
  "Hemograma completo com plaquetas": {
   "grupos": [
    "Adultos com HAS",
+   "Bronquiectasias",
    "Cirurgia bariátrica prévia",
    "Corticoide em dose imunossupressora",
    "Corticoide sistêmico ≥ 3 meses",
@@ -4598,6 +4680,10 @@
     "url": "https://www.ema.europa.eu/en/medicines/human/EPAR/cellcept"
    },
    {
+    "label": "ERS 2025 (bronquiectasias)",
+    "url": "https://doi.org/10.1183/13993003.01126-2025"
+   },
+   {
     "label": "ESC 2021 (insuficiência cardíaca)",
     "url": "https://doi.org/10.1093/eurheartj/ehab368"
    },
@@ -4640,6 +4726,10 @@
    {
     "label": "MS 2024 (PCDT HIV)",
     "url": "https://portal.saude.sp.gov.br/resources/crt/assistencia/pcdt/pcdt_hiv_modulo_1_2024_1.pdf"
+   },
+   {
+    "label": "Mosgrove 2026 (resumo da ERS 2025)",
+    "url": "https://doi.org/10.1038/s41533-026-00528-z"
    }
   ],
   "por_grupo": {
@@ -4651,6 +4741,16 @@
     {
      "label": "AHA 2025",
      "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356"
+    }
+   ],
+   "Bronquiectasias": [
+    {
+     "label": "ERS 2025 (bronquiectasias)",
+     "url": "https://doi.org/10.1183/13993003.01126-2025"
+    },
+    {
+     "label": "Mosgrove 2026 (resumo da ERS 2025)",
+     "url": "https://doi.org/10.1038/s41533-026-00528-z"
     }
    ],
    "Cirurgia bariátrica prévia": [
@@ -5097,17 +5197,90 @@
    ]
   }
  },
+ "IgE específica para Aspergillus fumigatus, soro": {
+  "grupos": [
+   "Bronquiectasias"
+  ],
+  "referencias": [
+   {
+    "label": "ERS 2025 (bronquiectasias)",
+    "url": "https://doi.org/10.1183/13993003.01126-2025"
+   },
+   {
+    "label": "Mosgrove 2026 (resumo da ERS 2025)",
+    "url": "https://doi.org/10.1038/s41533-026-00528-z"
+   }
+  ],
+  "por_grupo": {
+   "Bronquiectasias": [
+    {
+     "label": "ERS 2025 (bronquiectasias)",
+     "url": "https://doi.org/10.1183/13993003.01126-2025"
+    },
+    {
+     "label": "Mosgrove 2026 (resumo da ERS 2025)",
+     "url": "https://doi.org/10.1038/s41533-026-00528-z"
+    }
+   ]
+  }
+ },
+ "IgG específica para Aspergillus (precipitinas), soro": {
+  "grupos": [
+   "Bronquiectasias"
+  ],
+  "referencias": [
+   {
+    "label": "ERS 2025 (bronquiectasias)",
+    "url": "https://doi.org/10.1183/13993003.01126-2025"
+   },
+   {
+    "label": "Mosgrove 2026 (resumo da ERS 2025)",
+    "url": "https://doi.org/10.1038/s41533-026-00528-z"
+   }
+  ],
+  "por_grupo": {
+   "Bronquiectasias": [
+    {
+     "label": "ERS 2025 (bronquiectasias)",
+     "url": "https://doi.org/10.1183/13993003.01126-2025"
+    },
+    {
+     "label": "Mosgrove 2026 (resumo da ERS 2025)",
+     "url": "https://doi.org/10.1038/s41533-026-00528-z"
+    }
+   ]
+  }
+ },
  "Imunoglobulina A (IgA), soro": {
   "grupos": [
+   "Bronquiectasias",
    "Doença celíaca na família"
   ],
   "referencias": [
    {
     "label": "ACG 2023",
     "url": "https://gi.org/clinical-guidelines/"
+   },
+   {
+    "label": "ERS 2025 (bronquiectasias)",
+    "url": "https://doi.org/10.1183/13993003.01126-2025"
+   },
+   {
+    "label": "Mosgrove 2026 (resumo da ERS 2025)",
+    "url": "https://doi.org/10.1038/s41533-026-00528-z"
    }
   ],
   "por_grupo": {
+   "Bronquiectasias": [
+    {
+     "label": "ERS 2025 (bronquiectasias)",
+     "url": "https://doi.org/10.1183/13993003.01126-2025"
+    },
+    {
+     "label": "Mosgrove 2026 (resumo da ERS 2025)",
+     "url": "https://doi.org/10.1038/s41533-026-00528-z"
+    }
+   ],
    "Doença celíaca na família": [
     {
      "label": "ACG 2023",
@@ -5116,8 +5289,36 @@
    ]
   }
  },
+ "Imunoglobulina E (IgE) total, soro": {
+  "grupos": [
+   "Bronquiectasias"
+  ],
+  "referencias": [
+   {
+    "label": "ERS 2025 (bronquiectasias)",
+    "url": "https://doi.org/10.1183/13993003.01126-2025"
+   },
+   {
+    "label": "Mosgrove 2026 (resumo da ERS 2025)",
+    "url": "https://doi.org/10.1038/s41533-026-00528-z"
+   }
+  ],
+  "por_grupo": {
+   "Bronquiectasias": [
+    {
+     "label": "ERS 2025 (bronquiectasias)",
+     "url": "https://doi.org/10.1183/13993003.01126-2025"
+    },
+    {
+     "label": "Mosgrove 2026 (resumo da ERS 2025)",
+     "url": "https://doi.org/10.1038/s41533-026-00528-z"
+    }
+   ]
+  }
+ },
  "Imunoglobulina G (IgG), soro": {
   "grupos": [
+   "Bronquiectasias",
    "Em uso de ocrelizumabe",
    "Em uso de rituximabe"
   ],
@@ -5127,11 +5328,29 @@
     "url": "https://doi.org/10.1136/ard.2010.144998"
    },
    {
+    "label": "ERS 2025 (bronquiectasias)",
+    "url": "https://doi.org/10.1183/13993003.01126-2025"
+   },
+   {
     "label": "FDA (bula do ocrelizumabe)",
     "url": "https://www.gene.com/download/pdf/ocrevus_prescribing.pdf"
+   },
+   {
+    "label": "Mosgrove 2026 (resumo da ERS 2025)",
+    "url": "https://doi.org/10.1038/s41533-026-00528-z"
    }
   ],
   "por_grupo": {
+   "Bronquiectasias": [
+    {
+     "label": "ERS 2025 (bronquiectasias)",
+     "url": "https://doi.org/10.1183/13993003.01126-2025"
+    },
+    {
+     "label": "Mosgrove 2026 (resumo da ERS 2025)",
+     "url": "https://doi.org/10.1038/s41533-026-00528-z"
+    }
+   ],
    "Em uso de ocrelizumabe": [
     {
      "label": "FDA (bula do ocrelizumabe)",
@@ -5142,6 +5361,33 @@
     {
      "label": "Buch 2011 (consenso do rituximabe)",
      "url": "https://doi.org/10.1136/ard.2010.144998"
+    }
+   ]
+  }
+ },
+ "Imunoglobulina M (IgM), soro": {
+  "grupos": [
+   "Bronquiectasias"
+  ],
+  "referencias": [
+   {
+    "label": "ERS 2025 (bronquiectasias)",
+    "url": "https://doi.org/10.1183/13993003.01126-2025"
+   },
+   {
+    "label": "Mosgrove 2026 (resumo da ERS 2025)",
+    "url": "https://doi.org/10.1038/s41533-026-00528-z"
+   }
+  ],
+  "por_grupo": {
+   "Bronquiectasias": [
+    {
+     "label": "ERS 2025 (bronquiectasias)",
+     "url": "https://doi.org/10.1183/13993003.01126-2025"
+    },
+    {
+     "label": "Mosgrove 2026 (resumo da ERS 2025)",
+     "url": "https://doi.org/10.1038/s41533-026-00528-z"
     }
    ]
   }

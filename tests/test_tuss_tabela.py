@@ -43,12 +43,19 @@ def test_nome_da_tuss_e_nome_do_evidens_dao_o_mesmo_codigo():
 def test_catalogo_ganha_os_exames_da_tabela_sem_repetir_os_que_ja_existem():
     laboratorio = catalogo.catalogo()['laboratorio']
     assert len(laboratorio) > 850 and len(set(map(str.lower, laboratorio))) == len(laboratorio)
-    for novo in ('Acetaminofen', 'Colesterol (HDL)', 'IgM', 'Ácido láctico (lactato)', 'Leishmania, pesquisa'):
+    for novo in ('Acetaminofen', 'Colesterol (HDL)', 'IgD', 'Ácido láctico (lactato)', 'Leishmania, pesquisa'):
         assert novo in laboratorio, novo
     # já estavam no catálogo com o nome do Evidēns: o nome da TUSS não entra de novo
     for repetido in ('Creatinina', 'Glicose', 'Ácido úrico', 'Albumina', 'Cálcio iônico'):
         assert repetido not in laboratorio, repetido
     assert 'Creatinina, soro' in laboratorio and 'Cálcio iônico, soro' in laboratorio
+    # IgM, IgE total e cultura para micobactérias ganharam nome do Evidēns com as bronquiectasias (18/11/2026)
+    for repetido, do_evidens in (('IgM', 'Imunoglobulina M (IgM), soro'), ('IgE, total', 'Imunoglobulina E (IgE) total, soro'),
+                                 ('Cultura para mycobacterium', 'Cultura para micobactérias, escarro')):
+        assert repetido not in laboratorio and do_evidens in laboratorio, repetido
+    # "IgE, por alérgeno" serve a vários exames: continua no catálogo ao lado da IgE para Aspergillus
+    assert 'IgE, por alérgeno, cada (cada)' in laboratorio
+    assert 'IgE específica para Aspergillus fumigatus, soro' in laboratorio
     # cálcio total fica de fora: o cálcio dos pedidos é sempre o iônico
     assert 'Cálcio' not in laboratorio
     # imagem e vacinas não mudam

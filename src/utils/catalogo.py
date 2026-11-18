@@ -117,6 +117,9 @@ def _do_motor():
 # Código da tabela que não entra no catálogo. O cálcio total fica de fora por decisão clínica do
 # projeto: o cálcio dos pedidos é sempre o iônico.
 FORA_DO_CATALOGO = {'40301400'}
+# Código da TUSS que serve a vários exames ("IgE, por alérgeno, cada"): o título do Evidēns que o usa para um alérgeno
+# (IgE para Aspergillus, nas bronquiectasias) não tira do catálogo o exame genérico da tabela.
+CODIGO_DE_VARIOS_EXAMES = {'40307263'}
 
 
 @functools.lru_cache(maxsize=4)
@@ -130,7 +133,8 @@ def _da_tabela_tuss(ja_no_catalogo):
     for titulo in ja_no_catalogo:
         nomes_vistos.add(tuss._chave(titulo))
         linhas = tuss.linhas_da_guia(titulo)
-        if len(linhas) == 1 and linhas[0]['codigo']:       # exame simples: o código já está representado
+        if len(linhas) == 1 and linhas[0]['codigo'] and linhas[0]['codigo'] not in CODIGO_DE_VARIOS_EXAMES:
+            # exame simples: o código já está representado
             cobertos.add(linhas[0]['codigo'])
     novos = []
     for codigo, nome in tuss.TABELA_DE_LABORATORIO:
