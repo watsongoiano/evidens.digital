@@ -39,6 +39,9 @@ Convenções:
 """
 from __future__ import annotations
 
+import re
+from urllib.parse import quote
+
 from src.utils.medicamentos import MEDICAMENTOS
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -47,6 +50,13 @@ from src.utils.medicamentos import MEDICAMENTOS
 _URL_AHA = ('https://professional.heart.org/en/science-news/'
             '2026-guideline-for-perioperative-cardiovascular-management-for-noncardiac-surgery')
 _URL_AHA_2024 = 'https://doi.org/10.1161/CIR.0000000000001285'
+# Link para o ponto exato da diretriz: o texto integral, com o trecho a localizar (fragmento de texto, "#:~:text=").
+# O navegador rola até o trecho e o destaca; onde não há suporte, abre o texto integral no início. O trecho é o
+# título da tabela, copiado da diretriz (não um número de seção, que se repete no sumário e nas citações).
+_URL_AHA_TEXTO = 'https://www.ahajournals.org/doi/10.1161/CIR.0000000000001285'
+_TRECHOS_DA_AHA = {      # lugar citado (expressão regular) → título, como está na diretriz
+    r'Tabelas? 13\b': 'Perioperative Management of Direct Oral Anticoagulants and Vitamin K Antagonists',
+}
 _URL_SBC = 'https://doi.org/10.36660/abc.20240590'
 _URL_GLP1 = 'https://doi.org/10.1016/j.cgh.2024.10.003'
 _URL_SPAQI_ENDO = 'https://doi.org/10.1016/j.mayocp.2020.10.002'
@@ -86,8 +96,17 @@ REFERENCIAS = {
 }
 
 
+def _no_trecho(url, trecho):
+    """O endereço que abre a página no trecho citado (fragmento de texto)."""
+    return f'{url}#:~:text={quote(trecho, safe="")}'
+
+
 def _aha(onde):
-    return [{'label': f'AHA/ACC 2026, {onde}', 'url': _URL_AHA}, dict(REFERENCIAS['aha_2024'])]
+    """Referência à AHA/ACC com o lugar citado. Quando o lugar é uma tabela de título conhecido, o link abre o texto
+    integral já na tabela."""
+    trecho = next((t for lugar, t in _TRECHOS_DA_AHA.items() if re.search(lugar, onde)), None)
+    url = _no_trecho(_URL_AHA_TEXTO, trecho) if trecho else _URL_AHA
+    return [{'label': f'AHA/ACC 2026, {onde}', 'url': url}, dict(REFERENCIAS['aha_2024'])]
 
 
 def _sbc(onde):
@@ -838,6 +857,11 @@ def _esquema_aha_doac(farmaco, clcr, sang, neuraxial):
     return (3, 2, 1) if reduzida else (2, 1, 1)
 
 
+def _sem_dose(sem, reinicio):
+    """Os dias sem dose, como a Tabela 13 da AHA os marca: da interrupção até a véspera do reinício."""
+    return f'do D-{sem} ao ' + ('D0' if reinicio == 1 else f'D+{reinicio - 1}')
+
+
 def _esquema_sbc_doac(farmaco, clcr, sang):
     """(antes, depois, classe, nota) pela SBC (Quadro 26; edoxabana pelo texto do 4.3.2.6)."""
     alto = sang == 'alto'
@@ -910,9 +934,10 @@ def _doac(chave, ctx):
         a = _esquema_aha_doac(farmaco, corte, sang, neuraxial)
         b = _esquema_aha_doac(farmaco, corte - 1, sang, neuraxial)
         return _item(chave, 'individualizar', 'Depende do ClCr',
-                     f'Falta o ClCr (Cockcroft-Gault). Pela AHA (sangramento {_ROTULO_SANGRAMENTO[sang]}): com ClCr '
-                     f'≥{corte}, última dose no D-{a[0]} e reinício no D+{a[2]}; com ClCr <{corte}, última dose no '
-                     f'D-{b[0]} e reinício no D+{b[2]}.',
+                     'Falta o ClCr (Cockcroft-Gault) para escolher a linha da Tabela 13 da AHA (sangramento '
+                     f'{_ROTULO_SANGRAMENTO[sang]}). Com ClCr ≥{corte}: sem dose {_sem_dose(a[1], a[2])} (última no '
+                     f'D-{a[0]}) e reinício no D+{a[2]}. Com ClCr <{corte}: sem dose {_sem_dose(b[1], b[2])} (última no '
+                     f'D-{b[0]}) e reinício no D+{b[2]}.',
                      'AHA 1 (B-NR) · SBC I-B', refs)
     ultima, sem, reinicio = _esquema_aha_doac(farmaco, clcr, sang, neuraxial)
     antes, depois, classe_sbc, nota = _esquema_sbc_doac(farmaco, clcr, sang)
@@ -920,10 +945,10 @@ def _doac(chave, ctx):
         sbc_txt = f'SBC (Quadro 26): suspender {antes} antes e reintroduzir {depois} depois.'
     else:
         sbc_txt = (f'SBC (texto, sem quadro): suspender {antes} antes, a conduta "mais aceita" para a edoxabana.')
-    resumo = f'Última dose no D-{ultima} ({_dias(sem)} sem dose); reiniciar no D+{reinicio}'
-    texto = (f'AHA (Tabela 13, ClCr {_num(clcr)} mL/min, sangramento {_ROTULO_SANGRAMENTO[sang]}): última dose no '
-             f'D-{ultima}, {_dias(sem)} sem dose e reinício no D+{reinicio}, após hemostasia. {sbc_txt} Sem ponte com '
-             f'heparina.{nota}')
+    resumo = f'Sem dose {_sem_dose(sem, reinicio)} (última no D-{ultima}); reiniciar no D+{reinicio}'
+    texto = (f'AHA (Tabela 13, ClCr {_num(clcr)} mL/min, sangramento {_ROTULO_SANGRAMENTO[sang]}): sem dose '
+             f'{_sem_dose(sem, reinicio)}, com a última dose no D-{ultima} e o reinício no D+{reinicio}, após '
+             f'hemostasia. {sbc_txt} Sem ponte com heparina.{nota}')
     if neuraxial:
         texto += (' Neuroaxial: interrupção completa por ≥5 meias-vidas (≥3 dias para anti-Xa; ≥4 dias para '
                   'dabigatrana, 5–6 se ClCr <50). Em dose terapêutica, a primeira dose só ≥24 h após a punção ou a '
@@ -995,8 +1020,8 @@ def _varfarina(chave, ctx):
                      'alto risco tromboembólico.',
                      'AHA 1 (B-NR) · SBC I-C', refs)
     d = _decisao_ponte(ctx)
-    base = ('Última dose no D-6 (5 dias sem dose) e operar com INR <1,5 (SBC I-C); INR na véspera e, se ≥1,5, '
-            'vitamina K oral 1–2 mg e nova medida (texto da SBC).')
+    base = ('Sem dose do D-5 ao D0 (AHA, Tabela 13): última dose no D-6 e operar com INR <1,5 (SBC I-C); INR na '
+            'véspera e, se ≥1,5, vitamina K oral 1–2 mg e nova medida (texto da SBC).')
     if d['aha'] is None:
         return _item(chave, 'individualizar', 'Suspender 5 dias antes; ponte conforme o risco',
                      base + ' Falta a indicação da anticoagulação (FA, TEV ou prótese mecânica) para classificar o '

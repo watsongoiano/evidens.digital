@@ -3531,7 +3531,6 @@
   "Urgência ou emergência: suspender, vitamina K por via venosa e reposição de fatores com complexo protrombínico ou plasma fresco congelado, conforme a disponibilidade.": "Urgent or emergency surgery: stop, give IV vitamin K and replace clotting factors with prothrombin complex concentrate or fresh frozen plasma, depending on availability.",
   "Suspender 5 dias antes; ponte conforme o risco": "Stop 5 days before; bridging according to risk",
   "Falta o risco de sangramento da cirurgia: em sangramento mínimo (catarata, odontologia ou dermatologia menores) a varfarina é mantida; nos demais, suspensa 5 dias antes, com ponte só no alto risco tromboembólico.": "The surgical bleeding risk is missing: with minimal bleeding risk (minor cataract, dental or dermatologic procedures) warfarin is continued; otherwise, it is stopped 5 days before, with bridging only at high thromboembolic risk.",
-  "Última dose no D-6 (5 dias sem dose) e operar com INR <1,5 (SBC I-C); INR na véspera e, se ≥1,5, vitamina K oral 1–2 mg e nova medida (texto da SBC).": "Last dose on D-6 (5 days without a dose) and operate with INR <1.5 (SBC I-C); INR the day before and, if ≥1.5, oral vitamin K 1–2 mg and repeat measurement (SBC text).",
   "Falta a indicação da anticoagulação (FA, TEV ou prótese mecânica) para classificar o risco tromboembólico e decidir a ponte.": "The indication for anticoagulation (AF, VTE or mechanical prosthesis) is missing to classify thromboembolic risk and decide on bridging.",
   "Ponte com HBPM ou HNF em dose plena quando o INR ficar abaixo da faixa (SBC: INR <2), em geral do D-3 ao D-1; última HBPM 24 h antes e HNF 4–6 h antes.": "Bridge with full-dose LMWH or UFH once INR falls below the therapeutic range (SBC: INR <2), usually from D-3 to D-1; last LMWH 24 h before and UFH 4–6 h before.",
   "Varfarina de volta no D+1 (≥24 h), na dose habitual; heparina retomada no D+3 (SBC: 48–72 h se sangramento alto), em dose plena ou profilática por decisão de equipe, até o INR voltar à faixa.": "Warfarin restarted on D+1 (≥24 h), at the usual dose; heparin resumed on D+3 (SBC: 48–72 h if high bleeding risk), at full or prophylactic dose by team decision, until INR is back in range.",
@@ -4269,7 +4268,8 @@
   "Operadoras (conferência do pedido)": "Payers (request check)",
   "Conferir pedido": "Check request",
   "Anexe o PDF com os exames pedidos, no alto desta página.": "Attach the PDF with the requested tests, at the top of this page.",
-  "Não foi possível conferir o pedido.": "The request could not be checked."
+  "Não foi possível conferir o pedido.": "The request could not be checked.",
+  "Sem dose do D-5 ao D0 (AHA, Tabela 13): última dose no D-6 e operar com INR <1,5 (SBC I-C); INR na véspera e, se ≥1,5, vitamina K oral 1–2 mg e nova medida (texto da SBC).": "No dose from D-5 to D0 (AHA, Table 13): last dose on D-6 and operate with INR <1.5 (SBC I-C); INR the day before and, if ≥1.5, oral vitamin K 1–2 mg and repeat measurement (SBC text)."
  },
  "padroes": [
   [
@@ -4841,26 +4841,6 @@
    "Stop %1 days before"
   ],
   [
-   "^Pela AHA \\(sangramento (baixo/moderado|alto)\\): com ClCr ≥(\\d+), última dose no D-(\\d+) e reinício no D\\+(\\d+); com ClCr <(\\d+), última dose no D-(\\d+) e reinício no D\\+(\\d+)\\.$",
-   "By the AHA ($1 bleeding risk): with CrCl ≥%2, last dose on D-%3 and restart on D+%4; with CrCl <%5, last dose on D-%6 and restart on D+%7."
-  ],
-  [
-   "^Última dose no D-(\\d+) \\(1 dia sem dose\\); reiniciar no D\\+(\\d+)$",
-   "Last dose on D-%1 (1 day without a dose); restart on D+%2"
-  ],
-  [
-   "^Última dose no D-(\\d+) \\((\\d+) dias sem dose\\); reiniciar no D\\+(\\d+)$",
-   "Last dose on D-%1 (%2 days without a dose); restart on D+%3"
-  ],
-  [
-   "^AHA \\(Tabela 13, ClCr ([\\d,]+) mL/min, sangramento (baixo/moderado|alto)\\): última dose no D-(\\d+), 1 dia sem dose e reinício no D\\+(\\d+), após hemostasia\\.$",
-   "AHA (Table 13, CrCl %1 mL/min, $2 bleeding risk): last dose on D-%3, 1 day without a dose and restart on D+%4, after hemostasis."
-  ],
-  [
-   "^AHA \\(Tabela 13, ClCr ([\\d,]+) mL/min, sangramento (baixo/moderado|alto)\\): última dose no D-(\\d+), (\\d+) dias sem dose e reinício no D\\+(\\d+), após hemostasia\\.$",
-   "AHA (Table 13, CrCl %1 mL/min, $2 bleeding risk): last dose on D-%3, %4 days without a dose and restart on D+%5, after hemostasis."
-  ],
-  [
    "^SBC \\(Quadro 26\\): suspender (.+?) antes e reintroduzir (.+?) depois\\.$",
    "SBC (Box 26): stop $1 before and restart $2 after."
   ],
@@ -5151,6 +5131,22 @@
   [
    "^Feito em (\\d{2})/(\\d{2})/(\\d{4})\\. Avaliação inicial: resultado válido por (\\d+) dias \\(critério do Evidēns\\), até (\\d{2})/(\\d{2})/(\\d{4})\\. O sistema não conferiu o resultado: se estiver alterado, peça nova amostra\\.$",
    "Done on %3-%2-%1. Initial evaluation: result valid for %4 days (Evidēns criterion), until %7-%6-%5. The system did not check the result: if it is abnormal, order a new sample."
+  ],
+  [
+   "^Falta o ClCr \\(Cockcroft-Gault\\) para escolher a linha da Tabela 13 da AHA \\(sangramento (baixo/moderado|alto)\\)\\.$",
+   "CrCl (Cockcroft-Gault) is needed to choose the row of AHA Table 13 ($1 bleeding risk)."
+  ],
+  [
+   "^Com ClCr (≥|<)(\\d+): sem dose do D-(\\d+) ao (D0|D\\+\\d+) \\(última no D-(\\d+)\\) e reinício no D\\+(\\d+)\\.$",
+   "With CrCl %1%2: no dose from D-%3 to %4 (last on D-%5) and restart on D+%6."
+  ],
+  [
+   "^Sem dose do D-(\\d+) ao (D0|D\\+\\d+) \\(última no D-(\\d+)\\); reiniciar no D\\+(\\d+)$",
+   "No dose from D-%1 to %2 (last on D-%3); restart on D+%4"
+  ],
+  [
+   "^AHA \\(Tabela 13, ClCr ([\\d,]+) mL/min, sangramento (baixo/moderado|alto)\\): sem dose do D-(\\d+) ao (D0|D\\+\\d+), com a última dose no D-(\\d+) e o reinício no D\\+(\\d+), após hemostasia\\.$",
+   "AHA (Table 13, CrCl %1 mL/min, $2 bleeding risk): no dose from D-%3 to %4, with the last dose on D-%5 and restart on D+%6, after hemostasis."
   ]
  ],
  "manter": [
