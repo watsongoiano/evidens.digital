@@ -1,54 +1,41 @@
-# Security Policy
+# Segurança
 
-## Supported Versions
+## Versão coberta
 
-The following table outlines which versions of this project are actively supported with security updates. Unsupported versions will **not** receive security patches, and users are strongly encouraged to upgrade.
+Só a versão publicada em [evidens.life](https://evidens.life), que corresponde à branch `main`, recebe correções.
+Não há versões antigas mantidas.
 
-| Version | Supported     |
-| ------- | ------------- |
-| 5.1.x   | ✅ Supported   |
-| 5.0.x   | ❌ Unsupported |
-| 4.0.x   | ✅ Supported   |
-| < 4.0   | ❌ Unsupported |
+## Como relatar uma vulnerabilidade
 
----
+Não abra uma issue pública. Use um destes caminhos:
 
-## Reporting a Vulnerability
+1. **Relato privado no GitHub:** aba *Security* do repositório → *Report a vulnerability*
+   ([link direto](https://github.com/watsongoiano/evidens.digital/security/advisories/new)).
+2. **Contato do site:** a página [evidens.life/contact](https://evidens.life/contact), pedindo um canal privado
+   antes de enviar os detalhes.
 
-We take the security of our project seriously. If you discover a vulnerability, please help us keep the community safe by following the steps below:
+Inclua o que for possível: o que a falha permite, os passos para reproduzir, a página ou rota afetada e a data
+do teste.
 
-### How to Report
+## Ao testar
 
-* **Email:** Send a detailed report to **security@\[yourdomain].com**.
-* **GPG Encryption (optional):** You may encrypt your message with our [public PGP key](#) for confidentiality.
-* **Alternative contact:** If email is not possible, please open a private issue via GitHub’s [security advisories](https://docs.github.com/en/code-security/security-advisories/repository-security-advisories).
+- Use apenas a sua própria conta e dados fictícios. Não acesse, altere nem apague dados de outros usuários.
+- Não envie dados reais de pacientes.
+- Não faça testes de carga nem de negação de serviço.
+- Dê tempo para a correção antes de divulgar.
 
-### What to Include
+## O que o sistema guarda
 
-To help us triage and resolve the issue quickly, please include:
+Para orientar o que é relevante relatar:
 
-1. A description of the vulnerability.
-2. Steps to reproduce (proof of concept is highly recommended).
-3. Potential impact if exploited.
-4. Your environment details (version, OS, etc.).
+- **Contas:** e-mail, nome, registro profissional, senha (só o hash), aceite dos Termos de Uso, eventos de uso
+  e as tentativas de login que falharam (e-mail e IP), apagadas ao fim da janela de bloqueio.
+- **Do médico:** receituário ou timbrado, credenciamentos em planos de saúde, vínculos com estabelecimentos do
+  SUS e, enquanto durar a sessão de assinatura digital, o token dela (cifrado), o certificado público e o nome
+  do titular.
+- **Do paciente:** nada é gravado. Os dados do formulário e os laudos em PDF são processados em memória e
+  descartados; o nome do paciente é opcional e só acompanha o pedido de PDF.
 
-### Response Expectations
-
-* **Acknowledgment:** We will confirm receipt of your report within **48 hours**.
-* **Initial assessment:** A preliminary evaluation will be shared within **5 business days**.
-* **Regular updates:** You will receive progress updates at least **once every 14 days** until the issue is resolved.
-* **Resolution:** Once fixed, we will coordinate public disclosure with you, following responsible disclosure practices.
-
-### If the Vulnerability Is Declined
-
-If the issue does not qualify as a security vulnerability (e.g., out-of-scope or intended behavior), we will provide a clear explanation.
-
----
-
-## Responsible Disclosure
-
-We kindly ask that you:
-
-* Give us a reasonable time (typically **90 days**) to address the issue before publicly disclosing.
-* Avoid exploiting the vulnerability beyond what is necessary to demonstrate its existence.
-* Respect the safety and privacy of users when testing.
+Os perigos clínicos conhecidos e os controles de cada um estão em
+[`docs/registro-de-perigos.md`](docs/registro-de-perigos.md). As variáveis de ambiente e os segredos estão
+descritos em [`docs/deploy.md`](docs/deploy.md); os segredos ficam só nas variáveis de ambiente.
