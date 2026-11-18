@@ -275,12 +275,14 @@ def decide_ponte(categorias):
 # ---------------------------------------------------------------------------------------------------------------
 # Leitura da saída do módulo
 # ---------------------------------------------------------------------------------------------------------------
-RE_DIAS = re.compile(r'Última dose no D-(\d+) \((\d+) dias? sem dose\); reiniciar no D\+(\d+)')
+# O resumo segue a Tabela 13: os dias sem dose (da interrupção à véspera do reinício), a última dose e o reinício.
+RE_DIAS = re.compile(r'Sem dose do D-(\d+) ao (D0|D\+\d+) \(última no D-(\d+)\); reiniciar no D\+(\d+)')
 RE_HORAS = re.compile(r'Última dose ≥(\d+) h antes; reiniciar (\d+) h depois')
-RE_SEM_CLCR = re.compile(r'com ClCr ≥(\d+), última dose no D-(\d+) e reinício no D\+(\d+); com ClCr <(\d+), '
-                         r'última dose no D-(\d+) e reinício no D\+(\d+)')
+RE_SEM_CLCR = re.compile(r'Com ClCr ≥(\d+): sem dose do D-\d+ ao (?:D0|D\+\d+) \(última no D-(\d+)\) e reinício no '
+                         r'D\+(\d+)\. Com ClCr <(\d+): sem dose do D-\d+ ao (?:D0|D\+\d+) \(última no D-(\d+)\) e '
+                         r'reinício no D\+(\d+)')
 RE_CAT_AHA = re.compile(r'pela AHA \(Tabela 14\): (baixo|moderado|alto)')
-RE_ULTIMA_VARF = re.compile(r'Última dose no D-(\d+) \((\d+) dias sem dose\)')
+RE_ULTIMA_VARF = re.compile(r'Sem dose do D-(\d+) ao D0 \(AHA, Tabela 13\): última dose no D-(\d+)')
 RE_HEPARINA_POS = re.compile(r'heparina retomada no D\+(\d+)')
 RE_VARF_VOLTA = re.compile(r'Varfarina de volta no D\+(\d+)')
 RE_ENOXA_ANTES = re.compile(r'última dose (\d+) h antes')
@@ -293,8 +295,10 @@ def esquema_doac(resumo):
     """(x, y) do resumo do módulo; horas pela mesma equivalência usada para a SBC."""
     m = RE_DIAS.search(resumo)
     if m:
-        x, sem, y = map(int, m.groups())
+        sem, fim, x, y = m.groups()
+        sem, x, y = int(sem), int(x), int(y)
         assert sem == x - 1, f'dias sem dose incoerentes com a última dose: {resumo}'
+        assert fim == ('D0' if y == 1 else f'D+{y - 1}'), f'os dias sem dose não vão até a véspera do reinício: {resumo}'
         return x, y
     m = RE_HORAS.search(resumo)
     if m:
@@ -686,7 +690,8 @@ def verifica_varfarina(p, it, r):
         assert it['conduta'] == 'individualizar' and 'indicação' in it['texto'], it['texto']
         return
     assert m, it['texto']
-    x = int(m.group(1))
+    assert int(m.group(1)) == int(m.group(2)) - 1, it['texto']
+    x = int(m.group(2))
     # Última dose: AHA Tabela 13 (D-6), SBC Quadro 25 (5 dias), CHEST 2022 (≥5 dias), ASRA 2025 (5 dias)
     t = le_t13(('varfarina', 'te_alto' if cat_aha == {'alto'} else 'te_baixo_moderado', sang))
     fontes_x = [('AHA Tabela 13', t['x'], t['x']), ('SBC Quadro 25', 6, 6), ('CHEST 2022', 6, INF)]

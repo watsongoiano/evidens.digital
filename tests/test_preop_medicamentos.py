@@ -258,24 +258,24 @@ def test_aviso_de_hba1c_com_antidiabetico():
 
 # --- DOAC: fármaco × ClCr × sangramento (AHA Tabela 13; SBC Quadro 26) --------------------------------------------
 @pytest.mark.parametrize('chave, clcr, sangramento, resumo, sbc', [
-    ('apixabana', 80, 'baixo_moderado', 'Última dose no D-2 (1 dia sem dose); reiniciar no D+1',
+    ('apixabana', 80, 'baixo_moderado', 'Sem dose do D-1 ao D0 (última no D-2); reiniciar no D+1',
      'suspender 24 h antes e reintroduzir 24 h depois'),
-    ('apixabana', 80, 'alto', 'Última dose no D-3 (2 dias sem dose); reiniciar no D+3',
+    ('apixabana', 80, 'alto', 'Sem dose do D-2 ao D+2 (última no D-3); reiniciar no D+3',
      'suspender pelo menos 48 h antes e reintroduzir 48 h depois'),
-    ('rivaroxabana', 25, 'baixo_moderado', 'Última dose no D-3 (2 dias sem dose); reiniciar no D+1',
+    ('rivaroxabana', 25, 'baixo_moderado', 'Sem dose do D-2 ao D0 (última no D-3); reiniciar no D+1',
      'suspender pelo menos 48 h antes'),
-    ('rivaroxabana', 25, 'alto', 'Última dose no D-4 (3 dias sem dose); reiniciar no D+3',
+    ('rivaroxabana', 25, 'alto', 'Sem dose do D-3 ao D+2 (última no D-4); reiniciar no D+3',
      'suspender pelo menos 48 h antes'),
-    ('rivaroxabana', 90, 'baixo_moderado', 'Última dose no D-2 (1 dia sem dose); reiniciar no D+1',
+    ('rivaroxabana', 90, 'baixo_moderado', 'Sem dose do D-1 ao D0 (última no D-2); reiniciar no D+1',
      'suspender 24 h antes'),
-    ('edoxabana', 60, 'alto', 'Última dose no D-3 (2 dias sem dose); reiniciar no D+3', 'suspender 48–72 h antes'),
-    ('dabigatrana', 60, 'baixo_moderado', 'Última dose no D-2 (1 dia sem dose); reiniciar no D+1',
+    ('edoxabana', 60, 'alto', 'Sem dose do D-2 ao D+2 (última no D-3); reiniciar no D+3', 'suspender 48–72 h antes'),
+    ('dabigatrana', 60, 'baixo_moderado', 'Sem dose do D-1 ao D0 (última no D-2); reiniciar no D+1',
      'suspender 24 h antes e reintroduzir 24 h depois'),
-    ('dabigatrana', 60, 'alto', 'Última dose no D-3 (2 dias sem dose); reiniciar no D+3',
+    ('dabigatrana', 60, 'alto', 'Sem dose do D-2 ao D+2 (última no D-3); reiniciar no D+3',
      'suspender 48 h antes e reintroduzir 48 h depois'),
-    ('dabigatrana', 45, 'baixo_moderado', 'Última dose no D-3 (2 dias sem dose); reiniciar no D+1',
+    ('dabigatrana', 45, 'baixo_moderado', 'Sem dose do D-2 ao D0 (última no D-3); reiniciar no D+1',
      'suspender 48 h antes e reintroduzir 24 h depois'),
-    ('dabigatrana', 40, 'alto', 'Última dose no D-5 (4 dias sem dose); reiniciar no D+3',
+    ('dabigatrana', 40, 'alto', 'Sem dose do D-4 ao D+2 (última no D-5); reiniciar no D+3',
      'suspender 96 h antes e reintroduzir 48 h depois'),
 ])
 def test_matriz_doac(chave, clcr, sangramento, resumo, sbc):
@@ -325,19 +325,19 @@ def test_neuroaxial_conta_como_sangramento_alto_e_gera_aviso():
     r = pm.condutas(['dabigatrana'], {'clcr': 70, 'sangramento': 'baixo_moderado', 'neuraxial': True})
     i = r['itens'][0]
     # Neuroaxial: ≥ 5 meias-vidas (AHA §7.6, texto): ≥ 4 dias sem dabigatrana com ClCr ≥ 50; 6 com ClCr < 50
-    assert i['resumo'] == 'Última dose no D-5 (4 dias sem dose); reiniciar no D+3'
+    assert i['resumo'] == 'Sem dose do D-4 ao D+2 (última no D-5); reiniciar no D+3'
     assert '≥24 h após a punção ou a retirada do cateter' in i['texto'] and 'ASRA' in i['divergencia']
     r = pm.condutas(['dabigatrana'], {'clcr': 40, 'sangramento': 'alto', 'neuraxial': True})
-    assert r['itens'][0]['resumo'] == 'Última dose no D-7 (6 dias sem dose); reiniciar no D+3'
+    assert r['itens'][0]['resumo'] == 'Sem dose do D-6 ao D+2 (última no D-7); reiniciar no D+3'
     aviso = next(a for a in r['avisos'] if a['titulo'] == 'Anestesia neuroaxial e anticoagulantes')
     assert '≥5 meias-vidas' in aviso['texto']
-    assert item('apixabana', clcr=70, sangramento='minimo', neuraxial=True)['resumo'].startswith('Última dose no D-4')
+    assert item('apixabana', clcr=70, sangramento='minimo', neuraxial=True)['resumo'].startswith('Sem dose do D-3 ao D+2 (última no D-4)')
 
 
 def test_aceita_a_grafia_neuroaxial():
     r = pm.condutas(['apixabana'], {'clcr': 70, 'sangramento': 'baixo_moderado', 'neuroaxial': True})
     # Anti-Xa com neuroaxial: ≥ 3 dias sem dose (72 h)
-    assert r['itens'][0]['resumo'] == 'Última dose no D-4 (3 dias sem dose); reiniciar no D+3'
+    assert r['itens'][0]['resumo'] == 'Sem dose do D-3 ao D+2 (última no D-4); reiniciar no D+3'
     assert 'Anestesia neuroaxial e anticoagulantes' in [a['titulo'] for a in r['avisos']]
 
 
@@ -572,3 +572,20 @@ def test_hormonios_e_tireoide_spaqi():
     assert '7 dias' in item('tamoxifeno')['texto']
     assert item('levotiroxina')['conduta'] == 'manter'
     assert pm.condutas(['anastrozol'], {})['itens'] == []
+
+
+def test_referencia_da_aha_abre_o_texto_integral_na_tabela_13():
+    """Pedido do responsável clínico (18/11/2026): a referência leva ao ponto exato da diretriz, não ao endereço
+    geral. A Tabela 13 abre pelo título dela, copiado da diretriz (fragmento de texto)."""
+    from urllib.parse import unquote
+    for med in ('rivaroxabana', 'dabigatrana', 'varfarina'):
+        refs = item(med, clcr=80, sangramento="alto", condicoes={"fa"}, urgencia="eletiva", idade=70)["referencias"]
+        da_tabela = [r for r in refs if 'Tabela' in r['label'] and '13' in r['label']]
+        assert da_tabela, (med, [r['label'] for r in refs])
+        url = da_tabela[0]['url']
+        assert url.startswith('https://www.ahajournals.org/doi/10.1161/CIR.0000000000001285#:~:text='), url
+        assert unquote(url.split('#:~:text=')[1]) == ('Perioperative Management of Direct Oral Anticoagulants and '
+                                                      'Vitamin K Antagonists')
+        assert ' ' not in url
+    # Lugar sem título conhecido continua no endereço geral da diretriz.
+    assert pm._aha('§7.6 (texto) e Tabela 15')[0]['url'] == pm._URL_AHA
