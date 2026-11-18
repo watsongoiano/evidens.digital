@@ -18,9 +18,14 @@ def test_catalogo_do_motor_esta_atualizado(app, medica_aprovada):
             return cliente
 
     with redirect_stdout(io.StringIO()):
-        atual = catalogo.titulos_do_motor(_App())
+        atual, indicacoes = catalogo.varrer_o_motor(_App())
     gravado = json.loads(catalogo.ARQUIVO_DO_MOTOR.read_text(encoding='utf-8'))
     assert gravado == atual, 'Rode: python scripts/gerar_catalogo.py'
+    # Para quem o motor indica cada exame (usado na conferência do pedido das operadoras): mesmo arquivo gerado.
+    assert json.loads(catalogo.ARQUIVO_DAS_INDICACOES.read_text(encoding='utf-8')) == indicacoes, \
+        'Rode: python scripts/gerar_catalogo.py'
+    assert set(indicacoes) == set(atual['laboratorio']) | set(atual['imagem'])
+    assert all(item['grupos'] for item in indicacoes.values())
 
 
 def test_catalogo_une_motor_e_extras_sem_repetir(client):

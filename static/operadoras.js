@@ -70,14 +70,12 @@
       if (l.no_checkup && l.no_checkup !== l.exame) cartao.append(el('p', 'text-[12px] text-ink/50', `No check-up: ${l.no_checkup}`));
       cartao.append(el('p', 'text-[14px] text-ink/75 mt-2', l.motivo));
       if (l.aviso) cartao.append(el('p', 'text-[13px] text-[#C0392B] mt-1', l.aviso));
-      if (l.observacao) {
-        const obs = el('p', 'text-[13px] text-ink/60 mt-2', l.observacao + ' ');
-        const fonte = l.observacao_link;
-        if (fonte && /^https:\/\/[^\s"'<>]+$/.test(fonte.url || '')) {
-          const a = el('a', 'underline', fonte.label); a.href = fonte.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-          obs.append(a);
-        }
-        cartao.append(obs);
+      const grupos = (l.indicado_para || {}).grupos || [];
+      if (grupos.length) {      // em que situações o check-up indica este exame (nenhuma presente nos dados informados)
+        const mostrados = grupos.slice(0, 6).join('; ');
+        const resto = grupos.length - 6;
+        cartao.append(el('p', 'text-[13px] text-ink/60 mt-2', `No check-up, este exame é indicado para: ${mostrados}`
+          + (resto > 0 ? ` e outras ${resto} situações` : '') + '. Nenhuma foi informada para este paciente.'));
       }
       const rodape = fontes(l.referencias, l.grau);
       if (rodape) cartao.append(rodape);
@@ -88,9 +86,10 @@
   function baixar() {
     if (!dados) return;
     const campo = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-    const linhas = [['exame', 'nome_no_pedido', 'data', 'arquivo', 'conferencia', 'motivo', 'no_checkup', 'grau', 'referencias', 'observacao']]
+    const linhas = [['exame', 'nome_no_pedido', 'data', 'arquivo', 'conferencia', 'justificativa', 'no_checkup', 'grau', 'referencias', 'no_checkup_indicado_para']]
       .concat(dados.linhas.map(l => [l.exame, l.nome_no_pedido, l.data, l.arquivo, (VEREDITOS[l.veredito] || {}).rotulo || l.veredito,
-        [l.motivo, l.aviso].filter(Boolean).join(' '), l.no_checkup, l.grau, (l.referencias || []).map(r => r.label).join(' | '), l.observacao]));
+        [l.motivo, l.aviso].filter(Boolean).join(' '), l.no_checkup, l.grau, (l.referencias || []).map(r => `${r.label} ${r.url || ''}`.trim()).join(' | '),
+        ((l.indicado_para || {}).grupos || []).join('; ')]));
     const link = el('a');
     link.href = URL.createObjectURL(new Blob(['﻿' + linhas.map(l => l.map(campo).join(';')).join('\n')], { type: 'text/csv;charset=utf-8' }));
     link.download = 'conferencia_do_pedido.csv';

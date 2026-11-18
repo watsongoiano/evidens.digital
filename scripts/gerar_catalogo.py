@@ -1,4 +1,5 @@
-"""Gera src/data/catalogo_motor.json com os títulos que o motor recomenda.
+"""Gera src/data/catalogo_motor.json (os títulos que o motor recomenda) e src/data/indicacoes_motor.json (para quem
+o motor indica cada exame, e com que fontes).
 
 Rode depois de mudar as recomendações do motor:  python scripts/gerar_catalogo.py
 O teste tests/test_catalogo.py falha se o arquivo estiver desatualizado.
@@ -48,8 +49,9 @@ class _App:
 
 
 with redirect_stdout(io.StringIO()):
-    titulos = catalogo.titulos_do_motor(_App())
+    titulos, indicacoes = catalogo.varrer_o_motor(_App())
 
 catalogo.ARQUIVO_DO_MOTOR.write_text(json.dumps(titulos, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
+catalogo.ARQUIVO_DAS_INDICACOES.write_text(json.dumps(indicacoes, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
 shutil.rmtree(PASTA_TEMPORARIA, ignore_errors=True)
-print({c: len(v) for c, v in titulos.items()})
+print({c: len(v) for c, v in titulos.items()}, '| exames com indicações:', len(indicacoes))

@@ -158,11 +158,45 @@ def catalogo():
     return saida
 
 
+ARQUIVO_DAS_INDICACOES = Path(__file__).resolve().parents[1] / 'data' / 'indicacoes_motor.json'
+
+
 def titulos_do_motor(app):
     """Varre perfis pelo motor e devolve {categoria: [títulos]} (usado pelo script e pelo teste)."""
+    return varrer_o_motor(app)[0]
+
+
+def indicacoes_do_motor():
+    """{título: {'grupos': [...], 'referencias': [{'label', 'url'}]}}: para quem o motor indica cada exame de
+    laboratório ou de imagem, e com que fontes (src/data/indicacoes_motor.json, gerado pela varredura)."""
+    try:
+        return json.loads(ARQUIVO_DAS_INDICACOES.read_text(encoding='utf-8'))
+    except FileNotFoundError:
+        return {}
+
+
+def varrer_o_motor(app):
+    """Varre perfis pelo motor. Devolve ({categoria: [títulos]}, {título: {'grupos', 'referencias'}}).
+
+    O segundo item diz, para cada exame de laboratório ou de imagem, em que grupos o motor o indica (a primeira
+    parte do subtítulo de cada indicação: "Adultos com HAS", "Em uso de lítio") e as fontes que ele cita."""
     import itertools
+    from src.utils import periodicidade
     cliente = app.test_client()
     encontrados = {c: set() for c in CATEGORIAS}
+    indicacoes = {}
+
+    def registrar(recomendacoes):
+        for rec in recomendacoes:
+            if rec.get('categoria') not in encontrados:
+                continue
+            encontrados[rec['categoria']].add(rec['titulo'])
+            if rec['categoria'] in ('laboratorio', 'imagem'):
+                item = indicacoes.setdefault(rec['titulo'], {'grupos': set(), 'referencias': {}})
+                item['grupos'].update(grupo for grupo, _ in periodicidade.indicacoes(rec.get('subtitulo')) if grupo)
+                for fonte in rec.get('referencias') or []:
+                    if fonte.get('label'):
+                        item['referencias'].setdefault(fonte['label'], fonte.get('url') or '')
     grade = itertools.product(
         (18, 25, 35, 45, 50, 55, 60, 65, 70, 80), ('masculino', 'feminino'), ('nunca', 'atual', 'ex'),
         ([], ['diabetes'], ['hipertensao'], ['hiv'], ['doenca_renal', 'dcv_aterosclerotica'], ['insuficiencia_cardiaca'], ['dpoc'],
@@ -179,27 +213,20 @@ def titulos_do_motor(app):
                      idade_gestacional='20' if gest == 'sim' else '', primeira_consulta='sim',
                      macos_ano='30' if tab != 'nunca' else '', anos_parou_fumar='5' if tab == 'ex' else '',
                      cd4='500' if 'hiv' in com else '', alcoolismo='pesado', doses_semana='20')
-        resposta = cliente.post('/api/checkup-intelligent', json=dados)
-        for rec in resposta.get_json()['recommendations']:
-            if rec.get('categoria') in encontrados:
-                encontrados[rec['categoria']].add(rec['titulo'])
+        registrar(cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations'])
     # Gestação: todas as janelas do pré-natal, com Rh negativo, toxoplasmose suscetível e risco
     for idade, ig in itertools.product((22, 35), (8, 12, 15, 22, 26, 32, 36)):
         dados = dict(idade=idade, sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[],
                      imunossupressao='nao', gestante='sim', lactante='nao', idade_gestacional=ig,
                      primeira_consulta='sim', fator_rh='negativo', toxoplasmose='suscetivel',
                      gestacao_condicoes=['pe_previa', 'dmg_previo', 'prematuro_previo'])
-        for rec in cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
-            if rec.get('categoria') in encontrados:
-                encontrados[rec['categoria']].add(rec['titulo'])
+        registrar(cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations'])
     # Colo do útero: os desfechos do último teste de DNA-HPV (colposcopia, repetição em 1 ano)
     from src.utils import colo_utero
     for resultado, imuno in itertools.product(colo_utero.RESULTADOS, ('nao', 'sim')):
         dados = dict(idade=40, sexo='feminino', tabagismo='nunca', comorbidades=[], historia_familiar=[],
                      imunossupressao=imuno, gestante='nao', lactante='nao', hpv_resultado=resultado)
-        for rec in cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
-            if rec.get('categoria') in encontrados:
-                encontrados[rec['categoria']].add(rec['titulo'])
+        registrar(cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations'])
     # Listas suspensas (comorbidades, medicações e família): cada item sozinho, em idades e sexos distintos
     from src.utils import condicoes
     for idade, sexo in itertools.product((30, 47, 68), ('masculino', 'feminino')):
@@ -209,7 +236,9 @@ def titulos_do_motor(app):
         for caso in casos:
             dados = dict(dict(idade=idade, sexo=sexo, tabagismo='nunca', comorbidades=[], medicacoes=[],
                               historia_familiar=[], imunossupressao='nao', gestante='nao', lactante='nao'), **caso)
-            for rec in cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations']:
-                if rec.get('categoria') in encontrados:
-                    encontrados[rec['categoria']].add(rec['titulo'])
-    return {c: sorted(v, key=lambda t: t.lower()) for c, v in encontrados.items()}
+            registrar(cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations'])
+    titulos = {c: sorted(v, key=lambda t: t.lower()) for c, v in encontrados.items()}
+    por_titulo = {titulo: {'grupos': sorted(item['grupos'], key=str.lower),
+                           'referencias': [{'label': rotulo, 'url': url} for rotulo, url in sorted(item['referencias'].items())]}
+                  for titulo, item in sorted(indicacoes.items(), key=lambda par: par[0].lower())}
+    return titulos, por_titulo

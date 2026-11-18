@@ -32,14 +32,42 @@ médico pediu tem evidência para aquele paciente.
    - **Indicado**: está entre os exames que o check-up recomenda para o paciente. Vêm o grupo, a periodicidade, o
      grau e as referências da própria recomendação.
    - **Não indicado**: não está. Se o check-up o deixou de fora por um motivo que ele mesmo declara (já feito e em
-     dia, adiado na gestação, recomendação de não fazer), o motivo aparece; senão, "O check-up não indica este exame
-     para este paciente".
+     dia, adiado na gestação, recomendação de não fazer), o motivo aparece. Senão, vai a justificativa formal, com a
+     fonte e o link (ver "Justificativa do exame não indicado").
    A tela mostra também a lista do que o check-up indica para o paciente, com o que foi e o que não foi pedido, e
    baixa o resultado em CSV.
 
+### Justificativa do exame não indicado
+
+Não basta dizer que o exame não está no check-up. Para cada exame não indicado, a tela mostra:
+
+1. **O que a diretriz diz sobre pedir o exame de rotina**, com a referência e o link. A ordem de busca é: parecer de
+   sociedade médica já cadastrado (tabela "Pareceres de sociedades médicas", abaixo) e, depois, o registro
+   `SEM_INDICACAO_DE_ROTINA` em `src/utils/operadora.py`.
+2. **Para quem o check-up indica o exame** ("Adultos com HAS", "Em uso de lítio"...), com a observação de que nenhuma
+   dessas situações foi informada. Vem de `src/data/indicacoes_motor.json`, gerado pela varredura do motor
+   (`python scripts/gerar_catalogo.py`; o teste falha se o arquivo estiver desatualizado).
+
+Exame que ainda não foi pesquisado sai com "Ainda não há justificativa de diretriz registrada para ele", e a linha
+fica marcada (`sem_justificativa`) para a pesquisa e o registro. Nenhum texto entra no registro sem conferência na
+fonte.
+
+| Exame | O que a diretriz diz | Fonte |
+|---|---|---|
+| TGP (ALT) | Sem rastreio de doença hepática esteatótica na população geral; a pesquisa de fibrose (FIB-4) fica para diabetes tipo 2, obesidade com complicações, consumo de álcool ou história familiar de cirrose | [AASLD 2023](https://doi.org/10.1097/HEP.0000000000000323); [USPSTF, recomendações A e B](https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations) |
+| TGO (AST) | Não pedir de rotina na avaliação inicial, nem junto da TGP, que é mais específica | [CSCC 2024, Choosing Wisely Canada](https://choosingwiselycanada.org/download/17612); [AASLD 2023](https://doi.org/10.1097/HEP.0000000000000323) |
+| Bilirrubinas | Fora dos rastreios recomendados; fração direta só com a total elevada | [USPSTF, recomendações A e B](https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations); [CSCC 2024](https://choosingwiselycanada.org/download/17612) |
+| Ureia | Não pedir de rotina na avaliação inicial: a creatinina, com a TFG estimada, basta | [CSCC 2024](https://choosingwiselycanada.org/download/17612) |
+| Creatinina | Não rastrear doença renal crônica em adulto assintomático sem fator de risco (recomendação fraca, evidência de baixa qualidade) | [ACP 2013](https://doi.org/10.7326/0003-4819-159-12-201312170-00726) |
+| PCR | Evidência insuficiente para somar a PCR ultrassensível à avaliação do risco cardiovascular (declaração I) | [USPSTF 2018](https://doi.org/10.1001/jama.2018.8359) |
+| TP/INR e TTPA | Predizem mal o sangramento em pessoas não selecionadas; sem história de sangramento, não se pedem de rotina nem antes de cirurgia | [BCSH 2008](https://doi.org/10.1111/j.1365-2141.2007.06968.x) |
+| Lactato | Não é exame de rastreio; indicado na suspeita de sepse ou de hipoperfusão | [Surviving Sepsis Campaign 2021](https://doi.org/10.1007/s00134-021-06506-y) |
+| CK total | Não é exame de rastreio, nem de rotina em uso de estatina (classe III) | [AHA/ACC 2018](https://doi.org/10.1161/CIR.0000000000000625) |
+| Sódio, potássio, cálcio, cálcio iônico, magnésio, fósforo, proteínas totais e frações, hemograma | Fora dos rastreios recomendados pela USPSTF (graus A e B); não pedir exames de sangue de rotina sem indicação pelo risco do paciente | [USPSTF, recomendações A e B](https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations); [CFPC, Choosing Wisely Canada](https://choosingwiselycanada.org/wp-content/uploads/2022/10/Choosing-Wisely-Canada-Labs-Recommendations-Full-List.pdf) |
+
 O que **não** entra na conferência: cores, finalidade, CID, regime, pareceres de sociedades e intervalos mínimos do
-modo em lote (abaixo). Entram só dois ajustes de identidade do exame: o cálcio total conta como cálcio iônico, e o
-exame já pesquisado (lactato, CK) traz, como observação, a indicação reconhecida e a fonte.
+modo em lote (abaixo). O veredito (indicado ou não indicado) é sempre o do check-up; os pareceres e o registro acima
+só explicam o exame não indicado. O cálcio total conta como cálcio iônico.
 
 Os dados do paciente vão à rota `POST /api/admin/operadoras/conferir` no campo `paciente`, em JSON no formato que o
 formulário do check-up envia; é a porta de entrada prevista para os dados que virão do cadastro da operadora. "Exames

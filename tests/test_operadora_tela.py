@@ -51,10 +51,47 @@ def test_conferencia_e_o_check_up_do_paciente_sem_regra_a_mais(admin):
     assert passaram_a_indicados                      # a hipertensão e o diabetes informados mudam a conferência
     indicado = com[passaram_a_indicados[0]]
     assert indicado['motivo'] and indicado['referencias'] and indicado['referencias'][0]['url'].startswith('https://')
-    nao_indicado = next(linha for linha in com.values() if linha['estado'] == 'sem_indicacao')
-    assert nao_indicado['motivo'] == 'O check-up não indica este exame para este paciente.'
-    for linha in com.values():                       # nada do modo em lote: sem Choosing Wisely, cor ou finalidade
-        assert 'Choosing Wisely' not in linha['motivo'] and 'cor' not in linha
+    for linha in com.values():                       # nada do modo em lote: sem cor nem finalidade
+        assert 'cor' not in linha and 'finalidade_usada' not in linha
+
+
+def test_exame_nao_indicado_traz_justificativa_formal_com_fonte(admin):
+    """Não basta "não está no check-up": cada exame não indicado traz o que a diretriz diz, com link, e as situações
+    em que o check-up o indica."""
+    linhas = _por_exame(_envio(admin))
+    nao_indicados = [linha for linha in linhas.values() if linha['estado'] == 'sem_indicacao']
+    assert len(nao_indicados) >= 5
+    for linha in nao_indicados:
+        assert linha['motivo'] != 'O check-up não indica este exame para este paciente.'
+        if linha['sem_justificativa']:
+            assert 'Ainda não há justificativa de diretriz registrada' in linha['motivo']
+        else:
+            assert len(linha['motivo']) > 60 and linha['referencias'], linha
+            assert all(fonte['url'].startswith('https://') and fonte['label'] for fonte in linha['referencias']), linha
+    com_justificativa = [linha for linha in nao_indicados if not linha['sem_justificativa']]
+    assert len(com_justificativa) >= 5
+    sodio = linhas['Sódio, soro']
+    assert sodio['motivo'].startswith('Sem recomendação de rastreio: a USPSTF não inclui o sódio entre os rastreios')
+    assert 'Adultos com HAS' in sodio['indicado_para']['grupos'] and sodio['indicado_para']['grupos'][0].startswith('Adultos')
+
+
+def test_registro_de_justificativas_e_precedencia_do_parecer_de_sociedade():
+    from src.utils import operadora, tuss
+    for codigo, item in operadora.SEM_INDICACAO_DE_ROTINA.items():
+        assert codigo in tuss.DESCRICOES or codigo in tuss.DA_TABELA, codigo
+        assert len(item['texto']) > 60 and item['referencias'], codigo
+        assert all(f['url'].startswith('https://') and f['label'] for f in item['referencias']), codigo
+    tgo = operadora.justificativa_de_nao_indicacao({'40302504'}, 'masculino', 40)
+    assert 'TGO' in tgo['texto'] and [f['label'] for f in tgo['referencias']] == ['CSCC 2024 (Choosing Wisely Canada)', 'AASLD 2023']
+    # A vitamina D tem parecer de sociedade (Endocrine Society 2024): ele vem antes do registro próprio, com o aviso.
+    vitamina_d = operadora.justificativa_de_nao_indicacao({'40302830'}, 'feminino', 40)
+    assert vitamina_d['texto'].startswith('Endocrine Society 2024') and vitamina_d['aviso'].startswith('Divergência')
+    assert operadora.justificativa_de_nao_indicacao({'nome:exame que ninguem pesquisou'}, 'feminino', 40) is None
+    # Grupo só de gestante não aparece para homem.
+    homem, mulher = (operadora.indicado_para({'40304361'}, sexo)['grupos'] for sexo in ('masculino', 'feminino'))
+    assert not [g for g in homem if 'estant' in g] and len(mulher) >= len(homem)
+    resultado, _ = operadora.conferir_pedido(PACIENTE, [{'exame': 'Exame que ninguém pesquisou', 'codigos': None}])
+    assert resultado['linhas'][0]['sem_justificativa'] and resultado['linhas'][0]['veredito'] == 'nao_indicado'
 
 
 def test_resumo_e_lista_do_check_up_acompanham_a_resposta(admin):
@@ -78,7 +115,7 @@ def test_exame_ja_feito_e_em_dia_sai_como_nao_indicado_agora(admin):
     assert linha['motivo'].startswith('Já feito e ainda em dia. Feito em ')
 
 
-def test_calcio_total_conta_como_calcio_ionico_e_exame_registrado_traz_a_observacao():
+def test_calcio_total_conta_como_calcio_ionico_e_exame_registrado_traz_a_fonte():
     from src.utils import operadora
     paciente = {**PACIENTE, 'comorbidades': ['hipertensao']}
     pedidos = [{'exame': 'Cálcio', 'nome_no_pedido': 'CÁLCIO', 'codigos': None},
@@ -87,8 +124,8 @@ def test_calcio_total_conta_como_calcio_ionico_e_exame_registrado_traz_a_observa
     assert erro is None
     calcio, lactato = resultado['linhas']
     assert calcio['veredito'] == 'indicado' and calcio['no_checkup'] == 'Cálcio iônico, soro'
-    assert lactato['veredito'] == 'nao_indicado' and 'sepse' in lactato['observacao']
-    assert lactato['observacao_link']['url'].startswith('https://doi.org/')
+    assert lactato['veredito'] == 'nao_indicado' and 'sepse' in lactato['motivo']
+    assert lactato['referencias'][0]['url'].startswith('https://doi.org/')
 
 
 def test_pedido_em_lista_de_nomes_ou_de_codigos_tuss_e_lido():

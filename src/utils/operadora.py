@@ -715,6 +715,125 @@ def escrever_csv(brutas, resultados):
 # finalidade do modo em lote (acima) não entram aqui.
 
 _DE_EXAME = ('laboratorio', 'imagem')
+
+
+def _fonte(rotulo, url):
+    return {'label': rotulo, 'url': url}
+
+
+_USPSTF_A_E_B = _fonte('USPSTF (recomendações A e B)',
+                       'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations')
+_AASLD_2023 = _fonte('AASLD 2023', 'https://doi.org/10.1097/HEP.0000000000000323')
+_CSCC_2024 = _fonte('CSCC 2024 (Choosing Wisely Canada)', _CSCC)
+_CFPC = _fonte('CFPC (Choosing Wisely Canada)', _CW_CANADA)
+_ACP_2013 = _fonte('ACP 2013 (doença renal crônica)', 'https://doi.org/10.7326/0003-4819-159-12-201312170-00726')
+_USPSTF_2018_RISCO = _fonte('USPSTF 2018 (fatores de risco não tradicionais)', 'https://doi.org/10.1001/jama.2018.8359')
+_BCSH_2008 = _fonte('BCSH 2008 (risco de sangramento)', 'https://doi.org/10.1111/j.1365-2141.2007.06968.x')
+
+
+def _sem_diretriz(nome):
+    """Exame pesquisado que não está entre os rastreios recomendados pela USPSTF nem tem diretriz própria de rotina."""
+    return {'texto': f'Sem recomendação de rastreio: a USPSTF não inclui {nome} entre os rastreios recomendados para adulto '
+                     'assintomático (graus A e B), e o CFPC (Choosing Wisely Canada) orienta não pedir exames de sangue '
+                     'de rotina sem indicação pelo risco do paciente.',
+            'referencias': [_USPSTF_A_E_B, _CFPC]}
+
+
+# Justificativa formal, com a fonte, de por que cada exame não é pedido de rotina. Vale na conferência do pedido, para
+# o exame que o check-up não indica ao paciente. Cada texto foi conferido na fonte citada; exame novo que aparecer nos
+# pedidos das operadoras é pesquisado e entra aqui. Os pareceres de sociedades (PARECERES_CONTRARIOS) vêm antes.
+SEM_INDICACAO_DE_ROTINA = {
+    '40302512': {'texto': 'A AASLD (2023) não recomenda rastrear doença hepática esteatótica na população geral: a '
+                          'pesquisa de fibrose (FIB-4, que usa TGO, TGP e plaquetas) fica para quem tem diabetes tipo 2, '
+                          'obesidade com complicações, consumo de álcool ou história familiar de cirrose. A USPSTF não '
+                          'inclui as enzimas hepáticas entre os rastreios recomendados (graus A e B).',
+                 'referencias': [_AASLD_2023, _USPSTF_A_E_B]},
+    '40302504': {'texto': 'A CSCC (Choosing Wisely Canada, 2024) orienta não pedir TGO de rotina na avaliação inicial, nem '
+                          'junto da TGP, que é mais específica para lesão hepática. A AASLD (2023) não recomenda rastrear '
+                          'doença hepática esteatótica na população geral.',
+                 'referencias': [_CSCC_2024, _AASLD_2023]},
+    '40301397': {'texto': 'Sem recomendação de rastreio: a USPSTF não inclui as bilirrubinas entre os rastreios '
+                          'recomendados para adulto assintomático (graus A e B). A CSCC (Choosing Wisely Canada, 2024) '
+                          'orienta pedir a fração direta só quando a bilirrubina total está elevada.',
+                 'referencias': [_USPSTF_A_E_B, _CSCC_2024]},
+    '40302580': {'texto': 'A CSCC (Choosing Wisely Canada, 2024) orienta não pedir ureia de rotina na avaliação inicial: a '
+                          'creatinina, com a TFG estimada, basta para avaliar a função renal.',
+                 'referencias': [_CSCC_2024]},
+    '40301630': {'texto': 'O ACP (2013) recomenda não rastrear doença renal crônica em adulto assintomático sem fator de '
+                          'risco (recomendação fraca, evidência de baixa qualidade).',
+                 'referencias': [_ACP_2013]},
+    '40308391': {'texto': 'A USPSTF (2018) considera a evidência insuficiente para somar a PCR ultrassensível à avaliação '
+                          'do risco cardiovascular de adulto assintomático (declaração I), e a PCR não está entre os '
+                          'rastreios que ela recomenda (graus A e B).',
+                 'referencias': [_USPSTF_2018_RISCO, _USPSTF_A_E_B]},
+    '40301109': {'texto': 'Lactato não é exame de rastreio. A indicação reconhecida é a suspeita de sepse ou de '
+                          'hipoperfusão (Surviving Sepsis Campaign 2021, recomendação fraca, evidência de baixa qualidade).',
+                 'referencias': [_fonte('Surviving Sepsis Campaign 2021', _SSC_2021)]},
+    '40301648': {'texto': 'CK não é exame de rastreio, nem de rotina em quem usa estatina (AHA/ACC 2018, classe III, sem '
+                          'benefício). A indicação reconhecida é o sintoma muscular grave ou a fraqueza objetiva em uso de '
+                          'estatina.',
+                 'referencias': [_fonte('AHA/ACC 2018 (colesterol)', _ACC_AHA_2018)]},
+    '40302423': _sem_diretriz('o sódio'), '40302318': _sem_diretriz('o potássio'), '40301400': _sem_diretriz('o cálcio'),
+    '40301419': _sem_diretriz('o cálcio iônico'), '40302237': _sem_diretriz('o magnésio'),
+    '40301931': _sem_diretriz('o fósforo'), '40302385': _sem_diretriz('as proteínas totais e frações'),
+    '40304361': _sem_diretriz('o hemograma'),
+}
+for _codigo in ('40304590', '40304639'):          # TP/INR e TTPA
+    SEM_INDICACAO_DE_ROTINA[_codigo] = {
+        'texto': 'Os testes de coagulação predizem mal o sangramento em pessoas não selecionadas: sem história de '
+                 'sangramento, o BCSH (2008) não os recomenda de rotina nem antes de cirurgia. A USPSTF não os inclui '
+                 'entre os rastreios recomendados (graus A e B).',
+        'referencias': [_BCSH_2008, _USPSTF_A_E_B]}
+
+
+def justificativa_de_nao_indicacao(chaves, sexo, idade):
+    """Por que o exame não é pedido de rotina: {'texto', 'referencias', 'aviso'} ou None, se ainda não há registro.
+
+    Primeiro o parecer de sociedade médica sobre o exame (PARECERES_CONTRARIOS); depois o registro próprio."""
+    for chave in sorted(chaves):
+        parecer = parecer_contrario(chave, sexo, 'rastreio', idade)
+        if parecer:
+            return {'texto': parecer['motivo'], 'referencias': [_fonte(parecer['referencia'], parecer['link'])],
+                    'aviso': parecer['aviso']}
+    for chave in sorted(chaves):
+        if chave in SEM_INDICACAO_DE_ROTINA:
+            return {**SEM_INDICACAO_DE_ROTINA[chave], 'aviso': ''}
+    return None
+
+
+@lru_cache(maxsize=1)
+def _indicacoes_por_chave():
+    """Código TUSS (ou chave pelo nome) → {'grupos', 'referencias'}: para quem o check-up indica o exame, e com que
+    fontes. Vem da varredura do motor (src/data/indicacoes_motor.json)."""
+    from src.utils import catalogo
+    por_chave = {}
+    for titulo, item in catalogo.indicacoes_do_motor().items():
+        for chave in periodicidade.chaves(titulo, 'feminino') | periodicidade.chaves(titulo, 'masculino'):
+            alvo = por_chave.setdefault(chave, {'grupos': [], 'referencias': []})
+            alvo['grupos'] += [g for g in item['grupos'] if g not in alvo['grupos']]
+            alvo['referencias'] += [r for r in item['referencias'] if r not in alvo['referencias']]
+    return por_chave
+
+
+_SO_DE_MULHER = re.compile(r'gestant|gesta[çc][ãa]o|mulher|puérper|pré-natal', re.IGNORECASE)
+_SO_DE_HOMEM = re.compile(r'\bhomens?\b', re.IGNORECASE)
+
+
+def indicado_para(chaves, sexo):
+    """Em que situações o check-up indica o exame: {'grupos': [...], 'referencias': [...]} (vazio se em nenhuma)."""
+    grupos, referencias = [], []
+    for chave in sorted(chaves):
+        item = _indicacoes_por_chave().get(chave)
+        if item:
+            grupos += [g for g in item['grupos'] if g not in grupos]
+            referencias += [r for r in item['referencias'] if r not in referencias]
+    de_fora = _SO_DE_MULHER if sexo == 'masculino' else _SO_DE_HOMEM if sexo == 'feminino' else None
+    if de_fora:
+        grupos = [g for g in grupos if not de_fora.search(g)]
+    def ordem(grupo):      # primeiro os grupos de pessoas ("Adultos com HAS", "Diabéticos"); as medicações por último
+        medicacao = grupo.startswith(('Em uso de', 'Corticoide'))
+        return (0 if grupo.startswith('Adultos') else 2 if medicacao else 1, _sem_acento(grupo))
+    return {'grupos': sorted(grupos, key=ordem), 'referencias': referencias}
 _NAO_INDICADO_AGORA = {
     'em_dia': 'Já feito e ainda em dia',
     'nao_recomendado': 'O check-up recomenda não fazer',
@@ -796,6 +915,10 @@ def conferir_pedido(paciente, pedidos):
     if status != 200:
         raise RuntimeError(f'o motor do check-up falhou (status {status})')
     sexo = dados.get('sexo')
+    try:
+        idade = int(float(dados.get('idade')))
+    except (TypeError, ValueError):
+        idade = 40
     do_checkup = [r for r in resposta.get('recommendations') or [] if r.get('categoria') in _DE_EXAME]
     indicados, nao_agora = {}, {}
     for rec in do_checkup:
@@ -815,7 +938,8 @@ def conferir_pedido(paciente, pedidos):
         item = next((nao_agora[c] for c in sorted(chaves) if c in nao_agora), None)
         linha = {'exame': pedido['exame'], 'nome_no_pedido': pedido.get('nome_no_pedido') or '',
                  'data': pedido.get('data') or '', 'arquivo': pedido.get('arquivo') or '', 'no_checkup': '',
-                 'grau': '', 'referencias': [], 'aviso': '', 'observacao': '', 'observacao_link': None}
+                 'grau': '', 'referencias': [], 'aviso': '', 'indicado_para': {'grupos': [], 'referencias': []},
+                 'sem_justificativa': False}
         if rec:
             atendidos.add(rec['titulo'])
             linha.update(veredito='indicado', estado='indicado', motivo=rec.get('subtitulo') or 'Recomendado pelo check-up.',
@@ -828,11 +952,16 @@ def conferir_pedido(paciente, pedidos):
                          no_checkup=item['titulo'],
                          referencias=build_reference_links(item['titulo'], item.get('referencia') or ''))
         else:
-            linha.update(veredito='nao_indicado', estado='sem_indicacao',
-                         motivo='O check-up não indica este exame para este paciente.')
-            nota = next((NAO_SAO_DE_RASTREIO[c] for c in sorted(chaves) if c in NAO_SAO_DE_RASTREIO), None)
-            if nota and nota['link']:
-                linha.update(observacao=nota['motivo'], observacao_link={'label': nota['referencia'], 'url': nota['link']})
+            # Não basta dizer que o exame não está no check-up: vai a justificativa formal, com a fonte, e as
+            # situações em que o check-up o indica (nenhuma delas presente nos dados informados).
+            justificativa = justificativa_de_nao_indicacao(chaves, sexo, idade)
+            linha.update(veredito='nao_indicado', estado='sem_indicacao', indicado_para=indicado_para(chaves, sexo))
+            if justificativa:
+                linha.update(motivo=justificativa['texto'], referencias=justificativa['referencias'],
+                             aviso=justificativa['aviso'])
+            else:
+                linha.update(motivo='O check-up não indica este exame para este paciente. Ainda não há justificativa de '
+                                    'diretriz registrada para ele.', sem_justificativa=True)
         linhas.append(linha)
     indicadas = sum(1 for linha in linhas if linha['veredito'] == 'indicado')
     return {
