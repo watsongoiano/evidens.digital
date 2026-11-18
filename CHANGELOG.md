@@ -1,6 +1,15 @@
 
 # Patches applied (2025-08-26T12:12:23)
 
+## 2026-11-18 — README e SECURITY.md conforme o sistema atual
+
+- O README dizia que o risco cardiovascular estava desativado e que os documentos não tinham assinatura digital.
+  Passa a descrever o PREVENT, a assinatura ICP-Brasil, o pré-operatório, a leitura de laudos, a guia do plano,
+  a APAC, a conferência para operadoras e as variáveis de ambiente em uso. As rotas aparecem com o prefixo `/api`.
+- O `SECURITY.md` era o modelo do GitHub (versões 4.x e 5.x, e-mail de exemplo). Passa a dizer como relatar uma
+  vulnerabilidade pelo relato privado do GitHub e o que o sistema guarda.
+- Autor e licença do README não foram alterados.
+
 ## 2026-11-17 — APAC no formulário do SUS, orientações em subtópicos e resumo dos exames
 
 - O laudo de APAC passa a usar o formulário do SUS como fundo (`src/data/apac_sus.pdf`; do modelo recebido só saiu
