@@ -84,6 +84,13 @@ O que **não** entra na conferência: cores, finalidade, CID, regime, pareceres 
 modo em lote (abaixo). O veredito (indicado ou não indicado) é sempre o do check-up; os pareceres e o registro acima
 só explicam o exame não indicado. O cálcio total conta como cálcio iônico.
 
+**Exame aceito como alternativa.** A glicemia de jejum pedida conta como indicada quando o check-up recomenda a HbA1c
+e a própria recomendação a cita "como alternativa" (rastreio e confirmação do diabetes: ADA 2026; USPSTF 2021). Um
+exame basta: com a HbA1c no mesmo pedido, a glicemia sai como não indicada. No acompanhamento do diabético não há
+alternativa: o check-up recomenda os dois. Fica em `ALTERNATIVAS_NA_CONFERENCIA`, em `src/utils/operadora.py`, que escolhe
+quais alternativas do modo em lote valem na tela (a citologia no lugar do DNA-HPV ainda não) (decisão do responsável
+clínico, 18/11/2026).
+
 Os dados do paciente vão à rota `POST /api/admin/operadoras/conferir` no campo `paciente`, em JSON no formato que o
 formulário do check-up envia; é a porta de entrada prevista para os dados que virão do cadastro da operadora. "Exames
 já realizados" vai junto, como no check-up. Nada é gravado: o PDF e os dados são lidos em memória e descartados.

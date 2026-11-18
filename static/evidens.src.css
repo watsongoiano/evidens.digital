@@ -138,6 +138,12 @@ html.lenis, html.lenis body { height: auto; }
   .rec-grau-pp { @apply w-7 text-[10px]; }
   .rec-grau-d { @apply bg-[#C0392B]; }
   .rec-grau-i { @apply bg-ink/35; }
+  /* O que o grau significa, ao passar o mouse ou tocar no selo (o texto vem em data-dica) */
+  .rec-grau[data-dica] { @apply relative cursor-help; }
+  .rec-grau[data-dica]:hover::after, .rec-grau[data-dica]:focus::after {
+    content: attr(data-dica);
+    @apply absolute right-0 top-full mt-1.5 z-30 w-max max-w-[15rem] rounded-md bg-ink text-white text-[12px] font-normal leading-snug px-2.5 py-1.5 text-left shadow-lg whitespace-normal;
+  }
   .rec-remover { @apply w-7 h-7 rounded-full text-ink/50 hover:text-ink hover:bg-paper transition; }
   dialog#dialogoAcrescimo::backdrop { background: rgba(20,41,47,.45); }
   .nao-incluida-card { @apply rounded-2xl bg-white border px-5 py-4 mb-3; }
