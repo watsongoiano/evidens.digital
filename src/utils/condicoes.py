@@ -1971,7 +1971,9 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
             'grave ou descompensação.', 'Diabetes, nefropatia ou hepatopatia ≥ 50 anos | Dose única | Rede privada',
             SBIM_ESPECIAIS, 'B')
     if 60 <= idade < 70:
-        risco_vsr = bool({'dpoc', 'asma_grave', 'dcv_aterosclerotica', 'cardiopatia', 'insuficiencia_cardiaca'} & com) \
+        # A hipertensão arterial pulmonar é doença cardiopulmonar crônica: entra como as demais pneumopatias e cardiopatias.
+        risco_vsr = bool({'dpoc', 'asma_grave', 'dcv_aterosclerotica', 'cardiopatia', 'insuficiencia_cardiaca',
+                          'hipertensao_arterial_pulmonar'} & com) \
             or tem_diabetes or drc or hepatopatia or obeso or imuno or hiv
         if risco_vsr:
             add(VSR, 'vacina', 'Dose única para 60-69 anos com maior risco: cardiopatia, pneumopatia, diabetes, obesidade, '

@@ -57,3 +57,14 @@ def test_hipertensao_arterial_pulmonar_vacina_pneumococica_antes_dos_50():
 def test_sem_a_condicao_nada_muda():
     recs, orient = _rodar([], idade=44)
     assert 'Teste de caminhada de 6 minutos' not in recs and not any('Hipertensão arterial pulmonar' in t for t in orient)
+
+
+def test_hipertensao_arterial_pulmonar_conta_como_risco_para_a_vsr_de_60_a_69_anos():
+    """A regra da SBIm que o motor já aplica dá a VSR de 60 a 69 anos a quem tem cardiopatia ou pneumopatia. Sem a
+    doença na lista de risco, o sistema dizia "sem fator de risco nas listas" (achado de revisão do PR #196)."""
+    recs, orient = _rodar([HAP], idade=63)
+    assert recs[condicoes.VSR]['subtitulo'].startswith('60-69 anos com fator de risco')
+    assert 'VSR de 60 a 69 anos: só com fator de risco' not in orient
+    # Sem a doença, a orientação continua valendo
+    recs, orient = _rodar([], idade=63)
+    assert condicoes.VSR not in recs and 'VSR de 60 a 69 anos: só com fator de risco' in orient
