@@ -466,8 +466,12 @@ def agravantes_de_risco(comorbidades, familia, hiv=False):
     return lista
 
 
-def _rec(titulo, categoria, descricao, subtitulo, referencia, grau, prioridade='media', substituir=False, esquema=None):
+def _rec(titulo, categoria, descricao, subtitulo, referencia, grau, prioridade='media', substituir=False, esquema=None,
+         obs=None):
+    """``obs``: instrução que precisa chegar a quem faz o exame; sai impressa no pedido, abaixo do exame."""
     extra = {'esquema_pdf': esquema} if esquema else {}
+    if obs:
+        extra['quando_pdf'] = obs
     return {**extra, 'titulo': titulo, 'categoria': categoria, 'descricao': descricao, 'subtitulo': subtitulo,
             'referencia': referencia, 'grau_evidencia': grau, 'prioridade': prioridade, '_substituir': substituir}
 
@@ -498,6 +502,9 @@ def _garantir(recs, nova):
                         r['subtitulo'] = f"{atual} | Também: {nova['subtitulo']}".strip(' |')
                 if nova['referencia'] not in (r.get('referencia') or ''):
                     r['referencia'] = f"{r.get('referencia') or ''} | {nova['referencia']}".strip(' |')
+            # A instrução do pedido vale também quando o exame já estava recomendado por outro motivo
+            if nova.get('quando_pdf') and not r.get('quando_pdf'):
+                r['quando_pdf'] = nova['quando_pdf']
             return
     recs.append(nova)
 
@@ -1750,7 +1757,7 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Densitometria óssea (DEXA)', 'imagem',
             'Hiperparatireoidismo primário: densitometria em três sítios (coluna lombar, fêmur e terço distal do rádio) na '
             'avaliação inicial e a cada 1-2 anos em quem não foi operado.', 'Hiperparatireoidismo primário | A cada 1-2 anos',
-            HPTP_2022, 'E')
+            HPTP_2022, 'E', obs='Incluir o terço distal do rádio (antebraço), além da coluna lombar e do fêmur.')
         add('Radiografia de coluna torácica e lombar (perfil)', 'imagem',
             'Hiperparatireoidismo primário: imagem da coluna (radiografia ou avaliação de fratura vertebral pela '
             'densitometria) na avaliação inicial, para fratura vertebral.', inicial, HPTP_2022, 'E')

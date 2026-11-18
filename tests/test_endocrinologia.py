@@ -114,3 +114,27 @@ def test_hiperprolactinemia():
 def test_ressonancia_de_sela_tem_codigo_e_vai_em_apac():
     assert tuss.CODIGOS['Ressonância magnética de sela túrcica'] == ['41101022']
     assert sigtap.vai_em_apac('Ressonância magnética de sela túrcica')
+
+
+def test_densitometria_do_hiperparatireoidismo_leva_o_radio_ao_pedido():
+    """A diretriz pede três sítios; o código da guia é o de coluna e fêmur. A instrução do terço distal do rádio
+    precisa chegar a quem faz o exame: vai impressa no pedido, abaixo do exame (achado de revisão do PR #192)."""
+    import io
+    from pypdf import PdfReader
+    from src.utils import pdf_minutas
+    obs = 'Incluir o terço distal do rádio (antebraço), além da coluna lombar e do fêmur.'
+    recs, _ = _rodar(['hiperparatireoidismo_primario'], idade=50)
+    assert recs['Densitometria óssea (DEXA)']['quando_pdf'] == obs and len(obs) <= 160
+    # Vale também quando a densitometria já estava recomendada por outro motivo (rastreio da osteoporose)
+    ja = [{'titulo': 'Densitometria óssea (DEXA)', 'categoria': 'imagem', 'descricao': 'Rastreio.', 'prioridade': 'media',
+           'subtitulo': 'Mulheres ≥65 anos', 'referencia': 'USPSTF 2025', 'grau_evidencia': 'B'}]
+    condicoes.aplicar(ja, 68, 'feminino', ['hiperparatireoidismo_primario'], [], [])
+    dxa = next(r for r in ja if r['titulo'] == 'Densitometria óssea (DEXA)')
+    assert dxa['quando_pdf'] == obs and 'Hiperparatireoidismo primário' in dxa['subtitulo']
+    # Sem a condição, o pedido de densitometria sai sem a observação
+    assert 'quando_pdf' not in {'titulo': 'Densitometria óssea (DEXA)', **_rodar(['osteoporose'], idade=68)[0].get(
+        'Densitometria óssea (DEXA)', {})}
+    dados = pdf_minutas.gerar_pdf_exames_imagem({'nome': 'Maria de Teste', 'idade': '50', 'sexo': 'feminino'},
+                                                [recs['Densitometria óssea (DEXA)']])
+    texto = ' '.join(' '.join(p.extract_text().split()) for p in PdfReader(io.BytesIO(dados)).pages)
+    assert 'Densitometria óssea (DEXA)' in texto and 'Obs.: Incluir o terço distal do rádio (antebraço)' in texto
