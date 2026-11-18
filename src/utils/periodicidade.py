@@ -82,7 +82,7 @@ SEM_INTERVALO = {
     'repetir em 3 meses',  # confirmação de DRC: a data do exame alterado não adia a repetição
     # a critério clínico
     'conforme necessidade', 'conforme indicação clínica', 'fator de risco', 'adulto em risco',
-    'conforme o tratamento',
+    'conforme o tratamento', 'conforme a evolução',
     'conforme o padrão ultrassonográfico', 'repetir conforme o resultado (t-score)', 'decisão individual (expectativa de vida, prevenção secundária)',
     'alvo < 6 mg/dl', 'não solicitar se >500 em 2 exames consecutivos com intervalo de 6 meses',
     # quem e a partir de quando, sem dizer de quanto em quanto tempo
