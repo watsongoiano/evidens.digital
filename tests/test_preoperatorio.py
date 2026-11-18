@@ -583,6 +583,30 @@ def test_linha_intraperitoneal_em_tres_cirurgias_com_o_mesmo_risco_cardiaco():
     assert po.DURACAO_TIPICA['colecistectomia'][0] == 'menos_2h'
 
 
+def test_duracao_tipica_de_mama_tireoide_e_artroscopia():
+    """Só entra duração onde há série publicada com o tempo operatório (pedido de 18/11/2026). Mama: Towfighi 2022,
+    NSQIP, 15.167 mastectomias, 114,9 min. Tireoide: Goldfarb 2011, NSQIP, 10.838 pacientes, 121,8 min (no limite
+    das 2 h: a tela avisa). Ortopédica menor: Gowd 2019, NSQIP, 78.864 artroscopias de joelho, 31,2 min."""
+    esperado = {'mama': ('menos_2h', '115 min', '10.1007/s10549-022-06628-x'),
+                'tireoide': ('2_3h', '122 min', '10.1245/s10434-011-1938-2'),
+                'ortopedica_menor': ('menos_2h', '31 min', '10.1016/j.arthro.2019.01.059')}
+    tela = po.sugestoes_da_tela()['duracao']
+    for chave, (faixa, minutos, doi) in esperado.items():
+        assert po.DURACAO_TIPICA[chave][0] == faixa and minutos in po.DURACAO_TIPICA[chave][1], chave
+        assert tela[chave]['faixa'] == faixa and tela[chave]['url'] == 'https://doi.org/' + doi, chave
+        assert po.CIRURGIAS[chave]['ariscat']          # a duração só entra no ARISCAT
+    assert 'limite das 2 h' in tela['tireoide']['nota'] and tela['mama']['nota'] == ''
+    # Linhas que seguem sem duração automática: não achamos série publicada que represente a linha inteira
+    for chave in ('ginecologica_menor', 'plastica', 'vats_menor', 'angioplastia_periferica', 'cabeca_pescoco',
+                  'neurocirurgia', 'stent_carotida_sintomatica', 'pneumectomia', 'perfuracao_intestinal'):
+        assert chave in po.CIRURGIAS and chave not in po.DURACAO_TIPICA, chave
+    # Nessas linhas a tela diz por que o campo ficou em branco
+    from pathlib import Path
+    html = (Path(__file__).resolve().parent.parent / 'intelligent-tools.html').read_text(encoding='utf-8')
+    assert 'Sem sugestão automática: o Evidēns ainda não tem uma série publicada do tempo operatório que represente esta linha.' in html
+    assert 'else if (cirurgia && !semDuracao) {' in html
+
+
 def test_condicao_grave_implica_o_antecedente():
     """SCA e angina CCS III/IV são dor isquêmica atual (doença coronária em Lee 1999); IC descompensada é IC."""
     assert _p(instaveis=['sca'])['condicoes'] >= {'dac'}

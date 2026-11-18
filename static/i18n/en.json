@@ -4324,7 +4324,15 @@
   "Hiperprolactinemia": "Hyperprolactinemia",
   "Conforme o tratamento": "According to treatment",
   "Conforme o padrão ultrassonográfico": "According to the sonographic pattern",
-  "Incluir o terço distal do rádio (antebraço), além da coluna lombar e do fêmur.": "Include the distal third of the radius (forearm), in addition to the lumbar spine and the femur."
+  "Incluir o terço distal do rádio (antebraço), além da coluna lombar e do fêmur.": "Include the distal third of the radius (forearm), in addition to the lumbar spine and the femur.",
+  "média de 115 min na mastectomia total por câncer de mama": "mean of 115 min for total mastectomy for breast cancer",
+  "média de 122 min na tireoidectomia": "mean of 122 min for thyroidectomy",
+  "média de 31 min na artroscopia de joelho": "mean of 31 min for knee arthroscopy",
+  "Média no limite das 2 h: 119 min na doença benigna e 123 min na maligna. Confira a duração prevista.": "Mean right at the 2 h limit: 119 min in benign disease and 123 min in malignant disease. Check the expected duration.",
+  "Towfighi 2022, NSQIP": "Towfighi 2022, NSQIP",
+  "Goldfarb 2011, NSQIP": "Goldfarb 2011, NSQIP",
+  "Gowd 2019, NSQIP": "Gowd 2019, NSQIP",
+  "Sem sugestão automática: o Evidēns ainda não tem uma série publicada do tempo operatório que represente esta linha. Informe a duração prevista.": "No automatic suggestion: Evidēns does not yet have a published operative-time series that represents this line. Enter the expected duration."
  },
  "padroes": [
   [
