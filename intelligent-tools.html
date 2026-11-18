@@ -469,6 +469,11 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             <li role="option" data-valor="pre_diabetes" data-busca="pre-diabetes glicemia de jejum alterada intolerancia ">Pré-diabetes</li>
             <li role="option" data-valor="hipotireoidismo" data-busca="hipotireoidismo tireoide hashimoto ">Hipotireoidismo</li>
             <li role="option" data-valor="hipertireoidismo" data-busca="hipertireoidismo tireoide graves ">Hipertireoidismo</li>
+            <li role="option" data-valor="nodulo_tireoide" data-busca="nodulo de tireoide tireoidiano bocio nodular cisto tirads paaf ">Nódulo de tireoide</li>
+            <li role="option" data-valor="hiperparatireoidismo_primario" data-busca="hiperparatireoidismo primario paratireoide pth calcio hipercalcemia hptp ">Hiperparatireoidismo primário</li>
+            <li role="option" data-valor="incidentaloma_adrenal" data-busca="incidentaloma adrenal nodulo de suprarrenal adenoma adrenal massa adrenal ">Incidentaloma adrenal</li>
+            <li role="option" data-valor="hipogonadismo_masculino" data-busca="hipogonadismo masculino testosterona baixa deficiencia androgenica ">Hipogonadismo masculino</li>
+            <li role="option" data-valor="hiperprolactinemia" data-busca="hiperprolactinemia ou prolactinoma prolactina alta galactorreia adenoma de hipofise cabergolina ">Hiperprolactinemia ou prolactinoma</li>
             <li role="option" data-valor="masld" data-busca="esteatose hepatica (masld) gordura no figado nafld ">Esteatose hepática (MASLD)</li>
             <li role="option" data-valor="cirrose" data-busca="cirrose / hepatopatia cronica figado ">Cirrose / hepatopatia crônica</li>
             <li role="option" data-valor="hepatite_b_cronica" data-busca="hepatite b cronica figado hbv ">Hepatite B crônica</li>
@@ -1346,9 +1351,10 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
         <div class="campo sm:col-span-2"><label for="guiaPlano">Plano do paciente</label><select id="guiaPlano"><option value="">Particular (sem guia)</option></select></div>
         <div class="campo sm:col-span-2" data-guia-campo style="display: none;"><label for="guiaCarteira">Número da carteira</label><input type="text" id="guiaCarteira" maxlength="30" autocomplete="off" inputmode="numeric"></div>
       </div>
-      <!-- SUS: laudo de APAC dos exames que a regulação pede em APAC (src/utils/sigtap.py). Nada disto é guardado. -->
+      <!-- SUS: laudo de APAC dos exames que vão em APAC: os que a regulação pede e os da tabela de alta complexidade
+           (src/utils/sigtap.py). Aparece só quando o pedido tem um deles. Nada disto é guardado. -->
       <div id="apacCampos" class="mt-3" style="display: none;">
-        <p class="text-[13px] text-ink/60 mb-3">Tomografia, ressonância, endoscopia, colonoscopia e densitometria saem com o laudo de solicitação de APAC, logo depois do pedido. Os campos abaixo são opcionais (o que ficar em branco é preenchido à mão) e não são guardados.</p>
+        <p class="text-[13px] text-ink/60 mb-3"><span id="apacTemExame">Este pedido tem exame de alta complexidade: <span id="apacExamesDoPedido" data-i18n-manter></span>.</span><span id="apacSemLista" hidden>Não foi possível conferir agora quais exames deste pedido são de alta complexidade: o laudo de APAC sai para os que forem.</span> <span id="apacComoSai"></span> Os campos abaixo são opcionais (o que ficar em branco é preenchido à mão) e não são guardados.</p>
         <div class="grade">
           <div class="campo"><label for="apacCep">CEP</label><input type="text" id="apacCep" maxlength="9" inputmode="numeric" placeholder="00000-000" autocomplete="off"><p id="apacCepAviso" class="text-[12px] text-ink/55 mt-1" aria-live="polite"></p></div>
           <div class="campo"><div class="grade !mt-0 grid-cols-[1fr_4.5rem]"><div class="campo"><label for="apacMunicipio">Município</label><input type="text" id="apacMunicipio" maxlength="60" autocomplete="off"></div><div class="campo"><label for="apacUf">UF</label><input type="text" id="apacUf" maxlength="2" autocomplete="off"></div></div></div>
@@ -2432,7 +2438,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
                                 ${(subtitulo || referencia_html) ? `<p class="rec-sub">${subtitulo ? escapeHtml(subtitulo) : ''}${subtitulo && referencia_html ? '<span class="text-ink/30 mx-1.5">·</span>' : ''}${referencia_html ? `<span class="referencia-links">${referencia_html}</span>` : ''}</p>` : ''}
                                 ${rec.ultimo_exame ? `<p class="text-[13px] text-[#C0392B] mt-1.5" data-aviso-exame><i class="fa-regular fa-calendar-check mr-1.5"></i>${escapeHtml(rec.ultimo_exame)}${linkDoAviso(rec.ultimo_exame_link)}</p>` : ''}
                             </div>
-                            ${grau ? `<span class="rec-grau ${/^(C|E|PP|D|I)$/.test(grau) ? 'rec-grau-' + grau.toLowerCase() : ''}" title="Grau de evidência ${escapeHtml(grau)}">${escapeHtml(grau)}</span>` : '<span></span>'}
+                            ${grau ? `<span class="rec-grau ${/^(C|E|PP|D|I)$/.test(grau) ? 'rec-grau-' + grau.toLowerCase() : ''}" tabindex="0" role="img" data-dica="${escapeHtml(dicaDoGrau(grau))}" aria-label="${escapeHtml(dicaDoGrau(grau))}">${escapeHtml(grau)}</span>` : '<span></span>'}
                             <button type="button" onclick="removeRecommendation(this)" aria-label="Retirar esta recomendação" class="rec-remover"><i class="fa-solid fa-xmark"></i></button>
                         </div>`;
                     });
@@ -2459,6 +2465,24 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
         };
 
         // Link da fonte citada no aviso de exame já feito (só endereço https enviado pelo servidor).
+        // O que o grau significa, para o selo de cada recomendação: lido da legenda da página (um texto só, já no
+        // idioma em uso), sem o trecho entre parênteses. "C" → "Decisão individual, com o paciente: benefício pequeno
+        // ou evidência limitada".
+        function significadoDoGrau(grau) {
+            for (const item of document.querySelectorAll('#legendaGraus li')) {
+                const selo = item.querySelector('.rec-grau');
+                if (selo && selo.textContent.trim() === grau) {
+                    return item.textContent.slice(item.textContent.indexOf(selo.textContent) + selo.textContent.length)
+                        .replace(/\s*\(.*$/s, '').replace(/[.\s]+$/, '').trim();
+                }
+            }
+            return '';
+        }
+        function dicaDoGrau(grau) {
+            const significado = significadoDoGrau(grau);
+            return T('Grau de evidência') + ' ' + grau + (significado ? ': ' + significado : '');
+        }
+
         function linkDoAviso(link) {
             if (!link || !/^https:\/\/[^\s"'<>]+$/.test(link.url || '')) return '';
             return ` <a href='${link.url}' target="_blank" rel="noopener noreferrer" class="underline">${escapeHtml(link.rotulo)}</a>`;
@@ -2714,8 +2738,18 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             const valor = document.getElementById('guiaPlano').value;
             const comGuia = !!valor && !ehSus(valor);
             document.querySelectorAll('[data-guia-campo]').forEach(el => { el.style.display = comGuia ? '' : 'none'; });
-            // O laudo de APAC é dos exames de imagem e procedimentos; o pedido de laboratório pelo SUS sai sem anexo.
-            document.getElementById('apacCampos').style.display = ehSus(valor) && categoriaDoDialogo === 'imagem' ? '' : 'none';
+            // O laudo de APAC é dos exames que vão em APAC (imagem ou laboratório); pedido pelo SUS sem nenhum deles
+            // sai sem anexo e não pergunta os dados do laudo.
+            const emApac = examesEmApacDoPedido(categoriaDoDialogo);
+            document.getElementById('apacExamesDoPedido').textContent = emApac.map(t => T(t)).join('; ');
+            // Imagem: um laudo por exame. Laboratório: os exames de mesmo CID dividem o laudo (três linhas de procedimento).
+            document.getElementById('apacComoSai').textContent = T(categoriaDoDialogo === 'laboratorio'
+                ? 'Os exames de laboratório saem juntos no mesmo laudo de solicitação de APAC (até três por laudo), logo depois do pedido.'
+                : 'Cada um sai com o laudo de solicitação de APAC, logo depois do pedido.');
+            // Lista indisponível: a tela avisa e pede os dados do laudo mesmo assim (o servidor decide os exames).
+            document.getElementById('apacTemExame').hidden = !titulosEmApac;
+            document.getElementById('apacSemLista').hidden = !!titulosEmApac;
+            document.getElementById('apacCampos').style.display = ehSus(valor) && pedidoPodeTerApac(categoriaDoDialogo) ? '' : 'none';
         }
 
         function prepararJustificativa(categoria) {
@@ -2770,6 +2804,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             painel.style.display = 'none';
             convite.style.display = 'none';
             if (categoria === 'vacina') return;
+            await carregarExamesEmApac();
             const planos = await carregarPlanos();
             if (!planos.disponivel) return;
             if (!planos.lista.length && !(planos.sus || []).length) { convite.style.display = ''; return; }
@@ -2784,10 +2819,36 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             mostrarCamposDoPlano();
         }
 
+        // Exames que saem com laudo de APAC (os que a regulação pede e os da tabela de alta complexidade, PAC): a
+        // lista vem do servidor uma vez por página.
+        // Enquanto a lista não vem (ou se a busca falha), fica nula: lista vazia diria que nenhum exame vai em APAC.
+        let titulosEmApac = null;
+        async function carregarExamesEmApac() {
+            if (titulosEmApac) return titulosEmApac;
+            try {
+                const r = await fetch('/api/apac/exames', { credentials: 'same-origin' });
+                if (!r.ok) throw new Error('lista de exames em APAC indisponível');
+                titulosEmApac = new Set(((await r.json()).titulos || []).map(t => t.trim().toLowerCase()));
+            } catch (e) {
+                titulosEmApac = null;   // tenta de novo na próxima vez que o pedido for aberto
+            }
+            return titulosEmApac;
+        }
+        function examesEmApacDoPedido(categoria) {
+            if (!titulosEmApac || !['imagem', 'laboratorio'].includes(categoria)) return [];
+            return itensDaCategoria(categoria).map(i => (i.titulo || '').trim()).filter(t => titulosEmApac.has(t.toLowerCase()));
+        }
+        // Sem a lista, quem decide é o servidor: os dados do laudo seguem com o pedido e ele anexa o laudo dos exames
+        // que vão em APAC (nenhum, se o pedido não tiver).
+        function pedidoPodeTerApac(categoria) {
+            if (!['imagem', 'laboratorio'].includes(categoria)) return false;
+            return titulosEmApac ? examesEmApacDoPedido(categoria).length > 0 : true;
+        }
+
         function apacDoDialogo(categoria) {
             const painel = document.getElementById('guiaPainel');
             const plano = document.getElementById('guiaPlano').value;
-            if (categoria !== 'imagem' || painel.style.display === 'none' || !ehSus(plano)) return null;
+            if (!pedidoPodeTerApac(categoria) || painel.style.display === 'none' || !ehSus(plano)) return null;
             const v = id => document.getElementById(id).value.trim();
             const paciente = {};
             [['cns', 'apacCns'], ['nascimento', 'apacNascimento'], ['mae', 'apacMae'], ['telefone', 'apacTelefone'],
@@ -2950,7 +3011,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
                 chip.className = 'inline-flex items-center gap-2 rounded-full bg-mist/70 border border-teal/20 pl-3 pr-1.5 py-1 text-[13px]';
                 const texto = document.createElement('span'); texto.textContent = titulo;
                 const x = document.createElement('button'); x.type = 'button'; x.className = 'w-6 h-6 rounded-full text-ink/40 hover:text-ink hover:bg-white'; x.setAttribute('aria-label', 'Retirar'); x.innerHTML = '<i class="fa-solid fa-xmark text-[11px]"></i>';
-                x.addEventListener('click', () => { acrescentados[categoria].splice(i, 1); desenharAcrescentados(categoria); desenharConflitos(); });
+                x.addEventListener('click', () => { acrescentados[categoria].splice(i, 1); desenharAcrescentados(categoria); desenharConflitos(); mostrarCamposDaGuia(); });
                 chip.append(texto, x);
                 caixa.appendChild(chip);
             });
@@ -2968,6 +3029,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             campo.value = '';
             desenharAcrescentados(categoriaDoDialogo);
             desenharConflitos();
+            mostrarCamposDaGuia();      // exame de alta complexidade acrescentado: os campos da APAC aparecem
             campo.focus();
         }
 

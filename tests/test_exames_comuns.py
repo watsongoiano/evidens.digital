@@ -101,9 +101,14 @@ def test_exame_fora_da_lista_fica_com_o_texto_do_resultado_unico():
 
 
 def test_titulo_do_motor_leva_aos_campos_do_exame_da_lista():
-    """"Fósforo, soro" (título do motor) é o exame "Fósforo" da lista: o resultado vai para o campo numérico."""
-    assert E.apelidos()['Fósforo, soro'] == ('Fósforo', ['fosforo'])
-    assert E.do_laudo('Fósforo, soro', ['Material: Soro', 'RESULTADO: 3,5 mg/dL']) == {'fosforo': 3.5}
+    """"Glicemia de jejum, soro" (título do motor) é o exame "Glicose, soro" da lista: o resultado vai para o
+    campo numérico. O fósforo tem na lista o mesmo título do motor; o nome antigo ("Fósforo") continua valendo."""
+    assert E.apelidos()['Glicemia de jejum, soro'] == ('Glicose, soro', ['glicose'])
+    assert E.do_laudo('Glicemia de jejum, soro', ['Material: Soro', 'RESULTADO: 92 mg/dL']) == {'glicose': 92.0}
+    assert E.apelidos()['Fósforo, soro'] == ('Fósforo, soro', ['fosforo'])
+    assert E.apelidos()['Fósforo'] == ('Fósforo, soro', ['fosforo'])
+    for titulo in ('Fósforo, soro', 'Fósforo'):
+        assert E.do_laudo(titulo, ['Material: Soro', 'RESULTADO: 3,5 mg/dL']) == {'fosforo': 3.5}
 
 
 def test_laudo_devolve_os_resultados_de_cada_exame():
