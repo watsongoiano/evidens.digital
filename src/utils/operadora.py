@@ -751,9 +751,10 @@ def _da_lista_de_exames(textos):
 def exames_do_pedido(conteudo, arquivo):
     """Exames pedidos que estão num PDF. Devolve (pedidos, nao_identificados, regime_do_setor).
 
-    Lê o laudo de laboratório nos formatos conhecidos; se o PDF não tiver esse formato, lê uma lista de nomes de
-    exame ou de códigos TUSS. A data é opcional (a conferência não depende dela). PDF escaneado, sem texto, levanta
-    laudos.LaudoIlegivel."""
+    Lê o laudo de laboratório nos formatos conhecidos. Se nenhum exame vier com data de coleta, o PDF é tratado como
+    uma lista de exames pedidos: nomes (um por linha, ou separados por vírgula ou ponto e vírgula) e códigos TUSS se
+    somam ao que foi reconhecido. A data é opcional (a conferência não depende dela). PDF escaneado, sem texto,
+    levanta laudos.LaudoIlegivel."""
     from src.utils import laudos
     textos = laudos.textos_do_pdf(conteudo)
     lido, dados = laudos.dos_textos(textos), laudos.cabecalho(textos)
@@ -765,8 +766,14 @@ def exames_do_pedido(conteudo, arquivo):
         if titulo and titulo not in vistos:
             vistos.add(titulo)
             pedidos.append({'exame': titulo, 'nome_no_pedido': linha, 'data': '', 'codigos': None})
-    if not pedidos:
-        pedidos = [dict(p, data='') for p in _da_lista_de_exames(textos)]
+    if not lido['exames']:      # nenhum exame com data de coleta: não é laudo, é uma lista de exames pedidos
+        for pedido in _da_lista_de_exames(textos):
+            repetido = next((p for p in pedidos if p['exame'] == pedido['exame']), None)
+            if repetido is None:
+                vistos.add(pedido['exame'])
+                pedidos.append(dict(pedido, data=''))
+            elif pedido['codigos']:      # o mesmo exame, agora com o código TUSS do pedido
+                repetido['codigos'] = pedido['codigos']
     for pedido in pedidos:
         pedido['arquivo'] = arquivo
     return pedidos, list(lido['nao_reconhecidos']), regime_do_setor(dados['setor'])

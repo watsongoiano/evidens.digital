@@ -100,6 +100,14 @@ def test_pedido_em_lista_de_nomes_ou_de_codigos_tuss_e_lido():
     assert {'Hemograma completo com plaquetas', 'Creatinina, soro', 'Ureia, soro', 'Hormônio Tireoestimulante (TSH), soro',
             '25-hidroxivitamina D, soro'} <= nomes, nomes
     assert regime is None and all(p['arquivo'] == 'pedido' and p['data'] == '' for p in pedidos)
+    # Nome em maiúsculas (que o leitor de laudos reconhece sozinho) junto de códigos e de nomes separados por vírgula:
+    # nada fica de fora.
+    misto, _, _ = operadora.exames_do_pedido(_pdf([['HEMOGRAMA COMPLETO', '40302830', 'Creatinina, ureia']]), 'pedido')
+    assert {p['exame'] for p in misto} == {'Hemograma completo com plaquetas', '25-hidroxivitamina D, soro',
+                                           'Creatinina, soro', 'Ureia, soro'}, misto
+    # Laudo de laboratório (exames com data de coleta) continua lido só pelo leitor de laudos.
+    do_laudo, _, _ = operadora.exames_do_pedido(_pdf(FORMATO_C), 'laudo')
+    assert do_laudo and all(p['data'] for p in do_laudo)
 
 
 def test_envio_incompleto_invalido_ou_ilegivel_volta_com_mensagem(admin):
@@ -136,3 +144,5 @@ def test_formulario_do_check_up_fica_na_pagina_das_operadoras(admin):
     assert "classList.add('embutido')" in checkup and "'/api/admin/operadoras/conferir'" in checkup
     assert "window.location.replace('/operadoras')" in checkup            # fora do quadro, o modo operadora não vale
     assert 'operadoraPedido' not in checkup and 'operadoras_resultado' in checkup
+    # Resposta de um envio cujo paciente ou PDF mudou é descartada, como no check-up.
+    assert "conferirPedidoDaOperadora(data, revisaoDoEnvio)" in checkup and "tipo: 'operadoras_descartado'" in checkup

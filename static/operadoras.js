@@ -114,7 +114,7 @@
       if (e.data.tipo === 'operadoras_altura' && e.data.altura > 0) quadro.style.height = (e.data.altura + 24) + 'px';
       if (e.data.tipo === 'operadoras_alterado') desatualizar();
       if (e.data.tipo === 'operadoras_enviando') $('[data-andamento]').style.display = '';
-      if (e.data.tipo === 'operadoras_erro') $('[data-andamento]').style.display = 'none';
+      if (e.data.tipo === 'operadoras_erro' || e.data.tipo === 'operadoras_descartado') $('[data-andamento]').style.display = 'none';
       if (e.data.tipo === 'operadoras_resultado' && e.data.corpo) {
         dados = e.data.corpo; filtro = '';
         $('[data-andamento]').style.display = 'none';

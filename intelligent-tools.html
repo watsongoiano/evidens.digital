@@ -2009,8 +2009,11 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             new ResizeObserver(avisarAltura).observe(document.body);
             window.addEventListener('load', avisarAltura);
             ['input', 'change'].forEach(evento => checkupForm.addEventListener(evento, () => avisarPaginaDeFora({ tipo: 'operadoras_alterado' })));
+            // Trocar o PDF do pedido também invalida a resposta que ainda não chegou (como mudar o formulário).
+            const campoDoPdf = window.parent.document.querySelector('[data-pedido-pdf]');
+            if (campoDoPdf) campoDoPdf.addEventListener('change', () => { revisaoDoFormulario += 1; });
         }
-        async function conferirPedidoDaOperadora(data) {
+        async function conferirPedidoDaOperadora(data, revisaoDoEnvio) {
             const campo = window.parent.document.querySelector('[data-pedido-pdf]');
             const arquivos = campo ? Array.from(campo.files) : [];
             if (!arquivos.length) { mostrarErrosDaTela([T('Anexe o PDF com os exames pedidos, no alto desta página.')]); return; }
@@ -2024,9 +2027,12 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             try {
                 const resposta = await fetch('/api/admin/operadoras/conferir', { method: 'POST', body: envio, credentials: 'same-origin' });
                 const corpo = await resposta.json().catch(() => ({}));
+                // O paciente ou o PDF mudou enquanto a resposta vinha (ou houve novo envio): ela não vale mais.
+                if (revisaoDoEnvio !== revisaoDoFormulario) { avisarPaginaDeFora({ tipo: 'operadoras_descartado' }); return; }
                 if (!resposta.ok) throw new Error(corpo.error || T('Não foi possível conferir o pedido.'));
                 avisarPaginaDeFora({ tipo: 'operadoras_resultado', corpo });
             } catch (erro) {
+                if (revisaoDoEnvio !== revisaoDoFormulario) { avisarPaginaDeFora({ tipo: 'operadoras_descartado' }); return; }
                 avisarPaginaDeFora({ tipo: 'operadoras_erro' });
                 mostrarErrosDaTela([erro.message || T('Não foi possível conferir o pedido.')]);
             }
@@ -2046,7 +2052,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             const data = lerFormulario();
             const problemas = conferirNumeros();
             if (problemas.length) { limparResultados(); mostrarErrosDaTela(problemas); return; }
-            if (MODO_OPERADORA) { conferirPedidoDaOperadora(data); return; }
+            if (MODO_OPERADORA) { conferirPedidoDaOperadora(data, revisaoDoEnvio); return; }
 
             // O nome do paciente não é necessário para calcular as recomendações
             // e não é enviado nesta etapa; ele só acompanha o pedido de PDF.
