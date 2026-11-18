@@ -225,7 +225,14 @@ def test_tela_tem_o_sus_no_seletor_e_os_campos_da_apac():
     assert 'id="apacCampos"' in html and 'function apacDoDialogo(categoria)' in html
     # Os campos do laudo aparecem quando o pedido (imagem ou laboratório) tem exame que vai em APAC.
     assert "fetch('/api/apac/exames'" in html and 'function examesEmApacDoPedido(categoria)' in html
-    assert "ehSus(valor) && emApac.length" in html and "categoriaDoDialogo === 'imagem'" not in html
+    assert "ehSus(valor) && pedidoPodeTerApac(categoriaDoDialogo)" in html and "categoriaDoDialogo === 'imagem'" not in html
+    # Busca da lista falhou: nada de guardar lista vazia (o pedido sairia sem o laudo, sem aviso). A lista fica
+    # nula, a tela avisa, os dados do laudo seguem com o pedido e o servidor decide quais exames levam laudo.
+    carga = html[html.index('async function carregarExamesEmApac()'):html.index('function examesEmApacDoPedido(categoria)')]
+    assert "if (!r.ok) throw" in carga and 'titulosEmApac = null;' in carga and 'new Set()' not in carga
+    assert 'return titulosEmApac ? examesEmApacDoPedido(categoria).length > 0 : true;' in html
+    assert "if (!pedidoPodeTerApac(categoria) || painel.style.display === 'none' || !ehSus(plano)) return null;" in html
+    assert 'id="apacSemLista" hidden' in html and "getElementById('apacSemLista').hidden = !!titulosEmApac" in html
     # A tela diz como o laudo sai: laboratório agrupado (até três por laudo), imagem um por exame
     assert 'id="apacComoSai"' in html and "categoriaDoDialogo === 'laboratorio'" in html
     assert 'saem juntos no mesmo laudo de solicitação de APAC (até três por laudo)' in html

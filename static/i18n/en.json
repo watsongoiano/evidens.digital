@@ -4273,7 +4273,8 @@
   "O laudo de APAC é só para pedidos de exames.": "The APAC report is only for exam orders.",
   "Os campos abaixo são opcionais (o que ficar em branco é preenchido à mão) e não são guardados.": "The fields below are optional (whatever is left blank is filled in by hand) and are not stored.",
   "Os exames de laboratório saem juntos no mesmo laudo de solicitação de APAC (até três por laudo), logo depois do pedido.": "The laboratory tests go together on the same APAC request report (up to three per report), right after the order.",
-  "Cada um sai com o laudo de solicitação de APAC, logo depois do pedido.": "Each one comes with its APAC request report, right after the order."
+  "Cada um sai com o laudo de solicitação de APAC, logo depois do pedido.": "Each one comes with its APAC request report, right after the order.",
+  "Não foi possível conferir agora quais exames deste pedido são de alta complexidade: o laudo de APAC sai para os que forem.": "It was not possible to check right now which tests in this order are high-complexity: the APAC report will be issued for those that are."
  },
  "padroes": [
   [
