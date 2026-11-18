@@ -73,6 +73,11 @@ def test_exame_nao_indicado_traz_justificativa_formal_com_fonte(admin):
     sodio = linhas['Sódio, soro']
     assert sodio['motivo'].startswith('Sem recomendação de rastreio: a USPSTF não inclui o sódio entre os rastreios')
     assert 'Adultos com HAS' in sodio['indicado_para']['grupos'] and sodio['indicado_para']['grupos'][0].startswith('Adultos')
+    # Cada situação vem com a referência que o check-up usa nela (a nossa), com link.
+    situacoes = {s['grupo']: s['referencias'] for s in sodio['indicado_para']['situacoes']}
+    assert list(situacoes) == sodio['indicado_para']['grupos']
+    assert any(f['label'].startswith('AHA') for f in situacoes['Adultos com HAS'])
+    assert all(f['label'] and f['url'].startswith('https://') for fontes in situacoes.values() for f in fontes)
 
 
 def test_registro_de_justificativas_e_precedencia_do_parecer_de_sociedade():
@@ -87,6 +92,14 @@ def test_registro_de_justificativas_e_precedencia_do_parecer_de_sociedade():
     vitamina_d = operadora.justificativa_de_nao_indicacao({'40302830'}, 'feminino', 40)
     assert vitamina_d['texto'].startswith('Endocrine Society 2024') and vitamina_d['aviso'].startswith('Divergência')
     assert operadora.justificativa_de_nao_indicacao({'nome:exame que ninguem pesquisou'}, 'feminino', 40) is None
+    # Correções do responsável clínico (17/11/2026): creatinina pela KDIGO, não pelo ACP; ureia e bilirrubinas sem a
+    # Choosing Wisely Canada; coagulograma pela NICE NG45, que o pré-operatório já usa.
+    def fontes(codigo):
+        return [f['label'] for f in operadora.justificativa_de_nao_indicacao({codigo}, 'masculino', 40)['referencias']]
+    assert fontes('40301630') == ['KDIGO 2024', 'USPSTF (recomendações A e B)']
+    assert fontes('40302580') == fontes('40301397') == fontes('40302423') == ['USPSTF (recomendações A e B)']
+    assert fontes('40304590') == fontes('40304639') == ['USPSTF (recomendações A e B)', 'NICE NG45']
+    assert fontes('40302512') == ['AASLD 2023', 'USPSTF (recomendações A e B)']
     # Grupo só de gestante não aparece para homem.
     homem, mulher = (operadora.indicado_para({'40304361'}, sexo)['grupos'] for sexo in ('masculino', 'feminino'))
     assert not [g for g in homem if 'estant' in g] and len(mulher) >= len(homem)
@@ -183,3 +196,36 @@ def test_formulario_do_check_up_fica_na_pagina_das_operadoras(admin):
     assert 'operadoraPedido' not in checkup and 'operadoras_resultado' in checkup
     # Resposta de um envio cujo paciente ou PDF mudou é descartada, como no check-up.
     assert "conferirPedidoDaOperadora(data, revisaoDoEnvio)" in checkup and "tipo: 'operadoras_descartado'" in checkup
+
+
+def test_justificativa_so_cita_sociedade_que_o_algoritmo_ja_cita():
+    """Decisão do responsável clínico (17/11/2026): a fonte da justificativa é só sociedade que o check-up já cita.
+    Referência é a sociedade (USPSTF, AHA/ACC, KDIGO), não uma diretriz específica. Aceitas à parte: a Surviving
+    Sepsis Campaign e, só na TGO, a CSCC."""
+    from src.utils import operadora
+    assert operadora.sociedades_da_fonte('AHA/ACC 2018 (colesterol)') == {'AHA', 'ACC'}
+    assert operadora.sociedades_da_fonte('NICE NG45') == {'NICE'}
+    assert operadora.sociedades_da_fonte('CSEM (Choosing Wisely Canada), ASCP 2015 e SBPC/ML 2019') == {'CSEM', 'ASCP', 'SBPC', 'ML'}
+    do_algoritmo = operadora.sociedades_do_algoritmo()
+    assert {'USPSTF', 'AHA', 'ACC', 'KDIGO', 'AASLD', 'NICE', 'Endocrine Society', 'Surviving Sepsis Campaign'} <= do_algoritmo
+    assert not {'ACP', 'CSCC', 'CFPC', 'BCSH', 'CAMB', 'ASCP', 'CRA', 'CSEM', 'SBI'} & do_algoritmo
+    for codigo, item in operadora.SEM_INDICACAO_DE_ROTINA.items():
+        for fonte in item['referencias']:
+            assert operadora.fonte_aceita(fonte['label'], codigo), (codigo, fonte['label'])
+        for de_fora in ('ACP', 'CFPC', 'BCSH', 'Choosing Wisely'):
+            assert codigo == '40302504' or de_fora not in item['texto'], (codigo, de_fora)
+    assert operadora.fonte_aceita('CSCC 2024 (Choosing Wisely Canada)', '40302504')          # só na TGO
+    assert not operadora.fonte_aceita('CSCC 2024 (Choosing Wisely Canada)', '40302580')
+    # Parecer de sociedade que o algoritmo não cita (CAMB, ASCP, CRA, CSEM) não vai para a tela: fica a USPSTF.
+    for codigo in ('40304370', '40301150', '40301761', '40306852', '40312127', '40306437', '40304612', '40306909', '40301087'):
+        vai = operadora.justificativa_de_nao_indicacao({codigo}, 'feminino', 40)
+        assert [f['label'] for f in vai['referencias']] == ['USPSTF (recomendações A e B)'], codigo
+        assert 'Choosing Wisely' not in vai['texto'], codigo
+    t4 = operadora.justificativa_de_nao_indicacao({'40316491'}, 'feminino', 40)
+    assert t4['texto'].startswith('USPSTF 2015 (grau I)') and [f['label'] for f in t4['referencias']] == ['USPSTF 2015']
+    # Parecer de sociedade do algoritmo continua valendo, e o texto não cita sociedade de fora.
+    for codigo, sexo, inicio in (('40302830', 'feminino', 'Endocrine Society 2024'), ('40316513', 'masculino', 'Endocrine Society 2018'),
+                                 ('40307085', 'feminino', 'USPSTF 2023'), ('40310213', 'masculino', 'USPSTF 2019')):
+        vai = operadora.justificativa_de_nao_indicacao({codigo}, sexo, 55)
+        assert vai['texto'].startswith(inicio), codigo
+        assert not any(fora in vai['texto'] for fora in ('SBI', 'CUA', 'ASCP', 'CFPC', 'SBMFC')), codigo

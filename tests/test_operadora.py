@@ -132,7 +132,7 @@ def test_pareceres_contra_o_pedido_de_rotina():
     assert mulher['codigo_do_motivo'] == homem['codigo_do_motivo'] == 'parecer_contrario'
     assert 'Endocrine Society 2014' in mulher['motivo'] and 'Endocrine Society 2018' in homem['motivo']
     herpes = _um(codigo_tuss=HERPES_IGG, sexo='F')
-    assert (herpes['codigo_do_motivo'], herpes['referencia']) == ('parecer_contrario', 'USPSTF 2023 e SBI 2019')
+    assert (herpes['codigo_do_motivo'], herpes['referencia']) == ('parecer_contrario', 'USPSTF 2023')
     for codigo in (VHS, ACIDO_URICO, ELETROFORESE, FAN, PAINEL_REUMATOLOGICO, ANTI_TPO, T4_LIVRE):
         r = _um(codigo_tuss=codigo)
         assert (r['cor'], r['codigo_do_motivo']) == ('vermelho', 'parecer_contrario'), codigo
@@ -147,7 +147,7 @@ def test_pareceres_contra_o_pedido_de_rotina():
 def test_urocultura_de_rastreio_depende_de_gestacao():
     """USPSTF 2019: grau B na gestação, grau D fora dela. O pedido não informa gestação."""
     r = _um(codigo_tuss=UROCULTURA, sexo='M', idade='33')
-    assert (r['cor'], r['codigo_do_motivo'], r['referencia']) == ('vermelho', 'parecer_contrario', 'USPSTF 2019 e SBI 2019')
+    assert (r['cor'], r['codigo_do_motivo'], r['referencia']) == ('vermelho', 'parecer_contrario', 'USPSTF 2019')
     assert _cor(codigo_tuss=UROCULTURA, sexo='F', idade='33') == ('amarelo', 'depende_de_gestacao')
     assert _cor(codigo_tuss=UROCULTURA, sexo='F', idade='49') == ('amarelo', 'depende_de_gestacao')
     assert _cor(codigo_tuss=UROCULTURA, sexo='F', idade='50') == ('vermelho', 'parecer_contrario')

@@ -172,7 +172,7 @@ def _parecer(codigos, referencia, link, motivo, sexo=None, escopo='rastreio', co
 PARECERES_CONTRARIOS = (
     _parecer(['40302830'], 'Endocrine Society 2024', _VITAMINA_D,
              'Endocrine Society 2024 (sugestão condicional): contra a dosagem de rotina de 25-hidroxivitamina D em '
-             'adultos sem indicação estabelecida. No mesmo sentido: SBPC/ML e SBEM 2017, ASCP 2014, CFPC e SBMFC 2018.',
+             'adultos sem indicação estabelecida.',
              aviso='Divergência: para o USPSTF 2021 a evidência é insuficiente (grau I); SBPC/ML e SBEM 2017 indicam '
                    'a dosagem em grupos de risco, como gestantes e lactantes.', idade_max=60),
     _parecer(['40302830'], 'Endocrine Society 2024; SBPC/ML e SBEM 2017', _VITAMINA_D,
@@ -189,24 +189,20 @@ PARECERES_CONTRARIOS = (
              'para investigação de hiperandrogenismo nem para controle de terapia com testosterona.', sexo='feminino'),
     _parecer(['40316513'], 'Endocrine Society 2018', 'https://doi.org/10.1210/jc.2018-00229',
              'Endocrine Society 2018 (recomendação forte, evidência de baixa qualidade): contra o rastreio de '
-             'hipogonadismo em homens da população geral. No mesmo sentido: CUA (Choosing Wisely Canada). Não vale '
-             'para busca de casos em doença hipofisária, uso crônico de opioide ou glicocorticoide, infertilidade e '
-             'osteoporose.', sexo='masculino'),
-    _parecer(['40307085', '40307093'], 'USPSTF 2023 e SBI 2019', 'https://pubmed.ncbi.nlm.nih.gov/36786784/',
+             'hipogonadismo em homens da população geral. Não vale para busca de casos em doença hipofisária, uso '
+             'crônico de opioide ou glicocorticoide, infertilidade e osteoporose.', sexo='masculino'),
+    _parecer(['40307085', '40307093'], 'USPSTF 2023', 'https://pubmed.ncbi.nlm.nih.gov/36786784/',
              'USPSTF 2023 (grau D): contra o rastreio sorológico de herpes genital em adolescentes e adultos '
-             'assintomáticos, gestantes incluídas. SBI 2019 (Choosing Wisely Brasil): não usar sorologia de herpes '
-             'simples para diagnóstico ou rastreio na população geral. Não vale para pessoas com HIV ou '
-             'imunossupressão.'),
+             'assintomáticos, gestantes incluídas. Não vale para pessoas com HIV ou imunossupressão.'),
     # Urocultura de rastreio: recomendada na gestação (grau B) e contraindicada fora dela (grau D). O pedido não
     # informa gestação: mulher em idade reprodutiva (15 a 49 anos, OMS) fica no amarelo.
     _parecer(['40310213'], 'USPSTF 2019', _BACTERIURIA,
              'USPSTF 2019: a urocultura de rastreio é recomendada na gestação (grau B) e contraindicada fora dela '
              '(grau D); o pedido não informa gestação.', sexo='feminino', cor='amarelo',
              codigo_do_motivo='depende_de_gestacao', idade_max=49),
-    _parecer(['40310213'], 'USPSTF 2019 e SBI 2019', _BACTERIURIA,
-             'USPSTF 2019 (grau D) e SBI 2019 (Choosing Wisely Brasil): contra a urocultura de rastreio em adulto '
-             'assintomático fora da gestação e sem doença urológica crônica. Não vale antes de procedimento '
-             'urológico (IDSA 2019).'),
+    _parecer(['40310213'], 'USPSTF 2019', _BACTERIURIA,
+             'USPSTF 2019 (grau D): contra a urocultura de rastreio em adulto assintomático fora da gestação e sem '
+             'doença urológica crônica. Não vale antes de procedimento urológico (IDSA 2019).'),
     _parecer(['40304370'], 'CAMB 2020 e ASCP 2015 (Choosing Wisely)', _CAMB,
              'CAMB 2020 e ASCP 2015 (Choosing Wisely): não usar a VHS para rastrear assintomáticos nem como teste '
              'geral de inflamação; a proteína C reativa é preferível.'),
@@ -725,18 +721,53 @@ _USPSTF_A_E_B = _fonte('USPSTF (recomendações A e B)',
                        'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations')
 _AASLD_2023 = _fonte('AASLD 2023', 'https://doi.org/10.1097/HEP.0000000000000323')
 _CSCC_2024 = _fonte('CSCC 2024 (Choosing Wisely Canada)', _CSCC)
-_CFPC = _fonte('CFPC (Choosing Wisely Canada)', _CW_CANADA)
-_ACP_2013 = _fonte('ACP 2013 (doença renal crônica)', 'https://doi.org/10.7326/0003-4819-159-12-201312170-00726')
+_KDIGO_2024 = _fonte('KDIGO 2024', 'https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf')
+_NICE_NG45 = _fonte('NICE NG45', 'https://www.nice.org.uk/guidance/ng45/chapter/recommendations')
 _USPSTF_2018_RISCO = _fonte('USPSTF 2018 (fatores de risco não tradicionais)', 'https://doi.org/10.1001/jama.2018.8359')
-_BCSH_2008 = _fonte('BCSH 2008 (risco de sangramento)', 'https://doi.org/10.1111/j.1365-2141.2007.06968.x')
+_USPSTF_2015_TIREOIDE = _fonte('USPSTF 2015', 'https://www.uspreventiveservicestaskforce.org/uspstf/document/'
+                                              'clinical-summary142/thyroid-dysfunction-screening')
+
+# Fonte da justificativa é só sociedade que o algoritmo do check-up já cita (decisão do responsável clínico,
+# 17/11/2026). "Referência" aqui é a sociedade, não uma diretriz específica: a USPSTF, a AHA/ACC, a KDIGO. Duas
+# exceções aprovadas por ele: a Surviving Sepsis Campaign, para qualquer exame, e a CSCC (Choosing Wisely Canada)
+# só na TGO. Sociedade de fora (ACP, BCSH, CFPC, CAMB, ASCP...) não entra sem a aprovação dele.
+SOCIEDADES_ACEITAS_A_PARTE = frozenset({'Surviving Sepsis Campaign'})
+FONTES_ACEITAS_POR_EXAME = {'40302504': frozenset({'CSCC'})}
+
+_ANO = re.compile(r'\b(?:19|20)\d{2}(?:[-/]\d{2,4})?\b')
+_CODIGO_DE_DOCUMENTO = re.compile(r'\s+(?:[A-Z]{2}\s?\d+\w*|v\.\s?\d+|\d+e)$')
+
+
+def sociedades_da_fonte(rotulo):
+    """'AHA/ACC 2018 (colesterol)' → {'AHA', 'ACC'}: quem assina a fonte, sem o ano nem o nome do documento."""
+    limpo = _ANO.sub(' ', re.sub(r'\([^)]*\)', ' ', rotulo or ''))
+    partes = (_CODIGO_DE_DOCUMENTO.sub('', ' '.join(parte.split())) for parte in re.split(r'/|;|,|\s+e\s+', limpo))
+    return {parte for parte in partes if parte}
+
+
+@lru_cache(maxsize=1)
+def sociedades_do_algoritmo():
+    """As sociedades que o check-up cita nas indicações de exame (varredura do motor), mais as aceitas à parte."""
+    from src.utils import catalogo
+    do_motor = set()
+    for item in catalogo.indicacoes_do_motor().values():
+        for fonte in item['referencias']:
+            do_motor |= sociedades_da_fonte(fonte['label'])
+    return frozenset(do_motor | SOCIEDADES_ACEITAS_A_PARTE)
+
+
+def fonte_aceita(rotulo, codigo=None, todas=True):
+    """A fonte é de sociedade que o algoritmo já cita? `todas`: todas as que assinam (False: ao menos uma)."""
+    aceitas = sociedades_do_algoritmo() | FONTES_ACEITAS_POR_EXAME.get(codigo, frozenset())
+    assinam = sociedades_da_fonte(rotulo)
+    return bool(assinam) and (assinam <= aceitas if todas else bool(assinam & aceitas))
 
 
 def _sem_diretriz(nome):
-    """Exame pesquisado que não está entre os rastreios recomendados pela USPSTF nem tem diretriz própria de rotina."""
+    """Exame pesquisado que não está entre os rastreios que a USPSTF recomenda ao adulto assintomático."""
     return {'texto': f'Sem recomendação de rastreio: a USPSTF não inclui {nome} entre os rastreios recomendados para adulto '
-                     'assintomático (graus A e B), e o CFPC (Choosing Wisely Canada) orienta não pedir exames de sangue '
-                     'de rotina sem indicação pelo risco do paciente.',
-            'referencias': [_USPSTF_A_E_B, _CFPC]}
+                     'assintomático (graus A e B).',
+            'referencias': [_USPSTF_A_E_B]}
 
 
 # Justificativa formal, com a fonte, de por que cada exame não é pedido de rotina. Vale na conferência do pedido, para
@@ -752,16 +783,12 @@ SEM_INDICACAO_DE_ROTINA = {
                           'junto da TGP, que é mais específica para lesão hepática. A AASLD (2023) não recomenda rastrear '
                           'doença hepática esteatótica na população geral.',
                  'referencias': [_CSCC_2024, _AASLD_2023]},
-    '40301397': {'texto': 'Sem recomendação de rastreio: a USPSTF não inclui as bilirrubinas entre os rastreios '
-                          'recomendados para adulto assintomático (graus A e B). A CSCC (Choosing Wisely Canada, 2024) '
-                          'orienta pedir a fração direta só quando a bilirrubina total está elevada.',
-                 'referencias': [_USPSTF_A_E_B, _CSCC_2024]},
-    '40302580': {'texto': 'A CSCC (Choosing Wisely Canada, 2024) orienta não pedir ureia de rotina na avaliação inicial: a '
-                          'creatinina, com a TFG estimada, basta para avaliar a função renal.',
-                 'referencias': [_CSCC_2024]},
-    '40301630': {'texto': 'O ACP (2013) recomenda não rastrear doença renal crônica em adulto assintomático sem fator de '
-                          'risco (recomendação fraca, evidência de baixa qualidade).',
-                 'referencias': [_ACP_2013]},
+    '40301397': _sem_diretriz('as bilirrubinas'), '40302580': _sem_diretriz('a ureia'),
+    '40301630': {'texto': 'A KDIGO (2024) orienta pesquisar doença renal crônica, com a TFG estimada pela creatinina e a '
+                          'albuminúria, em quem tem risco para a doença ou já a tem (ponto de prática 1.1.1.1; recomendação '
+                          '1.1.2.1, grau 1B). Não há, na diretriz, recomendação de testar o adulto assintomático sem fator '
+                          'de risco, e a USPSTF não inclui a creatinina entre os rastreios recomendados (graus A e B).',
+                 'referencias': [_KDIGO_2024, _USPSTF_A_E_B]},
     '40308391': {'texto': 'A USPSTF (2018) considera a evidência insuficiente para somar a PCR ultrassensível à avaliação '
                           'do risco cardiovascular de adulto assintomático (declaração I), e a PCR não está entre os '
                           'rastreios que ela recomenda (graus A e B).',
@@ -777,22 +804,38 @@ SEM_INDICACAO_DE_ROTINA = {
     '40301419': _sem_diretriz('o cálcio iônico'), '40302237': _sem_diretriz('o magnésio'),
     '40301931': _sem_diretriz('o fósforo'), '40302385': _sem_diretriz('as proteínas totais e frações'),
     '40304361': _sem_diretriz('o hemograma'),
+    # Exames com parecer só de sociedade que o algoritmo não cita (CAMB, ASCP, CRA, CSEM): enquanto ela não é
+    # aprovada, a tela usa o que a USPSTF diz.
+    '40304370': _sem_diretriz('a VHS'), '40301150': _sem_diretriz('o ácido úrico'),
+    '40301761': _sem_diretriz('a eletroforese de proteínas'), '40302717': _sem_diretriz('a eletroforese de proteínas'),
+    '40306852': _sem_diretriz('o FAN'), '40312127': _sem_diretriz('o perfil reumatológico'),
+    '40306437': _sem_diretriz('o anti-TPO'), '40304612': _sem_diretriz('o tempo de sangramento'),
+    '40304914': _sem_diretriz('o tempo de sangramento'), '40301087': _sem_diretriz('o folato eritrocitário'),
 }
+for _codigo in ('40306909', '40306917', '40306925'):
+    SEM_INDICACAO_DE_ROTINA[_codigo] = _sem_diretriz('a sorologia para Helicobacter pylori')
+for _codigo in ('40316491', '40305627'):          # T4 livre e provas de função tireoidiana
+    SEM_INDICACAO_DE_ROTINA[_codigo] = {
+        'texto': 'USPSTF 2015 (grau I): evidência insuficiente para o rastreio de disfunção tireoidiana em adultos '
+                 'assintomáticos fora da gestação.',
+        'referencias': [_USPSTF_2015_TIREOIDE]}
 for _codigo in ('40304590', '40304639'):          # TP/INR e TTPA
     SEM_INDICACAO_DE_ROTINA[_codigo] = {
-        'texto': 'Os testes de coagulação predizem mal o sangramento em pessoas não selecionadas: sem história de '
-                 'sangramento, o BCSH (2008) não os recomenda de rotina nem antes de cirurgia. A USPSTF não os inclui '
-                 'entre os rastreios recomendados (graus A e B).',
-        'referencias': [_BCSH_2008, _USPSTF_A_E_B]}
+        'texto': 'Sem recomendação de rastreio: a USPSTF não inclui os testes de coagulação entre os rastreios '
+                 'recomendados para adulto assintomático (graus A e B). Nem antes de cirurgia eletiva eles são de '
+                 'rotina: a NICE (NG45) só os considera na doença hepática crônica (ASA 3 ou 4, cirurgia de porte '
+                 'intermediário ou maior).',
+        'referencias': [_USPSTF_A_E_B, _NICE_NG45]}
 
 
 def justificativa_de_nao_indicacao(chaves, sexo, idade):
     """Por que o exame não é pedido de rotina: {'texto', 'referencias', 'aviso'} ou None, se ainda não há registro.
 
-    Primeiro o parecer de sociedade médica sobre o exame (PARECERES_CONTRARIOS); depois o registro próprio."""
+    Primeiro o parecer de sociedade médica sobre o exame (PARECERES_CONTRARIOS), se ela é uma das que o algoritmo
+    já cita; depois o registro próprio."""
     for chave in sorted(chaves):
         parecer = parecer_contrario(chave, sexo, 'rastreio', idade)
-        if parecer:
+        if parecer and fonte_aceita(parecer['referencia'], todas=False):
             return {'texto': parecer['motivo'], 'referencias': [_fonte(parecer['referencia'], parecer['link'])],
                     'aviso': parecer['aviso']}
     for chave in sorted(chaves):
@@ -803,15 +846,16 @@ def justificativa_de_nao_indicacao(chaves, sexo, idade):
 
 @lru_cache(maxsize=1)
 def _indicacoes_por_chave():
-    """Código TUSS (ou chave pelo nome) → {'grupos', 'referencias'}: para quem o check-up indica o exame, e com que
-    fontes. Vem da varredura do motor (src/data/indicacoes_motor.json)."""
+    """Código TUSS (ou chave pelo nome) → {grupo: [fontes]}: para quem o check-up indica o exame, e com que fontes.
+    Vem da varredura do motor (src/data/indicacoes_motor.json)."""
     from src.utils import catalogo
     por_chave = {}
     for titulo, item in catalogo.indicacoes_do_motor().items():
         for chave in periodicidade.chaves(titulo, 'feminino') | periodicidade.chaves(titulo, 'masculino'):
-            alvo = por_chave.setdefault(chave, {'grupos': [], 'referencias': []})
-            alvo['grupos'] += [g for g in item['grupos'] if g not in alvo['grupos']]
-            alvo['referencias'] += [r for r in item['referencias'] if r not in alvo['referencias']]
+            alvo = por_chave.setdefault(chave, {})
+            for grupo, fontes in item['por_grupo'].items():
+                ja = alvo.setdefault(grupo, [])
+                ja += [fonte for fonte in fontes if fonte not in ja]
     return por_chave
 
 
@@ -820,20 +864,25 @@ _SO_DE_HOMEM = re.compile(r'\bhomens?\b', re.IGNORECASE)
 
 
 def indicado_para(chaves, sexo):
-    """Em que situações o check-up indica o exame: {'grupos': [...], 'referencias': [...]} (vazio se em nenhuma)."""
-    grupos, referencias = [], []
+    """Em que situações o check-up indica o exame, cada uma com as fontes que o check-up cita para ela:
+    {'grupos': [...], 'situacoes': [{'grupo', 'referencias'}], 'referencias': [...]} (vazio se em nenhuma)."""
+    por_grupo = {}
     for chave in sorted(chaves):
-        item = _indicacoes_por_chave().get(chave)
-        if item:
-            grupos += [g for g in item['grupos'] if g not in grupos]
-            referencias += [r for r in item['referencias'] if r not in referencias]
+        for grupo, fontes in _indicacoes_por_chave().get(chave, {}).items():
+            ja = por_grupo.setdefault(grupo, [])
+            ja += [fonte for fonte in fontes if fonte not in ja]
     de_fora = _SO_DE_MULHER if sexo == 'masculino' else _SO_DE_HOMEM if sexo == 'feminino' else None
     if de_fora:
-        grupos = [g for g in grupos if not de_fora.search(g)]
+        por_grupo = {grupo: fontes for grupo, fontes in por_grupo.items() if not de_fora.search(grupo)}
     def ordem(grupo):      # primeiro os grupos de pessoas ("Adultos com HAS", "Diabéticos"); as medicações por último
         medicacao = grupo.startswith(('Em uso de', 'Corticoide'))
         return (0 if grupo.startswith('Adultos') else 2 if medicacao else 1, _sem_acento(grupo))
-    return {'grupos': sorted(grupos, key=ordem), 'referencias': referencias}
+    grupos = sorted(por_grupo, key=ordem)
+    referencias = []
+    for grupo in grupos:
+        referencias += [fonte for fonte in por_grupo[grupo] if fonte not in referencias]
+    return {'grupos': grupos, 'situacoes': [{'grupo': grupo, 'referencias': por_grupo[grupo]} for grupo in grupos],
+            'referencias': referencias}
 _NAO_INDICADO_AGORA = {
     'em_dia': 'Já feito e ainda em dia',
     'nao_recomendado': 'O check-up recomenda não fazer',
@@ -938,7 +987,8 @@ def conferir_pedido(paciente, pedidos):
         item = next((nao_agora[c] for c in sorted(chaves) if c in nao_agora), None)
         linha = {'exame': pedido['exame'], 'nome_no_pedido': pedido.get('nome_no_pedido') or '',
                  'data': pedido.get('data') or '', 'arquivo': pedido.get('arquivo') or '', 'no_checkup': '',
-                 'grau': '', 'referencias': [], 'aviso': '', 'indicado_para': {'grupos': [], 'referencias': []},
+                 'grau': '', 'referencias': [], 'aviso': '',
+                 'indicado_para': {'grupos': [], 'situacoes': [], 'referencias': []},
                  'sem_justificativa': False}
         if rec:
             atendidos.add(rec['titulo'])

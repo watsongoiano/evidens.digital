@@ -176,10 +176,11 @@ def indicacoes_do_motor():
 
 
 def varrer_o_motor(app):
-    """Varre perfis pelo motor. Devolve ({categoria: [títulos]}, {título: {'grupos', 'referencias'}}).
+    """Varre perfis pelo motor. Devolve ({categoria: [títulos]}, {título: {'grupos', 'referencias', 'por_grupo'}}).
 
     O segundo item diz, para cada exame de laboratório ou de imagem, em que grupos o motor o indica (a primeira
-    parte do subtítulo de cada indicação: "Adultos com HAS", "Em uso de lítio") e as fontes que ele cita."""
+    parte do subtítulo de cada indicação: "Adultos com HAS", "Em uso de lítio"), as fontes que ele cita e, em
+    'por_grupo', as fontes de cada grupo."""
     import itertools
     from src.utils import periodicidade
     cliente = app.test_client()
@@ -192,11 +193,13 @@ def varrer_o_motor(app):
                 continue
             encontrados[rec['categoria']].add(rec['titulo'])
             if rec['categoria'] in ('laboratorio', 'imagem'):
-                item = indicacoes.setdefault(rec['titulo'], {'grupos': set(), 'referencias': {}})
-                item['grupos'].update(grupo for grupo, _ in periodicidade.indicacoes(rec.get('subtitulo')) if grupo)
-                for fonte in rec.get('referencias') or []:
-                    if fonte.get('label'):
-                        item['referencias'].setdefault(fonte['label'], fonte.get('url') or '')
+                item = indicacoes.setdefault(rec['titulo'], {'referencias': {}, 'por_grupo': {}})
+                fontes = {f['label']: f.get('url') or '' for f in rec.get('referencias') or [] if f.get('label')}
+                for rotulo, url in fontes.items():
+                    item['referencias'].setdefault(rotulo, url)
+                for grupo, _ in periodicidade.indicacoes(rec.get('subtitulo')):
+                    if grupo:
+                        item['por_grupo'].setdefault(grupo, {}).update(fontes)
     grade = itertools.product(
         (18, 25, 35, 45, 50, 55, 60, 65, 70, 80), ('masculino', 'feminino'), ('nunca', 'atual', 'ex'),
         ([], ['diabetes'], ['hipertensao'], ['hiv'], ['doenca_renal', 'dcv_aterosclerotica'], ['insuficiencia_cardiaca'], ['dpoc'],
@@ -238,7 +241,10 @@ def varrer_o_motor(app):
                               historia_familiar=[], imunossupressao='nao', gestante='nao', lactante='nao'), **caso)
             registrar(cliente.post('/api/checkup-intelligent', json=dados).get_json()['recommendations'])
     titulos = {c: sorted(v, key=lambda t: t.lower()) for c, v in encontrados.items()}
-    por_titulo = {titulo: {'grupos': sorted(item['grupos'], key=str.lower),
-                           'referencias': [{'label': rotulo, 'url': url} for rotulo, url in sorted(item['referencias'].items())]}
+    def lista(fontes):
+        return [{'label': rotulo, 'url': url} for rotulo, url in sorted(fontes.items())]
+    por_titulo = {titulo: {'grupos': sorted(item['por_grupo'], key=str.lower), 'referencias': lista(item['referencias']),
+                           'por_grupo': {grupo: lista(item['por_grupo'][grupo])
+                                         for grupo in sorted(item['por_grupo'], key=str.lower)}}
                   for titulo, item in sorted(indicacoes.items(), key=lambda par: par[0].lower())}
     return titulos, por_titulo

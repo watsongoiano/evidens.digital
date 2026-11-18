@@ -20,15 +20,18 @@
     return e;
   }
   const dataBr = iso => (/^\d{4}-\d{2}-\d{2}$/.test(iso || '') ? iso.split('-').reverse().join('/') : '');
-  function fontes(referencias, grau) {
-    const linha = el('p', 'text-[12px] text-ink/50 mt-2');
+  function ligacoes(alvo, referencias) {      // as fontes, cada uma com o seu link, separadas por " | "
     (referencias || []).forEach((r, i) => {
-      if (i) linha.append(' | ');
+      if (i) alvo.append(' | ');
       if (/^https:\/\/[^\s"'<>]+$/.test(r.url || '')) {
         const a = el('a', 'underline', r.label); a.href = r.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-        linha.append(a);
-      } else linha.append(r.label || '');
+        alvo.append(a);
+      } else alvo.append(r.label || '');
     });
+    return alvo;
+  }
+  function fontes(referencias, grau) {
+    const linha = ligacoes(el('p', 'text-[12px] text-ink/50 mt-2'), referencias);
     if (grau) linha.append((referencias || []).length ? ' · ' : '', `grau ${grau}`);
     return linha.childNodes.length ? linha : null;
   }
@@ -70,15 +73,21 @@
       if (l.no_checkup && l.no_checkup !== l.exame) cartao.append(el('p', 'text-[12px] text-ink/50', `No check-up: ${l.no_checkup}`));
       cartao.append(el('p', 'text-[14px] text-ink/75 mt-2', l.motivo));
       if (l.aviso) cartao.append(el('p', 'text-[13px] text-[#C0392B] mt-1', l.aviso));
-      const grupos = (l.indicado_para || {}).grupos || [];
-      if (grupos.length) {      // em que situações o check-up indica este exame (nenhuma presente nos dados informados)
-        const mostrados = grupos.slice(0, 6).join('; ');
-        const resto = grupos.length - 6;
-        cartao.append(el('p', 'text-[13px] text-ink/60 mt-2', `No check-up, este exame é indicado para: ${mostrados}`
-          + (resto > 0 ? ` e outras ${resto} situações` : '') + '. Nenhuma foi informada para este paciente.'));
-      }
       const rodape = fontes(l.referencias, l.grau);
       if (rodape) cartao.append(rodape);
+      const situacoes = (l.indicado_para || {}).situacoes || [];
+      if (situacoes.length) {   // em que situações o check-up indica este exame, com a referência que ele usa em cada uma
+        cartao.append(el('p', 'text-[13px] text-ink/60 mt-3', 'No check-up, este exame é indicado para:'));
+        const lista = el('ul', 'text-[13px] text-ink/60 list-disc pl-5 mt-1');
+        situacoes.slice(0, 6).forEach(s => {
+          const item = el('li', '', s.grupo);
+          if ((s.referencias || []).length) { item.append(': '); ligacoes(item, s.referencias); }
+          lista.append(item);
+        });
+        const resto = situacoes.length - 6;
+        cartao.append(lista, el('p', 'text-[13px] text-ink/60 mt-1',
+          (resto === 1 ? 'E mais 1 situação. ' : resto > 1 ? `E outras ${resto} situações. ` : '') + 'Nenhuma foi informada para este paciente.'));
+      }
       return cartao;
     }));
   }
@@ -89,7 +98,7 @@
     const linhas = [['exame', 'nome_no_pedido', 'data', 'arquivo', 'conferencia', 'justificativa', 'no_checkup', 'grau', 'referencias', 'no_checkup_indicado_para']]
       .concat(dados.linhas.map(l => [l.exame, l.nome_no_pedido, l.data, l.arquivo, (VEREDITOS[l.veredito] || {}).rotulo || l.veredito,
         [l.motivo, l.aviso].filter(Boolean).join(' '), l.no_checkup, l.grau, (l.referencias || []).map(r => `${r.label} ${r.url || ''}`.trim()).join(' | '),
-        ((l.indicado_para || {}).grupos || []).join('; ')]));
+        ((l.indicado_para || {}).situacoes || []).map(s => `${s.grupo} (${(s.referencias || []).map(r => r.label).join(', ')})`).join('; ')]));
     const link = el('a');
     link.href = URL.createObjectURL(new Blob(['﻿' + linhas.map(l => l.map(campo).join(';')).join('\n')], { type: 'text/csv;charset=utf-8' }));
     link.download = 'conferencia_do_pedido.csv';
