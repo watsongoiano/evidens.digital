@@ -247,3 +247,13 @@ def test_orientacoes_saem_em_subtopicos(client):
     for grau in ('rec-grau-c', 'rec-grau-e', 'rec-grau-pp', 'rec-grau-d', 'rec-grau-i'):
         assert grau in html and grau in __import__('pathlib').Path('static/evidens.css').read_text(encoding='utf-8')
     assert 'id="examesResumo"' in html and 'guardarResumoDoLaudo(dados.resumo)' in html
+    # O selo do grau diz o que o grau significa (texto da legenda, sem os parênteses), ao passar o mouse ou tocar.
+    import re
+    css = __import__('pathlib').Path('static/evidens.css').read_text(encoding='utf-8')
+    assert 'data-dica="${escapeHtml(dicaDoGrau(grau))}"' in html and 'title="Grau de evidência' not in html
+    assert '.rec-grau[data-dica]:hover:after' in css and 'content:attr(data-dica)' in css
+    legenda = html[html.index('id="legendaGraus"'):html.index('</details>', html.index('id="legendaGraus"'))]
+    significados = dict(re.findall(r'<li><span class="rec-grau[^"]*">(\w+)</span>([^(<]+)', legenda))
+    assert set(significados) == {'A', 'B', 'C', 'E', 'PP', 'D', 'I'}
+    assert significados['A'].strip() == 'Recomendação forte, com evidência de boa qualidade'
+    assert significados['C'].strip() == 'Decisão individual, com o paciente: benefício pequeno ou evidência limitada'
