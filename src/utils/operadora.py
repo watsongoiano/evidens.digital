@@ -947,6 +947,25 @@ def exames_do_pedido(conteudo, arquivo):
     return pedidos, list(lido['nao_reconhecidos']), regime_do_setor(dados['setor'])
 
 
+# Das alternativas do modo em lote (ALTERNATIVAS), as que a conferência do pedido aceita, com o nome pelo qual a
+# recomendação do check-up as cita. Vale só quando a própria recomendação diz "como alternativa": a glicemia de jejum
+# no rastreio e na confirmação do diabetes (ADA 2026; USPSTF 2021), não no acompanhamento do diabético. E um exame
+# basta: com a HbA1c no mesmo pedido, a glicemia não entra. Decisão do responsável clínico, 18/11/2026.
+ALTERNATIVAS_NA_CONFERENCIA = {'40302040': 'glicemia de jejum'}
+
+
+def _alternativa_aceita(chaves, indicados):
+    """(chave do exame recomendado, nome da alternativa, recomendação) quando o check-up aceita o exame pedido no
+    lugar do que ele recomenda; senão, None."""
+    for alternativa in ALTERNATIVAS:
+        nome = ALTERNATIVAS_NA_CONFERENCIA.get(alternativa['codigo'])
+        rec = indicados.get(alternativa['no_lugar_de'])
+        descricao = (rec or {}).get('descricao') or ''
+        if nome and alternativa['codigo'] in chaves and 'como alternativa' in descricao and nome in descricao:
+            return alternativa['no_lugar_de'], nome, rec
+    return None
+
+
 def conferir_pedido(paciente, pedidos):
     """Compara os exames pedidos com o que o check-up recomenda para o paciente. Devolve (resultado, erro).
 
@@ -979,11 +998,16 @@ def conferir_pedido(paciente, pedidos):
                 for chave in periodicidade.chaves(item['titulo'], sexo):
                     nao_agora.setdefault(chave, item)
 
+    def chaves_do(pedido):
+        chaves = set(pedido.get('codigos') or periodicidade.chaves(pedido['exame'], sexo))
+        return chaves | {EQUIVALENTES[c] for c in chaves if c in EQUIVALENTES}
+    no_pedido = set().union(*map(chaves_do, pedidos)) if pedidos else set()
+
     linhas, atendidos = [], set()
     for pedido in pedidos:
-        chaves = set(pedido.get('codigos') or periodicidade.chaves(pedido['exame'], sexo))
-        chaves |= {EQUIVALENTES[c] for c in chaves if c in EQUIVALENTES}
+        chaves = chaves_do(pedido)
         rec = next((indicados[c] for c in sorted(chaves) if c in indicados), None)
+        alternativa = None if rec else _alternativa_aceita(chaves, indicados)
         item = next((nao_agora[c] for c in sorted(chaves) if c in nao_agora), None)
         linha = {'exame': pedido['exame'], 'nome_no_pedido': pedido.get('nome_no_pedido') or '',
                  'data': pedido.get('data') or '', 'arquivo': pedido.get('arquivo') or '', 'no_checkup': '',
@@ -995,6 +1019,21 @@ def conferir_pedido(paciente, pedidos):
             linha.update(veredito='indicado', estado='indicado', motivo=rec.get('subtitulo') or 'Recomendado pelo check-up.',
                          no_checkup=rec['titulo'], grau=rec.get('grau_evidencia') or '',
                          referencias=rec.get('referencias') or [], aviso=rec.get('ultimo_exame') or '')
+        elif alternativa and alternativa[0] not in no_pedido:
+            _, nome, rec = alternativa             # pedida no lugar do exame recomendado: vale por ele
+            atendidos.add(rec['titulo'])
+            motivo = (rec.get('subtitulo') or 'Recomendado pelo check-up').rstrip('.')
+            linha.update(veredito='indicado', estado='indicado', no_checkup=rec['titulo'],
+                         motivo=f'{motivo}. O check-up recomenda {rec["titulo"]} e aceita a {nome} como alternativa: um '
+                                'exame basta.',
+                         grau=rec.get('grau_evidencia') or '', referencias=rec.get('referencias') or [],
+                         aviso=rec.get('ultimo_exame') or '')
+        elif alternativa:
+            _, nome, rec = alternativa             # o recomendado já está no pedido, e um exame basta
+            linha.update(veredito='nao_indicado', estado='sem_indicacao', no_checkup=rec['titulo'],
+                         motivo=f'O pedido já traz {rec["titulo"]}, que o check-up recomenda para este paciente. A {nome} '
+                                'é a alternativa a ele, e um exame basta.',
+                         referencias=rec.get('referencias') or [])
         elif item:
             estado = item.get('estado') or 'nao_incluido'
             rotulo = _NAO_INDICADO_AGORA.get(estado, 'Não incluído pelo check-up')
