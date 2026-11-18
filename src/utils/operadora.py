@@ -70,11 +70,9 @@ from src.utils import periodicidade, tuss
 
 VERSAO = '0.2'
 
-# Limites do envio pela tela do administrador (o script não tem limite).
+# Limites do envio pela tela (/operadoras).
 TAMANHO_MAXIMO_DO_ENVIO = 4 * 1024 * 1024
-MAXIMO_DE_LINHAS_NA_TELA = 2000
-MAXIMO_DE_LAUDOS_NA_TELA = 8
-LINHAS_MOSTRADAS_NA_TELA = 300
+MAXIMO_DE_ARQUIVOS_NA_TELA = 8
 
 OBRIGATORIAS = ('id_pedido', 'id_beneficiario', 'idade', 'sexo', 'data_pedido', 'codigo_tuss', 'carater', 'regime')
 OPCIONAIS = ('segmentacao', 'finalidade', 'cid', 'indicacao_clinica', 'data_ultimo_exame', 'valor', 'comorbidades',
@@ -140,13 +138,6 @@ def medicacoes_validas():
     return {chave: item['rotulo'] for chave, item in medicamentos.MEDICAMENTOS.items()}
 
 
-def listas_para_a_tela():
-    """Comorbidades e medicações de uso contínuo que a tela oferece (as mesmas do check-up)."""
-    def ordenadas(itens):
-        return [{'valor': chave, 'rotulo': rotulo} for chave, rotulo in sorted(itens.items(), key=lambda par: _sem_acento(par[1]))]
-    return {'comorbidades': ordenadas(comorbidades_validas()), 'medicacoes': ordenadas(medicacoes_validas())}
-
-
 def _chaves_do_perfil(texto, validas, coluna, erros):
     """Chaves separadas por "|" (ou espaço) → frozenset; chave fora da lista é erro da linha."""
     chaves = frozenset(parte for parte in re.split(r'[|\s]+', str(texto or '').strip().lower()) if parte)
@@ -181,7 +172,7 @@ def _parecer(codigos, referencia, link, motivo, sexo=None, escopo='rastreio', co
 PARECERES_CONTRARIOS = (
     _parecer(['40302830'], 'Endocrine Society 2024', _VITAMINA_D,
              'Endocrine Society 2024 (sugestão condicional): contra a dosagem de rotina de 25-hidroxivitamina D em '
-             'adultos sem indicação estabelecida. No mesmo sentido: SBPC/ML e SBEM 2017, ASCP 2014, CFPC e SBMFC 2018.',
+             'adultos sem indicação estabelecida.',
              aviso='Divergência: para o USPSTF 2021 a evidência é insuficiente (grau I); SBPC/ML e SBEM 2017 indicam '
                    'a dosagem em grupos de risco, como gestantes e lactantes.', idade_max=60),
     _parecer(['40302830'], 'Endocrine Society 2024; SBPC/ML e SBEM 2017', _VITAMINA_D,
@@ -198,24 +189,20 @@ PARECERES_CONTRARIOS = (
              'para investigação de hiperandrogenismo nem para controle de terapia com testosterona.', sexo='feminino'),
     _parecer(['40316513'], 'Endocrine Society 2018', 'https://doi.org/10.1210/jc.2018-00229',
              'Endocrine Society 2018 (recomendação forte, evidência de baixa qualidade): contra o rastreio de '
-             'hipogonadismo em homens da população geral. No mesmo sentido: CUA (Choosing Wisely Canada). Não vale '
-             'para busca de casos em doença hipofisária, uso crônico de opioide ou glicocorticoide, infertilidade e '
-             'osteoporose.', sexo='masculino'),
-    _parecer(['40307085', '40307093'], 'USPSTF 2023 e SBI 2019', 'https://pubmed.ncbi.nlm.nih.gov/36786784/',
+             'hipogonadismo em homens da população geral. Não vale para busca de casos em doença hipofisária, uso '
+             'crônico de opioide ou glicocorticoide, infertilidade e osteoporose.', sexo='masculino'),
+    _parecer(['40307085', '40307093'], 'USPSTF 2023', 'https://pubmed.ncbi.nlm.nih.gov/36786784/',
              'USPSTF 2023 (grau D): contra o rastreio sorológico de herpes genital em adolescentes e adultos '
-             'assintomáticos, gestantes incluídas. SBI 2019 (Choosing Wisely Brasil): não usar sorologia de herpes '
-             'simples para diagnóstico ou rastreio na população geral. Não vale para pessoas com HIV ou '
-             'imunossupressão.'),
+             'assintomáticos, gestantes incluídas. Não vale para pessoas com HIV ou imunossupressão.'),
     # Urocultura de rastreio: recomendada na gestação (grau B) e contraindicada fora dela (grau D). O pedido não
     # informa gestação: mulher em idade reprodutiva (15 a 49 anos, OMS) fica no amarelo.
     _parecer(['40310213'], 'USPSTF 2019', _BACTERIURIA,
              'USPSTF 2019: a urocultura de rastreio é recomendada na gestação (grau B) e contraindicada fora dela '
              '(grau D); o pedido não informa gestação.', sexo='feminino', cor='amarelo',
              codigo_do_motivo='depende_de_gestacao', idade_max=49),
-    _parecer(['40310213'], 'USPSTF 2019 e SBI 2019', _BACTERIURIA,
-             'USPSTF 2019 (grau D) e SBI 2019 (Choosing Wisely Brasil): contra a urocultura de rastreio em adulto '
-             'assintomático fora da gestação e sem doença urológica crônica. Não vale antes de procedimento '
-             'urológico (IDSA 2019).'),
+    _parecer(['40310213'], 'USPSTF 2019', _BACTERIURIA,
+             'USPSTF 2019 (grau D): contra a urocultura de rastreio em adulto assintomático fora da gestação e sem '
+             'doença urológica crônica. Não vale antes de procedimento urológico (IDSA 2019).'),
     _parecer(['40304370'], 'CAMB 2020 e ASCP 2015 (Choosing Wisely)', _CAMB,
              'CAMB 2020 e ASCP 2015 (Choosing Wisely): não usar a VHS para rastrear assintomáticos nem como teste '
              'geral de inflamação; a proteína C reativa é preferível.'),
@@ -276,7 +263,6 @@ AVISOS_DE_DIVERGENCIA = {
 }
 
 # Sem recomendação de rastreio para o perfil: a fonte da regra geral.
-_SEM_RECOMENDACAO = {'referencia': 'SBMFC 2018 e CFPC (Choosing Wisely)', 'link': _CW_CANADA}
 
 
 def parecer_contrario(codigo, sexo, finalidade='rastreio', idade=40):
@@ -446,23 +432,6 @@ def _perfil(idade, sexo, comorbidades=frozenset(), medicacoes=frozenset()):
     return _da_resposta(resposta, sexo)
 
 
-def perfil_do_paciente(bruto):
-    """Perfil a partir dos dados completos do paciente, no mesmo formato que o formulário do check-up envia (e que, no
-    futuro, virá do cadastro da operadora). Devolve (perfil, erro): erro é a mensagem do motor para dado inválido.
-
-    `exames_anteriores` não entra: o pedido em análise é que está sendo julgado, e o exame "em dia" sairia da lista do
-    check-up como se não fosse recomendado. O nome do paciente também não entra."""
-    from src.routes.checkup_intelligent import recomendar
-    dados = {k: v for k, v in (bruto or {}).items() if k not in ('exames_anteriores', 'nome_paciente')}
-    with contextlib.redirect_stdout(io.StringIO()):
-        resposta, status = recomendar(dados)
-    if status == 400:
-        return None, resposta.get('error') or 'Dados do paciente inválidos.'
-    if status != 200:
-        raise RuntimeError(f'o motor do check-up falhou (status {status})')
-    return _da_resposta(resposta, {'F': 'feminino', 'M': 'masculino'}.get(dados.get('sexo'), dados.get('sexo'))), None
-
-
 def _da_resposta(resposta, sexo):
     """(recomendados, contrários) por código TUSS, a partir da resposta do motor do check-up."""
     recomendados, contrarios = {}, {}
@@ -494,7 +463,7 @@ def _condicional(texto):
     return 'se normal' in texto.lower()
 
 
-def classificar(linha, do_paciente=None):
+def classificar(linha):
     """Classifica uma linha já normalizada (ler_linha). Devolve as colunas de SAIDA, menos 'erro'."""
     pedido = linha['codigo_tuss']
     codigo = EQUIVALENTES.get(pedido, pedido)          # as regras valem para o exame equivalente
@@ -519,10 +488,7 @@ def classificar(linha, do_paciente=None):
     finalidade, origem = finalidade_usada(linha)
     comum = {'finalidade_usada': finalidade, 'origem_da_finalidade': origem}
     comorbidades, medicacoes = linha.get('comorbidades') or frozenset(), linha.get('medicacoes') or frozenset()
-    if do_paciente is not None:          # dados completos do paciente (formulário do check-up): valem no lugar das colunas
-        perfil, comorbidades = (do_paciente if finalidade == 'rastreio' else None), frozenset({'dados_do_paciente'})
-    else:
-        perfil = _perfil(linha['idade'], linha['sexo'], comorbidades, medicacoes) if finalidade == 'rastreio' else None
+    perfil = _perfil(linha['idade'], linha['sexo'], comorbidades, medicacoes) if finalidade == 'rastreio' else None
     parecer = parecer_contrario(codigo, linha['sexo'], finalidade, linha['idade'])
     if parecer and not (perfil and codigo in perfil[0]):
         return saida(parecer['cor'], parecer['codigo_do_motivo'], parecer['motivo'], referencia=parecer['referencia'],
@@ -537,10 +503,8 @@ def classificar(linha, do_paciente=None):
                          proxima_data_elegivel=proxima.isoformat(), **comum)
     fora = NAO_SAO_DE_RASTREIO.get(codigo)
     if fora and finalidade == 'rastreio' and not (perfil and codigo in perfil[0]):
-        fonte = {'referencia': fora['referencia'], 'link': fora['link']} if fora['link'] else _SEM_RECOMENDACAO
-        return saida('vermelho', 'nao_e_de_rastreio', fora['motivo'] + ('' if fora['link'] else
-                     ' SBMFC 2018 e CFPC (Choosing Wisely) são contra exames de sangue de rotina sem indicação pelo '
-                     'risco individual.'), **fonte, **comum)
+        fonte = {'referencia': fora['referencia'], 'link': fora['link']} if fora['link'] else {}
+        return saida('vermelho' if fora['link'] else 'amarelo', 'nao_e_de_rastreio', fora['motivo'], **fonte, **comum)
     if fora:
         return saida('verde', 'indicacao_informada' if origem == 'informada' else 'indicacao_pelo_cid',
                      'Finalidade diagnóstica ou de seguimento informada no pedido.' if origem == 'informada'
@@ -595,13 +559,12 @@ def classificar(linha, do_paciente=None):
         links = build_reference_links(contra.get('titulo') or '', contra.get('referencia') or '')
         return saida('vermelho', 'recomendacao_contraria', contra.get('motivo') or 'Recomendação contrária ao rastreio.',
                      **comum, **_referencia(contra.get('referencia'), links))
-    return saida('vermelho', 'sem_recomendacao_para_o_perfil',
-                 ('O check-up não recomenda este exame para os dados do paciente informados. ' if do_paciente is not None else
-                  'O check-up não recomenda este exame para a idade, o sexo, as comorbidades e as medicações informadas. '
+    # Sem recomendação do check-up e sem parecer contrário de sociedade: não se barra, pede-se a indicação clínica.
+    return saida('amarelo', 'sem_recomendacao_para_o_perfil',
+                 ('O check-up não indica este exame para a idade, o sexo, as comorbidades e as medicações informadas. '
                   if comorbidades or medicacoes else
-                  'O check-up não recomenda este exame como rastreio para a idade e o sexo informados, sem comorbidade '
-                  'nem gestação informadas. ') + 'SBMFC 2018 e CFPC (Choosing Wisely) são contra exames de sangue anuais de '
-                 'rotina sem indicação pelo risco individual.', **_SEM_RECOMENDACAO, **comum)
+                  'O check-up não indica este exame como rastreio para a idade e o sexo informados, sem comorbidade nem '
+                  'gestação informadas. ') + 'Pedir a indicação clínica.', **comum)
 
 
 def _br(data):
@@ -631,7 +594,7 @@ def _com_o_ultimo_do_arquivo(linhas):
             linha['origem_do_ultimo_exame'] = 'informada'
 
 
-def classificar_lote(brutas, do_paciente=None):
+def classificar_lote(brutas):
     """Classifica as linhas do arquivo. Devolve (resultados, resumo); cada resultado traz as colunas de SAIDA."""
     lidas = [ler_linha(bruta) for bruta in brutas]
     _com_o_ultimo_do_arquivo([linha for linha, _ in lidas])
@@ -639,7 +602,7 @@ def classificar_lote(brutas, do_paciente=None):
     for linha, erros in lidas:
         if not erros:
             try:
-                resultados.append({**classificar(linha, do_paciente), 'erro': ''})
+                resultados.append({**classificar(linha), 'erro': ''})
                 valores.append(linha.get('valor') or 0.0)
                 continue
             except RuntimeError as falha:
@@ -741,11 +704,320 @@ def escrever_csv(brutas, resultados):
     return destino.getvalue()
 
 
-def linhas_para_a_tela(brutas, resultados):
-    """As primeiras linhas, só com o que a tela mostra: identificadores do pedido, exame, cor, motivo e referência."""
-    def texto(valor):
-        return str(valor or '')[:300]
-    return [{'id_pedido': texto(b.get('id_pedido')), 'id_beneficiario': texto(b.get('id_beneficiario')),
-             'data_pedido': texto(b.get('data_pedido')), 'codigo_tuss': texto(b.get('codigo_tuss')),
-             **{c: texto(r.get(c)) for c in ('cor', 'acao', 'motivo', 'exame', 'grau', 'referencia', 'link', 'aviso', 'erro')}}
-            for b, r in list(zip(brutas, resultados))[:LINHAS_MOSTRADAS_NA_TELA]]
+# ── Conferência do pedido pelo check-up (tela /operadoras) ───────────────────────────────────────────────────────────
+# A operadora informa os dados do paciente, os mesmos do check-up, e envia o PDF com os exames que o médico pediu. O
+# motor do check-up roda como está, sem nenhuma regra a mais, e cada exame pedido é só comparado com o que ele devolve:
+# está entre os recomendados para o paciente (indicado) ou não está (não indicado). Os pareceres, as cores e a
+# finalidade do modo em lote (acima) não entram aqui.
+
+_DE_EXAME = ('laboratorio', 'imagem')
+
+
+def _fonte(rotulo, url):
+    return {'label': rotulo, 'url': url}
+
+
+_USPSTF_A_E_B = _fonte('USPSTF (recomendações A e B)',
+                       'https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics/uspstf-a-and-b-recommendations')
+_AASLD_2023 = _fonte('AASLD 2023', 'https://doi.org/10.1097/HEP.0000000000000323')
+_CSCC_2024 = _fonte('CSCC 2024 (Choosing Wisely Canada)', _CSCC)
+_KDIGO_2024 = _fonte('KDIGO 2024', 'https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf')
+_NICE_NG45 = _fonte('NICE NG45', 'https://www.nice.org.uk/guidance/ng45/chapter/recommendations')
+_USPSTF_2018_RISCO = _fonte('USPSTF 2018 (fatores de risco não tradicionais)', 'https://doi.org/10.1001/jama.2018.8359')
+_USPSTF_2015_TIREOIDE = _fonte('USPSTF 2015', 'https://www.uspreventiveservicestaskforce.org/uspstf/document/'
+                                              'clinical-summary142/thyroid-dysfunction-screening')
+
+# Fonte da justificativa é só sociedade que o algoritmo do check-up já cita (decisão do responsável clínico,
+# 17/11/2026). "Referência" aqui é a sociedade, não uma diretriz específica: a USPSTF, a AHA/ACC, a KDIGO. Duas
+# exceções aprovadas por ele: a Surviving Sepsis Campaign, para qualquer exame, e a CSCC (Choosing Wisely Canada)
+# só na TGO. Sociedade de fora (ACP, BCSH, CFPC, CAMB, ASCP...) não entra sem a aprovação dele.
+SOCIEDADES_ACEITAS_A_PARTE = frozenset({'Surviving Sepsis Campaign'})
+FONTES_ACEITAS_POR_EXAME = {'40302504': frozenset({'CSCC'})}
+
+_ANO = re.compile(r'\b(?:19|20)\d{2}(?:[-/]\d{2,4})?\b')
+_CODIGO_DE_DOCUMENTO = re.compile(r'\s+(?:[A-Z]{2}\s?\d+\w*|v\.\s?\d+|\d+e)$')
+
+
+def sociedades_da_fonte(rotulo):
+    """'AHA/ACC 2018 (colesterol)' → {'AHA', 'ACC'}: quem assina a fonte, sem o ano nem o nome do documento."""
+    limpo = _ANO.sub(' ', re.sub(r'\([^)]*\)', ' ', rotulo or ''))
+    partes = (_CODIGO_DE_DOCUMENTO.sub('', ' '.join(parte.split())) for parte in re.split(r'/|;|,|\s+e\s+', limpo))
+    return {parte for parte in partes if parte}
+
+
+@lru_cache(maxsize=1)
+def sociedades_do_algoritmo():
+    """As sociedades que o check-up cita nas indicações de exame (varredura do motor), mais as aceitas à parte."""
+    from src.utils import catalogo
+    do_motor = set()
+    for item in catalogo.indicacoes_do_motor().values():
+        for fonte in item['referencias']:
+            do_motor |= sociedades_da_fonte(fonte['label'])
+    return frozenset(do_motor | SOCIEDADES_ACEITAS_A_PARTE)
+
+
+def fonte_aceita(rotulo, codigo=None, todas=True):
+    """A fonte é de sociedade que o algoritmo já cita? `todas`: todas as que assinam (False: ao menos uma)."""
+    aceitas = sociedades_do_algoritmo() | FONTES_ACEITAS_POR_EXAME.get(codigo, frozenset())
+    assinam = sociedades_da_fonte(rotulo)
+    return bool(assinam) and (assinam <= aceitas if todas else bool(assinam & aceitas))
+
+
+def _sem_diretriz(nome):
+    """Exame pesquisado que não está entre os rastreios que a USPSTF recomenda ao adulto assintomático."""
+    return {'texto': f'Sem recomendação de rastreio: a USPSTF não inclui {nome} entre os rastreios recomendados para adulto '
+                     'assintomático (graus A e B).',
+            'referencias': [_USPSTF_A_E_B]}
+
+
+# Justificativa formal, com a fonte, de por que cada exame não é pedido de rotina. Vale na conferência do pedido, para
+# o exame que o check-up não indica ao paciente. Cada texto foi conferido na fonte citada; exame novo que aparecer nos
+# pedidos das operadoras é pesquisado e entra aqui. Os pareceres de sociedades (PARECERES_CONTRARIOS) vêm antes.
+SEM_INDICACAO_DE_ROTINA = {
+    '40302512': {'texto': 'A AASLD (2023) não recomenda rastrear doença hepática esteatótica na população geral: a '
+                          'pesquisa de fibrose (FIB-4, que usa TGO, TGP e plaquetas) fica para quem tem diabetes tipo 2, '
+                          'obesidade com complicações, consumo de álcool ou história familiar de cirrose. A USPSTF não '
+                          'inclui as enzimas hepáticas entre os rastreios recomendados (graus A e B).',
+                 'referencias': [_AASLD_2023, _USPSTF_A_E_B]},
+    '40302504': {'texto': 'A CSCC (Choosing Wisely Canada, 2024) orienta não pedir TGO de rotina na avaliação inicial, nem '
+                          'junto da TGP, que é mais específica para lesão hepática. A AASLD (2023) não recomenda rastrear '
+                          'doença hepática esteatótica na população geral.',
+                 'referencias': [_CSCC_2024, _AASLD_2023]},
+    '40301397': _sem_diretriz('as bilirrubinas'), '40302580': _sem_diretriz('a ureia'),
+    '40301630': {'texto': 'A KDIGO (2024) orienta pesquisar doença renal crônica, com a TFG estimada pela creatinina e a '
+                          'albuminúria, em quem tem risco para a doença ou já a tem (ponto de prática 1.1.1.1; recomendação '
+                          '1.1.2.1, grau 1B). Não há, na diretriz, recomendação de testar o adulto assintomático sem fator '
+                          'de risco, e a USPSTF não inclui a creatinina entre os rastreios recomendados (graus A e B).',
+                 'referencias': [_KDIGO_2024, _USPSTF_A_E_B]},
+    '40308391': {'texto': 'A USPSTF (2018) considera a evidência insuficiente para somar a PCR ultrassensível à avaliação '
+                          'do risco cardiovascular de adulto assintomático (declaração I), e a PCR não está entre os '
+                          'rastreios que ela recomenda (graus A e B).',
+                 'referencias': [_USPSTF_2018_RISCO, _USPSTF_A_E_B]},
+    '40301109': {'texto': 'Lactato não é exame de rastreio. A indicação reconhecida é a suspeita de sepse ou de '
+                          'hipoperfusão (Surviving Sepsis Campaign 2021, recomendação fraca, evidência de baixa qualidade).',
+                 'referencias': [_fonte('Surviving Sepsis Campaign 2021', _SSC_2021)]},
+    '40301648': {'texto': 'CK não é exame de rastreio, nem de rotina em quem usa estatina (AHA/ACC 2018, classe III, sem '
+                          'benefício). A indicação reconhecida é o sintoma muscular grave ou a fraqueza objetiva em uso de '
+                          'estatina.',
+                 'referencias': [_fonte('AHA/ACC 2018 (colesterol)', _ACC_AHA_2018)]},
+    '40302423': _sem_diretriz('o sódio'), '40302318': _sem_diretriz('o potássio'), '40301400': _sem_diretriz('o cálcio'),
+    '40301419': _sem_diretriz('o cálcio iônico'), '40302237': _sem_diretriz('o magnésio'),
+    '40301931': _sem_diretriz('o fósforo'), '40302385': _sem_diretriz('as proteínas totais e frações'),
+    '40304361': _sem_diretriz('o hemograma'),
+    # Exames com parecer só de sociedade que o algoritmo não cita (CAMB, ASCP, CRA, CSEM): enquanto ela não é
+    # aprovada, a tela usa o que a USPSTF diz.
+    '40304370': _sem_diretriz('a VHS'), '40301150': _sem_diretriz('o ácido úrico'),
+    '40301761': _sem_diretriz('a eletroforese de proteínas'), '40302717': _sem_diretriz('a eletroforese de proteínas'),
+    '40306852': _sem_diretriz('o FAN'), '40312127': _sem_diretriz('o perfil reumatológico'),
+    '40306437': _sem_diretriz('o anti-TPO'), '40304612': _sem_diretriz('o tempo de sangramento'),
+    '40304914': _sem_diretriz('o tempo de sangramento'), '40301087': _sem_diretriz('o folato eritrocitário'),
+}
+for _codigo in ('40306909', '40306917', '40306925'):
+    SEM_INDICACAO_DE_ROTINA[_codigo] = _sem_diretriz('a sorologia para Helicobacter pylori')
+for _codigo in ('40316491', '40305627'):          # T4 livre e provas de função tireoidiana
+    SEM_INDICACAO_DE_ROTINA[_codigo] = {
+        'texto': 'USPSTF 2015 (grau I): evidência insuficiente para o rastreio de disfunção tireoidiana em adultos '
+                 'assintomáticos fora da gestação.',
+        'referencias': [_USPSTF_2015_TIREOIDE]}
+for _codigo in ('40304590', '40304639'):          # TP/INR e TTPA
+    SEM_INDICACAO_DE_ROTINA[_codigo] = {
+        'texto': 'Sem recomendação de rastreio: a USPSTF não inclui os testes de coagulação entre os rastreios '
+                 'recomendados para adulto assintomático (graus A e B). Nem antes de cirurgia eletiva eles são de '
+                 'rotina: a NICE (NG45) só os considera na doença hepática crônica (ASA 3 ou 4, cirurgia de porte '
+                 'intermediário ou maior).',
+        'referencias': [_USPSTF_A_E_B, _NICE_NG45]}
+
+
+def justificativa_de_nao_indicacao(chaves, sexo, idade):
+    """Por que o exame não é pedido de rotina: {'texto', 'referencias', 'aviso'} ou None, se ainda não há registro.
+
+    Primeiro o parecer de sociedade médica sobre o exame (PARECERES_CONTRARIOS), se ela é uma das que o algoritmo
+    já cita; depois o registro próprio."""
+    for chave in sorted(chaves):
+        parecer = parecer_contrario(chave, sexo, 'rastreio', idade)
+        if parecer and fonte_aceita(parecer['referencia'], todas=False):
+            return {'texto': parecer['motivo'], 'referencias': [_fonte(parecer['referencia'], parecer['link'])],
+                    'aviso': parecer['aviso']}
+    for chave in sorted(chaves):
+        if chave in SEM_INDICACAO_DE_ROTINA:
+            return {**SEM_INDICACAO_DE_ROTINA[chave], 'aviso': ''}
+    return None
+
+
+@lru_cache(maxsize=1)
+def _indicacoes_por_chave():
+    """Código TUSS (ou chave pelo nome) → {grupo: [fontes]}: para quem o check-up indica o exame, e com que fontes.
+    Vem da varredura do motor (src/data/indicacoes_motor.json)."""
+    from src.utils import catalogo
+    por_chave = {}
+    for titulo, item in catalogo.indicacoes_do_motor().items():
+        for chave in periodicidade.chaves(titulo, 'feminino') | periodicidade.chaves(titulo, 'masculino'):
+            alvo = por_chave.setdefault(chave, {})
+            for grupo, fontes in item['por_grupo'].items():
+                ja = alvo.setdefault(grupo, [])
+                ja += [fonte for fonte in fontes if fonte not in ja]
+    return por_chave
+
+
+_SO_DE_MULHER = re.compile(r'gestant|gesta[çc][ãa]o|mulher|puérper|pré-natal', re.IGNORECASE)
+_SO_DE_HOMEM = re.compile(r'\bhomens?\b', re.IGNORECASE)
+
+
+def indicado_para(chaves, sexo):
+    """Em que situações o check-up indica o exame, cada uma com as fontes que o check-up cita para ela:
+    {'grupos': [...], 'situacoes': [{'grupo', 'referencias'}], 'referencias': [...]} (vazio se em nenhuma)."""
+    por_grupo = {}
+    for chave in sorted(chaves):
+        for grupo, fontes in _indicacoes_por_chave().get(chave, {}).items():
+            ja = por_grupo.setdefault(grupo, [])
+            ja += [fonte for fonte in fontes if fonte not in ja]
+    de_fora = _SO_DE_MULHER if sexo == 'masculino' else _SO_DE_HOMEM if sexo == 'feminino' else None
+    if de_fora:
+        por_grupo = {grupo: fontes for grupo, fontes in por_grupo.items() if not de_fora.search(grupo)}
+    def ordem(grupo):      # primeiro os grupos de pessoas ("Adultos com HAS", "Diabéticos"); as medicações por último
+        medicacao = grupo.startswith(('Em uso de', 'Corticoide'))
+        return (0 if grupo.startswith('Adultos') else 2 if medicacao else 1, _sem_acento(grupo))
+    grupos = sorted(por_grupo, key=ordem)
+    referencias = []
+    for grupo in grupos:
+        referencias += [fonte for fonte in por_grupo[grupo] if fonte not in referencias]
+    return {'grupos': grupos, 'situacoes': [{'grupo': grupo, 'referencias': por_grupo[grupo]} for grupo in grupos],
+            'referencias': referencias}
+_NAO_INDICADO_AGORA = {
+    'em_dia': 'Já feito e ainda em dia',
+    'nao_recomendado': 'O check-up recomenda não fazer',
+    'adiado_gestacao': 'Adiado na gestação',
+    'proxima_janela': 'Fora da etapa atual da gestação',
+    'etapa_anterior': 'Etapa da gestação já passada',
+    'dados_insuficientes': 'Faltam dados para o check-up indicar',
+}
+_MARCADOR_DE_LISTA = re.compile(r'^\s*(?:[-•*·–]+|\d{1,2}\s*[.)-])\s*')
+_CODIGO_TUSS = re.compile(r'(?<!\d)(4\d{7})(?!\d)')
+
+
+def _da_lista_de_exames(textos):
+    """Exames de um pedido que não tem o formato de laudo: uma lista de nomes ou de códigos TUSS, um por linha (ou
+    separados por vírgula ou ponto e vírgula). Devolve [{'exame', 'nome_no_pedido', 'codigos'}]."""
+    from src.utils import laudos
+    achados = {}
+    for texto in textos:
+        for linha in texto.splitlines():
+            linha = ' '.join(linha.split())
+            for codigo in _CODIGO_TUSS.findall(linha):
+                nome = _conhecidos().get(codigo) or tuss.DESCRICOES.get(codigo) or tuss.DA_TABELA.get(codigo)
+                if nome:
+                    achados.setdefault(nome, {'exame': nome, 'nome_no_pedido': linha[:120], 'codigos': {codigo}})
+            sem_codigo = _CODIGO_TUSS.sub(' ', linha)
+            for trecho in [sem_codigo] + re.split(r'[,;]', sem_codigo):
+                trecho = _MARCADOR_DE_LISTA.sub('', trecho).strip(' -–:.')
+                titulo = laudos.reconhecer(trecho) if 2 < len(trecho) <= 90 else None
+                if titulo:
+                    achados.setdefault(titulo, {'exame': titulo, 'nome_no_pedido': trecho, 'codigos': None})
+    return list(achados.values())
+
+
+def exames_do_pedido(conteudo, arquivo):
+    """Exames pedidos que estão num PDF. Devolve (pedidos, nao_identificados, regime_do_setor).
+
+    Lê o laudo de laboratório nos formatos conhecidos. Se nenhum exame vier com data de coleta, o PDF é tratado como
+    uma lista de exames pedidos: nomes (um por linha, ou separados por vírgula ou ponto e vírgula) e códigos TUSS se
+    somam ao que foi reconhecido. A data é opcional (a conferência não depende dela). PDF escaneado, sem texto,
+    levanta laudos.LaudoIlegivel."""
+    from src.utils import laudos
+    textos = laudos.textos_do_pdf(conteudo)
+    lido, dados = laudos.dos_textos(textos), laudos.cabecalho(textos)
+    pedidos = [{'exame': e['exame'], 'nome_no_pedido': e['nome_no_laudo'], 'data': e['data'], 'codigos': None}
+               for e in lido['exames']]
+    vistos = {p['exame'] for p in pedidos}
+    for linha in lido['sem_data']:                      # reconhecido, só sem data de coleta: conta do mesmo jeito
+        titulo = laudos.reconhecer(linha)
+        if titulo and titulo not in vistos:
+            vistos.add(titulo)
+            pedidos.append({'exame': titulo, 'nome_no_pedido': linha, 'data': '', 'codigos': None})
+    if not lido['exames']:      # nenhum exame com data de coleta: não é laudo, é uma lista de exames pedidos
+        for pedido in _da_lista_de_exames(textos):
+            repetido = next((p for p in pedidos if p['exame'] == pedido['exame']), None)
+            if repetido is None:
+                vistos.add(pedido['exame'])
+                pedidos.append(dict(pedido, data=''))
+            elif pedido['codigos']:      # o mesmo exame, agora com o código TUSS do pedido
+                repetido['codigos'] = pedido['codigos']
+    for pedido in pedidos:
+        pedido['arquivo'] = arquivo
+    return pedidos, list(lido['nao_reconhecidos']), regime_do_setor(dados['setor'])
+
+
+def conferir_pedido(paciente, pedidos):
+    """Compara os exames pedidos com o que o check-up recomenda para o paciente. Devolve (resultado, erro).
+
+    `paciente`: os dados no formato que o formulário do check-up envia (é também o formato previsto para os dados que
+    virão do cadastro da operadora). Vão ao motor como estão, menos o nome; "exames já realizados" inclusive, de modo
+    que o exame ainda em dia sai como não indicado agora, com a data do próximo. `pedidos`: saída de exames_do_pedido.
+    `erro` é a mensagem do motor quando os dados do paciente são inválidos."""
+    from src.routes.checkup_intelligent import recomendar
+    from src.utils.reference_links import build_reference_links
+    dados = {k: v for k, v in (paciente or {}).items() if k != 'nome_paciente'}
+    with contextlib.redirect_stdout(io.StringIO()):       # o motor imprime cada recomendação que acrescenta
+        resposta, status = recomendar(dados)
+    if status == 400:
+        return None, resposta.get('error') or 'Dados do paciente inválidos.'
+    if status != 200:
+        raise RuntimeError(f'o motor do check-up falhou (status {status})')
+    sexo = dados.get('sexo')
+    try:
+        idade = int(float(dados.get('idade')))
+    except (TypeError, ValueError):
+        idade = 40
+    do_checkup = [r for r in resposta.get('recommendations') or [] if r.get('categoria') in _DE_EXAME]
+    indicados, nao_agora = {}, {}
+    for rec in do_checkup:
+        for chave in periodicidade.chaves(rec['titulo'], sexo):
+            indicados.setdefault(chave, rec)
+    for lista in ('nao_incluidas', 'adiados_gestacao', 'proximas_gestacao'):
+        for item in resposta.get(lista) or []:
+            if item.get('categoria') in _DE_EXAME and item.get('titulo'):
+                for chave in periodicidade.chaves(item['titulo'], sexo):
+                    nao_agora.setdefault(chave, item)
+
+    linhas, atendidos = [], set()
+    for pedido in pedidos:
+        chaves = set(pedido.get('codigos') or periodicidade.chaves(pedido['exame'], sexo))
+        chaves |= {EQUIVALENTES[c] for c in chaves if c in EQUIVALENTES}
+        rec = next((indicados[c] for c in sorted(chaves) if c in indicados), None)
+        item = next((nao_agora[c] for c in sorted(chaves) if c in nao_agora), None)
+        linha = {'exame': pedido['exame'], 'nome_no_pedido': pedido.get('nome_no_pedido') or '',
+                 'data': pedido.get('data') or '', 'arquivo': pedido.get('arquivo') or '', 'no_checkup': '',
+                 'grau': '', 'referencias': [], 'aviso': '',
+                 'indicado_para': {'grupos': [], 'situacoes': [], 'referencias': []},
+                 'sem_justificativa': False}
+        if rec:
+            atendidos.add(rec['titulo'])
+            linha.update(veredito='indicado', estado='indicado', motivo=rec.get('subtitulo') or 'Recomendado pelo check-up.',
+                         no_checkup=rec['titulo'], grau=rec.get('grau_evidencia') or '',
+                         referencias=rec.get('referencias') or [], aviso=rec.get('ultimo_exame') or '')
+        elif item:
+            estado = item.get('estado') or 'nao_incluido'
+            rotulo = _NAO_INDICADO_AGORA.get(estado, 'Não incluído pelo check-up')
+            linha.update(veredito='nao_indicado', estado=estado, motivo=f'{rotulo}. {item.get("motivo") or ""}'.strip(),
+                         no_checkup=item['titulo'],
+                         referencias=build_reference_links(item['titulo'], item.get('referencia') or ''))
+        else:
+            # Não basta dizer que o exame não está no check-up: vai a justificativa formal, com a fonte, e as
+            # situações em que o check-up o indica (nenhuma delas presente nos dados informados).
+            justificativa = justificativa_de_nao_indicacao(chaves, sexo, idade)
+            linha.update(veredito='nao_indicado', estado='sem_indicacao', indicado_para=indicado_para(chaves, sexo))
+            if justificativa:
+                linha.update(motivo=justificativa['texto'], referencias=justificativa['referencias'],
+                             aviso=justificativa['aviso'])
+            else:
+                linha.update(motivo='O check-up não indica este exame para este paciente. Ainda não há justificativa de '
+                                    'diretriz registrada para ele.', sem_justificativa=True)
+        linhas.append(linha)
+    indicadas = sum(1 for linha in linhas if linha['veredito'] == 'indicado')
+    return {
+        'resumo': {'pedidos': len(linhas), 'indicados': indicadas, 'nao_indicados': len(linhas) - indicadas,
+                   'do_checkup': len(do_checkup)},
+        'linhas': linhas,
+        'do_checkup': [{'titulo': r['titulo'], 'motivo': r.get('subtitulo') or '', 'grau': r.get('grau_evidencia') or '',
+                        'categoria': r['categoria'], 'pedido': r['titulo'] in atendidos} for r in do_checkup],
+    }, None

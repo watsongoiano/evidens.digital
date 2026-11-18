@@ -99,10 +99,13 @@ def test_grau_da_recomendacao():
     assert 'grau D' in r['motivo'] and r['referencia'] == 'USPSTF 2018' and r['link'].startswith('https://')
 
 
-def test_sem_recomendacao_para_o_perfil_sai_com_a_fonte_da_regra_geral():
+def test_sem_recomendacao_para_o_perfil_pede_esclarecimento_e_nao_barra():
+    """Exame que o check-up não indica e que não tem parecer contrário de sociedade não é barrado: pede-se a
+    indicação clínica. A regra geral contra exames de rotina (Choosing Wisely) foi retirada pelo responsável clínico."""
     r = _um(codigo_tuss=CREATININA, idade='30', finalidade='rastreio')
-    assert (r['cor'], r['codigo_do_motivo']) == ('vermelho', 'sem_recomendacao_para_o_perfil')
-    assert r['referencia'] == 'SBMFC 2018 e CFPC (Choosing Wisely)' and r['link'].startswith('https://')
+    assert (r['cor'], r['codigo_do_motivo']) == ('amarelo', 'sem_recomendacao_para_o_perfil')
+    assert r['referencia'] == '' and r['link'] == '' and 'Choosing Wisely' not in r['motivo']
+    assert r['motivo'].endswith('Pedir a indicação clínica.')
 
 
 def test_exame_alternativo_ao_recomendado_e_aceito():
@@ -111,13 +114,13 @@ def test_exame_alternativo_ao_recomendado_e_aceito():
     assert (r['cor'], r['codigo_do_motivo'], r['exame']) == ('verde', 'alternativa_aceita', 'Glicose, soro')
     assert r['referencia'] == 'ADA 2026 / USPSTF 2021' and r['link'].startswith('https://')
     assert _cor(codigo_tuss=GLICEMIA, idade='50', data_ultimo_exame='2025-11-01') == ('amarelo', 'intervalo_depende_do_resultado')
-    assert _cor(codigo_tuss=GLICEMIA, idade='25') == ('vermelho', 'sem_recomendacao_para_o_perfil')      # fora de 35-70
+    assert _cor(codigo_tuss=GLICEMIA, idade='25') == ('amarelo', 'sem_recomendacao_para_o_perfil')      # fora de 35-70
     assert _cor(codigo_tuss=CITOLOGIA, sexo='F', idade='35') == ('verde', 'alternativa_aceita')
     assert _cor(codigo_tuss=CITOLOGIA, sexo='F', idade='22') == ('verde', 'recomendado')                 # o próprio check-up
     r = _um(codigo_tuss=CITOLOGIA, sexo='F', idade='35', data_ultimo_exame='2025-11-01')
     assert (r['cor'], r['codigo_do_motivo']) == ('amarelo', 'intervalo_depende_do_resultado')
     assert 'após dois exames anuais normais' in r['motivo']
-    assert _cor(codigo_tuss=CITOLOGIA, sexo='F', idade='70') == ('vermelho', 'sem_recomendacao_para_o_perfil')
+    assert _cor(codigo_tuss=CITOLOGIA, sexo='F', idade='70') == ('amarelo', 'sem_recomendacao_para_o_perfil')
 
 
 def test_pareceres_contra_o_pedido_de_rotina():
@@ -129,7 +132,7 @@ def test_pareceres_contra_o_pedido_de_rotina():
     assert mulher['codigo_do_motivo'] == homem['codigo_do_motivo'] == 'parecer_contrario'
     assert 'Endocrine Society 2014' in mulher['motivo'] and 'Endocrine Society 2018' in homem['motivo']
     herpes = _um(codigo_tuss=HERPES_IGG, sexo='F')
-    assert (herpes['codigo_do_motivo'], herpes['referencia']) == ('parecer_contrario', 'USPSTF 2023 e SBI 2019')
+    assert (herpes['codigo_do_motivo'], herpes['referencia']) == ('parecer_contrario', 'USPSTF 2023')
     for codigo in (VHS, ACIDO_URICO, ELETROFORESE, FAN, PAINEL_REUMATOLOGICO, ANTI_TPO, T4_LIVRE):
         r = _um(codigo_tuss=codigo)
         assert (r['cor'], r['codigo_do_motivo']) == ('vermelho', 'parecer_contrario'), codigo
@@ -144,7 +147,7 @@ def test_pareceres_contra_o_pedido_de_rotina():
 def test_urocultura_de_rastreio_depende_de_gestacao():
     """USPSTF 2019: grau B na gestação, grau D fora dela. O pedido não informa gestação."""
     r = _um(codigo_tuss=UROCULTURA, sexo='M', idade='33')
-    assert (r['cor'], r['codigo_do_motivo'], r['referencia']) == ('vermelho', 'parecer_contrario', 'USPSTF 2019 e SBI 2019')
+    assert (r['cor'], r['codigo_do_motivo'], r['referencia']) == ('vermelho', 'parecer_contrario', 'USPSTF 2019')
     assert _cor(codigo_tuss=UROCULTURA, sexo='F', idade='33') == ('amarelo', 'depende_de_gestacao')
     assert _cor(codigo_tuss=UROCULTURA, sexo='F', idade='49') == ('amarelo', 'depende_de_gestacao')
     assert _cor(codigo_tuss=UROCULTURA, sexo='F', idade='50') == ('vermelho', 'parecer_contrario')
@@ -435,12 +438,12 @@ SODIO, CALCIO_TOTAL, LACTATO, CK = '40302423', '40301400', '40301109', '40301648
 
 
 def test_com_comorbidade_informada_vale_o_que_o_check_up_recomenda_para_o_paciente():
-    assert _um(codigo_tuss=SODIO, finalidade='rastreio')['cor'] == 'vermelho'
+    assert _um(codigo_tuss=SODIO, finalidade='rastreio')['cor'] == 'amarelo'
     com_has = _um(codigo_tuss=SODIO, finalidade='rastreio', comorbidades='hipertensao')
     assert com_has['cor'] == 'verde' and com_has['motivo'] == 'Adultos com HAS: exame recomendado (grau B).'
     sem_indicacao = _um(codigo_tuss='40302237', finalidade='rastreio', comorbidades='hipertensao|dislipidemia',
                         medicacoes='sinvastatina')                                   # magnésio
-    assert sem_indicacao['cor'] == 'vermelho' and 'as comorbidades e as medicações informadas' in sem_indicacao['motivo']
+    assert sem_indicacao['cor'] == 'amarelo' and 'as comorbidades e as medicações informadas' in sem_indicacao['motivo']
 
 
 def test_comorbidade_ou_medicacao_fora_da_lista_do_check_up_invalida_a_linha():
@@ -465,7 +468,7 @@ def test_exames_registrados_como_fora_de_rastreio_trazem_a_indicacao_e_a_fonte()
     ck = _um(codigo_tuss=CK, finalidade='rastreio', medicacoes='sinvastatina')
     assert ck['cor'] == 'vermelho' and ck['referencia'] == 'AHA/ACC 2018 (colesterol)'
     assert _um(codigo_tuss=LACTATO, finalidade='diagnostico')['cor'] == 'verde'
-    assert _um(codigo_tuss='40302385', finalidade='rastreio')['link'].startswith('https://')      # sem fonte própria: Choosing Wisely
+    assert _um(codigo_tuss='40302385', finalidade='rastreio')['cor'] == 'amarelo'      # sem fonte própria: não barra
     for item in op.NAO_SAO_DE_RASTREIO.values():
         assert item['motivo'] and (item['link'] is None or item['link'].startswith('https://'))
 
@@ -485,5 +488,5 @@ def test_detalhes_das_condicoes_do_check_up_sao_aceitos_no_perfil():
     validas = op.comorbidades_validas()
     assert 'osteoporose_diagnostico' in validas and validas['les_nefrite'].startswith('Lúpus eritematoso sistêmico: ')
     fosfatase = '40301885'
-    assert _um(codigo_tuss=fosfatase, finalidade='rastreio', comorbidades='osteoporose')['cor'] == 'vermelho'
+    assert _um(codigo_tuss=fosfatase, finalidade='rastreio', comorbidades='osteoporose')['cor'] == 'amarelo'
     assert _um(codigo_tuss=fosfatase, finalidade='rastreio', comorbidades='osteoporose|osteoporose_diagnostico')['cor'] == 'verde'

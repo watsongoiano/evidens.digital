@@ -221,3 +221,9 @@ html.lenis, html.lenis body { height: auto; }
 @layer components {
   .marca-r { @apply font-normal align-super; font-size: 0.38em; line-height: 0; margin-left: 0.08em; }
 }
+
+/* Formulário do check-up embutido na página das operadoras (/operadoras): fica só o formulário. */
+.embutido body { background: transparent; }
+.embutido body > header, .embutido body > footer, .embutido .abas-modo, .embutido main > [data-modo] { display: none !important; }
+.embutido main { max-width: none; padding: 0 2px 8px; }
+.embutido #checkupForm { margin-top: 0; }
