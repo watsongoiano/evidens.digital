@@ -77,6 +77,9 @@ TEMPO_CISTECTOMIA = _ref('Haeuser 2022', 'https://doi.org/10.1159/000522141')
 TEMPO_COLECTOMIA = _ref('Al-Temimi 2019, NSQIP', 'https://doi.org/10.1007/s00384-019-03334-x')
 TEMPO_LOBECTOMIA = _ref('Dexter 2022', 'https://doi.org/10.1016/j.athoracsur.2022.01.040')
 TEMPO_RTU = _ref('Jiang 2021, NSQIP', 'https://doi.org/10.1089/end.2020.0941')
+TEMPO_MAMA = _ref('Towfighi 2022, NSQIP', 'https://doi.org/10.1007/s10549-022-06628-x')
+TEMPO_TIREOIDE = _ref('Goldfarb 2011, NSQIP', 'https://doi.org/10.1245/s10434-011-1938-2')
+TEMPO_ARTROSCOPIA = _ref('Gowd 2019, NSQIP', 'https://doi.org/10.1016/j.arthro.2019.01.059')
 TEMPO_PROSTATECTOMIA = _ref('Xia 2018, NSQIP', 'https://doi.org/10.1089/end.2018.0210')
 SBD = _ref('SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91)', 'https://doi.org/10.1186/s13098-025-02060-5')
 
@@ -267,9 +270,14 @@ DURACAO_TIPICA = {
     'esofagectomia': ('mais_3h', 'mediana de 402 min na esofagectomia minimamente invasiva (321 min na aberta)',
                       TEMPO_ESOFAGO),
     'cistectomia': ('mais_3h', 'média de 5,5 h na cistectomia radical', TEMPO_CISTECTOMIA),
+    'mama': ('menos_2h', 'média de 115 min na mastectomia total por câncer de mama', TEMPO_MAMA),
+    'tireoide': ('2_3h', 'média de 122 min na tireoidectomia', TEMPO_TIREOIDE),
+    'ortopedica_menor': ('menos_2h', 'média de 31 min na artroscopia de joelho', TEMPO_ARTROSCOPIA),
 }
 # Onde a mesma linha junta operações de durações diferentes, a dica avisa
-NOTA_DA_DURACAO = {'coluna': 'Artrodese lombar em série maior: média de 205 min, mais de 3 h (Nooh 2017, NSQIP).'}
+NOTA_DA_DURACAO = {'coluna': 'Artrodese lombar em série maior: média de 205 min, mais de 3 h (Nooh 2017, NSQIP).',
+                   'tireoide': 'Média no limite das 2 h: 119 min na doença benigna e 123 min na maligna. Confira a '
+                               'duração prevista.'}
 
 # Risco de sangramento de cada cirurgia: (classe que a tela marca, piso, fonte, nota). Toda cirurgia tem classe; abaixo
 # do piso a tela não deixa marcar e o motor sobe para o piso. O piso é a menor classe que a diretriz dá a um
