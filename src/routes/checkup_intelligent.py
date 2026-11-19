@@ -1933,7 +1933,7 @@ def preoperatorio_endpoint():
            'tfg': resultado['tfg_exata'], 'cirurgia': p['cirurgia'],
            'sangramento': p['sangramento'], 'cirurgia_risco_elevado': resultado['contexto']['cir_elev'],
            'urgencia': p['urgencia'], 'neuroaxial': p['neuroaxial'], 'condicoes': set(p['condicoes']),
-           'stent': p['stent'], 'aas_indicacao': p['aas_indicacao'],
+           'stent': p['stent'], 'aas_indicacao': p['aas_indicacao'], 'dose_heparina': p['dose_heparina'],
            'pa_controlada': (pas < 140 and pad < 90) if pas and pad else None}
     resultado['medicamentos'] = preop_medicamentos.condutas(p['medicacoes'], ctx)
     _links_do_preoperatorio(resultado)

@@ -19,6 +19,10 @@ Fontes (só entra o que tem fonte citável; o que não tem não gera item):
   glicocorticoide.
 - SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91; versão em inglês da Diretriz SBD 2025): antidiabéticos e
   insulinas (R4–R15, Tabela 2); aGLP-1 pela nota da SBA de 15/05/2026 (C.SBA-01744/2026).
+- ACCP 2022 (antitrombóticos no perioperatório), conforme a revisão de Douketis e Spyropoulos (NEJM Evidence
+  2023;2(6), doi 10.1056/EVIDra2200322), Figuras 1 e 2 e texto: enoxaparina em dose plena e em dose baixa. Os
+  intervalos são os da HBPM na ponte da varfarina (nota da Figura 1), aqui estendidos ao uso contínuo; a dose baixa
+  depois do procedimento aparece na ponte e, após a interrupção de DOAC, no alto risco de TEV (Figura 2).
 
 Convenções:
 - D0 = dia da cirurgia. "Dias sem dose" são dias inteiros antes do D0 em que o fármaco não é tomado.
@@ -76,6 +80,7 @@ _URL_KDIGO_DM = 'https://doi.org/10.1016/j.kint.2022.06.008'
 _URL_ASRA = 'https://doi.org/10.1136/rapm-2024-105766'
 _URL_VALVAS = 'https://doi.org/10.1161/CIR.0000000000000923'
 _URL_MEC = 'https://doi.org/10.15585/mmwr.rr7304a1'
+_URL_ACCP = 'https://doi.org/10.1056/EVIDra2200322'
 
 REFERENCIAS = {
     'aha': {'label': 'AHA/ACC 2026, Manejo cardiovascular perioperatório em cirurgia não cardíaca', 'url': _URL_AHA},
@@ -98,6 +103,8 @@ REFERENCIAS = {
     'valvas': {'label': 'ACC/AHA 2020, valvopatias (Circulation 2021;143:e72–e227)', 'url': _URL_VALVAS},
     'mec': {'label': 'CDC US MEC 2024, critérios de elegibilidade para contraceptivos (MMWR 2024;73(4))',
             'url': _URL_MEC},
+    'accp': {'label': 'ACCP 2022, antitrombóticos no perioperatório (resumo em NEJM Evidence 2023;2(6))',
+             'url': _URL_ACCP},
 }
 
 
@@ -1014,6 +1021,24 @@ def _doac(chave, ctx):
     return _item(chave, 'suspender', resumo, texto, classe, refs, div)
 
 
+_DOSE_DO_DOAC = 'AHA/ACC e SBC não diferenciam o intervalo pela dose (plena ou reduzida) do DOAC.'
+
+
+def _nota_da_dose_do_doac(item, ctx):
+    """Cirurgia eletiva (sem urgência nem emergência): a AHA/ACC (Tabela 13) e a SBC 2024, que são as fontes dos
+    intervalos do item, não diferenciam o intervalo de suspensão do DOAC pela dose, e o item diz isso no fim do texto.
+    Só o texto muda: o resumo e os dias ficam como ``_doac`` os calculou. Ficam sem a frase os itens em que ela não se
+    aplica: o DOAC mantido no sangramento mínimo e o contraindicado na prótese mecânica (não tratam de intervalo), o
+    item sem o risco de sangramento ("Depende do risco de sangramento", que não mostra intervalo) e a anestesia
+    neuroaxial (o item cita a ASRA, que separa a dose terapêutica da profilática e não entrou nessa conferência)."""
+    sem_frase = (ctx.get('urgencia') in ('urgencia', 'emergencia') or item['conduta'] == 'manter'
+                 or _sangramento(ctx) is None
+                 or ctx.get('neuraxial') or _cond(ctx) & {'protese_mecanica', 'protese_mecanica_mitral'})
+    if not sem_frase:
+        item['texto'] += ' ' + _DOSE_DO_DOAC
+    return item
+
+
 def _decisao_ponte(ctx):
     cat_aha, mot_aha, faltas = _risco_te_aha(ctx)
     cat_sbc, mot_sbc, notas = _risco_te_sbc(ctx)
@@ -1085,6 +1110,32 @@ def _varfarina(chave, ctx):
                  'AHA 1 (B-NR); ponte de rotina 3: Dano (C-LD) · SBC IIa-C', refs, _div_ponte(d))
 
 
+# Enoxaparina pela dose (campo "Dose da enoxaparina" da tela). ACCP 2022, lida na revisão de Douketis e Spyropoulos
+# (NEJM Evidence 2023;2(6), Figuras 1 e 2 e texto), e SBC 2024 (Quadro 25 e texto do 4.3.2.6). Nenhuma delas, nem a
+# AHA/ACC (Tabela 13), fixa o intervalo entre a última dose profilática e a cirurgia: o item diz isso.
+# Os intervalos da dose plena (última dose na manhã da véspera com metade da dose diária, retorno em 24 h ou em 48 a
+# 72 h) estão na nota da Figura 1, sobre a HBPM usada como ponte na interrupção da varfarina; a SBC também os define
+# para a ponte. O uso contínuo de enoxaparina é uma extensão nossa, e o texto e a classe do item dizem isso. A dose
+# baixa depois do procedimento aparece na mesma nota (ponte) e na Figura 2 (após a interrupção de DOAC, no alto risco
+# de tromboembolismo venoso, em pacientes selecionados, nas primeiras 48 a 72 h): o texto não afirma mais do que isso.
+# Da mesma revisão: (1) procedimento de sangramento mínimo pode ser feito sob anticoagulação plena (Tabela 1, nota §) e
+# a Figura 1 não tem HBPM na linha de sangramento mínimo, de modo que o esquema da ponte não é aplicado ali e o item
+# diz que a fonte não descreve o manejo; (2) a ponte pós-operatória é evitada quando a hemostasia cirúrgica é
+# inadequada (p. 4); (3) em cirurgias selecionadas de sangramento alto (cardíaca, intracraniana) a dose plena pode
+# ficar impedida, e a dose profilática pode ser dada por 3 a 5 dias enquanto a varfarina é retomada (p. 4).
+# A frase da SBC sobre a HBPM profilática 12 h depois está no texto do 4.3.2.6, que trata dos DOAC: pede hemostasia
+# adequada e manda parar a HBPM ao reintroduzir o anticoagulante oral.
+_DOSES_HEPARINA = ('plena', 'profilatica')
+_HBPM_NEUROAXIAL = 'Na anestesia neuroaxial (ASRA): punção ≥24 h após dose plena e ≥12 h após dose profilática.'
+_HBPM_BAIXA_DEPOIS = ('Dose baixa depois da cirurgia: a ACCP 2022 a descreve na ponte da varfarina (enoxaparina 40 mg/dia '
+                      'nas primeiras 24 a 72 h após cirurgia de sangramento alto, até voltar a dose plena) e, após a '
+                      'interrupção de DOAC, em pacientes selecionados de alto risco de tromboembolismo venoso '
+                      '(anticoagulante em dose baixa nas primeiras 48 a 72 h após o procedimento). A SBC 2024 (texto do '
+                      '4.3.2.6, na seção dos anticoagulantes orais diretos) aconselha iniciar a HBPM profilática 12 h '
+                      'após o procedimento, se adequada hemostasia, em pacientes ou procedimentos de alto risco de '
+                      'tromboembolismo venoso, e suspendê-la ao reintroduzir o anticoagulante oral.')
+
+
 def _enoxaparina(chave, ctx):
     if ctx.get('urgencia') in ('urgencia', 'emergencia'):
         return _item(chave, 'individualizar', 'Urgência: informar a hora da última dose',
@@ -1092,10 +1143,53 @@ def _enoxaparina(chave, ctx):
                      'neuroaxial só ≥24 h após dose plena e ≥12 h após dose profilática (ASRA); com dose recente, '
                      'preferir outra técnica.',
                      'ASRA 2025 · SBC IIa-C', _refs(_ref('asra'), _sbc('Quadro 25')))
+    dose = ctx.get('dose_heparina')
+    if dose == 'plena' and _sangramento(ctx) == 'minimo':
+        # Sem esquema na fonte: nem suspender (o da ponte não vale aqui) nem manter (a fonte não fala da HBPM).
+        return _item(chave, 'individualizar', 'Dose plena e sangramento mínimo: conduta individualizada',
+                     'Sangramento mínimo: a ACCP 2022 (Tabela 1 da revisão) diz que o procedimento pode ser feito com '
+                     'segurança sob anticoagulação em dose plena, mas não descreve o manejo da HBPM em dose plena nesse '
+                     'cenário: a Figura 1 traz só a varfarina na linha de sangramento mínimo. O esquema da ponte não se '
+                     'aplica a este cenário. A conduta é individualizada.',
+                     'ACCP 2022: manejo não descrito', _refs(_ref('accp')))
+    if dose == 'plena':
+        return _item(chave, 'suspender', 'Dose plena: última dose na manhã da véspera, com metade da dose diária',
+                     'ACCP 2022, dose plena (enoxaparina 1 mg/kg de 12/12 h ou 1,5 mg/kg/dia): última dose na manhã da '
+                     'véspera (D-1), com metade da dose diária total. Retorno da dose plena (ACCP 2022), com hemostasia '
+                     'adequada: cerca de 24 h após cirurgia de sangramento baixo ou moderado; 48 a 72 h após '
+                     'sangramento alto. Com hemostasia cirúrgica inadequada, a ACCP 2022 aconselha evitar a ponte '
+                     'pós-operatória. Exceção no sangramento alto (ACCP 2022): em cirurgias selecionadas (por exemplo, '
+                     'cardíaca ou intracraniana), os riscos e as consequências do sangramento podem impedir a dose '
+                     'plena depois da cirurgia; nesses pacientes, a HBPM em dose profilática (baixa) pode ser dada por '
+                     '3 a 5 dias, enquanto a varfarina é retomada. São os intervalos que a ACCP 2022 define para a '
+                     'HBPM na ponte da varfarina, aqui estendidos ao uso contínuo. SBC 2024 (Quadro 25, IIa-C): última dose 24 h antes, intervalo que a SBC define para a '
+                     'HBPM na ponte, aqui estendido ao uso contínuo. '
+                     + _HBPM_BAIXA_DEPOIS + ' ' + _HBPM_NEUROAXIAL,
+                     'ACCP 2022 (extrapolado da ponte) · SBC IIa-C (extrapolado da ponte) · ASRA 2025',
+                     _refs(_ref('accp'), _sbc('Quadro 25 e texto do 4.3.2.6'), _ref('asra')),
+                     # As duas posições, sem escolha entre as sociedades: o horário é compatível; muda a meia dose.
+                     'ACCP 2022: última dose plena na manhã da véspera (D-1), com metade da dose diária total. SBC 2024 '
+                     '(IIa-C): última dose 24 h antes. As duas redações são compatíveis no horário (a manhã da véspera '
+                     'fica a cerca de 24 h da cirurgia); a diferença é a meia dose da véspera, descrita só pela ACCP.')
+    if dose == 'profilatica':
+        return _item(chave, 'individualizar', 'Dose profilática: horário da última dose combinado com a equipe',
+                     'Dose profilática antes da cirurgia: ACCP 2022, SBC 2024 e AHA/ACC não fixam o intervalo entre a '
+                     'última dose e a cirurgia; combinar o horário da última dose com a equipe. '
+                     + _HBPM_BAIXA_DEPOIS + ' ' + _HBPM_NEUROAXIAL,
+                     'Intervalo não fixado nas fontes · ASRA 2025',
+                     _refs(_ref('accp'), _sbc('Quadro 25 e texto do 4.3.2.6'), _aha('Tabela 13'), _ref('asra')))
+    if _sangramento(ctx) == 'minimo':
+        # Sem a dose e com sangramento mínimo, o esquema da ponte não se aplica (mesmo motivo da dose plena acima).
+        return _item(chave, 'individualizar', 'Informe a dose; sangramento mínimo: conduta individualizada',
+                     'Informe se a dose é plena ou profilática. Sangramento mínimo: a ACCP 2022 (Tabela 1 da revisão) '
+                     'diz que o procedimento pode ser feito com segurança sob anticoagulação em dose plena, mas não '
+                     'descreve o manejo da HBPM nesse cenário. O esquema da ponte não se aplica a este cenário. A '
+                     'conduta é individualizada.',
+                     'ACCP 2022: manejo não descrito', _refs(_ref('accp')))
     return _item(chave, 'suspender', 'Dose plena: última dose 24 h antes',
-                 'Em dose plena, última aplicação 24 h antes e retorno ≥24 h depois (48–72 h se sangramento alto), com '
-                 'hemostasia: intervalos que a SBC define para a HBPM na ponte, aqui estendidos ao uso contínuo. Na '
-                 'anestesia neuroaxial (ASRA): punção ≥24 h após dose plena e ≥12 h após dose profilática.',
+                 'Informe se a dose é plena ou profilática. Em dose plena, última aplicação 24 h antes e retorno ≥24 h '
+                 'depois (48–72 h se sangramento alto), com hemostasia: intervalos que a SBC define para a HBPM na '
+                 'ponte, aqui estendidos ao uso contínuo. ' + _HBPM_NEUROAXIAL,
                  'SBC IIa-C (extrapolado da ponte) · ASRA 2025', _refs(_sbc('Quadro 25'), _ref('asra')))
 
 
@@ -1352,7 +1446,7 @@ def _regra(chave, ctx, medicacoes):
     if chave == 'varfarina':
         return _varfarina(chave, ctx)
     if chave in _DOAC:
-        return _doac(chave, ctx)
+        return _nota_da_dose_do_doac(_doac(chave, ctx), ctx)
     if chave == 'enoxaparina':
         return _enoxaparina(chave, ctx)
     if chave == _AAS:
@@ -1571,7 +1665,8 @@ def condutas(medicacoes: list[str], ctx: dict) -> dict:
     cirurgia_risco_elevado, urgencia
     ('eletiva'|'tempo_sensivel'|'urgencia'|'emergencia'), neuraxial (aceita também 'neuroaxial'), condicoes (set), stent
     ({'tipo': 'farmacologico'|'convencional'|'balao', 'indicacao': 'sca'|'dac_cronica', 'dias': int}; 'meses' ainda
-    é aceito), aas_indicacao ('primaria'|'secundaria'), pa_controlada, cirurgia (chave de preoperatorio.CIRURGIAS).
+    é aceito), aas_indicacao ('primaria'|'secundaria'), pa_controlada, cirurgia (chave de preoperatorio.CIRURGIAS),
+    dose_heparina ('plena'|'profilatica': a dose da enoxaparina; outro valor conta como não informada).
     Em ``condicoes``, o TEV ('tev') vem com o tempo desde o evento ('tev_recente_3m', 'tev_3_12m' ou 'tev_mais_12m');
     sem o tempo, o risco tromboembólico não é classificado.
 
@@ -1583,6 +1678,8 @@ def condutas(medicacoes: list[str], ctx: dict) -> dict:
     ctx['condicoes'] = _cond(ctx)
     if ctx.get('neuraxial') is None and 'neuroaxial' in ctx:
         ctx['neuraxial'] = ctx['neuroaxial']
+    if ctx.get('dose_heparina') not in _DOSES_HEPARINA:
+        ctx['dose_heparina'] = ''
     meds = []
     for chave in medicacoes or ():
         if chave in MEDICAMENTOS and chave not in meds:

@@ -420,6 +420,85 @@ def test_rota_do_preoperatorio(app, contas):
     assert app.test_client().post('/api/preoperatorio', json=corpo).status_code == 401
 
 
+def test_dose_da_enoxaparina_e_lida_e_validada():
+    """Campo "Dose da enoxaparina": plena, profilática ou vazio (não informada); outro valor é recusado."""
+    assert po.DOSES_HEPARINA == {'plena': 'Plena (terapêutica)', 'profilatica': 'Profilática'}
+    assert _p()['dose_heparina'] == '' and _p(dose_heparina=None)['dose_heparina'] == ''
+    assert _p(dose_heparina='')['dose_heparina'] == ''
+    for dose in po.DOSES_HEPARINA:
+        assert _p(dose_heparina=dose)['dose_heparina'] == dose
+    for errado in ('x', 'PLENA', 'terapeutica', 1, True, ['plena'], {'plena': 1}):
+        with pytest.raises(po.EntradaInvalida) as erro:
+            _p(dose_heparina=errado)
+        assert erro.value.mensagem == 'Opção inválida em a dose da enoxaparina.'
+
+
+def test_rota_leva_a_dose_da_enoxaparina_ate_a_conduta(app, contas):
+    cliente, _ = _conta_preop(app, contas)
+    corpo = dict(idade=64, sexo='feminino', peso=70, cirurgia='colectomia', urgencia='eletiva', sangramento='alto',
+                 condicoes=['tev'], medicacoes=['enoxaparina', 'apixabana'], creatinina=0.9)
+
+    def itens(**extra):
+        r = cliente.post('/api/preoperatorio', json=dict(corpo, **extra))
+        assert r.status_code == 200, r.get_json()
+        return {i['chave']: i for i in r.get_json()['medicamentos']['itens']}
+
+    sem = itens()
+    assert sem == itens(dose_heparina='') == itens(dose_heparina=None)
+    assert sem['enoxaparina']['resumo'] == 'Dose plena: última dose 24 h antes'
+    assert sem['enoxaparina']['texto'].startswith('Informe se a dose é plena ou profilática.')
+    plena = itens(dose_heparina='plena')['enoxaparina']
+    assert plena['resumo'] == 'Dose plena: última dose na manhã da véspera, com metade da dose diária'
+    assert plena['classe'] == 'ACCP 2022 (extrapolado da ponte) · SBC IIa-C (extrapolado da ponte) · ASRA 2025'
+    assert 'ACCP 2022 define para a HBPM na ponte da varfarina, aqui estendidos ao uso contínuo' in plena['texto']
+    assert plena['divergencia'].endswith('a diferença é a meia dose da véspera, descrita só pela ACCP.')
+    assert 'optamos' not in plena['divergencia']
+    assert '<a href="https://doi.org/10.1056/EVIDra2200322"' in plena['referencia_html']
+    profilatica = itens(dose_heparina='profilatica')
+    assert profilatica['enoxaparina']['conduta'] == 'individualizar'
+    assert profilatica['enoxaparina']['resumo'] == 'Dose profilática: horário da última dose combinado com a equipe'
+    assert '<a href="https://doi.org/10.1056/EVIDra2200322"' in profilatica['enoxaparina']['referencia_html']
+    # o DOAC do mesmo pedido leva a frase da dose, e a dose da enoxaparina não mexe nele
+    assert sem['apixabana']['texto'].endswith('AHA/ACC e SBC não diferenciam o intervalo pela dose (plena ou reduzida) do DOAC.')
+    # dose plena com sangramento mínimo (catarata; na colectomia o motor sobe o risco ao piso): sem o esquema da ponte
+    minimo = cliente.post('/api/preoperatorio', json=dict(corpo, cirurgia='catarata', sangramento='minimo', dose_heparina='plena'))
+    assert minimo.status_code == 200, minimo.get_json()
+    enoxa = {i['chave']: i for i in minimo.get_json()['medicamentos']['itens']}['enoxaparina']
+    assert enoxa['conduta'] == 'individualizar' and 'véspera' not in enoxa['resumo'] + enoxa['texto']
+    assert enoxa['resumo'] == 'Dose plena e sangramento mínimo: conduta individualizada'
+    assert profilatica['apixabana'] == sem['apixabana']
+    # valor fora da lista: erro de validação, como nos campos vizinhos
+    r = cliente.post('/api/preoperatorio', json=dict(corpo, dose_heparina='dobrada'))
+    assert r.status_code == 400
+    assert r.get_json()['erros'] == [{'campo': '', 'mensagem': 'Opção inválida em a dose da enoxaparina.'}]
+
+
+def test_tela_pergunta_a_dose_da_enoxaparina_so_com_a_enoxaparina_marcada():
+    import re
+    from pathlib import Path
+    html = (Path(__file__).resolve().parent.parent / 'intelligent-tools.html').read_text(encoding='utf-8')
+    # O campo nasce escondido, ao lado da anestesia neuroaxial, com as três opções do motor
+    campo = re.search(r'<div class="campo" id="po_dose_heparina_campo" hidden>(.*?)</div>', html, re.S)
+    assert campo, 'campo "Dose da enoxaparina" ausente ou visível desde o início'
+    assert '<label for="po_dose_heparina">Dose da enoxaparina</label>' in campo.group(1)
+    assert '<select id="po_dose_heparina">' in campo.group(1)
+    opcoes = re.findall(r'<option value="([^"]*)">([^<]+)</option>', campo.group(1))
+    assert opcoes == [('', 'Não informada')] + list(po.DOSES_HEPARINA.items())
+    cirurgia = html[html.index('id="s-cirurgia"'):html.index('id="s-condicoes"')]
+    assert cirurgia.index('id="po_neuroaxial"') < cirurgia.index('id="po_dose_heparina_campo"')
+    # Aparece só com a enoxaparina entre as medicações em uso (a lista de medicações tem a enoxaparina)
+    assert 'data-valor="enoxaparina"' in html
+    assert "const meds = [...checkupForm.querySelectorAll('input[name=\"medicacoes\"]:checked')].map(i => i.value);" in html
+    assert "document.getElementById('po_dose_heparina_campo').hidden = !meds.includes('enoxaparina');" in html
+    # Vai no pedido como dose_heparina; escondido, vai vazio
+    assert ("dose_heparina: document.getElementById('po_dose_heparina_campo').hidden ? '' : v('po_dose_heparina'),"
+            in html)
+    envio = html[html.index('function lerPreop()'):html.index('async function avaliarPreop()')]
+    assert 'dose_heparina:' in envio and "neuroaxial: v('po_neuroaxial') === 'sim'" in envio
+    # Sem estilo próprio: só as classes dos campos vizinhos
+    assert '<style' not in html
+
+
 def test_jovem_sem_comorbidade_em_cirurgia_de_baixo_risco_recebe_orientacao_curta():
     r = po.avaliar(_p(idade=28, sexo='feminino', cirurgia='pele'))
     assert r['resumido'] and r['resumo']['titulo'] == 'Risco cardiológico não indicado para este paciente.'

@@ -384,6 +384,7 @@ STOP_BANG_ITENS = {'ronco': 'Ronco alto', 'cansaco': 'Cansaço ou sonolência di
 DURACOES = {'menos_2h': 'Menos de 2 h', '2_3h': '2 a 3 h', 'mais_3h': 'Mais de 3 h'}
 SANGRAMENTOS = {'minimo': 'Mínimo (catarata, dentária ou pele simples)',
                 'baixo_moderado': 'Baixo ou moderado (< 2% em 30 dias)', 'alto': 'Alto (≥ 2% em 30 dias)'}
+DOSES_HEPARINA = {'plena': 'Plena (terapêutica)', 'profilatica': 'Profilática'}   # campo "Dose da enoxaparina"
 
 
 # ── Leitura ──────────────────────────────────────────────────────────────────
@@ -489,6 +490,8 @@ def ler(dados, hoje=None):
         'stop_bang': _lista(dados.get('stop_bang'), STOP_BANG_ITENS, 'STOP-Bang'),
         'medicacoes': [m for m in (dados.get('medicacoes') or []) if isinstance(m, str)][:80],
         'aas_indicacao': _escolha(dados.get('aas_indicacao'), ('primaria', 'secundaria'), 'a indicação do AAS'),
+        # Dose da enoxaparina (só perguntada com a enoxaparina entre as medicações); '' = não informada
+        'dose_heparina': _escolha(dados.get('dose_heparina'), tuple(DOSES_HEPARINA), 'a dose da enoxaparina') or '',
         'creatinina': _num(dados.get('creatinina'), 'a creatinina', 0.1, 25),
         'hemoglobina': _num(dados.get('hemoglobina'), 'a hemoglobina', 2, 25),
         'hba1c_dias': _num(dados.get('hba1c_dias'), 'a data da HbA1c', 0, 40000),
