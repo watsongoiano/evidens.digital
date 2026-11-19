@@ -288,7 +288,7 @@ CODIGOS = {
     'Imunoglobulina G (IgG), soro': ['40307280'],
     'Imunoglobulina M (IgM), soro': ['40307301'],
     'Imunoglobulina E (IgE) total, soro': ['40307271'],
-    'IgE específica para Aspergillus fumigatus, soro': ['40307263'],
+    'IgE específica para Aspergillus, soro': ['40307263'],
     'Cultura de escarro (bactérias)': ['40310124'],
     'Cultura para micobactérias, escarro': ['40310159'],
     'VHS': ['40304370'],
@@ -357,9 +357,14 @@ CODIGOS = {
 }
 
 # Exames que saem na guia sem código, com o motivo (nada de código inventado).
+# Códigos da TUSS que servem a vários exames diferentes ("IgE, por alérgeno, cada"; "Cultura bacteriana, em diversos
+# materiais"). Dois títulos com um desses códigos NÃO são o mesmo exame: não se unem na lista de recomendações, somam
+# a quantidade na guia e não tiram do catálogo o exame genérico da tabela.
+CODIGOS_DE_VARIOS_EXAMES = frozenset({'40307263', '40310124'})
+
 SEM_CODIGO = {
-    'IgG específica para Aspergillus (precipitinas), soro':
-        'a TUSS traz "Aspergilus, reação sorológica" (40306453); a equivalência com a IgG específica não foi conferida',
+    'IgG específica para Aspergillus, soro':
+        'a TUSS traz "Aspergilus, reação sorológica" (40306453), sem dizer o método; a equivalência com a IgG específica não foi conferida',
     'Trichomonas vaginalis, PCR (swab vaginal)':
         'só a cultura tem código conferido (40310574, Trichomonas, cultura para)',
     'Antígeno criptocócico (LF-CrAg), soro':

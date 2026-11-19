@@ -74,11 +74,12 @@ def test_bronquiectasias_painel_da_avaliacao_inicial():
     """ERS 2025, recomendação 1 (forte; certeza moderada): testagem padronizada. O painel é o que o resumo dos autores
     da diretriz (Mosgrove 2026, p. 2 e Tabela 1) manda fazer em todo paciente com bronquiectasias confirmadas."""
     from src.utils import tuss
-    assert condicoes.COMORBIDADES['bronquiectasias']['rotulo'] == 'Bronquiectasias'
+    # A diretriz trata do adulto, fora da fibrose cística: o rótulo diz isso
+    assert condicoes.COMORBIDADES['bronquiectasias']['rotulo'] == 'Bronquiectasias (adulto, sem fibrose cística)'
     recs, orient = _rodar(['bronquiectasias'], idade=55)
     painel = {'Hemograma completo com plaquetas', 'Imunoglobulina G (IgG), soro', 'Imunoglobulina A (IgA), soro',
               'Imunoglobulina M (IgM), soro', 'Eletroforese de proteínas, soro', 'Imunoglobulina E (IgE) total, soro',
-              'IgE específica para Aspergillus fumigatus, soro', 'IgG específica para Aspergillus (precipitinas), soro',
+              'IgE específica para Aspergillus, soro', 'IgG específica para Aspergillus, soro',
               'Cultura de escarro (bactérias)', 'Cultura para micobactérias, escarro'}
     assert set(recs) == painel
     for titulo in painel:
@@ -93,7 +94,7 @@ def test_bronquiectasias_painel_da_avaliacao_inicial():
     assert tuss.CODIGOS['Imunoglobulina M (IgM), soro'] == ['40307301']
     assert tuss.CODIGOS['Imunoglobulina E (IgE) total, soro'] == ['40307271']
     assert tuss.CODIGOS['Cultura para micobactérias, escarro'] == ['40310159']
-    assert 'IgG específica para Aspergillus (precipitinas), soro' in tuss.SEM_CODIGO
+    assert 'IgG específica para Aspergillus, soro' in tuss.SEM_CODIGO
 
 
 def test_bronquiectasias_o_que_fica_so_na_orientacao():
@@ -102,9 +103,41 @@ def test_bronquiectasias_o_que_fica_so_na_orientacao():
     recs, orient = _rodar(['bronquiectasias'], idade=55)
     escarro = orient['Bronquiectasias: escarro no seguimento']['descricao']
     assert 'exacerbação' in escarro and 'macrolídeo' in escarro and 'Pseudomonas' in escarro
+    # Conferido contra a fonte por revisor independente: os qualificadores da diretriz ficam no texto
+    for trecho in ('de preferência antes do antibiótico', 'que não melhoram com antibiótico',
+                   'repetir a cultura e discutir de imediato com o especialista', 'recomendação condicional',
+                   'a cultura positiva isolada não é motivo para antibiótico'):
+        assert trecho in escarro, trecho
     resto = orient['Bronquiectasias: o que não vira pedido automático']['descricao']
-    for trecho in ('espirometria', 'não fixa intervalo', 'vacinas', 'discinesia ciliar', 'risco cardiovascular'):
+    for trecho in ('espirometria', 'não fixa intervalo', 'vacinas', 'discinesia ciliar', 'risco cardiovascular',
+                   'quando os exames iniciais são negativos', 'doença de via aérea associada', 'não relacionadas à fibrose cística'):
         assert trecho in resto, trecho
     assert not any('Espirometria' in t or 'Tomografia' in t or 'Alfa-1' in t for t in recs)
     assert not any(r['categoria'] == 'vacina' for r in recs.values())
     assert not _rodar([], idade=55)[1].get('Bronquiectasias: escarro no seguimento')
+
+
+def test_cultura_de_escarro_nao_se_funde_com_outra_cultura_do_mesmo_codigo():
+    """"Cultura bacteriana" (40310124) e "IgE, por alérgeno" (40307263) são códigos da TUSS que servem a vários exames.
+    Na gestante de 36 semanas com bronquiectasias, a cultura de escarro e a do estreptococo do grupo B são dois exames
+    (achado do revisor independente: a de escarro sumia). Na guia, a quantidade soma."""
+    import io
+    from pypdf import PdfReader
+    from src.routes.checkup_intelligent import deduplicar_recomendacoes
+    from src.utils import pdf_minutas, tuss
+    assert tuss.CODIGOS_DE_VARIOS_EXAMES == {'40307263', '40310124'}
+    gbs = next(t for t, c in tuss.CODIGOS.items() if c == ['40310124'] and 'estreptococo' in t)
+    recs = [{'titulo': gbs, 'categoria': 'laboratorio', 'subtitulo': 'Gestante | 36-37 semanas', 'referencia': 'ACOG',
+             'descricao': 'x', 'prioridade': 'alta', 'grau_evidencia': 'A'},
+            {'titulo': 'Cultura de escarro (bactérias)', 'categoria': 'laboratorio', 'descricao': 'y', 'prioridade': 'media',
+             'subtitulo': 'Bronquiectasias | Avaliação inicial', 'referencia': condicoes.ERS_BRONQUIECTASIAS, 'grau_evidencia': 'A'}]
+    titulos = [r['titulo'] for r in deduplicar_recomendacoes(recs, 'feminino')]
+    assert titulos == [gbs, 'Cultura de escarro (bactérias)']
+    # O mesmo exame pedido duas vezes continua virando um item só
+    assert len(deduplicar_recomendacoes([dict(recs[1]), dict(recs[1])], 'feminino')) == 1
+    # Exames de código único continuam se unindo pelo código
+    par = [{'titulo': 'Hemograma completo com plaquetas', 'categoria': 'laboratorio', 'subtitulo': 'a', 'referencia': 'r',
+            'descricao': 'x', 'prioridade': 'media'},
+           {'titulo': 'Hemograma completo, sangue total', 'categoria': 'laboratorio', 'subtitulo': 'b', 'referencia': 'r',
+            'descricao': 'x', 'prioridade': 'media'}]
+    assert len(deduplicar_recomendacoes(par, 'feminino')) == 1

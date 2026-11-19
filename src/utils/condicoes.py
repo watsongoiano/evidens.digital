@@ -61,7 +61,8 @@ COMORBIDADES = {
                    'busca': 'rcu colite ulcerativa dii doenca inflamatoria intestinal autoimune'},
     'esclerose_sistemica': {'rotulo': 'Esclerose sistêmica (esclerodermia)', 'busca': 'autoimune colagenose'},
     'asma_grave': {'rotulo': 'Asma moderada ou grave'},
-    'bronquiectasias': {'rotulo': 'Bronquiectasias', 'busca': 'bronquiectasia escarro pseudomonas abpa'},
+    'bronquiectasias': {'rotulo': 'Bronquiectasias (adulto, sem fibrose cística)',
+                        'busca': 'bronquiectasia escarro pseudomonas abpa'},
     'hipertensao_arterial_pulmonar': {'rotulo': 'Hipertensão arterial pulmonar (grupo 1)',
                                       'busca': 'hipertensao pulmonar hap pah bosentana ambrisentana sildenafila'},
     'asplenia': {'rotulo': 'Asplenia / esplenectomia', 'busca': 'baco'},
@@ -1698,21 +1699,26 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
                   'para bactérias e micobactérias.')
         for titulo in ('Hemograma completo com plaquetas', 'Imunoglobulina G (IgG), soro', 'Imunoglobulina A (IgA), soro',
                        'Imunoglobulina M (IgM), soro', 'Eletroforese de proteínas, soro',
-                       'Imunoglobulina E (IgE) total, soro', 'IgE específica para Aspergillus fumigatus, soro',
-                       'IgG específica para Aspergillus (precipitinas), soro', 'Cultura de escarro (bactérias)',
+                       'Imunoglobulina E (IgE) total, soro', 'IgE específica para Aspergillus, soro',
+                       'IgG específica para Aspergillus, soro', 'Cultura de escarro (bactérias)',
                        'Cultura para micobactérias, escarro'):
             add(titulo, 'laboratorio', painel, 'Bronquiectasias | Avaliação inicial', ERS_BRONQUIECTASIAS, 'A')
         orientar('Bronquiectasias: escarro no seguimento',
-                 'Colher cultura de escarro no início de cada exacerbação, antes do antibiótico, e repetir se não houver '
-                 'resposta. Pesquisar micobactérias também nos sintomas persistentes e antes de iniciar macrolídeo '
-                 'prolongado. O isolamento novo de Pseudomonas aeruginosa pede avaliação para erradicação.',
+                 'Colher cultura de escarro no início de cada exacerbação, de preferência antes do antibiótico, e repetir '
+                 'se não houver resposta. Pesquisar micobactérias também nos sintomas persistentes que não melhoram com '
+                 'antibiótico e antes de iniciar macrolídeo prolongado. Isolamento novo de Pseudomonas aeruginosa: repetir '
+                 'a cultura e discutir de imediato com o especialista; a diretriz sugere o tratamento de erradicação '
+                 '(recomendação condicional). No paciente estável, a cultura positiva isolada não é motivo para '
+                 'antibiótico.',
                  ERS_BRONQUIECTASIAS)
         orientar('Bronquiectasias: o que não vira pedido automático',
                  'A espirometria entra na avaliação da gravidade (VEF1), não na investigação da causa. O resumo da diretriz '
                  'não fixa intervalo de consulta, de cultura de escarro nem de espirometria no paciente estável, e não '
-                 'trata de vacinas. Causas raras (discinesia ciliar, fibrose cística) são investigadas conforme o quadro, '
-                 'em geral pelo especialista. Na avaliação inicial, rever comorbidades: risco cardiovascular, osteoporose, '
-                 'rinossinusite, refluxo e humor.', ERS_BRONQUIECTASIAS)
+                 'trata de vacinas. Causas raras (discinesia ciliar, fibrose cística) são investigadas quando os exames '
+                 'iniciais são negativos e a história as sugere. Na avaliação inicial, rever comorbidades: risco '
+                 'cardiovascular, osteoporose, rinossinusite, refluxo e humor, e otimizar o tratamento da doença de via '
+                 'aérea associada. A diretriz trata das bronquiectasias do adulto não relacionadas à fibrose cística.',
+                 ERS_BRONQUIECTASIAS)
     if 'hipertensao_arterial_pulmonar' in com:
         # ESC/ERS 2022, texto integral lido em 18/11/2026: Tabela 17 (avaliações e momentos do seguimento, com as notas:
         # exames básicos = hemograma, INR em uso de antagonista da vitamina K, creatinina, sódio, potássio, TGO/TGP,
