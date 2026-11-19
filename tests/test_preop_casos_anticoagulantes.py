@@ -860,6 +860,11 @@ def verifica_enoxaparina(p, it, r):
             verifica_aviso_neuro(r)
         return
     assert it['texto'].startswith('Informe se a dose é plena ou profilática.'), it['texto']
+    if sang == 'minimo':
+        # Sem a dose e com sangramento mínimo: o esquema da ponte não se aplica (ACCP 2022, Tabela 1 da revisão)
+        assert it['conduta'] == 'individualizar' and not RE_ENOXA_ANTES.search(it['resumo'] + ' ' + it['texto'])
+        assert 'O esquema da ponte não se aplica' in it['texto']
+        return
     m = RE_ENOXA_ANTES.search(it['resumo'])
     assert m, it['resumo']
     # Última dose plena 24 h antes: SBC Quadro 25 (IIa-C), CHEST 2022 (~24 h), ASRA 2025 (dose alta, 24 h)

@@ -4373,7 +4373,9 @@
   "O esquema da ponte não se aplica a este cenário.": "The bridging schedule does not apply to this setting.",
   "A conduta é individualizada.": "Management is individualized.",
   "ACCP 2022: manejo não descrito": "ACCP 2022: management not described",
-  "AHA/ACC e SBC não diferenciam o intervalo pela dose (plena ou reduzida) do DOAC.": "AHA/ACC and SBC do not differentiate the interval by DOAC dose (full or reduced)."
+  "AHA/ACC e SBC não diferenciam o intervalo pela dose (plena ou reduzida) do DOAC.": "AHA/ACC and SBC do not differentiate the interval by DOAC dose (full or reduced).",
+  "Informe a dose; sangramento mínimo: conduta individualizada": "Enter the dose; minimal bleeding risk: individualized management",
+  "Informe se a dose é plena ou profilática. Sangramento mínimo: a ACCP 2022 (Tabela 1 da revisão) diz que o procedimento pode ser feito com segurança sob anticoagulação em dose plena, mas não descreve o manejo da HBPM nesse cenário. O esquema da ponte não se aplica a este cenário. A conduta é individualizada.": "Enter whether the dose is therapeutic or prophylactic. Minimal bleeding risk: ACCP 2022 (Table 1 of the review) states that the procedure can be done safely under full-dose anticoagulation, but does not describe LMWH management in this setting. The bridging schedule does not apply here. Management is individualized."
  },
  "padroes": [
   [

@@ -781,3 +781,11 @@ def test_referencia_da_aha_abre_o_texto_integral_na_tabela_13():
         assert ' ' not in url
     # Lugar sem título conhecido continua no endereço geral da diretriz.
     assert pm._aha('§7.6 (texto) e Tabela 15')[0]['url'] == pm._URL_AHA
+
+
+def test_enoxaparina_sem_dose_no_sangramento_minimo_nao_aplica_o_esquema_da_ponte():
+    # Mesmo motivo da dose plena: sem a dose informada, o item não pode mandar suspender 24 h antes no sangramento mínimo.
+    i = item('enoxaparina', sangramento='minimo')
+    assert i['conduta'] == 'individualizar' and i['resumo'].startswith('Informe a dose')
+    assert '24 h antes' not in i['texto'] and 'não se aplica' in i['texto']
+    assert item('enoxaparina', sangramento='alto')['conduta'] == 'suspender'      # fora do mínimo, nada muda

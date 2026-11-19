@@ -1134,6 +1134,14 @@ def _enoxaparina(chave, ctx):
                      + _HBPM_BAIXA_DEPOIS + ' ' + _HBPM_NEUROAXIAL,
                      'Intervalo não fixado nas fontes · ASRA 2025',
                      _refs(_ref('accp'), _sbc('Quadro 25 e texto do 4.3.2.6'), _aha('Tabela 13'), _ref('asra')))
+    if _sangramento(ctx) == 'minimo':
+        # Sem a dose e com sangramento mínimo, o esquema da ponte não se aplica (mesmo motivo da dose plena acima).
+        return _item(chave, 'individualizar', 'Informe a dose; sangramento mínimo: conduta individualizada',
+                     'Informe se a dose é plena ou profilática. Sangramento mínimo: a ACCP 2022 (Tabela 1 da revisão) '
+                     'diz que o procedimento pode ser feito com segurança sob anticoagulação em dose plena, mas não '
+                     'descreve o manejo da HBPM nesse cenário. O esquema da ponte não se aplica a este cenário. A '
+                     'conduta é individualizada.',
+                     'ACCP 2022: manejo não descrito', _refs(_ref('accp')))
     return _item(chave, 'suspender', 'Dose plena: última dose 24 h antes',
                  'Informe se a dose é plena ou profilática. Em dose plena, última aplicação 24 h antes e retorno ≥24 h '
                  'depois (48–72 h se sangramento alto), com hemostasia: intervalos que a SBC define para a HBPM na '
