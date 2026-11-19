@@ -273,10 +273,22 @@ def chaves(titulo, sexo=None):
     return frozenset(codigos) if codigos and all(linha['codigo'] for linha in linhas) else frozenset({'nome:' + tuss._chave(titulo)})
 
 
+def chaves_do_exame(titulo, sexo=None):
+    """Como `chaves`, mas separa os exames que dividem um código TUSS (`tuss.CODIGOS_DE_VARIOS_EXAMES`).
+
+    A cultura de escarro e a de estreptococo do grupo B têm o mesmo código: uma feita não põe a outra em dia.
+    Nesses códigos a chave leva o nome do exame. O erro possível é só pedir de novo, nunca dispensar.
+    """
+    proprias = chaves(titulo, sexo)
+    if not proprias & tuss.CODIGOS_DE_VARIOS_EXAMES:
+        return proprias
+    return frozenset(c + ':' + tuss._chave(titulo) if c in tuss.CODIGOS_DE_VARIOS_EXAMES else c for c in proprias)
+
+
 def _ultima_data(titulo, sexo, feitos):
     """Data em que a recomendação inteira foi coberta pela última vez (None se alguma parte falta)."""
     datas = []
-    for chave in chaves(titulo, sexo):
+    for chave in chaves_do_exame(titulo, sexo):
         do_componente = [data for chaves_feitas, data in feitos if chave in chaves_feitas]
         if not do_componente:
             return None
@@ -322,7 +334,7 @@ def _resultados_mais_recentes(titulo, sexo, exames_anteriores):
     parte: o potássio alterado de ontem não pode sumir porque o sódio é de anteontem.
     """
     escolhidos = {}
-    for chave in chaves(titulo, sexo):
+    for chave in chaves_do_exame(titulo, sexo):
         da_parte = [e for e in exames_anteriores if chave in cobertos(e['exame'], sexo)]
         if da_parte:
             ultima = max(e['data'] for e in da_parte)
@@ -336,7 +348,7 @@ EQUIVALENTES = {'40301400': '40301419'}
 
 def cobertos(titulo, sexo=None):
     """Códigos que o exame feito cobre: os dele e os dos exames a que equivale."""
-    proprios = chaves(titulo, sexo)
+    proprios = chaves_do_exame(titulo, sexo)
     return proprios | {EQUIVALENTES[c] for c in proprios if c in EQUIVALENTES}
 
 
@@ -418,7 +430,7 @@ def exames_conhecidos():
     from src.utils.catalogo import catalogo
     cat, vistos, nomes = catalogo(), set(), []
     for titulo in list(cat.get('laboratorio', [])) + list(cat.get('imagem', [])):
-        chave = chaves(titulo)
+        chave = chaves_do_exame(titulo)
         if chave not in vistos:
             vistos.add(chave)
             nomes.append(titulo)

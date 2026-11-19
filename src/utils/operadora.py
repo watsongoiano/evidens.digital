@@ -708,7 +708,8 @@ def escrever_csv(brutas, resultados):
 # A operadora informa os dados do paciente, os mesmos do check-up, e envia o PDF com os exames que o médico pediu. O
 # motor do check-up roda como está, sem nenhuma regra a mais, e cada exame pedido é só comparado com o que ele devolve:
 # está entre os recomendados para o paciente (indicado) ou não está (não indicado). Os pareceres, as cores e a
-# finalidade do modo em lote (acima) não entram aqui.
+# finalidade do modo em lote (acima) não entram aqui. As vacinas que o check-up recomenda saem em lista à parte, para
+# a operadora avisar o paciente: não entram na conferência nem mudam o veredito de exame algum.
 
 _DE_EXAME = ('laboratorio', 'imagem')
 
@@ -966,13 +967,38 @@ def _alternativa_aceita(chaves, indicados):
     return None
 
 
+def _vacinas_para_avisar(resposta, exames_anteriores):
+    """(recomendadas, outras): as vacinas que o check-up recomenda ao paciente, cada uma com as datas informadas em
+    "Vacinas já tomadas", e as informadas que ele não recomenda com o mesmo nome.
+
+    A vacina já tomada chega ao motor como um exame já realizado: título do catálogo do motor e data. O motor confere a
+    data e não faz mais nada com ela, porque não tem regra de histórico vacinal (perigo P-19, em aberto; "vacinas não
+    passam por esta regra", docs/periodicidade.md). Por isso nada aqui diz se a vacina está em dia nem quando é a
+    próxima dose: a data informada só acompanha a recomendação, que é a do motor, com a referência dele."""
+    from src.utils import catalogo
+    do_motor, doses = set(catalogo.vacinas_do_motor()), {}
+    for item in exames_anteriores or []:        # já validados pelo motor: dicionários com o nome e a data AAAA-MM-DD
+        titulo = ' '.join(str(item.get('exame') or '').split())
+        if titulo in do_motor:
+            doses.setdefault(titulo, set()).add(str(item.get('data') or '').strip())
+    recomendadas = [r for r in resposta.get('recommendations') or [] if r.get('categoria') == 'vacina']
+    nomes = {r['titulo'] for r in recomendadas}
+    return ([{'titulo': r['titulo'], 'motivo': r.get('subtitulo') or '', 'grau': r.get('grau_evidencia') or '',
+              'referencias': r.get('referencias') or [], 'doses_informadas': sorted(doses.get(r['titulo'], ()))}
+             for r in recomendadas],
+            [{'titulo': titulo, 'doses_informadas': sorted(datas)} for titulo, datas in doses.items() if titulo not in nomes])
+
+
 def conferir_pedido(paciente, pedidos):
     """Compara os exames pedidos com o que o check-up recomenda para o paciente. Devolve (resultado, erro).
 
     `paciente`: os dados no formato que o formulário do check-up envia (é também o formato previsto para os dados que
     virão do cadastro da operadora). Vão ao motor como estão, menos o nome; "exames já realizados" inclusive, de modo
-    que o exame ainda em dia sai como não indicado agora, com a data do próximo. `pedidos`: saída de exames_do_pedido.
-    `erro` é a mensagem do motor quando os dados do paciente são inválidos."""
+    que o exame ainda em dia sai como não indicado agora, com a data do próximo (a tela não os envia mais; a rota
+    continua aceitando). `pedidos`: saída de exames_do_pedido. `erro` é a mensagem do motor quando os dados do
+    paciente são inválidos.
+
+    As vacinas saem à parte, fora da conferência (ver _vacinas_para_avisar)."""
     from src.routes.checkup_intelligent import recomendar
     from src.utils.reference_links import build_reference_links
     dados = {k: v for k, v in (paciente or {}).items() if k != 'nome_paciente'}
@@ -1053,10 +1079,12 @@ def conferir_pedido(paciente, pedidos):
                                     'diretriz registrada para ele.', sem_justificativa=True)
         linhas.append(linha)
     indicadas = sum(1 for linha in linhas if linha['veredito'] == 'indicado')
+    vacinas, outras_vacinas = _vacinas_para_avisar(resposta, dados.get('exames_anteriores'))
     return {
         'resumo': {'pedidos': len(linhas), 'indicados': indicadas, 'nao_indicados': len(linhas) - indicadas,
                    'do_checkup': len(do_checkup)},
         'linhas': linhas,
         'do_checkup': [{'titulo': r['titulo'], 'motivo': r.get('subtitulo') or '', 'grau': r.get('grau_evidencia') or '',
                         'categoria': r['categoria'], 'pedido': r['titulo'] in atendidos} for r in do_checkup],
+        'vacinas': vacinas, 'outras_vacinas_informadas': outras_vacinas,
     }, None

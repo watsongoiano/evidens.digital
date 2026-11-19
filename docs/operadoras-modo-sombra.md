@@ -27,7 +27,8 @@ médico pediu tem evidência para aquele paciente.
    laboratório nos formatos conhecidos e, se o PDF não for laudo, uma lista de nomes de exame ou de códigos TUSS.
    PDF escaneado, sem texto, não é lido.
 2. **Dados do paciente.** O formulário é o do check-up, com os mesmos itens, dentro da própria página (um quadro com
-   o formulário do check-up: há um formulário só, sem cópia para manter).
+   o formulário do check-up: há um formulário só, sem cópia para manter). A única diferença é a seção 08: sai "Exames
+   já realizados" e entra "Vacinas já tomadas" (ver "Exames já realizados e vacinas").
 3. **Resultado.** O motor do check-up roda para o paciente e cada exame pedido sai como:
    - **Indicado**: está entre os exames que o check-up recomenda para o paciente. Vêm o grupo, a periodicidade, o
      grau e as referências da própria recomendação.
@@ -35,7 +36,7 @@ médico pediu tem evidência para aquele paciente.
      dia, adiado na gestação, recomendação de não fazer), o motivo aparece. Senão, vai a justificativa formal, com a
      fonte e o link (ver "Justificativa do exame não indicado").
    A tela mostra também a lista do que o check-up indica para o paciente, com o que foi e o que não foi pedido, e
-   baixa o resultado em CSV.
+   baixa o resultado em CSV. À parte, fora da conferência, vêm as vacinas para avisar ao paciente.
 
 ### Justificativa do exame não indicado
 
@@ -92,8 +93,39 @@ quais alternativas do modo em lote valem na tela (a citologia no lugar do DNA-HP
 clínico, 18/11/2026).
 
 Os dados do paciente vão à rota `POST /api/admin/operadoras/conferir` no campo `paciente`, em JSON no formato que o
-formulário do check-up envia; é a porta de entrada prevista para os dados que virão do cadastro da operadora. "Exames
-já realizados" vai junto, como no check-up. Nada é gravado: o PDF e os dados são lidos em memória e descartados.
+formulário do check-up envia; é a porta de entrada prevista para os dados que virão do cadastro da operadora. Nada é
+gravado: o PDF e os dados são lidos em memória e descartados.
+
+### Exames já realizados e vacinas
+
+Decisão do responsável clínico (18/11/2026): a página das operadoras não pergunta os exames já realizados; no lugar,
+pergunta as vacinas já tomadas, e o resultado traz as vacinas a avisar, de acordo com a SBIm. O formulário do check-up
+do médico não muda.
+
+- **Seção 08 escondida só no formulário embutido** (`modo=operadora`). Os campos dela são desligados e nada dela
+  segue para o motor: exame, data, resultado ou laudo. Sem eles a página não tem "já feito e em dia", e os
+  resultados que entram nos cálculos (colesterol, HDL, creatinina, relação albumina/creatinina, HbA1c e DNA-HPV) não
+  são informados. As duas perguntas sobre o rastreio anterior do colo do útero, que ficavam nessa seção e não são
+  exame já feito, passam para o fim de "Comorbidades e História Prévia". A rota continua aceitando
+  `exames_anteriores` com exames (dados do cadastro da operadora).
+- **Vacinas já tomadas** (seção 08 do formulário embutido, opcional): vacina escolhida no catálogo do motor
+  (`src/data/catalogo_motor.json`, servido por `GET /api/admin/operadoras/vacinas`) e a data; a mesma vacina pode ser
+  informada mais de uma vez. Seguem no formato que o motor já entende, o de `exames_anteriores` (título e data), e
+  ele confere a data. **O motor não tem regra de histórico vacinal** (perigo P-19, em aberto; "vacinas não passam por
+  esta regra", `docs/periodicidade.md`), e nenhuma foi criada: a vacina informada continua recomendada, e a tela não
+  diz se ela está em dia nem quando é a próxima dose. A data só aparece ao lado da recomendação.
+- **Vacinas para avisar ao paciente** (resultado): as vacinas que o check-up recomenda para o paciente, cada uma com
+  o esquema do subtítulo, a referência que o motor dá, com link, e o grau. O motor cita a SBIm (calendários e
+  pacientes especiais), às vezes com outra fonte ao lado; a exceção, hoje, é a pneumocócica na hipertensão arterial
+  pulmonar, que ele recomenda pela ESC/ERS 2022. Campos da resposta: `vacinas` (`titulo`, `motivo`, `grau`,
+  `referencias`, `doses_informadas`) e `outras_vacinas_informadas` (`titulo`, `doses_informadas`), para a vacina
+  informada que o check-up não recomenda com aquele nome ao paciente. A vacina que a triagem de segurança retira
+  não aparece.
+- **Fora da conferência.** As vacinas não liberam nem barram exame algum, e a tela diz isso: `resumo`, `linhas` e
+  `do_checkup` são os mesmos com e sem vacinas. O CSV continua só com os exames (não tem coluna de tipo).
+
+Para a tela dizer "em dia" e a data da próxima dose falta uma decisão clínica, vacina por vacina: como ler o esquema
+da SBIm a partir das doses informadas (dose anual, reforço a cada 10 anos, esquemas de 2 e 3 doses, dose única).
 
 **Limite conhecido.** O check-up pede um exame por indicação. Quando ele recomenda a HbA1c para rastrear diabetes, a
 glicemia de jejum pedida no lugar sai como não indicada, embora a própria recomendação a cite como alternativa.

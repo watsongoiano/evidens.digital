@@ -1,7 +1,8 @@
 // Conferência do pedido pelo check-up (/operadoras, por enquanto só administrador).
 // O formulário do paciente é o do check-up, num quadro com a própria página do check-up (um formulário só, sem
-// cópia). Ele envia os dados e o PDF anexado aqui para /api/admin/operadoras/conferir e entrega o resultado, que
-// esta página mostra. Nada fica guardado: recarregar a página apaga tudo.
+// cópia), com "Vacinas já tomadas" no lugar de "Exames já realizados". Ele envia os dados e o PDF anexado aqui para
+// /api/admin/operadoras/conferir e entrega o resultado, que esta página mostra: a conferência dos exames e, à parte,
+// as vacinas a avisar. Nada fica guardado: recarregar a página apaga tudo.
 (function () {
   'use strict';
   const VEREDITOS = {
@@ -92,6 +93,27 @@
     }));
   }
 
+  // Vacinas que o check-up recomenda para o paciente, para a operadora avisá-lo. Ficam fora da conferência do
+  // pedido (não mudam o veredito de exame algum) e fora do CSV, que não tem coluna de tipo. A data informada em
+  // "Vacinas já tomadas" só acompanha a recomendação: o check-up não diz se a vacina está em dia.
+  const dosesInformadas = v => (v.doses_informadas || []).map(dataBr).filter(Boolean).join(', ');
+  function vacinas() {
+    const itens = dados.vacinas || [], outras = dados.outras_vacinas_informadas || [];
+    $('[data-vacinas-contagem]').textContent = `(${itens.length})`;
+    $('[data-vacinas]').replaceChildren(...(itens.length ? itens.map(v => {
+      const cartao = el('div', 'recommendation-card');
+      cartao.append(el('h5', '', v.titulo));
+      if (v.motivo) cartao.append(el('p', 'text-[14px] text-ink/75 mt-2', v.motivo));
+      if (dosesInformadas(v)) cartao.append(el('p', 'text-[13px] text-ink/60 mt-1', `Informada como já tomada em ${dosesInformadas(v)}.`));
+      const rodape = fontes(v.referencias, v.grau);
+      if (rodape) cartao.append(rodape);
+      return cartao;
+    }) : [el('p', 'text-[14px] text-ink/50', 'Nenhuma vacina a avisar para este paciente.')]));
+    $('[data-outras-vacinas]').replaceChildren(...(outras.length ? [
+      el('p', 'text-[13px] text-ink/60', 'Outras vacinas informadas como já tomadas, que o check-up não recomenda com este nome para este paciente:'),
+      ...outras.map(v => el('p', 'text-[14px] text-ink/75 mt-1', `${v.titulo}: ${dosesInformadas(v)}.`))] : []));
+  }
+
   function baixar() {
     if (!dados) return;
     const campo = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
@@ -128,7 +150,7 @@
         $('[data-andamento]').style.display = 'none';
         $('[data-desatualizado]').style.display = 'none';
         $('[data-resultado]').style.display = '';
-        resumo(); lista();
+        resumo(); lista(); vacinas();
         $('[data-resultado]').scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });

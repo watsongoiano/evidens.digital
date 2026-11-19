@@ -51,7 +51,7 @@ Os testes ficam em `tests/` e rodam com `python -m pytest`.
 
 | ID | Perigo | Exemplo observado |
 |---|---|---|
-| P-19 | Vacina sugerida a quem já está vacinado | Não há entrada de histórico vacinal |
+| P-19 | Vacina sugerida a quem já está vacinado | O motor não tem regra de histórico vacinal. Só a página das operadoras pergunta as vacinas já tomadas, e a data apenas acompanha a recomendação (`docs/operadoras-modo-sombra.md`) |
 | P-21 | Grau de evidência atribuído sem correspondência com a fonte | Graus digitados à mão em cada regra |
 | P-23 | Dado relevante coletado e ignorado | País, álcool, história familiar de câncer e de cardiopatia. A doença renal (marcada ou pela TFG < 60) passou a definir o acompanhamento (ver P-25) |
 
