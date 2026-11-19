@@ -447,7 +447,16 @@ def test_dose_da_enoxaparina_e_frase_do_doac_tem_traducao():
     assert len(frases) > 20 and not sorted(f for f in frases if not i18n.coberto(f))
     assert t(itens['']['texto']).startswith('Enter whether the dose is full or prophylactic. At full dose, last injection 24 h before')
     assert t(itens['plena']['resumo']) == 'Full dose: last dose on the morning of the day before, at half the daily dose'
-    assert t(itens['plena']['divergencia']).endswith('SBC 2024 (IIa-C): last dose 24 h before. We chose to follow the ACCP 2022.')
+    assert t(itens['plena']['classe']) == 'ACCP 2022 (extrapolated from bridging) · SBC IIa-C (extrapolated from bridging) · ASRA 2025'
+    assert 'the intervals the ACCP 2022 defines for LMWH in warfarin bridging, extended here to continuous use' in t(itens['plena']['texto'])
+    assert t(itens['plena']['divergencia']).endswith(
+        'SBC 2024 (IIa-C): last dose 24 h before. The two wordings are compatible in timing (the morning of the day before is '
+        'about 24 h before surgery); the difference is the half dose on the day before, described only by the ACCP.')
+    for dose in ('plena', 'profilatica'):
+        assert ('the ACCP 2022 describes it in warfarin bridging (enoxaparin 40 mg/day in the first 24 to 72 h after '
+                'high-bleeding-risk surgery, until the full dose is resumed) and, after DOAC interruption, in patients at high '
+                'risk of venous thromboembolism (low-dose anticoagulant in the first 48 to 72 h after the procedure)'
+                ) in t(itens[dose]['texto'])
     assert t(itens['profilatica']['resumo']) == 'Prophylactic dose: timing of the last dose agreed with the team'
     assert 'do not set the interval between the last dose and surgery' in t(itens['profilatica']['texto'])
     for item in doacs:

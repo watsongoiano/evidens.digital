@@ -449,7 +449,10 @@ def test_rota_leva_a_dose_da_enoxaparina_ate_a_conduta(app, contas):
     assert sem['enoxaparina']['texto'].startswith('Informe se a dose é plena ou profilática.')
     plena = itens(dose_heparina='plena')['enoxaparina']
     assert plena['resumo'] == 'Dose plena: última dose na manhã da véspera, com metade da dose diária'
-    assert plena['divergencia'].endswith('Nós optamos por seguir a ACCP 2022.')
+    assert plena['classe'] == 'ACCP 2022 (extrapolado da ponte) · SBC IIa-C (extrapolado da ponte) · ASRA 2025'
+    assert 'ACCP 2022 define para a HBPM na ponte da varfarina, aqui estendidos ao uso contínuo' in plena['texto']
+    assert plena['divergencia'].endswith('a diferença é a meia dose da véspera, descrita só pela ACCP.')
+    assert 'optamos' not in plena['divergencia']
     assert '<a href="https://doi.org/10.1056/EVIDra2200322"' in plena['referencia_html']
     profilatica = itens(dose_heparina='profilatica')
     assert profilatica['enoxaparina']['conduta'] == 'individualizar'

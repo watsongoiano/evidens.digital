@@ -438,12 +438,22 @@ def test_enoxaparina_extrapolada_e_rotulada():
 
 # --- Enoxaparina pela dose e DOAC (pedido do responsável clínico: dose plena ou profilática) --------------------------
 # Fontes: ACCP 2022 conforme a revisão de Douketis e Spyropoulos (NEJM Evidence 2023;2(6), doi 10.1056/EVIDra2200322,
-# Figuras 1 e 2 e texto), SBC 2024 (Quadro 25 e texto do 4.3.2.6) e AHA/ACC (Tabela 13).
+# Figuras 1 e 2 e texto), SBC 2024 (Quadro 25 e texto do 4.3.2.6) e AHA/ACC (Tabela 13). Os intervalos da dose plena
+# estão na nota da Figura 1, sobre a HBPM usada como ponte na interrupção da varfarina: o uso contínuo é uma extensão,
+# e o item tem de dizer isso. A dose baixa depois do procedimento vem da mesma nota (ponte) e da Figura 2 (após a
+# interrupção de DOAC, no alto risco de tromboembolismo venoso, nas primeiras 48 a 72 h).
 NEUROAXIAL_DA_HBPM = 'Na anestesia neuroaxial (ASRA): punção ≥24 h após dose plena e ≥12 h após dose profilática.'
 DOSE_DO_DOAC = ('A dose do DOAC (plena ou reduzida) não muda este intervalo nas diretrizes usadas aqui: ele depende do '
                 'fármaco, do ClCr e do risco de sangramento.')
 URL_ACCP = 'https://doi.org/10.1056/EVIDra2200322'
+DIVERGENCIA_NEUTRA = ('As duas redações são compatíveis no horário (a manhã da véspera fica a cerca de 24 h da cirurgia); a '
+                      'diferença é a meia dose da véspera, descrita só pela ACCP.')
 DOACS = ('apixabana', 'rivaroxabana', 'edoxabana', 'dabigatrana')
+DOSE_BAIXA_DEPOIS = ('Dose baixa depois da cirurgia: a ACCP 2022 a descreve na ponte da varfarina (enoxaparina 40 mg/dia nas '
+                     'primeiras 24 a 72 h após cirurgia de sangramento alto, até voltar a dose plena) e, após a interrupção '
+                     'de DOAC, em pacientes de alto risco de tromboembolismo venoso (anticoagulante em dose baixa nas '
+                     'primeiras 48 a 72 h após o procedimento). A SBC 2024 fala em iniciar a HBPM profilática 12 h após o '
+                     'procedimento em alto risco de tromboembolismo venoso.')
 
 
 def _referencias_com_link(i):
@@ -451,7 +461,7 @@ def _referencias_com_link(i):
     return {r['label']: r['url'] for r in i['referencias']}
 
 
-def test_enoxaparina_dose_plena_segue_a_accp_e_mostra_a_sbc():
+def test_enoxaparina_dose_plena_mostra_a_accp_e_a_sbc_como_extrapolacao_da_ponte():
     i = item('enoxaparina', dose_heparina='plena', urgencia='eletiva', sangramento='alto')
     assert i['conduta'] == 'suspender'
     assert i['resumo'] == 'Dose plena: última dose na manhã da véspera, com metade da dose diária'
@@ -459,22 +469,28 @@ def test_enoxaparina_dose_plena_segue_a_accp_e_mostra_a_sbc():
     # antes: ACCP 2022 (manhã da véspera, meia dose) e SBC (24 h antes, IIa-C), cada uma com o seu nome
     assert ('ACCP 2022, dose plena (enoxaparina 1 mg/kg de 12/12 h ou 1,5 mg/kg/dia): última dose na manhã da véspera '
             '(D-1), com metade da dose diária total.') in t
-    assert 'SBC 2024 (Quadro 25, IIa-C): última dose 24 h antes' in t
-    # depois: retorno da dose plena e dose baixa nos primeiros dias
+    # depois: retorno da dose plena
     assert ('Retorno da dose plena (ACCP 2022): cerca de 24 h após cirurgia de sangramento baixo ou moderado; 48 a 72 h '
             'após sangramento alto.') in t
-    assert 'enoxaparina 40 mg/dia' in t and 'primeiras 24 a 72 h após cirurgia de sangramento alto' in t
-    assert 'a SBC 2024 fala em iniciar a HBPM profilática 12 h após o procedimento' in t
-    assert t.endswith(NEUROAXIAL_DA_HBPM)                      # a frase do neuroeixo fica como estava
+    # honestidade com a fonte: ACCP e SBC definem esses intervalos para a HBPM na ponte; o uso contínuo é extensão
+    assert ('São os intervalos que a ACCP 2022 define para a HBPM na ponte da varfarina, aqui estendidos ao uso '
+            'contínuo.') in t
+    assert ('SBC 2024 (Quadro 25, IIa-C): última dose 24 h antes, intervalo que a SBC define para a HBPM na ponte, aqui '
+            'estendido ao uso contínuo.') in t
+    assert t.index('Retorno da dose plena') < t.index('São os intervalos que a ACCP 2022 define') < t.index('SBC 2024 (Quadro 25')
+    # dose baixa depois da cirurgia: só os dois contextos em que a ACCP a descreve, e o que a SBC diz
+    assert DOSE_BAIXA_DEPOIS in t and 'pode ser usada' not in t
+    assert t.endswith(DOSE_BAIXA_DEPOIS + ' ' + NEUROAXIAL_DA_HBPM)   # a frase do neuroeixo fica como estava
     assert 'Informe se a dose' not in t
-    assert i['classe'] == 'ACCP 2022 · SBC IIa-C (extrapolado da ponte) · ASRA 2025'
+    assert i['classe'] == 'ACCP 2022 (extrapolado da ponte) · SBC IIa-C (extrapolado da ponte) · ASRA 2025'
     refs = _referencias_com_link(i)
     assert refs['ACCP 2022, antitrombóticos no perioperatório (resumo em NEJM Evidence 2023;2(6))'] == URL_ACCP
     assert 'SBC 2024, Quadro 25 e texto do 4.3.2.6' in refs and any(r.startswith('ASRA 2025') for r in refs)
-    # ACCP e SBC escrevem a última dose de modo diferente: a divergência mostra as duas e diz qual seguimos
-    d = i['divergencia']
-    assert 'ACCP 2022: última dose plena na manhã da véspera (D-1), com metade da dose diária total.' in d
-    assert 'SBC 2024 (IIa-C): última dose 24 h antes.' in d and d.endswith('Nós optamos por seguir a ACCP 2022.')
+    # ACCP e SBC escrevem a última dose de modo diferente: o aviso mostra as duas, diz que o horário é compatível e
+    # que a diferença é a meia dose da véspera; não declara escolha entre as sociedades
+    assert i['divergencia'] == ('ACCP 2022: última dose plena na manhã da véspera (D-1), com metade da dose diária total. '
+                                'SBC 2024 (IIa-C): última dose 24 h antes. ' + DIVERGENCIA_NEUTRA)
+    assert 'optamos' not in i['divergencia'] and 'seguir' not in i['divergencia']
 
 
 def test_enoxaparina_dose_profilatica_diz_que_as_fontes_nao_fixam_o_intervalo():
@@ -483,9 +499,9 @@ def test_enoxaparina_dose_profilatica_diz_que_as_fontes_nao_fixam_o_intervalo():
     assert i['resumo'] == 'Dose profilática: horário da última dose combinado com a equipe'
     t = i['texto']
     assert 'ACCP 2022, SBC 2024 e AHA/ACC não fixam o intervalo entre a última dose e a cirurgia' in t
-    assert 'enoxaparina 40 mg/dia' in t and 'primeiras 24 a 72 h após cirurgia de sangramento alto' in t
-    assert 'a SBC 2024 fala em iniciar a HBPM profilática 12 h após o procedimento' in t
-    assert '≥12 h após dose profilática' in t and t.endswith(NEUROAXIAL_DA_HBPM)
+    # depois da cirurgia: a mesma ressalva da dose plena (ponte; após DOAC, alto risco de TEV nas primeiras 48 a 72 h)
+    assert DOSE_BAIXA_DEPOIS in t and 'pode ser usada' not in t
+    assert '≥12 h após dose profilática' in t and t.endswith(DOSE_BAIXA_DEPOIS + ' ' + NEUROAXIAL_DA_HBPM)
     # nada do esquema da dose plena: nem "manhã da véspera", nem "24 h antes", nem divergência
     assert 'manhã da véspera' not in t and '24 h antes' not in t and 'metade da dose' not in t
     assert i['divergencia'] == '' and i['classe'] == 'Intervalo não fixado nas fontes · ASRA 2025'

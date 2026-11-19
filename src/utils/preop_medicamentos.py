@@ -20,7 +20,9 @@ Fontes (só entra o que tem fonte citável; o que não tem não gera item):
 - SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91; versão em inglês da Diretriz SBD 2025): antidiabéticos e
   insulinas (R4–R15, Tabela 2); aGLP-1 pela nota da SBA de 15/05/2026 (C.SBA-01744/2026).
 - ACCP 2022 (antitrombóticos no perioperatório), conforme a revisão de Douketis e Spyropoulos (NEJM Evidence
-  2023;2(6), doi 10.1056/EVIDra2200322), Figuras 1 e 2 e texto: enoxaparina em dose plena e em dose baixa.
+  2023;2(6), doi 10.1056/EVIDra2200322), Figuras 1 e 2 e texto: enoxaparina em dose plena e em dose baixa. Os
+  intervalos são os da HBPM na ponte da varfarina (nota da Figura 1), aqui estendidos ao uso contínuo; a dose baixa
+  depois do procedimento aparece na ponte e, após a interrupção de DOAC, no alto risco de TEV (Figura 2).
 
 Convenções:
 - D0 = dia da cirurgia. "Dias sem dose" são dias inteiros antes do D0 em que o fármaco não é tomado.
@@ -1066,12 +1068,18 @@ def _varfarina(chave, ctx):
 # Enoxaparina pela dose (campo "Dose da enoxaparina" da tela). ACCP 2022, lida na revisão de Douketis e Spyropoulos
 # (NEJM Evidence 2023;2(6), Figuras 1 e 2 e texto), e SBC 2024 (Quadro 25 e texto do 4.3.2.6). Nenhuma delas, nem a
 # AHA/ACC (Tabela 13), fixa o intervalo entre a última dose profilática e a cirurgia: o item diz isso.
+# Os intervalos da dose plena (última dose na manhã da véspera com metade da dose diária, retorno em 24 h ou em 48 a
+# 72 h) estão na nota da Figura 1, sobre a HBPM usada como ponte na interrupção da varfarina; a SBC também os define
+# para a ponte. O uso contínuo de enoxaparina é uma extensão nossa, e o texto e a classe do item dizem isso. A dose
+# baixa depois do procedimento aparece na mesma nota (ponte) e na Figura 2 (após a interrupção de DOAC, no alto risco
+# de tromboembolismo venoso, nas primeiras 48 a 72 h): o texto não afirma mais do que isso.
 _DOSES_HEPARINA = ('plena', 'profilatica')
 _HBPM_NEUROAXIAL = 'Na anestesia neuroaxial (ASRA): punção ≥24 h após dose plena e ≥12 h após dose profilática.'
-_HBPM_BAIXA_DEPOIS = ('Depois da cirurgia, a dose baixa ou profilática (enoxaparina 40 mg/dia) pode ser usada nas '
-                      'primeiras 24 a 72 h após cirurgia de sangramento alto, até voltar a dose plena (ACCP 2022); a '
-                      'SBC 2024 fala em iniciar a HBPM profilática 12 h após o procedimento em alto risco de '
-                      'tromboembolismo venoso.')
+_HBPM_BAIXA_DEPOIS = ('Dose baixa depois da cirurgia: a ACCP 2022 a descreve na ponte da varfarina (enoxaparina 40 mg/dia '
+                      'nas primeiras 24 a 72 h após cirurgia de sangramento alto, até voltar a dose plena) e, após a '
+                      'interrupção de DOAC, em pacientes de alto risco de tromboembolismo venoso (anticoagulante em dose '
+                      'baixa nas primeiras 48 a 72 h após o procedimento). A SBC 2024 fala em iniciar a HBPM '
+                      'profilática 12 h após o procedimento em alto risco de tromboembolismo venoso.')
 
 
 def _enoxaparina(chave, ctx):
@@ -1085,14 +1093,18 @@ def _enoxaparina(chave, ctx):
     if dose == 'plena':
         return _item(chave, 'suspender', 'Dose plena: última dose na manhã da véspera, com metade da dose diária',
                      'ACCP 2022, dose plena (enoxaparina 1 mg/kg de 12/12 h ou 1,5 mg/kg/dia): última dose na manhã da '
-                     'véspera (D-1), com metade da dose diária total. SBC 2024 (Quadro 25, IIa-C): última dose 24 h '
-                     'antes, intervalo que a SBC define para a HBPM na ponte. Retorno da dose plena (ACCP 2022): cerca '
-                     'de 24 h após cirurgia de sangramento baixo ou moderado; 48 a 72 h após sangramento alto. '
+                     'véspera (D-1), com metade da dose diária total. Retorno da dose plena (ACCP 2022): cerca de 24 h '
+                     'após cirurgia de sangramento baixo ou moderado; 48 a 72 h após sangramento alto. São os '
+                     'intervalos que a ACCP 2022 define para a HBPM na ponte da varfarina, aqui estendidos ao uso '
+                     'contínuo. SBC 2024 (Quadro 25, IIa-C): última dose 24 h antes, intervalo que a SBC define para a '
+                     'HBPM na ponte, aqui estendido ao uso contínuo. '
                      + _HBPM_BAIXA_DEPOIS + ' ' + _HBPM_NEUROAXIAL,
-                     'ACCP 2022 · SBC IIa-C (extrapolado da ponte) · ASRA 2025',
+                     'ACCP 2022 (extrapolado da ponte) · SBC IIa-C (extrapolado da ponte) · ASRA 2025',
                      _refs(_ref('accp'), _sbc('Quadro 25 e texto do 4.3.2.6'), _ref('asra')),
+                     # As duas posições, sem escolha entre as sociedades: o horário é compatível; muda a meia dose.
                      'ACCP 2022: última dose plena na manhã da véspera (D-1), com metade da dose diária total. SBC 2024 '
-                     '(IIa-C): última dose 24 h antes. Nós optamos por seguir a ACCP 2022.')
+                     '(IIa-C): última dose 24 h antes. As duas redações são compatíveis no horário (a manhã da véspera '
+                     'fica a cerca de 24 h da cirurgia); a diferença é a meia dose da véspera, descrita só pela ACCP.')
     if dose == 'profilatica':
         return _item(chave, 'individualizar', 'Dose profilática: horário da última dose combinado com a equipe',
                      'Dose profilática antes da cirurgia: ACCP 2022, SBC 2024 e AHA/ACC não fixam o intervalo entre a '
