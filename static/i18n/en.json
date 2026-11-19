@@ -4361,7 +4361,28 @@
   "IgE específica para Aspergillus, soro": "Aspergillus-specific IgE, serum",
   "IgG específica para Aspergillus, soro": "Aspergillus-specific IgG, serum",
   "Colher cultura de escarro no início de cada exacerbação, de preferência antes do antibiótico, e repetir se não houver resposta. Pesquisar micobactérias também nos sintomas persistentes que não melhoram com antibiótico e antes de iniciar macrolídeo prolongado. Isolamento novo de Pseudomonas aeruginosa: repetir a cultura e discutir de imediato com o especialista; a diretriz sugere o tratamento de erradicação (recomendação condicional). No paciente estável, a cultura positiva isolada não é motivo para antibiótico.": "Collect a sputum culture at the start of each exacerbation, ideally before the antibiotic, and repeat it if there is no response. Also test for mycobacteria when persistent symptoms do not improve with antibiotics and before starting a long-term macrolide. New isolation of Pseudomonas aeruginosa: repeat the culture and discuss immediately with the specialist; the guideline suggests eradication treatment (conditional recommendation). In a stable patient, a positive culture alone is not a reason for antibiotics.",
-  "A espirometria entra na avaliação da gravidade (VEF1), não na investigação da causa. O resumo da diretriz não fixa intervalo de consulta, de cultura de escarro nem de espirometria no paciente estável, e não trata de vacinas. Causas raras (discinesia ciliar, fibrose cística) são investigadas quando os exames iniciais são negativos e a história as sugere. Na avaliação inicial, rever comorbidades: risco cardiovascular, osteoporose, rinossinusite, refluxo e humor, e otimizar o tratamento da doença de via aérea associada. A diretriz trata das bronquiectasias do adulto não relacionadas à fibrose cística.": "Spirometry is part of the severity assessment (FEV1), not of the investigation of the cause. The guideline summary does not set an interval for visits, sputum culture or spirometry in stable patients, and does not address vaccines. Rare causes (ciliary dyskinesia, cystic fibrosis) are investigated when the initial tests are negative and the history suggests them. At the baseline assessment, review comorbidities: cardiovascular risk, osteoporosis, rhinosinusitis, reflux and mood, and optimise the treatment of co-existing airway disease. The guideline addresses bronchiectasis in adults not related to cystic fibrosis."
+  "A espirometria entra na avaliação da gravidade (VEF1), não na investigação da causa. O resumo da diretriz não fixa intervalo de consulta, de cultura de escarro nem de espirometria no paciente estável, e não trata de vacinas. Causas raras (discinesia ciliar, fibrose cística) são investigadas quando os exames iniciais são negativos e a história as sugere. Na avaliação inicial, rever comorbidades: risco cardiovascular, osteoporose, rinossinusite, refluxo e humor, e otimizar o tratamento da doença de via aérea associada. A diretriz trata das bronquiectasias do adulto não relacionadas à fibrose cística.": "Spirometry is part of the severity assessment (FEV1), not of the investigation of the cause. The guideline summary does not set an interval for visits, sputum culture or spirometry in stable patients, and does not address vaccines. Rare causes (ciliary dyskinesia, cystic fibrosis) are investigated when the initial tests are negative and the history suggests them. At the baseline assessment, review comorbidities: cardiovascular risk, osteoporosis, rhinosinusitis, reflux and mood, and optimise the treatment of co-existing airway disease. The guideline addresses bronchiectasis in adults not related to cystic fibrosis.",
+  "Há mais de 12 meses": "More than 12 months ago",
+  "Já somados:": "Already counted:",
+  "incompleto, falta informar": "incomplete, still missing",
+  "Falta informar há quanto tempo foi o TEV (menos de 3 meses, de 3 a 12 meses ou mais de 12 meses) para classificar o risco tromboembólico e decidir a ponte.": "How long ago the VTE occurred (less than 3 months, 3 to 12 months or more than 12 months) is needed to classify thromboembolic risk and decide on bridging.",
+  "Sem esse dado, a ponte não é indicada nem dispensada: TEV há menos de 3 meses é alto risco.": "Without it, bridging is neither indicated nor ruled out: VTE less than 3 months ago is high risk.",
+  "Risco tromboembólico não classificado: falta informar há quanto tempo foi o TEV (menos de 3 meses, de 3 a 12 meses ou mais de 12 meses).": "Thromboembolic risk not classified: how long ago the VTE occurred (less than 3 months, 3 to 12 months or more than 12 months) is missing.",
+  "TEV há menos de 3 meses é alto risco, com ponte de heparina (AHA 2a, C-LD; SBC IIa-C); sem o tempo, a ponte não é indicada nem dispensada.": "VTE less than 3 months ago is high risk, with heparin bridging (AHA 2a, C-LD; SBC IIa-C); without the timing, bridging is neither indicated nor ruled out.",
+  "há quanto tempo foi o TEV (menos de 3 meses, de 3 a 12 meses ou mais de 12 meses)": "how long ago the VTE occurred (less than 3 months, 3 to 12 months or more than 12 months)",
+  "TEV há menos de 3 meses: considerar adiar a cirurgia eletiva": "VTE less than 3 months ago: consider postponing elective surgery",
+  "TEV há menos de 3 meses é alto risco tromboembólico (AHA, Tabela 14; SBC, Tabela 11).": "VTE less than 3 months ago is high thromboembolic risk (AHA, Table 14; SBC, Table 11).",
+  "Em pacientes selecionados, com trombose recente e alto risco trombótico residual, adiar a cirurgia eletiva pode permitir uma interrupção mais segura do anticoagulante (AHA, texto do §7.6, sem classe de recomendação).": "In selected patients with recent thrombosis and high residual thrombotic risk, postponing elective surgery may allow safer interruption of the anticoagulant (AHA, §7.6 text, no class of recommendation).",
+  "A AHA não define por quanto tempo adiar: decidir em equipe, com quem prescreve o anticoagulante, o cirurgião e o anestesista.": "The AHA does not define how long to postpone: decide as a team, with the anticoagulant prescriber, the surgeon and the anesthesiologist.",
+  "Só a AHA/ACC fala em adiar, e em texto de apoio, sem classe de recomendação.": "Only the AHA/ACC mentions postponing, and in supportive text, with no class of recommendation.",
+  "A SBC 2024 classifica o TEV há <3 meses como alto risco (Tabela 11), sem tratar do adiamento.": "The SBC 2024 classifies VTE <3 months ago as high risk (Table 11), without addressing postponement.",
+  "Nós optamos por mostrar o aviso, para decisão caso a caso.": "We chose to show the warning, for a case-by-case decision.",
+  "AHA/ACC 2026, §7.6 (texto) e Tabela 14": "AHA/ACC 2026, §7.6 (text) and Table 14",
+  "SBC 2024, Tabela 11": "SBC 2024, Table 11",
+  "Escore incompleto: o risco pulmonar não é classificado.": "Incomplete score: pulmonary risk is not classified.",
+  "SpO₂, até 24 pontos": "SpO₂, up to 24 points",
+  "hemoglobina, 11 pontos": "hemoglobin, 11 points",
+  "duração da cirurgia, até 23 pontos": "surgery duration, up to 23 points"
  },
  "padroes": [
   [
@@ -5177,14 +5198,6 @@
    "Anemia (hemoglobin %1 g/dL): test for iron deficiency, which is treated with iron before elective surgery."
   ],
   [
-   "^TFG (\\d+) mL/min/1,73 m²: dose máxima de 1\\.000 mg/dia \\(KDIGO 2022\\)\\.$",
-   "eGFR %1 mL/min/1.73 m²: maximum dose 1,000 mg/day (KDIGO 2022)."
-  ],
-  [
-   "^TFG (\\d+) mL/min/1,73 m² \\(CKD-EPI 2021\\): a metformina é contraindicada abaixo de 30\\. Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir sem função renal estável\\.$",
-   "eGFR %1 mL/min/1.73 m² (CKD-EPI 2021): metformin is contraindicated below 30. Stop it and review treatment with the attending physician; after surgery, do not restart without stable kidney function."
-  ],
-  [
    "^Faltam dados para fechar o risco do paciente: (.+?)\\. Com o resultado: risco elevado, avaliação cardiológica indicada; risco baixo, liberar sem investigação de isquemia\\.$",
    "Data are missing to complete the patient's risk: $1. With the result: elevated risk, cardiac evaluation indicated; low risk, clear without ischemia testing."
   ],
@@ -5239,6 +5252,34 @@
   [
    "^AHA \\(Tabela 13, ClCr ([\\d,]+) mL/min, sangramento (baixo/moderado|alto)\\): sem dose do D-(\\d+) ao (D0|D\\+\\d+), com a última dose no D-(\\d+) e o reinício no D\\+(\\d+), após hemostasia\\.$",
    "AHA (Table 13, CrCl %1 mL/min, $2 bleeding risk): no dose from D-%3 to %4, with the last dose on D-%5 and restart on D+%6, after hemostasis."
+  ],
+  [
+   "^TFG ([\\d,]+) mL/min/1,73 m²: dose máxima de 1\\.000 mg/dia \\(KDIGO 2022\\)\\.$",
+   "eGFR %1 mL/min/1.73 m²: maximum dose 1,000 mg/day (KDIGO 2022)."
+  ],
+  [
+   "^TFG ([\\d,]+) mL/min/1,73 m² \\(CKD-EPI 2021\\): a metformina é contraindicada abaixo de 30\\. Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir sem função renal estável\\.$",
+   "eGFR %1 mL/min/1.73 m² (CKD-EPI 2021): metformin is contraindicated below 30. Stop it and review treatment with the attending physician; after surgery, do not restart without stable kidney function."
+  ],
+  [
+   "^Com o que foi informado, a pontuação mínima é (\\d+): já está na faixa de risco alto \\(≥ 45\\), qualquer que seja o dado que falta\\.$",
+   "With what was entered, the minimum score is %1: already in the high-risk range (≥ 45), whatever the missing data turn out to be."
+  ],
+  [
+   "^Com o que foi informado, a pontuação mínima é (\\d+): o risco é pelo menos intermediário \\(26 a 44\\) e passa a alto com 45 ou mais\\.$",
+   "With what was entered, the minimum score is %1: the risk is at least intermediate (26 to 44) and becomes high at 45 or more."
+  ],
+  [
+   "^Com o que foi informado, a pontuação mínima é (\\d+); a faixa \\(baixo < 26, intermediário 26 a 44, alto ≥ 45\\) depende do que falta\\.$",
+   "With what was entered, the minimum score is %1; the range (low < 26, intermediate 26 to 44, high ≥ 45) depends on what is missing."
+  ],
+  [
+   "^O que falta pode somar: (.+)\\.$",
+   "What is missing can add: $1."
+  ],
+  [
+   "^Confira (.+): aceito só número inteiro, de ([\\d.,]+) a ([\\d.,]+)\\.$",
+   "Check $1: only whole numbers are accepted, from %2 to %3."
   ]
  ],
  "manter": [

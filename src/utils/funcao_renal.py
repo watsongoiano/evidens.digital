@@ -25,6 +25,33 @@ _KFRE_COEF = {'idade': -0.2201, 'idade_media': 7.036, 'masculino': 0.2467, 'masc
 # Sobrevida basal fora da América do Norte (o Brasil entra aqui)
 _KFRE_S0 = {2: 0.9832, 5: 0.9365}
 
+# Limiares de decisão: TFG (categorias G da KDIGO 2024; 30 e 45 são também os da metformina) e ClCr dos
+# anticoagulantes (AHA/ACC, Tabela 13; SBC 2024, Quadro 26).
+LIMIARES_TFG = (15, 30, 45, 60, 90)
+LIMIARES_CLCR = (15, 30, 50)
+
+
+def para_exibir(valor, limiares, casas=0):
+    """Número para mostrar: arredondado para ``casas``; se o arredondamento o levar para o outro lado de um limiar de
+    decisão, sai com mais uma casa, truncada. Uma TFG de 29,6 aparece como 29,6, e não como 30 ao lado de
+    "contraindicada abaixo de 30".
+
+    Só para exibir: as comparações com os limiares usam sempre o valor exato, nunca o que esta função devolve.
+    """
+    def do_mesmo_lado(mostrado):
+        return all((mostrado < limite) == (valor < limite) for limite in limiares)
+
+    arredondado = prevent._arredondar_meio_para_cima(valor, casas)
+    if do_mesmo_lado(arredondado):
+        return int(arredondado) if casas == 0 else arredondado
+    for mais in range(casas + 1, casas + 6):
+        fator = 10 ** mais
+        for folga in (1e-9, 0):          # a folga desfaz o erro de ponto flutuante (29,7 × 10 = 296,99999999999997)
+            truncado = math.floor(valor * fator + folga) / fator
+            if do_mesmo_lado(truncado):
+                return truncado
+    return valor
+
 
 def categoria_g(tfg):
     for limite, cat, rotulo in ((90, 'G1', 'normal ou alta'), (60, 'G2', 'levemente diminuída'),
@@ -75,10 +102,12 @@ def avaliar(creatinina, idade, sexo, uacr=None, drc=False):
     """
     if not creatinina or sexo not in ('feminino', 'masculino'):
         return None
-    tfg = prevent.egfr_ckd_epi_2021(float(creatinina), idade, sexo)
+    # TFG exata: é a que define a categoria G, o corte de 60 e o KFRE. A tela recebe o número de ``para_exibir``.
+    tfg = prevent.tfg_ckd_epi_2021(float(creatinina), idade, sexo)
     g = categoria_g(tfg)
     a = categoria_a(float(uacr)) if uacr else None
-    cartao = {'tfg': tfg, 'g': g, 'a': a, 'drc': bool(drc), 'kfre': None, 'observacoes': [], 'fontes': [CKD_EPI, KDIGO],
+    cartao = {'tfg': para_exibir(tfg, LIMIARES_TFG), 'g': g, 'a': a, 'drc': bool(drc), 'kfre': None, 'observacoes': [],
+              'fontes': [CKD_EPI, KDIGO],
               'estagio': f"Estágio {ESTAGIO[g['categoria']]}" if drc else None,
               'risco_kdigo': risco_kdigo(g['categoria'], a['categoria']) if drc and a else None}
     obs = cartao['observacoes']

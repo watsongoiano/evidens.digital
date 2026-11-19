@@ -59,8 +59,10 @@ GRUPOS = [
         ('c', 'historia_familiar_dac', 'História familiar de doença coronária precoce', []),
         ('c', 'doenca_renal', 'Doença renal crônica', []),
         ('c', 'hepatopatia', 'Hepatopatia crônica', []),
+        # O tempo desde o TEV define o risco tromboembólico; sem ele, o motor não classifica (não presume > 12 meses).
         ('c', 'tev', 'Trombose venosa ou TEP prévio', [
-            ('c', 'tev_recente_3m', 'Há menos de 3 meses'), ('c', 'tev_3_12m', 'Entre 3 e 12 meses')]),
+            ('c', 'tev_recente_3m', 'Há menos de 3 meses'), ('c', 'tev_3_12m', 'Entre 3 e 12 meses'),
+            ('c', 'tev_mais_12m', 'Há mais de 12 meses')]),
         ('c', 'trombofilia_grave', 'Trombofilia grave ou antifosfolípide', []),
         ('c', 'cancer_ativo', 'Câncer ativo', []),
     ]),
