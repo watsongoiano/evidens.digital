@@ -412,8 +412,8 @@ def _como_na_lista(titulo):
     from src.utils import periodicidade
     global _LISTA
     if _LISTA is None:
-        _LISTA = {periodicidade.chaves(t): t for t in periodicidade.exames_conhecidos()}
-    return _LISTA.get(periodicidade.chaves(titulo), titulo)
+        _LISTA = {periodicidade.chaves_do_exame(t): t for t in periodicidade.exames_conhecidos()}
+    return _LISTA.get(periodicidade.chaves_do_exame(titulo), titulo)
 
 
 _LISTA = None

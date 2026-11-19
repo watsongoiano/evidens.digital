@@ -61,6 +61,8 @@ COMORBIDADES = {
                    'busca': 'rcu colite ulcerativa dii doenca inflamatoria intestinal autoimune'},
     'esclerose_sistemica': {'rotulo': 'Esclerose sistêmica (esclerodermia)', 'busca': 'autoimune colagenose'},
     'asma_grave': {'rotulo': 'Asma moderada ou grave'},
+    'bronquiectasias': {'rotulo': 'Bronquiectasias (adulto, sem fibrose cística)',
+                        'busca': 'bronquiectasia escarro pseudomonas abpa'},
     'hipertensao_arterial_pulmonar': {'rotulo': 'Hipertensão arterial pulmonar (grupo 1)',
                                       'busca': 'hipertensao pulmonar hap pah bosentana ambrisentana sildenafila'},
     'asplenia': {'rotulo': 'Asplenia / esplenectomia', 'busca': 'baco'},
@@ -298,6 +300,9 @@ EULAR_VACINAS = 'EULAR 2019 (vacinação em DRAI)'
 AAD_PSORIASE = 'AAD-NPF 2019 (comorbidades da psoríase)'
 ACR_CHEST_DPI = 'ACR/CHEST 2023 (doença pulmonar intersticial)'
 ESC_ERS_HP = 'ESC/ERS 2022 (hipertensão pulmonar)'
+# Diretriz ERS 2025 (Chalmers et al., Eur Respir J 2025;66:2501126), lida no resumo dos próprios autores para a
+# atenção primária (Mosgrove et al., npj Prim Care Respir Med 2026, doi 10.1038/s41533-026-00528-z).
+ERS_BRONQUIECTASIAS = 'ERS 2025 (bronquiectasias) / Mosgrove 2026 (resumo da ERS 2025)'
 ECCO_ANEMIA = 'ECCO 2015 (anemia na DII)'
 BSG_DII = 'BSG 2025 (vigilância colorretal na DII)'
 ACG_DII = 'ACG 2017 (cuidados preventivos na DII)'
@@ -1682,6 +1687,38 @@ def aplicar(recs, idade, sexo, comorbidades, medicacoes, familia, gestante=False
         add('Espirometria, com broncodilatador', 'imagem',
             'Asma: função pulmonar no diagnóstico, 3-6 meses após iniciar o controlador e depois periodicamente, pelo menos a '
             'cada 1-2 anos.', 'Asma moderada ou grave | A cada 1-2 anos', GINA, 'C')
+    if 'bronquiectasias' in com:
+        # ERS 2025, recomendação 1 (forte; certeza moderada, de revisão narrativa): testagem padronizada para a causa, a
+        # gravidade, o risco, as comorbidades e os traços tratáveis. O painel abaixo é o que o resumo dos autores manda
+        # fazer em todo paciente com bronquiectasias confirmadas (Mosgrove 2026, p. 2 e Tabela 1). A força é a da
+        # recomendação 1; não há força por exame. O resumo não fixa intervalo de consulta, de cultura nem de espirometria
+        # no paciente estável e não trata de vacinas: nada disso vira pedido.
+        painel = ('Bronquiectasias: painel de exames para investigar a causa, indicado a todo paciente com o '
+                  'diagnóstico confirmado: hemograma, imunoglobulinas (IgG, IgA e IgM), eletroforese de proteínas, '
+                  'pesquisa de aspergilose broncopulmonar alérgica (IgE total, IgE e IgG para Aspergillus) e escarro '
+                  'para bactérias e micobactérias.')
+        for titulo in ('Hemograma completo com plaquetas', 'Imunoglobulina G (IgG), soro', 'Imunoglobulina A (IgA), soro',
+                       'Imunoglobulina M (IgM), soro', 'Eletroforese de proteínas, soro',
+                       'Imunoglobulina E (IgE) total, soro', 'IgE específica para Aspergillus, soro',
+                       'IgG específica para Aspergillus, soro', 'Cultura de escarro (bactérias)',
+                       'Cultura para micobactérias, escarro'):
+            add(titulo, 'laboratorio', painel, 'Bronquiectasias | Avaliação inicial', ERS_BRONQUIECTASIAS, 'A')
+        orientar('Bronquiectasias: escarro no seguimento',
+                 'Colher cultura de escarro no início de cada exacerbação, de preferência antes do antibiótico, e repetir '
+                 'se não houver resposta. Pesquisar micobactérias também nos sintomas persistentes que não melhoram com '
+                 'antibiótico e antes de iniciar macrolídeo prolongado. Isolamento novo de Pseudomonas aeruginosa: repetir '
+                 'a cultura e discutir de imediato com o especialista; a diretriz sugere o tratamento de erradicação '
+                 '(recomendação condicional). No paciente estável, a cultura positiva isolada não é motivo para '
+                 'antibiótico.',
+                 ERS_BRONQUIECTASIAS)
+        orientar('Bronquiectasias: o que não vira pedido automático',
+                 'A espirometria entra na avaliação da gravidade (VEF1), não na investigação da causa. O resumo da diretriz '
+                 'não fixa intervalo de consulta, de cultura de escarro nem de espirometria no paciente estável, e não '
+                 'trata de vacinas. Causas raras (discinesia ciliar, fibrose cística) são investigadas quando os exames '
+                 'iniciais são negativos e a história as sugere. Na avaliação inicial, rever comorbidades: risco '
+                 'cardiovascular, osteoporose, rinossinusite, refluxo e humor, e otimizar o tratamento da doença de via '
+                 'aérea associada. A diretriz trata das bronquiectasias do adulto não relacionadas à fibrose cística.',
+                 ERS_BRONQUIECTASIAS)
     if 'hipertensao_arterial_pulmonar' in com:
         # ESC/ERS 2022, texto integral lido em 18/11/2026: Tabela 17 (avaliações e momentos do seguimento, com as notas:
         # exames básicos = hemograma, INR em uso de antagonista da vitamina K, creatinina, sódio, potássio, TGO/TGP,

@@ -120,6 +120,10 @@ DESCRICOES = {
     '40308391': 'Proteína C reativa, quantitativa - pesquisa e/ou dosagem',
     '40302571': 'Troponina',
     '40307280': 'IgG',
+    '40307301': 'IgM',
+    '40307271': 'IgE, total',
+    '40307263': 'IgE, por alérgeno, cada (cada)',
+    '40310159': 'Cultura para mycobacterium',
     '40308553': 'Anti-transglutaminase tecidual - IgA',
     '40308804': 'Anticorpos anti peptídeo cíclico citrulinado - IgG',
     # Microbiologia
@@ -282,6 +286,11 @@ CODIGOS = {
     'Proteína C reativa, soro': ['40308391'],
     'Troponina, soro': ['40302571'],
     'Imunoglobulina G (IgG), soro': ['40307280'],
+    'Imunoglobulina M (IgM), soro': ['40307301'],
+    'Imunoglobulina E (IgE) total, soro': ['40307271'],
+    'IgE específica para Aspergillus, soro': ['40307263'],
+    'Cultura de escarro (bactérias)': ['40310124'],
+    'Cultura para micobactérias, escarro': ['40310159'],
     'VHS': ['40304370'],
     'Insulina de jejum, soro': ['40316360'],
     'Apolipoproteína B, soro': ['40301362'],
@@ -348,7 +357,14 @@ CODIGOS = {
 }
 
 # Exames que saem na guia sem código, com o motivo (nada de código inventado).
+# Códigos da TUSS que servem a vários exames diferentes ("IgE, por alérgeno, cada"; "Cultura bacteriana, em diversos
+# materiais"). Dois títulos com um desses códigos NÃO são o mesmo exame: não se unem na lista de recomendações, somam
+# a quantidade na guia e não tiram do catálogo o exame genérico da tabela.
+CODIGOS_DE_VARIOS_EXAMES = frozenset({'40307263', '40310124'})
+
 SEM_CODIGO = {
+    'IgG específica para Aspergillus, soro':
+        'a TUSS traz "Aspergilus, reação sorológica" (40306453), sem dizer o método; a equivalência com a IgG específica não foi conferida',
     'Trichomonas vaginalis, PCR (swab vaginal)':
         'só a cultura tem código conferido (40310574, Trichomonas, cultura para)',
     'Antígeno criptocócico (LF-CrAg), soro':
