@@ -53,8 +53,9 @@ Discordâncias reais ficam como ``xfail(strict=True)`` com o motivo e a fonte. D
 
 Pontos documentados no relatório (/tmp/validacao/casos-anticoagulantes.md) e não testados aqui, por não serem de
 intervalo de suspensão:
-- TEV há <3 meses (AHA, texto do §7.6): adiar a cirurgia eletiva pode permitir uma interrupção mais segura; nem
-  ``condutas`` nem os adiamentos de ``preoperatorio`` dizem isso.
+- TEV há <3 meses (AHA, texto do §7.6): adiar a cirurgia eletiva pode permitir uma interrupção mais segura. Desde a
+  revisão independente de 18/11/2026, ``condutas`` traz esse aviso na cirurgia eletiva
+  (tests/test_preop_revisao_independente.py).
 - Ponte na prótese mecânica: a CHEST 2022 sugere CONTRA a ponte (condicional), a AHA a indica só na prótese de alto
   risco (mitral, bola-gaiola/disco, AVC recente) e a SBC em toda prótese. O módulo segue a AHA e cita a SBC na
   divergência, mas não cita a CHEST.
@@ -564,9 +565,10 @@ def contexto(p):
         if p['avc'] == 'recente':
             c.add('avc_ait_recente')
     if p['tev']:
+        # O tempo do TEV vai sempre explícito: 'tev' sozinho (sem data) não é mais lido como "há mais de 12 meses"
+        # (revisão independente de 18/11/2026; ver tests/test_preop_revisao_independente.py).
         c.add('tev')
-        c.add({'<1m': 'tev_recente_3m', '1-3m': 'tev_recente_3m', '3-12m': 'tev_3_12m', '>12m': None}[p['tev']]
-              or 'tev')
+        c.add({'<1m': 'tev_recente_3m', '1-3m': 'tev_recente_3m', '3-12m': 'tev_3_12m', '>12m': 'tev_mais_12m'}[p['tev']])
     if p['protese']:
         c.add('protese_mecanica')
         if p['protese'] == 'mitral':

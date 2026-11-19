@@ -130,7 +130,8 @@ def _da_tabela_tuss(ja_no_catalogo):
     for titulo in ja_no_catalogo:
         nomes_vistos.add(tuss._chave(titulo))
         linhas = tuss.linhas_da_guia(titulo)
-        if len(linhas) == 1 and linhas[0]['codigo']:       # exame simples: o código já está representado
+        if len(linhas) == 1 and linhas[0]['codigo'] and linhas[0]['codigo'] not in tuss.CODIGOS_DE_VARIOS_EXAMES:
+            # exame simples: o código já está representado
             cobertos.add(linhas[0]['codigo'])
     novos = []
     for codigo, nome in tuss.TABELA_DE_LABORATORIO:
@@ -156,6 +157,11 @@ def catalogo():
             lista += _da_tabela_tuss(tuple(lista))
         saida[categoria] = sorted(lista, key=lambda t: t.lower())
     return saida
+
+
+def vacinas_do_motor():
+    """Títulos das vacinas que o motor recomenda para algum perfil (`catalogo_motor.json`), em ordem alfabética."""
+    return sorted(_do_motor().get('vacina', []), key=lambda t: t.lower())
 
 
 ARQUIVO_DAS_INDICACOES = Path(__file__).resolve().parents[1] / 'data' / 'indicacoes_motor.json'

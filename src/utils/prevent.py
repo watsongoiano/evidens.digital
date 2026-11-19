@@ -61,14 +61,22 @@ def _arredondar_meio_para_cima(valor, casas):
     return math.floor(abs(valor) * fator + 0.5 + 1e-12) / fator * (1 if valor >= 0 else -1)
 
 
-def egfr_ckd_epi_2021(creatinina_mg_dl, idade, sexo):
-    """TFG estimada (CKD-EPI 2021, sem raça), em mL/min/1,73 m², inteira."""
+def tfg_ckd_epi_2021(creatinina_mg_dl, idade, sexo):
+    """TFG estimada (CKD-EPI 2021, sem raça), em mL/min/1,73 m², SEM arredondar.
+
+    É este o valor que se compara com os limiares clínicos (15, 30, 45, 60...): 29,6 não é 30. Para mostrar na
+    tela, ``funcao_renal.para_exibir``."""
     feminino = sexo == 'feminino'
     k = 0.7 if feminino else 0.9
     a1 = -0.241 if feminino else -0.302
     razao = creatinina_mg_dl / k
-    valor = 142 * min(razao, 1) ** a1 * max(razao, 1) ** -1.2 * 0.9938 ** idade * (1.012 if feminino else 1)
-    return int(_arredondar_meio_para_cima(valor, 0))
+    return 142 * min(razao, 1) ** a1 * max(razao, 1) ** -1.2 * 0.9938 ** idade * (1.012 if feminino else 1)
+
+
+def egfr_ckd_epi_2021(creatinina_mg_dl, idade, sexo):
+    """A mesma TFG, inteira: a entrada das equações PREVENT (como o ``calc_egfr`` do preventr). Não serve para
+    comparar com limiar clínico: para isso, ``tfg_ckd_epi_2021``."""
+    return int(_arredondar_meio_para_cima(tfg_ckd_epi_2021(creatinina_mg_dl, idade, sexo), 0))
 
 
 def imc(peso_kg, altura_cm):

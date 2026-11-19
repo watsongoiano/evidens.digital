@@ -36,6 +36,10 @@ Convenções:
   divide), e o texto cita o outro componente: IECA/BRA + diurético/BCC seguem o IECA/BRA; betabloqueador +
   diurético segue o betabloqueador; estatina + ezetimiba segue a estatina; iSGLT2 + metformina/iDPP-4 seguem o
   iSGLT2; iDPP-4 + metformina seguem a metformina (não tomar no dia); insulina + aGLP-1 seguem o aGLP-1.
+- Dado ausente não é dado normal: TEV sem o tempo desde o evento não é lido como TEV há mais de 12 meses (o risco
+  tromboembólico fica sem categoria e a saída pede o dado), como já era com o ClCr e a indicação da anticoagulação.
+- ``clcr`` e ``tfg`` chegam sem arredondar e é assim que são comparados com os cortes (15, 30, 45, 50); o
+  arredondamento fica só no texto mostrado.
 - Medicamento sem recomendação perioperatória nas fontes não gera item (não se presume "manter"). Entre eles:
   ezetimiba e outros hipolipemiantes isolados, nitratos, ticlopidina, cilostazol, insulinas bifásica e icodeca,
   hipnóticos não benzodiazepínicos, metilfenidato, anticonvulsivantes, inalatórios, IBP, imunossupressores fora do
@@ -46,6 +50,7 @@ from __future__ import annotations
 import re
 from urllib.parse import quote
 
+from src.utils import funcao_renal
 from src.utils.medicamentos import MEDICAMENTOS
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -197,6 +202,16 @@ def _num(x):
     return f'{x:g}'.replace('.', ',')
 
 
+def _mostra_clcr(clcr):
+    """ClCr como aparece no texto: uma casa, sem atravessar o corte que decidiu a conduta (29,96 não vira 30)."""
+    return _num(funcao_renal.para_exibir(clcr, funcao_renal.LIMIARES_CLCR, 1))
+
+
+def _mostra_tfg(tfg):
+    """TFG como aparece no texto: inteira, salvo se o arredondamento a levasse para o outro lado de um corte."""
+    return _num(funcao_renal.para_exibir(tfg, funcao_renal.LIMIARES_TFG))
+
+
 def _item(chave, conduta, resumo, texto, classe, referencias, divergencia=''):
     return {'chave': chave, 'medicamento': MEDICAMENTOS[chave]['rotulo'], 'conduta': conduta, 'resumo': resumo,
             'texto': texto, 'classe': classe, 'referencias': referencias, 'divergencia': divergencia}
@@ -277,11 +292,34 @@ def _descreve_escore(nome, valor, comp):
     return f'{nome} = {valor} ({partes})'
 
 
+_FALTA_INDICACAO = 'a indicação da anticoagulação (FA, TEV ou prótese mecânica)'
+_FALTA_TEMPO_TEV = 'há quanto tempo foi o TEV (menos de 3 meses, de 3 a 12 meses ou mais de 12 meses)'
+_TEMPOS_DO_TEV = ('tev_recente_3m', 'tev_3_12m', 'tev_mais_12m')
+
+
+def _tev_sem_tempo(cond):
+    """TEV marcado sem dizer há quanto tempo. Não se presume que foi há mais de 12 meses: pode ser recente."""
+    return 'tev' in cond and not cond & set(_TEMPOS_DO_TEV)
+
+
+def _marca_tev(cond, marca):
+    """Categoria do TEV pelo tempo desde o evento (AHA, Tabela 14; SBC, Tabela 11). Com mais de um tempo marcado
+    (TEV de repetição), vale o mais recente. Sem o tempo, nada é marcado (ver ``_tev_sem_tempo``)."""
+    if 'tev_recente_3m' in cond:
+        marca('alto', 'TEV há <3 meses')
+    elif 'tev_3_12m' in cond:
+        marca('moderado', 'TEV há 3–12 meses')
+    elif 'tev_mais_12m' in cond:
+        marca('baixo', 'TEV há >12 meses')
+
+
 def _risco_te_aha(ctx):
     """Categoria de risco tromboembólico pela AHA (Tabela 14, adaptada de Douketis/CHEST 2022).
 
-    Devolve (categoria ou None, motivos, faltas). 'tev' sem 'tev_recente_3m'/'tev_3_12m' é lido como TEV há
-    >12 meses; prótese mecânica não mitral é lida como aórtica de duplo folheto.
+    Devolve (categoria ou None, motivos, faltas). TEV sem o tempo ('tev' sem 'tev_recente_3m', 'tev_3_12m' nem
+    'tev_mais_12m') não é classificado: a categoria fica None e ``faltas`` pede o dado, salvo se outra indicação já
+    for de alto risco (aí o tempo do TEV não muda a categoria, mas continua pedido). Prótese mecânica não mitral é
+    lida como aórtica de duplo folheto.
     """
     cond = _cond(ctx)
     motivos, faltas = [], []
@@ -308,12 +346,7 @@ def _risco_te_aha(ctx):
             faltas.append('se a valvopatia é reumática (FA com valvopatia reumática é alto risco)')
     if recente:
         marca('alto', 'AVC/AIT há <3 meses')
-    if 'tev_recente_3m' in cond:
-        marca('alto', 'TEV há <3 meses')
-    elif 'tev_3_12m' in cond:
-        marca('moderado', 'TEV há 3–12 meses')
-    elif 'tev' in cond:
-        marca('baixo', 'TEV há >12 meses')
+    _marca_tev(cond, marca)
     if 'trombofilia_grave' in cond:
         marca('alto', 'trombofilia grave')
     if 'cancer_ativo' in cond:
@@ -330,14 +363,20 @@ def _risco_te_aha(ctx):
         else:
             marca('baixo', 'prótese aórtica mecânica de duplo folheto sem fator maior')
         faltas.append('o modelo da prótese (bola-gaiola ou disco basculante são alto risco)')
+    if _tev_sem_tempo(cond):
+        # O TEV sem data pode ser de alto risco: só há categoria se outra indicação já for de alto risco.
+        faltas.insert(0, _FALTA_TEMPO_TEV)
+        if not any(c == 'alto' for c, _ in motivos):
+            return None, [], faltas
     if not motivos:
-        return None, [], ['a indicação da anticoagulação (FA, TEV ou prótese mecânica)']
+        return None, [], [_FALTA_INDICACAO]
     cat = max((c for c, _ in motivos), key=_ORDEM_RISCO.get)
     return cat, [m for c, m in motivos if c == cat], faltas
 
 
 def _risco_te_sbc(ctx):
-    """Categoria de risco tromboembólico pela SBC (Tabela 11, CHADS₂; toda prótese mecânica = alto, texto 4.3)."""
+    """Categoria de risco tromboembólico pela SBC (Tabela 11, CHADS₂; toda prótese mecânica = alto, texto 4.3).
+    Devolve (categoria ou None, motivos, notas). Como na AHA, TEV sem o tempo não é classificado."""
     cond = _cond(ctx)
     motivos, notas = [], []
     escore = chads2(ctx)
@@ -358,19 +397,14 @@ def _risco_te_sbc(ctx):
             notas.append('AVC/AIT há >3 meses com CHADS₂ <5 também pode ser considerado alto risco (nota da Tabela 11)')
     if 'avc_ait_recente' in cond:
         marca('alto', 'AVC/AIT há <3 meses')
-    if 'tev_recente_3m' in cond:
-        marca('alto', 'TEV há <3 meses')
-    elif 'tev_3_12m' in cond:
-        marca('moderado', 'TEV há 3–12 meses')
-    elif 'tev' in cond:
-        marca('baixo', 'TEV há >12 meses')
+    _marca_tev(cond, marca)
     if 'trombofilia_grave' in cond:
         marca('alto', 'trombofilia grave')
     if 'cancer_ativo' in cond:
         marca('moderado', 'neoplasia ativa')
     if cond & {'protese_mecanica', 'protese_mecanica_mitral'}:
         marca('alto', 'prótese valvar mecânica, que a SBC considera de alto risco em qualquer posição')
-    if not motivos:
+    if not motivos or (_tev_sem_tempo(cond) and not any(c == 'alto' for c, _ in motivos)):
         return None, [], notas
     cat = max((c for c, _ in motivos), key=_ORDEM_RISCO.get)
     return cat, [m for c, m in motivos if c == cat], notas
@@ -690,19 +724,20 @@ def _isglt2(chave, ctx):
 
 def _metformina(chave, ctx):
     # O limite da metformina é de TFG estimada (mL/min/1,73 m²), não de ClCr por Cockcroft-Gault: as duas medidas não
-    # se trocam, sobretudo nos extremos de peso. Por isso usa ``tfg`` (CKD-EPI 2021), e não ``clcr``.
+    # se trocam, sobretudo nos extremos de peso. Por isso usa ``tfg`` (CKD-EPI 2021), e não ``clcr``. A comparação com
+    # 30 e 45 é feita com a TFG exata (29,6 é abaixo de 30); o arredondamento fica só no texto (``_mostra_tfg``).
     tfg = ctx.get('tfg')
     refs = [_sbd('R5 e Tabela 2'), _aha('§7.8, rec. 3'), _ref('spaqi_endo')]
     if tfg is not None and tfg < 30:
         return _item(chave, 'suspender', 'Suspender (TFG < 30)',
-                     f'TFG {tfg:.0f} mL/min/1,73 m² (CKD-EPI 2021): a metformina é contraindicada abaixo de 30. '
-                     'Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir sem '
-                     'função renal estável.',
+                     f'TFG {_mostra_tfg(tfg)} mL/min/1,73 m² (CKD-EPI 2021): a metformina é contraindicada abaixo de '
+                     '30. Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir '
+                     'sem função renal estável.',
                      'KDIGO 2022: ponto de prática (sem gradação)', _refs(_ref('kdigo_dm'), *refs))
     texto = ('Manter até a véspera e não tomar no dia da cirurgia. Reintroduzir com o paciente estável, com função '
              'renal preservada e sem complicação que leve a hipóxia tecidual.')
     if tfg is not None and tfg < 45:
-        texto += f' TFG {tfg:.0f} mL/min/1,73 m²: dose máxima de 1.000 mg/dia (KDIGO 2022).'
+        texto += f' TFG {_mostra_tfg(tfg)} mL/min/1,73 m²: dose máxima de 1.000 mg/dia (KDIGO 2022).'
         refs.append(_ref('kdigo_dm'))
     elif tfg is None:
         texto += ' Sem creatinina: confira a TFG, porque a metformina é contraindicada abaixo de 30 mL/min/1,73 m².'
@@ -915,8 +950,8 @@ def _doac(chave, ctx):
                      _refs(_ref('valvas'), _sbc('4.3.2 (texto)'), _aha('§7.6 (texto) e Tabela 15')))
     if neuraxial and farmaco == 'dabigatrana' and clcr is not None and clcr < 30:
         return _item(chave, 'individualizar', 'ClCr < 30: evitar anestesia neuroaxial',
-                     f'Dabigatrana com ClCr {_num(clcr)} mL/min: a ASRA não recomenda bloqueio neuroaxial; preferir '
-                     'outra técnica anestésica, em decisão com a anestesia. Se a neuroaxial for indispensável, '
+                     f'Dabigatrana com ClCr {_mostra_clcr(clcr)} mL/min: a ASRA não recomenda bloqueio neuroaxial; '
+                     'preferir outra técnica anestésica, em decisão com a anestesia. Se a neuroaxial for indispensável, '
                      'suspender por mais tempo (pela AHA, ≥6 dias sem dose) e conferir o efeito residual.',
                      'ASRA 2025 · AHA 1 (B-NR)', _refs(_ref('asra'), refs))
     if sang == 'minimo':
@@ -953,8 +988,8 @@ def _doac(chave, ctx):
     else:
         sbc_txt = (f'SBC (texto, sem quadro): suspender {antes} antes, a conduta "mais aceita" para a edoxabana.')
     resumo = f'Sem dose {_sem_dose(sem, reinicio)} (última no D-{ultima}); reiniciar no D+{reinicio}'
-    texto = (f'AHA (Tabela 13, ClCr {_num(clcr)} mL/min, sangramento {_ROTULO_SANGRAMENTO[sang]}): sem dose '
-             f'{_sem_dose(sem, reinicio)}, com a última dose no D-{ultima} e o reinício no D+{reinicio}, após '
+    texto = (f'AHA (Tabela 13, ClCr {_mostra_clcr(clcr)} mL/min, sangramento {_ROTULO_SANGRAMENTO[sang]}): sem '
+             f'dose {_sem_dose(sem, reinicio)}, com a última dose no D-{ultima} e o reinício no D+{reinicio}, após '
              f'hemostasia. {sbc_txt} Sem ponte com heparina.{nota}')
     if neuraxial:
         texto += (' Neuroaxial: interrupção completa por ≥5 meias-vidas (≥3 dias para anti-Xa; ≥4 dias para '
@@ -1008,12 +1043,15 @@ def _decisao_ponte(ctx):
     cat_aha, mot_aha, faltas = _risco_te_aha(ctx)
     cat_sbc, mot_sbc, notas = _risco_te_sbc(ctx)
     return {'aha': cat_aha, 'aha_motivos': mot_aha, 'faltas': faltas, 'sbc': cat_sbc, 'sbc_motivos': mot_sbc,
-            'notas': notas, 'ponte_aha': cat_aha == 'alto', 'ponte_sbc': cat_sbc == 'alto'}
+            'notas': notas, 'ponte_aha': cat_aha == 'alto', 'ponte_sbc': cat_sbc == 'alto',
+            'tev_sem_tempo': _tev_sem_tempo(_cond(ctx))}
 
 
 def _div_ponte(d):
     if d['aha'] is None or d['ponte_aha'] == d['ponte_sbc']:
         return ''
+    if d['sbc'] is None and d['tev_sem_tempo']:
+        return ''       # a SBC não foi classificada por faltar o tempo do TEV: não há posição dela a contrapor
     if d['ponte_sbc']:
         return (f'SBC: risco tromboembólico alto ({"; ".join(d["sbc_motivos"])}) e ponte com heparina (IIa-C). AHA: '
                 f'risco {d["aha"]} ({"; ".join(d["aha_motivos"])}), sem ponte, pois a ponte de rotina aumenta o '
@@ -1047,6 +1085,12 @@ def _varfarina(chave, ctx):
     d = _decisao_ponte(ctx)
     base = ('Sem dose do D-5 ao D0 (AHA, Tabela 13): última dose no D-6 e operar com INR <1,5 (SBC I-C); INR na '
             'véspera e, se ≥1,5, vitamina K oral 1–2 mg e nova medida (texto da SBC).')
+    if d['aha'] is None and d['tev_sem_tempo']:
+        return _item(chave, 'individualizar', 'Suspender 5 dias antes; ponte conforme o risco',
+                     base + f' Falta informar {_FALTA_TEMPO_TEV} para classificar o risco tromboembólico e decidir a '
+                            'ponte. Sem esse dado, a ponte não é indicada nem dispensada: TEV há menos de 3 meses é '
+                            'alto risco.',
+                     'AHA 1 (B-NR) · SBC I-C', refs)
     if d['aha'] is None:
         return _item(chave, 'individualizar', 'Suspender 5 dias antes; ponte conforme o risco',
                      base + ' Falta a indicação da anticoagulação (FA, TEV ou prótese mecânica) para classificar o '
@@ -1488,6 +1532,23 @@ def _avisos(meds, ctx):
     if 'varfarina' in meds:
         avisos.append(_aviso_ponte(ctx))
 
+    # TEV há menos de 3 meses em cirurgia eletiva: AHA/ACC, §7.6, texto de apoio da rec. 1 ("delaying elective NCS may
+    # permit safer interruption of OAC", em selecionados com trombose recente e alto risco trombótico residual). Sem
+    # classe de recomendação e sem prazo. A SBC 2024 (Tabela 11) e Douketis 2023 (NEJM Evidence, Tabela 2) classificam
+    # o TEV recente como alto risco, mas não falam em adiar. No sangramento mínimo o anticoagulante não é interrompido.
+    if 'tev_recente_3m' in cond and ctx.get('urgencia') == 'eletiva' and sang != 'minimo':
+        avisos.append(_aviso(
+            'TEV há menos de 3 meses: considerar adiar a cirurgia eletiva',
+            'TEV há menos de 3 meses é alto risco tromboembólico (AHA, Tabela 14; SBC, Tabela 11). Em pacientes '
+            'selecionados, com trombose recente e alto risco trombótico residual, adiar a cirurgia eletiva pode '
+            'permitir uma interrupção mais segura do anticoagulante (AHA, texto do §7.6, sem classe de recomendação). '
+            'A AHA não define por quanto tempo adiar: decidir em equipe, com quem prescreve o anticoagulante, o '
+            'cirurgião e o anestesista.',
+            _refs(_aha('§7.6 (texto) e Tabela 14'), _sbc('Tabela 11')),
+            'Só a AHA/ACC fala em adiar, e em texto de apoio, sem classe de recomendação. A SBC 2024 classifica o TEV '
+            'há <3 meses como alto risco (Tabela 11), sem tratar do adiamento. Nós optamos por mostrar o aviso, para '
+            'decisão caso a caso.'))
+
     janela = _janela_icp(ctx)
     if janela:
         avisos.append(_aviso_icp(janela))
@@ -1542,7 +1603,11 @@ def _aviso_ponte(ctx):
     partes = []
     if 'fa' in cond:
         partes.append(_descreve_escore('CHA₂DS₂-VASc', cha2ds2vasc(ctx), comp) + f'; CHADS₂ = {chads2(ctx)}.')
-    if d['aha'] is None:
+    if d['aha'] is None and d['tev_sem_tempo']:
+        partes.append(f'Risco tromboembólico não classificado: falta informar {_FALTA_TEMPO_TEV}. TEV há menos de 3 '
+                      'meses é alto risco, com ponte de heparina (AHA 2a, C-LD; SBC IIa-C); sem o tempo, a ponte não é '
+                      'indicada nem dispensada.')
+    elif d['aha'] is None:
         partes.append('Falta a indicação da anticoagulação (FA, TEV ou prótese mecânica) para classificar o risco '
                       'tromboembólico.')
     else:
@@ -1554,7 +1619,13 @@ def _aviso_ponte(ctx):
         else:
             partes.append('Sem ponte: a ponte de rotina aumenta o sangramento sem reduzir eventos (AHA 3: Dano, C-LD; '
                           'SBC IIa-C).')
-    faltas = list(d['faltas']) if d['aha'] is not None else []
+    if d['aha'] is not None:
+        faltas = list(d['faltas'])
+    elif d['tev_sem_tempo']:
+        # O tempo do TEV já foi pedido na frase acima; seguem os outros dados que faltam.
+        faltas = [f for f in d['faltas'] if f != _FALTA_TEMPO_TEV]
+    else:
+        faltas = []
     if 'fa' in cond:
         faltas = [f for f in faltas_escore] + faltas
     if faltas:
@@ -1588,13 +1659,16 @@ def condutas(medicacoes: list[str], ctx: dict) -> dict:
     """Conduta perioperatória para cada medicamento e avisos transversais.
 
     ``medicacoes``: chaves de ``MEDICAMENTOS`` (chaves desconhecidas são ignoradas; repetidas contam uma vez).
-    ``ctx`` (tudo opcional): idade, sexo ('masculino'|'feminino'), peso, clcr (mL/min, Cockcroft-Gault),
-    tfg (mL/min/1,73 m², CKD-EPI 2021; usada só na metformina), sangramento ('minimo'|'baixo_moderado'|'alto'),
+    ``ctx`` (tudo opcional): idade, sexo ('masculino'|'feminino'), peso, clcr (mL/min, Cockcroft-Gault, sem
+    arredondar), tfg (mL/min/1,73 m², CKD-EPI 2021, sem arredondar; usada só na metformina), sangramento
+    ('minimo'|'baixo_moderado'|'alto'),
     cirurgia_risco_elevado, urgencia
     ('eletiva'|'tempo_sensivel'|'urgencia'|'emergencia'), neuraxial (aceita também 'neuroaxial'), condicoes (set), stent
     ({'tipo': 'farmacologico'|'convencional'|'balao', 'indicacao': 'sca'|'dac_cronica', 'dias': int}; 'meses' ainda
     é aceito), aas_indicacao ('primaria'|'secundaria'), pa_controlada, cirurgia (chave de preoperatorio.CIRURGIAS),
     dose_heparina ('plena'|'profilatica': a dose da enoxaparina; outro valor conta como não informada).
+    Em ``condicoes``, o TEV ('tev') vem com o tempo desde o evento ('tev_recente_3m', 'tev_3_12m' ou 'tev_mais_12m');
+    sem o tempo, o risco tromboembólico não é classificado.
 
     Devolve {'itens': [...], 'avisos': [...]}. Item: chave, medicamento, conduta
     ('manter'|'suspender'|'ajustar'|'individualizar'), resumo, texto, classe, referencias [{label, url}],

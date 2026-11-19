@@ -796,7 +796,8 @@ def _identidade_do_exame(rec, sexo):
         if partes:
             return frozenset(partes)
         chaves = periodicidade.chaves(titulo, sexo)
-        if not any(c.startswith('nome:') for c in chaves):
+        # Código que serve a vários exames (cultura de escarro e de estreptococo do grupo B): cada título é um exame
+        if not any(c.startswith('nome:') for c in chaves) and not chaves & tuss.CODIGOS_DE_VARIOS_EXAMES:
             return chaves
     return frozenset({'titulo:' + (rec.get('categoria') or '') + ':' + _titulo_normalizado(titulo)})
 
@@ -1083,9 +1084,10 @@ def recomendar(bruto, registrar_uso=False):
 
         # Coerência entre campos: estatina → dislipidemia, anti-hipertensivo → HAS,
         # HbA1c ≥ 6,5 → diabetes, IMC ≥ 30 → obesidade, TFG < 60 → DRC (src/utils/coerencia.py).
+        # TFG exata (sem arredondar): é a que se compara com 60 (DRC a confirmar) e com os cortes do estágio G.
         egfr_inferencia = None
         if data.get('creatinina'):
-            egfr_inferencia = prevent.egfr_ckd_epi_2021(float(data['creatinina']), data['idade'], data['sexo'])
+            egfr_inferencia = prevent.tfg_ckd_epi_2021(float(data['creatinina']), data['idade'], data['sexo'])
         # Princípios ativos escolhidos na tela viram as classes com que o motor trabalha
         from src.utils import doses, medicamentos
         escolhidas = list(medicacoes_checkboxes)
@@ -1926,7 +1928,9 @@ def preoperatorio_endpoint():
     preoperatorio.aplicar_exames_anteriores(p, anteriores)
     resultado = preoperatorio.avaliar(p)
     pas, pad = p.get('pas'), p.get('pad')
-    ctx = {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr'], 'tfg': resultado['tfg'], 'cirurgia': p['cirurgia'],
+    # ClCr e TFG exatos (sem arredondar) para as regras dos medicamentos; 'clcr' e 'tfg' do resultado são os da tela.
+    ctx = {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr_exato'],
+           'tfg': resultado['tfg_exata'], 'cirurgia': p['cirurgia'],
            'sangramento': p['sangramento'], 'cirurgia_risco_elevado': resultado['contexto']['cir_elev'],
            'urgencia': p['urgencia'], 'neuroaxial': p['neuroaxial'], 'condicoes': set(p['condicoes']),
            'stent': p['stent'], 'aas_indicacao': p['aas_indicacao'], 'dose_heparina': p['dose_heparina'],
