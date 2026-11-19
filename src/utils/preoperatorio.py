@@ -796,7 +796,7 @@ def _fmt(x):
 def _feito(p, titulo):
     """(dias, data) do exame mais recente que cobre o título, ou None."""
     from src.utils import periodicidade
-    alvo = periodicidade.chaves(titulo)
+    alvo = periodicidade.chaves_do_exame(titulo)
     achados = [(dias, data) for chaves, dias, data in p['exames_feitos'] if chaves & alvo]
     return min(achados) if achados else None
 
@@ -817,7 +817,7 @@ def aplicar_exames_anteriores(p, anteriores, hoje=None):
     mais_recente = {}
     for exame in anteriores or []:
         dias = max(0, (hoje - exame['data']).days)
-        p['exames_feitos'].append((periodicidade.chaves(exame['exame']), dias, exame['data'].strftime('%d/%m/%Y')))
+        p['exames_feitos'].append((periodicidade.chaves_do_exame(exame['exame']), dias, exame['data'].strftime('%d/%m/%Y')))
         for item in exame.get('resultados') or []:
             campo = item.get('campo')
             if campo not in ('creatinina', 'hemoglobina', 'hba1c'):

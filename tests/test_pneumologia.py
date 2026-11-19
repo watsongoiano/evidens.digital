@@ -141,3 +141,19 @@ def test_cultura_de_escarro_nao_se_funde_com_outra_cultura_do_mesmo_codigo():
            {'titulo': 'Hemograma completo, sangue total', 'categoria': 'laboratorio', 'subtitulo': 'b', 'referencia': 'r',
             'descricao': 'x', 'prioridade': 'media'}]
     assert len(deduplicar_recomendacoes(par, 'feminino')) == 1
+
+
+def test_cultura_de_estreptococo_nao_poe_a_cultura_de_escarro_em_dia():
+    """Achado da revisão do PR #198: as duas culturas dividem o código 40310124 e são exames diferentes."""
+    from datetime import date, timedelta
+    from src.utils import periodicidade
+    hoje = date(2026, 11, 19)
+    rec = {'titulo': 'Cultura de escarro (bactérias)', 'categoria': 'laboratorio',
+           'subtitulo': 'Bronquiectasias | Avaliação inicial'}
+    outra = next(t for t in periodicidade.exames_conhecidos() if 'strepto' in t.lower() or 'estreptococo' in t.lower())
+    assert periodicidade.chaves(outra) == periodicidade.chaves(rec['titulo'])
+    mantidas, em_dia = periodicidade.aplicar([rec], [{'exame': outra, 'data': hoje - timedelta(days=1)}], hoje_=hoje)
+    assert [r['titulo'] for r in mantidas] == [rec['titulo']] and not em_dia
+    mantidas, em_dia = periodicidade.aplicar([rec], [{'exame': rec['titulo'], 'data': hoje - timedelta(days=1)}], hoje_=hoje)
+    assert not mantidas and len(em_dia) == 1
+    assert rec['titulo'] in periodicidade.exames_conhecidos()

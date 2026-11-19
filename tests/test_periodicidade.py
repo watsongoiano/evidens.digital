@@ -210,7 +210,8 @@ def test_data_de_hoje_e_aceita(client):
 def test_lista_de_exames_conhecidos_nao_repete_o_mesmo_exame(client, anonimo):
     assert anonimo.get('/api/exames-conhecidos').status_code == 401
     exames = client.get('/api/exames-conhecidos').get_json()['exames']
-    assert len(exames) > 100 and len({P.chaves(t) for t in exames}) == len(exames)
+    # chaves_do_exame: exames diferentes que dividem um código TUSS (culturas) aparecem cada um com seu nome
+    assert len(exames) > 100 and len({P.chaves_do_exame(t) for t in exames}) == len(exames)
     assert sum(t.lower().startswith('hemograma') for t in exames) == 1          # os três nomes do motor viram um
     conhecidos = {P.chaves(t) for t in exames}
     assert P.chaves('Hemoglobina glicada (HbA1c), soro') in conhecidos and P.chaves('Densitometria óssea (DEXA)') in conhecidos
