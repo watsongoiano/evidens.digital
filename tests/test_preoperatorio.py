@@ -459,7 +459,13 @@ def test_rota_leva_a_dose_da_enoxaparina_ate_a_conduta(app, contas):
     assert profilatica['enoxaparina']['resumo'] == 'Dose profilática: horário da última dose combinado com a equipe'
     assert '<a href="https://doi.org/10.1056/EVIDra2200322"' in profilatica['enoxaparina']['referencia_html']
     # o DOAC do mesmo pedido leva a frase da dose, e a dose da enoxaparina não mexe nele
-    assert sem['apixabana']['texto'].endswith('ele depende do fármaco, do ClCr e do risco de sangramento.')
+    assert sem['apixabana']['texto'].endswith('AHA/ACC e SBC não diferenciam o intervalo pela dose (plena ou reduzida) do DOAC.')
+    # dose plena com sangramento mínimo (catarata; na colectomia o motor sobe o risco ao piso): sem o esquema da ponte
+    minimo = cliente.post('/api/preoperatorio', json=dict(corpo, cirurgia='catarata', sangramento='minimo', dose_heparina='plena'))
+    assert minimo.status_code == 200, minimo.get_json()
+    enoxa = {i['chave']: i for i in minimo.get_json()['medicamentos']['itens']}['enoxaparina']
+    assert enoxa['conduta'] == 'individualizar' and 'véspera' not in enoxa['resumo'] + enoxa['texto']
+    assert enoxa['resumo'] == 'Dose plena e sangramento mínimo: conduta individualizada'
     assert profilatica['apixabana'] == sem['apixabana']
     # valor fora da lista: erro de validação, como nos campos vizinhos
     r = cliente.post('/api/preoperatorio', json=dict(corpo, dose_heparina='dobrada'))

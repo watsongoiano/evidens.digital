@@ -454,14 +454,33 @@ def test_dose_da_enoxaparina_e_frase_do_doac_tem_traducao():
         'about 24 h before surgery); the difference is the half dose on the day before, described only by the ACCP.')
     for dose in ('plena', 'profilatica'):
         assert ('the ACCP 2022 describes it in warfarin bridging (enoxaparin 40 mg/day in the first 24 to 72 h after '
-                'high-bleeding-risk surgery, until the full dose is resumed) and, after DOAC interruption, in patients at high '
-                'risk of venous thromboembolism (low-dose anticoagulant in the first 48 to 72 h after the procedure)'
+                'high-bleeding-risk surgery, until the full dose is resumed) and, after DOAC interruption, in selected patients '
+                'at high risk of venous thromboembolism (low-dose anticoagulant in the first 48 to 72 h after the procedure)'
                 ) in t(itens[dose]['texto'])
+        assert ('The SBC 2024 (text of 4.3.2.6, in the section on direct oral anticoagulants) advises starting prophylactic '
+                'LMWH 12 h after the procedure, if hemostasis is adequate, in patients or procedures at high risk of venous '
+                'thromboembolism, and stopping it when the oral anticoagulant is restarted.') in t(itens[dose]['texto'])
+    # hemostasia e exceção do sangramento alto na dose plena
+    plena_en = t(itens['plena']['texto'])
+    assert 'Restart of the full dose (ACCP 2022), with adequate hemostasis: about 24 h after' in plena_en
+    assert 'When surgical hemostasis is inadequate, the ACCP 2022 advises avoiding postoperative bridging.' in plena_en
+    assert ('in selected surgeries (for example, cardiac or intracranial), the risks and consequences of bleeding may preclude '
+            'the full dose after surgery; in such patients, prophylactic (low-dose) LMWH can be given for 3 to 5 days while '
+            'warfarin is resumed.') in plena_en
+    # dose plena com sangramento mínimo: sem o esquema da ponte
+    minimo = pm.condutas(['enoxaparina'], {'dose_heparina': 'plena', 'sangramento': 'minimo'})['itens'][0]
+    assert not [f for f in _frases_do_preop({'itens': [minimo]}) if not i18n.coberto(f)]
+    assert t(minimo['resumo']) == 'Full dose and minimal bleeding risk: individualized management'
+    assert t(minimo['classe']) == 'ACCP 2022: management not described'
+    assert t(minimo['texto']) == (
+        'Minimal bleeding risk: the ACCP 2022 (Table 1 of the review) states that the procedure can be safely done under '
+        'full-dose anticoagulation, but does not describe the management of full-dose LMWH in this setting: Figure 1 shows '
+        'only warfarin in the minimal-bleeding-risk row. The bridging schedule does not apply to this setting. Management is '
+        'individualized.')
     assert t(itens['profilatica']['resumo']) == 'Prophylactic dose: timing of the last dose agreed with the team'
     assert 'do not set the interval between the last dose and surgery' in t(itens['profilatica']['texto'])
     for item in doacs:
-        assert t(item['texto']).endswith('The DOAC dose (full or reduced) does not change this interval in the guidelines used here: '
-                                         'it depends on the drug, CrCl and bleeding risk.'), item['chave']
+        assert t(item['texto']).endswith('AHA/ACC and SBC do not differentiate the interval by DOAC dose (full or reduced).'), item['chave']
     # nenhuma sobra de português nos textos novos
     for item in list(itens.values()) + doacs:
         for campo in ('resumo', 'texto', 'divergencia'):

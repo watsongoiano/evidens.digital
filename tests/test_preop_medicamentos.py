@@ -443,17 +443,25 @@ def test_enoxaparina_extrapolada_e_rotulada():
 # e o item tem de dizer isso. A dose baixa depois do procedimento vem da mesma nota (ponte) e da Figura 2 (após a
 # interrupção de DOAC, no alto risco de tromboembolismo venoso, nas primeiras 48 a 72 h).
 NEUROAXIAL_DA_HBPM = 'Na anestesia neuroaxial (ASRA): punção ≥24 h após dose plena e ≥12 h após dose profilática.'
-DOSE_DO_DOAC = ('A dose do DOAC (plena ou reduzida) não muda este intervalo nas diretrizes usadas aqui: ele depende do '
-                'fármaco, do ClCr e do risco de sangramento.')
+DOSE_DO_DOAC = 'AHA/ACC e SBC não diferenciam o intervalo pela dose (plena ou reduzida) do DOAC.'
 URL_ACCP = 'https://doi.org/10.1056/EVIDra2200322'
 DIVERGENCIA_NEUTRA = ('As duas redações são compatíveis no horário (a manhã da véspera fica a cerca de 24 h da cirurgia); a '
                       'diferença é a meia dose da véspera, descrita só pela ACCP.')
 DOACS = ('apixabana', 'rivaroxabana', 'edoxabana', 'dabigatrana')
 DOSE_BAIXA_DEPOIS = ('Dose baixa depois da cirurgia: a ACCP 2022 a descreve na ponte da varfarina (enoxaparina 40 mg/dia nas '
                      'primeiras 24 a 72 h após cirurgia de sangramento alto, até voltar a dose plena) e, após a interrupção '
-                     'de DOAC, em pacientes de alto risco de tromboembolismo venoso (anticoagulante em dose baixa nas '
-                     'primeiras 48 a 72 h após o procedimento). A SBC 2024 fala em iniciar a HBPM profilática 12 h após o '
-                     'procedimento em alto risco de tromboembolismo venoso.')
+                     'de DOAC, em pacientes selecionados de alto risco de tromboembolismo venoso (anticoagulante em dose '
+                     'baixa nas primeiras 48 a 72 h após o procedimento). A SBC 2024 (texto do 4.3.2.6, na seção dos '
+                     'anticoagulantes orais diretos) aconselha iniciar a HBPM profilática 12 h após o procedimento, se '
+                     'adequada hemostasia, em pacientes ou procedimentos de alto risco de tromboembolismo venoso, e '
+                     'suspendê-la ao reintroduzir o anticoagulante oral.')
+# Revisão de Douketis, p. 4: sem ponte pós-operatória com hemostasia cirúrgica inadequada; em cirurgias selecionadas de
+# sangramento alto (cardíaca, intracraniana) a dose plena pode ficar impedida, e a dose baixa pode ser dada por 3 a 5 dias
+HEMOSTASIA_INADEQUADA = 'Com hemostasia cirúrgica inadequada, a ACCP 2022 aconselha evitar a ponte pós-operatória.'
+EXCECAO_SANGRAMENTO_ALTO = ('Exceção no sangramento alto (ACCP 2022): em cirurgias selecionadas (por exemplo, cardíaca ou '
+                            'intracraniana), os riscos e as consequências do sangramento podem impedir a dose plena depois '
+                            'da cirurgia; nesses pacientes, a HBPM em dose profilática (baixa) pode ser dada por 3 a 5 '
+                            'dias, enquanto a varfarina é retomada.')
 
 
 def _referencias_com_link(i):
@@ -470,8 +478,12 @@ def test_enoxaparina_dose_plena_mostra_a_accp_e_a_sbc_como_extrapolacao_da_ponte
     assert ('ACCP 2022, dose plena (enoxaparina 1 mg/kg de 12/12 h ou 1,5 mg/kg/dia): última dose na manhã da véspera '
             '(D-1), com metade da dose diária total.') in t
     # depois: retorno da dose plena
-    assert ('Retorno da dose plena (ACCP 2022): cerca de 24 h após cirurgia de sangramento baixo ou moderado; 48 a 72 h '
-            'após sangramento alto.') in t
+    assert ('Retorno da dose plena (ACCP 2022), com hemostasia adequada: cerca de 24 h após cirurgia de sangramento baixo '
+            'ou moderado; 48 a 72 h após sangramento alto.') in t
+    # condição de hemostasia e exceção do sangramento alto (p. 4 da revisão), antes da frase da extrapolação
+    assert HEMOSTASIA_INADEQUADA in t and EXCECAO_SANGRAMENTO_ALTO in t
+    assert (t.index('Retorno da dose plena') < t.index(HEMOSTASIA_INADEQUADA) < t.index(EXCECAO_SANGRAMENTO_ALTO)
+            < t.index('São os intervalos que a ACCP 2022 define'))
     # honestidade com a fonte: ACCP e SBC definem esses intervalos para a HBPM na ponte; o uso contínuo é extensão
     assert ('São os intervalos que a ACCP 2022 define para a HBPM na ponte da varfarina, aqui estendidos ao uso '
             'contínuo.') in t
@@ -509,6 +521,37 @@ def test_enoxaparina_dose_profilatica_diz_que_as_fontes_nao_fixam_o_intervalo():
     assert refs['ACCP 2022, antitrombóticos no perioperatório (resumo em NEJM Evidence 2023;2(6))'] == URL_ACCP
     assert 'SBC 2024, Quadro 25 e texto do 4.3.2.6' in refs and 'AHA/ACC 2026, Tabela 13' in refs
     assert any(r.startswith('ASRA 2025') for r in refs)
+
+
+def test_enoxaparina_dose_plena_no_sangramento_minimo_nao_aplica_o_esquema_da_ponte():
+    # Tabela 1 da revisão, nota §: procedimento de sangramento mínimo pode ser feito sob anticoagulação plena; a Figura 1
+    # não tem HBPM na linha de sangramento mínimo. O item não manda suspender nem manter: diz o que a fonte não descreve.
+    for urgencia in (None, 'eletiva', 'tempo_sensivel'):
+        ctx = dict(dose_heparina='plena', sangramento='minimo')
+        if urgencia:
+            ctx['urgencia'] = urgencia
+        i = item('enoxaparina', **ctx)
+        assert i['conduta'] == 'individualizar'
+        assert i['resumo'] == 'Dose plena e sangramento mínimo: conduta individualizada'
+        assert i['texto'] == ('Sangramento mínimo: a ACCP 2022 (Tabela 1 da revisão) diz que o procedimento pode ser feito '
+                              'com segurança sob anticoagulação em dose plena, mas não descreve o manejo da HBPM em dose '
+                              'plena nesse cenário: a Figura 1 traz só a varfarina na linha de sangramento mínimo. O esquema '
+                              'da ponte não se aplica a este cenário. A conduta é individualizada.')
+        tudo = i['resumo'] + ' ' + i['texto'] + ' ' + i['divergencia']
+        for proibido in ('véspera', 'metade da dose', '24 h', 'D-1', 'Retorno', 'suspender', 'Suspender', 'manter',
+                         'Manter', 'SBC'):
+            assert proibido not in tudo, proibido
+        assert i['classe'] == 'ACCP 2022: manejo não descrito' and i['divergencia'] == ''
+        assert list(_referencias_com_link(i).values()) == [URL_ACCP]
+    # a anestesia neuroaxial conta como sangramento alto: volta o esquema da dose plena
+    neuro = item('enoxaparina', dose_heparina='plena', sangramento='minimo', neuraxial=True)
+    assert neuro['conduta'] == 'suspender' and 'manhã da véspera' in neuro['resumo']
+    # os demais riscos de sangramento seguem com o esquema da ponte
+    for sangramento in (None, 'baixo_moderado', 'alto'):
+        assert item('enoxaparina', dose_heparina='plena', sangramento=sangramento)['conduta'] == 'suspender'
+    # a dose profilática não muda com o sangramento mínimo
+    assert (item('enoxaparina', dose_heparina='profilatica', sangramento='minimo')
+            == item('enoxaparina', dose_heparina='profilatica', sangramento='alto'))
 
 
 @pytest.mark.parametrize('dose', [None, '', 'x', 'PLENA', 'terapeutica', ['plena'], 1, True],
@@ -553,10 +596,14 @@ def test_doac_na_cirurgia_eletiva_diz_que_a_dose_nao_muda_o_intervalo(chave, urg
     assert 'com a última dose no D-3 e o reinício no D+3' in i['texto']
     # a dose da enoxaparina não interfere no item do DOAC
     assert item(chave, dose_heparina='profilatica', **ctx) == i
-    # sem o ClCr ou sem o risco de sangramento o item ainda fala do intervalo, e a frase vem junto
-    for falta in ('clcr', 'sangramento'):
-        j = item(chave, **{k: v for k, v in ctx.items() if k != falta})
-        assert j['conduta'] == 'individualizar' and j['texto'].endswith(' ' + DOSE_DO_DOAC), falta
+    assert 'não muda este intervalo' not in i['texto'] and 'diretrizes usadas aqui' not in i['texto']
+    # sem o ClCr o item ainda mostra os intervalos, e a frase vem junto
+    j = item(chave, **{k: v for k, v in ctx.items() if k != 'clcr'})
+    assert j['resumo'] == 'Depende do ClCr' and j['texto'].endswith(' ' + DOSE_DO_DOAC)
+    # sem o risco de sangramento o item não mostra intervalo nenhum: a frase não aparece
+    j = item(chave, **{k: v for k, v in ctx.items() if k != 'sangramento'})
+    assert j['resumo'] == 'Depende do risco de sangramento' and 'D-' not in j['texto']
+    assert 'DOAC' not in j['texto'] and 'intervalo' not in j['texto']
 
 
 @pytest.mark.parametrize('chave', DOACS)
@@ -568,7 +615,7 @@ def test_doac_sem_a_frase_da_dose_onde_ela_nao_se_aplica(chave):
             dict(base, condicoes={'fa', 'protese_mecanica_mitral'}),
             dict(base, neuraxial=True), dict(base, neuroaxial=True, clcr=25.0)]      # o item cita a ASRA, que separa as doses
     for ctx in fora:
-        assert 'A dose do DOAC' not in item(chave, **ctx)['texto'], ctx
+        assert 'do DOAC' not in item(chave, **ctx)['texto'], ctx
 
 
 @pytest.mark.parametrize('chave', ['varfarina', 'enoxaparina'])
@@ -578,7 +625,7 @@ def test_varfarina_e_enoxaparina_nao_levam_a_frase_do_doac(chave):
             for sangramento in (None, 'minimo', 'baixo_moderado', 'alto'):
                 i = item(chave, dose_heparina=dose, urgencia=urgencia, sangramento=sangramento, clcr=60.0,
                          condicoes={'fa'}, idade=70, sexo='feminino')
-                assert 'A dose do DOAC' not in i['texto'] + i['divergencia'], (dose, urgencia, sangramento)
+                assert 'do DOAC.' not in i['texto'] + i['divergencia'], (dose, urgencia, sangramento)
 
 
 # --- AAS ------------------------------------------------------------------------------------------------------------

@@ -27,8 +27,13 @@ reaproveitar a lógica do módulo, que só é chamado pela API pública):
   interrupção da varfarina; a Figura 2 fala em anticoagulante em dose baixa nas primeiras 48 a 72 h após o
   procedimento, depois da interrupção de DOAC, no alto risco de TEV. O módulo estende os intervalos ao uso contínuo de
   enoxaparina e tem de dizer isso. A SBC 2024 (Quadro 25 e texto do 4.3.2.6) fala em última dose 24 h antes (IIa-C,
-  também na ponte) e em HBPM profilática 12 h após o procedimento no alto risco de TEV. Nenhuma delas, nem a AHA/ACC
-  (Tabela 13), fixa o intervalo entre a última dose profilática e a cirurgia.
+  também na ponte) e, no texto do 4.3.2.6 (seção dos DOAC), em HBPM profilática 12 h após o procedimento, se adequada
+  hemostasia, no alto risco de TEV, suspensa ao reintroduzir o anticoagulante oral. Nenhuma delas, nem a AHA/ACC
+  (Tabela 13), fixa o intervalo entre a última dose profilática e a cirurgia. Da mesma revisão: procedimento de
+  sangramento mínimo pode ser feito sob anticoagulação plena (Tabela 1, nota §) e a Figura 1 não tem HBPM nessa linha,
+  de modo que o esquema da ponte não vale ali; ponte pós-operatória evitada com hemostasia cirúrgica inadequada; em
+  cirurgias selecionadas de sangramento alto (cardíaca, intracraniana) a dose plena pode ficar impedida e a dose baixa
+  pode ser dada por 3 a 5 dias; na Figura 2 a dose baixa é para pacientes selecionados ("selected patients").
 - ASRA 2025, 5ª edição (Kopp et al., Reg Anesth Pain Med, https://doi.org/10.1136/rapm-2024-105766): neuroaxial
   com DOAC em dose plena ≥72 h; dabigatrana ≥72 h (ClCr ≥50), ≥120 h (ClCr 30–49), bloqueio neuroaxial não
   sugerido com ClCr <30; primeira dose ≥24 h depois; varfarina 5 dias com INR normal; HBPM em dose plena 24 h.
@@ -301,17 +306,24 @@ RE_ENOXA_DEPOIS = re.compile(r'retorno ≥(\d+) h depois \((\d+)–(\d+) h se sa
 RE_ENOXA_PLENA_ACCP = re.compile(r'ACCP 2022, dose plena \(enoxaparina 1 mg/kg de 12/12 h ou 1,5 mg/kg/dia\): última '
                                  r'dose na manhã da véspera \(D-(\d+)\), com metade da dose diária total')
 RE_ENOXA_PLENA_SBC = re.compile(r'SBC 2024 \(Quadro 25, IIa-C\): última dose (\d+) h antes')
-RE_ENOXA_RETORNO = re.compile(r'Retorno da dose plena \(ACCP 2022\): cerca de (\d+) h após cirurgia de sangramento '
+RE_ENOXA_RETORNO = re.compile(r'Retorno da dose plena \(ACCP 2022\), com hemostasia adequada: cerca de (\d+) h após cirurgia de sangramento '
                               r'baixo ou moderado; (\d+) a (\d+) h após sangramento alto')
 RE_ENOXA_BAIXA = re.compile(r'a ACCP 2022 a descreve na ponte da varfarina \(enoxaparina 40 mg/dia nas primeiras (\d+) a '
                             r'(\d+) h após cirurgia de sangramento alto, até voltar a dose plena\)')
-RE_ENOXA_BAIXA_DOAC = re.compile(r'após a interrupção de DOAC, em pacientes de alto risco de tromboembolismo venoso '
+RE_ENOXA_BAIXA_DOAC = re.compile(r'após a interrupção de DOAC, em pacientes selecionados de alto risco de tromboembolismo venoso '
                                  r'\(anticoagulante em dose baixa nas primeiras (\d+) a (\d+) h após o procedimento\)')
 RE_ENOXA_PONTE_ACCP = re.compile(r'intervalos que a ACCP 2022 define para a HBPM na ponte da varfarina, aqui estendidos '
                                  r'ao uso contínuo')
 RE_ENOXA_PONTE_SBC = re.compile(r'intervalo que a SBC define para a HBPM na ponte, aqui estendido ao uso contínuo')
-RE_ENOXA_PROFILATICA_SBC = re.compile(r'SBC 2024 fala em iniciar a HBPM profilática (\d+) h após o procedimento em alto '
-                                      r'risco de tromboembolismo venoso')
+RE_ENOXA_PROFILATICA_SBC = re.compile(r'SBC 2024 \(texto do 4\.3\.2\.6, na seção dos anticoagulantes orais diretos\) aconselha '
+                                      r'iniciar a HBPM profilática (\d+) h após o procedimento, se adequada hemostasia, em '
+                                      r'pacientes ou procedimentos de alto risco de tromboembolismo venoso, e suspendê-la ao '
+                                      r'reintroduzir o anticoagulante oral')
+RE_ENOXA_HEMOSTASIA = re.compile(r'Com hemostasia cirúrgica inadequada, a ACCP 2022 aconselha evitar a ponte pós-operatória')
+RE_ENOXA_EXCECAO_ALTO = re.compile(r'Exceção no sangramento alto \(ACCP 2022\): em cirurgias selecionadas \(por exemplo, '
+                                   r'cardíaca ou intracraniana\), os riscos e as consequências do sangramento podem impedir '
+                                   r'a dose plena depois da cirurgia; nesses pacientes, a HBPM em dose profilática \(baixa\) '
+                                   r'pode ser dada por (\d+) a (\d+) dias, enquanto a varfarina é retomada')
 URL_ACCP_NEJM = 'https://doi.org/10.1056/EVIDra2200322'
 RE_REVERSAO_DOAC = {'dabigatrana': re.compile(r'idarucizumab', re.I),
                     'anti_xa': re.compile(r'andexanet|complexo protrombínico', re.I)}
@@ -522,6 +534,7 @@ CASOS = _grade() + [
     P('enoxaparina-plena-baixo', med='enoxaparina', dose='plena', idade=57, sexo='feminino', tev='1-3m'),
     P('enoxaparina-plena-alto', med='enoxaparina', dose='plena', sang='alto', idade=69, cancer=True, tev='3-12m'),
     P('enoxaparina-plena-sangNA', med='enoxaparina', dose='plena', sang=None, idade=43, sexo='feminino', tev='<1m'),
+    P('enoxaparina-plena-minimo', med='enoxaparina', dose='plena', sang='minimo', idade=61, tev='3-12m'),
     P('enoxaparina-plena-neuroaxial', med='enoxaparina', dose='plena', neuro=True, idade=51, tev='1-3m'),
     P('enoxaparina-plena-tempo-sensivel', med='enoxaparina', dose='plena', sang='alto', urg='tempo_sensivel', idade=74,
       sexo='feminino', cancer=True, tev='<1m'),
@@ -792,6 +805,16 @@ def verifica_enoxaparina_depois(texto, it):
 def verifica_enoxaparina_plena(p, it, r):
     """ACCP 2022 (revisão em NEJM Evidence): manhã da véspera, com metade da dose diária; SBC: 24 h antes (IIa-C)."""
     texto = it['texto']
+    if not p['neuro'] and p['sang'] == 'minimo':
+        # Revisão de Douketis, Tabela 1 (nota §) e Figura 1: sem esquema de HBPM no sangramento mínimo. O item não aplica
+        # a ponte, não manda suspender nem manter, e diz que a fonte não descreve o manejo.
+        tudo = it['resumo'] + ' ' + texto + ' ' + it['divergencia']
+        assert it['conduta'] == 'individualizar', it['conduta']
+        assert not RE_ENOXA_PLENA_ACCP.search(tudo) and not RE_ENOXA_ANTES.search(tudo) and not RE_ENOXA_RETORNO.search(tudo), tudo
+        assert not re.search(r'véspera|metade da dose|D-\d|[Ss]uspender|[Mm]anter', tudo), tudo
+        assert 'não descreve o manejo da HBPM em dose plena nesse cenário' in texto and 'individualizada' in texto, texto
+        assert URL_ACCP_NEJM in [ref['url'] for ref in it['referencias']], 'sem a referência da ACCP 2022'
+        return
     assert it['conduta'] == 'suspender' and 'manhã da véspera' in it['resumo'] and 'metade da dose' in it['resumo']
     ma, ms, mr = RE_ENOXA_PLENA_ACCP.search(texto), RE_ENOXA_PLENA_SBC.search(texto), RE_ENOXA_RETORNO.search(texto)
     assert ma and ms and mr, texto
@@ -800,6 +823,10 @@ def verifica_enoxaparina_plena(p, it, r):
     depois, lo, hi = map(int, mr.groups())
     _confere(depois, [('ACCP 2022', 24, INF)], 'HBPM plena: horas depois (sangramento baixo ou moderado)', it)
     assert (lo, hi) == (48, 72), 'ACCP 2022: 48 a 72 h após sangramento alto'
+    # Hemostasia e exceção do sangramento alto (p. 4 da revisão)
+    me = RE_ENOXA_EXCECAO_ALTO.search(texto)
+    assert RE_ENOXA_HEMOSTASIA.search(texto) and me, texto
+    assert tuple(map(int, me.groups())) == (3, 5), 'ACCP 2022: dose baixa por 3 a 5 dias'
     # ACCP e SBC definem esses intervalos para a HBPM na ponte: o texto e a classe dizem que o uso contínuo é extensão
     assert RE_ENOXA_PONTE_ACCP.search(texto) and RE_ENOXA_PONTE_SBC.search(texto), texto
     assert it['classe'].count('(extrapolado da ponte)') == 2 and 'ACCP 2022 (extrapolado da ponte)' in it['classe']
