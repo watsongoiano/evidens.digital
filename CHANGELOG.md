@@ -1,6 +1,26 @@
 
 # Patches applied (2025-08-26T12:12:23)
 
+## 2026-11-19 — Cadastro de pacientes: fase 1, só no servidor e só para o administrador
+
+Detalhes, contrato da API, limites e o que falta antes de abrir em `docs/pacientes.md`.
+
+- Para o usuário comum nada mudou: o check-up, o pré-operatório, os PDFs e as operadoras continuam sem gravar
+  dado de paciente, e os Termos, a home e a página de cadastro não foram alterados. Não há tela nesta fase.
+- Tabelas novas: `pacientes` (um JSON cifrado com todos os campos; CNS e CPF só como HMAC, para o banco recusar
+  duplicado na mesma conta) e `pacientes_acessos` (trilha: quem fez o quê e quando, sem dado de paciente). Nada do
+  paciente fica em claro no banco, nem o nome. As chaves derivam de `SECRET_KEY`; sem ela o cadastro se recusa a
+  gravar. **Trocar a `SECRET_KEY` torna os registros ilegíveis.**
+- Rotas novas em `/api/pacientes` (listar e buscar, criar, ler, atualizar, excluir, exportar), todas só para o
+  administrador: conta comum recebe 403 e, sem login, 401. Cada paciente é da conta que o cadastrou; o de outra
+  conta responde 404, também para o administrador.
+- Campos: identificação (nome, nome social, nascimento, sexo, CPF, CNS, mãe, raça/cor, prontuário, responsável),
+  contato e endereço (os do laudo de APAC), até 5 planos (operadora, carteira, validade) e a ficha clínica (retrato
+  do formulário do check-up, até 64 KB). Tudo é validado no servidor; chave desconhecida é recusada.
+- A regra de quem pode usar fica em `pacientes.habilitado_para`. Abrir a todos é trocar essa linha, depois da nova
+  versão dos Termos, dos textos da home e do cadastro e da política de retenção.
+- Registro de perigos: P-10 passa a ter uma exceção controlada; P-26 (dados guardados no cadastro) é novo.
+
 ## 2026-11-17 — APAC no formulário do SUS, orientações em subtópicos e resumo dos exames
 
 - O laudo de APAC passa a usar o formulário do SUS como fundo (`src/data/apac_sus.pdf`; do modelo recebido só saiu

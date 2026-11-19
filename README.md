@@ -102,6 +102,10 @@ Geram minutas em PDF a partir da lista de recomendações retornadas pelo endpoi
   para o paciente, a resposta é `400` com `codigo: "triagem_vacinas"`.
 - Resposta: PDF com campo de assinatura e carimbo do médico. Os documentos não têm assinatura digital.
 
+### /pacientes (cadastro de pacientes; por enquanto só o administrador, sem tela)
+Única parte do sistema que guarda dado de paciente, cifrado e por conta. Campos, rotas, respostas, limites e o que
+falta antes de abrir a todos estão em [`docs/pacientes.md`](docs/pacientes.md).
+
 ### Endpoints desativados
 `/gerar-receita-vacinas`, `/gerar-solicitacao-exames` e `/generate-pdf` respondem `410 Gone`. Os dois primeiros
 montavam documentos que declaravam assinatura digital sem que ela existisse; o terceiro não gerava nada.
@@ -136,7 +140,7 @@ Veja `.env.example`. As que a aplicação usa em produção:
 | Variável | Uso |
 |---|---|
 | `DATABASE_URL` | Postgres das contas (a integração Neon da Vercel preenche) |
-| `SECRET_KEY` | Assina o cookie de sessão |
+| `SECRET_KEY` | Assina o cookie de sessão e dá origem às chaves do cadastro de pacientes (não trocar sem ler `docs/pacientes.md`) |
 | `SETUP_TOKEN` | Código de instalação do primeiro administrador |
 | `RESEND_API_KEY` | Opcional: liga o aviso por e-mail ao administrador a cada novo pedido de conta (docs/deploy.md) |
 

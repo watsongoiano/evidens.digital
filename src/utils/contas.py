@@ -1,8 +1,10 @@
 """Contas de usuário: armazenamento e regras.
 
 Guarda só o que a área de acesso precisa: nome, e-mail, registro profissional
-(CRM ou matrícula), perfil, senha (como hash) e situação da conta. Dados de
-pacientes continuam não sendo gravados em lugar nenhum.
+(CRM ou matrícula), perfil, senha (como hash) e situação da conta. O check-up, o
+pré-operatório, os PDFs e as operadoras continuam sem gravar dado de paciente.
+A única exceção é o cadastro de pacientes (src/utils/pacientes.py), cifrado e,
+por enquanto, só do administrador: as tabelas dele ficam no fim de `_ESQUEMA`.
 
 Banco: Postgres em produção (variável DATABASE_URL ou POSTGRES_URL, entregue
 pela integração Neon da Vercel). Nos testes e na execução local, um arquivo
@@ -168,6 +170,32 @@ _ESQUEMA = [
         UNIQUE (usuario_id, estabelecimento_id)
     )""",
     "CREATE INDEX IF NOT EXISTS vinculos_sus_usuario ON vinculos_sus (usuario_id)",
+    # Cadastro de pacientes (src/utils/pacientes.py; docs/pacientes.md): a única tabela com dado de paciente.
+    # "dados" é um JSON cifrado com todos os campos: nada fica em claro, nem o nome. Os índices são o HMAC do CNS
+    # e do CPF (nulos se não informados), para o banco recusar duplicado na mesma conta sem guardar o número.
+    """CREATE TABLE IF NOT EXISTS pacientes (
+        id {pk},
+        usuario_id BIGINT NOT NULL,
+        dados TEXT NOT NULL,
+        indice_cns TEXT,
+        indice_cpf TEXT,
+        criado_em BIGINT NOT NULL,
+        atualizado_em BIGINT NOT NULL
+    )""",
+    "CREATE INDEX IF NOT EXISTS pacientes_usuario ON pacientes (usuario_id)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS pacientes_cns_da_conta ON pacientes (usuario_id, indice_cns) WHERE indice_cns IS NOT NULL",
+    "CREATE UNIQUE INDEX IF NOT EXISTS pacientes_cpf_da_conta ON pacientes (usuario_id, indice_cpf) WHERE indice_cpf IS NOT NULL",
+    # Trilha de acessos ao cadastro de pacientes: quem fez o quê e quando. Nenhum dado de paciente; "paciente_id"
+    # é nulo na listagem e continua aqui depois que o registro é excluído.
+    """CREATE TABLE IF NOT EXISTS pacientes_acessos (
+        id {pk},
+        paciente_id BIGINT,
+        usuario_id BIGINT NOT NULL,
+        acao TEXT NOT NULL,
+        quando BIGINT NOT NULL
+    )""",
+    "CREATE INDEX IF NOT EXISTS pacientes_acessos_usuario ON pacientes_acessos (usuario_id)",
+    "CREATE INDEX IF NOT EXISTS pacientes_acessos_paciente ON pacientes_acessos (paciente_id)",
 ]
 
 APROVACAO_MANUAL = "aprovacao_manual"

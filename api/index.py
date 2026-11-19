@@ -20,6 +20,7 @@ from src.routes.checkup_intelligent import checkup_intelligent_bp
 from src.utils import uso
 from src.routes import auth
 from src.routes.auth import auth_bp, exigir_administrador, usuario_atual
+from src.routes.pacientes import pacientes_bp
 from src.utils import i18n
 
 # Criar aplicação Flask
@@ -72,6 +73,8 @@ def _checkup_exige_login():
 # Registrar blueprints
 app.register_blueprint(checkup_intelligent_bp, url_prefix='/api')
 app.register_blueprint(auth_bp, url_prefix='/api')
+# Cadastro de pacientes: por enquanto só o administrador usa, e não há tela (docs/pacientes.md).
+app.register_blueprint(pacientes_bp, url_prefix='/api')
 
 
 def _pagina(arquivo, privada=False):
@@ -266,7 +269,9 @@ CAMPOS_DE_TEXTO = frozenset({'error', 'erros', 'mensagem'})
 def responder_no_idioma(resposta):
     """Em inglês (cookie do seletor ou ?lang=en), traduz as frases das respostas da API."""
     idioma = i18n.idioma_do_pedido(request)
-    if idioma == 'pt' or not request.path.startswith('/api/') or request.path.startswith(('/api/admin', '/api/analytics')):
+    # O cadastro de pacientes fica de fora: a resposta leva o que o médico digitou (a ficha pode ter um campo
+    # chamado "mensagem"), e dado de paciente nunca passa pelo tradutor.
+    if idioma == 'pt' or not request.path.startswith('/api/') or request.path.startswith(('/api/admin', '/api/analytics', '/api/pacientes')):
         return resposta
     if resposta.mimetype != 'application/json' or resposta.direct_passthrough:
         return resposta
