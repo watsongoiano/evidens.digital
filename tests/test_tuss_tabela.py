@@ -43,12 +43,20 @@ def test_nome_da_tuss_e_nome_do_evidens_dao_o_mesmo_codigo():
 def test_catalogo_ganha_os_exames_da_tabela_sem_repetir_os_que_ja_existem():
     laboratorio = catalogo.catalogo()['laboratorio']
     assert len(laboratorio) > 850 and len(set(map(str.lower, laboratorio))) == len(laboratorio)
-    for novo in ('Acetaminofen', 'Colesterol (HDL)', 'IgM', 'Ácido láctico (lactato)', 'Leishmania, pesquisa'):
+    for novo in ('Acetaminofen', 'Colesterol (HDL)', 'IgD', 'Ácido láctico (lactato)', 'Leishmania, pesquisa'):
         assert novo in laboratorio, novo
     # já estavam no catálogo com o nome do Evidēns: o nome da TUSS não entra de novo
     for repetido in ('Creatinina', 'Glicose', 'Ácido úrico', 'Albumina', 'Cálcio iônico'):
         assert repetido not in laboratorio, repetido
     assert 'Creatinina, soro' in laboratorio and 'Cálcio iônico, soro' in laboratorio
+    # IgM, IgE total e cultura para micobactérias ganharam nome do Evidēns com as bronquiectasias (18/11/2026)
+    for repetido, do_evidens in (('IgM', 'Imunoglobulina M (IgM), soro'), ('IgE, total', 'Imunoglobulina E (IgE) total, soro'),
+                                 ('Cultura para mycobacterium', 'Cultura para micobactérias, escarro')):
+        assert repetido not in laboratorio and do_evidens in laboratorio, repetido
+    # Códigos que servem a vários exames: o genérico da tabela continua no catálogo ao lado do título do Evidēns
+    assert 'IgE, por alérgeno, cada (cada)' in laboratorio and 'IgE específica para Aspergillus, soro' in laboratorio
+    assert 'Cultura bacteriana (em diversos materiais biológicos)' in laboratorio
+    assert 'Cultura de escarro (bactérias)' in laboratorio
     # cálcio total fica de fora: o cálcio dos pedidos é sempre o iônico
     assert 'Cálcio' not in laboratorio
     # imagem e vacinas não mudam
@@ -66,6 +74,21 @@ def test_exame_da_tabela_entra_no_pedido_e_sai_na_guia_com_o_codigo(app, contas)
     pedido, guia = [p.extract_text() for p in PdfReader(io.BytesIO(resposta.data)).pages]
     assert 'Acetaminofen' in pedido and 'Colesterol (HDL)' in pedido
     assert '40301036' in guia and '40301583' in guia
+
+
+def test_guia_soma_a_quantidade_de_exames_diferentes_no_mesmo_codigo():
+    """Cultura de escarro e cultura do estreptococo do grupo B usam o mesmo código (40310124, "Cultura bacteriana"):
+    são dois exames, e a guia sai com uma linha e quantidade 2. Dois pedidos do MESMO exame (TGO sozinha e no par
+    TGO/TGP) continuam com quantidade 1."""
+    from src.utils import pdf_minutas
+    gbs = next(t for t, c in tuss.CODIGOS.items() if c == ['40310124'] and 'estreptococo' in t)
+    linhas = pdf_minutas.linhas_da_guia_do_pedido([{'titulo': 'Cultura de escarro (bactérias)'}, {'titulo': gbs}], 'feminino')
+    assert [(l['codigo'], l['quantidade']) for l in linhas] == [('40310124', 2)]
+    linhas = pdf_minutas.linhas_da_guia_do_pedido([{'titulo': 'Cultura de escarro (bactérias)'}], 'feminino')
+    assert [(l['codigo'], l['quantidade']) for l in linhas] == [('40310124', 1)]
+    tgo = pdf_minutas.linhas_da_guia_do_pedido([{'titulo': 'Aspartato aminotransferase, soro'},
+                                                {'titulo': 'Aspartato aminotransferase, soro'}], 'feminino')
+    assert [l['quantidade'] for l in tgo] == [1]
 
 
 def test_exame_da_tabela_e_reconhecido_em_exames_ja_realizados(client):

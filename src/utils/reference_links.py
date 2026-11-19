@@ -259,6 +259,8 @@ _FONTES_DIRETAS = [
     ('ese/ensat 2023 (incidentaloma adrenal)', 'https://doi.org/10.1093/ejendo/lvad066'),
     ('endocrine society 2011 (hiperprolactinemia)', 'https://doi.org/10.1210/jc.2010-1692'),
     ('pituitary society 2023 (prolactinoma)', 'https://doi.org/10.1038/s41574-023-00886-5'),
+    ('ers 2025 (bronquiectasias)', 'https://doi.org/10.1183/13993003.01126-2025'),
+    ('mosgrove 2026 (resumo da ers 2025)', 'https://doi.org/10.1038/s41533-026-00528-z'),
     ('endocrine society 2024 (vitamina d)', 'https://doi.org/10.1210/clinem/dgae290'),
     ('endocrine society 2016 (hiperaldosteronismo)', 'https://doi.org/10.1210/jc.2015-4061'),
     ('endocrine society 2025 (hiperaldosteronismo)', 'https://doi.org/10.1210/clinem/dgaf284'),

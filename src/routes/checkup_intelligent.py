@@ -796,7 +796,8 @@ def _identidade_do_exame(rec, sexo):
         if partes:
             return frozenset(partes)
         chaves = periodicidade.chaves(titulo, sexo)
-        if not any(c.startswith('nome:') for c in chaves):
+        # Código que serve a vários exames (cultura de escarro e de estreptococo do grupo B): cada título é um exame
+        if not any(c.startswith('nome:') for c in chaves) and not chaves & tuss.CODIGOS_DE_VARIOS_EXAMES:
             return chaves
     return frozenset({'titulo:' + (rec.get('categoria') or '') + ':' + _titulo_normalizado(titulo)})
 

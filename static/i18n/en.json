@@ -1715,7 +1715,6 @@
   "Os dados do paciente mudaram. O plano e a carteira ainda são deste paciente?": "The patient data changed. Do the health plan and member ID still belong to this patient?",
   "Sim, manter": "Yes, keep them",
   "Limpar": "Clear",
-  "Os dados do paciente mudaram depois que o plano foi informado. Confira o plano e a carteira antes de gerar a guia.": "The patient data changed after the health plan was entered. Check the plan and the member ID before generating the form.",
   "São deste paciente": "They belong to this patient",
   "Obs.:": "Note:",
   "Termos de Uso": "Terms of Use",
@@ -4273,8 +4272,6 @@
   "Os exames de laboratório saem juntos no mesmo laudo de solicitação de APAC (até três por laudo), logo depois do pedido.": "The laboratory tests go together on the same APAC request report (up to three per report), right after the order.",
   "Cada um sai com o laudo de solicitação de APAC, logo depois do pedido.": "Each one comes with its APAC request report, right after the order.",
   "Não foi possível conferir agora quais exames deste pedido são de alta complexidade: o laudo de APAC sai para os que forem.": "It was not possible to check right now which tests in this order are high-complexity: the APAC report will be issued for those that are.",
-  "158 recomendações mapeadas": "158 recommendations mapped",
-  "158 recomendações": "158 recommendations",
   "Nódulo de tireoide": "Thyroid nodule",
   "Hiperparatireoidismo primário": "Primary hyperparathyroidism",
   "Incidentaloma adrenal": "Adrenal incidentaloma",
@@ -4345,6 +4342,26 @@
   "Hipertensão arterial pulmonar: no seguimento, o risco é estratificado em quatro níveis pela classe funcional (OMS), pela distância no teste de caminhada de 6 minutos e pelo BNP ou NT-proBNP. Reavaliar 3-6 meses após mudança do tratamento e a cada 3-6 meses no paciente estável, com o intervalo ajustado ao caso.": "Pulmonary arterial hypertension: during follow-up, risk is stratified into four strata by WHO functional class, 6-minute walk distance and BNP or NT-proBNP. Reassess 3-6 months after a change in therapy and every 3-6 months in stable patients, with the interval adjusted to the patient.",
   "Hipertensão arterial pulmonar: seguimento e vacinas": "Pulmonary arterial hypertension: follow-up and vaccines",
   "O seguimento é feito em centro de referência. Além dos exames pedidos, a diretriz lista: gasometria arterial na avaliação inicial (a oximetria de pulso pode substituí-la no paciente estável), eletrocardiograma, qualidade de vida, teste cardiopulmonar de exercício e cateterismo direito, conforme o caso. Exames estendidos (TSH, troponina, ácido úrico) conforme o quadro clínico; INR em uso de antagonista da vitamina K. Vacinas recomendadas: influenza, pneumocócica e COVID-19. Na deficiência de ferro sem anemia, a reposição pode ser considerada.": "Follow-up takes place at a referral centre. In addition to the tests ordered, the guideline lists: arterial blood gases at baseline (pulse oximetry may replace them in stable patients), electrocardiogram, quality of life, cardiopulmonary exercise testing and right heart catheterisation, as appropriate. Extended tests (TSH, troponin, uric acid) according to the clinical situation; INR for patients on vitamin K antagonists. Recommended vaccines: influenza, pneumococcal and COVID-19. In iron deficiency without anaemia, iron repletion may be considered.",
+  "Os dados do paciente mudaram depois que o plano foi informado. Antes de gerar o PDF, diga se o plano e a carteira são deste paciente.": "The patient's data changed after the plan was entered. Before generating the PDF, say whether the plan and the card number belong to this patient.",
+  "O PDF ainda não foi gerado. Escolha acima “São deste paciente” ou “Limpar” e clique de novo em “Gerar o PDF”.": "The PDF has not been generated yet. Choose “They belong to this patient” or “Clear” above and click “Generate the PDF” again.",
+  "165 recomendações mapeadas": "165 recommendations mapped",
+  "165 recomendações": "165 recommendations",
+  "Bronquiectasias | Avaliação inicial": "Bronchiectasis | Baseline assessment",
+  "Bronquiectasias: escarro no seguimento": "Bronchiectasis: sputum during follow-up",
+  "Bronquiectasias: o que não vira pedido automático": "Bronchiectasis: what does not become an automatic order",
+  "Bronquiectasias: painel de exames para investigar a causa, indicado a todo paciente com o diagnóstico confirmado: hemograma, imunoglobulinas (IgG, IgA e IgM), eletroforese de proteínas, pesquisa de aspergilose broncopulmonar alérgica (IgE total, IgE e IgG para Aspergillus) e escarro para bactérias e micobactérias.": "Bronchiectasis: test panel to investigate the cause, indicated for every patient with a confirmed diagnosis: full blood count, immunoglobulins (IgG, IgA and IgM), protein electrophoresis, testing for allergic bronchopulmonary aspergillosis (total IgE, IgE and IgG to Aspergillus) and sputum for bacteria and mycobacteria.",
+  "Cultura de escarro (bactérias)": "Sputum culture (bacteria)",
+  "Cultura para micobactérias, escarro": "Mycobacterial culture, sputum",
+  "ERS 2025 (bronquiectasias)": "ERS 2025 (bronchiectasis)",
+  "ERS 2025 (bronquiectasias) / Mosgrove 2026 (resumo da ERS 2025)": "ERS 2025 (bronchiectasis) / Mosgrove 2026 (summary of ERS 2025)",
+  "Mosgrove 2026 (resumo da ERS 2025)": "Mosgrove 2026 (summary of ERS 2025)",
+  "Imunoglobulina E (IgE) total, soro": "Total immunoglobulin E (IgE), serum",
+  "Imunoglobulina M (IgM), soro": "Immunoglobulin M (IgM), serum",
+  "Bronquiectasias (adulto, sem fibrose cística)": "Bronchiectasis (adult, not related to cystic fibrosis)",
+  "IgE específica para Aspergillus, soro": "Aspergillus-specific IgE, serum",
+  "IgG específica para Aspergillus, soro": "Aspergillus-specific IgG, serum",
+  "Colher cultura de escarro no início de cada exacerbação, de preferência antes do antibiótico, e repetir se não houver resposta. Pesquisar micobactérias também nos sintomas persistentes que não melhoram com antibiótico e antes de iniciar macrolídeo prolongado. Isolamento novo de Pseudomonas aeruginosa: repetir a cultura e discutir de imediato com o especialista; a diretriz sugere o tratamento de erradicação (recomendação condicional). No paciente estável, a cultura positiva isolada não é motivo para antibiótico.": "Collect a sputum culture at the start of each exacerbation, ideally before the antibiotic, and repeat it if there is no response. Also test for mycobacteria when persistent symptoms do not improve with antibiotics and before starting a long-term macrolide. New isolation of Pseudomonas aeruginosa: repeat the culture and discuss immediately with the specialist; the guideline suggests eradication treatment (conditional recommendation). In a stable patient, a positive culture alone is not a reason for antibiotics.",
+  "A espirometria entra na avaliação da gravidade (VEF1), não na investigação da causa. O resumo da diretriz não fixa intervalo de consulta, de cultura de escarro nem de espirometria no paciente estável, e não trata de vacinas. Causas raras (discinesia ciliar, fibrose cística) são investigadas quando os exames iniciais são negativos e a história as sugere. Na avaliação inicial, rever comorbidades: risco cardiovascular, osteoporose, rinossinusite, refluxo e humor, e otimizar o tratamento da doença de via aérea associada. A diretriz trata das bronquiectasias do adulto não relacionadas à fibrose cística.": "Spirometry is part of the severity assessment (FEV1), not of the investigation of the cause. The guideline summary does not set an interval for visits, sputum culture or spirometry in stable patients, and does not address vaccines. Rare causes (ciliary dyskinesia, cystic fibrosis) are investigated when the initial tests are negative and the history suggests them. At the baseline assessment, review comorbidities: cardiovascular risk, osteoporosis, rhinosinusitis, reflux and mood, and optimise the treatment of co-existing airway disease. The guideline addresses bronchiectasis in adults not related to cystic fibrosis.",
   "Há mais de 12 meses": "More than 12 months ago",
   "Já somados:": "Already counted:",
   "incompleto, falta informar": "incomplete, still missing",
@@ -5181,14 +5198,6 @@
    "Anemia (hemoglobin %1 g/dL): test for iron deficiency, which is treated with iron before elective surgery."
   ],
   [
-   "^TFG ([\\d,]+) mL/min/1,73 m²: dose máxima de 1\\.000 mg/dia \\(KDIGO 2022\\)\\.$",
-   "eGFR %1 mL/min/1.73 m²: maximum dose 1,000 mg/day (KDIGO 2022)."
-  ],
-  [
-   "^TFG ([\\d,]+) mL/min/1,73 m² \\(CKD-EPI 2021\\): a metformina é contraindicada abaixo de 30\\. Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir sem função renal estável\\.$",
-   "eGFR %1 mL/min/1.73 m² (CKD-EPI 2021): metformin is contraindicated below 30. Stop it and review treatment with the attending physician; after surgery, do not restart without stable kidney function."
-  ],
-  [
    "^Faltam dados para fechar o risco do paciente: (.+?)\\. Com o resultado: risco elevado, avaliação cardiológica indicada; risco baixo, liberar sem investigação de isquemia\\.$",
    "Data are missing to complete the patient's risk: $1. With the result: elevated risk, cardiac evaluation indicated; low risk, clear without ischemia testing."
   ],
@@ -5243,6 +5252,14 @@
   [
    "^AHA \\(Tabela 13, ClCr ([\\d,]+) mL/min, sangramento (baixo/moderado|alto)\\): sem dose do D-(\\d+) ao (D0|D\\+\\d+), com a última dose no D-(\\d+) e o reinício no D\\+(\\d+), após hemostasia\\.$",
    "AHA (Table 13, CrCl %1 mL/min, $2 bleeding risk): no dose from D-%3 to %4, with the last dose on D-%5 and restart on D+%6, after hemostasis."
+  ],
+  [
+   "^TFG ([\\d,]+) mL/min/1,73 m²: dose máxima de 1\\.000 mg/dia \\(KDIGO 2022\\)\\.$",
+   "eGFR %1 mL/min/1.73 m²: maximum dose 1,000 mg/day (KDIGO 2022)."
+  ],
+  [
+   "^TFG ([\\d,]+) mL/min/1,73 m² \\(CKD-EPI 2021\\): a metformina é contraindicada abaixo de 30\\. Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir sem função renal estável\\.$",
+   "eGFR %1 mL/min/1.73 m² (CKD-EPI 2021): metformin is contraindicated below 30. Stop it and review treatment with the attending physician; after surgery, do not restart without stable kidney function."
   ],
   [
    "^Com o que foi informado, a pontuação mínima é (\\d+): já está na faixa de risco alto \\(≥ 45\\), qualquer que seja o dado que falta\\.$",
