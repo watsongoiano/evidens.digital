@@ -1371,7 +1371,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
       </div>
       <p data-guia-campo class="text-[13px] text-ink/55 mt-3" style="display: none;">A guia SP/SADT sai no mesmo PDF, logo depois do pedido, com os seus dados no plano e os códigos TUSS. O número da carteira não é guardado.</p>
       <div id="guiaConfirmar" role="alert" class="aviso aviso-info mt-3" style="display: none;">
-        <p>Os dados do paciente mudaram depois que o plano foi informado. Confira o plano e a carteira antes de gerar a guia.</p>
+        <p>Os dados do paciente mudaram depois que o plano foi informado. Antes de gerar o PDF, diga se o plano e a carteira são deste paciente.</p>
         <p class="flex flex-wrap gap-3 mt-3"><button type="button" id="guiaManter" class="btn-claro">São deste paciente</button><button type="button" id="guiaLimpar" class="btn-claro">Limpar</button></p>
       </div>
     </div>
@@ -1396,6 +1396,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
       <div id="assinaturaErro" role="alert" class="aviso aviso-erro mt-3" style="display: none;"></div>
     </div>
 
+    <p id="guiaBloqueio" role="alert" class="aviso aviso-atencao mt-4" style="display: none;">O PDF ainda não foi gerado. Escolha acima “São deste paciente” ou “Limpar” e clique de novo em “Gerar o PDF”.</p>
     <div class="flex flex-wrap items-center gap-3 mt-6">
       <button type="button" id="acrescimoSim" class="btn-claro">Sim, acrescentar</button>
       <button type="button" id="acrescimoGerar" class="btn-escuro"><span id="acrescimoGerarTexto">Gerar o PDF</span> <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button>
@@ -2556,6 +2557,17 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             const pendente = planoAConfirmar && comPlano;
             document.getElementById('planoConfirmar').style.display = pendente ? '' : 'none';
             document.getElementById('guiaConfirmar').style.display = pendente ? '' : 'none';
+            if (!pendente) esconderBloqueioDaGuia();
+        }
+
+        // "Gerar o PDF" com a conferência do plano pendente: a tela diz por que o PDF não saiu e o que fazer.
+        function mostrarBloqueioDaGuia() {
+            document.getElementById('guiaBloqueio').style.display = '';
+            document.getElementById('guiaConfirmar').classList.replace('aviso-info', 'aviso-atencao');
+        }
+        function esconderBloqueioDaGuia() {
+            document.getElementById('guiaBloqueio').style.display = 'none';
+            document.getElementById('guiaConfirmar').classList.replace('aviso-atencao', 'aviso-info');
         }
 
         // Dados do paciente no laudo de APAC: identificam uma pessoa e não podem passar para a próxima.
@@ -3055,6 +3067,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             prepararJustificativa(categoria);
             await prepararGuia(categoria);
             await prepararAssinatura();
+            esconderBloqueioDaGuia();      // o aviso de um clique anterior não reaparece ao reabrir o diálogo
             const dialogo = document.getElementById('dialogoAcrescimo');
             if (typeof dialogo.showModal === 'function') dialogo.showModal(); else dialogo.setAttribute('open', '');
         }
@@ -3092,6 +3105,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             const guia = categoria === 'vacina' ? null : guiaDoDialogo();
             if (guia && planoAConfirmar) {
                 // A guia não sai com plano e carteira que podem ser de outro paciente.
+                mostrarBloqueioDaGuia();
                 document.getElementById('guiaConfirmar').scrollIntoView({ block: 'nearest' });
                 document.getElementById('guiaManter').focus();
                 return;

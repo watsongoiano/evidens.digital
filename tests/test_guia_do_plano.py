@@ -291,6 +291,16 @@ def test_troca_de_paciente_pede_confirmacao_do_plano_antes_da_guia():
     # a guia não sai enquanto o plano estiver por confirmar
     gerar = tela[tela.index("document.getElementById('acrescimoGerar').addEventListener('click'"):]
     assert gerar.index('if (guia && planoAConfirmar)') < gerar.index('fecharDialogo();') < gerar.index('baixarPdf(')
+    # ...e a tela diz por que o PDF não saiu e o que fazer (relato de 19/11/2026: o clique parecia não fazer nada)
+    bloqueio = gerar[gerar.index('if (guia && planoAConfirmar)'):gerar.index('const doc = DOCUMENTOS[categoria];')]
+    assert bloqueio.index('mostrarBloqueioDaGuia();') < bloqueio.index('return;')
+    assert 'id="guiaBloqueio" role="alert"' in tela and 'O PDF ainda não foi gerado.' in tela
+    assert 'Antes de gerar o PDF, diga se o plano e a carteira são deste paciente.' in tela
+    # o aviso some quando a conferência é resolvida (confirmar, limpar ou editar) e ao reabrir o diálogo
+    mostrar = re.search(r'function mostrarCamposDoPlano\(\) \{(.*?)\n        \}', tela, re.S).group(1)
+    assert 'if (!pendente) esconderBloqueioDaGuia();' in mostrar
+    abrir = tela[tela.index('await prepararAssinatura();'):tela.index("if (typeof dialogo.showModal === 'function')")]
+    assert 'esconderBloqueioDaGuia();' in abrir
     # editar o plano ou a carteira vale como confirmação; "Limpar" zera os dois
     assert re.search(r'function planoEditado\(origem\) \{.*?planoAConfirmar = false;', tela, re.S)
     assert "['planoLimpar', 'guiaLimpar'].forEach(id => document.getElementById(id).addEventListener('click', limparGuia));" in tela
