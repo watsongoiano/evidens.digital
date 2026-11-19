@@ -140,7 +140,8 @@ Veja `.env.example`. As que a aplicação usa em produção:
 | Variável | Uso |
 |---|---|
 | `DATABASE_URL` | Postgres das contas (a integração Neon da Vercel preenche) |
-| `SECRET_KEY` | Assina o cookie de sessão e dá origem às chaves do cadastro de pacientes (não trocar sem ler `docs/pacientes.md`) |
+| `SECRET_KEY` | Assina o cookie de sessão |
+| `PACIENTES_CHAVE` | Chave própria do cadastro de pacientes, separada da de sessão: 32 caracteres ou mais; sem ela o cadastro fica desligado. Não trocar nem perder sem ler `docs/pacientes.md` |
 | `SETUP_TOKEN` | Código de instalação do primeiro administrador |
 | `RESEND_API_KEY` | Opcional: liga o aviso por e-mail ao administrador a cada novo pedido de conta (docs/deploy.md) |
 

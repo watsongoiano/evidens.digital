@@ -7,9 +7,10 @@ só as rotas de src/routes/pacientes.py chegam aqui e, por enquanto, só o admin
 O que fica no banco (tabelas em src/utils/contas.py):
 
 - ``pacientes.dados``: um JSON com todos os campos, cifrado (Fernet, a mesma primitiva do token da assinatura
-  digital) com chave derivada de SECRET_KEY. Nada do paciente fica em claro, nem o nome.
-- ``pacientes.indice_cns`` e ``indice_cpf``: HMAC-SHA256 do número, com outra chave derivada de SECRET_KEY, só
-  para achar duplicado na mesma conta sem guardar o número.
+  digital) com chave derivada de PACIENTES_CHAVE, a chave própria do cadastro (não é a SECRET_KEY, que assina a
+  sessão). Nada do paciente fica em claro, nem o nome. O dono e o número do registro vão dentro do texto cifrado.
+- ``pacientes.indice_cns`` e ``indice_cpf``: HMAC-SHA256 do número, com outra chave derivada de PACIENTES_CHAVE,
+  só para achar duplicado na mesma conta sem guardar o número.
 - ``pacientes_acessos``: quem fez o quê e quando (criar, ver, listar, editar, excluir, exportar). Sem dado de
   paciente: nem o termo da busca entra.
 
@@ -36,6 +37,11 @@ LIMITE_DA_LISTA = 500          # pacientes devolvidos por listagem ou busca
 LOTE_DA_LISTA = 200            # linhas decifradas por consulta ao banco
 MAX_PLANOS = 5
 MAX_FICHA = 64 * 1024          # bytes da ficha clínica em JSON
+MAX_PACIENTES_POR_CONTA = 5000 # a listagem decifra todos os registros da conta em memória
+
+# Nomes que a ficha não aceita como chave: num objeto JavaScript eles alcançam o protótipo. A tela mostra os
+# dados só com textContent (docs/pacientes.md).
+CHAVES_RESERVADAS = frozenset({'__proto__', 'constructor', 'prototype'})
 
 # Raça/cor: as categorias do IBGE usadas nos formulários do SUS (campo "raça/cor" do laudo de APAC).
 # Guarda-se a chave; o rótulo é o que vai impresso.
@@ -50,24 +56,32 @@ CAMPOS = ('nome', 'nome_social', 'nascimento', 'sexo', 'cpf', 'cns', 'mae', 'rac
           'telefone', 'email', 'cep', 'endereco', 'municipio', 'ibge', 'uf', 'planos', 'ficha')
 CAMPOS_DO_PLANO = ('operadora', 'carteira', 'validade')
 
-# Rótulos das chaves derivadas de SECRET_KEY. O "v1" acompanha o prefixo gravado em cada registro: trocar a
+# A chave do cadastro é uma variável de ambiente só dele, separada da SECRET_KEY (que assina o cookie de sessão):
+# quem obtém a chave de sessão não abre os pacientes, e trocar a de sessão não os torna ilegíveis. Sem ela, ou com
+# menos de MIN_DA_CHAVE caracteres, o cadastro fica indisponível; a SECRET_KEY nunca entra no lugar.
+VARIAVEL_DA_CHAVE = 'PACIENTES_CHAVE'
+MIN_DA_CHAVE = 32
+
+# Rótulos das chaves derivadas de PACIENTES_CHAVE. O "v1" acompanha o prefixo gravado em cada registro: trocar a
 # derivação ou a chave pede rótulo novo e regravação dos registros antigos.
 ROTULO_DA_CIFRA = b'evidens-pacientes-v1'
 ROTULO_DO_INDICE = b'evidens-pacientes-indice-v1'
 VERSAO_DA_CIFRA = 'v1'
 
-# Mesmo valor de src/routes/auth.CHAVE_PADRAO: a chave de desenvolvimento nunca cifra dado de paciente
-# (tests/test_pacientes.py confere que os dois valores continuam iguais).
+# Mesmo valor de src/routes/auth.CHAVE_PADRAO: a chave de desenvolvimento, que está no código, nunca cifra dado de
+# paciente (tests/test_pacientes.py confere que os dois valores continuam iguais).
 _CHAVE_DE_DESENVOLVIMENTO = 'dev-secret-key-change-in-production'
 
-MSG_SEM_CHAVE = ('O cadastro de pacientes está desligado neste ambiente: falta a SECRET_KEY, que cifra os dados. '
-                 'Nada foi gravado.')
-MSG_ILEGIVEL = ('Este registro não pôde ser aberto com a chave atual do ambiente (SECRET_KEY). '
+MSG_SEM_CHAVE = ('O cadastro de pacientes está desligado neste ambiente: falta a PACIENTES_CHAVE, a chave própria '
+                 f'do cadastro (ao menos {MIN_DA_CHAVE} caracteres, diferente da chave de sessão). Nada foi gravado.')
+MSG_ILEGIVEL = ('Este registro não pôde ser aberto com a chave atual do ambiente (PACIENTES_CHAVE). '
                 'Nenhum dado foi alterado.')
+MSG_CONFLITO = ('Este paciente foi alterado por outro pedido ao mesmo tempo. Nada foi gravado: '
+                'abra o registro de novo e repita a alteração.')
 
 
 class CadastroIndisponivel(Exception):
-    """Não há SECRET_KEY própria no ambiente: sem ela nada é cifrado, gravado nem aberto."""
+    """Não há PACIENTES_CHAVE utilizável no ambiente: sem ela nada é cifrado, gravado nem aberto."""
 
     def __init__(self):
         super().__init__(MSG_SEM_CHAVE)
@@ -89,8 +103,24 @@ class Duplicado(Exception):
         self.campo, self.paciente_id = campo, int(paciente_id)
 
 
+class LimiteDaConta(Exception):
+    """A conta já tem `MAX_PACIENTES_POR_CONTA` pacientes: nada foi gravado."""
+
+    def __init__(self, limite):
+        super().__init__(f"O limite é de {f'{limite:,}'.replace(',', '.')} pacientes por conta. Nada foi gravado: "
+                         'exclua registros que não usa mais para cadastrar outros.')
+        self.limite = int(limite)
+
+
+class EdicaoSimultanea(Exception):
+    """O registro mudou entre a leitura e a gravação desta edição: nada foi gravado."""
+
+    def __init__(self):
+        super().__init__(MSG_CONFLITO)
+
+
 class RegistroIlegivel(Exception):
-    """O registro não abre com a chave atual, ou não é da conta gravada na linha."""
+    """O registro não abre com a chave atual, ou não é da conta ou do número gravados na linha."""
 
     def __init__(self):
         super().__init__(MSG_ILEGIVEL)
@@ -108,8 +138,10 @@ def habilitado_para(usuario):
 # ── Chaves, cifra e índice ───────────────────────────────────────────────────
 
 def _chave(rotulo):
-    segredo = (os.environ.get('SECRET_KEY') or '').strip()
-    if not segredo or segredo == _CHAVE_DE_DESENVOLVIMENTO:
+    segredo = (os.environ.get(VARIAVEL_DA_CHAVE) or '').strip()
+    # A chave de sessão é lida só para recusar o mesmo valor: as duas têm de ser diferentes.
+    de_sessao = (os.environ.get('SECRET_KEY') or '').strip()
+    if len(segredo) < MIN_DA_CHAVE or segredo in (_CHAVE_DE_DESENVOLVIMENTO, de_sessao):
         raise CadastroIndisponivel()
     return hmac.new(segredo.encode(), rotulo, hashlib.sha256).digest()
 
@@ -119,14 +151,15 @@ def _cofre():
     return Fernet(base64.urlsafe_b64encode(_chave(ROTULO_DA_CIFRA)))
 
 
-def _cifrar(cofre, usuario_id, campos):
-    # O dono vai dentro do texto cifrado: uma linha copiada para outra conta, direto no banco, não abre.
-    claro = json.dumps({'dono': int(usuario_id), 'campos': campos}, ensure_ascii=False, separators=(',', ':'),
-                       allow_nan=False)
+def _cifrar(cofre, usuario_id, paciente_id, campos):
+    # O dono e o número do registro vão dentro do texto cifrado: uma linha copiada para outra conta, ou um texto
+    # cifrado trocado de linha, direto no banco, não abre.
+    claro = json.dumps({'dono': int(usuario_id), 'id': int(paciente_id), 'campos': campos}, ensure_ascii=False,
+                       separators=(',', ':'), allow_nan=False)
     return VERSAO_DA_CIFRA + ':' + cofre.encrypt(claro.encode()).decode()
 
 
-def _decifrar(cofre, usuario_id, cifrado):
+def _decifrar(cofre, usuario_id, paciente_id, cifrado):
     from cryptography.fernet import InvalidToken
     versao, _, corpo = str(cifrado or '').partition(':')
     if versao != VERSAO_DA_CIFRA:
@@ -136,7 +169,7 @@ def _decifrar(cofre, usuario_id, cifrado):
     except (InvalidToken, ValueError):
         raise RegistroIlegivel() from None
     if not isinstance(envelope, dict) or envelope.get('dono') != int(usuario_id) \
-            or not isinstance(envelope.get('campos'), dict):
+            or envelope.get('id') != int(paciente_id) or not isinstance(envelope.get('campos'), dict):
         raise RegistroIlegivel()
     return envelope['campos']
 
@@ -242,7 +275,9 @@ def _ler_raca(valor):
 
 def _ler_email(valor):
     email = contas.normalizar_email(valor if isinstance(valor, str) else '')
-    if not contas._EMAIL.match(email) or len(email) > LIMITES['email']:
+    # O tamanho vem antes da expressão regular (custo quadrático em texto longo). Caractere de controle, invisível
+    # ou substituto solto é recusado: `_limpo` os troca por espaço, e aí o texto deixa de ser igual ao enviado.
+    if len(email) > LIMITES['email'] or contas._limpo(email, LIMITES['email']) != email or not contas._EMAIL.match(email):
         raise _Recusa('Informe um e-mail válido.')
     return email
 
@@ -318,6 +353,9 @@ def _ler_ficha(valor):
     for chave, item in valor.items():
         if not isinstance(chave, str) or not 0 < len(chave) <= 80:
             raise _Recusa(mensagem)
+        if chave.strip() in CHAVES_RESERVADAS:
+            # A ficha só tem um nível (objeto dentro de objeto é recusado logo abaixo): conferir aqui cobre todos.
+            raise _Recusa('Ficha clínica: há um campo com nome reservado, que o cadastro não aceita.')
         if not (_valor_simples(item) or (isinstance(item, list) and all(_valor_simples(v) for v in item))):
             raise _Recusa(mensagem)
     try:
@@ -390,6 +428,10 @@ def validar(dados):
 
 # ── Banco ────────────────────────────────────────────────────────────────────
 
+def _em_postgres():
+    return not contas._eh_sqlite(contas._url())
+
+
 def _id(valor):
     """Identificador que cabe na coluna (BIGINT); fora disso o registro não existe."""
     try:
@@ -446,13 +488,21 @@ def criar(usuario_id, dados):
     cofre, indices, agora = _cofre(), _indices(uid, campos), int(time.time())
     try:
         with contas._conexao() as executar:
+            total = executar('SELECT COUNT(*) FROM pacientes WHERE usuario_id = ?', (uid,)).fetchall()[0][0]
+            if total >= MAX_PACIENTES_POR_CONTA:
+                raise LimiteDaConta(MAX_PACIENTES_POR_CONTA)
             _recusar_duplicado(executar, uid, indices)
+            # Duas etapas na mesma transação: o número do registro só existe depois do INSERT e vai dentro do
+            # texto cifrado. A linha sem dados nunca fica visível a outra conexão.
             pid = executar(
                 'INSERT INTO pacientes (usuario_id, dados, indice_cns, indice_cpf, criado_em, atualizado_em) '
                 'VALUES (?, ?, ?, ?, ?, ?) RETURNING id',
-                (uid, _cifrar(cofre, uid, campos), indices['cns'], indices['cpf'], agora, agora)).fetchone()[0]
+                (uid, '', indices['cns'], indices['cpf'], agora, agora)).fetchall()[0][0]
+            if executar('UPDATE pacientes SET dados = ? WHERE id = ? AND usuario_id = ?',
+                        (_cifrar(cofre, uid, pid, campos), pid, uid)).rowcount != 1:
+                raise RuntimeError('o registro novo não foi gravado')
             _registrar(executar, pid, uid, 'criar', agora)
-    except Duplicado:
+    except (Duplicado, LimiteDaConta):
         raise
     except Exception as erro:
         # Outra requisição gravou o mesmo CNS ou CPF no intervalo: o índice único do banco recusou.
@@ -494,7 +544,7 @@ def listar(usuario_id, busca=''):
                                   'ORDER BY id DESC LIMIT ?', (uid, ultimo, LOTE_DA_LISTA)).fetchall()
             for pid, cifrado, atualizado_em in linhas:
                 try:
-                    campos = _decifrar(cofre, uid, cifrado)
+                    campos = _decifrar(cofre, uid, pid, cifrado)
                 except RegistroIlegivel:
                     ilegiveis += 1
                     continue
@@ -524,7 +574,7 @@ def _consultar(usuario_id, paciente_id, acao):
                          (pid, uid)).fetchone()
         if not linha:
             return None
-        paciente = _completo(pid, _decifrar(cofre, uid, linha[0]), linha[1], linha[2])
+        paciente = _completo(pid, _decifrar(cofre, uid, pid, linha[0]), linha[1], linha[2])
         _registrar(executar, pid, uid, acao)
     return paciente
 
@@ -546,7 +596,12 @@ def atualizar(usuario_id, paciente_id, dados):
     """Troca os campos enviados e mantém os demais; campo enviado vazio ('' ou null) é apagado.
 
     `planos` e `ficha`, quando enviados, substituem os anteriores por inteiro. Devolve o registro como ficou,
-    ou None se o paciente não for da conta.
+    ou None se o paciente não for da conta ou tiver sido excluído no meio do caminho.
+
+    Dois pedidos ao mesmo tempo: em Postgres a leitura trava a linha (SELECT … FOR UPDATE) até a gravação, e o
+    segundo pedido espera e parte do que o primeiro gravou. Em sqlite, que não tem a cláusula, o UPDATE só grava
+    se o texto cifrado ainda for o que foi lido. Nos dois bancos confere-se quantas linhas o UPDATE alcançou:
+    nenhuma, e o registro sumiu (None) ou mudou (`EdicaoSimultanea`); em nenhum dos casos entra "editar" na trilha.
     """
     uid, pid = int(usuario_id), _id(paciente_id)
     if not isinstance(dados, dict):
@@ -557,25 +612,34 @@ def atualizar(usuario_id, paciente_id, dados):
     indices = {}
     try:
         with contas._conexao() as executar:
-            linha = executar('SELECT dados, criado_em FROM pacientes WHERE id = ? AND usuario_id = ?',
-                             (pid, uid)).fetchone()
-            if not linha:
+            trava = ' FOR UPDATE' if _em_postgres() else ''
+            # fetchall: a consulta termina aqui e não segura o banco (sqlite) enquanto a edição é preparada.
+            linhas = executar('SELECT dados, criado_em FROM pacientes WHERE id = ? AND usuario_id = ?' + trava,
+                              (pid, uid)).fetchall()
+            if not linhas:
                 return None
-            campos = validar({**_decifrar(cofre, uid, linha[0]), **dados})
+            lido, criado_em = linhas[0]
+            campos = validar({**_decifrar(cofre, uid, pid, lido), **dados})
             indices = _indices(uid, campos)
             _recusar_duplicado(executar, uid, indices, exceto=pid)
-            executar('UPDATE pacientes SET dados = ?, indice_cns = ?, indice_cpf = ?, atualizado_em = ? '
-                     'WHERE id = ? AND usuario_id = ?',
-                     (_cifrar(cofre, uid, campos), indices['cns'], indices['cpf'], agora, pid, uid))
+            gravadas = executar('UPDATE pacientes SET dados = ?, indice_cns = ?, indice_cpf = ?, atualizado_em = ? '
+                                'WHERE id = ? AND usuario_id = ? AND dados = ?',
+                                (_cifrar(cofre, uid, pid, campos), indices['cns'], indices['cpf'], agora, pid, uid,
+                                 lido)).rowcount
+            if gravadas != 1:
+                ainda_existe = executar('SELECT id FROM pacientes WHERE id = ? AND usuario_id = ?', (pid, uid)).fetchall()
+                if not ainda_existe:
+                    return None                    # excluído entre a leitura e a gravação
+                raise EdicaoSimultanea()
             _registrar(executar, pid, uid, 'editar', agora)
-    except (Duplicado, DadosInvalidos, RegistroIlegivel):
+    except (Duplicado, DadosInvalidos, RegistroIlegivel, EdicaoSimultanea):
         raise
     except Exception as erro:
         if indices and _violou_unicidade(erro):
             with contas._conexao() as executar:
                 _recusar_duplicado(executar, uid, indices, exceto=pid)
         raise
-    return _completo(pid, campos, linha[1], agora)
+    return _completo(pid, campos, criado_em, agora)
 
 
 def excluir(usuario_id, paciente_id):

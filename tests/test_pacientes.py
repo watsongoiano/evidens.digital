@@ -19,9 +19,46 @@ CHECKUP = dict(idade=50, sexo='feminino', tabagismo='nunca', imunossupressao='na
                comorbidades=[], historia_familiar=[], medicacoes=[])
 
 # Toda rota do cadastro (método, caminho). test_lista_de_rotas_esta_completa garante que nenhuma fica de fora.
-ROTAS = [('GET', '/api/pacientes'), ('GET', '/api/pacientes?busca=ficticio'), ('POST', '/api/pacientes/buscar'),
-         ('POST', '/api/pacientes'), ('GET', '/api/pacientes/{id}'), ('POST', '/api/pacientes/{id}'),
+ROTAS = [('GET', '/api/pacientes'), ('POST', '/api/pacientes/buscar'), ('POST', '/api/pacientes'), ('GET', '/api/pacientes/{id}'), ('POST', '/api/pacientes/{id}'),
          ('POST', '/api/pacientes/{id}/excluir'), ('GET', '/api/pacientes/{id}/exportar')]
+
+
+# Chave fictícia do cadastro, só para os testes (PACIENTES_CHAVE; 32 caracteres ou mais). Nenhum ambiente a usa.
+CHAVE_FICTICIA = 'chave-ficticia-do-cadastro-apenas-para-os-testes'
+CABECALHO = {'X-Requested-With': 'evidens'}
+
+
+@pytest.fixture(autouse=True)
+def _chave_do_cadastro():
+    # Remendo próprio: o `monkeypatch.undo()` de um teste não tira a chave do ambiente.
+    with pytest.MonkeyPatch.context() as remendo:
+        remendo.setenv('PACIENTES_CHAVE', CHAVE_FICTICIA)
+        yield
+
+
+def _com_cabecalho(cliente):
+    """Como a tela vai fazer: todo pedido ao cadastro leva `X-Requested-With: evidens`."""
+    cliente.environ_base['HTTP_X_REQUESTED_WITH'] = 'evidens'
+    return cliente
+
+
+@pytest.fixture()
+def admin(admin):
+    return _com_cabecalho(admin)
+
+
+@pytest.fixture()
+def client(client):
+    return _com_cabecalho(client)
+
+
+@pytest.fixture()
+def anonimo(anonimo):
+    return _com_cabecalho(anonimo)
+
+
+def _buscar(cliente, termo):
+    return cliente.post('/api/pacientes/buscar', json={'busca': termo})
 
 
 def _cpf():
@@ -129,16 +166,15 @@ def test_criar_ler_listar_buscar_atualizar_exportar_e_excluir(admin, administrad
     assert lista['truncado'] is False and lista['ilegiveis'] == 0 and lista['total'] == len(lista['pacientes'])
 
     # Busca: parte do nome (sem acento, sem maiúsculas, em qualquer ordem), nome social e final do CNS;
-    # pela URL ou pelo corpo.
+    # o termo vai sempre no corpo.
     for termo in ('jequitiba ficticia', 'XAVANTE jequitibá', '  xavi   SUCUPIRA ', dados['cns'], f"{dados['cns'][:3]} {dados['cns'][3:]}"):
-        pela_url = admin.get('/api/pacientes', query_string={'busca': termo}).get_json()
-        pelo_corpo = admin.post('/api/pacientes/buscar', json={'busca': termo}).get_json()
-        assert [p['id'] for p in pela_url['pacientes']] == [pid] == [p['id'] for p in pelo_corpo['pacientes']], termo
-        assert pela_url['total'] == 1 and pela_url == pelo_corpo
-    pelo_final = admin.get('/api/pacientes', query_string={'busca': dados['cns'][-4:]}).get_json()['pacientes']
+        pelo_corpo = _buscar(admin, termo).get_json()
+        assert [p['id'] for p in pelo_corpo['pacientes']] == [pid] and pelo_corpo['total'] == 1, termo
+        assert set(pelo_corpo) == {'pacientes', 'total', 'truncado', 'ilegiveis'}
+    pelo_final = _buscar(admin, dados['cns'][-4:]).get_json()['pacientes']
     assert pid in [p['id'] for p in pelo_final] and all(p['cns_final'] == dados['cns'][-4:] for p in pelo_final)
     for termo in ('nome-que-ninguem-tem', 'jequitiba sucupira inexistente', '0000000000000000', dados['cpf']):
-        assert admin.get('/api/pacientes', query_string={'busca': termo}).get_json()['pacientes'] == [], termo
+        assert _buscar(admin, termo).get_json()['pacientes'] == [], termo
     assert pid in [p['id'] for p in admin.post('/api/pacientes/buscar', json={}).get_json()['pacientes']]      # sem termo: todos
 
     # Atualizar: troca o que foi enviado, mantém o resto; '' apaga; planos e ficha são substituídos por inteiro.
@@ -161,7 +197,7 @@ def test_criar_ler_listar_buscar_atualizar_exportar_e_excluir(admin, administrad
 
     # Excluir: some da leitura, da lista e da exportação.
     assert admin.post(f'/api/pacientes/{pid}/excluir').get_json() == {'ok': True}
-    for metodo, caminho in ROTAS[4:]:
+    for metodo, caminho in ROTAS[3:]:
         assert _pedir(admin, metodo, caminho, pid).status_code == 404, caminho
     assert pid not in [p['id'] for p in admin.get('/api/pacientes').get_json()['pacientes']]
     assert pacientes.ler(administrador['id'], pid) is None
@@ -180,10 +216,10 @@ def test_lista_em_ordem_alfabetica_com_teto(admin, monkeypatch):
     for nome in nomes:
         _criar(admin, nome=nome)
     monkeypatch.setattr(pacientes, 'LOTE_DA_LISTA', 2)        # a leitura em lotes não perde nem repete ninguém
-    todos = admin.get('/api/pacientes', query_string={'busca': marca}).get_json()
+    todos = _buscar(admin, marca).get_json()
     assert [p['nome'].split()[0] for p in todos['pacientes']] == ['Abel', 'Bento', 'Caio', 'Davi', 'Érico']
     monkeypatch.setattr(pacientes, 'LIMITE_DA_LISTA', 3)
-    cortada = admin.get('/api/pacientes', query_string={'busca': marca}).get_json()
+    cortada = _buscar(admin, marca).get_json()
     assert [p['nome'].split()[0] for p in cortada['pacientes']] == ['Abel', 'Bento', 'Caio']
     assert cortada['total'] == 5 and cortada['truncado'] is True
 
@@ -199,7 +235,7 @@ def test_nada_do_paciente_fica_em_claro_no_banco(admin, contas):
     pid = criado['id']
     # Passa por todas as ações, inclusive a busca pelo nome, antes de olhar o banco.
     admin.get(f'/api/pacientes/{pid}')
-    admin.get('/api/pacientes', query_string={'busca': dados['nome']})
+    _buscar(admin, dados['nome'])
     admin.post('/api/pacientes/buscar', json={'busca': dados['mae']})
     admin.post(f'/api/pacientes/{pid}', json={'endereco': dados['endereco'] + ' fundos'})
     admin.get(f'/api/pacientes/{pid}/exportar')
@@ -227,26 +263,43 @@ def test_mesma_ficha_gravada_duas_vezes_da_textos_cifrados_diferentes(admin, con
     assert all(l[1] is None and l[2] is None for l in linhas)          # sem CNS e sem CPF: índices nulos
 
 
-def test_chaves_derivam_da_secret_key_com_rotulos_proprios(monkeypatch):
+def test_chaves_derivam_da_chave_propria_do_cadastro_e_nao_da_chave_de_sessao(monkeypatch):
     assert pacientes.ROTULO_DA_CIFRA == b'evidens-pacientes-v1' and pacientes.ROTULO_DO_INDICE == b'evidens-pacientes-indice-v1'
+    assert pacientes.VARIAVEL_DA_CHAVE == 'PACIENTES_CHAVE' and pacientes.MIN_DA_CHAVE == 32
     cifra, indice = pacientes._chave(pacientes.ROTULO_DA_CIFRA), pacientes._chave(pacientes.ROTULO_DO_INDICE)
     assert len(cifra) == 32 and len(indice) == 32 and cifra != indice
-    monkeypatch.setenv('SECRET_KEY', 'outra-chave-apenas-para-este-teste')
+    # Trocar a chave de sessão não muda nada no cadastro...
+    monkeypatch.setenv('SECRET_KEY', 'outra-chave-de-sessao-apenas-para-este-teste')
+    assert pacientes._chave(pacientes.ROTULO_DA_CIFRA) == cifra and pacientes._chave(pacientes.ROTULO_DO_INDICE) == indice
+    # ...e trocar a do cadastro muda as duas chaves derivadas.
+    monkeypatch.setenv('PACIENTES_CHAVE', 'outra-chave-ficticia-do-cadastro-so-para-este-teste')
     assert pacientes._chave(pacientes.ROTULO_DA_CIFRA) != cifra and pacientes._chave(pacientes.ROTULO_DO_INDICE) != indice
 
 
-def test_sem_secret_key_o_cadastro_se_recusa_a_gravar(admin, administrador, contas, monkeypatch):
+def test_registro_continua_abrindo_quando_a_chave_de_sessao_muda(admin, monkeypatch):
+    dados, criado = _criar(admin)
+    monkeypatch.setenv('SECRET_KEY', 'chave-de-sessao-trocada-apenas-para-este-teste')
+    assert admin.get(f"/api/pacientes/{criado['id']}").get_json()['paciente']['nome'] == dados['nome']
+
+
+def test_sem_chave_propria_ou_com_chave_fraca_o_cadastro_fica_indisponivel(admin, administrador, contas, monkeypatch):
+    """Sem PACIENTES_CHAVE, ou com menos de 32 caracteres, nada é gravado nem aberto. A SECRET_KEY (que está
+    definida e é forte o bastante para a sessão) nunca entra no lugar."""
     from src.routes import auth
-    assert pacientes._CHAVE_DE_DESENVOLVIMENTO == auth.CHAVE_PADRAO
+    assert pacientes._CHAVE_DE_DESENVOLVIMENTO == auth.CHAVE_PADRAO and len(auth.CHAVE_PADRAO) >= 32
     _, existente = _criar(admin)
     antes = _contagens(contas)
-    for chave in (None, '', '   ', auth.CHAVE_PADRAO):
+    sessao = 'chave-de-sessao-longa-apenas-para-este-teste-0123456789'
+    monkeypatch.setenv('SECRET_KEY', sessao)
+    for chave in (None, '', '   ', 'a', '1234', 'f' * 31, ' ' * 20 + 'g' * 31 + ' ' * 20, auth.CHAVE_PADRAO, sessao):
         if chave is None:
-            monkeypatch.delenv('SECRET_KEY')
+            monkeypatch.delenv('PACIENTES_CHAVE')
         else:
-            monkeypatch.setenv('SECRET_KEY', chave)
-        with pytest.raises(pacientes.CadastroIndisponivel, match='SECRET_KEY'):
+            monkeypatch.setenv('PACIENTES_CHAVE', chave)
+        with pytest.raises(pacientes.CadastroIndisponivel, match='PACIENTES_CHAVE'):
             pacientes.criar(administrador['id'], _ficticio())
+        with pytest.raises(pacientes.CadastroIndisponivel):
+            pacientes._chave(pacientes.ROTULO_DO_INDICE)
         for metodo, caminho in ROTAS:
             if caminho.endswith('/excluir'):
                 continue                      # apagar não depende da chave
@@ -254,12 +307,24 @@ def test_sem_secret_key_o_cadastro_se_recusa_a_gravar(admin, administrador, cont
             assert r.status_code == 503 and r.get_json()['codigo'] == 'sem_chave', (chave, caminho)
             assert 'Fict' not in r.get_data(as_text=True)
     assert _contagens(contas) == antes
+    monkeypatch.setenv('PACIENTES_CHAVE', 'h' * 32)               # 32 caracteres já servem
+    assert len(pacientes._chave(pacientes.ROTULO_DA_CIFRA)) == 32
+
+
+def test_nenhuma_chave_do_cadastro_esta_gravada_no_repositorio():
+    exemplo = (RAIZ / '.env.example').read_text(encoding='utf-8')
+    assert re.search(r'^PACIENTES_CHAVE=$', exemplo, re.M)                 # só o nome, sem valor
+    for arquivo in ('vercel.json', 'api/index.py', 'src/utils/pacientes.py', 'src/routes/pacientes.py', 'docs/pacientes.md',
+                    'docs/deploy.md', 'README.md'):
+        assert not re.search(r'PACIENTES_CHAVE\s*[=:]\s*["\']?[A-Za-z0-9_\-+/]{8,}', (RAIZ / arquivo).read_text(encoding='utf-8')), arquivo
+    fonte = (RAIZ / 'src' / 'utils' / 'pacientes.py').read_text(encoding='utf-8')
+    assert "environ.get('SECRET_KEY')" in fonte and fonte.count("environ.get(") == 2      # a de sessão só para recusar valor igual
 
 
 def test_registro_nao_abre_com_outra_chave_e_ainda_pode_ser_excluido(admin, contas, monkeypatch):
     dados, criado = _criar(admin)
     pid = criado['id']
-    monkeypatch.setenv('SECRET_KEY', 'chave-trocada-apenas-para-este-teste')
+    monkeypatch.setenv('PACIENTES_CHAVE', 'chave-ficticia-trocada-apenas-para-este-teste')
     for caminho in (f'/api/pacientes/{pid}', f'/api/pacientes/{pid}/exportar'):
         r = admin.get(caminho)
         assert r.status_code == 500 and r.get_json()['codigo'] == 'ilegivel'
@@ -364,6 +429,12 @@ def test_cpf_valido():
     ({'sexo': 'outro'}, 'sexo', 'Sexo'),
     ({'raca': 'azul'}, 'raca', 'Raça/cor'),
     ({'email': 'sem-arroba'}, 'email', 'e-mail'),
+    ({'email': 'a\ud800@b.co'}, 'email', 'e-mail'),                 # substituto solto: dava 500
+    ({'email': 'fic\x00ticio@exemplo.test'}, 'email', 'e-mail'),
+    ({'email': 'ficticio@exemplo.test\x07'}, 'email', 'e-mail'),
+    ({'email': 'ficticio\u200b@exemplo.test'}, 'email', 'e-mail'),
+    ({'email': 'f' * 242 + '@exemplo.test'}, 'email', 'e-mail'),      # 255 caracteres
+    ({'email': 'a@' * 30000}, 'email', 'e-mail'),
     ({'cep': '7400'}, 'cep', 'CEP'),
     ({'ibge': '52087'}, 'ibge', 'IBGE'),
     ({'nome': ''}, 'nome', 'nome do paciente'),
@@ -382,6 +453,12 @@ def test_cpf_valido():
     ({'ficha': {'exames': {'hba1c': 7}}}, 'ficha', 'Ficha clínica'),
     ({'ficha': {'lista': [['aninhada']]}}, 'ficha', 'Ficha clínica'),
     ({'ficha': ['peso', 70]}, 'ficha', 'Ficha clínica'),
+    ({'ficha': {'__proto__': 'x'}}, 'ficha', 'nome reservado'),
+    ({'ficha': {'peso': 70, 'constructor': 'x'}}, 'ficha', 'nome reservado'),
+    ({'ficha': {'prototype': ['x']}}, 'ficha', 'nome reservado'),
+    ({'ficha': {' __proto__ ': 1}}, 'ficha', 'nome reservado'),
+    ({'ficha': {'__proto__': {'admin': True}}}, 'ficha', 'nome reservado'),
+    ({'planos': [{'operadora': 'Plano Fictício', '__proto__': 'x'}]}, 'planos', 'formato inválido'),
 ])
 def test_dado_invalido_e_recusado_sem_gravar_e_sem_devolver_o_que_foi_enviado(admin, contas, troca, campo, trecho):
     dados = _ficticio(**troca)
@@ -464,12 +541,12 @@ def test_paciente_de_outra_conta_nao_existe_nem_para_o_administrador(admin, admi
     pid = da_medica['id']
     antes = _contagens(contas)
     # Pela API, o administrador não lê, não edita, não exporta, não exclui e não vê na lista.
-    for metodo, caminho in ROTAS[4:]:
+    for metodo, caminho in ROTAS[3:]:
         r = _pedir(admin, metodo, caminho, pid, json={'municipio': 'Goiânia'})
         assert r.status_code == 404 and r.get_json() == {'error': 'Paciente não encontrado.'}, caminho
     assert _contagens(contas) == antes                       # recusa não entra na trilha nem mexe em nada
     for termo in ('', dados['nome'], dados['cns'][-4:]):
-        assert pid not in [p['id'] for p in admin.get('/api/pacientes', query_string={'busca': termo}).get_json()['pacientes']]
+        assert pid not in [p['id'] for p in _buscar(admin, termo).get_json()['pacientes']]
     # Pelo módulo, com o usuario_id errado, a mesma coisa.
     outro = administrador['id']
     assert pacientes.ler(outro, pid) is None and pacientes.exportar(outro, pid) is None
@@ -528,6 +605,39 @@ def test_pedido_vindo_de_outro_site_e_recusado(admin, contas, metodo, caminho):
     assert _contagens(contas) == antes
 
 
+@pytest.mark.parametrize('metodo, caminho', ROTAS)
+def test_sem_o_cabecalho_proprio_o_pedido_e_recusado(app, administrador, admin, contas, metodo, caminho):
+    """Leitura ou gravação sem `X-Requested-With: evidens` responde 403, mesmo com a sessão do administrador e
+    vinda do próprio site: página de outro site não consegue mandar esse cabeçalho sem a permissão do servidor."""
+    from tests.conftest import _entrar
+    _, criado = _criar(admin)
+    sem = app.test_client()
+    assert _entrar(sem, administrador['email']).status_code == 200
+    antes = _contagens(contas)
+    for cabecalhos in ({}, {'X-Requested-With': 'XMLHttpRequest'}, {'X-Requested-With': ''},
+                       {'Origin': 'http://localhost', 'Sec-Fetch-Site': 'same-origin'}):
+        r = _pedir(sem, metodo, caminho, criado['id'], json=_ficticio(), headers=cabecalhos)
+        assert r.status_code == 403 and 'X-Requested-With' in r.get_json()['error'], cabecalhos
+        assert 'Fict' not in r.get_data(as_text=True) and r.headers['Cache-Control'] == 'no-store'
+    assert _contagens(contas) == antes
+    r = _pedir(sem, metodo, caminho, criado['id'], json=_ficticio(), headers={'X-Requested-With': 'Evidens'})
+    assert r.status_code in (200, 201)
+
+
+def test_busca_pela_url_nao_existe_mais(admin, contas):
+    """O termo (um nome) não pode ir no endereço: fica nos registros de acesso da hospedagem."""
+    dados, criado = _criar(admin)
+    antes = _contagens(contas)
+    for consulta in ({'busca': dados['nome']}, {'busca': ''}):
+        r = admin.get('/api/pacientes', query_string=consulta)
+        assert r.status_code == 400 and 'POST /api/pacientes/buscar' in r.get_json()['error']
+        assert 'pacientes' not in r.get_json() and 'Fict' not in r.get_data(as_text=True)
+    assert _contagens(contas) == antes
+    fonte = (RAIZ / 'src' / 'routes' / 'pacientes.py').read_text(encoding='utf-8')
+    assert "request.args.get('busca'" not in fonte
+    assert criado['id'] in [p['id'] for p in admin.get('/api/pacientes').get_json()['pacientes']]
+
+
 def test_sem_banco_ou_com_termos_pendentes_o_cadastro_fica_fechado(app, admin, administrador, contas, monkeypatch):
     from src.utils import termos
     _, criado = _criar(admin)
@@ -536,7 +646,7 @@ def test_sem_banco_ou_com_termos_pendentes_o_cadastro_fica_fechado(app, admin, a
     assert r.status_code == 403 and r.headers[termos.CABECALHO] == 'pendente' and 'paciente' not in r.get_json()
     monkeypatch.undo()
     monkeypatch.delenv('DATABASE_URL')
-    assert app.test_client().get('/api/pacientes').status_code == 503
+    assert app.test_client().get('/api/pacientes', headers=CABECALHO).status_code == 503
 
 
 def test_regra_de_quem_pode_usar_fica_num_lugar_so(administrador, medica_aprovada):
@@ -560,7 +670,7 @@ def test_abrir_o_cadastro_e_trocar_so_a_regra_e_cada_conta_ve_so_os_seus(app, cl
     da_medica = r.get_json()['paciente']
     assert [p['id'] for p in client.get('/api/pacientes').get_json()['pacientes']] == [da_medica['id']]
     assert client.get(f"/api/pacientes/{da_medica['id']}").get_json()['paciente']['nome'] == dados['nome']
-    for metodo, caminho in ROTAS[4:]:
+    for metodo, caminho in ROTAS[3:]:
         assert _pedir(client, metodo, caminho, do_admin['id'], json={'municipio': 'Goiânia'}).status_code == 404, caminho
         assert _pedir(admin, metodo, caminho, da_medica['id'], json={'municipio': 'Goiânia'}).status_code == 404, caminho
     assert da_medica['id'] not in [p['id'] for p in admin.get('/api/pacientes').get_json()['pacientes']]
@@ -581,7 +691,7 @@ def test_cada_acao_entra_na_trilha_sem_dado_de_paciente(admin, administrador, co
     dados, criado = _criar(admin)
     pid = criado['id']
     admin.get(f'/api/pacientes/{pid}')
-    admin.get('/api/pacientes', query_string={'busca': dados['nome']})
+    _buscar(admin, dados['nome'])
     admin.post('/api/pacientes/buscar', json={'busca': dados['cns'][-4:]})
     admin.post(f'/api/pacientes/{pid}', json={'municipio': 'Aparecida de Goiânia'})
     admin.get(f'/api/pacientes/{pid}/exportar')
@@ -725,3 +835,228 @@ def test_resposta_do_cadastro_nao_passa_pelo_tradutor(admin):
     assert admin.get(f'/api/pacientes/{pid}?lang=en').get_json()['paciente']['ficha'] == ficha
     assert admin.get(f'/api/pacientes/{pid}/exportar?lang=en').get_json()['paciente']['ficha'] == ficha
     assert admin.post('/api/pacientes?lang=en', json={'nome': ''}).get_json()['error'] == 'Confira os dados informados.'
+
+
+# --- Achados da revisão de segurança -----------------------------------------------------------
+
+class _RegexVigiada:
+    """Fica no lugar de `contas._EMAIL` e anota o tamanho de cada texto que chega à expressão regular."""
+
+    def __init__(self, original):
+        self.original, self.tamanhos = original, []
+
+    def match(self, texto):
+        self.tamanhos.append(len(texto))
+        return self.original.match(texto)
+
+
+def test_email_longo_e_recusado_antes_da_expressao_regular(admin, anonimo, contas, monkeypatch):
+    """A expressão do e-mail tem custo quadrático: texto acima do teto não chega a ela, nem no cadastro de
+    pacientes nem em /api/auth/cadastro. Dentro do teto, o que era aceito continua aceito."""
+    vigia = _RegexVigiada(contas._EMAIL)
+    monkeypatch.setattr(contas, '_EMAIL', vigia)
+    for longo in ('a@' * 30000, 'f' * 242 + '@exemplo.test', '@' * 255, ' ' * 10 + 'f' * 300 + '@exemplo.test'):
+        r = admin.post('/api/pacientes', json=_ficticio(email=longo))
+        assert r.status_code == 400 and r.get_json()['campos'] == ['email']
+        r = anonimo.post('/api/auth/cadastro', json=dict(email=longo, nome='Pessoa Fictícia Longa', registro='CRM-GO 33333',
+                                                         perfil='medico', senha='senha-de-teste-123', aceite_termos=True))
+        assert r.status_code == 400 and r.get_json()['erros'] == ['Informe um e-mail válido.']
+        with pytest.raises(contas.DadosInvalidos):
+            contas._validar_cadastro(longo, 'Pessoa Fictícia Longa', 'CRM-GO 33333', 'medico', 'senha-de-teste-123')
+    assert vigia.tamanhos == []                                   # nenhum deles chegou à expressão regular
+    # No teto (254) e abaixo dele nada mudou.
+    no_teto = 'f' * 241 + '@exemplo.test'
+    assert len(no_teto) == 254
+    assert pacientes.validar({'nome': 'Teto Fictício', 'email': f'  {no_teto.upper()}  '})['email'] == no_teto
+    contas._validar_cadastro(no_teto, 'Pessoa Fictícia Teto', 'CRM-GO 33333', 'medico', 'senha-de-teste-123')
+    contas._validar_cadastro('ficticia.teto@exemplo.test', 'Pessoa Fictícia Teto', 'CRM-GO 33333', 'medico', 'senha-de-teste-123')
+    for errado in ('sem-arroba', 'a@b', 'a b@exemplo.test', ''):
+        with pytest.raises(contas.DadosInvalidos):
+            contas._validar_cadastro(errado, 'Pessoa Fictícia Teto', 'CRM-GO 33333', 'medico', 'senha-de-teste-123')
+    assert vigia.tamanhos and max(vigia.tamanhos) <= 254
+    # Substituto solto no e-mail da conta: 400, não 500.
+    r = anonimo.post('/api/auth/cadastro', json=dict(email='a\ud800@b.co', nome='Pessoa Fictícia Solta', registro='CRM-GO 33333',
+                                                     perfil='medico', senha='senha-de-teste-123', aceite_termos=True))
+    assert r.status_code == 400 and r.get_json()['erros'] == ['Informe um e-mail válido.']
+
+
+def test_email_com_substituto_solto_na_edicao_tambem_e_400(admin):
+    _, criado = _criar(admin)
+    r = admin.post(f"/api/pacientes/{criado['id']}", json={'email': 'a\ud800@b.co'})
+    assert r.status_code == 400 and r.get_json()['campos'] == ['email']
+    assert admin.get(f"/api/pacientes/{criado['id']}").get_json()['paciente'] == criado
+
+
+def test_ficha_recusa_nomes_reservados_e_aceita_os_parecidos():
+    assert pacientes.CHAVES_RESERVADAS == {'__proto__', 'constructor', 'prototype'}
+    ficha = {'proto': 1, 'construtor': 'x', 'Constructor': 2, 'observacao': '__proto__'}
+    assert pacientes.validar({'nome': 'Ficha Fictícia', 'ficha': ficha})['ficha'] == ficha
+    for chave in pacientes.CHAVES_RESERVADAS:
+        for corpo in ({chave: 'Nome Fictício'}, {'nome': 'Reservado Fictício', chave: 1}):
+            with pytest.raises(pacientes.DadosInvalidos):
+                pacientes.validar(corpo)
+
+
+def test_paciente_excluido_no_meio_da_edicao_responde_404_sem_gravar(admin, administrador, contas, monkeypatch):
+    """Outro pedido exclui o paciente entre a leitura e a gravação da edição: a edição responde 404, não diz
+    "salvo" e não deixa linha "editar" na trilha depois de "excluir"."""
+    uid = administrador['id']
+    _, criado = _criar(admin)
+    pid = criado['id']
+    validar = pacientes.validar
+
+    def exclui_e_valida(dados):
+        assert pacientes.excluir(uid, pid) is True            # outra conexão, no meio da edição
+        return validar(dados)
+    monkeypatch.setattr(pacientes, 'validar', exclui_e_valida)
+    r = admin.post(f'/api/pacientes/{pid}', json={'municipio': 'Anápolis'})
+    monkeypatch.undo()
+    assert r.status_code == 404 and r.get_json() == {'error': 'Paciente não encontrado.'}
+    assert [a['acao'] for a in pacientes.trilha(uid, pid)] == ['excluir', 'criar']
+    with contas._conexao() as executar:
+        assert executar('SELECT COUNT(*) FROM pacientes WHERE id = ?', (pid,)).fetchone()[0] == 0
+    assert admin.get(f'/api/pacientes/{pid}').status_code == 404
+
+
+def test_paciente_alterado_no_meio_da_edicao_responde_409_e_nao_perde_a_outra_gravacao(admin, administrador, monkeypatch):
+    uid = administrador['id']
+    _, criado = _criar(admin)
+    pid = criado['id']
+    validar, vezes = pacientes.validar, []
+
+    def edita_e_valida(dados):
+        vezes.append(1)
+        if len(vezes) == 1:                                   # outra conexão grava primeiro
+            assert pacientes.atualizar(uid, pid, {'telefone': '(62) 91111-1111'})['telefone'] == '(62) 91111-1111'
+        return validar(dados)
+    monkeypatch.setattr(pacientes, 'validar', edita_e_valida)
+    r = admin.post(f'/api/pacientes/{pid}', json={'municipio': 'Anápolis'})
+    monkeypatch.undo()
+    assert r.status_code == 409 and r.get_json()['codigo'] == 'conflito' and 'paciente' not in r.get_json()
+    assert 'Fict' not in r.get_data(as_text=True)
+    atual = pacientes.ler(uid, pid)
+    assert atual['telefone'] == '(62) 91111-1111' and atual['municipio'] == 'Goiânia'
+    assert [a['acao'] for a in pacientes.trilha(uid, pid)] == ['ver', 'editar', 'criar']      # só a edição que gravou
+    # Repetir o pedido, agora sozinho, grava.
+    assert admin.post(f'/api/pacientes/{pid}', json={'municipio': 'Anápolis'}).status_code == 200
+
+
+def test_update_que_nao_alcanca_nenhuma_linha_nao_vira_salvo(admin, administrador, contas, monkeypatch):
+    """O número de linhas do UPDATE é conferido: 0 linhas nunca responde "Paciente salvo." nem entra na trilha."""
+    from contextlib import contextmanager
+    uid = administrador['id']
+    _, criado = _criar(admin)
+    pid = criado['id']
+    conexao, comandos = contas._conexao, []
+
+    class _NenhumaLinha:
+        rowcount = 0
+
+    @contextmanager
+    def update_sem_efeito():
+        with conexao() as executar:
+            def vigiado(sql, params=()):
+                comandos.append(sql)
+                return _NenhumaLinha() if sql.startswith('UPDATE pacientes') else executar(sql, params)
+            yield vigiado
+    monkeypatch.setattr(contas, '_conexao', update_sem_efeito)
+    r = admin.post(f'/api/pacientes/{pid}', json={'municipio': 'Anápolis'})
+    monkeypatch.undo()
+    assert r.status_code == 409 and r.get_json()['codigo'] == 'conflito' and r.get_json().get('ok') is None
+    assert any(c.startswith('UPDATE pacientes') for c in comandos)
+    assert not any(c.startswith('INSERT INTO pacientes_acessos') for c in comandos)
+    assert [a['acao'] for a in pacientes.trilha(uid, pid)] == ['criar']
+    assert pacientes.ler(uid, pid)['municipio'] == 'Goiânia'
+
+
+def test_em_postgres_a_edicao_trava_a_linha_com_for_update(administrador, contas, monkeypatch):
+    """Em produção (Postgres) a leitura da edição usa SELECT … FOR UPDATE; em sqlite, que não tem a cláusula, a
+    proteção é a condição do UPDATE (testes acima)."""
+    from contextlib import contextmanager
+    uid = administrador['id']
+    criado = pacientes.criar(uid, _ficticio())
+    conexao, comandos = contas._conexao, []
+
+    @contextmanager
+    def anotando():
+        with conexao() as executar:
+            def vigiado(sql, params=()):
+                comandos.append(sql)
+                return executar(sql.replace(' FOR UPDATE', ''), params)      # o sqlite dos testes não conhece a cláusula
+            yield vigiado
+    monkeypatch.setattr(contas, '_conexao', anotando)
+    pacientes.atualizar(uid, criado['id'], {'municipio': 'Trindade'})
+    assert not any('FOR UPDATE' in c for c in comandos)                       # sqlite
+    comandos.clear()
+    monkeypatch.setattr(pacientes, '_em_postgres', lambda: True)
+    assert pacientes.atualizar(uid, criado['id'], {'municipio': 'Inhumas'})['municipio'] == 'Inhumas'
+    travas = [c for c in comandos if 'FOR UPDATE' in c]
+    assert len(travas) == 1 and travas[0].startswith('SELECT dados, criado_em FROM pacientes WHERE id = ? AND usuario_id = ?')
+    assert comandos.index(travas[0]) < next(i for i, c in enumerate(comandos) if c.startswith('UPDATE pacientes'))
+    pacientes.ler(uid, criado['id'])
+    assert sum('FOR UPDATE' in c for c in comandos) == 1                      # leitura comum não trava
+
+
+def test_teto_de_pacientes_por_conta(admin, administrador, medica_aprovada, contas, monkeypatch):
+    assert pacientes.MAX_PACIENTES_POR_CONTA == 5000
+    uid = administrador['id']
+    _, criado = _criar(admin)
+    with contas._conexao() as executar:
+        total = executar('SELECT COUNT(*) FROM pacientes WHERE usuario_id = ?', (uid,)).fetchone()[0]
+    monkeypatch.setattr(pacientes, 'MAX_PACIENTES_POR_CONTA', total)
+    antes = _contagens(contas)
+    dados = _ficticio()
+    r = admin.post('/api/pacientes', json=dados)
+    assert r.status_code == 409 and r.get_json()['codigo'] == 'limite' and str(total) in r.get_json()['error']
+    assert not any(s in r.get_data(as_text=True) for s in _segredos(dados)) and _contagens(contas) == antes
+    # O teto é de cada conta, e não impede ler, editar nem excluir; excluir abre vaga.
+    da_medica = pacientes.criar(medica_aprovada['id'], _ficticio())
+    assert pacientes.excluir(medica_aprovada['id'], da_medica['id'])
+    assert admin.post(f"/api/pacientes/{criado['id']}", json={'municipio': 'Goianira'}).status_code == 200
+    assert admin.post(f"/api/pacientes/{criado['id']}/excluir").status_code == 200
+    assert admin.post('/api/pacientes', json=dados).status_code == 201
+
+
+def test_texto_cifrado_trocado_de_linha_na_mesma_conta_nao_abre(admin, administrador, contas):
+    """O número do registro vai dentro do texto cifrado, junto com o dono: quem mexer direto no banco não faz o
+    paciente A aparecer com os dados do paciente B."""
+    uid = administrador['id']
+    dados_a, a = _criar(admin)
+    dados_b, b = _criar(admin)
+    with contas._conexao() as executar:
+        cifrados = dict(executar('SELECT id, dados FROM pacientes WHERE id IN (?, ?)', (a['id'], b['id'])).fetchall())
+        executar('UPDATE pacientes SET dados = ? WHERE id = ?', (cifrados[b['id']], a['id']))
+        executar('UPDATE pacientes SET dados = ? WHERE id = ?', (cifrados[a['id']], b['id']))
+    try:
+        for pid in (a['id'], b['id']):
+            r = admin.get(f'/api/pacientes/{pid}')
+            assert r.status_code == 500 and r.get_json()['codigo'] == 'ilegivel'
+            assert not any(s in r.get_data(as_text=True) for s in _segredos(dados_a) + _segredos(dados_b))
+            assert admin.post(f'/api/pacientes/{pid}', json={'municipio': 'Goiânia'}).status_code == 500
+        lista = admin.get('/api/pacientes').get_json()
+        assert lista['ilegiveis'] >= 2 and not {a['id'], b['id']} & {p['id'] for p in lista['pacientes']}
+    finally:
+        with contas._conexao() as executar:
+            for pid, cifrado in cifrados.items():
+                executar('UPDATE pacientes SET dados = ? WHERE id = ?', (cifrado, pid))
+    assert pacientes.ler(uid, a['id'])['nome'] == dados_a['nome'] and pacientes.ler(uid, b['id'])['nome'] == dados_b['nome']
+    # Depois de editar, o registro continua preso ao próprio número.
+    assert admin.post(f"/api/pacientes/{a['id']}", json={'municipio': 'Nerópolis'}).status_code == 200
+    assert pacientes.ler(uid, a['id'])['municipio'] == 'Nerópolis'
+
+
+def test_documentacao_registra_os_achados_da_revisao():
+    doc = (RAIZ / 'docs' / 'pacientes.md').read_text(encoding='utf-8')
+    plano = ' '.join(doc.split())
+    assert '`SECRET_KEY` lê tudo' not in plano
+    for trecho in ('`PACIENTES_CHAVE`', 'separada da chave de sessão', 'menos de 32 caracteres', 'nunca usa a `SECRET_KEY`',
+                   'Perder a chave', 'ilegíveis para sempre', 'gerador de senhas', 'só pode ser usada com dados fictícios',
+                   'desde o primeiro paciente real', 'base legal', 'encarregado', 'retenção',
+                   '`X-Requested-With: evidens`', 'FOR UPDATE', '"conflito"', '"limite"', '5.000',
+                   '`__proto__`', '`constructor`', '`prototype`', '`textContent`', 'innerHTML'):
+        assert trecho in plano, trecho
+    assert '?busca=' not in doc.split('## API')[1].split('## Trilha')[0].split('Erros (')[0].replace('`GET /api/pacientes?busca=…` não existe', '')
+    for arquivo in ('README.md', 'docs/deploy.md', '.env.example', 'CHANGELOG.md', 'docs/registro-de-perigos.md'):
+        assert 'PACIENTES_CHAVE' in (RAIZ / arquivo).read_text(encoding='utf-8'), arquivo
+    # Fase 1: os Termos e a home não mudam.
+    assert 'PACIENTES_CHAVE' not in (RAIZ / 'termos.html').read_text(encoding='utf-8')

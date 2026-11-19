@@ -19,6 +19,10 @@ TAMANHO_MAXIMO_DO_ENVIO = 128 * 1024
 
 MSG_NAO_ENCONTRADO = 'Paciente não encontrado.'
 
+# Todo pedido ao cadastro leva este cabeçalho. Um formulário, um link ou uma imagem de outro site não conseguem
+# mandá-lo, e um `fetch` de outro site só o manda se o servidor autorizar (CORS), o que ele não faz.
+CABECALHO_PROPRIO, VALOR_DO_CABECALHO = 'X-Requested-With', 'evidens'
+
 
 def exigir_cadastro(funcao):
     """Porta única das rotas do cadastro de pacientes.
@@ -46,9 +50,11 @@ def exigir_cadastro(funcao):
 @pacientes_bp.before_request
 def _so_do_proprio_site():
     """Nenhum pedido vindo de outro site, nem de leitura: a resposta leva dado de paciente e cada leitura entra na
-    trilha de acessos."""
+    trilha de acessos. Além da origem, todo pedido (leitura ou gravação) precisa do cabeçalho próprio."""
     if not origem_confiavel():
         return jsonify({'error': 'Requisição recusada: origem não reconhecida.'}), 403
+    if request.headers.get(CABECALHO_PROPRIO, '').strip().lower() != VALOR_DO_CABECALHO:
+        return jsonify({'error': f'Requisição recusada: falta o cabeçalho {CABECALHO_PROPRIO}: {VALOR_DO_CABECALHO}.'}), 403
 
 
 @pacientes_bp.after_request
@@ -67,6 +73,16 @@ def _duplicado(erro):
     nome = {'cns': 'CNS', 'cpf': 'CPF'}[erro.campo]
     return jsonify({'error': f'Já existe um paciente com este {nome} no seu cadastro.', 'codigo': 'duplicado',
                     'campo': erro.campo, 'paciente_id': erro.paciente_id}), 409
+
+
+@pacientes_bp.errorhandler(pacientes.LimiteDaConta)
+def _limite(erro):
+    return jsonify({'error': str(erro), 'codigo': 'limite', 'limite': erro.limite}), 409
+
+
+@pacientes_bp.errorhandler(pacientes.EdicaoSimultanea)
+def _conflito(erro):
+    return jsonify({'error': pacientes.MSG_CONFLITO, 'codigo': 'conflito'}), 409
 
 
 @pacientes_bp.errorhandler(pacientes.CadastroIndisponivel)
@@ -97,16 +113,17 @@ def _dono():
 @pacientes_bp.route('/pacientes')
 @exigir_cadastro
 def pacientes_listar():
-    """Lista da conta; `?busca=` filtra por parte do nome ou pelo final do CNS.
-
-    O termo na URL fica nos registros de acesso da hospedagem: a tela deve preferir `POST /api/pacientes/buscar`."""
-    return jsonify(pacientes.listar(_dono(), request.args.get('busca', '')))
+    """Lista inteira da conta. Não há busca pela URL: o termo (um nome) ficaria nos registros de acesso da
+    hospedagem. Quem manda `?busca=` recebe 400 em vez de uma lista sem filtro."""
+    if 'busca' in request.args:
+        return jsonify({'error': 'A busca não vai no endereço: use POST /api/pacientes/buscar, com o termo no corpo.'}), 400
+    return jsonify(pacientes.listar(_dono()))
 
 
 @pacientes_bp.route('/pacientes/buscar', methods=['POST'])
 @exigir_cadastro
 def pacientes_buscar():
-    """A mesma lista, com o termo no corpo ({busca}) para ele não aparecer na URL."""
+    """A lista filtrada por parte do nome ou pelo final do CNS; o termo vai no corpo ({busca}), nunca na URL."""
     corpo = _corpo()
     busca = corpo.get('busca') if isinstance(corpo, dict) else ''
     return jsonify(pacientes.listar(_dono(), busca if isinstance(busca, str) else ''))

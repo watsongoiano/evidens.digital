@@ -305,7 +305,9 @@ def crm_de(usuario):
 
 def _validar_cadastro(email, nome, registro, perfil, senha):
     erros = []
-    if not _EMAIL.match(email) or len(email) > 254:
+    # O tamanho vem antes da expressão regular, que tem custo quadrático em texto longo. Substituto solto
+    # ("\ud800") não é texto: o banco não consegue gravá-lo.
+    if len(email) > 254 or not _EMAIL.match(email) or any('\ud800' <= c <= '\udfff' for c in email):
         erros.append('Informe um e-mail válido.')
     if not (3 <= len(nome) <= 150):
         erros.append('Informe o nome completo.')

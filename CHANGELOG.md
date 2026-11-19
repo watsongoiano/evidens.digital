@@ -1,6 +1,26 @@
 
 # Patches applied (2025-08-26T12:12:23)
 
+## 2026-11-19 — Cadastro de pacientes: correções da revisão de segurança
+
+Ainda fase 1 (só o servidor, só o administrador, sem tela). Contrato atualizado em `docs/pacientes.md`.
+
+- **Chave própria**: a cifra e os índices passam a derivar de `PACIENTES_CHAVE`, variável de ambiente só do
+  cadastro, e não mais da `SECRET_KEY`. Sem ela, com menos de 32 caracteres ou com o mesmo valor da chave de sessão,
+  o cadastro responde 503 (`sem_chave`); a `SECRET_KEY` nunca entra no lugar. **É preciso criar a variável na
+  hospedagem**; registros gravados antes desta versão não abrem mais (só havia dados de teste).
+- **Edição simultânea**: em Postgres a edição trava a linha (`SELECT … FOR UPDATE`); nos dois bancos confere-se
+  quantas linhas o `UPDATE` alcançou. Paciente excluído no meio da edição responde 404, sem "salvo" e sem "editar"
+  na trilha; registro alterado no meio responde 409 (`conflito`).
+- **API**: todo pedido precisa do cabeçalho `X-Requested-With: evidens` (403 sem ele); `GET /api/pacientes?busca=`
+  deixou de existir (400), a busca fica só em `POST /api/pacientes/buscar`; teto de 5.000 pacientes por conta
+  (409, `limite`).
+- **Validação**: o tamanho do e-mail é conferido antes da expressão regular (também em `/api/auth/cadastro`);
+  e-mail com caractere de controle ou substituto solto é recusado com 400 (dava 500); a ficha recusa as chaves
+  `__proto__`, `constructor` e `prototype`.
+- O número do registro vai dentro do texto cifrado, junto com o dono: texto cifrado trocado de linha não abre.
+- Documentação: enquanto os Termos e a home não mudarem, a fase 1 só pode ser usada com dados fictícios.
+
 ## 2026-11-19 — Cadastro de pacientes: fase 1, só no servidor e só para o administrador
 
 Detalhes, contrato da API, limites e o que falta antes de abrir em `docs/pacientes.md`.
@@ -9,8 +29,8 @@ Detalhes, contrato da API, limites e o que falta antes de abrir em `docs/pacient
   dado de paciente, e os Termos, a home e a página de cadastro não foram alterados. Não há tela nesta fase.
 - Tabelas novas: `pacientes` (um JSON cifrado com todos os campos; CNS e CPF só como HMAC, para o banco recusar
   duplicado na mesma conta) e `pacientes_acessos` (trilha: quem fez o quê e quando, sem dado de paciente). Nada do
-  paciente fica em claro no banco, nem o nome. As chaves derivam de `SECRET_KEY`; sem ela o cadastro se recusa a
-  gravar. **Trocar a `SECRET_KEY` torna os registros ilegíveis.**
+  paciente fica em claro no banco, nem o nome. As chaves derivavam de `SECRET_KEY` (trocado na entrada acima:
+  agora derivam de `PACIENTES_CHAVE`); sem a chave o cadastro se recusa a gravar.
 - Rotas novas em `/api/pacientes` (listar e buscar, criar, ler, atualizar, excluir, exportar), todas só para o
   administrador: conta comum recebe 403 e, sem login, 401. Cada paciente é da conta que o cadastrou; o de outra
   conta responde 404, também para o administrador.
