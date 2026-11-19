@@ -671,19 +671,34 @@ def _anexar_apacs(pdf, dados_paciente, exames, apac, agrupar=False):
     return len(laudos)
 
 
+def linhas_da_guia_do_pedido(exames, sexo=None):
+    """Linhas da guia SP/SADT para os exames do pedido: uma por código, com a quantidade."""
+    from src.utils import tuss
+    linhas, titulos_por_codigo = [], {}
+    for exame in exames:
+        titulo = exame.get('titulo')
+        for linha in tuss.linhas_da_guia(titulo, sexo):
+            repetida = next((l for l in linhas if linha['codigo'] and l['codigo'] == linha['codigo']), None)
+            ja_contados = titulos_por_codigo.setdefault(linha['codigo'], set())
+            if repetida and linha['codigo'] in tuss.CODIGOS_DE_VARIOS_EXAMES:
+                # Código que serve a vários exames (cultura de escarro e do estreptococo do grupo B): soma, mas só
+                # quando o título é outro; o mesmo exame pedido duas vezes continua valendo um.
+                if tuss._chave(titulo) not in ja_contados:
+                    repetida['quantidade'] += linha['quantidade']
+            elif repetida:   # dois pedidos com o mesmo código (ex.: TGO pedido sozinho e no par TGO/TGP)
+                repetida['quantidade'] = max(repetida['quantidade'], linha['quantidade'])
+            else:
+                linhas.append(linha)
+            ja_contados.add(tuss._chave(titulo))
+    return linhas
+
+
 def _anexar_guias(pdf, dados_paciente, exames, guia):
     """Acrescenta ao pedido as guias SP/SADT (5 procedimentos por guia)."""
     from src.utils import tuss
     sexo = dados_paciente.get('sexo')
     sexo = {'F': 'feminino', 'M': 'masculino'}.get(sexo, sexo)
-    linhas = []
-    for exame in exames:
-        for linha in tuss.linhas_da_guia(exame.get('titulo'), sexo):
-            repetida = next((l for l in linhas if linha['codigo'] and l['codigo'] == linha['codigo']), None)
-            if repetida:   # dois pedidos com o mesmo código (ex.: TGO pedido sozinho e no par TGO/TGP)
-                repetida['quantidade'] = max(repetida['quantidade'], linha['quantidade'])
-            else:
-                linhas.append(linha)
+    linhas = linhas_da_guia_do_pedido(exames, sexo)
     partes = max(1, -(-len(linhas) // LINHAS_POR_GUIA))
     pdf.em_guia = True
     pdf.set_auto_page_break(auto=False)

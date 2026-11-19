@@ -259,7 +259,7 @@ class Paciente:
             return 'baixa'
         return 'boa'
 
-    def ariscat(self):
+    def _ariscat_pontos(self):
         pts = 16 if self.idade > 80 else 3 if self.idade > 50 else 0
         if self.spo2 is not None:
             pts += 24 if self.spo2 <= 90 else 8 if self.spo2 <= 95 else 0
@@ -268,7 +268,21 @@ class Paciente:
         pts += {PER: 0, ABD: 15, TOR: 24}[self.incisao]
         pts += {None: 0, 'menos_2h': 0, '2_3h': 16, 'mais_3h': 23}[self.dur]
         pts += 8 * (self.urg == 'emergencia')
+        return pts
+
+    def ariscat(self):
+        """(pontos, nível). O escore de Canet 2010 soma sete variáveis: sem SpO₂, hemoglobina ou duração, a soma do
+        que foi informado é só o piso e não há categoria (nível None). Antes este oráculo contava o dado ausente como
+        zero ponto, o mesmo erro do motor (revisão independente de 18/11/2026)."""
+        pts = self._ariscat_pontos()
+        if self.spo2 is None or self.hb is None or self.dur is None:
+            return pts, None
         return pts, (B if pts < 26 else M if pts < 45 else A)
+
+    def ariscat_piso(self):
+        """Faixa da pontuação mínima: o risco pulmonar é pelo menos este, mesmo com o escore incompleto."""
+        pts = self._ariscat_pontos()
+        return B if pts < 26 else M if pts < 45 else A
 
     def stop_bang(self):
         stop = len(self.sb & {'ronco', 'cansaco', 'apneia_observada'}) + ('hipertensao' in self.cond)
@@ -1104,13 +1118,18 @@ def _check_pulmonar(c, r, pac, erros):
     if pac.cir in ARISCAT_NA:
         if pul['escore'].get('aplicavel', True):
             erros.append('ARISCAT apresentado como aplicável em procedimento excluído da derivação (Canet 2010)')
+    elif nivel is None:
+        e = pul['escore']
+        if (e.get('status'), e['nivel'], e['valor'], e.get('minimo')) != ('incompleto', None, '—', pts) or not e['faltando']:
+            erros.append(f'ARISCAT com dado obrigatório ausente: esperado incompleto, sem categoria, piso {pts}; veio '
+                         f'{e.get("status")}/{e["nivel"]}/{e["valor"]}/{e.get("minimo")}')
     elif (pul['escore']['valor'], pul['escore']['nivel']) != (pts, nivel):
         erros.append(f'ARISCAT: esperado {pts}/{nivel}, veio {pul["escore"]["valor"]}/{pul["escore"]["nivel"]}')
     pts, nivel = pac.stop_bang()
     if (pul['stop_bang']['valor'], pul['stop_bang']['nivel']) != (pts, nivel):
         erros.append(f'STOP-Bang: esperado {pts}/{nivel}, veio {pul["stop_bang"]["valor"]}/{pul["stop_bang"]["nivel"]}')
     expansao = any(m['titulo'] == 'Expansão pulmonar no pós-operatório' for m in pul['medidas'])
-    if ((pac.ariscat()[1] != B and pac.cir not in ARISCAT_NA) or 'dpoc' in pac.cond) and not expansao:
+    if ((pac.ariscat_piso() != B and pac.cir not in ARISCAT_NA) or 'dpoc' in pac.cond) and not expansao:
         erros.append('Expansão pulmonar não sugerida com ARISCAT ≥ 26 ou DPOC (ACP 2006)')
     titulos = {o['titulo'] for o in r['orientacoes']}
     quer_fumo = 'tabagismo' in pac.cond and pac.eletiva

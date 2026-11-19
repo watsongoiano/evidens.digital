@@ -223,7 +223,8 @@ def _frases_do_preop(valor, dentro=False):
 def _ctx_dos_medicamentos(p, resultado):
     """O mesmo contexto que a rota /api/preoperatorio monta para preop_medicamentos.condutas."""
     pas, pad = p.get('pas'), p.get('pad')
-    return {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr'], 'tfg': resultado['tfg'], 'cirurgia': p['cirurgia'],
+    return {'idade': p['idade'], 'sexo': p['sexo'], 'peso': p['peso'], 'clcr': resultado['clcr_exato'], 'tfg': resultado['tfg_exata'],
+            'cirurgia': p['cirurgia'],
             'sangramento': p['sangramento'], 'cirurgia_risco_elevado': resultado['contexto']['cir_elev'],
             'urgencia': p['urgencia'], 'neuroaxial': p['neuroaxial'], 'condicoes': set(p['condicoes']),
             'stent': p['stent'], 'aas_indicacao': p['aas_indicacao'],
@@ -350,7 +351,11 @@ def _ctx_extras_dos_medicamentos():
     condicoes = [set(), {'ic'}, {'ic_fe_reduzida'}, {'hipertensao'}, {'fa'}, {'fa', 'hipertensao', 'diabetes', 'dac'},
                  {'fa', 'avc_ait'}, {'fa', 'avc_ait_recente'}, {'fa', 'avc_ait', 'ic', 'hipertensao', 'diabetes', 'doenca_arterial_periferica'},
                  {'fa', 'avc_ait_recente', 'ic', 'hipertensao', 'diabetes'}, {'fa', 'valvopatia'}, {'tev'}, {'tev_3_12m'},
-                 {'tev_recente_3m'}, {'trombofilia_grave'}, {'cancer_ativo'}, {'protese_mecanica'}, {'protese_mecanica', 'fa', 'avc_ait'},
+                 {'tev_recente_3m'}, {'tev', 'tev_mais_12m'}, {'tev', 'tev_recente_3m'},
+                 # TEV sem data: sozinho, com outra indicação (sem categoria) e com indicação que já é de alto risco
+                 {'tev', 'fa'}, {'tev', 'fa', 'valvopatia'}, {'tev', 'protese_mecanica'}, {'tev', 'protese_mecanica_mitral'},
+                 {'tev', 'cancer_ativo'}, {'tev', 'fa', 'ic', 'hipertensao', 'diabetes', 'dac'},
+                 {'trombofilia_grave'}, {'cancer_ativo'}, {'protese_mecanica'}, {'protese_mecanica', 'fa', 'avc_ait'},
                  {'protese_mecanica_mitral'}, {'avc_ait'}, {'avc_ait_recente'}, {'stent'}, {'dac'}, {'doenca_arterial_periferica'},
                  {'diabetes'}, {'fa', 'ic', 'hipertensao', 'diabetes', 'avc_ait', 'dac'}]
     for com, (idade, sexo) in itertools.product(condicoes, ((None, None), (50, 'masculino'), (68, 'feminino'), (80, 'masculino'), (80, 'feminino'))):
@@ -368,6 +373,9 @@ def _ctx_extras_dos_medicamentos():
                          sangramento=sang))
     for tipo, dias, neuro in itertools.product(('farmacologico', 'convencional', 'balao'), (5, 20, 45, 100, 200, 300, 400), (False, True)):
         ctxs.append(dict(base, condicoes={'stent', 'fa'}, stent={'tipo': tipo, 'indicacao': None, 'dias': dias}, neuraxial=neuro))
+    # ClCr e TFG logo abaixo de um corte: o texto mostra o valor sem atravessá-lo (29,95 e 29,6, não 30)
+    for clcr, tfg, neuro in itertools.product((14.96, 29.955, 49.95, 29.4), (14.7, 29.6, 44.65, 59.7, 38.0), (False, True)):
+        ctxs.append(dict(base, condicoes={'fa'}, clcr=clcr, tfg=tfg, neuraxial=neuro))
     # prótese mecânica com anticoagulante direto; anestesia neuroaxial com cada ClCr
     for com, clcr, neuro in itertools.product(({'protese_mecanica'}, {'protese_mecanica_mitral', 'fa'}, {'fa'}), (None, 20.0, 45.0, 80.0),
                                               (False, True)):
@@ -397,7 +405,8 @@ def _textos_do_preoperatorio():
     certo = dict(idade=60, sexo='masculino', cirurgia='colectomia', urgencia='eletiva')
     errados = [None, {}, dict(certo, idade='abc'), dict(certo, idade=10), dict(certo, sexo=None), dict(certo, sexo='x'),
                dict(certo, cirurgia=''), dict(certo, cirurgia='x'), dict(certo, urgencia=''), dict(certo, urgencia='x'),
-               dict(certo, peso='x'), dict(certo, peso=500), dict(certo, asa=7), dict(certo, duracao='x'), dict(certo, sangramento='x'),
+               dict(certo, peso='x'), dict(certo, peso=500), dict(certo, asa=7), dict(certo, asa=2.9), dict(certo, cfs='4,5'),
+               dict(certo, duracao='x'), dict(certo, sangramento='x'),
                dict(certo, pas=20), dict(certo, pad=300), dict(certo, spo2=30), dict(certo, escadas='x'), dict(certo, cfs=12),
                dict(certo, aas_indicacao='x'), dict(certo, creatinina=40), dict(certo, hemoglobina=1), dict(certo, hba1c_dias=-1),
                dict(certo, pas=120, pad=130), dict(certo, instaveis={'x': 1}), dict(certo, condicoes={'x': 1}),

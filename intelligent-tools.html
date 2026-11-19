@@ -299,7 +299,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
           <label class="opcao" for="po_c_doenca_renal"><input type="checkbox" id="po_c_doenca_renal" name="po_condicoes" value="doenca_renal">Doença renal crônica</label>
           <label class="opcao" for="po_c_hepatopatia"><input type="checkbox" id="po_c_hepatopatia" name="po_condicoes" value="hepatopatia">Hepatopatia crônica</label>
           <label class="opcao" for="po_c_tev"><input type="checkbox" id="po_c_tev" name="po_condicoes" value="tev">Trombose venosa ou TEP prévio</label>
-          <span class="po-detalhe-de" data-detalhe-de="po_c_tev" hidden><label class="opcao po-filho" for="po_c_tev_recente_3m"><input type="checkbox" id="po_c_tev_recente_3m" name="po_condicoes" value="tev_recente_3m">Há menos de 3 meses</label><label class="opcao po-filho" for="po_c_tev_3_12m"><input type="checkbox" id="po_c_tev_3_12m" name="po_condicoes" value="tev_3_12m">Entre 3 e 12 meses</label></span>
+          <span class="po-detalhe-de" data-detalhe-de="po_c_tev" hidden><label class="opcao po-filho" for="po_c_tev_recente_3m"><input type="checkbox" id="po_c_tev_recente_3m" name="po_condicoes" value="tev_recente_3m">Há menos de 3 meses</label><label class="opcao po-filho" for="po_c_tev_3_12m"><input type="checkbox" id="po_c_tev_3_12m" name="po_condicoes" value="tev_3_12m">Entre 3 e 12 meses</label><label class="opcao po-filho" for="po_c_tev_mais_12m"><input type="checkbox" id="po_c_tev_mais_12m" name="po_condicoes" value="tev_mais_12m">Há mais de 12 meses</label></span>
           <label class="opcao" for="po_c_trombofilia_grave"><input type="checkbox" id="po_c_trombofilia_grave" name="po_condicoes" value="trombofilia_grave">Trombofilia grave ou antifosfolípide</label>
           <label class="opcao" for="po_c_cancer_ativo"><input type="checkbox" id="po_c_cancer_ativo" name="po_condicoes" value="cancer_ativo">Câncer ativo</label>
         </div>
@@ -488,6 +488,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             <li role="option" data-valor="retocolite" data-busca="retocolite ulcerativa rcu colite ulcerativa dii doenca inflamatoria intestinal autoimune ">Retocolite ulcerativa</li>
             <li role="option" data-valor="esclerose_sistemica" data-busca="esclerose sistemica (esclerodermia) autoimune colagenose ">Esclerose sistêmica (esclerodermia)</li>
             <li role="option" data-valor="asma_grave" data-busca="asma moderada ou grave  ">Asma moderada ou grave</li>
+            <li role="option" data-valor="bronquiectasias" data-busca="bronquiectasias (adulto, sem fibrose cistica) bronquiectasia escarro pseudomonas abpa ">Bronquiectasias (adulto, sem fibrose cística)</li>
             <li role="option" data-valor="hipertensao_arterial_pulmonar" data-busca="hipertensao arterial pulmonar (grupo 1) hipertensao pulmonar hap pah bosentana ambrisentana sildenafila ">Hipertensão arterial pulmonar (grupo 1)</li>
             <li role="option" data-valor="asplenia" data-busca="asplenia / esplenectomia baco ">Asplenia / esplenectomia</li>
             <li role="option" data-valor="anemia_falciforme" data-busca="doenca falciforme anemia falciforme hemoglobinopatia ">Doença falciforme</li>
@@ -1379,7 +1380,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
       </div>
       <p data-guia-campo class="text-[13px] text-ink/55 mt-3" style="display: none;">A guia SP/SADT sai no mesmo PDF, logo depois do pedido, com os seus dados no plano e os códigos TUSS. O número da carteira não é guardado.</p>
       <div id="guiaConfirmar" role="alert" class="aviso aviso-info mt-3" style="display: none;">
-        <p>Os dados do paciente mudaram depois que o plano foi informado. Confira o plano e a carteira antes de gerar a guia.</p>
+        <p>Os dados do paciente mudaram depois que o plano foi informado. Antes de gerar o PDF, diga se o plano e a carteira são deste paciente.</p>
         <p class="flex flex-wrap gap-3 mt-3"><button type="button" id="guiaManter" class="btn-claro">São deste paciente</button><button type="button" id="guiaLimpar" class="btn-claro">Limpar</button></p>
       </div>
     </div>
@@ -1404,6 +1405,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
       <div id="assinaturaErro" role="alert" class="aviso aviso-erro mt-3" style="display: none;"></div>
     </div>
 
+    <p id="guiaBloqueio" role="alert" class="aviso aviso-atencao mt-4" style="display: none;">O PDF ainda não foi gerado. Escolha acima “São deste paciente” ou “Limpar” e clique de novo em “Gerar o PDF”.</p>
     <div class="flex flex-wrap items-center gap-3 mt-6">
       <button type="button" id="acrescimoSim" class="btn-claro">Sim, acrescentar</button>
       <button type="button" id="acrescimoGerar" class="btn-escuro"><span id="acrescimoGerarTexto">Gerar o PDF</span> <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]"></i></button>
@@ -2404,7 +2406,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
                   <p class="font-mono text-[11px] text-ink/45">${escapeHtml(estagio)}</p>
                 </div>
                 <div class="flex flex-wrap items-end gap-x-8 gap-y-3 mt-3">
-                  <div><p class="text-[40px] font-light leading-none">${renal.tfg}</p><p class="text-[13px] text-ink/55 mt-1">${T('TFG (mL/min/1,73 m²)')}</p></div>
+                  <div><p class="text-[40px] font-light leading-none">${escapeHtml(String(renal.tfg).replace('.', ','))}</p><p class="text-[13px] text-ink/55 mt-1">${T('TFG (mL/min/1,73 m²)')}</p></div>
                   <div class="flex flex-col gap-1.5 text-[13px]">
                     <span>${escapeHtml(renal.g.categoria)}: <strong class="font-medium">${escapeHtml(T(renal.g.rotulo))}</strong></span>
                     ${renal.a ? `<span>${escapeHtml(renal.a.categoria)}: <strong class="font-medium">${T('albuminúria')} ${escapeHtml(T(renal.a.rotulo))}</strong></span>` : ''}
@@ -2645,6 +2647,17 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             const pendente = planoAConfirmar && comPlano;
             document.getElementById('planoConfirmar').style.display = pendente ? '' : 'none';
             document.getElementById('guiaConfirmar').style.display = pendente ? '' : 'none';
+            if (!pendente) esconderBloqueioDaGuia();
+        }
+
+        // "Gerar o PDF" com a conferência do plano pendente: a tela diz por que o PDF não saiu e o que fazer.
+        function mostrarBloqueioDaGuia() {
+            document.getElementById('guiaBloqueio').style.display = '';
+            document.getElementById('guiaConfirmar').classList.replace('aviso-info', 'aviso-atencao');
+        }
+        function esconderBloqueioDaGuia() {
+            document.getElementById('guiaBloqueio').style.display = 'none';
+            document.getElementById('guiaConfirmar').classList.replace('aviso-atencao', 'aviso-info');
         }
 
         // Dados do paciente no laudo de APAC: identificam uma pessoa e não podem passar para a próxima.
@@ -3144,6 +3157,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             prepararJustificativa(categoria);
             await prepararGuia(categoria);
             await prepararAssinatura();
+            esconderBloqueioDaGuia();      // o aviso de um clique anterior não reaparece ao reabrir o diálogo
             const dialogo = document.getElementById('dialogoAcrescimo');
             if (typeof dialogo.showModal === 'function') dialogo.showModal(); else dialogo.setAttribute('open', '');
         }
@@ -3181,6 +3195,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             const guia = categoria === 'vacina' ? null : guiaDoDialogo();
             if (guia && planoAConfirmar) {
                 // A guia não sai com plano e carteira que podem ser de outro paciente.
+                mostrarBloqueioDaGuia();
                 document.getElementById('guiaConfirmar').scrollIntoView({ block: 'nearest' });
                 document.getElementById('guiaManter').focus();
                 return;
@@ -4204,10 +4219,15 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
         const textoSeguro = t => escapeHtml(T(t || ''));
         const classeTag = c => c ? `<span class="po-classe">${escapeHtml(c)}</span>` : '';
         const divergenciaHtml = t => t ? `<div class="po-divergencia"><strong>${textoSeguro('Divergência:')}</strong> ${textoSeguro(t)}</div>` : '';
-        // Escore calculado sem um dado ("item contado como ausente") ou não calculado (valor "—": falta o essencial).
-        const faltaHtml = e => !(e.falta && e.falta.length) ? '' : e.valor === '—'
+        // Escore calculado sem um dado ("item contado como ausente") ou não calculado: falta o essencial (valor "—") ou
+        // uma variável obrigatória (ARISCAT com status "incompleto": sem categoria, só o que falta e a pontuação mínima).
+        const incompleto = e => e.status === 'incompleto' || e.valor === '—';
+        const faltaHtml = e => !(e.falta && e.falta.length) ? '' : incompleto(e)
             ? `<p class="po-detalhe text-[#A0430A]">${textoSeguro('Para calcular, informe:')} ${e.falta.map(textoSeguro).join(', ')}.</p>`
             : `<p class="po-detalhe text-[#A0430A]">${textoSeguro('Sem')} ${e.falta.map(textoSeguro).join(', ')}: ${textoSeguro('item contado como ausente.')}</p>`;
+        // No escore incompleto, os itens listados são só os já somados (a pontuação mínima), nunca o escore final.
+        const itensHtml = e => !(e.itens && e.itens.length) ? ''
+            : `<p class="po-detalhe">${e.status === 'incompleto' ? textoSeguro('Já somados:') + ' ' : ''}${e.itens.map(textoSeguro).join(' · ')}</p>`;
         const refsHtml = x => x && x.referencia_html ? `<p class="po-ref referencia-links">${x.referencia_html}</p>` : '';
         // Classes escritas por extenso: o Tailwind só gera o CSS das classes que encontra no arquivo.
         const CLASSE_DA_FAIXA = { baixo: 'po-faixa po-faixa-baixo', intermediario: 'po-faixa po-faixa-intermediario',
@@ -4273,7 +4293,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
                 ${refsHtml(e)}${divergenciaHtml(e.divergencia)}</div>`).join('');
             h += '</div>';
             if (r.clcr != null) h += `<p class="text-[13px] text-ink/60 mt-3">${textoSeguro('Depuração de creatinina (Cockcroft-Gault)')}: <strong>${escapeHtml(String(r.clcr).replace('.', ','))} mL/min</strong></p>`;
-            if (r.tfg != null) h += `<p class="text-[13px] text-ink/60 mt-1">${textoSeguro('TFG estimada (CKD-EPI 2021)')}: <strong>${escapeHtml(String(r.tfg))} mL/min/1,73 m²</strong> <span class="text-ink/45">${textoSeguro('· ClCr para as doses dos anticoagulantes; TFG para a metformina')}</span></p>`;
+            if (r.tfg != null) h += `<p class="text-[13px] text-ink/60 mt-1">${textoSeguro('TFG estimada (CKD-EPI 2021)')}: <strong>${escapeHtml(String(r.tfg).replace('.', ','))} mL/min/1,73 m²</strong> <span class="text-ink/45">${textoSeguro('· ClCr para as doses dos anticoagulantes; TFG para a metformina')}</span></p>`;
             (r.notas_renais || []).forEach(n => { h += `<p class="po-detalhe">${textoSeguro(n.texto)}</p>${refsHtml(n)}`; });
             if (r.resumido) { detalhes += h.slice(inicioDosDetalhes); h = h.slice(0, inicioDosDetalhes); }
 
@@ -4311,7 +4331,7 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             h += `<h3 class="po-titulo">${textoSeguro('Risco pulmonar e apneia do sono')}</h3><div class="po-escores">`;
             h += [pul.escore, pul.stop_bang].map(e => `<div class="po-escore"><p class="po-escore-nome">${textoSeguro(e.nome)}</p>
                 <p class="po-escore-valor">${escapeHtml(e.valor)} ${faixaHtml(e)}</p>
-                ${e.itens && e.itens.length ? `<p class="po-detalhe">${e.itens.map(textoSeguro).join(' · ')}</p>` : ''}
+                ${itensHtml(e)}
                 ${e.nota ? `<p class="po-detalhe">${textoSeguro(e.nota)}</p>` : ''}
                 ${faltaHtml(e)}
                 ${refsHtml(e)}</div>`).join('') + '</div>';
@@ -4408,7 +4428,9 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             linhas.push(T(r.indicacao.conclusao));
             (r.adiar || []).filter(a => !a.ok).forEach(a => linhas.push('- ' + T(a.titulo) + ': ' + T(a.texto)));
             linhas.push(T('Escores') + ': ' + r.escores.map(e => `${T(e.nome)} ${e.valor}${e.faixa ? ' (' + T(e.faixa) + ')' : ''}`).join('; ')
-                        + `; ${T(r.pulmonar.escore.nome)} ${r.pulmonar.escore.valor} (${T(r.pulmonar.escore.faixa)})`
+                        + '; ' + (r.pulmonar.escore.status === 'incompleto'
+                            ? `${T(r.pulmonar.escore.nome)} ${T('incompleto, falta informar')} ${r.pulmonar.escore.faltando.map(T).join(', ')}`
+                            : `${T(r.pulmonar.escore.nome)} ${r.pulmonar.escore.valor} (${T(r.pulmonar.escore.faixa)})`)
                         + `; ${T(r.pulmonar.stop_bang.nome)} ${r.pulmonar.stop_bang.valor} (${T(r.pulmonar.stop_bang.faixa)})`
                         + (r.clcr != null ? `; ClCr ${String(r.clcr).replace('.', ',')} mL/min` : ''));
             const pedidos = currentRecommendations.map(e => T(e.titulo));
