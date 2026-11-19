@@ -13,7 +13,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 
 # Páginas vistas por uma médica com conta aprovada (o fixture `client`).
 PAGINAS = ['/', '/intelligent-tools', '/contact', '/cadastro', '/conta']
-PAGINAS_DO_ADMIN = ['/admin', '/analytics', '/operadoras']
+PAGINAS_DO_ADMIN = ['/admin', '/analytics', '/operadoras', '/pacientes']
 
 
 # --- Arquivos publicados ----------------------------------------------------
@@ -23,6 +23,8 @@ PAGINAS_DO_ADMIN = ['/admin', '/analytics', '/operadoras']
     '/static/conta.js',
     '/static/analytics.js',
     '/static/operadoras.js',
+    '/static/pacientes.js',
+    '/static/pacientes-checkup.js',
     '/favicon.ico',
     '/favicon.png',
     '/src/static/styles/base.css',
@@ -37,6 +39,7 @@ def test_paginas_e_recursos_publicos_respondem(client, rota):
     '/intelligent-tools.html',                # só pela rota /intelligent-tools, que exige login
     '/analytics.html',
     '/operadoras.html',
+    '/pacientes.html',
     '/admin.html',
     '/conta.html',
     '/src/utils/contas.py',

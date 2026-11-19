@@ -19,6 +19,7 @@ FERRAMENTAS = {
     'scripts/generate_favicon.py',
     'scripts/extrair_textos.py',   # lista os textos das páginas sem tradução para o inglês
     'scripts/modo_sombra.py',      # classifica um arquivo de pedidos de exame de operadora, sem barrar nada
+    'scripts/conferir_pacientes_tela.py',   # conferência da tela do cadastro de pacientes em navegador (manual)
     'src/utils/operadora.py',      # regras do modo sombra; usado pelo script acima enquanto a conta de operadora não tem rota
 }
 

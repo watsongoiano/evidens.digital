@@ -1437,8 +1437,11 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             const buscar = window.fetch.bind(window);
             window.fetch = async function (...args) {
                 const resposta = await buscar(...args);
+                // Pedido que se declara `semVoltarAoLogin` (os do cadastro de pacientes, static/pacientes.js): a
+                // sessão vencida é avisada por quem pediu, sem sair da página, para o formulário não se perder.
+                const ficaNaPagina = !!(args[1] && args[1].semVoltarAoLogin);
                 if (resposta.status === 401) {
-                    window.location.href = '/login?destino=check-up';
+                    if (!ficaNaPagina) window.location.href = '/login?destino=check-up';
                 } else if (resposta.status === 403 && resposta.headers.get('X-Evidens-Termos')) {
                     window.location.href = '/termos?aceitar=1&destino=check-up';
                 }
@@ -2226,9 +2229,13 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
         let revisaoDoFormulario = 0;
         // Nome, plano e carteira não mudam as recomendações. Mas nome novo com resultado na tela
         // pode ser outro paciente: o plano e a carteira passam a pedir confirmação.
+        // E nome novo é outro paciente para o laudo de APAC, haja ou não resultado na tela: os dados do laudo
+        // (CNS, mãe, nascimento, endereço) identificam uma pessoa e podem ter vindo do cadastro antes de qualquer
+        // resultado. Qualquer alteração do nome com algum deles preenchido limpa o laudo.
         function semEfeitoNasRecomendacoes(evento) {
             const campo = evento && evento.target;
             if (!campo || !(campo.id === 'nome_paciente' || campo.hasAttribute('data-plano'))) return false;
+            if (campo.id === 'nome_paciente' && apacPreenchida()) limparApac();
             if (campo.id === 'nome_paciente' && evento.type === 'change'
                     && (recommendationsDiv.style.display === 'block'
                         || document.getElementById('preopResultado').style.display === 'block')) {
@@ -2673,10 +2680,23 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
                                 'apacMunicipio', 'apacUf', 'apacCep', 'apacAnamnese', 'apacExames'];
         let apacIbge = '';     // código IBGE do município, vindo da busca do CEP
         let cepBuscado = '';   // último CEP consultado (o mesmo CEP não é buscado duas vezes seguidas)
+        const apacPreenchida = () => CAMPOS_DA_APAC.some(id => document.getElementById(id).value.trim() !== '');
         function limparApac() {
             CAMPOS_DA_APAC.forEach(id => { document.getElementById(id).value = ''; });
             apacIbge = ''; cepBuscado = '';     // outro paciente com o mesmo CEP: a busca é refeita
             document.getElementById('apacCepAviso').textContent = '';
+            // Paciente do cadastro ainda escolhido e com o mesmo nome na tela: os dados dele voltam ao laudo
+            // (static/pacientes-checkup.js decide; sem vínculo, o laudo fica em branco).
+            const ponte = window.evidensCheckup;
+            if (ponte && typeof ponte.aoLimparApac === 'function') ponte.aoLimparApac();
+        }
+
+        // Paciente escolhido no cadastro e nome diferente na tela: o que veio do cadastro não é de quem está na tela.
+        const nomeComparavel = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+        function vinculoDivergente() {
+            const ponte = window.evidensCheckup;
+            const doVinculo = ponte && typeof ponte.nomeDoVinculo === 'function' ? ponte.nomeDoVinculo() : '';
+            return !!doVinculo && nomeComparavel(doVinculo) !== nomeComparavel(document.getElementById('nome_paciente').value);
         }
 
         // Máscaras dos campos da APAC: só dígitos entram; a pontuação é posta enquanto se digita.
@@ -2771,6 +2791,84 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             mostrarCamposDoPlano();
             mostrarCamposDaGuia();
         }
+
+        // Dados clínicos: tudo o que o formulário tem além da identificação (nome, idade, sexo, plano e carteira) e
+        // dos campos marcados com data-fora-dos-clinicos (a busca do cadastro). "Preenchido" é diferente do estado em
+        // que a página abre.
+        const CAMPOS_DE_IDENTIFICACAO = ['nome_paciente', 'idade', 'sexo', 'pacientePlano', 'pacienteCarteira'];
+        const ehClinico = campo => !!campo.type && !['submit', 'button', 'fieldset', 'file'].includes(campo.type)
+            && !CAMPOS_DE_IDENTIFICACAO.includes(campo.id) && !campo.hasAttribute('data-fora-dos-clinicos');
+        function estadoDoCampo(campo) {
+            if (campo.type === 'checkbox' || campo.type === 'radio') return campo.checked;
+            return campo.value;
+        }
+        function estadoInicialDoCampo(campo) {
+            if (campo.type === 'checkbox' || campo.type === 'radio') return campo.defaultChecked;
+            if (campo.tagName === 'SELECT') {
+                const padrao = [...campo.options].find(o => o.defaultSelected) || campo.options[0];
+                return padrao ? padrao.value : '';
+            }
+            return campo.type === 'hidden' ? '' : campo.defaultValue;
+        }
+        function temDadosClinicos() {
+            return document.querySelectorAll('.exame-anterior').length > 0
+                || [...checkupForm.elements].some(c => ehClinico(c) && estadoDoCampo(c) !== estadoInicialDoCampo(c));
+        }
+        // Zera os dados clínicos e mantém a identificação. A tela não tem botão de "novo paciente": a limpeza que
+        // ela já conhece é o reset do próprio formulário (os botões de opção escutam o evento). Aqui ele é usado e,
+        // em seguida, cada campo que mudou avisa os seus ouvintes com os eventos de sempre, para os campos
+        // condicionais se esconderem e o resultado na tela deixar de valer. Os cartões de exames já realizados saem
+        // pelo próprio botão de retirar.
+        function limparDadosClinicos() {
+            document.querySelectorAll('.exame-anterior .exame-retirar').forEach(botao => botao.click());
+            const identificacao = CAMPOS_DE_IDENTIFICACAO.map(id => [document.getElementById(id), document.getElementById(id).value]);
+            const campos = [...checkupForm.elements].filter(ehClinico);
+            const antes = new Map(campos.map(c => [c, estadoDoCampo(c)]));
+            checkupForm.reset();
+            campos.filter(c => c.type === 'hidden').forEach(c => { c.value = ''; });     // o reset não alcança campo oculto
+            identificacao.forEach(([campo, valor]) => { campo.value = valor; });
+            campos.filter(c => estadoDoCampo(c) !== antes.get(c)).forEach(c => {
+                ['input', 'change'].forEach(tipo => c.dispatchEvent(new Event(tipo, { bubbles: true })));
+            });
+            limparErros();
+        }
+
+        // Cadastro de pacientes (por enquanto só o administrador; static/pacientes-checkup.js). Só esta ponte liga o
+        // cadastro à tela. Preencher a partir do cadastro não vale como conferência do plano: a troca de paciente
+        // passa por pedirConfirmacaoDoPlano(), como qualquer outra, e só o médico baixa a guarda (planoAConfirmar).
+        window.evidensCheckup = {
+            embutido: EMBUTIDO,
+            planoPendente: () => planoAConfirmar,
+            ibge: () => apacIbge,
+            // plano: { id, carteira } com o credenciamento do médico que corresponde ao plano do cadastro, ou null.
+            // semPlano: o cadastro do paciente escolhido não traz plano que sirva; o plano e a carteira que estão na
+            // tela são de outro paciente e saem (o SUS fica: é escolha do médico a cada pedido, não dado do paciente).
+            trocarDePaciente(plano, semPlano) {
+                if (plano) {
+                    campoPlano().value = String(plano.id);
+                    campoCarteira().value = plano.carteira || '';
+                } else if (semPlano) {
+                    if (!ehSus(campoPlano().value)) campoPlano().value = '';
+                    campoCarteira().value = '';
+                }
+                if (plano || semPlano) {
+                    document.getElementById('guiaPlano').value = campoPlano().value;
+                    document.getElementById('guiaCarteira').value = campoCarteira().value;
+                }
+                pedirConfirmacaoDoPlano();      // levanta a guarda se há plano ou carteira; limpa o laudo de APAC
+                mostrarCamposDaGuia();
+            },
+            // O CEP veio do cadastro. Com o código IBGE, a busca do CEP não é refeita para este mesmo CEP; sem ele,
+            // o CEP não conta como buscado e a busca de sempre (ViaCEP) acontece quando o campo for preenchido.
+            enderecoDoCadastro(cep, ibge) { cepBuscado = ibge ? cep : ''; apacIbge = ibge || ''; },
+            // Postos por static/pacientes-checkup.js: o nome do paciente escolhido no cadastro ('' sem escolha), o que
+            // fazer quando o laudo de APAC é limpo e como soltar a escolha quando o nome na tela já é outro.
+            nomeDoVinculo: null,
+            aoLimparApac: null,
+            soltarVinculo: null,
+            temDadosClinicos,
+            limparDadosClinicos,
+        };
 
         function preencherPlanos(seletor, lista) {
             const atual = seletor.value;
@@ -2962,9 +3060,13 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             if (!pedidoPodeTerApac(categoria) || painel.style.display === 'none' || !ehSus(plano)) return null;
             const v = id => document.getElementById(id).value.trim();
             const paciente = {};
-            [['cns', 'apacCns'], ['nascimento', 'apacNascimento'], ['mae', 'apacMae'], ['telefone', 'apacTelefone'],
-             ['endereco', 'apacEndereco'], ['municipio', 'apacMunicipio'], ['uf', 'apacUf'], ['cep', 'apacCep']]
-                .forEach(([campo, id]) => { if (v(id)) paciente[campo] = campo === 'uf' ? v(id).toUpperCase() : v(id); });
+            // Guarda própria: com um paciente do cadastro escolhido e outro nome na tela, os dados do paciente no
+            // laudo não saem (o botão de gerar já barra antes; esta é a segunda tranca).
+            if (!vinculoDivergente()) {
+                [['cns', 'apacCns'], ['nascimento', 'apacNascimento'], ['mae', 'apacMae'], ['telefone', 'apacTelefone'],
+                 ['endereco', 'apacEndereco'], ['municipio', 'apacMunicipio'], ['uf', 'apacUf'], ['cep', 'apacCep']]
+                    .forEach(([campo, id]) => { if (v(id)) paciente[campo] = campo === 'uf' ? v(id).toUpperCase() : v(id); });
+            }
             if (apacIbge && paciente.cep) paciente.ibge = apacIbge;
             // CID: em branco, o servidor escolhe por exame a partir das comorbidades marcadas (src/utils/sigtap.py).
             const comorbidades = [...checkupForm.querySelectorAll('input[name="comorbidades"]:checked')].map(c => c.value);
@@ -3200,6 +3302,17 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             const painelAberto = document.getElementById('acrescimoPainel').style.display !== 'none';
             if (painelAberto && document.getElementById('acrescimoBusca').value.trim()) adicionarDoCampo();
             const categoria = categoriaDoDialogo;
+            if (categoria !== 'vacina' && vinculoDivergente()) {
+                // O nome na tela não é o do paciente escolhido no cadastro (mudou sem passar pelos ouvintes do
+                // campo): nada do cadastro acompanha o pedido. A escolha é solta, o laudo de APAC é limpo, o plano
+                // e a carteira passam a pedir confirmação, e o médico confere antes de gerar de novo.
+                const ponte = window.evidensCheckup;
+                if (typeof ponte.soltarVinculo === 'function') ponte.soltarVinculo();
+                pedirConfirmacaoDoPlano();
+                mostrarCamposDaGuia();
+                alert(T('O nome na tela não é o do paciente escolhido no cadastro. A seleção foi solta e os dados do paciente no laudo de APAC foram limpos: confira os dados e gere o PDF de novo.'));
+                return;
+            }
             const guia = categoria === 'vacina' ? null : guiaDoDialogo();
             if (guia && planoAConfirmar) {
                 // A guia não sai com plano e carteira que podem ser de outro paciente.

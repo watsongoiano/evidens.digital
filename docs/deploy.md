@@ -17,14 +17,17 @@
 
 ## Área de acesso (contas)
 
-O check-up inteiro exige login. As contas ficam num banco Postgres; dados de pacientes continuam não sendo gravados.
+O check-up inteiro exige login. As contas ficam num banco Postgres. O check-up, o pré-operatório, os PDFs e as
+operadoras continuam sem gravar dado de paciente; a única exceção é o cadastro de pacientes, cifrado e por enquanto
+só do administrador (`docs/pacientes.md`).
 
 Variáveis de ambiente na Vercel:
 
 | Variável | Para quê |
 | --- | --- |
 | `DATABASE_URL` (ou `POSTGRES_URL`) | Conexão com o Postgres. A integração **Neon** da Vercel (Storage → Create Database → Neon) cria e preenche sozinha. |
-| `SECRET_KEY` | Assina o cookie de sessão. Valor longo e aleatório. Sem ela (ou com o valor padrão), a área de acesso fica desligada. |
+| `SECRET_KEY` | Assina o cookie de sessão. Valor longo e aleatório. Sem ela (ou com o valor padrão), a área de acesso fica desligada. Não cifra o cadastro de pacientes. |
+| `PACIENTES_CHAVE` | Chave própria do cadastro de pacientes, separada da `SECRET_KEY` e com valor diferente do dela. Pelo menos 32 caracteres, criados por um gerador de senhas. Sem ela, ou com menos de 32 caracteres, o cadastro responde 503; o resto do sistema funciona. **Trocar ou perder o valor torna ilegíveis os pacientes já gravados**: guarde uma cópia fora da hospedagem (`docs/pacientes.md`). |
 | `SETUP_TOKEN` | Código de instalação, usado uma única vez em `/configurar` para criar o administrador. Pode ser apagado depois. |
 | `RESEND_API_KEY` | Opcional. Liga o aviso por e-mail ao administrador a cada novo pedido de conta (ver abaixo). |
 | `AVISO_CADASTRO_PARA` | Opcional. Destinatários do aviso, separados por vírgula. Padrão: e-mail dos administradores. |

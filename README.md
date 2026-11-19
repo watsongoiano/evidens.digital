@@ -34,6 +34,7 @@ evidens.digital/
 ├── index.html                    # Página inicial
 ├── intelligent-tools.html        # Formulário do check-up e resultados
 ├── contact.html, analytics.html  # Contato e painel de uso
+├── pacientes.html                # Cadastro de pacientes (por enquanto só o administrador)
 ├── tests/                        # Suíte de testes (pytest)
 ├── docs/                         # Registro de perigos e deploy
 ├── vercel.json                   # Encaminha todas as rotas para api/index.py
@@ -102,6 +103,11 @@ Geram minutas em PDF a partir da lista de recomendações retornadas pelo endpoi
   para o paciente, a resposta é `400` com `codigo: "triagem_vacinas"`.
 - Resposta: PDF com campo de assinatura e carimbo do médico. Os documentos não têm assinatura digital.
 
+### /pacientes (cadastro de pacientes; por enquanto só o administrador)
+Única parte do sistema que guarda dado de paciente, cifrado e por conta. A tela (página `/pacientes` e seletor
+"Paciente cadastrado" no check-up) só aparece para o administrador. Campos, rotas, respostas, limites, a tela e o
+que falta antes de abrir a todos estão em [`docs/pacientes.md`](docs/pacientes.md).
+
 ### Endpoints desativados
 `/gerar-receita-vacinas`, `/gerar-solicitacao-exames` e `/generate-pdf` respondem `410 Gone`. Os dois primeiros
 montavam documentos que declaravam assinatura digital sem que ela existisse; o terceiro não gerava nada.
@@ -137,6 +143,7 @@ Veja `.env.example`. As que a aplicação usa em produção:
 |---|---|
 | `DATABASE_URL` | Postgres das contas (a integração Neon da Vercel preenche) |
 | `SECRET_KEY` | Assina o cookie de sessão |
+| `PACIENTES_CHAVE` | Chave própria do cadastro de pacientes, separada da de sessão: 32 caracteres ou mais; sem ela o cadastro fica desligado. Não trocar nem perder sem ler `docs/pacientes.md` |
 | `SETUP_TOKEN` | Código de instalação do primeiro administrador |
 | `RESEND_API_KEY` | Opcional: liga o aviso por e-mail ao administrador a cada novo pedido de conta (docs/deploy.md) |
 

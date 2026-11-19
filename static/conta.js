@@ -86,10 +86,48 @@
     try { await enviar('/api/auth/logout'); } finally { window.location.href = '/'; }
   }));
 
+  // Quem está na sessão: uma consulta só por página.
+  let consultaDaSessao = null;
+  function quemSou() {
+    if (!consultaDaSessao) {
+      consultaDaSessao = fetch('/api/auth/eu', { credentials: 'same-origin' }).then(r => r.json()).then(d => (d && d.usuario) || null);
+    }
+    return consultaDaSessao;
+  }
+
+  // Cadastro de pacientes: por enquanto só o administrador (docs/pacientes.md). O link do menu, o botão em "Minha
+  // conta" e, no check-up, o seletor de paciente são criados aqui, só para ele: para as outras contas as páginas
+  // não ganham nenhum elemento, nem escondido. A home e os Termos não carregam este arquivo.
+  function abrirCadastroDePacientes(usuario) {
+    if (!usuario || !usuario.administrador || document.documentElement.classList.contains('embutido')) return;
+    const menu = document.querySelector('header nav');
+    if (menu && window.location.pathname !== '/pacientes' && !menu.querySelector('a[href="/pacientes"]')) {
+      const link = document.createElement('a');
+      link.href = '/pacientes'; link.className = 'hidden sm:inline hover:text-teal transition'; link.textContent = 'Pacientes';
+      menu.insertBefore(link, menu.querySelector('a[href="/conta"]') || menu.querySelector('[data-sair]'));
+    }
+    const atalhos = document.querySelector('p[data-so-admin]');
+    if (atalhos) {
+      const botao = document.createElement('a');
+      botao.href = '/pacientes'; botao.className = 'btn-claro mt-2';
+      const icone = document.createElement('i'); icone.className = 'fa-solid fa-address-book text-[12px]'; icone.setAttribute('aria-hidden', 'true');
+      botao.append(icone, 'Pacientes');
+      atalhos.append(' ', botao);
+    }
+    if (document.getElementById('checkupForm')) {
+      ['/static/pacientes.js', '/static/pacientes-checkup.js'].forEach(endereco => {
+        const script = document.createElement('script');
+        script.src = endereco; script.async = false;      // na ordem: o segundo depende do primeiro
+        document.head.appendChild(script);
+      });
+    }
+  }
+  if (document.querySelector('header nav [data-sair]')) quemSou().then(abrirCadastroDePacientes).catch(() => {});
+
   // Página "Minha conta"
   const nome = document.querySelector('[data-nome]');
   if (nome) {
-    fetch('/api/auth/eu', { credentials: 'same-origin' }).then(r => r.json()).then(({ usuario }) => {
+    quemSou().then(usuario => {
       if (!usuario) { window.location.href = '/login'; return; }
       nome.textContent = usuario.nome.split(' ')[0] + '.';
       const perfis = { medico: 'Médico(a)', residente: 'Residente', estudante: 'Estudante de medicina' };

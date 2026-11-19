@@ -1,6 +1,88 @@
 
 # Patches applied (2025-08-26T12:12:23)
 
+## 2026-11-19 — Cadastro de pacientes: correções da revisão da tela
+
+Ainda só para o administrador e só com dados fictícios. Detalhes em `docs/pacientes.md`, seção "Tela".
+
+- **Laudo de APAC nunca com o nome de um paciente e os dados de outro**: alterar o nome limpa o laudo, com ou sem
+  resultado na tela; nome diferente do paciente escolhido no cadastro solta a seleção à vista do médico; e a
+  geração do PDF tem guarda própria (não envia os dados do paciente do cadastro se o nome na tela for outro).
+- **Troca de paciente**: o seletor avisa "Os dados clínicos na tela são do paciente anterior." e oferece "Limpar
+  dados clínicos"; o plano e a carteira do anterior saem quando o cadastro do novo não traz plano que sirva.
+- **Mesmo paciente**: mudar um dado clínico com resultado na tela repõe no laudo os dados do paciente escolhido.
+- **Salvar**: resposta atrasada não refaz a seleção; busca e resultados ficam desabilitados durante o
+  salvamento. O botão "Limpar seleção" agora some de fato quando não há paciente escolhido.
+- **Edição concorrente**: a edição envia o `atualizado_em` lido e a API responde 409 (`conflito`) se o registro
+  mudou em outro lugar; cada edição avança a versão em pelo menos 1 segundo.
+- **Sessão terminada no check-up**: aviso ao lado do seletor, sem sair da página; depois dos Termos, volta-se à
+  página de origem.
+- Datas pelo relógio local (não UTC) na tela e pelo horário de Brasília no servidor; CEP do cadastro sem IBGE é
+  buscado; aviso de validade vencida da carteira; `aria-describedby` nos erros por campo, `aria-live` no
+  paciente escolhido, ícone decorativo escondido de leitores de tela; "Ex: Unimed Goiânia" com par em inglês.
+- **Conferência no navegador** em `scripts/conferir_pacientes_tela.py` (obrigatória antes de mexer na tela; sem
+  dependência nova, sem chave em arquivo, só dados inventados); testes novos em `tests/test_pacientes_tela.py` e
+  `tests/test_pacientes.py`.
+
+## 2026-11-19 — Cadastro de pacientes: fase 2, a tela, só para o administrador
+
+Para a conta comum nada muda nem aparece; a home e os Termos não foram alterados. Detalhes em `docs/pacientes.md`,
+seção "Tela". **Só dados fictícios** até a atualização dos Termos (a tela repete o aviso).
+
+- **Página `/pacientes`** (`pacientes.html`, `static/pacientes.js`): lista com busca, criar, editar, excluir (com
+  confirmação na linha) e exportar (arquivo montado da resposta do `fetch`). Mensagem própria para cada recusa da
+  API (400 por campo, 403, 404, 409 duplicado/conflito/limite, 500 ilegível, 503 sem chave).
+- **Check-up** (`static/pacientes-checkup.js`): "Paciente cadastrado" no início da Identificação busca e preenche
+  nome, idade (do nascimento), sexo, plano e carteira e os dados do laudo de APAC; "Salvar paciente no cadastro"
+  grava só a identificação preenchida. Nenhum dado clínico é gravado. Preencher pelo cadastro levanta a guarda de
+  conferência do plano, como qualquer troca de paciente; com ela pendente, o plano não é gravado.
+- **Só o administrador**: o link "Pacientes" e o seletor são criados por `static/conta.js` depois de saber quem
+  está na sessão; a conta comum não recebe link, botão, seção nem os scripts.
+- **Segurança da tela**: um único ponto de saída para a API, sempre com `X-Requested-With: evidens`; dado de
+  paciente só por `textContent`/`value`; nada em URL, `localStorage` ou `sessionStorage`.
+- CSS recompilado (campo recusado destacado); pares em inglês das frases novas; testes em
+  `tests/test_pacientes_tela.py`.
+
+## 2026-11-19 — Cadastro de pacientes: correções da revisão de segurança
+
+Ainda fase 1 (só o servidor, só o administrador, sem tela). Contrato atualizado em `docs/pacientes.md`.
+
+- **Chave própria**: a cifra e os índices passam a derivar de `PACIENTES_CHAVE`, variável de ambiente só do
+  cadastro, e não mais da `SECRET_KEY`. Sem ela, com menos de 32 caracteres ou com o mesmo valor da chave de sessão,
+  o cadastro responde 503 (`sem_chave`); a `SECRET_KEY` nunca entra no lugar. **É preciso criar a variável na
+  hospedagem**; registros gravados antes desta versão não abrem mais (só havia dados de teste).
+- **Edição simultânea**: em Postgres a edição trava a linha (`SELECT … FOR UPDATE`); nos dois bancos confere-se
+  quantas linhas o `UPDATE` alcançou. Paciente excluído no meio da edição responde 404, sem "salvo" e sem "editar"
+  na trilha; registro alterado no meio responde 409 (`conflito`).
+- **API**: todo pedido precisa do cabeçalho `X-Requested-With: evidens` (403 sem ele); `GET /api/pacientes?busca=`
+  deixou de existir (400), a busca fica só em `POST /api/pacientes/buscar`; teto de 5.000 pacientes por conta
+  (409, `limite`).
+- **Validação**: o tamanho do e-mail é conferido antes da expressão regular (também em `/api/auth/cadastro`);
+  e-mail com caractere de controle ou substituto solto é recusado com 400 (dava 500); a ficha recusa as chaves
+  `__proto__`, `constructor` e `prototype`.
+- O número do registro vai dentro do texto cifrado, junto com o dono: texto cifrado trocado de linha não abre.
+- Documentação: enquanto os Termos e a home não mudarem, a fase 1 só pode ser usada com dados fictícios.
+
+## 2026-11-19 — Cadastro de pacientes: fase 1, só no servidor e só para o administrador
+
+Detalhes, contrato da API, limites e o que falta antes de abrir em `docs/pacientes.md`.
+
+- Para o usuário comum nada mudou: o check-up, o pré-operatório, os PDFs e as operadoras continuam sem gravar
+  dado de paciente, e os Termos, a home e a página de cadastro não foram alterados. Não há tela nesta fase.
+- Tabelas novas: `pacientes` (um JSON cifrado com todos os campos; CNS e CPF só como HMAC, para o banco recusar
+  duplicado na mesma conta) e `pacientes_acessos` (trilha: quem fez o quê e quando, sem dado de paciente). Nada do
+  paciente fica em claro no banco, nem o nome. As chaves derivavam de `SECRET_KEY` (trocado na entrada acima:
+  agora derivam de `PACIENTES_CHAVE`); sem a chave o cadastro se recusa a gravar.
+- Rotas novas em `/api/pacientes` (listar e buscar, criar, ler, atualizar, excluir, exportar), todas só para o
+  administrador: conta comum recebe 403 e, sem login, 401. Cada paciente é da conta que o cadastrou; o de outra
+  conta responde 404, também para o administrador.
+- Campos: identificação (nome, nome social, nascimento, sexo, CPF, CNS, mãe, raça/cor, prontuário, responsável),
+  contato e endereço (os do laudo de APAC), até 5 planos (operadora, carteira, validade) e a ficha clínica (retrato
+  do formulário do check-up, até 64 KB). Tudo é validado no servidor; chave desconhecida é recusada.
+- A regra de quem pode usar fica em `pacientes.habilitado_para`. Abrir a todos é trocar essa linha, depois da nova
+  versão dos Termos, dos textos da home e do cadastro e da política de retenção.
+- Registro de perigos: P-10 passa a ter uma exceção controlada; P-26 (dados guardados no cadastro) é novo.
+
 ## 2026-11-17 — APAC no formulário do SUS, orientações em subtópicos e resumo dos exames
 
 - O laudo de APAC passa a usar o formulário do SUS como fundo (`src/data/apac_sus.pdf`; do modelo recebido só saiu

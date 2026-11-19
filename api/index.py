@@ -20,6 +20,7 @@ from src.routes.checkup_intelligent import checkup_intelligent_bp
 from src.utils import uso
 from src.routes import auth
 from src.routes.auth import auth_bp, exigir_administrador, usuario_atual
+from src.routes.pacientes import pacientes_bp, tela_liberada as tela_de_pacientes_liberada
 from src.utils import i18n
 
 # Criar aplicação Flask
@@ -72,6 +73,8 @@ def _checkup_exige_login():
 # Registrar blueprints
 app.register_blueprint(checkup_intelligent_bp, url_prefix='/api')
 app.register_blueprint(auth_bp, url_prefix='/api')
+# Cadastro de pacientes: por enquanto só o administrador usa, pela API e pela tela /pacientes (docs/pacientes.md).
+app.register_blueprint(pacientes_bp, url_prefix='/api')
 
 
 def _pagina(arquivo, privada=False):
@@ -172,6 +175,20 @@ def operadoras_page():
     return _pagina('operadoras.html', privada=True)
 
 
+@app.route('/pacientes')
+def pacientes_page():
+    """Tela do cadastro de pacientes: por enquanto, só para o administrador (a mesma regra da API, em
+    `pacientes.habilitado_para`). A página não traz dado de paciente: tudo vem de /api/pacientes."""
+    u = usuario_atual()
+    if u is None:
+        return redirect('/login')
+    if not tela_de_pacientes_liberada(u):
+        return redirect('/intelligent-tools')
+    if auth.termos_pendentes(u):
+        return redirect('/termos?aceitar=1&destino=pacientes')
+    return _pagina('pacientes.html', privada=True)
+
+
 @app.route('/api/admin/operadoras/conferir', methods=['POST'])
 @exigir_administrador
 def conferir_pedido_de_exames():
@@ -248,6 +265,8 @@ ARQUIVOS_PUBLICOS = frozenset({
     'static/termos/evidens-termos-de-uso-v2.0.pdf',
     'static/analytics.js',
     'static/operadoras.js',
+    'static/pacientes.js',
+    'static/pacientes-checkup.js',
     'static/i18n.js',
     'static/i18n/en.json',
     'favicon.ico',
@@ -274,7 +293,9 @@ CAMPOS_DE_TEXTO = frozenset({'error', 'erros', 'mensagem'})
 def responder_no_idioma(resposta):
     """Em inglês (cookie do seletor ou ?lang=en), traduz as frases das respostas da API."""
     idioma = i18n.idioma_do_pedido(request)
-    if idioma == 'pt' or not request.path.startswith('/api/') or request.path.startswith(('/api/admin', '/api/analytics')):
+    # O cadastro de pacientes fica de fora: a resposta leva o que o médico digitou (a ficha pode ter um campo
+    # chamado "mensagem"), e dado de paciente nunca passa pelo tradutor.
+    if idioma == 'pt' or not request.path.startswith('/api/') or request.path.startswith(('/api/admin', '/api/analytics', '/api/pacientes')):
         return resposta
     if resposta.mimetype != 'application/json' or resposta.direct_passthrough:
         return resposta

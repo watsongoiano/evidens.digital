@@ -14,7 +14,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
 PAGINAS = ['index.html', 'intelligent-tools.html', 'login.html', 'cadastro.html', 'conta.html',
-           'configurar.html', 'contact.html']
+           'configurar.html', 'contact.html', 'pacientes.html']
 ATRIBUTOS = ('placeholder', 'title', 'aria-label', 'alt', 'label')
 IGNORAR_DENTRO = {'script', 'style', 'noscript', 'template'}
 

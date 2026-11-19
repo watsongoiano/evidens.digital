@@ -1,8 +1,10 @@
 """Contas de usuário: armazenamento e regras.
 
 Guarda só o que a área de acesso precisa: nome, e-mail, registro profissional
-(CRM ou matrícula), perfil, senha (como hash) e situação da conta. Dados de
-pacientes continuam não sendo gravados em lugar nenhum.
+(CRM ou matrícula), perfil, senha (como hash) e situação da conta. O check-up, o
+pré-operatório, os PDFs e as operadoras continuam sem gravar dado de paciente.
+A única exceção é o cadastro de pacientes (src/utils/pacientes.py), cifrado e,
+por enquanto, só do administrador: as tabelas dele ficam no fim de `_ESQUEMA`.
 
 Banco: Postgres em produção (variável DATABASE_URL ou POSTGRES_URL, entregue
 pela integração Neon da Vercel). Nos testes e na execução local, um arquivo
@@ -27,7 +29,24 @@ JANELA_TENTATIVAS = 15 * 60          # segundos
 MAX_FALHAS_POR_EMAIL = 5
 MAX_FALHAS_POR_IP = 30
 
-_EMAIL = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+class _Email:
+    """Formato mínimo de e-mail: sem espaço, um só "@" e um ponto no meio do domínio.
+
+    Era a expressão ``^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$``, de custo quadrático em texto adversário (CodeQL
+    py/polynomial-redos). A conferência à mão aceita os mesmos textos em tempo linear; mantém `match` porque
+    os outros módulos a usam como usavam a expressão.
+    """
+
+    @staticmethod
+    def match(texto):
+        if not isinstance(texto, str) or texto.count('@') != 1 or any(c.isspace() for c in texto):
+            return None
+        local, dominio = texto.split('@')
+        # um ponto com pelo menos um caractere antes e um depois, dentro do domínio
+        return True if local and '.' in dominio[1:-1] else None
+
+
+_EMAIL = _Email()
 
 # Hash de uma senha qualquer, para gastar o mesmo tempo quando o e-mail não
 # existe (não dá para descobrir quem tem conta medindo a demora da resposta).
@@ -168,6 +187,32 @@ _ESQUEMA = [
         UNIQUE (usuario_id, estabelecimento_id)
     )""",
     "CREATE INDEX IF NOT EXISTS vinculos_sus_usuario ON vinculos_sus (usuario_id)",
+    # Cadastro de pacientes (src/utils/pacientes.py; docs/pacientes.md): a única tabela com dado de paciente.
+    # "dados" é um JSON cifrado com todos os campos: nada fica em claro, nem o nome. Os índices são o HMAC do CNS
+    # e do CPF (nulos se não informados), para o banco recusar duplicado na mesma conta sem guardar o número.
+    """CREATE TABLE IF NOT EXISTS pacientes (
+        id {pk},
+        usuario_id BIGINT NOT NULL,
+        dados TEXT NOT NULL,
+        indice_cns TEXT,
+        indice_cpf TEXT,
+        criado_em BIGINT NOT NULL,
+        atualizado_em BIGINT NOT NULL
+    )""",
+    "CREATE INDEX IF NOT EXISTS pacientes_usuario ON pacientes (usuario_id)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS pacientes_cns_da_conta ON pacientes (usuario_id, indice_cns) WHERE indice_cns IS NOT NULL",
+    "CREATE UNIQUE INDEX IF NOT EXISTS pacientes_cpf_da_conta ON pacientes (usuario_id, indice_cpf) WHERE indice_cpf IS NOT NULL",
+    # Trilha de acessos ao cadastro de pacientes: quem fez o quê e quando. Nenhum dado de paciente; "paciente_id"
+    # é nulo na listagem e continua aqui depois que o registro é excluído.
+    """CREATE TABLE IF NOT EXISTS pacientes_acessos (
+        id {pk},
+        paciente_id BIGINT,
+        usuario_id BIGINT NOT NULL,
+        acao TEXT NOT NULL,
+        quando BIGINT NOT NULL
+    )""",
+    "CREATE INDEX IF NOT EXISTS pacientes_acessos_usuario ON pacientes_acessos (usuario_id)",
+    "CREATE INDEX IF NOT EXISTS pacientes_acessos_paciente ON pacientes_acessos (paciente_id)",
 ]
 
 APROVACAO_MANUAL = "aprovacao_manual"
@@ -277,7 +322,9 @@ def crm_de(usuario):
 
 def _validar_cadastro(email, nome, registro, perfil, senha):
     erros = []
-    if not _EMAIL.match(email) or len(email) > 254:
+    # O tamanho vem antes da expressão regular, que tem custo quadrático em texto longo. Substituto solto
+    # ("\ud800") não é texto: o banco não consegue gravá-lo.
+    if len(email) > 254 or not _EMAIL.match(email) or any('\ud800' <= c <= '\udfff' for c in email):
         erros.append('Informe um e-mail válido.')
     if not (3 <= len(nome) <= 150):
         erros.append('Informe o nome completo.')

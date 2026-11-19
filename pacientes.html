@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pacientes — Evidēns</title>
+<meta name="robots" content="noindex">
+<script src="/static/i18n.js"></script>
+<link rel="icon" href="/favicon.ico?v=2" sizes="32x32">
+<link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="/static/evidens.css">
+<script defer src="/static/conta.js"></script>
+<script defer src="/static/pacientes.js"></script>
+</head>
+<body class="bg-paper text-ink font-sans min-h-screen flex flex-col">
+
+<header class="px-4 sm:px-6 lg:px-[6%] pt-4 lg:pt-6">
+  <div class="max-w-[1240px] mx-auto bg-white h-[60px] pl-5 pr-2.5 lg:pl-6 flex items-center justify-between rounded-[3px] border border-ink/5">
+    <a href="/" class="flex items-center gap-2.5" aria-label="Evidēns — início">
+      <span class="grid grid-cols-3 gap-[3px]" aria-hidden="true">
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-aqua"></i><i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i>
+        <i class="w-[5px] h-[5px] rounded-full bg-teal"></i><i class="w-[5px] h-[5px] rounded-full bg-mist"></i><i class="w-[5px] h-[5px] rounded-full bg-aqua"></i>
+      </span>
+      <span class="text-[28px] font-medium tracking-tight leading-none"><span class="whitespace-nowrap">evidēns<sup class="marca-r">®</sup></span></span>
+    </a>
+    <nav class="flex items-center gap-2 lg:gap-6 text-[13px] uppercase tracking-[0.12em] text-ink/75"><a href="/intelligent-tools" class="hover:text-teal transition">Check-up</a><a href="/conta" class="hidden sm:inline hover:text-teal transition">Conta</a><button type="button" data-sair class="inline-flex items-center bg-ink text-white font-medium uppercase tracking-[0.12em] rounded-[3px] px-4 h-10 hover:bg-teal transition">Sair</button></nav>
+  </div>
+</header>
+
+<main class="flex-1 w-full max-w-[1100px] mx-auto px-4 sm:px-6 pt-10 lg:pt-14 pb-24" data-pacientes>
+  <p data-aviso-de-teste role="note" class="aviso aviso-atencao sticky top-3 z-20 shadow-sm"><i class="fa-solid fa-flask text-[12px] mr-2" aria-hidden="true"></i>Fase de testes: use apenas dados fictícios até a atualização dos Termos de Uso.</p>
+
+  <p class="text-[12px] tracking-[0.2em] text-teal font-medium mt-10 mb-6">CADASTRO DE PACIENTES</p>
+  <h1 class="font-light text-[36px] sm:text-[48px] leading-[1] tracking-tightest">Pacientes, <span class="font-serif italic text-teal tracking-tight">no seu cadastro.</span></h1>
+  <p class="text-[16px] text-ink/65 leading-relaxed mt-5 max-w-[720px]">Dados de identificação usados nos pedidos, na guia do plano e no laudo de APAC. Só a sua conta vê os pacientes que ela cadastrou; os dados ficam cifrados no servidor, e cada consulta, alteração, exportação e exclusão entra na trilha de acessos.</p>
+
+  <div data-erro-geral role="alert" class="aviso aviso-erro mt-8" style="display: none;"></div>
+  <div data-ok-geral role="status" class="aviso aviso-info mt-8" style="display: none;"></div>
+
+  <section data-pac-lista class="mt-10" aria-labelledby="t-lista">
+    <h2 id="t-lista" class="categoria-titulo">Pacientes cadastrados <span data-total class="text-ink/30" data-i18n-manter></span></h2>
+    <form data-busca class="flex flex-wrap items-end gap-3" novalidate>
+      <div class="campo flex-1 min-w-[240px]">
+        <label for="busca">Buscar</label>
+        <input type="text" id="busca" maxlength="80" autocomplete="off" placeholder="Parte do nome ou os últimos dígitos do CNS">
+      </div>
+      <button type="submit" class="btn-claro"><i class="fa-solid fa-magnifying-glass text-[12px]" aria-hidden="true"></i>Buscar</button>
+      <button type="button" class="btn-escuro" data-novo><i class="fa-solid fa-plus text-[12px]" aria-hidden="true"></i>Novo paciente</button>
+    </form>
+    <p data-notas class="text-[13px] text-ink/60 mt-4" aria-live="polite"></p>
+    <div data-linhas class="mt-5"></div>
+  </section>
+
+  <section data-ficha class="secao mt-10" aria-labelledby="t-ficha" style="display: none;">
+    <h2 id="t-ficha" class="secao-titulo"><span data-titulo-da-ficha>Novo paciente</span></h2>
+    <p class="secao-nota">Só o nome é obrigatório. Nesta fase o cadastro guarda apenas a identificação: nenhum dado clínico ou resultado de exame.</p>
+    <form data-formulario class="flex flex-col gap-6" novalidate>
+      <div class="grade">
+        <div class="campo sm:col-span-2"><label for="p_nome">Nome completo</label><input type="text" id="p_nome" data-campo="nome" aria-describedby="p_erro_nome" required maxlength="150" autocomplete="off"><p id="p_erro_nome" data-erro-de="nome" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo sm:col-span-2"><label for="p_nome_social">Nome social (opcional)</label><input type="text" id="p_nome_social" data-campo="nome_social" aria-describedby="p_erro_nome_social" maxlength="150" autocomplete="off"><p id="p_erro_nome_social" data-erro-de="nome_social" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_nascimento">Data de nascimento</label><input type="date" id="p_nascimento" data-campo="nascimento" aria-describedby="p_erro_nascimento" min="1900-01-01" autocomplete="off"><p id="p_erro_nascimento" data-erro-de="nascimento" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_sexo">Sexo</label><select id="p_sexo" data-campo="sexo" aria-describedby="p_erro_sexo"><option value="">Não informado</option><option value="masculino">Masculino</option><option value="feminino">Feminino</option></select><p id="p_erro_sexo" data-erro-de="sexo" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_cpf">CPF</label><input type="text" id="p_cpf" data-campo="cpf" aria-describedby="p_erro_cpf" maxlength="14" inputmode="numeric" placeholder="000.000.000-00" autocomplete="off"><p id="p_erro_cpf" data-erro-de="cpf" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_cns">CNS (Cartão Nacional de Saúde)</label><input type="text" id="p_cns" data-campo="cns" aria-describedby="p_erro_cns" maxlength="18" inputmode="numeric" placeholder="15 dígitos" autocomplete="off"><p id="p_erro_cns" data-erro-de="cns" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo sm:col-span-2"><label for="p_mae">Nome da mãe</label><input type="text" id="p_mae" data-campo="mae" aria-describedby="p_erro_mae" maxlength="120" autocomplete="off"><p id="p_erro_mae" data-erro-de="mae" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_raca">Raça/cor</label><select id="p_raca" data-campo="raca" aria-describedby="p_erro_raca"><option value="">Não informada</option><option value="branca">Branca</option><option value="preta">Preta</option><option value="parda">Parda</option><option value="amarela">Amarela</option><option value="indigena">Indígena</option></select><p id="p_erro_raca" data-erro-de="raca" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_prontuario">Prontuário</label><input type="text" id="p_prontuario" data-campo="prontuario" aria-describedby="p_erro_prontuario" maxlength="20" autocomplete="off"><p id="p_erro_prontuario" data-erro-de="prontuario" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo sm:col-span-2"><label for="p_responsavel">Responsável (se houver)</label><input type="text" id="p_responsavel" data-campo="responsavel" aria-describedby="p_erro_responsavel" maxlength="120" autocomplete="off"><p id="p_erro_responsavel" data-erro-de="responsavel" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_telefone">Telefone</label><input type="text" id="p_telefone" data-campo="telefone" aria-describedby="p_erro_telefone" maxlength="20" inputmode="tel" placeholder="(00) 00000-0000" autocomplete="off"><p id="p_erro_telefone" data-erro-de="telefone" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_email">E-mail</label><input type="email" id="p_email" data-campo="email" aria-describedby="p_erro_email" maxlength="254" autocomplete="off"><p id="p_erro_email" data-erro-de="email" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_cep">CEP</label><input type="text" id="p_cep" data-campo="cep" aria-describedby="p_erro_cep" maxlength="9" inputmode="numeric" placeholder="00000-000" autocomplete="off"><p id="p_erro_cep" data-erro-de="cep" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_ibge">Código IBGE do município (7 dígitos)</label><input type="text" id="p_ibge" data-campo="ibge" aria-describedby="p_erro_ibge" maxlength="7" inputmode="numeric" autocomplete="off"><p id="p_erro_ibge" data-erro-de="ibge" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo sm:col-span-2"><label for="p_endereco">Endereço (rua, nº, bairro)</label><input type="text" id="p_endereco" data-campo="endereco" aria-describedby="p_erro_endereco" maxlength="150" autocomplete="off"><p id="p_erro_endereco" data-erro-de="endereco" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_municipio">Município</label><input type="text" id="p_municipio" data-campo="municipio" aria-describedby="p_erro_municipio" maxlength="60" autocomplete="off"><p id="p_erro_municipio" data-erro-de="municipio" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+        <div class="campo"><label for="p_uf">UF</label><select id="p_uf" data-campo="uf" aria-describedby="p_erro_uf"><option value="">Não informada</option><option value="AC" data-i18n-manter>AC</option><option value="AL" data-i18n-manter>AL</option><option value="AM" data-i18n-manter>AM</option><option value="AP" data-i18n-manter>AP</option><option value="BA" data-i18n-manter>BA</option><option value="CE" data-i18n-manter>CE</option><option value="DF" data-i18n-manter>DF</option><option value="ES" data-i18n-manter>ES</option><option value="GO" data-i18n-manter>GO</option><option value="MA" data-i18n-manter>MA</option><option value="MG" data-i18n-manter>MG</option><option value="MS" data-i18n-manter>MS</option><option value="MT" data-i18n-manter>MT</option><option value="PA" data-i18n-manter>PA</option><option value="PB" data-i18n-manter>PB</option><option value="PE" data-i18n-manter>PE</option><option value="PI" data-i18n-manter>PI</option><option value="PR" data-i18n-manter>PR</option><option value="RJ" data-i18n-manter>RJ</option><option value="RN" data-i18n-manter>RN</option><option value="RO" data-i18n-manter>RO</option><option value="RR" data-i18n-manter>RR</option><option value="RS" data-i18n-manter>RS</option><option value="SC" data-i18n-manter>SC</option><option value="SE" data-i18n-manter>SE</option><option value="SP" data-i18n-manter>SP</option><option value="TO" data-i18n-manter>TO</option></select><p id="p_erro_uf" data-erro-de="uf" class="text-[12px] text-[#7B241C] mt-1" hidden></p></div>
+      </div>
+
+      <div>
+        <h3 class="categoria-titulo">Planos de saúde <span class="text-ink/30 normal-case tracking-normal">(no máximo 5)</span></h3>
+        <div data-pac-planos class="flex flex-col gap-3"></div>
+        <p id="p_erro_planos" data-erro-de="planos" class="text-[12px] text-[#7B241C] mt-2" hidden></p>
+        <button type="button" class="btn-claro mt-3" data-mais-plano><i class="fa-solid fa-plus text-[12px]" aria-hidden="true"></i>Adicionar plano</button>
+      </div>
+
+      <div data-erro role="alert" class="aviso aviso-erro" style="display: none;"></div>
+      <div class="flex flex-wrap items-center gap-4">
+        <button type="submit" class="btn-escuro" data-salvar>Salvar paciente <i class="fa-solid fa-arrow-right -rotate-45 text-[11px]" aria-hidden="true"></i></button>
+        <button type="button" class="btn-claro" data-cancelar>Cancelar</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<footer class="max-w-[1100px] w-full mx-auto px-4 sm:px-6 pb-10">
+  <div class="flex flex-col md:flex-row md:justify-between gap-3 pt-8 border-t border-ink/10 text-[12px] text-ink/50">
+    <p>Responsável técnico: Dr. Rodolfo Cambraia Frota · CRM-GO 26815</p>
+    <p class="flex items-center gap-4 md:justify-end">© 2026 Evidēns · <a href="/contact" class="hover:text-teal">Contato</a> · <a href="/termos" class="hover:text-teal">Termos de Uso</a> <span data-idioma></span></p>
+  </div>
+</footer>
+</body>
+</html>
