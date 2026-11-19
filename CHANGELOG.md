@@ -1,6 +1,29 @@
 
 # Patches applied (2025-08-26T12:12:23)
 
+## 2026-11-19 — Cadastro de pacientes: correções da revisão da tela
+
+Ainda só para o administrador e só com dados fictícios. Detalhes em `docs/pacientes.md`, seção "Tela".
+
+- **Laudo de APAC nunca com o nome de um paciente e os dados de outro**: alterar o nome limpa o laudo, com ou sem
+  resultado na tela; nome diferente do paciente escolhido no cadastro solta a seleção à vista do médico; e a
+  geração do PDF tem guarda própria (não envia os dados do paciente do cadastro se o nome na tela for outro).
+- **Troca de paciente**: o seletor avisa "Os dados clínicos na tela são do paciente anterior." e oferece "Limpar
+  dados clínicos"; o plano e a carteira do anterior saem quando o cadastro do novo não traz plano que sirva.
+- **Mesmo paciente**: mudar um dado clínico com resultado na tela repõe no laudo os dados do paciente escolhido.
+- **Salvar**: resposta atrasada não refaz a seleção; busca e resultados ficam desabilitados durante o
+  salvamento. O botão "Limpar seleção" agora some de fato quando não há paciente escolhido.
+- **Edição concorrente**: a edição envia o `atualizado_em` lido e a API responde 409 (`conflito`) se o registro
+  mudou em outro lugar; cada edição avança a versão em pelo menos 1 segundo.
+- **Sessão terminada no check-up**: aviso ao lado do seletor, sem sair da página; depois dos Termos, volta-se à
+  página de origem.
+- Datas pelo relógio local (não UTC) na tela e pelo horário de Brasília no servidor; CEP do cadastro sem IBGE é
+  buscado; aviso de validade vencida da carteira; `aria-describedby` nos erros por campo, `aria-live` no
+  paciente escolhido, ícone decorativo escondido de leitores de tela; "Ex: Unimed Goiânia" com par em inglês.
+- **Conferência no navegador** em `scripts/conferir_pacientes_tela.py` (obrigatória antes de mexer na tela; sem
+  dependência nova, sem chave em arquivo, só dados inventados); testes novos em `tests/test_pacientes_tela.py` e
+  `tests/test_pacientes.py`.
+
 ## 2026-11-19 — Cadastro de pacientes: fase 2, a tela, só para o administrador
 
 Para a conta comum nada muda nem aparece; a home e os Termos não foram alterados. Detalhes em `docs/pacientes.md`,

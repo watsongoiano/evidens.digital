@@ -29,6 +29,7 @@ import unicodedata
 from datetime import date, datetime, timedelta, timezone
 
 from src.utils import contas
+from src.utils.uso import FUSO
 from src.utils.validacao import SEXOS
 
 ACOES = ('criar', 'ver', 'listar', 'editar', 'excluir', 'exportar')
@@ -76,7 +77,7 @@ MSG_SEM_CHAVE = ('O cadastro de pacientes está desligado neste ambiente: falta 
                  f'do cadastro (ao menos {MIN_DA_CHAVE} caracteres, diferente da chave de sessão). Nada foi gravado.')
 MSG_ILEGIVEL = ('Este registro não pôde ser aberto com a chave atual do ambiente (PACIENTES_CHAVE). '
                 'Nenhum dado foi alterado.')
-MSG_CONFLITO = ('Este paciente foi alterado por outro pedido ao mesmo tempo. Nada foi gravado: '
+MSG_CONFLITO = ('Este paciente foi alterado em outro lugar depois de aberto. Nada foi gravado: '
                 'abra o registro de novo e repita a alteração.')
 
 
@@ -221,8 +222,8 @@ def _digitos(valor):
 
 
 def _hoje():
-    # Fuso mais adiantado do país (Fernando de Noronha): quem nasceu hoje em qualquer estado não é "futuro".
-    return datetime.now(timezone(timedelta(hours=-2))).date()
+    # O dia de hoje no horário de Brasília, como no resto do sistema (uso.FUSO, periodicidade.FUSO_BRASILIA).
+    return datetime.now(FUSO).date()
 
 
 def _ler_nome(valor):
@@ -598,6 +599,12 @@ def atualizar(usuario_id, paciente_id, dados):
     `planos` e `ficha`, quando enviados, substituem os anteriores por inteiro. Devolve o registro como ficou,
     ou None se o paciente não for da conta ou tiver sido excluído no meio do caminho.
 
+    `atualizado_em`, quando enviado, é a versão que quem edita tinha em mãos (o `atualizado_em` do registro lido):
+    se o registro foi alterado depois disso, a edição é recusada com `EdicaoSimultanea` e nada é gravado, para um
+    formulário aberto há tempo não sobrescrever o que mudou em outro lugar. Não é campo do paciente e não é
+    gravado; cada edição avança o `atualizado_em` do registro em pelo menos 1 segundo, então duas edições no mesmo
+    segundo não se confundem.
+
     Dois pedidos ao mesmo tempo: em Postgres a leitura trava a linha (SELECT … FOR UPDATE) até a gravação, e o
     segundo pedido espera e parte do que o primeiro gravou. Em sqlite, que não tem a cláusula, o UPDATE só grava
     se o texto cifrado ainda for o que foi lido. Nos dois bancos confere-se quantas linhas o UPDATE alcançou:
@@ -608,17 +615,24 @@ def atualizar(usuario_id, paciente_id, dados):
         raise DadosInvalidos(['Envie os dados do paciente em JSON.'])
     if pid is None:
         return None
+    dados = dict(dados)
+    versao = dados.pop('atualizado_em', None)
+    if versao is not None and (isinstance(versao, bool) or not isinstance(versao, int)):
+        raise DadosInvalidos(['A versão do registro (atualizado_em) deve ser o número recebido na leitura.'])
     cofre, agora = _cofre(), int(time.time())
     indices = {}
     try:
         with contas._conexao() as executar:
             trava = ' FOR UPDATE' if _em_postgres() else ''
             # fetchall: a consulta termina aqui e não segura o banco (sqlite) enquanto a edição é preparada.
-            linhas = executar('SELECT dados, criado_em FROM pacientes WHERE id = ? AND usuario_id = ?' + trava,
-                              (pid, uid)).fetchall()
+            linhas = executar('SELECT dados, criado_em, atualizado_em FROM pacientes WHERE id = ? AND usuario_id = ?'
+                              + trava, (pid, uid)).fetchall()
             if not linhas:
                 return None
-            lido, criado_em = linhas[0]
+            lido, criado_em, atualizado_em = linhas[0]
+            if versao is not None and versao != int(atualizado_em):
+                raise EdicaoSimultanea()           # mudou desde que quem edita leu o registro
+            agora = max(agora, int(atualizado_em) + 1)
             campos = validar({**_decifrar(cofre, uid, pid, lido), **dados})
             indices = _indices(uid, campos)
             _recusar_duplicado(executar, uid, indices, exceto=pid)

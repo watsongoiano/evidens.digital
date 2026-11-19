@@ -110,7 +110,7 @@
     if (atalhos) {
       const botao = document.createElement('a');
       botao.href = '/pacientes'; botao.className = 'btn-claro mt-2';
-      const icone = document.createElement('i'); icone.className = 'fa-solid fa-address-book text-[12px]';
+      const icone = document.createElement('i'); icone.className = 'fa-solid fa-address-book text-[12px]'; icone.setAttribute('aria-hidden', 'true');
       botao.append(icone, 'Pacientes');
       atalhos.append(' ', botao);
     }

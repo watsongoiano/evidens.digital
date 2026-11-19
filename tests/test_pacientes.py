@@ -997,7 +997,7 @@ def test_em_postgres_a_edicao_trava_a_linha_com_for_update(administrador, contas
     monkeypatch.setattr(pacientes, '_em_postgres', lambda: True)
     assert pacientes.atualizar(uid, criado['id'], {'municipio': 'Inhumas'})['municipio'] == 'Inhumas'
     travas = [c for c in comandos if 'FOR UPDATE' in c]
-    assert len(travas) == 1 and travas[0].startswith('SELECT dados, criado_em FROM pacientes WHERE id = ? AND usuario_id = ?')
+    assert len(travas) == 1 and travas[0].startswith('SELECT dados, criado_em, atualizado_em FROM pacientes WHERE id = ? AND usuario_id = ?')
     assert comandos.index(travas[0]) < next(i for i, c in enumerate(comandos) if c.startswith('UPDATE pacientes'))
     pacientes.ler(uid, criado['id'])
     assert sum('FOR UPDATE' in c for c in comandos) == 1                      # leitura comum não trava
@@ -1066,3 +1066,62 @@ def test_documentacao_registra_os_achados_da_revisao():
         assert 'PACIENTES_CHAVE' in (RAIZ / arquivo).read_text(encoding='utf-8'), arquivo
     # Fase 1: os Termos e a home não mudam.
     assert 'PACIENTES_CHAVE' not in (RAIZ / 'termos.html').read_text(encoding='utf-8')
+
+
+# --- Versão do registro na edição (formulário aberto há tempo) -------------
+
+def test_edicao_com_versao_antiga_responde_409_e_nao_sobrescreve(admin, administrador, contas):
+    """A tela envia o `atualizado_em` que leu ao abrir o formulário; se o registro mudou depois, nada é gravado."""
+    uid = administrador['id']
+    _, criado = _criar(admin)
+    pid, versao = criado['id'], criado['atualizado_em']
+    # outra aba (ou o check-up) altera o registro enquanto o formulário está aberto
+    outra = admin.post(f'/api/pacientes/{pid}', json={'telefone': '(62) 92222-2222'})
+    assert outra.status_code == 200 and outra.get_json()['paciente']['atualizado_em'] > versao
+    antes = _contagens(contas)
+    r = admin.post(f'/api/pacientes/{pid}', json={'municipio': 'Anápolis', 'telefone': '', 'atualizado_em': versao})
+    assert r.status_code == 409 and r.get_json()['codigo'] == 'conflito' and 'paciente' not in r.get_json()
+    assert 'Fict' not in r.get_data(as_text=True) and _contagens(contas) == antes        # nem gravação, nem trilha
+    atual = pacientes.ler(uid, pid)
+    assert atual['telefone'] == '(62) 92222-2222' and atual['municipio'] == 'Goiânia'
+    # com a versão atual a edição entra, e a versão avança
+    r = admin.post(f'/api/pacientes/{pid}', json={'municipio': 'Anápolis', 'atualizado_em': atual['atualizado_em']})
+    assert r.status_code == 200 and r.get_json()['paciente']['municipio'] == 'Anápolis'
+    assert r.get_json()['paciente']['atualizado_em'] > atual['atualizado_em']
+    assert 'atualizado_em' not in pacientes.CAMPOS                 # é versão do registro, não campo do paciente
+
+
+def test_cada_edicao_avanca_a_versao_mesmo_no_mesmo_segundo(admin, administrador, monkeypatch):
+    """`atualizado_em` é em segundos: duas edições no mesmo segundo não podem ficar com a mesma versão."""
+    _, criado = _criar(admin)
+    pid = criado['id']
+    monkeypatch.setattr(pacientes.time, 'time', lambda: criado['atualizado_em'])       # o relógio não anda
+    primeira = pacientes.atualizar(administrador['id'], pid, {'municipio': 'Trindade'})
+    segunda = pacientes.atualizar(administrador['id'], pid, {'municipio': 'Inhumas'})
+    assert criado['atualizado_em'] < primeira['atualizado_em'] < segunda['atualizado_em']
+    r = admin.post(f'/api/pacientes/{pid}', json={'municipio': 'Goianira', 'atualizado_em': primeira['atualizado_em']})
+    assert r.status_code == 409 and r.get_json()['codigo'] == 'conflito'
+
+
+def test_edicao_sem_versao_continua_valendo_e_versao_invalida_e_400(admin):
+    _, criado = _criar(admin)
+    pid = criado['id']
+    assert admin.post(f'/api/pacientes/{pid}', json={'municipio': 'Trindade'}).status_code == 200
+    for invalida in ('ontem', 1.5, True, [1]):
+        r = admin.post(f'/api/pacientes/{pid}', json={'municipio': 'Inhumas', 'atualizado_em': invalida})
+        assert r.status_code == 400, invalida
+    # na criação não existe versão: a chave é recusada como qualquer campo desconhecido
+    assert admin.post('/api/pacientes', json={'nome': 'Outra Pessoa Fictícia', 'atualizado_em': 1}).status_code == 400
+
+
+def test_hoje_do_cadastro_usa_o_fuso_do_resto_do_sistema(monkeypatch):
+    from datetime import datetime, timezone
+    from src.utils import uso
+    assert pacientes.FUSO is uso.FUSO
+
+    class Relogio(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime(2026, 3, 10, 1, 30, tzinfo=timezone.utc).astimezone(tz)      # 22h30 do dia 9 em Brasília
+    monkeypatch.setattr(pacientes, 'datetime', Relogio)
+    assert pacientes._hoje().isoformat() == '2026-03-09'

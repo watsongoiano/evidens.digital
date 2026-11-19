@@ -11,13 +11,16 @@
   const T = t => (window.evidensIdioma ? window.evidensIdioma.traduzir(t) : t);
   const API = '/api/pacientes';
   const CABECALHOS = { 'X-Requested-With': 'evidens' };
+  // Esta parte roda em duas páginas: /pacientes (tem [data-pacientes]) e o check-up (não tem).
+  const NO_CHECKUP = !document.querySelector('[data-pacientes]');
 
   // ── Parte comum: pedidos, mensagens e formatos ──────────────────────────────
 
   // Único ponto de saída para a API. Com `corpo`, POST em JSON; sem ele, GET.
   async function pedir(caminho, corpo) {
     const pedido = { method: corpo === undefined ? 'GET' : 'POST', credentials: 'same-origin', cache: 'no-store',
-                     headers: Object.assign({}, CABECALHOS) };
+                     headers: Object.assign({}, CABECALHOS),
+                     semVoltarAoLogin: NO_CHECKUP };     // lido pela página do check-up, que vigia todo fetch
     if (corpo !== undefined) {
       pedido.headers['Content-Type'] = 'application/json';
       pedido.body = JSON.stringify(corpo);
@@ -28,8 +31,13 @@
     } catch (e) {
       return { status: 0, ok: false, dados: {} };
     }
-    if (resposta.status === 401) window.location.href = '/login';
-    else if (resposta.status === 403 && resposta.headers.get('X-Evidens-Termos')) window.location.href = '/termos?aceitar=1&destino=pacientes';
+    // Sessão terminada: /pacientes volta ao login. No check-up não: sair da página apagaria o formulário que o
+    // médico preencheu; quem chamou mostra o aviso (mensagemDeErro) e ele entra de novo em outra aba.
+    // Termos pendentes: depois do aceite, volta-se à página de onde o pedido saiu.
+    if (resposta.status === 401) { if (!NO_CHECKUP) window.location.href = '/login'; }
+    else if (resposta.status === 403 && resposta.headers.get('X-Evidens-Termos')) {
+      window.location.href = NO_CHECKUP ? '/termos?aceitar=1&destino=check-up' : '/termos?aceitar=1&destino=pacientes';
+    }
     let dados = null;
     try { dados = await resposta.json(); } catch (e) { dados = null; }
     return { status: resposta.status, ok: resposta.ok, dados: dados && typeof dados === 'object' ? dados : {} };
@@ -43,14 +51,14 @@
     const d = r.dados || {};
     if (r.status === 0) return { texto: T('Sem conexão com o servidor. Tente de novo.') };
     if (r.status === 400) return { texto: T('Confira os dados informados.'), itens: Array.isArray(d.erros) ? d.erros.map(String) : [], campos: Array.isArray(d.campos) ? d.campos.map(String) : [] };
-    if (r.status === 401) return { texto: T('A sessão terminou. Entre de novo.') };
+    if (r.status === 401) return { texto: T(NO_CHECKUP ? 'A sessão terminou. Entre de novo em outra aba e repita.' : 'A sessão terminou. Entre de novo.') };
     if (r.status === 403) return { texto: T('O cadastro de pacientes não está disponível para esta conta.') };
     if (r.status === 404) return { texto: T('Paciente não encontrado: o registro pode ter sido excluído.') };
     if (r.status === 409 && d.codigo === 'duplicado') {
       return { texto: T(d.campo === 'cpf' ? 'Já existe um paciente com este CPF no seu cadastro.' : 'Já existe um paciente com este CNS no seu cadastro.'),
                duplicado: Number(d.paciente_id) || null };
     }
-    if (r.status === 409 && d.codigo === 'conflito') return { texto: T('Este paciente foi alterado em outro lugar ao mesmo tempo. Nada foi gravado: abra o registro de novo e repita a alteração.') };
+    if (r.status === 409 && d.codigo === 'conflito') return { texto: T('Este cadastro foi alterado em outro lugar. Reabra e repita a alteração.'), conflito: true };
     if (r.status === 409 && d.codigo === 'limite') return { texto: T('O cadastro chegou ao limite de pacientes por conta. Nada foi gravado: exclua registros que não usa mais para cadastrar outros.') };
     if (r.status === 413) return { texto: T('O envio é grande demais. Nada foi gravado.') };
     if (r.status === 500 && d.codigo === 'ilegivel') return { texto: T('Este registro não pôde ser aberto com a chave atual da instalação. Nenhum dado foi alterado.') };
@@ -83,6 +91,11 @@
     cep: v => { const d = soDigitos(v, 8); return d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d; },
     ibge: v => soDigitos(v, 7),
   };
+  // A data de hoje no relógio de quem usa a tela (toISOString daria a data em UTC: à noite, no Brasil, já é amanhã).
+  function hojeLocal() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
   // Para comparar nomes (de pessoa ou de operadora) sem acento, caixa nem espaço a mais.
   const semAcento = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 
@@ -99,7 +112,7 @@
     return e;
   }
 
-  window.evidensPacientes = { T, pedir, caminhoDo, mensagemDeErro, soDigitos, dataBr, dataIso, idadeDe, semAcento, el, dado, API };
+  window.evidensPacientes = { T, pedir, caminhoDo, mensagemDeErro, soDigitos, dataBr, dataIso, idadeDe, hojeLocal, semAcento, el, dado, API };
 
   // ── Página /pacientes ───────────────────────────────────────────────────────
   const pagina = document.querySelector('[data-pacientes]');
@@ -113,6 +126,7 @@
   const formulario = $('[data-formulario]');
   const campo = nome => formulario.querySelector(`[data-campo="${nome}"]`);
   let emEdicao = null;      // id do paciente aberto no formulário; null = paciente novo
+  let versaoEmEdicao = null; // atualizado_em do registro quando o formulário abriu: a API recusa a edição se mudou
   let ultimaBusca = '';     // só na memória da página
   let rodada = 0;           // descarta a resposta de uma busca mais antiga que chega depois
 
@@ -244,6 +258,7 @@
   function abrirFormulario(paciente) {
     limparErros();
     emEdicao = paciente ? paciente.id : null;
+    versaoEmEdicao = paciente && Number.isFinite(Number(paciente.atualizado_em)) ? Number(paciente.atualizado_em) : null;
     $('[data-titulo-da-ficha]').textContent = T(paciente ? 'Editar paciente' : 'Novo paciente');
     CAMPOS.forEach(nome => {
       const valor = paciente ? String(paciente[nome] || '') : '';
@@ -251,13 +266,13 @@
     });
     $('[data-pac-planos]').replaceChildren(...((paciente && paciente.planos) || []).slice(0, MAX_PLANOS).map(linhaDePlano));
     atualizarPlanos();
-    campo('nascimento').max = new Date().toISOString().slice(0, 10);
+    campo('nascimento').max = hojeLocal();
     $('[data-ficha]').style.display = '';
     $('[data-ficha]').scrollIntoView({ block: 'start', behavior: 'smooth' });
     campo('nome').focus({ preventScroll: true });
   }
   function fecharFormulario() {
-    emEdicao = null;
+    emEdicao = null; versaoEmEdicao = null;
     formulario.reset();                         // nada do paciente fica nos campos escondidos
     $('[data-pac-planos]').replaceChildren();
     limparErros();
@@ -305,6 +320,9 @@
     const botao = $('[data-salvar]');
     botao.disabled = true;
     const editando = emEdicao;
+    // Na edição vai junto a versão lida ao abrir: se o registro mudou em outro lugar desde então (outra aba, o
+    // check-up), a API responde 409 e nada é sobrescrito.
+    if (editando !== null && versaoEmEdicao !== null) dados.atualizado_em = versaoEmEdicao;
     const r = await pedir(editando === null ? API : caminhoDo(editando), dados);
     botao.disabled = false;
     if (r.ok) {

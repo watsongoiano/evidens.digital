@@ -139,6 +139,14 @@ Todas em `/api`, com a sessão do administrador e o cabeçalho `X-Requested-With
   a edição responde 404, sem "Paciente salvo." e sem linha `editar` na trilha depois de `excluir`. Se o registro
   mudou nesse intervalo (só acontece em sqlite, que não tem a trava), responde 409 com `codigo: "conflito"` e nada
   é gravado: a tela deve reler o paciente e repetir a alteração.
+- **Versão do registro (`atualizado_em`) na edição**: quem edita pode enviar, junto com os campos, o
+  `atualizado_em` que recebeu ao ler o paciente. Se o registro foi alterado depois dessa leitura (outra aba, o
+  check-up), a edição responde 409 com `codigo: "conflito"` e nada é gravado, para um formulário aberto há tempo
+  não sobrescrever a mudança feita em outro lugar. Sem o campo, a edição vale como antes. O valor tem de ser o
+  número recebido (outra coisa é 400); não é campo do paciente e não é aceito na criação. Cada edição avança o
+  `atualizado_em` em pelo menos 1 segundo, de modo que duas edições no mesmo segundo ficam com versões diferentes.
+- **"Hoje"** (data de nascimento não pode ser futura) é o dia no horário de Brasília, como no resto do sistema
+  (`uso.FUSO`).
 - **Teto por conta**: 5.000 pacientes. Acima disso, criar responde 409 com `codigo: "limite"`; ler, editar,
   exportar e excluir continuam funcionando, e excluir abre vaga.
 - **Exportar** devolve `{formato: "evidens-paciente", versao: 1, exportado_em, paciente}`.
@@ -191,17 +199,19 @@ Testes em `tests/test_pacientes_tela.py`.
 - **Exportar**: o arquivo `paciente-<id>.json` é montado a partir da resposta do `fetch` (um link para a rota não
   levaria o cabeçalho próprio).
 - CPF, CNS, CEP e código IBGE têm máscara. O CEP não é consultado em serviço externo nesta página.
+- A data máxima do nascimento é a data local de quem usa a tela (não a data em UTC). Cada campo aponta para o
+  parágrafo do seu erro (`aria-describedby`).
 
 Mensagens (em `mensagemDeErro`, `static/pacientes.js`):
 
 | Resposta | O que a tela faz |
 |---|---|
 | 400 | A frase do servidor aparece embaixo de cada campo recusado, e o campo fica destacado |
-| 401 | Volta para o login |
-| 403 | "O cadastro de pacientes não está disponível para esta conta." (Termos pendentes: vai para o aceite) |
+| 401 | Em `/pacientes`, volta para o login. No check-up, não sai da página (o formulário preenchido se perderia): "A sessão terminou. Entre de novo em outra aba e repita." |
+| 403 | "O cadastro de pacientes não está disponível para esta conta." (Termos pendentes: vai para o aceite e, depois dele, volta à página de onde o pedido saiu) |
 | 404 | "Paciente não encontrado: o registro pode ter sido excluído.", e a lista é recarregada |
 | 409 `duplicado` | "Já existe um paciente com este CPF/CNS no seu cadastro.", com o botão "Abrir o paciente que já existe" |
-| 409 `conflito` | Avisa que nada foi gravado e pede para abrir o registro de novo |
+| 409 `conflito` | "Este cadastro foi alterado em outro lugar. Reabra e repita a alteração." A edição envia o `atualizado_em` lido ao abrir o formulário |
 | 409 `limite` | Avisa que a conta chegou ao limite e que nada foi gravado |
 | 500 `ilegivel` | "Este registro não pôde ser aberto com a chave atual da instalação. Nenhum dado foi alterado." |
 | 503 `sem_chave` | "O cadastro de pacientes ainda não foi ativado nesta instalação.", e os botões de buscar e criar são desligados |
@@ -232,15 +242,64 @@ lida nem enviada.
   `window.evidensCheckup.trocarDePaciente` (em `intelligent-tools.html`) põe o plano e a carteira na tela e chama
   `pedirConfirmacaoDoPlano()`, a mesma função de qualquer troca de paciente: havendo plano ou carteira na tela, a
   guia só sai depois de o médico confirmar ("Sim, manter"), e o laudo de APAC do paciente anterior é apagado
-  antes de entrar o do novo. Se o cadastro não tem plano que o médico atenda, o plano que estava na tela fica,
-  também pendente de confirmação. A ponte só lê a guarda; nunca a baixa.
-- **Salvar paciente no cadastro**: sem paciente escolhido, cria; com um escolhido, atualiza esse registro (se o
-  nome na tela for outro, pede confirmação antes). Só o que está preenchido é enviado: campo em branco no
-  check-up não apaga o que o cadastro tem (o laudo de APAC é limpo a cada troca de paciente). A idade não é
-  gravada; o nascimento vem do campo do laudo de APAC. O plano da tela entra na lista `planos` no lugar do de
-  mesma operadora, ou no fim. Com a guarda do plano pendente, nada é gravado até o médico confirmar.
+  antes de entrar o do novo. Se o cadastro do paciente escolhido não tem plano que o médico atenda, o plano e a
+  carteira que estavam na tela saem (são do paciente anterior); a escolha do SUS fica, porque é do médico a cada
+  pedido. Se a validade da carteira no cadastro já passou, o plano é preenchido e a tela avisa ("A validade da
+  carteira no cadastro venceu em MM/AAAA."). A ponte só lê a guarda; nunca a baixa.
+- **O vínculo vale só para o nome do cadastro.** O pedido nunca pode sair com o nome de um paciente e o CNS, a
+  mãe, o nascimento ou o endereço de outro. São três trancas:
+  1. na página, qualquer alteração do nome com algum dado no laudo de APAC limpa o laudo, haja ou não resultado
+     na tela (`semEfeitoNasRecomendacoes`);
+  2. no seletor, nome alterado e diferente do nome do paciente escolhido solta o vínculo à vista do médico, com
+     o mesmo efeito de "Limpar seleção" e uma frase que explica (para corrigir o nome de um cadastrado, use a
+     página do cadastro);
+  3. na geração do PDF, se há paciente escolhido e o nome na tela é outro (`vinculoDivergente`), o pedido não
+     sai: o vínculo é solto, o laudo é limpo, o plano passa a pedir confirmação e a tela avisa; e
+     `apacDoDialogo` não monta os dados do paciente nessa situação.
+- **Mesmo paciente, dado clínico alterado**: com resultado na tela, a mudança limpa o laudo de APAC (regra antiga
+  da página). Se o paciente do cadastro continua escolhido e o nome é o dele, os dados dele voltam ao laudo
+  (`aoLimparApac`); anamnese, exames realizados e CID, que são clínicos, não voltam.
+- **Dados clínicos do paciente anterior**: o cadastro só traz identificação. Ao escolher um paciente diferente do
+  que está na tela (outro registro, ou um nome digitado diferente) com dados clínicos preenchidos, o seletor
+  avisa "Os dados clínicos na tela são do paciente anterior." e oferece "Limpar dados clínicos", que zera o
+  formulário pelo `reset` dele (a limpeza que a página já conhecia), mantém nome, idade, sexo, plano e carteira e
+  avisa os ouvintes de cada campo. Nada é limpo sem o médico pedir.
+- **CEP sem código IBGE no cadastro**: o CEP não conta como já buscado e a busca de sempre (ViaCEP) acontece.
+- **Salvar paciente no cadastro**: sem paciente escolhido, cria; com um escolhido, atualiza esse registro. Só o
+  que está preenchido é enviado: campo em branco no check-up não apaga o que o cadastro tem (o laudo de APAC é
+  limpo a cada troca de paciente). A idade não é gravada; o nascimento vem do campo do laudo de APAC. O plano da
+  tela entra na lista `planos` no lugar do de mesma operadora, ou no fim. Com a guarda do plano pendente, nada é
+  gravado até o médico confirmar. A edição leva o `atualizado_em` relido na hora. Durante o salvamento a busca e
+  os resultados ficam desabilitados; se o médico soltar a seleção ou trocar o nome enquanto o pedido está fora, a
+  resposta atrasada não refaz o vínculo (o mesmo vale para a resposta de uma escolha anterior).
 - **Limpar seleção** solta o paciente escolhido e trata a tela como troca de paciente (guarda do plano e laudo de
   APAC limpo); o próximo "Salvar" cria um paciente novo.
+- **Sessão terminada**: o seletor mostra "A sessão terminou. Entre de novo em outra aba e repita." e a página
+  não é trocada.
+
+### Conferência no navegador (obrigatória antes de cada mudança na tela)
+
+A suíte só lê o código das telas: o repositório não tem teste de navegador nem de execução de JavaScript, e não
+ganhou dependência para isso. O comportamento é conferido por `scripts/conferir_pacientes_tela.py`, que é
+**conferência manual obrigatória antes de cada mudança** em `pacientes.html`, `static/pacientes.js`,
+`static/pacientes-checkup.js`, na ponte `window.evidensCheckup` ou nas guardas do laudo de APAC e do plano em
+`intelligent-tools.html`:
+
+```
+python scripts/conferir_pacientes_tela.py [--capturas PASTA] [--so C1,M2]
+```
+
+- Precisa de `playwright` no Python que roda o roteiro (fora do `requirements.txt`, de propósito) e de um Chrome
+  (`--chrome` ou a variável `CHROME`).
+- Sobe o próprio servidor num banco sqlite temporário, com uma `PACIENTES_CHAVE` sorteada na hora e passada só
+  pelo ambiente do processo: **nenhuma chave em arquivo, nenhum banco real, nenhum dado real** (os pacientes são
+  inventados no roteiro). O ViaCEP e a lista de exames em APAC são simulados; nada sai da máquina.
+- Cobre: conta comum (nada aparece, API recusa); laudo de APAC com outro nome na tela (o corpo do `POST` do PDF
+  é impresso e não pode levar dado do paciente do cadastro), também quando o nome muda sem evento; troca de
+  paciente com dados clínicos e com plano na tela; corrida no "Salvar"; dado clínico alterado do mesmo paciente;
+  CEP sem IBGE; validade vencida; inglês; edição concorrente em `/pacientes`; sessão terminada e Termos.
+- Sai com código 0 se tudo conferiu. Os testes de `tests/test_pacientes_tela.py` travam as mesmas correções no
+  código, mas não substituem o roteiro.
 
 ### Segurança da tela
 

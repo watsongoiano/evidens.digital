@@ -4445,7 +4445,20 @@
   "Planos de saúde: envie uma lista.": "Health plans: send a list.",
   "Cada paciente pode ter até 5 planos de saúde.": "Each patient can have up to 5 health plans.",
   "Plano de saúde em formato inválido: use operadora, carteira e validade.": "Health plan in an invalid format: use insurer, member number and validity.",
-  "Há campos que o cadastro de pacientes não aceita.": "There are fields the patient registry does not accept."
+  "Há campos que o cadastro de pacientes não aceita.": "There are fields the patient registry does not accept.",
+  "Os dados clínicos na tela são do paciente anterior.": "The clinical data on screen belongs to the previous patient.",
+  "Comorbidades, medicações, exames e hábitos não vêm do cadastro: limpe-os ou confira um a um antes de gerar as recomendações.": "Comorbidities, medications, tests and habits do not come from the registry: clear them or check each one before generating the recommendations.",
+  "Limpar dados clínicos": "Clear clinical data",
+  "Dados clínicos limpos: a identificação ficou.": "Clinical data cleared: the identification was kept.",
+  "A validade da carteira no cadastro venceu em": "The card validity in the registry expired in",
+  "O nome mudou: a seleção do cadastro foi solta e os dados do paciente no laudo de APAC foram limpos. Para corrigir o nome de um paciente cadastrado, use a página do cadastro.": "The name changed: the registry selection was released and the patient data in the APAC report was cleared. To correct the name of a registered patient, use the registry page.",
+  "O nome na tela não é o do paciente escolhido no cadastro. A seleção foi solta e os dados do paciente no laudo de APAC foram limpos: confira os dados e gere o PDF de novo.": "The name on screen is not that of the patient chosen in the registry. The selection was released and the patient data in the APAC report was cleared: check the data and generate the PDF again.",
+  "O paciente na tela mudou durante o salvamento: nada foi gravado.": "The patient on screen changed while saving: nothing was saved.",
+  "O paciente na tela mudou enquanto isso: a seleção não foi alterada.": "The patient on screen changed in the meantime: the selection was not changed.",
+  "Este cadastro foi alterado em outro lugar. Nada foi gravado: salve de novo.": "This record was changed elsewhere. Nothing was saved: save again.",
+  "Este cadastro foi alterado em outro lugar. Reabra e repita a alteração.": "This record was changed elsewhere. Reopen it and repeat the change.",
+  "A sessão terminou. Entre de novo em outra aba e repita.": "The session has ended. Sign in again in another tab and repeat.",
+  "Ex: Unimed Goiânia": "E.g. Unimed Goiânia"
  },
  "padroes": [
   [
@@ -5468,7 +5481,6 @@
   "SBD 2024",
   "ADA 2026",
   "Evidēns.",
-  "Ex: Unimed Goiânia",
   "Ex: 225125",
   "Zero",
   "NICE CG185 (2023)",
@@ -5559,6 +5571,7 @@
   "SBD/SBA/ABESO IIa-C",
   "SBD/SBA/ABESO IIb-C",
   "AHA/ASA 2021 2a",
-  "SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91)"
+  "SBD/SBA/ABESO 2026 (Diabetol Metab Syndr 2026;18:91)",
+  "CNS"
  ]
 }
