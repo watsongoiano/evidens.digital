@@ -29,7 +29,24 @@ JANELA_TENTATIVAS = 15 * 60          # segundos
 MAX_FALHAS_POR_EMAIL = 5
 MAX_FALHAS_POR_IP = 30
 
-_EMAIL = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+class _Email:
+    """Formato mínimo de e-mail: sem espaço, um só "@" e um ponto no meio do domínio.
+
+    Era a expressão ``^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$``, de custo quadrático em texto adversário (CodeQL
+    py/polynomial-redos). A conferência à mão aceita os mesmos textos em tempo linear; mantém `match` porque
+    os outros módulos a usam como usavam a expressão.
+    """
+
+    @staticmethod
+    def match(texto):
+        if not isinstance(texto, str) or texto.count('@') != 1 or any(c.isspace() for c in texto):
+            return None
+        local, dominio = texto.split('@')
+        # um ponto com pelo menos um caractere antes e um depois, dentro do domínio
+        return True if local and '.' in dominio[1:-1] else None
+
+
+_EMAIL = _Email()
 
 # Hash de uma senha qualquer, para gastar o mesmo tempo quando o e-mail não
 # existe (não dá para descobrir quem tem conta medindo a demora da resposta).

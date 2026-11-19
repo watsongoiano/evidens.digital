@@ -1125,3 +1125,15 @@ def test_hoje_do_cadastro_usa_o_fuso_do_resto_do_sistema(monkeypatch):
             return datetime(2026, 3, 10, 1, 30, tzinfo=timezone.utc).astimezone(tz)      # 22h30 do dia 9 em Brasília
     monkeypatch.setattr(pacientes, 'datetime', Relogio)
     assert pacientes._hoje().isoformat() == '2026-03-09'
+
+
+def test_formato_do_email_e_conferido_em_tempo_linear(contas):
+    """CodeQL py/polynomial-redos: a conferência do e-mail não usa mais expressão regular com retrocesso."""
+    import time
+    for aceito in ('a@b.co', 'nome.sobrenome@exemplo.test', 'é@domínio.com.br', 'a@b..c'):
+        assert contas._EMAIL.match(aceito), aceito
+    for recusado in ('', 'a', 'a@b', '@b.co', 'a@.co', 'a@b.', 'a@@b.co', 'a b@c.co', 'a@b.co\n', 'a@b@c.co', None):
+        assert not contas._EMAIL.match(recusado), recusado
+    inicio = time.perf_counter()
+    assert not contas._EMAIL.match('!@' + '!.' * 200000 + '@')
+    assert time.perf_counter() - inicio < 0.5
