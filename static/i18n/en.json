@@ -4344,7 +4344,28 @@
   "Hipertensão arterial pulmonar: monitorar o estado do ferro com regularidade (ferro sérico, ferritina e saturação de transferrina). Deficiência de ferro: ferritina abaixo de 100 µg/L, ou de 100 a 299 µg/L com saturação de transferrina abaixo de 20%. Com anemia ferropriva, corrigir o ferro.": "Pulmonary arterial hypertension: monitor iron status regularly (serum iron, ferritin and transferrin saturation). Iron deficiency: ferritin below 100 µg/L, or 100 to 299 µg/L with transferrin saturation below 20%. With iron-deficiency anaemia, correct the iron status.",
   "Hipertensão arterial pulmonar: no seguimento, o risco é estratificado em quatro níveis pela classe funcional (OMS), pela distância no teste de caminhada de 6 minutos e pelo BNP ou NT-proBNP. Reavaliar 3-6 meses após mudança do tratamento e a cada 3-6 meses no paciente estável, com o intervalo ajustado ao caso.": "Pulmonary arterial hypertension: during follow-up, risk is stratified into four strata by WHO functional class, 6-minute walk distance and BNP or NT-proBNP. Reassess 3-6 months after a change in therapy and every 3-6 months in stable patients, with the interval adjusted to the patient.",
   "Hipertensão arterial pulmonar: seguimento e vacinas": "Pulmonary arterial hypertension: follow-up and vaccines",
-  "O seguimento é feito em centro de referência. Além dos exames pedidos, a diretriz lista: gasometria arterial na avaliação inicial (a oximetria de pulso pode substituí-la no paciente estável), eletrocardiograma, qualidade de vida, teste cardiopulmonar de exercício e cateterismo direito, conforme o caso. Exames estendidos (TSH, troponina, ácido úrico) conforme o quadro clínico; INR em uso de antagonista da vitamina K. Vacinas recomendadas: influenza, pneumocócica e COVID-19. Na deficiência de ferro sem anemia, a reposição pode ser considerada.": "Follow-up takes place at a referral centre. In addition to the tests ordered, the guideline lists: arterial blood gases at baseline (pulse oximetry may replace them in stable patients), electrocardiogram, quality of life, cardiopulmonary exercise testing and right heart catheterisation, as appropriate. Extended tests (TSH, troponin, uric acid) according to the clinical situation; INR for patients on vitamin K antagonists. Recommended vaccines: influenza, pneumococcal and COVID-19. In iron deficiency without anaemia, iron repletion may be considered."
+  "O seguimento é feito em centro de referência. Além dos exames pedidos, a diretriz lista: gasometria arterial na avaliação inicial (a oximetria de pulso pode substituí-la no paciente estável), eletrocardiograma, qualidade de vida, teste cardiopulmonar de exercício e cateterismo direito, conforme o caso. Exames estendidos (TSH, troponina, ácido úrico) conforme o quadro clínico; INR em uso de antagonista da vitamina K. Vacinas recomendadas: influenza, pneumocócica e COVID-19. Na deficiência de ferro sem anemia, a reposição pode ser considerada.": "Follow-up takes place at a referral centre. In addition to the tests ordered, the guideline lists: arterial blood gases at baseline (pulse oximetry may replace them in stable patients), electrocardiogram, quality of life, cardiopulmonary exercise testing and right heart catheterisation, as appropriate. Extended tests (TSH, troponin, uric acid) according to the clinical situation; INR for patients on vitamin K antagonists. Recommended vaccines: influenza, pneumococcal and COVID-19. In iron deficiency without anaemia, iron repletion may be considered.",
+  "Há mais de 12 meses": "More than 12 months ago",
+  "Já somados:": "Already counted:",
+  "incompleto, falta informar": "incomplete, still missing",
+  "Falta informar há quanto tempo foi o TEV (menos de 3 meses, de 3 a 12 meses ou mais de 12 meses) para classificar o risco tromboembólico e decidir a ponte.": "How long ago the VTE occurred (less than 3 months, 3 to 12 months or more than 12 months) is needed to classify thromboembolic risk and decide on bridging.",
+  "Sem esse dado, a ponte não é indicada nem dispensada: TEV há menos de 3 meses é alto risco.": "Without it, bridging is neither indicated nor ruled out: VTE less than 3 months ago is high risk.",
+  "Risco tromboembólico não classificado: falta informar há quanto tempo foi o TEV (menos de 3 meses, de 3 a 12 meses ou mais de 12 meses).": "Thromboembolic risk not classified: how long ago the VTE occurred (less than 3 months, 3 to 12 months or more than 12 months) is missing.",
+  "TEV há menos de 3 meses é alto risco, com ponte de heparina (AHA 2a, C-LD; SBC IIa-C); sem o tempo, a ponte não é indicada nem dispensada.": "VTE less than 3 months ago is high risk, with heparin bridging (AHA 2a, C-LD; SBC IIa-C); without the timing, bridging is neither indicated nor ruled out.",
+  "há quanto tempo foi o TEV (menos de 3 meses, de 3 a 12 meses ou mais de 12 meses)": "how long ago the VTE occurred (less than 3 months, 3 to 12 months or more than 12 months)",
+  "TEV há menos de 3 meses: considerar adiar a cirurgia eletiva": "VTE less than 3 months ago: consider postponing elective surgery",
+  "TEV há menos de 3 meses é alto risco tromboembólico (AHA, Tabela 14; SBC, Tabela 11).": "VTE less than 3 months ago is high thromboembolic risk (AHA, Table 14; SBC, Table 11).",
+  "Em pacientes selecionados, com trombose recente e alto risco trombótico residual, adiar a cirurgia eletiva pode permitir uma interrupção mais segura do anticoagulante (AHA, texto do §7.6, sem classe de recomendação).": "In selected patients with recent thrombosis and high residual thrombotic risk, postponing elective surgery may allow safer interruption of the anticoagulant (AHA, §7.6 text, no class of recommendation).",
+  "A AHA não define por quanto tempo adiar: decidir em equipe, com quem prescreve o anticoagulante, o cirurgião e o anestesista.": "The AHA does not define how long to postpone: decide as a team, with the anticoagulant prescriber, the surgeon and the anesthesiologist.",
+  "Só a AHA/ACC fala em adiar, e em texto de apoio, sem classe de recomendação.": "Only the AHA/ACC mentions postponing, and in supportive text, with no class of recommendation.",
+  "A SBC 2024 classifica o TEV há <3 meses como alto risco (Tabela 11), sem tratar do adiamento.": "The SBC 2024 classifies VTE <3 months ago as high risk (Table 11), without addressing postponement.",
+  "Nós optamos por mostrar o aviso, para decisão caso a caso.": "We chose to show the warning, for a case-by-case decision.",
+  "AHA/ACC 2026, §7.6 (texto) e Tabela 14": "AHA/ACC 2026, §7.6 (text) and Table 14",
+  "SBC 2024, Tabela 11": "SBC 2024, Table 11",
+  "Escore incompleto: o risco pulmonar não é classificado.": "Incomplete score: pulmonary risk is not classified.",
+  "SpO₂, até 24 pontos": "SpO₂, up to 24 points",
+  "hemoglobina, 11 pontos": "hemoglobin, 11 points",
+  "duração da cirurgia, até 23 pontos": "surgery duration, up to 23 points"
  },
  "padroes": [
   [
@@ -5160,11 +5181,11 @@
    "Anemia (hemoglobin %1 g/dL): test for iron deficiency, which is treated with iron before elective surgery."
   ],
   [
-   "^TFG (\\d+) mL/min/1,73 m²: dose máxima de 1\\.000 mg/dia \\(KDIGO 2022\\)\\.$",
+   "^TFG ([\\d,]+) mL/min/1,73 m²: dose máxima de 1\\.000 mg/dia \\(KDIGO 2022\\)\\.$",
    "eGFR %1 mL/min/1.73 m²: maximum dose 1,000 mg/day (KDIGO 2022)."
   ],
   [
-   "^TFG (\\d+) mL/min/1,73 m² \\(CKD-EPI 2021\\): a metformina é contraindicada abaixo de 30\\. Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir sem função renal estável\\.$",
+   "^TFG ([\\d,]+) mL/min/1,73 m² \\(CKD-EPI 2021\\): a metformina é contraindicada abaixo de 30\\. Suspender e rever o tratamento com o médico assistente; no pós-operatório, não reintroduzir sem função renal estável\\.$",
    "eGFR %1 mL/min/1.73 m² (CKD-EPI 2021): metformin is contraindicated below 30. Stop it and review treatment with the attending physician; after surgery, do not restart without stable kidney function."
   ],
   [
@@ -5222,6 +5243,26 @@
   [
    "^AHA \\(Tabela 13, ClCr ([\\d,]+) mL/min, sangramento (baixo/moderado|alto)\\): sem dose do D-(\\d+) ao (D0|D\\+\\d+), com a última dose no D-(\\d+) e o reinício no D\\+(\\d+), após hemostasia\\.$",
    "AHA (Table 13, CrCl %1 mL/min, $2 bleeding risk): no dose from D-%3 to %4, with the last dose on D-%5 and restart on D+%6, after hemostasis."
+  ],
+  [
+   "^Com o que foi informado, a pontuação mínima é (\\d+): já está na faixa de risco alto \\(≥ 45\\), qualquer que seja o dado que falta\\.$",
+   "With what was entered, the minimum score is %1: already in the high-risk range (≥ 45), whatever the missing data turn out to be."
+  ],
+  [
+   "^Com o que foi informado, a pontuação mínima é (\\d+): o risco é pelo menos intermediário \\(26 a 44\\) e passa a alto com 45 ou mais\\.$",
+   "With what was entered, the minimum score is %1: the risk is at least intermediate (26 to 44) and becomes high at 45 or more."
+  ],
+  [
+   "^Com o que foi informado, a pontuação mínima é (\\d+); a faixa \\(baixo < 26, intermediário 26 a 44, alto ≥ 45\\) depende do que falta\\.$",
+   "With what was entered, the minimum score is %1; the range (low < 26, intermediate 26 to 44, high ≥ 45) depends on what is missing."
+  ],
+  [
+   "^O que falta pode somar: (.+)\\.$",
+   "What is missing can add: $1."
+  ],
+  [
+   "^Confira (.+): aceito só número inteiro, de ([\\d.,]+) a ([\\d.,]+)\\.$",
+   "Check $1: only whole numbers are accepted, from %2 to %3."
   ]
  ],
  "manter": [

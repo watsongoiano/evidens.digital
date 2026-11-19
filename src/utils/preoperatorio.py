@@ -206,7 +206,8 @@ INSTAVEIS = {
 CONDICOES = ('dac', 'iam_previo', 'stent', 'revascularizacao_cirurgica', 'ic', 'ic_fe_reduzida', 'ic_recente', 'avc_ait',
              'avc_ait_recente', 'diabetes', 'diabetes_insulina', 'hipertensao', 'fa', 'valvopatia', 'protese_mecanica',
              'protese_mecanica_mitral', 'dpoc', 'doenca_arterial_periferica', 'marcapasso_cdi', 'hipertensao_pulmonar',
-             'tev', 'tev_recente_3m', 'tev_3_12m', 'cancer_ativo', 'trombofilia_grave', 'tabagismo', 'obesidade',
+             'tev', 'tev_recente_3m', 'tev_3_12m', 'tev_mais_12m', 'cancer_ativo', 'trombofilia_grave', 'tabagismo',
+             'obesidade',
              'hepatopatia', 'doenca_renal', 'dislipidemia', 'historia_familiar_dac', 'cardiopatia_congenita')
 # Fluxo da AHA/ACC (Figura 1). Fatores de risco cardiovascular (nota *): hipertensão, tabagismo, colesterol alto,
 # diabetes, obesidade, história familiar de doença coronária precoce, mulher > 65 anos, homem > 55 anos.
@@ -409,6 +410,14 @@ def _num(valor, nome, minimo, maximo, obrigatorio=False):
     return numero
 
 
+def _inteiro(valor, nome, minimo, maximo):
+    """Como ``_num``, mas só aceita número inteiro: classe ASA 2,9 não vira 2."""
+    numero = _num(valor, nome, minimo, maximo)
+    if numero is not None and numero != int(numero):
+        raise EntradaInvalida(f'Confira {nome}: aceito só número inteiro, de {minimo:g} a {maximo:g}.')
+    return None if numero is None else int(numero)
+
+
 def _escolha(valor, opcoes, nome, obrigatorio=False):
     if valor in (None, ''):
         if obrigatorio:
@@ -460,7 +469,7 @@ def ler(dados, hoje=None):
         'altura': _num(dados.get('altura'), 'a altura (cm)', 100, 250),
         'cirurgia': _escolha(dados.get('cirurgia'), CIRURGIAS, 'a cirurgia proposta', obrigatorio=True),
         'urgencia': _escolha(dados.get('urgencia'), URGENCIAS, 'a urgência', obrigatorio=True),
-        'asa': _num(dados.get('asa'), 'a classe ASA', 1, 5),
+        'asa': _inteiro(dados.get('asa'), 'a classe ASA', 1, 5),
         'funcional': _escolha(dados.get('funcional'), ESTADOS_FUNCIONAIS, 'o estado funcional'),
         'duracao': _escolha(dados.get('duracao'), DURACOES, 'a duração prevista'),
         'sangramento': _escolha(dados.get('sangramento'), SANGRAMENTOS, 'o risco de sangramento'),
@@ -476,7 +485,7 @@ def ler(dados, hoje=None):
         'escadas': _escolha(dados.get('escadas'), ('sim', 'nao', 'nao_sabe'), 'a pergunta das escadas'),
         'dasi': _lista(dados.get('dasi'), DASI_ITENS, 'DASI'),
         'dasi_respondido': dados.get('dasi_respondido') in (True, 'sim'),
-        'cfs': _num(dados.get('cfs'), 'a Escala Clínica de Fragilidade', 1, 9),
+        'cfs': _inteiro(dados.get('cfs'), 'a Escala Clínica de Fragilidade', 1, 9),
         'stop_bang': _lista(dados.get('stop_bang'), STOP_BANG_ITENS, 'STOP-Bang'),
         'medicacoes': [m for m in (dados.get('medicacoes') or []) if isinstance(m, str)][:80],
         'aas_indicacao': _escolha(dados.get('aas_indicacao'), ('primaria', 'secundaria'), 'a indicação do AAS'),
@@ -539,12 +548,21 @@ def ler(dados, hoje=None):
 
 # ── Escores ──────────────────────────────────────────────────────────────────
 
-def clcr(p):
-    """Cockcroft-Gault (mL/min). None sem creatinina ou peso."""
+def clcr_exato(p):
+    """Cockcroft-Gault (mL/min), sem arredondar: o valor que se compara com os cortes dos anticoagulantes (15, 30 e
+    50). None sem creatinina ou peso."""
     if not p.get('creatinina') or not p.get('peso'):
         return None
     valor = (140 - p['idade']) * p['peso'] / (72 * p['creatinina'])
-    return round(valor * (0.85 if p['sexo'] == 'feminino' else 1), 1)
+    return valor * (0.85 if p['sexo'] == 'feminino' else 1)
+
+
+def clcr(p):
+    """Cockcroft-Gault (mL/min) para mostrar, com uma casa; perto de um corte, sem atravessá-lo (29,96 não vira
+    30,0). Para decidir, ``clcr_exato``."""
+    from src.utils import funcao_renal
+    valor = clcr_exato(p)
+    return None if valor is None else funcao_renal.para_exibir(valor, funcao_renal.LIMIARES_CLCR, 1)
 
 
 def _medicacao_com_classe(p, classe):
@@ -684,7 +702,23 @@ def capacidade_funcional(p):
             'referencias': [DASI, AHA, SBC]}
 
 
+_ARISCAT_NIVEL = {'baixo': 'Baixo', 'intermediario': 'Intermediário', 'alto': 'Alto'}
+# Pontos que cada variável obrigatória pode acrescentar quando falta (Canet 2010: SpO₂ 91–95% 8 e ≤ 90% 24;
+# hemoglobina ≤ 10 g/dL 11; duração de 2 a 3 h 16 e > 3 h 23)
+_ARISCAT_PODE_SOMAR = {'SpO₂': 'SpO₂, até 24 pontos', 'hemoglobina': 'hemoglobina, 11 pontos',
+                       'duração da cirurgia': 'duração da cirurgia, até 23 pontos'}
+
+
+def _nivel_ariscat(pontos):
+    return 'baixo' if pontos < 26 else 'intermediario' if pontos < 45 else 'alto'
+
+
 def ariscat(p):
+    """ARISCAT (Canet 2010). SpO₂, hemoglobina e duração da cirurgia são obrigatórias: sem uma delas, o escore sai
+    ``status: 'incompleto'``, com ``faltando``, sem categoria (``nivel`` None) e sem valor. Dado ausente não vale zero
+    ponto. ``minimo`` é a soma só do que foi informado e ``nivel_minimo`` a faixa dessa soma: o risco é pelo menos
+    esse (as medidas que dependem de risco intermediário ou alto usam ``nivel_minimo``, nunca um "baixo" presumido).
+    """
     cir = CIRURGIAS[p['cirurgia']]
     itens, falta = [], []
     idade = p['idade']
@@ -718,19 +752,34 @@ def ariscat(p):
     if p['urgencia'] == 'emergencia':
         itens.append(('Cirurgia de emergência', 8))
     pontos = sum(pts for _, pts in itens)
-    nivel = 'baixo' if pontos < 26 else 'intermediario' if pontos < 45 else 'alto'
+    nivel = _nivel_ariscat(pontos)
     taxa = {'baixo': '1,6%', 'intermediario': '13,3%', 'alto': '42,1%'}[nivel]
     externa = {'baixo': '3,4%', 'intermediario': '13,0%', 'alto': '38,0%'}[nivel]
     resultado = {'nome': 'ARISCAT', 'valor': pontos, 'nivel': nivel, 'aplicavel': cir['ariscat'],
-                 'faixa': {'baixo': 'Baixo', 'intermediario': 'Intermediário', 'alto': 'Alto'}[nivel],
+                 'faixa': _ARISCAT_NIVEL[nivel], 'status': 'calculado', 'faltando': [], 'nivel_minimo': nivel,
                  'itens': [f'{n} ({pts})' for n, pts in itens],
                  'nota': (f'Complicação pulmonar pós-operatória: {taxa} na validação original e {externa} na validação '
                           'externa (PERISCOPE).'),
-                 'falta': falta, 'referencias': [ARISCAT, PERISCOPE]}
+                 'falta': [], 'referencias': [ARISCAT, PERISCOPE]}
     if not cir['ariscat']:
-        resultado.update(faixa='Não se aplica', nivel='baixo', falta=[],
+        resultado.update(faixa='Não se aplica', nivel='baixo', nivel_minimo='baixo', status='nao_aplicavel',
                          nota='O ARISCAT não foi derivado neste tipo de procedimento (anestesia só local, ambulatorial '
                               'ou transplante).')
+    elif falta:
+        # Variável obrigatória ausente: sem categoria e sem valor. A soma do que foi informado é só o piso do escore.
+        if nivel == 'alto':
+            piso = (f'Com o que foi informado, a pontuação mínima é {pontos}: já está na faixa de risco alto (≥ 45), '
+                    'qualquer que seja o dado que falta.')
+        elif nivel == 'intermediario':
+            piso = (f'Com o que foi informado, a pontuação mínima é {pontos}: o risco é pelo menos intermediário '
+                    '(26 a 44) e passa a alto com 45 ou mais.')
+        else:
+            piso = (f'Com o que foi informado, a pontuação mínima é {pontos}; a faixa (baixo < 26, intermediário 26 a '
+                    '44, alto ≥ 45) depende do que falta.')
+        resultado.update(valor='—', nivel=None, faixa='Faltam dados', status='incompleto', faltando=falta, falta=falta,
+                         minimo=pontos,
+                         nota='Escore incompleto: o risco pulmonar não é classificado. ' + piso + ' O que falta pode '
+                              'somar: ' + '; '.join(_ARISCAT_PODE_SOMAR[f] for f in falta) + '.')
     return resultado
 
 
@@ -1535,10 +1584,13 @@ def avaliar(p):
     escores.append(cap)
     if frag:
         escores.append(frag)
+    # ClCr e TFG: os valores exatos vão para as regras (cortes de 15, 30, 45 e 50); a tela recebe os de exibição,
+    # que nunca aparecem do outro lado de um corte (TFG de 29,6 não é mostrada como 30).
+    from src.utils import funcao_renal, prevent
+    depuracao_exata = clcr_exato(p)
     depuracao = clcr(p)
-    from src.utils import prevent
-    tfg = (round(prevent.egfr_ckd_epi_2021(float(p['creatinina']), p['idade'], p['sexo']))
-           if p['creatinina'] else None)
+    tfg_exata = prevent.tfg_ckd_epi_2021(float(p['creatinina']), p['idade'], p['sexo']) if p['creatinina'] else None
+    tfg = None if tfg_exata is None else funcao_renal.para_exibir(tfg_exata, funcao_renal.LIMIARES_TFG)
     notas_renais = []
     if depuracao is not None and ('obesidade' in c or 'imc_35' in p['stop_bang']):
         notas_renais.append({'texto': 'Obesidade: o Cockcroft-Gault com peso real superestima a depuração; o peso '
@@ -1570,7 +1622,8 @@ def avaliar(p):
 
     pulmonar = ariscat(p)
     medidas_pulmonares = []
-    if (pulmonar.get('aplicavel', True) and pulmonar['nivel'] != 'baixo') or 'dpoc' in c or 'ic' in c \
+    # Com o ARISCAT incompleto vale o piso (nivel_minimo): as medidas entram quando o risco é pelo menos intermediário
+    if (pulmonar.get('aplicavel', True) and pulmonar['nivel_minimo'] != 'baixo') or 'dpoc' in c or 'ic' in c \
             or p['funcional'] in ('parcial', 'total'):
         medidas_pulmonares.append({'titulo': 'Expansão pulmonar no pós-operatório',
                                    'texto': 'Exercícios de respiração profunda ou incentivador. Estudos posteriores não '
@@ -1609,11 +1662,11 @@ def avaliar(p):
 
     # Sem indicação de avaliação cardiológica num paciente sem doença cardiovascular, sem sintomas e sem risco pelos
     # escores (o jovem sem comorbidade em cirurgia de baixo risco): a tela mostra só uma orientação curta.
-    pulmonar_risco = ariscat(p)
+    # ARISCAT incompleto não é ARISCAT baixo: sem a categoria, o resultado completo fica à vista.
     resumido = (conclusao[0] == 'nao_indicada' and not cir_ia and p['idade'] < 65 and not c
                 and not risco_elevado and not p['sintomas'] and not p['instaveis'] and not p['pa_descontrolada']
                 and not any(not a.get('ok') for a in adiar)
-                and (not pulmonar_risco.get('aplicavel', True) or pulmonar_risco['nivel'] == 'baixo')
+                and (not pulmonar.get('aplicavel', True) or pulmonar['nivel'] == 'baixo')
                 and sb['nivel'] != 'alto' and (frag is None or (frag['valor'] or 0) < 5))
     resumo = None
     if resumido:
@@ -1642,6 +1695,8 @@ def avaliar(p):
         'escores': escores,
         'clcr': depuracao,
         'tfg': tfg,
+        'clcr_exato': depuracao_exata,
+        'tfg_exata': tfg_exata,
         'exames': lista_exames,
         'orientacoes': orientacoes,
         'pulmonar': {'escore': pulmonar, 'stop_bang': sb, 'medidas': medidas_pulmonares},
