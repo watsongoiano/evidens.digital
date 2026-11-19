@@ -1238,6 +1238,14 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
       </div>
     </section>
 
+    <!-- Só no formulário embutido na página das operadoras (modo=operadora), no lugar de "Exames já realizados". -->
+    <section class="secao" aria-labelledby="s-vacinas-tomadas" hidden>
+      <h2 id="s-vacinas-tomadas" class="secao-titulo"><span class="secao-num">08</span>Vacinas já tomadas</h2>
+      <p class="secao-nota">Opcional. Escolha a vacina na lista e informe a data em que foi tomada. A data aparece no resultado, ao lado do esquema que o check-up recomenda. O check-up não desconta a vacina já tomada nem calcula a data da próxima dose.</p>
+      <button type="button" id="adicionarVacinaTomada" class="btn-claro"><i class="fa-solid fa-plus text-[11px]"></i> Adicionar vacina</button>
+      <div id="vacinasTomadas" class="grid sm:grid-cols-2 gap-1.5 mt-2"></div>
+    </section>
+
     <div id="formErrors" role="alert" class="aviso aviso-erro" style="display: none;"></div>
 
     <div class="flex flex-wrap items-center gap-4 pt-2">
@@ -2011,6 +2019,17 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
         const avisarPaginaDeFora = mensagem => window.parent.postMessage(mensagem, window.location.origin);
         if (MODO_OPERADORA && EMBUTIDO) {
             document.querySelector('[data-rotulo-do-envio]').textContent = T('Conferir pedido');
+            // A página das operadoras não pergunta os exames já realizados (decisão do responsável clínico, 18/11/2026):
+            // a seção some e nada dela (exame, data, resultado, laudo) segue para o motor. As duas perguntas sobre o
+            // rastreio anterior do colo do útero ficavam nela e não são exame já feito: vão para o fim das comorbidades.
+            const secaoDosExames = document.querySelector('section[aria-labelledby="s-exames"]');
+            document.querySelector('section[aria-labelledby="s-comorbidades"]').appendChild(document.getElementById('colo-historico').parentElement);
+            secaoDosExames.hidden = true;
+            secaoDosExames.querySelectorAll('input, select, button').forEach(campo => { campo.disabled = true; });
+            // No lugar dela entra "Vacinas já tomadas", que o check-up do médico não mostra.
+            document.querySelector('section[aria-labelledby="s-vacinas-tomadas"]').hidden = false;
+            document.getElementById('adicionarVacinaTomada').addEventListener('click',
+                () => adicionarVacinaTomada().querySelector('[data-nome-da-vacina]').focus());
             const avisarAltura = () => avisarPaginaDeFora(      // a página de fora ajusta a altura do quadro
                 { tipo: 'operadoras_altura', altura: Math.ceil(document.documentElement.getBoundingClientRect().height) });
             new ResizeObserver(avisarAltura).observe(document.body);
@@ -2020,12 +2039,82 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             const campoDoPdf = window.parent.document.querySelector('[data-pedido-pdf]');
             if (campoDoPdf) campoDoPdf.addEventListener('change', () => { revisaoDoFormulario += 1; });
         }
+        // Vacinas já tomadas (só na página das operadoras): vacina do catálogo do motor e a data. Seguem para o motor no
+        // formato que ele já entende, o dos exames já realizados (título e data). O motor confere a data e, por regra
+        // dele, não desconta vacina nem calcula a próxima dose: a data só aparece no resultado, ao lado da recomendação.
+        let vacinasDoMotor = null, linhasDeVacina = 0;
+        const nomeDaVacina = {};      // nome mostrado (traduzido em inglês) → título em português
+        async function carregarVacinasDoMotor() {
+            if (!vacinasDoMotor) {
+                try {
+                    const r = await fetch('/api/admin/operadoras/vacinas', { credentials: 'same-origin' });
+                    vacinasDoMotor = r.ok ? (await r.json()).vacinas : null;
+                } catch (e) { vacinasDoMotor = null; }
+                (vacinasDoMotor || []).forEach(t => { nomeDaVacina[T(t).toLowerCase()] = t; });
+            }
+            return vacinasDoMotor || [];
+        }
+        function adicionarVacinaTomada() {
+            const n = ++linhasDeVacina;
+            const linha = document.createElement('div');
+            linha.className = 'exame-cartao'; linha.setAttribute('data-vacina-tomada', '');
+            // Campos montados nó a nó, como nos cartões dos exames: nenhum texto é interpretado como HTML.
+            const campo = (classe, rotulo, entrada) => {
+                const div = document.createElement('div'); div.className = 'campo ' + classe;
+                const label = document.createElement('label'); label.htmlFor = entrada.id; label.textContent = T(rotulo);
+                div.append(label, entrada);
+                return div;
+            };
+            const nome = document.createElement('input');
+            Object.assign(nome, { type: 'text', id: `vacinaTomada${n}`, maxLength: 300, autocomplete: 'off', placeholder: T('Digite para buscar no catálogo') });
+            nome.setAttribute('data-nome-da-vacina', '');
+            const quando = document.createElement('input');
+            Object.assign(quando, { type: 'date', id: `dataDaVacina${n}`, max: hojeNoFormato() });
+            quando.setAttribute('data-data-da-vacina', '');
+            const retirar = document.createElement('button');
+            retirar.type = 'button'; retirar.className = 'exame-retirar'; retirar.setAttribute('aria-label', T('Retirar esta vacina'));
+            const icone = document.createElement('i'); icone.className = 'fa-solid fa-xmark';
+            retirar.appendChild(icone);
+            const topo = document.createElement('div'); topo.className = 'flex items-start gap-3';
+            topo.append(campo('flex-1 min-w-0 !mb-0', 'Vacina', nome), retirar);
+            const datas = document.createElement('div'); datas.className = 'exame-campos';
+            datas.appendChild(campo('', 'Tomada em', quando));
+            linha.append(topo, datas);
+            listaDeBusca(nome, carregarVacinasDoMotor, () => {
+                nome.dispatchEvent(new Event('change', { bubbles: true }));   // o resultado na tela deixa de valer
+                quando.focus();
+            });
+            retirar.addEventListener('click', () => {
+                linha.remove();
+                checkupForm.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            document.getElementById('vacinasTomadas').appendChild(linha);
+            return linha;
+        }
+        function vacinasTomadasDoFormulario() {
+            return [...document.querySelectorAll('[data-vacina-tomada]')].map(linha => {
+                const digitado = linha.querySelector('[data-nome-da-vacina]').value.trim();
+                return { exame: nomeDaVacina[digitado.toLowerCase()] || digitado, data: linha.querySelector('[data-data-da-vacina]').value };
+            }).filter(item => item.exame || item.data);
+        }
+
         async function conferirPedidoDaOperadora(data, revisaoDoEnvio) {
             const campo = window.parent.document.querySelector('[data-pedido-pdf]');
             const arquivos = campo ? Array.from(campo.files) : [];
             if (!arquivos.length) { mostrarErrosDaTela([T('Anexe o PDF com os exames pedidos, no alto desta página.')]); return; }
-            const paciente = Object.assign({}, data);      // o mesmo que o check-up envia, menos o nome
+            const vacinas = vacinasTomadasDoFormulario();
+            if (vacinas.length) {
+                const doCatalogo = await carregarVacinasDoMotor();
+                const problemas = [];
+                if (vacinas.some(v => !doCatalogo.includes(v.exame))) problemas.push(T('Vacinas já tomadas: escolha cada vacina na lista.'));
+                if (vacinas.some(v => !v.data)) problemas.push(T('Vacinas já tomadas: informe a data de cada vacina.'));
+                if (vacinas.some(v => v.data > hojeNoFormato())) problemas.push(T('Vacinas já tomadas: a data não pode estar no futuro.'));
+                if (problemas.length) { mostrarErrosDaTela(problemas); return; }
+            }
+            const paciente = Object.assign({}, data);      // o mesmo que o check-up envia, menos o nome e os exames já realizados
             delete paciente.nome_paciente;
+            delete paciente.exames_anteriores;             // nenhum exame já realizado segue; no campo deles, só as vacinas
+            if (vacinas.length) paciente.exames_anteriores = vacinas;
             paciente.inferencias_recusadas = window.inferenciasRecusadas ? window.inferenciasRecusadas() : [];
             const envio = new FormData();
             envio.append('paciente', JSON.stringify(paciente));

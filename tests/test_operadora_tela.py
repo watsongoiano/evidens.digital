@@ -1,9 +1,11 @@
 """Conferência do pedido pelo check-up (/operadoras): por enquanto, só o administrador vê e envia."""
 import io
 import json
+from pathlib import Path
 
 from tests.test_operadora import FORMATO_C, _pdf
 
+RAIZ = Path(__file__).resolve().parent.parent
 ROTA = '/api/admin/operadoras/conferir'
 PACIENTE = {'idade': 61, 'sexo': 'masculino', 'tabagismo': 'nunca_fumou'}
 
@@ -255,3 +257,181 @@ def test_glicemia_de_jejum_vale_pela_hba1c_no_rastreio():
     paciente = dict(paciente, comorbidades=['diabetes_tipo_2'])
     linhas, _ = conferir('Glicose, soro', 'Hemoglobina glicada (HbA1c), soro')
     assert linhas['Glicose, soro']['veredito'] == 'indicado' and linhas['Glicose, soro']['no_checkup'] == 'Glicose, soro'
+
+
+# --- Exames já realizados saem da página; vacinas já tomadas entram; vacinas a avisar, em bloco à parte ---------------
+# Decisão do responsável clínico (18/11/2026): a página das operadoras não pergunta os exames já realizados. No lugar,
+# "Vacinas já tomadas"; no resultado, as vacinas que o check-up recomenda (pela SBIm), fora da conferência do pedido.
+
+def _so_no_modo_operadora(checkup):
+    """O trecho do script do formulário que só roda quando ele está embutido na página das operadoras."""
+    inicio = checkup.index('if (MODO_OPERADORA && EMBUTIDO) {')
+    return checkup[inicio:checkup.index('// Vacinas já tomadas (só na página das operadoras)', inicio)]
+
+
+def test_secao_08_troca_de_exames_para_vacinas_so_na_pagina_das_operadoras(admin):
+    checkup = admin.get('/intelligent-tools').get_data(as_text=True)
+    # No check-up do médico nada muda: a seção 08 é a dos exames já realizados, que seguem no envio, e a das vacinas
+    # já tomadas fica escondida.
+    assert '<section class="secao" aria-labelledby="s-exames">' in checkup
+    assert '<span class="secao-num">08</span>Exames já realizados</h2>' in checkup
+    assert 'if (anteriores.length) data.exames_anteriores = anteriores;' in checkup
+    assert '<section class="secao" aria-labelledby="s-vacinas-tomadas" hidden>' in checkup
+    # Só o formulário embutido esconde a seção dos exames, desliga os campos dela (deixam de ir no envio) e mostra a
+    # das vacinas. A numeração conta só as seções visíveis, e a das vacinas fica com o 08.
+    so_na_operadora = _so_no_modo_operadora(checkup)
+    for trecho in ('secaoDosExames.hidden = true', 'campo.disabled = true',
+                   """document.querySelector('section[aria-labelledby="s-vacinas-tomadas"]').hidden = false"""):
+        assert trecho in so_na_operadora and checkup.count(trecho) == 1, trecho
+    assert 'if (secao.hidden) return;' in checkup
+    assert checkup.index('aria-labelledby="s-exames"') < checkup.index('aria-labelledby="s-vacinas-tomadas"') < checkup.index('id="formErrors"')
+    # As duas perguntas do rastreio anterior do colo do útero ficavam na seção 08 e não são exame já feito: saem dela
+    # antes de os campos serem desligados, e continuam no formulário.
+    mover = "appendChild(document.getElementById('colo-historico').parentElement)"
+    assert mover in so_na_operadora and so_na_operadora.index(mover) < so_na_operadora.index('campo.disabled = true')
+    operadoras = admin.get('/operadoras').get_data(as_text=True)
+    assert 'com "Vacinas já tomadas" no lugar de "Exames já realizados"' in operadoras
+
+
+def test_no_envio_da_operadora_nao_vai_exame_ja_realizado_so_as_vacinas_ja_tomadas(admin):
+    from src.utils import i18n
+    checkup = admin.get('/intelligent-tools').get_data(as_text=True)
+    envio = checkup[checkup.index('async function conferirPedidoDaOperadora'):checkup.index("checkupForm.addEventListener('submit'")]
+    # O que viesse dos exames já realizados é retirado; no campo deles seguem só as vacinas, no formato que o motor
+    # já entende (título e data).
+    assert envio.index('delete paciente.exames_anteriores;') < envio.index('if (vacinas.length) paciente.exames_anteriores = vacinas;')
+    assert checkup.count('paciente.exames_anteriores') == 2
+    assert '{ exame: nomeDaVacina[digitado.toLowerCase()] || digitado, data: ' in checkup
+    # A vacina é escolhida no catálogo do motor, e a tela confere a escolha e a data antes de enviar.
+    assert "fetch('/api/admin/operadoras/vacinas'" in checkup and 'listaDeBusca(nome, carregarVacinasDoMotor' in checkup
+    assert '!doCatalogo.includes(v.exame)' in envio and '!v.data' in envio and 'v.data > hojeNoFormato()' in envio
+    for texto in ('Retirar esta vacina', 'Vacina', 'Tomada em', 'Vacinas já tomadas: escolha cada vacina na lista.',
+                  'Vacinas já tomadas: informe a data de cada vacina.', 'Vacinas já tomadas: a data não pode estar no futuro.'):
+        assert f"'{texto}'" in checkup and i18n.coberto(texto), texto
+
+
+def test_vacinas_ja_tomadas_sao_escolhidas_no_catalogo_do_motor(admin, client, app):
+    do_motor = json.loads((RAIZ / 'src' / 'data' / 'catalogo_motor.json').read_text(encoding='utf-8'))['vacina']
+    resposta = admin.get('/api/admin/operadoras/vacinas')
+    assert resposta.status_code == 200 and len(do_motor) >= 15
+    assert sorted(resposta.get_json()['vacinas']) == sorted(do_motor)
+    assert client.get('/api/admin/operadoras/vacinas').status_code == 403
+    assert app.test_client().get('/api/admin/operadoras/vacinas').status_code == 401
+
+
+def test_vacinas_do_check_up_saem_em_bloco_a_parte_com_o_esquema_e_a_referencia_do_motor(admin):
+    paciente = {**PACIENTE, 'imunossupressao': 'nao'}
+    dados = _envio(admin, paciente).get_json()
+    do_motor = [rec for rec in admin.post('/api/checkup-intelligent', json=paciente).get_json()['recommendations']
+                if rec['categoria'] == 'vacina']
+    assert len(do_motor) >= 5 and [v['titulo'] for v in dados['vacinas']] == [rec['titulo'] for rec in do_motor]
+    for vacina, rec in zip(dados['vacinas'], do_motor):       # nada além do que o motor recomenda, como ele recomenda
+        assert vacina == {'titulo': rec['titulo'], 'motivo': rec['subtitulo'], 'grau': rec['grau_evidencia'],
+                          'referencias': rec['referencias'], 'doses_informadas': []}
+        assert vacina['motivo'] and vacina['grau']
+        assert all(fonte['label'] and fonte['url'].startswith('https://') for fonte in vacina['referencias'])
+        assert any(fonte['label'].startswith('SBIm') for fonte in vacina['referencias']), vacina['titulo']
+    assert dados['outras_vacinas_informadas'] == []
+    # Fora da conferência do pedido: nenhuma vacina entre as linhas, na lista do check-up ou no resumo.
+    nomes = {v['titulo'] for v in dados['vacinas']}
+    assert not nomes & ({linha['exame'] for linha in dados['linhas']} | {linha['no_checkup'] for linha in dados['linhas']}
+                        | {item['titulo'] for item in dados['do_checkup']})
+    assert {item['categoria'] for item in dados['do_checkup']} <= {'laboratorio', 'imagem'}
+    assert set(dados['resumo']) == {'pedidos', 'indicados', 'nao_indicados', 'do_checkup'}
+
+
+def test_vacina_ja_tomada_chega_ao_motor_e_so_acompanha_a_recomendacao(admin):
+    """A vacina já tomada segue no formato dos exames já realizados (título e data), e o motor confere a data. Ele não
+    tem regra de histórico vacinal (perigo P-19, em aberto; docs/periodicidade.md: "vacinas não passam por esta
+    regra"): a vacina continua recomendada, com o mesmo esquema, e a data informada só a acompanha. Nenhuma regra de
+    vacina foi criada: não há "em dia" nem data da próxima dose."""
+    paciente = {**PACIENTE, 'comorbidades': ['hipertensao']}
+    sem = _envio(admin, paciente).get_json()
+    influenza, dtpa = (next(v['titulo'] for v in sem['vacinas'] if v['titulo'].startswith(nome)) for nome in ('Influenza', 'dTpa'))
+    de_outro_perfil = 'Hepatites A e B (Twinrix® ou vacinas isoladas)'      # do catálogo do motor, não deste paciente
+    assert de_outro_perfil not in {v['titulo'] for v in sem['vacinas']}
+    tomadas = [{'exame': dtpa, 'data': '2024-01-10'}, {'exame': influenza, 'data': '2026-05-10'},
+               {'exame': dtpa, 'data': '2014-06-01'}, {'exame': de_outro_perfil, 'data': '2010-03-02'}]
+    com = _envio(admin, {**paciente, 'exames_anteriores': tomadas}).get_json()
+    doses = {v['titulo']: v['doses_informadas'] for v in com['vacinas'] if v['doses_informadas']}
+    assert doses == {influenza: ['2026-05-10'], dtpa: ['2014-06-01', '2024-01-10']}
+    assert com['outras_vacinas_informadas'] == [{'titulo': de_outro_perfil, 'doses_informadas': ['2010-03-02']}]
+    def sem_as_doses(vacinas):
+        return [{campo: valor for campo, valor in vacina.items() if campo != 'doses_informadas'} for vacina in vacinas]
+    assert sem_as_doses(com['vacinas']) == sem_as_doses(sem['vacinas'])
+    assert all(set(vacina) == {'titulo', 'motivo', 'grau', 'referencias', 'doses_informadas'} for vacina in com['vacinas'])
+    # O veredito dos exames é o mesmo com e sem vacinas informadas.
+    for parte in ('resumo', 'linhas', 'do_checkup'):
+        assert com[parte] == sem[parte], parte
+    # A data passa pela validação do motor: futura ou em branco, o envio volta com a mensagem dele.
+    for data in ('2999-01-01', ''):
+        recusado = _envio(admin, {**paciente, 'exames_anteriores': [{'exame': influenza, 'data': data}]})
+        assert recusado.status_code == 422 and recusado.get_json()['error'].startswith('Dados inválidos'), data
+
+
+def test_nenhuma_vacina_do_catalogo_vale_por_exame_e_o_exame_ja_feito_continua_valendo_na_rota():
+    """A vacina viaja no campo dos exames já realizados: o nome dela não pode coincidir com exame algum."""
+    from src.utils import catalogo, operadora, periodicidade
+    sexos = (None, 'feminino', 'masculino')
+    de_exame = {chave for categoria in ('laboratorio', 'imagem') for titulo in catalogo.catalogo()[categoria]
+                for sexo in sexos for chave in periodicidade.cobertos(titulo, sexo)}
+    for vacina in catalogo.vacinas_do_motor():
+        for sexo in sexos:
+            chaves = periodicidade.cobertos(vacina, sexo)
+            assert len(chaves) == 1 and next(iter(chaves)).startswith('nome:') and not chaves & de_exame, vacina
+    hoje = periodicidade.hoje().isoformat()
+    paciente = {**PACIENTE, 'comorbidades': ['hipertensao', 'diabetes']}
+    pedidos = [{'exame': exame} for exame in ('Creatinina, soro', 'Sódio, soro', 'Hemoglobina glicada (HbA1c), soro',
+                                             'Ácido láctico (lactato)')]
+    sem, _ = operadora.conferir_pedido(paciente, pedidos)
+    todas = [{'exame': vacina, 'data': hoje} for vacina in catalogo.vacinas_do_motor()]
+    com, erro = operadora.conferir_pedido({**paciente, 'exames_anteriores': todas}, pedidos)
+    assert erro is None and com['vacinas'] and all(vacina['doses_informadas'] == [hoje] for vacina in com['vacinas'])
+    assert len(com['vacinas']) + len(com['outras_vacinas_informadas']) == len(todas)
+    for parte in ('resumo', 'linhas', 'do_checkup'):
+        assert com[parte] == sem[parte], parte
+    # Pela rota (dados que virão do cadastro da operadora), o exame já feito continua valendo, junto das vacinas.
+    misto, _ = operadora.conferir_pedido({**paciente, 'exames_anteriores': todas + [{'exame': 'Creatinina, soro', 'data': hoje}]},
+                                         pedidos)
+    creatinina = next(linha for linha in misto['linhas'] if linha['exame'] == 'Creatinina, soro')
+    assert (creatinina['veredito'], creatinina['estado']) == ('nao_indicado', 'em_dia')
+    assert misto['vacinas'] == com['vacinas'] and misto['outras_vacinas_informadas'] == com['outras_vacinas_informadas']
+
+
+def test_sem_vacina_recomendada_o_bloco_vem_vazio_e_a_conferencia_e_a_mesma(monkeypatch):
+    from src.routes import checkup_intelligent
+    from src.utils import operadora
+    paciente = {**PACIENTE, 'comorbidades': ['hipertensao']}
+    pedidos = [{'exame': exame} for exame in ('Creatinina, soro', 'Sódio, soro', 'Ácido láctico (lactato)')]
+    com, _ = operadora.conferir_pedido(paciente, pedidos)
+    assert com['vacinas']
+    motor = checkup_intelligent.recomendar
+
+    def sem_vacinas(dados):
+        resposta, status = motor(dados)
+        return {**resposta, 'recommendations': [rec for rec in resposta['recommendations'] if rec['categoria'] != 'vacina']}, status
+    monkeypatch.setattr(checkup_intelligent, 'recomendar', sem_vacinas)
+    sem, erro = operadora.conferir_pedido(paciente, pedidos)
+    assert erro is None and sem['vacinas'] == [] and sem['outras_vacinas_informadas'] == []
+    for parte in ('resumo', 'linhas', 'do_checkup'):
+        assert sem[parte] == com[parte], parte
+
+
+def test_bloco_de_vacinas_na_tela_fica_fora_do_veredito_e_do_csv(admin):
+    operadoras = admin.get('/operadoras').get_data(as_text=True)
+    for texto in ('Vacinas para avisar ao paciente',
+                  'As vacinas não entram na conferência do pedido: não liberam nem barram exame algum.',
+                  'O check-up não desconta a vacina já tomada nem calcula a data da próxima dose'):
+        assert texto in operadoras, texto
+    # Depois da conferência dos exames e da lista do check-up, fora dos cartões do veredito.
+    assert (operadoras.index('<div data-linhas') < operadoras.index('<ul data-do-checkup')
+            < operadoras.index('<div data-vacinas ') < operadoras.index('<div data-outras-vacinas '))
+    script = (RAIZ / 'static' / 'operadoras.js').read_text(encoding='utf-8')
+    for trecho in ('dados.vacinas || []', 'dados.outras_vacinas_informadas || []', 'fontes(v.referencias, v.grau)',
+                   'Informada como já tomada em', "'Nenhuma vacina a avisar para este paciente.'"):
+        assert trecho in script, trecho
+    # O CSV continua só com os exames: as mesmas colunas (não há coluna de tipo) e só as linhas da conferência.
+    baixar = script[script.index('function baixar()'):script.index('function desatualizar()')]
+    assert ("[['exame', 'nome_no_pedido', 'data', 'arquivo', 'conferencia', 'justificativa', 'no_checkup', 'grau', "
+            "'referencias', 'no_checkup_indicado_para']]") in baixar
+    assert 'dados.linhas.map' in baixar and 'vacina' not in baixar.lower()

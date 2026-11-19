@@ -46,7 +46,7 @@
 
   <section class="mt-10">
     <h2 class="categoria-titulo">2. Dados do paciente</h2>
-    <p class="text-[14px] text-ink/65 max-w-[720px]">Os mesmos itens do check-up. Ao final, clique em "Conferir pedido".</p>
+    <p class="text-[14px] text-ink/65 max-w-[720px]">Os mesmos itens do check-up, com "Vacinas já tomadas" no lugar de "Exames já realizados". Ao final, clique em "Conferir pedido".</p>
     <iframe data-formulario src="/intelligent-tools?modo=operadora&amp;embutido=1" title="Dados do paciente, como no check-up" class="block w-full mt-6 border-0" style="height: 2400px;"></iframe>
   </section>
 
@@ -75,6 +75,11 @@
       <summary class="cursor-pointer text-[14px]">O que o check-up indica para este paciente <span data-do-checkup-contagem class="text-ink/45"></span></summary>
       <ul data-do-checkup class="mt-4 text-[14px] flex flex-col gap-2"></ul>
     </details>
+
+    <h3 class="categoria-titulo mt-10">Vacinas para avisar ao paciente <span data-vacinas-contagem class="text-ink/30"></span></h3>
+    <p class="text-[13px] text-ink/60 max-w-[720px]">As vacinas não entram na conferência do pedido: não liberam nem barram exame algum. São as que o check-up recomenda para este paciente, com o esquema e a referência dele. O check-up não desconta a vacina já tomada nem calcula a data da próxima dose: a data informada em "Vacinas já tomadas" aparece ao lado do esquema.</p>
+    <div data-vacinas class="mt-6"></div>
+    <div data-outras-vacinas class="mt-6"></div>
   </section>
 </main>
 
