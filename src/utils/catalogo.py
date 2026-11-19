@@ -159,6 +159,11 @@ def catalogo():
     return saida
 
 
+def vacinas_do_motor():
+    """Títulos das vacinas que o motor recomenda para algum perfil (`catalogo_motor.json`), em ordem alfabética."""
+    return sorted(_do_motor().get('vacina', []), key=lambda t: t.lower())
+
+
 ARQUIVO_DAS_INDICACOES = Path(__file__).resolve().parents[1] / 'data' / 'indicacoes_motor.json'
 
 

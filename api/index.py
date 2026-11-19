@@ -222,6 +222,14 @@ def conferir_pedido_de_exames():
     return jsonify({**resultado, 'avisos': avisos})
 
 
+@app.route('/api/admin/operadoras/vacinas')
+@exigir_administrador
+def vacinas_do_catalogo_do_motor():
+    """Vacinas que o motor do check-up recomenda (catálogo do motor), para "Vacinas já tomadas" na página das operadoras."""
+    from src.utils import catalogo
+    return jsonify({'vacinas': catalogo.vacinas_do_motor()})
+
+
 @app.route('/api/analytics/stats')
 @exigir_administrador
 def get_analytics_stats():

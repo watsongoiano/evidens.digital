@@ -4382,7 +4382,15 @@
   "Escore incompleto: o risco pulmonar não é classificado.": "Incomplete score: pulmonary risk is not classified.",
   "SpO₂, até 24 pontos": "SpO₂, up to 24 points",
   "hemoglobina, 11 pontos": "hemoglobin, 11 points",
-  "duração da cirurgia, até 23 pontos": "surgery duration, up to 23 points"
+  "duração da cirurgia, até 23 pontos": "surgery duration, up to 23 points",
+  "Vacinas já tomadas": "Vaccines already taken",
+  "Opcional. Escolha a vacina na lista e informe a data em que foi tomada. A data aparece no resultado, ao lado do esquema que o check-up recomenda. O check-up não desconta a vacina já tomada nem calcula a data da próxima dose.": "Optional. Pick the vaccine from the list and enter the date it was taken. The date appears in the result, next to the schedule the check-up recommends. The check-up does not discount a vaccine already taken or calculate the date of the next dose.",
+  "Adicionar vacina": "Add vaccine",
+  "Retirar esta vacina": "Remove this vaccine",
+  "Tomada em": "Taken on",
+  "Vacinas já tomadas: escolha cada vacina na lista.": "Vaccines already taken: pick each vaccine from the list.",
+  "Vacinas já tomadas: informe a data de cada vacina.": "Vaccines already taken: enter the date of each vaccine.",
+  "Vacinas já tomadas: a data não pode estar no futuro.": "Vaccines already taken: the date cannot be in the future."
  },
  "padroes": [
   [
