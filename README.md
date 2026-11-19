@@ -34,6 +34,7 @@ evidens.digital/
 ├── index.html                    # Página inicial
 ├── intelligent-tools.html        # Formulário do check-up e resultados
 ├── contact.html, analytics.html  # Contato e painel de uso
+├── pacientes.html                # Cadastro de pacientes (por enquanto só o administrador)
 ├── tests/                        # Suíte de testes (pytest)
 ├── docs/                         # Registro de perigos e deploy
 ├── vercel.json                   # Encaminha todas as rotas para api/index.py
@@ -102,9 +103,10 @@ Geram minutas em PDF a partir da lista de recomendações retornadas pelo endpoi
   para o paciente, a resposta é `400` com `codigo: "triagem_vacinas"`.
 - Resposta: PDF com campo de assinatura e carimbo do médico. Os documentos não têm assinatura digital.
 
-### /pacientes (cadastro de pacientes; por enquanto só o administrador, sem tela)
-Única parte do sistema que guarda dado de paciente, cifrado e por conta. Campos, rotas, respostas, limites e o que
-falta antes de abrir a todos estão em [`docs/pacientes.md`](docs/pacientes.md).
+### /pacientes (cadastro de pacientes; por enquanto só o administrador)
+Única parte do sistema que guarda dado de paciente, cifrado e por conta. A tela (página `/pacientes` e seletor
+"Paciente cadastrado" no check-up) só aparece para o administrador. Campos, rotas, respostas, limites, a tela e o
+que falta antes de abrir a todos estão em [`docs/pacientes.md`](docs/pacientes.md).
 
 ### Endpoints desativados
 `/gerar-receita-vacinas`, `/gerar-solicitacao-exames` e `/generate-pdf` respondem `410 Gone`. Os dois primeiros

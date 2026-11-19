@@ -1,16 +1,18 @@
 # Cadastro de pacientes
 
-Fase 1 (novembro de 2026): **só o servidor, só para o administrador, sem tela.** O cadastro está no ar para ser
+Fases 1 e 2 (novembro de 2026): **servidor e tela, só para o administrador.** O cadastro está no ar para ser
 testado antes de abrir a todos. Código em `src/utils/pacientes.py` (regras, cifra, banco) e
-`src/routes/pacientes.py` (rotas); tabelas em `src/utils/contas.py`; testes em `tests/test_pacientes.py`.
+`src/routes/pacientes.py` (rotas); tabelas em `src/utils/contas.py`; tela em `pacientes.html`,
+`static/pacientes.js` e `static/pacientes-checkup.js` (seção "Tela", abaixo); testes em `tests/test_pacientes.py`
+e `tests/test_pacientes_tela.py`.
 
 É a única exceção à regra "nenhum dado de paciente é gravado". **Para o usuário comum nada mudou:** o check-up, o
 pré-operatório, os PDFs (pedidos, guia SP/SADT, laudo de APAC) e as operadoras continuam recebendo os dados,
 calculando e descartando. Os Termos de Uso v2.0, a home e a página de cadastro continuam dizendo isso, e continuam
 verdadeiros para quem não é o administrador. A lista do que precisa mudar antes de abrir está no fim desta página.
 
-> **Só dados fictícios, por enquanto.** Enquanto os Termos de Uso e a home não forem atualizados, a fase 1 só pode
-> ser usada com dados fictícios (pacientes inventados, CPF e CNS gerados para teste), inclusive pelo administrador.
+> **Só dados fictícios, por enquanto.** Enquanto os Termos de Uso e a home não forem atualizados, a fase de testes
+> (API e tela) só pode ser usada com dados fictícios (pacientes inventados, CPF e CNS gerados para teste), inclusive pelo administrador.
 > Os textos publicados ainda dizem que nenhum dado de paciente é gravado, e as obrigações da LGPD não dependem de
 > quantas contas usam o cadastro: base legal, encarregado e retenção valem desde o primeiro paciente real, mesmo
 > que ele seja só do administrador. Ver "LGPD e uso na fase 1", abaixo.
@@ -98,7 +100,7 @@ Um registro por paciente, sempre de uma conta (a que cadastrou). Só `nome` é o
 - **Cabeçalho próprio**: todo pedido, de leitura ou de gravação, tem de levar `X-Requested-With: evidens`; sem
   ele a resposta é 403, mesmo com a sessão do administrador. Soma-se à conferência de origem: um link, um
   formulário ou uma imagem em outro site não conseguem mandar esse cabeçalho, e um `fetch` de outro site só o
-  mandaria com permissão do servidor (CORS), que não é dada. A tela (fase 2) manda o cabeçalho em todas as
+  mandaria com permissão do servidor (CORS), que não é dada. A tela manda o cabeçalho em todas as
   chamadas; abrir `/api/pacientes/<id>/exportar` como link comum não funciona, o arquivo tem de ser baixado por
   `fetch`.
 - As respostas de erro trazem só frases fixas: nunca repetem o que foi enviado, nem o nome de uma chave recusada.
@@ -156,6 +158,110 @@ Erros (sempre `{error: "frase"}`, mais o que a tabela indica):
 | 500 | O registro não abre com a chave atual, ou o texto cifrado não é o daquela linha | `codigo: "ilegivel"` |
 | 503 | Área de acesso desligada (sem banco ou sem `SECRET_KEY`), ou cadastro sem `PACIENTES_CHAVE` utilizável | `codigo: "sem_chave"` quando falta a chave do cadastro |
 
+## Tela
+
+Fase 2. Só o administrador vê: a página, o link e o seletor do check-up seguem a mesma regra das rotas. **Para a
+conta comum nada aparece**: nem página, nem link, nem botão, nem seção. `index.html` e `termos.html` não mudaram.
+Testes em `tests/test_pacientes_tela.py`.
+
+### Quem vê
+
+- **Página `/pacientes`** (`pacientes.html`): a rota em `api/index.py` pergunta a `pacientes.habilitado_para`
+  (por `tela_liberada`, em `src/routes/pacientes.py`). Sem login, vai para `/login`; conta comum, para o check-up,
+  como nas outras páginas do administrador; Termos pendentes, para o aceite. `/pacientes.html` não é servido. A
+  página não traz dado de paciente: tudo vem da API.
+- **Link "Pacientes"** no menu das páginas de quem entrou e botão "Pacientes" em "Minha conta": criados por
+  `static/conta.js` (`abrirCadastroDePacientes`) só depois de `/api/auth/eu` dizer que a conta é do administrador.
+  Não existem no HTML, nem escondidos.
+- **Seletor no check-up**: `static/conta.js` só carrega `static/pacientes.js` e `static/pacientes-checkup.js`
+  para o administrador; a conta comum nem baixa os dois arquivos. O seletor não aparece no formulário embutido
+  da página das operadoras.
+- No dia em que `habilitado_para` aceitar outras contas, a condição de `abrirCadastroDePacientes` (hoje
+  `usuario.administrador`) precisa acompanhar: o servidor já seguiria a regra nova, a tela não.
+
+### Página `/pacientes`
+
+- Aviso fixo no topo: "Fase de testes: use apenas dados fictícios até a atualização dos Termos de Uso."
+- **Lista**: `GET /api/pacientes` ao abrir; com termo, `POST /api/pacientes/buscar`. Mostra nome, nascimento
+  (com a idade), sexo e o final do CNS; avisa quando a lista foi cortada em 500 e quando há registros ilegíveis.
+- **Criar e editar**: um formulário só, com todos os campos de identificação da API e até 5 planos
+  (`{operadora, carteira, validade}`; a validade é digitada como MM/AAAA ou DD/MM/AAAA e enviada como a API
+  pede). A edição envia todos os campos: o que ficou em branco é apagado no cadastro. A `ficha` não é enviada.
+- **Excluir**: o botão pede confirmação na própria linha ("Confirmar exclusão" / "Cancelar").
+- **Exportar**: o arquivo `paciente-<id>.json` é montado a partir da resposta do `fetch` (um link para a rota não
+  levaria o cabeçalho próprio).
+- CPF, CNS, CEP e código IBGE têm máscara. O CEP não é consultado em serviço externo nesta página.
+
+Mensagens (em `mensagemDeErro`, `static/pacientes.js`):
+
+| Resposta | O que a tela faz |
+|---|---|
+| 400 | A frase do servidor aparece embaixo de cada campo recusado, e o campo fica destacado |
+| 401 | Volta para o login |
+| 403 | "O cadastro de pacientes não está disponível para esta conta." (Termos pendentes: vai para o aceite) |
+| 404 | "Paciente não encontrado: o registro pode ter sido excluído.", e a lista é recarregada |
+| 409 `duplicado` | "Já existe um paciente com este CPF/CNS no seu cadastro.", com o botão "Abrir o paciente que já existe" |
+| 409 `conflito` | Avisa que nada foi gravado e pede para abrir o registro de novo |
+| 409 `limite` | Avisa que a conta chegou ao limite e que nada foi gravado |
+| 500 `ilegivel` | "Este registro não pôde ser aberto com a chave atual da instalação. Nenhum dado foi alterado." |
+| 503 `sem_chave` | "O cadastro de pacientes ainda não foi ativado nesta instalação.", e os botões de buscar e criar são desligados |
+| Sem rede | "Sem conexão com o servidor. Tente de novo." |
+
+### Check-up: "Paciente cadastrado" e "Salvar paciente no cadastro"
+
+O bloco fica no início da seção Identificação (`static/pacientes-checkup.js`), com o mesmo aviso de fase de
+testes. Só dados de identificação vão e voltam; **nenhum dado clínico nem resultado é gravado**, e a `ficha` não é
+lida nem enviada.
+
+- **Buscar e escolher**: a busca (a partir de 2 letras) usa `POST /api/pacientes/buscar`; ao escolher, a tela lê
+  o registro (`GET /api/pacientes/<id>`) e preenche:
+
+  | Campo da tela | Do cadastro |
+  |---|---|
+  | Nome do paciente | `nome` |
+  | Idade | calculada de `nascimento` (em branco se não houver) |
+  | Sexo | `sexo` |
+  | Plano de saúde do paciente e Número da carteira (guia SP/SADT) | o primeiro item de `planos` cuja operadora tem o mesmo nome de um credenciamento do médico |
+  | Laudo de APAC: CNS, data de nascimento, nome da mãe, telefone, CEP, endereço, município, UF | `cns`, `nascimento`, `mae`, `telefone`, `cep`, `endereco`, `municipio`, `uf` (o `ibge` segue com o CEP) |
+
+  CPF, nome social, raça/cor, prontuário, responsável e e-mail não têm campo no check-up: ficam só no cadastro.
+  O vínculo do SUS não é escolhido sozinho.
+- Os campos são preenchidos com os mesmos eventos de quem digita: resultado na tela é invalidado, como em
+  qualquer mudança de idade ou sexo.
+- **Guarda do plano (`planoAConfirmar`)**: preencher pelo cadastro não vale como conferência. A ponte
+  `window.evidensCheckup.trocarDePaciente` (em `intelligent-tools.html`) põe o plano e a carteira na tela e chama
+  `pedirConfirmacaoDoPlano()`, a mesma função de qualquer troca de paciente: havendo plano ou carteira na tela, a
+  guia só sai depois de o médico confirmar ("Sim, manter"), e o laudo de APAC do paciente anterior é apagado
+  antes de entrar o do novo. Se o cadastro não tem plano que o médico atenda, o plano que estava na tela fica,
+  também pendente de confirmação. A ponte só lê a guarda; nunca a baixa.
+- **Salvar paciente no cadastro**: sem paciente escolhido, cria; com um escolhido, atualiza esse registro (se o
+  nome na tela for outro, pede confirmação antes). Só o que está preenchido é enviado: campo em branco no
+  check-up não apaga o que o cadastro tem (o laudo de APAC é limpo a cada troca de paciente). A idade não é
+  gravada; o nascimento vem do campo do laudo de APAC. O plano da tela entra na lista `planos` no lugar do de
+  mesma operadora, ou no fim. Com a guarda do plano pendente, nada é gravado até o médico confirmar.
+- **Limpar seleção** solta o paciente escolhido e trata a tela como troca de paciente (guarda do plano e laudo de
+  APAC limpo); o próximo "Salvar" cria um paciente novo.
+
+### Segurança da tela
+
+- Todo pedido sai de uma função só (`pedir`, em `static/pacientes.js`), com `X-Requested-With: evidens`.
+- Dado de paciente só entra na página por `textContent` ou `value`; os scripts não usam `innerHTML` nem montam
+  HTML por texto. Os elementos com dado de paciente levam `data-i18n-manter`, para o tradutor não mexer neles.
+- Nada de paciente vai para o endereço da página nem para `localStorage`/`sessionStorage`: a busca vai no corpo
+  do pedido, e o paciente escolhido no check-up vive só na memória da página (recarregar apaga).
+- O endereço das rotas leva só o número do registro (`/api/pacientes/<id>`).
+
+### O que a tela ainda não faz
+
+- Não grava nem mostra a `ficha` (dados clínicos e resultados), nem a trilha de acessos.
+- Não busca o endereço pelo CEP na página `/pacientes` (no check-up, a busca do CEP do laudo de APAC continua
+  como era).
+- Os avisos do check-up para a conta comum ("o número da carteira não é guardado", "não são guardados") não
+  mudaram: continuam verdadeiros para ela, e para o administrador enquanto ele não usa "Salvar paciente no
+  cadastro". Entram na lista do que muda antes de abrir.
+- Em inglês, as frases da tela e as frases fixas do 400 têm par em `static/i18n/en.json`; as recusas de tamanho
+  ("no máximo N caracteres"), que a tela evita com o limite de cada campo, sairiam em português.
+
 ## Trilha de acessos
 
 Tabela `pacientes_acessos`: `id`, `paciente_id`, `usuario_id`, `acao` (`criar`, `ver`, `listar`, `editar`,
@@ -212,7 +318,8 @@ Tabela `pacientes_acessos`: `id`, `paciente_id`, `usuario_id`, `acao` (`criar`, 
 
 ## LGPD e uso na fase 1
 
-- **Enquanto os Termos de Uso e a home não forem atualizados, a fase 1 só pode ser usada com dados fictícios.**
+- **Enquanto os Termos de Uso e a home não forem atualizados, a fase de testes (API e tela) só pode ser usada com
+  dados fictícios.**
   Vale para o administrador também: restringir o cadastro a uma conta reduz o risco, mas não muda o que os textos
   publicados prometem nem o que a lei exige.
 - **Base legal, encarregado e retenção valem desde o primeiro paciente real**, mesmo que só o administrador use o
@@ -221,7 +328,8 @@ Tabela `pacientes_acessos`: `id`, `paciente_id`, `usuario_id`, `acao` (`criar`, 
   pedidos, e por quanto tempo o registro e as cópias de segurança ficam guardados. Nada disso está definido hoje
   (itens 1 a 4 da lista abaixo); são decisões para tomar com assessoria jurídica.
 - O servidor não tem como saber se um dado é fictício: essa regra é de uso, não de código.
-- `termos.html` e `index.html` não foram alterados nesta fase.
+- `termos.html` e `index.html` não foram alterados nas fases 1 e 2. A tela repete o aviso de dados fictícios no
+  topo da página e no bloco do check-up.
 
 ## Antes de abrir a todos
 
@@ -246,8 +354,9 @@ ensaia a abertura e confere que cada conta só vê os seus). **Antes dessa troca
    chave e definir onde fica a cópia de segurança dela, antes de haver muitos registros.
 6. **Limites de uso**: o teto de pacientes por conta existe (5.000); falta o de gravações por hora (hoje só o
    administrador grava).
-7. **Tela**: mandar `X-Requested-With: evidens` em toda chamada, buscar pelo corpo, mostrar os dados só com
-   `textContent`, tratar o 409 `conflito` e o 409 `limite`, mostrar a trilha de acessos, pedir confirmação antes
-   de excluir.
-8. **Inglês**: as mensagens destas rotas estão só em português.
+7. **Tela**: já existe para o administrador (seção "Tela"). Falta mostrar a trilha de acessos, decidir se a
+   `ficha` clínica entra, trocar a condição `usuario.administrador` de `static/conta.js` pela regra nova e rever
+   os avisos do check-up que dizem que a carteira e os dados do laudo de APAC não são guardados.
+8. **Inglês**: as frases da tela e as frases fixas do 400 têm par; as demais mensagens destas rotas estão só em
+   português (as respostas do cadastro não passam pelo tradutor do servidor).
 9. **Registro de perigos**: rever P-10, P-14 e P-26 em `docs/registro-de-perigos.md`.

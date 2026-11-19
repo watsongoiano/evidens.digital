@@ -58,6 +58,7 @@ html.lenis, html.lenis body { height: auto; }
   }
   .campo textarea { @apply h-auto py-3 leading-relaxed; }
   .campo input:focus, .campo select:focus, .campo textarea:focus { @apply outline-none border-teal ring-2 ring-teal/20 bg-white; }
+  .campo [aria-invalid="true"] { @apply border-[#C0392B] ring-2 ring-[#C0392B]/15; }   /* campo recusado (cadastro de pacientes) */
   /* Chips, no mesmo desenho da demonstração da home: pílula com borda; marcada = teal com ✓. */
   .opcoes { @apply flex flex-wrap gap-2; }
   .opcao { @apply relative inline-flex items-center rounded-full border border-ink/15 bg-white px-3.5 h-9 text-[13px] text-ink/65 cursor-pointer select-none transition; }

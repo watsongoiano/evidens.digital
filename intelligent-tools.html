@@ -2662,6 +2662,28 @@ if (new URLSearchParams(window.location.search).get('embutido') === '1') documen
             mostrarCamposDaGuia();
         }
 
+        // Cadastro de pacientes (por enquanto só o administrador; static/pacientes-checkup.js). Só esta ponte liga o
+        // cadastro à tela. Preencher a partir do cadastro não vale como conferência do plano: a troca de paciente
+        // passa por pedirConfirmacaoDoPlano(), como qualquer outra, e só o médico baixa a guarda (planoAConfirmar).
+        window.evidensCheckup = {
+            embutido: EMBUTIDO,
+            planoPendente: () => planoAConfirmar,
+            ibge: () => apacIbge,
+            // plano: { id, carteira } com o credenciamento do médico que corresponde ao plano do cadastro, ou null.
+            trocarDePaciente(plano) {
+                if (plano) {
+                    campoPlano().value = String(plano.id);
+                    campoCarteira().value = plano.carteira || '';
+                    document.getElementById('guiaPlano').value = campoPlano().value;
+                    document.getElementById('guiaCarteira').value = campoCarteira().value;
+                }
+                pedirConfirmacaoDoPlano();      // levanta a guarda se há plano ou carteira; limpa o laudo de APAC
+                mostrarCamposDaGuia();
+            },
+            // O CEP e o código IBGE vieram do cadastro: a busca do CEP não é refeita para este mesmo CEP.
+            enderecoDoCadastro(cep, ibge) { cepBuscado = cep; apacIbge = ibge; },
+        };
+
         function preencherPlanos(seletor, lista) {
             const atual = seletor.value;
             while (seletor.options.length > 1) seletor.remove(1);

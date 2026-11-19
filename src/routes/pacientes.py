@@ -1,6 +1,6 @@
 """Rotas do cadastro de pacientes (src/utils/pacientes.py; docs/pacientes.md).
 
-Por enquanto só o administrador usa, e não há tela: o cadastro está no ar para ser testado antes de abrir.
+Por enquanto só o administrador usa (API e tela /pacientes): o cadastro está no ar para ser testado antes de abrir.
 Cada paciente pertence à conta que o cadastrou; o registro de outra conta responde 404, também para o
 administrador. As respostas de erro trazem só frases fixas, nunca o que foi enviado.
 """
@@ -22,6 +22,11 @@ MSG_NAO_ENCONTRADO = 'Paciente não encontrado.'
 # Todo pedido ao cadastro leva este cabeçalho. Um formulário, um link ou uma imagem de outro site não conseguem
 # mandá-lo, e um `fetch` de outro site só o manda se o servidor autorizar (CORS), o que ele não faz.
 CABECALHO_PROPRIO, VALOR_DO_CABECALHO = 'X-Requested-With', 'evidens'
+
+
+def tela_liberada(usuario):
+    """A página /pacientes (api/index.py) segue a mesma regra das rotas: quem `pacientes.habilitado_para` aceita."""
+    return pacientes.habilitado_para(usuario)
 
 
 def exigir_cadastro(funcao):

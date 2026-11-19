@@ -573,7 +573,10 @@ def test_lista_de_rotas_esta_completa(app):
     do_app = {(metodo, re.sub(r'<[^>]+>', '{id}', regra.rule)) for regra in app.url_map.iter_rules()
               if regra.rule.startswith('/api/pacientes') for metodo in regra.methods - {'HEAD', 'OPTIONS'}}
     assert do_app == {(metodo, caminho.split('?')[0]) for metodo, caminho in ROTAS}
-    assert all(regra.endpoint.startswith('pacientes.') for regra in app.url_map.iter_rules() if 'pacientes' in regra.rule)
+    # Fora da API só existe a página /pacientes (api/index.py), que não devolve dado de paciente.
+    outras = {regra.rule: regra.endpoint for regra in app.url_map.iter_rules()
+              if 'pacientes' in regra.rule and not regra.endpoint.startswith('pacientes.')}
+    assert outras == {'/pacientes': 'pacientes_page'}
 
 
 @pytest.mark.parametrize('metodo, caminho', ROTAS)
@@ -799,12 +802,15 @@ def test_so_as_rotas_do_cadastro_importam_o_modulo_de_pacientes():
     assert 'pacientes' not in (RAIZ / 'src' / 'utils' / 'uso.py').read_text(encoding='utf-8')
 
 
-def test_nao_ha_tela_do_cadastro_e_as_paginas_nao_o_chamam(app, client, admin):
-    """Fase 1: só o servidor. Nenhuma página publicada cita as rotas, e não existe página /pacientes."""
-    for pagina in sorted(RAIZ.glob('*.html')) + sorted((RAIZ / 'static').glob('*.js')):
-        assert '/api/pacientes' not in pagina.read_text(encoding='utf-8'), pagina.name
+def test_so_a_tela_do_cadastro_chama_as_rotas(app, client, admin):
+    """Fase 2: a tela existe, só para o administrador (tests/test_pacientes_tela.py). As rotas só são citadas pelos
+    scripts do cadastro; as páginas não trazem o endereço da API, e /pacientes.html não é servido."""
+    citam = {pagina.name for pagina in sorted(RAIZ.glob('*.html')) + sorted((RAIZ / 'static').glob('*.js'))
+             if '/api/pacientes' in pagina.read_text(encoding='utf-8')}
+    assert citam == {'pacientes.js'}
+    assert admin.get('/pacientes').status_code == 200 and client.get('/pacientes').status_code == 302
     for cliente in (client, admin):
-        assert cliente.get('/pacientes').status_code == 404 and cliente.get('/pacientes.html').status_code == 404
+        assert cliente.get('/pacientes.html').status_code == 404
 
 
 def test_documentacao_acompanha_o_contrato():

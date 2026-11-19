@@ -1,6 +1,25 @@
 
 # Patches applied (2025-08-26T12:12:23)
 
+## 2026-11-19 — Cadastro de pacientes: fase 2, a tela, só para o administrador
+
+Para a conta comum nada muda nem aparece; a home e os Termos não foram alterados. Detalhes em `docs/pacientes.md`,
+seção "Tela". **Só dados fictícios** até a atualização dos Termos (a tela repete o aviso).
+
+- **Página `/pacientes`** (`pacientes.html`, `static/pacientes.js`): lista com busca, criar, editar, excluir (com
+  confirmação na linha) e exportar (arquivo montado da resposta do `fetch`). Mensagem própria para cada recusa da
+  API (400 por campo, 403, 404, 409 duplicado/conflito/limite, 500 ilegível, 503 sem chave).
+- **Check-up** (`static/pacientes-checkup.js`): "Paciente cadastrado" no início da Identificação busca e preenche
+  nome, idade (do nascimento), sexo, plano e carteira e os dados do laudo de APAC; "Salvar paciente no cadastro"
+  grava só a identificação preenchida. Nenhum dado clínico é gravado. Preencher pelo cadastro levanta a guarda de
+  conferência do plano, como qualquer troca de paciente; com ela pendente, o plano não é gravado.
+- **Só o administrador**: o link "Pacientes" e o seletor são criados por `static/conta.js` depois de saber quem
+  está na sessão; a conta comum não recebe link, botão, seção nem os scripts.
+- **Segurança da tela**: um único ponto de saída para a API, sempre com `X-Requested-With: evidens`; dado de
+  paciente só por `textContent`/`value`; nada em URL, `localStorage` ou `sessionStorage`.
+- CSS recompilado (campo recusado destacado); pares em inglês das frases novas; testes em
+  `tests/test_pacientes_tela.py`.
+
 ## 2026-11-19 — Cadastro de pacientes: correções da revisão de segurança
 
 Ainda fase 1 (só o servidor, só o administrador, sem tela). Contrato atualizado em `docs/pacientes.md`.
